@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Create Marketplace Listing - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* MARKETPLACE COLOR SCHEME */
+        .app-container { --primary-color: #10b981; --primary-dark: #059669; }
+        
+        /* FORM HEADER */
+        .form-header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            margin: -1.5rem -1.5rem 2rem -1.5rem;
+            text-align: center;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+        .form-header h2 { 
+            margin: 0; 
+            font-size: 1.5rem; 
+            font-weight: 700;
+        }
+        .form-header p {
+            opacity: 0.9; 
+            margin: 0.5rem 0 0 0; 
+            font-size: 0.9rem;
+        }
+        .mode-badge {
+            display: inline-block;
+            padding: 0.375rem 0.875rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.75rem;
+        }
+        .mode-badge.green { background: #d1fae5; color: #065f46; }
+        .mode-badge.orange { background: #fed7aa; color: #92400e; }
+        
+        /* 2-COLUMN LAYOUT */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+        }
+        @media (min-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .form-group-full {
+                grid-column: 1 / -1;
+            }
+        }
+        
+        /* PHOTO UPLOAD */
+        .photo-upload-section {
+            grid-column: 1 / -1;
+            margin-top: 1rem;
+        }
+        
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            text-align: center;
+            background-color: #f9fafb;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .upload-area:hover {
+            border-color: #10b981;
+            background-color: #ecfdf5;
+        }
+        .upload-area.dragover {
+            border-color: #10b981;
+            background-color: #d1fae5;
+        }
+        
+        .upload-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            color: #10b981;
+        }
+        
+        .upload-text {
+            font-size: 1rem;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+        .upload-subtext {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+        
+        .photo-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .photo-preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            border: 2px solid var(--border-color);
+        }
+        
+        .photo-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .remove-photo {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: rgba(239, 68, 68, 0.95);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 1.25rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            transition: background-color 0.2s;
+        }
+        .remove-photo:hover {
+            background-color: rgb(220, 38, 38);
+        }
+        
+        .photo-counter {
+            margin-top: 1rem;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        .photo-counter.limit-reached {
+            color: #f59e0b;
+            font-weight: 600;
+        }
+        
+        /* SUBMIT BUTTON */
+        .marketplace-btn { 
+            background-color: #10b981 !important; 
+            grid-column: 1 / -1;
+        }
+        .marketplace-btn:hover { 
+            background-color: #059669 !important; 
+        }
+        
+        /* FORM MESSAGE */
+        #form-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            transform: translateX(400px);
+            transition: transform 0.3s ease-in-out;
+            min-width: 300px;
+        }
+        #form-message.show {
+            transform: translateX(0);
+        }
+        #form-message.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        #form-message.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+        #form-message.success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        #form-message.error {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* SEARCH MODE */
+        .hidden { display: none !important; }
+        .search-note {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            grid-column: 1 / -1;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+        }
+        .search-note p {
+            margin: 0;
+            color: #92400e;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-arrow">&#8592;</a>
+        <h1 id="page-title">Neues Marktplatz-Inserat</h1>
+    </header>
+    
+    <main class="app-content">
+        <div class="form-header">
+            <h2 id="form-header-title">Artikel verkaufen</h2>
+            <p id="form-header-subtitle">Liste deine gebrauchten Artikel und hilf der Community!</p>
+            <span class="mode-badge green" id="modeBadge">Angebot</span>
+        </div>
+        
+        <form id="gegenstandForm">
+            <div class="form-grid">
+                <!-- SEARCH MODE NOTE -->
+                <div class="search-note hidden" id="searchNote">
+                    <p><strong>Suchmodus:</strong> Beschreibe was du suchst. Andere Nutzer können dich kontaktieren wenn sie den Artikel haben.</p>
+                </div>
+                
+                <!-- BASIC INFO -->
+                <div class="form-group form-group-full">
+                    <label for="title" id="labelTitle">Titel *</label>
+                    <input type="text" id="title" required placeholder="z.B. IKEA Schreibtisch - Fast Neu">
+                </div>
+                
+                <div class="form-group form-group-full">
+                    <label for="description" id="labelDescription">Beschreibung *</label>
+                    <textarea id="description" rows="5" required placeholder="Beschreibe deinen Artikel im Detail..."></textarea>
+                </div>
+                
+                <!-- CATEGORY -->
+                <div class="form-group">
+                    <label for="category" id="labelCategory">Kategorie *</label>
+                    <select id="category" required>
+                        <option value="" disabled selected id="optCategorySelect">Kategorie wählen</option>
+                        <option value="Furniture & Home">Möbel & Wohnen</option>
+                        <option value="Electronics & Tech">Elektronik & Technik</option>
+                        <option value="Books & Study">Bücher & Studium</option>
+                        <option value="Clothing & Fashion">Kleidung & Mode</option>
+                        <option value="Kitchen & Appliances">Küche & Geräte</option>
+                        <option value="Sports & Outdoor">Sport & Outdoor</option>
+                        <option value="Bikes & Transport">Fahrräder & Transport</option>
+                        <option value="Music & Instruments">Musik & Instrumente</option>
+                        <option value="Others">Sonstiges</option>
+                    </select>
+                </div>
+                
+                <!-- CONDITION -->
+                <div class="form-group">
+                    <label for="condition" id="labelCondition">Zustand *</label>
+                    <select id="condition" required>
+                        <option value="" disabled selected id="optConditionSelect">Zustand wählen</option>
+                        <option value="New">Neu</option>
+                        <option value="Like New">Wie neu</option>
+                        <option value="Good">Gut</option>
+                        <option value="Fair">Akzeptabel</option>
+                        <option value="Poor">Gebraucht</option>
+                    </select>
+                </div>
+                
+                <!-- PRICE (Offer Mode) -->
+                <div class="form-group" id="single_price_group">
+                    <label for="price" id="labelPrice">Preis (€) <span id="priceRequired">*</span></label>
+                    <input type="number" id="price" min="0" step="0.01" required placeholder="z.B. 50">
+                </div>
+                
+                <!-- PRICE RANGE (Search Mode) -->
+                <div class="form-group" id="price_range_min_group" style="display: none;">
+                    <label for="price_range_min" id="labelPriceMin">Min. Preis (€)</label>
+                    <input type="number" id="price_range_min" min="0" step="0.01" placeholder="z.B. 30">
+                </div>
+                
+                <div class="form-group" id="price_range_max_group" style="display: none;">
+                    <label for="price_range_max" id="labelPriceMax">Max. Preis (€)</label>
+                    <input type="number" id="price_range_max" min="0" step="0.01" placeholder="z.B. 100">
+                </div>
+                
+                <!-- LOCATION -->
+                <div class="form-group">
+                    <label for="city" id="labelCity">Stadt *</label>
+                    <input type="text" id="city" required placeholder="z.B. Berlin" list="citySuggestions">
+                    <datalist id="citySuggestions"></datalist>
+                </div>
+                
+                <!-- PHOTO UPLOAD -->
+                <div class="photo-upload-section">
+                    <label style="display: block; margin-bottom: 0.75rem;" id="labelPhotos">Fotos <span id="photoRequired">(max 5)</span></label>
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <div class="upload-text" id="uploadText">Klicken zum Hochladen oder Drag & Drop</div>
+                        <div class="upload-subtext">PNG, JPG, WEBP bis zu 10MB</div>
+                    </div>
+                    
+                    <input type="file" id="photos" multiple accept="image/*" style="display: none;">
+                    
+                    <div id="photoPreviewGrid" class="photo-preview-grid"></div>
+                    <div id="photoCounter" class="photo-counter">0 / 5 Fotos</div>
+                </div>
+                
+                <div id="form-message"></div>
+                <button type="submit" class="submit-btn marketplace-btn" id="submit-btn">Inserat veröffentlichen</button>
+            </div>
+        </form>
+    </main>
+    
+    <!-- Navigation ausgeblendet für bessere Formular-Nutzung -->
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="cities.js"></script>
+<script>
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // AUTH HELPER
+    function requireAuth() {
+        return supabase.auth.getUser().then(function(response) {
+            var user = response.data.user;
+            if (!user) {
+                window.location.href = 'login.html';
+                throw new Error('Not authenticated');
+            }
+            return user;
+        });
+    }
+    
+    // POPULATE CITY AUTOCOMPLETE
+    populateCityDatalist('citySuggestions');
+
+    var form = document.getElementById('gegenstandForm');
+    var msgContainer = document.getElementById('form-message');
+    
+    // TOAST NOTIFICATION HELPER
+    function showToast(message, type, redirectUrl) {
+        if (type === undefined) type = 'success';
+        if (redirectUrl === undefined) redirectUrl = null;
+        msgContainer.textContent = message;
+        msgContainer.className = type;
+        
+        // Trigger animation
+        setTimeout(function() {
+            msgContainer.classList.add('show');
+        }, 100);
+        
+        // Auto-hide and redirect after 2 seconds
+        setTimeout(function() {
+            msgContainer.classList.remove('show');
+            if (redirectUrl) {
+                setTimeout(function() {
+                    window.location.href = redirectUrl;
+                }, 300);
+            }
+        }, 2000);
+    }
+    
+    var submitBtn = document.getElementById('submit-btn');
+    var pageTitle = document.getElementById('page-title');
+    var formHeaderTitle = document.getElementById('form-header-title');
+    var formHeaderSubtitle = document.getElementById('form-header-subtitle');
+    var modeBadge = document.getElementById('modeBadge');
+    var uploadArea = document.getElementById('uploadArea');
+    var photoInput = document.getElementById('photos');
+    var photoPreviewGrid = document.getElementById('photoPreviewGrid');
+    var photoCounter = document.getElementById('photoCounter');
+    var searchNote = document.getElementById('searchNote');
+    var priceInput = document.getElementById('price');
+    var priceRequired = document.getElementById('priceRequired');
+    
+    var params = new URLSearchParams(window.location.search);
+    var listingIdToEdit = params.get('id');
+    var listingMode = params.get('mode') || 'offer';
+    
+    var selectedFiles = [];
+    var MAX_PHOTOS = 5;
+    
+    // CONFIGURE FORM BASED ON MODE
+    function configureFormForMode(mode) {
+        var lang = localStorage.getItem('room8_language') || localStorage.getItem('language') || 'de';
+        var isDE = lang === 'de';
+        
+        var configs = {
+            offer: {
+                title: isDE ? 'Artikel verkaufen' : 'Sell Your Item',
+                subtitle: isDE ? 'Liste deine gebrauchten Artikel und hilf der Community!' : 'List your used items and help the community!',
+                badge: isDE ? 'Angebot' : 'Offer',
+                badgeClass: 'green'
+            },
+            search: {
+                title: isDE ? 'Artikel suchen' : 'Search for Item',
+                subtitle: isDE ? 'Beschreibe was du suchst' : 'Describe what you\'re looking for',
+                badge: isDE ? 'Suche' : 'Search',
+                badgeClass: 'orange'
+            }
+        };
+        
+        var config = configs[mode] || configs.offer;
+        
+        formHeaderTitle.textContent = config.title;
+        formHeaderSubtitle.textContent = config.subtitle;
+        modeBadge.textContent = config.badge;
+        modeBadge.className = 'mode-badge ' + config.badgeClass;
+        
+        // SEARCH MODE: Make price optional
+        if (mode === 'search') {
+            searchNote.classList.remove('hidden');
+            searchNote.innerHTML = '<p><strong>' + (isDE ? 'Suchmodus:' : 'Search Mode:') + '</strong> ' + (isDE ? 'Beschreibe was du suchst. Andere Nutzer können dich kontaktieren.' : 'Describe what you are looking for. Other users can contact you.') + '</p>';
+            priceInput.required = false;
+            priceRequired.textContent = '';
+            
+            // Hide single price, show price range
+            document.getElementById('single_price_group').style.display = 'none';
+            document.getElementById('price_range_min_group').style.display = 'block';
+            document.getElementById('price_range_max_group').style.display = 'block';
+            
+            document.getElementById('photoRequired').textContent = '(optional)';
+            document.getElementById('title').placeholder = isDE ? 'z.B. Suche IKEA Kallax Regal' : 'e.g. Looking for IKEA Desk';
+            document.getElementById('description').placeholder = isDE ? 'Beschreibe was du suchst...' : 'Describe what you\'re looking for...';
+        } else {
+            searchNote.classList.add('hidden');
+            priceInput.required = true;
+            priceRequired.textContent = '*';
+            
+            // Show single price, hide price range
+            document.getElementById('single_price_group').style.display = 'block';
+            document.getElementById('price_range_min_group').style.display = 'none';
+            document.getElementById('price_range_max_group').style.display = 'none';
+            
+            document.getElementById('photoRequired').textContent = '(max 5)';
+            document.getElementById('title').placeholder = isDE ? 'z.B. IKEA Schreibtisch - Fast Neu' : 'e.g. IKEA Desk - Almost New';
+            document.getElementById('description').placeholder = isDE ? 'Beschreibe deinen Artikel im Detail...' : 'Describe your item in detail...';
+        }
+    }
+
+    // PHOTO MANAGEMENT
+    function updatePhotoCounter() {
+        var lang = localStorage.getItem('room8_language') || localStorage.getItem('language') || 'de';
+        var isDE = lang === 'de';
+        photoCounter.textContent = selectedFiles.length + ' / ' + MAX_PHOTOS + ' ' + (isDE ? 'Fotos' : 'photos');
+        if (selectedFiles.length >= MAX_PHOTOS) {
+            photoCounter.classList.add('limit-reached');
+            uploadArea.style.display = 'none';
+        } else {
+            photoCounter.classList.remove('limit-reached');
+            uploadArea.style.display = 'block';
+        }
+    }
+
+    function renderPhotoPreview(file, index) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var previewItem = document.createElement('div');
+            previewItem.className = 'photo-preview-item';
+            previewItem.innerHTML = '<img src="' + e.target.result + '" alt="Preview ' + (index + 1) + '"><button type="button" class="remove-photo" data-index="' + index + '">&times;</button>';
+            
+            previewItem.querySelector('.remove-photo').addEventListener('click', function() {
+                removePhoto(index);
+            });
+            
+            photoPreviewGrid.appendChild(previewItem);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function removePhoto(index) {
+        selectedFiles.splice(index, 1);
+        updatePhotoPreviews();
+    }
+
+    function updatePhotoPreviews() {
+        photoPreviewGrid.innerHTML = '';
+        selectedFiles.forEach(function(file, index) {
+            renderPhotoPreview(file, index);
+        });
+        updatePhotoCounter();
+    }
+
+    function handleFiles(files) {
+        var remainingSlots = MAX_PHOTOS - selectedFiles.length;
+        var filesToAdd = Array.prototype.slice.call(files, 0, remainingSlots);
+        for (var i = 0; i < filesToAdd.length; i++) {
+            selectedFiles.push(filesToAdd[i]);
+        }
+        updatePhotoPreviews();
+    }
+
+    // DRAG & DROP
+    uploadArea.addEventListener('click', function() { photoInput.click(); });
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    uploadArea.addEventListener('dragleave', function() {
+        uploadArea.classList.remove('dragover');
+    });
+    uploadArea.addEventListener('drop', (e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+    });
+    photoInput.addEventListener('change', (e) {
+        handleFiles(e.target.files);
+    });
+
+    // EDIT MODE
+    async function populateFormForEdit() {
+        if (!listingIdToEdit) return;
+        
+        var lang = localStorage.getItem('room8_language') || localStorage.getItem('language') || 'de';
+        var isDE = lang === 'de';
+
+        pageTitle.textContent = isDE ? 'Marktplatz-Inserat bearbeiten' : 'Edit Marketplace Listing';
+        formHeaderTitle.textContent = isDE ? 'Inserat bearbeiten' : 'Edit Your Listing';
+        formHeaderSubtitle.textContent = isDE ? 'Aktualisiere deine Artikeldetails' : 'Update your item details';
+        submitBtn.textContent = isDE ? 'Inserat aktualisieren' : 'Update Listing';
+
+        var { data: listing, error } = await supabase.from('listings').select('*').eq('id', listingIdToEdit).single();
+        if (error) { console.error("Error:", error); return; }
+
+        document.getElementById('title').value = listing.title || '';
+        document.getElementById('description').value = listing.description || '';
+        document.getElementById('category').value = listing.category || '';
+        document.getElementById('condition').value = listing.condition || '';
+        document.getElementById('price').value = listing.price || '';
+        document.getElementById('city').value = listing.city || '';
+        
+        // Load listing mode first to configure form
+        if (listing.listing_mode) {
+            configureFormForMode(listing.listing_mode);
+        }
+        
+        // Load price range for SEARCH mode
+        if (listing.listing_mode === 'search' && (listing.price_range_min || listing.price_range_max)) {
+            document.getElementById('price_range_min').value = listing.price_range_min || '';
+            document.getElementById('price_range_max').value = listing.price_range_max || '';
+        }
+    }
+
+    // FORM SUBMIT
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        var lang = localStorage.getItem('room8_language') || localStorage.getItem('language') || 'de';
+        var isDE = lang === 'de';
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = isDE ? 'Speichern...' : 'Saving...';
+        msgContainer.textContent = '';
+        msgContainer.className = '';
+
+        try {
+            var user = await requireAuth();
+            
+            // VALIDATION: Check if min < max for search mode
+            if (listingMode === 'search') {
+                var minPrice = document.getElementById('price_range_min').value ? Number(document.getElementById('price_range_min').value) : null;
+                var maxPrice = document.getElementById('price_range_max').value ? Number(document.getElementById('price_range_max').value) : null;
+                
+                if (minPrice && maxPrice && minPrice > maxPrice) {
+                    showToast(isDE ? 'Mindestpreis kann nicht höher als Maximalpreis sein!' : 'Minimum price cannot be higher than maximum price!', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = listingIdToEdit ? (isDE ? 'Inserat aktualisieren' : 'Update Listing') : (isDE ? 'Inserat veröffentlichen' : 'Post Listing');
+                    return;
+                }
+            }
+            
+            // Handle price based on mode
+            var priceData = {};
+            if (listingMode === 'search') {
+                priceData = {
+                    price_range_min: document.getElementById('price_range_min').value ? Number(document.getElementById('price_range_min').value) : null,
+                    price_range_max: document.getElementById('price_range_max').value ? Number(document.getElementById('price_range_max').value) : null,
+                    price: null
+                };
+            } else {
+                priceData = {
+                    price: document.getElementById('price').value ? Number(document.getElementById('price').value) : null,
+                    price_range_min: null,
+                    price_range_max: null
+                };
+            }
+            
+            var listingData = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                category: document.getElementById('category').value,
+                condition: document.getElementById('condition').value,
+                price: priceData.price, price_range_min: priceData.price_range_min, price_range_max: priceData.price_range_max,
+                city: document.getElementById('city').value,
+                owner_id: user.id,
+                type: 'gegenstand',
+                listing_mode: listingMode
+            };
+
+            var processedListing;
+            if (listingIdToEdit) {
+                var updateResult = await supabase.from('listings').update(listingData).eq('id', listingIdToEdit).select().single();
+                if (updateResult.error) throw updateResult.error;
+                processedListing = updateResult.data;
+            } else {
+                var insertResult = await supabase.from('listings').insert(listingData).select().single();
+                if (insertResult.error) throw insertResult.error;
+                processedListing = insertResult.data;
+            }
+
+            // UPLOAD PHOTOS
+            if (selectedFiles.length > 0) {
+                for (var i = 0; i < selectedFiles.length; i++) { var file = selectedFiles[i];
+                    var filePath = user.id + '/' + processedListing.id + '/' + Date.now() + '_' + file.name;
+                    var uploadRes = await supabase.storage.from('listing-images').upload(filePath, file);
+                    if (uploadRes.error) throw uploadRes.error;
+
+                    var linkRes = await supabase.from('listing_photos').insert({
+                        listing_id: processedListing.id,
+                        storage_path: filePath
+                    });
+                    if (linkRes.error) throw linkRes.error;
+                }
+            }
+            
+            // Show success toast and redirect
+            var successMessage = listingIdToEdit 
+                ? (isDE ? 'Ã¢Å“â€œ Inserat erfolgreich aktualisiert!' : 'Ã¢Å“â€œ Listing updated successfully!')
+                : (isDE ? 'Ã¢Å“â€œ Dein Artikel wurde erfolgreich veröffentlicht!' : 'Ã¢Å“â€œ Your item has been posted successfully!');
+            showToast(successMessage, 'success', 'profile.html');
+
+        } catch (error) {
+            console.error('Error:', error);
+            showToast((isDE ? 'Fehler' : 'Error') + ': ' + error.message, 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = listingIdToEdit ? (isDE ? 'Inserat aktualisieren' : 'Update Listing') : (isDE ? 'Inserat veröffentlichen' : 'Post Listing');
+        }
+    });
+
+    // NAVIGATION
+
+    // INITIALIZE
+    document.addEventListener('DOMContentLoaded', function() {
+        configureFormForMode(listingMode);
+        populateFormForEdit();
+        updatePhotoCounter();
+    });
+</script>
+<!-- Navigation ausgeblendet -->
+<script src="config.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>

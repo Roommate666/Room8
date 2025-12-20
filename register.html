@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Registrieren - Room8</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .register-container {
+      max-width: 450px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .register-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .register-header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary-color);
+    }
+    
+    .register-header p {
+      color: #666;
+      font-size: 0.95rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+    
+    .register-btn {
+      width: 100%;
+      padding: 1rem;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .register-btn:hover {
+      background: #1e40af;
+    }
+    
+    .register-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .login-link {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #666;
+    }
+    
+    .login-link a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    #msg {
+      margin-top: 1rem;
+      text-align: center;
+      font-weight: 600;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    
+    #msg.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    #msg.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    .info-box {
+      background: #eff6ff;
+      border: 1px solid #93c5fd;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #1e40af;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <header class="app-header">
+      <a href="index.html" class="back-arrow">&#8592;</a>
+      <h1 data-i18n="nav_register">Register</h1>
+    </header>
+    
+    <main class="app-content">
+      <div class="register-container">
+        <div class="register-header">
+          <h1>&#127968; <span data-i18n="register_join">Join Room8</span></h1>
+          <p data-i18n="register_subtitle">Create your account to access the student marketplace</p>
+        </div>
+
+        <form id="registerForm">
+          <div class="form-group">
+            <label for="username" data-i18n="auth_username">Username</label>
+            <input 
+              type="text" 
+              id="username" 
+              name="username" 
+              required 
+              minlength="3"
+              data-i18n-placeholder="register_username_placeholder"
+              placeholder="Choose a username"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="email" data-i18n="register_email_label">Email Address</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              required
+              data-i18n-placeholder="register_email_placeholder"
+              placeholder="your.email@example.com"
+            >
+            <small style="color: #6b7280; font-size: 0.85rem;" data-i18n="register_email_hint">
+              You can use any email address
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label for="password" data-i18n="register_password_label">Password (min. 6 characters)</label>
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              required
+              minlength="6"
+              data-i18n-placeholder="register_password_placeholder"
+              placeholder="Choose a strong password"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="passwordConfirm" data-i18n="auth_confirm_password">Confirm Password</label>
+            <input 
+              type="password" 
+              id="passwordConfirm" 
+              name="passwordConfirm" 
+              required
+              minlength="6"
+              data-i18n-placeholder="register_password_confirm_placeholder"
+              placeholder="Repeat your password"
+            >
+          </div>
+
+          <button type="submit" class="register-btn" id="registerBtn" data-i18n="register_btn_create">
+            Create Account
+          </button>
+
+          <p id="msg"></p>
+        </form>
+
+        <div class="login-link">
+          <span data-i18n="auth_have_account">Already have an account?</span> <a href="login.html" data-i18n="auth_login_link">Log In</a>
+        </div>
+      </div>
+    </main>
+    
+    <footer class="app-footer-nav" id="app-footer-nav"></footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    var form = document.getElementById('registerForm');
+    var msg = document.getElementById('msg');
+    var registerBtn = document.getElementById('registerBtn');
+
+    function setMsg(text, isSuccess) {
+      msg.textContent = text;
+      msg.className = isSuccess ? 'success' : 'error';
+    }
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      var username = document.getElementById('username').value.trim();
+      var email = document.getElementById('email').value.trim().toLowerCase();
+      var password = document.getElementById('password').value;
+      var passwordConfirm = document.getElementById('passwordConfirm').value;
+
+      var lang = localStorage.getItem('room8_language') || 'en';
+      var messages = {
+        de: {
+          mismatch: 'Passwörter stimmen nicht überein!',
+          short: 'Passwort muss mindestens 6 Zeichen haben!',
+          creating: 'Konto wird erstellt...',
+          success: 'Konto erstellt! Bitte überprüfe deine E-Mail.',
+          already: 'Diese E-Mail ist bereits registriert. Versuche dich anzumelden!',
+          invalid: 'Bitte gib eine gültige E-Mail-Adresse ein.',
+          failed: 'Registrierung fehlgeschlagen: ',
+          checkEmail: 'Überprüfe deine E-Mail!',
+          sentTo: 'Wir haben einen Bestätigungslink an',
+          clickLink: 'gesendet. Klicke auf den Link um dein Konto zu aktivieren.'
+        },
+        en: {
+          mismatch: 'Passwords do not match!',
+          short: 'Password must be at least 6 characters!',
+          creating: 'Creating account...',
+          success: 'Account created! Please check your email to confirm your address.',
+          already: 'This email is already registered. Try logging in!',
+          invalid: 'Please enter a valid email address.',
+          failed: 'Registration failed: ',
+          checkEmail: 'Check your email!',
+          sentTo: 'We sent a confirmation link to',
+          clickLink: 'Click the link to activate your account.'
+        }
+      };
+      var m = messages[lang] || messages.en;
+
+      if (password !== passwordConfirm) {
+        setMsg(m.mismatch, false);
+        return;
+      }
+
+      if (password.length < 6) {
+        setMsg(m.short, false);
+        return;
+      }
+
+      registerBtn.disabled = true;
+      setMsg(m.creating, true);
+
+      supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            username: username
+          }
+        }
+      })
+      .then(function(response) {
+        if (response.error) {
+          throw response.error;
+        }
+
+        setMsg(m.success, true);
+        form.reset();
+        registerBtn.disabled = true;
+
+        var infoBox = document.createElement('div');
+        infoBox.className = 'info-box';
+        infoBox.innerHTML = '<strong>' + m.checkEmail + '</strong><br>' +
+          m.sentTo + ' <strong>' + email + '</strong><br>' +
+          m.clickLink;
+        msg.after(infoBox);
+      })
+      .catch(function(error) {
+        console.error('Registration error:', error);
+        
+        if (error.message.indexOf('already registered') !== -1) {
+          setMsg(m.already, false);
+        } else if (error.message.indexOf('Invalid email') !== -1) {
+          setMsg(m.invalid, false);
+        } else {
+          setMsg(m.failed + error.message, false);
+        }
+        
+        registerBtn.disabled = false;
+      });
+    });
+  </script>
+  <script src="translations.js"></script>
+</body>
+</html>

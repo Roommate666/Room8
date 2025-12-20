@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Benachrichtigungs-Einstellungen - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .settings-container { max-width: 800px; margin: 0 auto; padding: 1rem; padding-bottom: 5rem; }
+        .settings-header { text-align: center; margin-bottom: 1.5rem; }
+        .settings-header h1 { margin: 0 0 0.5rem 0; font-size: 1.5rem; color: #111827; }
+        .settings-header p { color: #6b7280; font-size: 0.9rem; }
+        .settings-section { background: white; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid #e5e7eb; }
+        .settings-section h2 { margin: 0 0 1rem 0; font-size: 1.1rem; color: #111827; font-weight: 700; }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; }
+        .setting-item:hover { background: #f9fafb; }
+        .setting-info { flex: 1; }
+        .setting-info h3 { margin: 0 0 0.25rem 0; font-size: 0.95rem; color: #111827; font-weight: 600; }
+        .setting-info p { margin: 0; font-size: 0.85rem; color: #6b7280; }
+        .toggle-switch { position: relative; width: 50px; height: 28px; flex-shrink: 0; margin-left: 1rem; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #d1d5db; transition: 0.3s; border-radius: 28px; }
+        .toggle-slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%; }
+        input:checked + .toggle-slider { background-color: #10b981; }
+        input:checked + .toggle-slider:before { transform: translateX(22px); }
+        .save-btn { width: 100%; padding: 1rem; background: #10b981; color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+        .save-btn:disabled { background: #d1d5db; cursor: not-allowed; }
+        .success-message { background: #d1fae5; color: #065f46; padding: 1rem; border-radius: 8px; text-align: center; margin-bottom: 1rem; display: none; }
+        .loading { text-align: center; padding: 3rem; color: #6b7280; }
+        .app-header { display: flex; align-items: center; padding: 1rem 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .app-header h1 { font-size: 1.25rem; margin: 0; flex: 1; text-align: center; }
+        .back-btn { color: white; text-decoration: none; font-size: 1.5rem; padding: 0.5rem; }
+        .header-spacer { width: 2rem; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <a href="settings.html" class="back-btn">&#8592;</a>
+            <h1 id="pageTitle">Benachrichtigungen</h1>
+            <div class="header-spacer"></div>
+        </header>
+
+        <div class="settings-container">
+            <div class="settings-header">
+                <h1>&#128276; <span id="headerTitle">Benachrichtigungs-Einstellungen</span></h1>
+                <p id="headerSubtitle">Wähle aus, worüber du informiert werden möchtest</p>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                <span id="successText">Einstellungen erfolgreich gespeichert!</span>
+            </div>
+
+            <div id="loadingState" class="loading">
+                <span id="loadingText">Lade Einstellungen...</span>
+            </div>
+
+            <div id="settingsContent" style="display: none;">
+                <div class="settings-section">
+                    <h2>&#128172; <span id="sectionChat">Chat & Kommunikation</span></h2>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3 id="labelChatMsg">Neue Chat-Nachrichten</h3>
+                            <p id="descChatMsg">Benachrichtigung wenn dir jemand schreibt</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="chat_message" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3 id="labelReview">Neue Bewertungen</h3>
+                            <p id="descReview">Benachrichtigung wenn du bewertet wirst</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="review" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h2>&#128203; <span id="sectionListings">Deine Inserate</span></h2>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3 id="labelFavorite">Favoriten</h3>
+                            <p id="descFavorite">Wenn jemand dein Inserat favorisiert</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="favorite" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3 id="labelInterest">Interesse-Anfragen</h3>
+                            <p id="descInterest">Wenn jemand Interesse an deinem Inserat zeigt</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="interest" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h2>&#127961; <span id="sectionCity">Neue Inserate in deiner Stadt</span></h2>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3 id="labelNewListing">Neue Wohnungen & Gegenstände</h3>
+                            <p id="descNewListing">Benachrichtigung bei neuen Listings in deiner Stadt</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="new_listing_city" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3 id="labelNewJob">Neue Jobs</h3>
+                            <p id="descNewJob">Benachrichtigung bei neuen Jobs in deiner Stadt</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="new_job_city" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3 id="labelNewCoupon">Neue Coupons</h3>
+                            <p id="descNewCoupon">Benachrichtigung bei neuen Coupons in deiner Stadt</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="new_coupon_city" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h2>&#128269; <span id="sectionSearches">Gespeicherte Suchen</span></h2>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3 id="labelSearchMatch">Treffer fuer gespeicherte Suchen</h3>
+                            <p id="descSearchMatch">Benachrichtigung wenn ein Inserat zu deiner Suche passt</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="saved_search_match" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <button class="save-btn" id="saveBtn">Einstellungen speichern</button>
+            </div>
+        </div>
+
+        <footer class="app-footer-nav" id="app-footer-nav"></footer>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    var currentUser = null;
+    var currentSettings = {};
+
+    // Translations
+    var nsTranslations = {
+        de: {
+            page_title: 'Benachrichtigungen',
+            header_title: 'Benachrichtigungs-Einstellungen',
+            header_subtitle: 'Wähle aus, worüber du informiert werden möchtest',
+            success: 'Einstellungen erfolgreich gespeichert!',
+            loading: 'Lade Einstellungen...',
+            section_chat: 'Chat & Kommunikation',
+            label_chat_msg: 'Neue Chat-Nachrichten',
+            desc_chat_msg: 'Benachrichtigung wenn dir jemand schreibt',
+            label_review: 'Neue Bewertungen',
+            desc_review: 'Benachrichtigung wenn du bewertet wirst',
+            section_listings: 'Deine Inserate',
+            label_favorite: 'Favoriten',
+            desc_favorite: 'Wenn jemand dein Inserat favorisiert',
+            label_interest: 'Interesse-Anfragen',
+            desc_interest: 'Wenn jemand Interesse an deinem Inserat zeigt',
+            section_city: 'Neue Inserate in deiner Stadt',
+            label_new_listing: 'Neue Wohnungen & Gegenstände',
+            desc_new_listing: 'Benachrichtigung bei neuen Listings in deiner Stadt',
+            label_new_job: 'Neue Jobs',
+            desc_new_job: 'Benachrichtigung bei neuen Jobs in deiner Stadt',
+            label_new_coupon: 'Neue Coupons',
+            desc_new_coupon: 'Benachrichtigung bei neuen Coupons in deiner Stadt',
+            section_searches: 'Gespeicherte Suchen',
+            label_search_match: 'Treffer für gespeicherte Suchen',
+            desc_search_match: 'Benachrichtigung wenn ein Inserat zu deiner Suche passt',
+            btn_save: 'Einstellungen speichern',
+            btn_saving: 'Speichere...',
+            error_load: 'Fehler beim Laden der Einstellungen',
+            error_save: 'Fehler beim Speichern der Einstellungen'
+        },
+        en: {
+            page_title: 'Notifications',
+            header_title: 'Notification Settings',
+            header_subtitle: 'Choose what you want to be notified about',
+            success: 'Settings saved successfully!',
+            loading: 'Loading settings...',
+            section_chat: 'Chat & Communication',
+            label_chat_msg: 'New Chat Messages',
+            desc_chat_msg: 'Notification when someone messages you',
+            label_review: 'New Reviews',
+            desc_review: 'Notification when you receive a review',
+            section_listings: 'Your Listings',
+            label_favorite: 'Favorites',
+            desc_favorite: 'When someone favorites your listing',
+            label_interest: 'Interest Requests',
+            desc_interest: 'When someone shows interest in your listing',
+            section_city: 'New Listings in Your City',
+            label_new_listing: 'New Apartments & Items',
+            desc_new_listing: 'Notification for new listings in your city',
+            label_new_job: 'New Jobs',
+            desc_new_job: 'Notification for new jobs in your city',
+            label_new_coupon: 'New Coupons',
+            desc_new_coupon: 'Notification for new coupons in your city',
+            section_searches: 'Saved Searches',
+            label_search_match: 'Matches for Saved Searches',
+            desc_search_match: 'Notification when a listing matches your search',
+            btn_save: 'Save Settings',
+            btn_saving: 'Saving...',
+            error_load: 'Error loading settings',
+            error_save: 'Error saving settings'
+        }
+    };
+
+    function getNSText(key) {
+        var lang = localStorage.getItem('room8_language') || localStorage.getItem('language') || 'de';
+        return nsTranslations[lang] && nsTranslations[lang][key] ? nsTranslations[lang][key] : nsTranslations['de'][key];
+    }
+
+    function applyNSTranslations() {
+        document.getElementById('pageTitle').textContent = getNSText('page_title');
+        document.getElementById('headerTitle').textContent = getNSText('header_title');
+        document.getElementById('headerSubtitle').textContent = getNSText('header_subtitle');
+        document.getElementById('successText').textContent = getNSText('success');
+        document.getElementById('loadingText').textContent = getNSText('loading');
+        document.getElementById('sectionChat').textContent = getNSText('section_chat');
+        document.getElementById('labelChatMsg').textContent = getNSText('label_chat_msg');
+        document.getElementById('descChatMsg').textContent = getNSText('desc_chat_msg');
+        document.getElementById('labelReview').textContent = getNSText('label_review');
+        document.getElementById('descReview').textContent = getNSText('desc_review');
+        document.getElementById('sectionListings').textContent = getNSText('section_listings');
+        document.getElementById('labelFavorite').textContent = getNSText('label_favorite');
+        document.getElementById('descFavorite').textContent = getNSText('desc_favorite');
+        document.getElementById('labelInterest').textContent = getNSText('label_interest');
+        document.getElementById('descInterest').textContent = getNSText('desc_interest');
+        document.getElementById('sectionCity').textContent = getNSText('section_city');
+        document.getElementById('labelNewListing').textContent = getNSText('label_new_listing');
+        document.getElementById('descNewListing').textContent = getNSText('desc_new_listing');
+        document.getElementById('labelNewJob').textContent = getNSText('label_new_job');
+        document.getElementById('descNewJob').textContent = getNSText('desc_new_job');
+        document.getElementById('labelNewCoupon').textContent = getNSText('label_new_coupon');
+        document.getElementById('descNewCoupon').textContent = getNSText('desc_new_coupon');
+        document.getElementById('sectionSearches').textContent = getNSText('section_searches');
+        document.getElementById('labelSearchMatch').textContent = getNSText('label_search_match');
+        document.getElementById('descSearchMatch').textContent = getNSText('desc_search_match');
+        document.getElementById('saveBtn').textContent = getNSText('btn_save');
+    }
+
+    function loadSettings() {
+        supabase.auth.getUser()
+            .then(function(response) {
+                var user = response.data.user;
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                currentUser = user;
+                
+                return supabase
+                    .from('notification_settings')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .single();
+            })
+            .then(function(response) {
+                if (response && response.data) {
+                    currentSettings = response.data;
+                    
+                    var checkboxIds = ['chat_message', 'review', 'favorite', 'interest', 'new_listing_city', 'new_job_city', 'new_coupon_city', 'saved_search_match'];
+                    checkboxIds.forEach(function(id) {
+                        var checkbox = document.getElementById(id);
+                        if (checkbox && currentSettings[id] !== undefined) {
+                            checkbox.checked = currentSettings[id];
+                        }
+                    });
+                }
+                
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('settingsContent').style.display = 'block';
+            })
+            .catch(function(error) {
+                console.error('Error loading settings:', error);
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('settingsContent').style.display = 'block';
+            });
+    }
+
+    document.getElementById('saveBtn').addEventListener('click', function() {
+        var btn = document.getElementById('saveBtn');
+        btn.disabled = true;
+        btn.textContent = getNSText('btn_saving');
+
+        var newSettings = {
+            user_id: currentUser.id,
+            chat_message: document.getElementById('chat_message').checked,
+            review: document.getElementById('review').checked,
+            favorite: document.getElementById('favorite').checked,
+            interest: document.getElementById('interest').checked,
+            new_listing_city: document.getElementById('new_listing_city').checked,
+            new_job_city: document.getElementById('new_job_city').checked,
+            new_coupon_city: document.getElementById('new_coupon_city').checked,
+            saved_search_match: document.getElementById('saved_search_match').checked
+        };
+
+        supabase
+            .from('notification_settings')
+            .upsert(newSettings, { onConflict: 'user_id' })
+            .then(function(response) {
+                if (response.error) throw response.error;
+                
+                var successMsg = document.getElementById('successMessage');
+                successMsg.style.display = 'block';
+                setTimeout(function() {
+                    successMsg.style.display = 'none';
+                }, 3000);
+            })
+            .catch(function(error) {
+                console.error('Error saving settings:', error);
+                alert(getNSText('error_save'));
+            })
+            .finally(function() {
+                btn.disabled = false;
+                btn.textContent = getNSText('btn_save');
+            });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        applyNSTranslations();
+        loadSettings();
+    });
+</script>
+<script src="navigation.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>

@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chat - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .app-container { height: 100vh; display: flex; flex-direction: column; }
+        .chat-header {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: white;
+            gap: 1rem;
+        }
+        .chat-header .back-arrow { 
+            font-size: 1.5rem; 
+            text-decoration: none; 
+            color: var(--text-color);
+            flex-shrink: 0;
+        }
+        .chat-header-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #e5e7eb;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .chat-header-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .chat-header-info { 
+            flex-grow: 1; 
+            min-width: 0;
+        }
+        .chat-header-info h2 { 
+            margin: 0; 
+            font-size: 1.1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .chat-header-info h2:hover {
+            color: var(--primary-color);
+        }
+        .chat-header-info p { 
+            margin: 0; 
+            font-size: 0.8rem; 
+            color: #6b7280; 
+        }
+        .chat-header-info a {
+            color: #6b7280;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .chat-header-info a:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+        .review-btn {
+            text-decoration: none;
+            background: #10b981;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .review-btn:hover {
+            background: #059669;
+        }
+        
+        /* Listing Preview Card */
+        .listing-preview {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            border-bottom: 1px solid #e5e7eb;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.2s;
+        }
+        .listing-preview:hover {
+            background: #f3f4f6;
+        }
+        .listing-preview-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #e5e7eb;
+        }
+        .listing-preview-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .listing-preview-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0;
+            color: #111827;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .listing-preview-price {
+            font-size: 0.8rem;
+            color: #10b981;
+            font-weight: 600;
+            margin: 0;
+        }
+        .listing-preview-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+        .badge-wohnung {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .badge-gegenstand {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            background-color: #f9fafb;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .chat-message {
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            max-width: 75%;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        .chat-message.sent {
+            background-color: #10b981;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-message.received {
+            background-color: white;
+            color: var(--text-color);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #e5e7eb;
+        }
+        .chat-message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 0.25rem;
+        }
+        .message-form {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            background: white;
+            gap: 0.5rem;
+        }
+        .message-form input {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            font-size: 0.95rem;
+        }
+        .message-form button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .message-form button:hover {
+            background: #059669;
+        }
+        .message-form button:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="chat-header">
+         <a href="nachrichten.html" class="back-arrow">←</a>
+         <img id="chat-avatar" class="chat-header-avatar" src="placeholder.png" alt="Avatar" title="Profil ansehen">
+        <div class="chat-header-info">
+            <h2 id="chat-title">Chat</h2>
+            <p id="chat-subtitle">Lädt...</p>
+        </div>
+         <a href="#" id="review-btn" class="review-btn" style="display:none;">⭐ Bewertung</a>
+    </header>
+    
+    <!-- Listing Preview -->
+    <a href="#" id="listing-preview" class="listing-preview" style="display: none;">
+        <img id="listing-preview-image" class="listing-preview-image" src="placeholder.png" alt="Inserat">
+        <div class="listing-preview-info">
+            <p id="listing-preview-title" class="listing-preview-title">Inserat</p>
+            <p id="listing-preview-price" class="listing-preview-price"></p>
+        </div>
+        <span id="listing-preview-badge" class="listing-preview-badge"></span>
+    </a>
+    
+    <!-- VERIFICATION BANNER FOR CHAT -->
+    <div id="chatVerificationBanner" style="display: none; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); padding: 1.5rem; margin: 1rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);">
+      <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px;">
+          <h3 style="margin: 0; color: #78350f; font-size: 1.1rem;">
+            🎓 Verifiziere deinen Studentenstatus um Nachrichten zu senden
+          </h3>
+          <p style="margin: 0.5rem 0 0 0; color: #92400e; font-size: 0.9rem;">
+            Du musst deinen Studentenstatus verifizieren, bevor du mit anderen Nutzern chatten kannst.
+          </p>
+        </div>
+        <a href="verify-options.html" style="background: white; color: #f59e0b; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          Jetzt verifizieren →
+        </a>
+      </div>
+    </div>
+    
+    <!-- TIPP: MUSTERVERTRÄGE BANNER -->
+    <div id="contractTipBanner" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 0.75rem 1rem; margin: 0.5rem 1rem; border-radius: 8px; display: flex; align-items: center; gap: 0.75rem; border: 1px solid #93c5fd;">
+      <span style="font-size: 1.1rem;">💡</span>
+      <p style="margin: 0; font-size: 0.8rem; color: #1e40af; flex: 1;" id="contractTipText">
+        <strong>Tipp:</strong> Nutze unsere <a href="nutzungsbedingungen.html#mustervertraege" style="color: #1e40af; text-decoration: underline;">Musterverträge</a> für sichere Absprachen!
+      </p>
+      <button onclick="this.parentElement.style.display='none'; localStorage.setItem('hideChatTip','true');" style="background: none; border: none; color: #6b7280; cursor: pointer; font-size: 1.1rem; padding: 0; line-height: 1;">×</button>
+    </div>
+    
+    <script>
+      if (localStorage.getItem('hideChatTip') === 'true') {
+        document.getElementById('contractTipBanner').style.display = 'none';
+      }
+      var tipLang = localStorage.getItem('room8_language') || 'de';
+      if (tipLang === 'en') {
+        document.getElementById('contractTipText').innerHTML = '<strong>Tip:</strong> Use our <a href="nutzungsbedingungen.html#mustervertraege" style="color: #1e40af; text-decoration: underline;">contract templates</a> for safe agreements!';
+      }
+    </script>
+    
+    <main class="chat-messages" id="chat-messages"></main>
+    <form class="message-form" id="message-form">
+        <input type="text" id="message-input" placeholder="Nachricht eingeben..." required autocomplete="off">
+        <button type="submit">Senden</button>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    var params = new URLSearchParams(window.location.search);
+    var listingId = params.get('listing');
+    var sellerId = params.get('seller');
+    var currentUser = null;
+    var otherUserId = null;
+    var subscription = null;
+    
+    var messagesContainer = document.getElementById('chat-messages');
+    var messageForm = document.getElementById('message-form');
+    var messageInput = document.getElementById('message-input');
+    var chatTitle = document.getElementById('chat-title');
+    var chatSubtitle = document.getElementById('chat-subtitle');
+    var reviewBtn = document.getElementById('review-btn');
+    var chatAvatar = document.getElementById('chat-avatar');
+    
+    var lang = localStorage.getItem('room8_language') || 'de';
+    
+    function getTranslation(key, fallback) {
+        var translations = {
+            de: {
+                loading: 'Lädt...',
+                chat_with: 'Chat mit',
+                verify_placeholder: 'Verifiziere deinen Studentenstatus um Nachrichten zu senden',
+                error: 'Fehler',
+                error_sending: 'Fehler beim Senden der Nachricht',
+                view_listing: 'Inserat ansehen',
+                housing: 'Wohnung',
+                item: 'Artikel',
+                per_month: '/Monat'
+            },
+            en: {
+                loading: 'Loading...',
+                chat_with: 'Chat with',
+                verify_placeholder: 'Verify your student status to send messages',
+                error: 'Error',
+                error_sending: 'Error sending message',
+                view_listing: 'View listing',
+                housing: 'Housing',
+                item: 'Item',
+                per_month: '/month'
+            }
+        };
+        var langObj = translations[lang] || translations.de;
+        return langObj[key] || fallback;
+    }
+
+    function formatTime(dateString) {
+        var date = new Date(dateString);
+        return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function renderMessage(msg, isOwnMessage) {
+        var msgDiv = document.createElement('div');
+        msgDiv.className = 'chat-message ' + (isOwnMessage ? 'sent' : 'received');
+        msgDiv.innerHTML = 
+            '<div>' + msg.content + '</div>' +
+            '<div class="chat-message-time">' + formatTime(msg.created_at) + '</div>';
+        messagesContainer.appendChild(msgDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function requireAuth() {
+        return supabase.auth.getUser().then(function(response) {
+            var user = response.data.user;
+            if (!user) {
+                window.location.href = 'login.html';
+                throw new Error('User not authenticated');
+            }
+            return user;
+        });
+    }
+
+    function loadChat() {
+        requireAuth()
+            .then(function(user) {
+                currentUser = user;
+                
+                return supabase
+                    .from('profiles')
+                    .select('is_verified, is_student_verified')
+                    .eq('id', currentUser.id)
+                    .single();
+            })
+            .then(function(profileResponse) {
+                var profile = profileResponse.data;
+                var isVerified = profile && (profile.is_verified || profile.is_student_verified);
+
+                if (!isVerified) {
+                    document.getElementById('chatVerificationBanner').style.display = 'block';
+                    messageInput.disabled = true;
+                    messageInput.placeholder = getTranslation('verify_placeholder', 'Verifiziere deinen Studentenstatus');
+                    var submitBtn = messageForm.querySelector('button');
+                    submitBtn.disabled = true;
+                    submitBtn.style.opacity = '0.5';
+                    submitBtn.style.cursor = 'not-allowed';
+                }
+                
+                return supabase
+                    .from('listings')
+                    .select('id, title, type, price, monthly_rent, owner_id, listing_photos(storage_path)')
+                    .eq('id', listingId)
+                    .single();
+            })
+            .then(function(listingResponse) {
+                if (listingResponse.error) throw listingResponse.error;
+                var listing = listingResponse.data;
+                var ownerId = listing.owner_id;
+                otherUserId = sellerId || ownerId;
+                
+                // Show listing preview
+                showListingPreview(listing);
+                
+                var ownerPromise = otherUserId 
+                    ? supabase.from('profiles').select('username, avatar_url').eq('id', otherUserId).single()
+                    : Promise.resolve({ data: null });
+                
+                return ownerPromise.then(function(ownerResponse) {
+                    return { listing: listing, owner: ownerResponse.data, ownerId: otherUserId };
+                });
+            })
+            .then(function(result) {
+                var listing = result.listing;
+                var owner = result.owner;
+                var ownerId = result.ownerId;
+                
+                var ownerUsername = owner ? owner.username : 'Unbekannt';
+                var ownerAvatar = (owner && owner.avatar_url) || 'placeholder.png';
+                
+                // Avatar - clickable to open profile
+                chatAvatar.src = ownerAvatar;
+                chatAvatar.onerror = function() { chatAvatar.src = 'placeholder.png'; };
+                chatAvatar.addEventListener('click', function() {
+                    window.location.href = 'public-profile.html?id=' + ownerId;
+                });
+                
+                // Title - clickable to open listing
+                chatTitle.textContent = ownerUsername;
+                chatTitle.addEventListener('click', function() {
+                    window.location.href = 'public-profile.html?id=' + ownerId;
+                });
+                
+                // Subtitle - link to listing
+                var chatWithText = getTranslation('view_listing', 'Inserat ansehen');
+                chatSubtitle.innerHTML = '<a href="detail.html?id=' + listingId + '">' + chatWithText + ': ' + listing.title + '</a>';
+                
+                if (sellerId && sellerId !== currentUser.id) {
+                    reviewBtn.style.display = 'block';
+                    reviewBtn.href = 'review.html?listingId=' + listingId + '&revieweeId=' + sellerId;
+                }
+                
+                return supabase
+                    .from('messages')
+                    .select('*')
+                    .eq('listing_id', listingId)
+                    .or('and(sender_id.eq.' + currentUser.id + ',receiver_id.eq.' + otherUserId + '),and(sender_id.eq.' + otherUserId + ',receiver_id.eq.' + currentUser.id + ')')
+                    .order('created_at', { ascending: true });
+            })
+            .then(function(msgResponse) {
+                if (msgResponse.error) throw msgResponse.error;
+                var messages = msgResponse.data;
+                
+                messagesContainer.innerHTML = '';
+                messages.forEach(function(msg) {
+                    renderMessage(msg, msg.sender_id === currentUser.id);
+                });
+                
+                // Realtime-Subscription
+                subscription = supabase
+                    .channel('chat-' + listingId)
+                    .on('postgres_changes', {
+                        event: 'INSERT',
+                        schema: 'public',
+                        table: 'messages',
+                        filter: 'listing_id=eq.' + listingId
+                    }, function(payload) {
+                        var newMsg = payload.new;
+                        var isFromOther = newMsg.sender_id === otherUserId;
+                        var isFromMe = newMsg.sender_id === currentUser.id;
+                        
+                        if (isFromOther && !isFromMe) {
+                            renderMessage(newMsg, false);
+                        }
+                    })
+                    .subscribe();
+            })
+            .catch(function(error) {
+                console.error('Error loading chat:', error);
+                messagesContainer.innerHTML = '<p style="text-align:center;color:red;padding:2rem;">' + getTranslation('error', 'Fehler') + ': ' + error.message + '</p>';
+            });
+    }
+    
+    function showListingPreview(listing) {
+        var preview = document.getElementById('listing-preview');
+        var previewImage = document.getElementById('listing-preview-image');
+        var previewTitle = document.getElementById('listing-preview-title');
+        var previewPrice = document.getElementById('listing-preview-price');
+        var previewBadge = document.getElementById('listing-preview-badge');
+        
+        // Set link
+        preview.href = 'detail.html?id=' + listing.id;
+        
+        // Set image
+        if (listing.listing_photos && listing.listing_photos.length > 0) {
+            var urlData = supabase.storage.from('listing-images').getPublicUrl(listing.listing_photos[0].storage_path);
+            if (urlData && urlData.data) {
+                previewImage.src = urlData.data.publicUrl;
+            }
+        }
+        previewImage.onerror = function() { this.src = 'placeholder.png'; };
+        
+        // Set title
+        previewTitle.textContent = listing.title;
+        
+        // Set price
+        var priceStr = '';
+        if (listing.type === 'wohnung' && listing.monthly_rent) {
+            priceStr = listing.monthly_rent + '€' + getTranslation('per_month', '/Monat');
+        } else if (listing.price) {
+            priceStr = listing.price + '€';
+        }
+        previewPrice.textContent = priceStr;
+        
+        // Set badge
+        if (listing.type === 'wohnung') {
+            previewBadge.textContent = getTranslation('housing', 'Wohnung');
+            previewBadge.className = 'listing-preview-badge badge-wohnung';
+        } else {
+            previewBadge.textContent = getTranslation('item', 'Artikel');
+            previewBadge.className = 'listing-preview-badge badge-gegenstand';
+        }
+        
+        preview.style.display = 'flex';
+    }
+
+    messageForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var content = messageInput.value.trim();
+        if (!content || !currentUser) return;
+        
+        var submitBtn = messageForm.querySelector('button');
+        submitBtn.disabled = true;
+        
+        var tempMsg = {
+            content: content,
+            created_at: new Date().toISOString(),
+            sender_id: currentUser.id
+        };
+        renderMessage(tempMsg, true);
+        messageInput.value = '';
+        
+        supabase.from('messages').insert({
+            sender_id: currentUser.id,
+            receiver_id: otherUserId,
+            listing_id: listingId,
+            content: content
+        })
+        .then(function(response) {
+            if (response.error) throw response.error;
+            messageInput.focus();
+        })
+        .catch(function(error) {
+            console.error('Error sending message:', error);
+            alert(getTranslation('error_sending', 'Fehler beim Senden') + ': ' + error.message);
+        })
+        .finally(function() {
+            submitBtn.disabled = false;
+        });
+    });
+    
+    window.addEventListener('beforeunload', function() {
+        if (subscription) subscription.unsubscribe();
+    });
+    
+    document.addEventListener('DOMContentLoaded', loadChat);
+</script>
+<script src="translations.js"></script>
+</body>
+</html>

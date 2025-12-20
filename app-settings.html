@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Settings â€“ Roommate</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .settings-item { display: block; width: 100%; text-align: left; padding: 1rem 1.5rem; background: none; border: none; border-bottom: 1px solid var(--border-color); font-size: 1rem; cursor: pointer; }
+        .settings-item.logout { color: #dc2626; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <a href="profile.html" class="back-arrow">â†</a>
+        <h1>Settings</h1>
+    </header>
+    <main class="app-content" style="padding:0;">
+        <div><button id="logout-button" class="settings-item logout">Log Out</button></div>
+    </main>
+    <footer class="app-footer-nav" id="app-footer-nav"></footer>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    document.getElementById('logout-button').addEventListener('click', async function() {
+        await supabase.auth.signOut();
+        window.location.href = 'login.html';
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<script src="nav.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>

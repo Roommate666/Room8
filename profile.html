@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mein Profil - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+            margin-left: 0.5rem;
+            position: relative;
+        }
+        .verified-badge svg {
+            width: 14px;
+            height: 14px;
+            stroke: white;
+            stroke-width: 3;
+        }
+        
+        /* ANALYTICS STATS STYLING */
+        .card-stats {
+            display: flex;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            margin: 0.5rem 0;
+            border-top: 1px solid #f3f4f6;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.85rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .stat-item svg {
+            flex-shrink: 0;
+        }
+
+        /* Feature Highlight Banner */
+        .feature-banner {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 1.5rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .feature-banner::before {
+            content: '';
+            position: absolute;
+            font-size: 6rem;
+            opacity: 0.1;
+            right: -1rem;
+            top: -1rem;
+        }
+
+        .feature-banner-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .feature-banner h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .feature-banner p {
+            margin: 0 0 1rem 0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            opacity: 0.95;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1rem 0;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            padding-left: 1.75rem;
+            position: relative;
+            font-size: 0.9rem;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .feature-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .feature-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .feature-btn-primary {
+            background: white;
+            color: #059669;
+        }
+
+        .feature-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .feature-btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .feature-btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .close-banner {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: background 0.2s;
+        }
+
+        .close-banner:hover {
+            background: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <h1 data-i18n="profile_title">Mein Profil</h1>
+        <div class="header-actions">
+            <!-- Notification Bell -->
+            <a href="notifications.html" class="header-icon-btn notification-bell-link" title="Benachrichtigungen" style="position: relative; margin-right: 0.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                    <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                </svg>
+                <span id="notificationBadge" style="display:none; position:absolute; top:-5px; right:-5px; background:#ef4444; color:white; border-radius:50%; width:18px; height:18px; font-size:0.7rem; font-weight:bold; display:flex; align-items:center; justify-content:center;"></span>
+            </a>
+            <a href="choose-listing.html" class="header-action-btn" data-i18n="profile_new_listing">+ Neues Inserat</a>
+            <a href="settings.html" class="header-icon-btn" data-i18n-title="profile_settings" title="Einstellungen" style="font-size: 1.5rem;">&#9881;</a>
+        </div>
+    </header>
+
+    <!-- Profil-Begrüßung mit Avatar -->
+    <div class="profile-greeting">
+        <a href="#" id="public-profile-link-avatar">
+            <div id="avatar-container" class="avatar-display">
+                <img src="placeholder.png" alt="Avatar" id="avatar-img">
+            </div>
+        </a>
+        <div class="greeting-text">
+            <h2 id="welcome-message" style="display: flex; align-items: center;">
+                Hallo, ...!
+                <span id="verified-badge" style="display: none;" class="verified-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </span>
+            </h2>
+            <div class="profile-actions">
+                <a href="edit-profile.html" class="profile-btn" data-i18n="profile_edit">Profil bearbeiten</a>
+                <a href="#" id="public-profile-link-text" class="profile-btn secondary" data-i18n="profile_public">Öffentliches Profil</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEUE FEATURES BANNER -->
+    <div class="feature-banner" id="featureBanner" style="display: none;">
+        <button class="close-banner" onclick="closeBanner()">&#215;</button>
+        <div class="feature-banner-header">
+            <div class="feature-icon">&#127881;</div>
+            <h3 data-i18n="profile_new_features">Hey! Wir haben neue Features!</h3>
+        </div>
+        <p data-i18n="profile_new_features_desc">Damit du nichts mehr verpasst, haben wir coole neue Funktionen hinzugefügt:</p>
+        <ul class="feature-list">
+            <li data-i18n="profile_feature_1">Benachrichtigungen nach deinen Wünschen anpassen</li>
+            <li data-i18n="profile_feature_2">Suchen speichern und automatisch Alerts bekommen</li>
+            <li data-i18n="profile_feature_3">Updates für neue Inserate in deiner Stadt</li>
+        </ul>
+        <div class="feature-buttons">
+            <a href="settings.html" class="feature-btn feature-btn-primary" data-i18n="profile_setup_now">
+                Jetzt einrichten
+            </a>
+            <a href="saved-searches.html" class="feature-btn feature-btn-secondary" data-i18n="profile_save_search">
+                Suche speichern
+            </a>
+        </div>
+    </div>
+
+    <!-- FAVORITES LINK -->
+    <div style="padding: 1rem 1.5rem; background-color: white; border-bottom: 1px solid var(--border-color);">
+        <a href="favorites.html" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 12px; text-decoration: none; color: #991b1b; border: 2px solid #fecaca; transition: all 0.2s;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="width: 48px; height: 48px; background-color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h4 style="margin: 0; font-size: 1.1rem; color: #7f1d1d;" data-i18n="profile_favorites">Meine Favoriten</h4>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #991b1b;" data-i18n="profile_favorites_desc">Gespeicherte Inserate ansehen</p>
+                </div>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </a>
+    </div>
+
+    <main class="app-content" style="padding: 0;">
+        <div class="my-listings-header">
+            <h3><span data-i18n="profile_my_listings">Meine Inserate</span> <span id="listing-count"></span></h3>
+        </div>
+        <div id="my-listings-container" class="listings-grid">
+            <p style="padding: 1.5rem;" data-i18n="general_loading">Laden...</p>
+        </div>
+    </main>
+
+    <footer class="app-footer-nav" id="app-footer-nav"></footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+    // Warte bis Supabase geladen ist
+    var supabase = null;
+    var maxRetries = 20;
+    var retryCount = 0;
+
+    function initSupabase() {
+        if (window.supabase && window.supabase.createClient && typeof SUPABASE_URL !== 'undefined') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('Supabase initialized successfully');
+            startApp();
+        } else {
+            retryCount++;
+            if (retryCount < maxRetries) {
+                setTimeout(initSupabase, 100);
+            } else {
+                console.error('Could not initialize Supabase');
+                document.getElementById('my-listings-container').innerHTML = 
+                    '<p style="padding:1.5rem; color:red;">Fehler beim Laden. Bitte Seite neu laden.</p>';
+            }
+        }
+    }
+
+    var listingsContainer = document.getElementById('my-listings-container');
+    var welcomeMessage = document.getElementById('welcome-message');
+    var avatarImg = document.getElementById('avatar-img');
+    var listingCount = document.getElementById('listing-count');
+    var verifiedBadge = document.getElementById('verified-badge');
+    var publicProfileLinkAvatar = document.getElementById('public-profile-link-avatar');
+    var publicProfileLinkText = document.getElementById('public-profile-link-text');
+
+    function requireAuth() {
+        return supabase.auth.getUser().then(function(response) {
+            var user = response.data.user;
+            if (!user) {
+                window.location.href = 'login.html';
+                throw new Error("User not authenticated");
+            }
+            return user;
+        });
+    }
+    
+    function deleteListing(listingId, cardElement) {
+        if (!confirm('Möchtest du dieses Inserat wirklich unwiderruflich löschen?')) return;
+        
+        supabase.from('listings').delete().eq('id', listingId)
+            .then(function(response) {
+                if (response.error) throw response.error;
+                cardElement.remove();
+                loadProfileData();
+            })
+            .catch(function(error) {
+                console.error('Fehler beim Löschen:', error.message);
+                alert('Konnte das Inserat nicht löschen.');
+            });
+    }
+
+    function createListingCard(listing) {
+        return new Promise(function(resolve) {
+            var card = document.createElement('div');
+            card.className = 'listing-card';
+            
+            var imageUrl = 'placeholder.png';
+            if (listing.listing_photos && listing.listing_photos.length > 0) {
+                var path = listing.listing_photos[0].storage_path;
+                var urlData = supabase.storage.from('listing-images').getPublicUrl(path);
+                if (urlData.data) imageUrl = urlData.data.publicUrl;
+            }
+            
+            // ANALYTICS: Lade Favorite-Count
+            supabase.from('favorites').select('id').eq('listing_id', listing.id)
+                .then(function(favResponse) {
+                    var favoriteCount = 0;
+                    if (!favResponse.error && favResponse.data) {
+                        favoriteCount = favResponse.data.length;
+                    }
+                    
+                    // Determine edit page based on type
+                    var editPage = 'gegenstand.html';
+                    if (listing.type === 'wohnung') {
+                        editPage = 'wohnung.html';
+                    } else if (listing.type === 'job') {
+                        editPage = 'job-create.html';
+                    }
+                    
+                    var editUrl = editPage + '?id=' + listing.id;
+                    var detailUrl = 'detail.html?id=' + listing.id;
+                    var viewCount = listing.view_count || 0;
+                    
+                    var typeLabel = 'Marketplace';
+                    if (listing.type === 'wohnung') typeLabel = 'Housing';
+                    else if (listing.type === 'job') typeLabel = 'Jobs';
+                    
+                    card.innerHTML = 
+                        '<a href="' + detailUrl + '" class="card-image-link">' +
+                            '<img src="' + imageUrl + '" alt="' + listing.title + '" onerror="this.src=\'placeholder.png\';">' +
+                        '</a>' +
+                        '<div class="card-content">' +
+                            '<h4>' + listing.title + '</h4>' +
+                            '<p class="card-meta">' + (listing.city || 'N/A') + ' - ' + typeLabel + '</p>' +
+                            '<div class="card-stats">' +
+                                '<span class="stat-item">' +
+                                    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                                        '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>' +
+                                        '<circle cx="12" cy="12" r="3"></circle>' +
+                                    '</svg> ' + viewCount +
+                                '</span>' +
+                                '<span class="stat-item">' +
+                                    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="' + (favoriteCount > 0 ? '#ef4444' : 'none') + '" stroke="currentColor" stroke-width="2">' +
+                                        '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>' +
+                                    '</svg> ' + favoriteCount +
+                                '</span>' +
+                            '</div>' +
+                            '<div class="card-actions">' +
+                                '<a href="' + editUrl + '" class="btn-small btn-edit">Bearbeiten</a>' +
+                                '<button class="btn-small btn-delete">Löschen</button>' +
+                            '</div>' +
+                        '</div>';
+                    
+                    card.querySelector('.btn-delete').addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        deleteListing(listing.id, card);
+                    });
+                    
+                    resolve(card);
+                })
+                .catch(function(err) {
+                    console.log('Could not load favorite count:', err);
+                    resolve(card);
+                });
+        });
+    }
+
+    function loadProfileData() {
+        var currentUser = null;
+        
+        requireAuth()
+            .then(function(user) {
+                currentUser = user;
+                return supabase.from('profiles')
+                    .select('username, avatar_url, is_verified, is_student_verified')
+                    .eq('id', user.id)
+                    .single();
+            })
+            .then(function(profileResponse) {
+                if (profileResponse.error) {
+                    console.error('Profile error:', profileResponse.error);
+                    throw profileResponse.error;
+                }
+                
+                var profile = profileResponse.data;
+                var username = profile.username || 'User';
+                welcomeMessage.childNodes[0].textContent = 'Hallo, ' + username + '! ';
+                
+                if (profile.avatar_url) {
+                    avatarImg.src = profile.avatar_url;
+                }
+
+                if (profile.is_verified || profile.is_student_verified) {
+                    verifiedBadge.style.display = 'inline-flex';
+                }
+
+                publicProfileLinkAvatar.href = 'public-profile.html?id=' + currentUser.id;
+                publicProfileLinkText.href = 'public-profile.html?id=' + currentUser.id;
+
+                return supabase.from('listings')
+                    .select('id, title, city, type, view_count, listing_photos(storage_path)')
+                    .eq('owner_id', currentUser.id);
+            })
+            .then(function(listingsResponse) {
+                if (listingsResponse.error) {
+                    console.error('Listings error:', listingsResponse.error);
+                    throw listingsResponse.error;
+                }
+                
+                var listings = listingsResponse.data;
+                listingsContainer.innerHTML = '';
+                
+                if (listings && listings.length > 0) {
+                    listingCount.textContent = '(' + listings.length + ')';
+                    
+                    var cardPromises = listings.map(function(listing) {
+                        return createListingCard(listing);
+                    });
+                    
+                    Promise.all(cardPromises).then(function(cards) {
+                        cards.forEach(function(card) {
+                            listingsContainer.appendChild(card);
+                        });
+                    });
+                } else {
+                    listingCount.textContent = '(0)';
+                    listingsContainer.innerHTML = 
+                        '<div class="empty-state">' +
+                            '<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+                                '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>' +
+                                '<line x1="12" y1="8" x2="12" y2="16"></line>' +
+                                '<line x1="8" y1="12" x2="16" y2="12"></line>' +
+                            '</svg>' +
+                            '<h3>Noch keine Inserate</h3>' +
+                            '<p>Erstelle dein erstes Inserat!</p>' +
+                            '<a href="choose-listing.html" class="submit-btn">+ Erstes Inserat erstellen</a>' +
+                        '</div>';
+                }
+            })
+            .catch(function(error) {
+                console.error('Fehler beim Laden:', error);
+                listingsContainer.innerHTML = 
+                    '<p style="padding:1.5rem; color:red;">' +
+                        '<b>Fehler:</b> Konnte deine Daten nicht laden. Bitte versuche es erneut.' +
+                    '</p>';
+            });
+    }
+    
+    function startApp() {
+        // DOM elements neu holen falls noch nicht gesetzt
+        listingsContainer = document.getElementById('my-listings-container');
+        welcomeMessage = document.getElementById('welcome-message');
+        avatarImg = document.getElementById('avatar-img');
+        listingCount = document.getElementById('listing-count');
+        verifiedBadge = document.getElementById('verified-badge');
+        publicProfileLinkAvatar = document.getElementById('public-profile-link-avatar');
+        publicProfileLinkText = document.getElementById('public-profile-link-text');
+        
+        loadProfileData();
+        checkFeatureBanner();
+    }
+    
+    // Starte wenn DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSupabase);
+    } else {
+        initSupabase();
+    }
+
+    // FEATURE BANNER LOGIC
+    function checkFeatureBanner() {
+        requireAuth()
+            .then(function(user) {
+                var bannerSeen = localStorage.getItem('feature_banner_seen_' + user.id);
+                
+                if (!bannerSeen) {
+                    setTimeout(function() {
+                        document.getElementById('featureBanner').style.display = 'block';
+                    }, 1000);
+                }
+            })
+            .catch(function(error) {
+                console.log('Feature banner check skipped');
+            });
+    }
+
+    window.closeBanner = function() {
+        if (!supabase) return;
+        supabase.auth.getUser()
+            .then(function(response) {
+                var user = response.data.user;
+                if (user) {
+                    localStorage.setItem('feature_banner_seen_' + user.id, 'true');
+                }
+            })
+            .catch(function(error) {
+                console.log('Could not save banner state');
+            });
+        document.getElementById('featureBanner').style.display = 'none';
+    };
+</script>
+<script>
+    // Update notification badge
+    function updateNotificationBadge() {
+        if (!supabase) return;
+        supabase.auth.getUser()
+            .then(function(res) {
+                if (!res.data.user) return;
+                return supabase.from('notifications')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_id', res.data.user.id)
+                    .eq('is_read', false);
+            })
+            .then(function(result) {
+                if (result && result.count > 0) {
+                    var badge = document.getElementById('notificationBadge');
+                    if (badge) {
+                        badge.textContent = result.count > 99 ? '99+' : result.count;
+                        badge.style.display = 'flex';
+                    }
+                }
+            })
+            .catch(function(e) { console.log('Badge error:', e); });
+    }
+    setTimeout(updateNotificationBadge, 1000);
+</script>
+<script src="notificationBell.js"></script>
+<script src="navigation.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>

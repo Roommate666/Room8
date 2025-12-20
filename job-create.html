@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Job erstellen â€“ Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .app-container { --primary-color: #6366f1; }
+        
+        .form-header {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            margin: -1.5rem -1.5rem 2rem -1.5rem;
+            text-align: center;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+        .form-header h2 { 
+            margin: 0; 
+            font-size: 1.5rem; 
+            font-weight: 700;
+        }
+        .form-header p {
+            opacity: 0.9; 
+            margin: 0.5rem 0 0 0; 
+            font-size: 0.9rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+        }
+        @media (min-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .form-group-full {
+                grid-column: 1 / -1;
+            }
+        }
+        
+        .section-header {
+            grid-column: 1 / -1;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #374151;
+            margin: 1rem 0 0.5rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+        
+        .submit-btn-jobs {
+            background-color: #6366f1 !important;
+            grid-column: 1 / -1;
+        }
+        .submit-btn-jobs:hover {
+            background-color: #4f46e5 !important;
+        }
+        
+        #form-message {
+            grid-column: 1 / -1;
+            margin-top: 1rem;
+            text-align: center;
+            font-weight: 600;
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+        }
+        #form-message.success {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        #form-message.error {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .hint-text {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-arrow">â†</a>
+        <h1>Job-Anzeige erstellen</h1>
+    </header>
+    
+    <main class="app-content">
+        <div class="form-header">
+            <h2>ðŸ’¼ Neue Job-Anzeige</h2>
+            <p>Stelle erstellen und Kandidaten finden</p>
+        </div>
+        
+        <form id="jobForm">
+            <div class="form-grid">
+                
+                <!-- FIRMA -->
+                <div class="section-header">ðŸ¢ Unternehmensinformationen</div>
+                
+                <div class="form-group">
+                    <label for="company_name">Firmenname *</label>
+                    <input type="text" id="company_name" required placeholder="z.B. SWR Augsburg">
+                </div>
+                
+                <div class="form-group">
+                    <label for="company_website">Website</label>
+                    <input type="url" id="company_website" placeholder="https://example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="company_size">Firmengröße *</label>
+                    <select id="company_size" required>
+                        <option value="" disabled selected>Wählen</option>
+                        <option value="startup">Startup (< 50 MA)</option>
+                        <option value="mittelstand">Mittelstand (50-500 MA)</option>
+                        <option value="konzern">Konzern (> 500 MA)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">Standort *</label>
+                    <input type="text" id="location" required placeholder="z.B. Berlin / Remote">
+                </div>
+                
+                <!-- JOB DETAILS -->
+                <div class="section-header">ðŸ’¼ Stellendetails</div>
+                
+                <div class="form-group form-group-full">
+                    <label for="title">Job-Titel *</label>
+                    <input type="text" id="title" required placeholder="z.B. Full-Stack Developer (m/w/d) - Werkstudent">
+                </div>
+                
+                <div class="form-group form-group-full">
+                    <label for="description">Beschreibung *</label>
+                    <textarea id="description" rows="6" required placeholder="Jobbeschreibung, Aufgaben, Anforderungen..."></textarea>
+                    <div class="hint-text">Nutzen Sie Absätze für bessere Lesbarkeit</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="job_type">Vertragsart *</label>
+                    <select id="job_type" required>
+                        <option value="" disabled selected>Wählen</option>
+                        <option value="werkstudent">Werkstudent</option>
+                        <option value="praktikum">Praktikum</option>
+                        <option value="minijob">Minijob</option>
+                        <option value="festanstellung">Festanstellung</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contract_duration">Vertragsdauer *</label>
+                    <select id="contract_duration" required>
+                        <option value="" disabled selected>Wählen</option>
+                        <option value="unbefristet">Unbefristet</option>
+                        <option value="befristet">Befristet</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contract_duration_months">Dauer in Monaten (bei befristet)</label>
+                    <input type="number" id="contract_duration_months" min="1" max="48" placeholder="z.B. 6">
+                </div>
+                
+                <!-- ARBEITSZEIT -->
+                <div class="section-header">â° Arbeitszeit & Vergütung</div>
+                
+                <div class="form-group">
+                    <label for="min_hours">Min. Stunden/Woche *</label>
+                    <input type="number" id="min_hours" min="1" max="40" required placeholder="z.B. 15">
+                </div>
+                
+                <div class="form-group">
+                    <label for="max_hours">Max. Stunden/Woche *</label>
+                    <input type="number" id="max_hours" min="1" max="40" required placeholder="z.B. 20">
+                </div>
+                
+                <div class="form-group">
+                    <label for="salary_type">Vergütungsart *</label>
+                    <select id="salary_type" required>
+                        <option value="" disabled selected>Wählen</option>
+                        <option value="per_hour">Pro Stunde</option>
+                        <option value="per_month">Pro Monat</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="hourly_salary_group" style="display: none;">
+                    <label for="salary_min">Min. Stundenlohn (â‚¬) *</label>
+                    <input type="number" id="salary_min" step="0.5" min="0" placeholder="z.B. 15">
+                </div>
+                
+                <div class="form-group" id="hourly_salary_max_group" style="display: none;">
+                    <label for="salary_max">Max. Stundenlohn (â‚¬) *</label>
+                    <input type="number" id="salary_max" step="0.5" min="0" placeholder="z.B. 18">
+                </div>
+                
+                <div class="form-group" id="monthly_salary_group" style="display: none;">
+                    <label for="salary_amount">Monatsgehalt (â‚¬) *</label>
+                    <input type="number" id="salary_amount" step="50" min="0" placeholder="z.B. 2000">
+                </div>
+                
+                <div class="form-group">
+                    <label for="start_date">Gewünschtes Startdatum</label>
+                    <input type="date" id="start_date">
+                </div>
+                
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="remote_possible">
+                    <label for="remote_possible">Remote-Arbeit möglich</label>
+                </div>
+                
+                <!-- ANFORDERUNGEN -->
+                <div class="section-header">ðŸ“š Anforderungen & Benefits</div>
+                
+                <div class="form-group form-group-full">
+                    <label for="requirements">Anforderungen</label>
+                    <textarea id="requirements" rows="4" placeholder="Eine Anforderung pro Zeile, z.B.:
+Studium in Informatik oder ähnlich
+JavaScript/TypeScript Kenntnisse
+React Erfahrung"></textarea>
+                    <div class="hint-text">Jede Zeile = ein Bullet-Point</div>
+                </div>
+                
+                <div class="form-group form-group-full">
+                    <label for="benefits">Was wir bieten</label>
+                    <textarea id="benefits" rows="4" placeholder="Ein Benefit pro Zeile, z.B.:
+Flexible Arbeitszeiten
+Remote Work
+MacBook Pro"></textarea>
+                    <div class="hint-text">Jede Zeile = ein Bullet-Point</div>
+                </div>
+                
+                <!-- BEWERBUNG -->
+                <div class="section-header">ðŸ“§ Bewerbungsdetails</div>
+                
+                <div class="form-group">
+                    <label for="application_email">Bewerbungs-Email *</label>
+                    <input type="email" id="application_email" required placeholder="jobs@firma.de">
+                </div>
+                
+                <div class="form-group">
+                    <label for="application_url">Bewerbungs-Link (optional)</label>
+                    <input type="url" id="application_url" placeholder="https://firma.de/karriere">
+                </div>
+                
+                <div class="form-group">
+                    <label for="application_deadline">Bewerbungsfrist</label>
+                    <input type="date" id="application_deadline">
+                </div>
+                
+                <div class="form-group form-group-full">
+                    <label for="required_documents">Benötigte Unterlagen</label>
+                    <textarea id="required_documents" rows="3" placeholder="Ein Dokument pro Zeile, z.B.:
+Lebenslauf
+Motivationsschreiben
+Zeugnisse"></textarea>
+                    <div class="hint-text">Jede Zeile = ein erforderliches Dokument</div>
+                </div>
+                
+                <!-- DEMO -->
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="is_demo">
+                    <label for="is_demo">Als Demo-Job markieren (wird nicht öffentlich angezeigt)</label>
+                </div>
+                
+                <div id="form-message"></div>
+                <button type="submit" class="submit-btn submit-btn-jobs" id="submit-btn">Job veröffentlichen</button>
+            </div>
+        </form>
+    </main>
+    
+    <footer class="app-footer-nav" id="app-footer-nav"></footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    var form = document.getElementById('jobForm');
+    var msgContainer = document.getElementById('form-message');
+    var submitBtn = document.getElementById('submit-btn');
+    var salaryTypeSelect = document.getElementById('salary_type');
+    
+    // Show/hide salary fields based on type
+    salaryTypeSelect.addEventListenerfunction('change', (e) {
+        var isHourly = e.target.value === 'per_hour';
+        document.getElementById('hourly_salary_group').style.display = isHourly ? 'block' : 'none';
+        document.getElementById('hourly_salary_max_group').style.display = isHourly ? 'block' : 'none';
+        document.getElementById('monthly_salary_group').style.display = isHourly ? 'none' : 'block';
+        
+        // Clear unused fields
+        if (isHourly) {
+            document.getElementById('salary_amount').value = '';
+        } else {
+            document.getElementById('salary_min').value = '';
+            document.getElementById('salary_max').value = '';
+        }
+    });
+    
+    // Helper: Convert textarea to array
+    function textareaToArray(value) {
+        if (!value || !value.trim()) return [];
+        return value.split('\n')
+            .map(function(line) { return line.trim(; }))
+            .filter(function(line) { return line.length > 0; });
+    }
+    
+    // Check if user is logged in (no admin check)
+    async function checkAuth() {
+        try {
+            var { data: { user }, error } = await supabase.auth.getUser();
+            
+            if (error || !user) {
+                alert('Bitte einloggen um Jobs zu erstellen!');
+                window.location.href = 'login.html';
+                return null;
+            }
+            
+            return user;
+        } catch (error) {
+            console.error('Auth check error:', error);
+            alert('Bitte einloggen um Jobs zu erstellen!');
+            window.location.href = 'login.html';
+            return null;
+        }
+    }
+    
+    // Form submit
+    form.addEventListenerfunction('submit', async (e) {
+        e.preventDefault();
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Speichern...';
+        msgContainer.textContent = '';
+        msgContainer.className = '';
+        
+        try {
+            var { data: { user }, error: authError } = await supabase.auth.getUser();
+            
+            if (authError || !user) {
+                throw new Error('Bitte einloggen!');
+            }
+            
+            var salaryType = document.getElementById('salary_type').value;
+            
+            // Prepare salary data
+            var salaryData = {};
+            if (salaryType === 'per_hour') {
+                salaryData = {
+                    salary_type: 'per_hour',
+                    salary_min: parseFloat(document.getElementById('salary_min').value),
+                    salary_max: parseFloat(document.getElementById('salary_max').value),
+                    salary_amount: null
+                };
+            } else {
+                salaryData = {
+                    salary_type: 'per_month',
+                    salary_amount: parseFloat(document.getElementById('salary_amount').value),
+                    salary_min: null,
+                    salary_max: null
+                };
+            }
+            
+            var jobData = {
+                type: 'job',
+                listing_mode: 'offer',
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                company_name: document.getElementById('company_name').value,
+                company_website: document.getElementById('company_website').value || null,
+                company_size: document.getElementById('company_size').value,
+                job_type: document.getElementById('job_type').value,
+                min_hours_per_week: parseInt(document.getElementById('min_hours').value),
+                max_hours_per_week: parseInt(document.getElementById('max_hours').value),
+                ...salaryData,
+                start_date: document.getElementById('start_date').value || null,
+                contract_duration: document.getElementById('contract_duration').value,
+                contract_duration_months: document.getElementById('contract_duration_months').value ? parseInt(document.getElementById('contract_duration_months').value) : null,
+                remote_possible: document.getElementById('remote_possible').checked,
+                location: document.getElementById('location').value,
+                city: document.getElementById('location').value.split('/')[0].trim(),
+                requirements: textareaToArray(document.getElementById('requirements').value),
+                benefits: textareaToArray(document.getElementById('benefits').value),
+                application_email: document.getElementById('application_email').value || null,
+                application_url: document.getElementById('application_url').value || null,
+                application_deadline: document.getElementById('application_deadline').value || null,
+                required_documents: textareaToArray(document.getElementById('required_documents').value),
+                is_demo: document.getElementById('is_demo').checked,
+                owner_id: user.id
+            };
+            
+            var { data, error } = await supabase
+                .from('listings')
+                .insert(jobData)
+                .select()
+                .single();
+            
+            if (error) throw error;
+            
+            msgContainer.textContent = 'âœ“ Job erfolgreich erstellt!';
+            msgContainer.className = 'success';
+            
+            setTimeout(function() {
+                window.location.href = 'jobs.html';
+            }, 1500);
+            
+        } catch (error) {
+            console.error('Error:', error);
+            msgContainer.textContent = `Fehler: ${error.message}`;
+            msgContainer.className = 'error';
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Job veröffentlichen';
+        }
+    });
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async function() {
+        await checkAuth();
+    });
+</script>
+<!-- Navigation Component -->
+<script src="config.js"></script>
+<script src="navigation.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>

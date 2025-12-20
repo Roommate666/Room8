@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Meine Favoriten - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .favorites-header {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .favorites-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.5rem;
+        }
+        
+        .favorites-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .favorites-tabs {
+            display: flex;
+            border-bottom: 2px solid #e5e7eb;
+            background-color: white;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 1rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+            transition: all 0.2s;
+        }
+        
+        .tab-btn.active {
+            color: #ef4444;
+            border-bottom-color: #ef4444;
+        }
+        
+        .listings-grid {
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-bottom: 5rem;
+        }
+        
+        .favorite-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #111827;
+            position: relative;
+        }
+        
+        .card-image-container {
+            position: relative;
+            width: 100%;
+            padding-top: 75%;
+            overflow: hidden;
+            background-color: #f3f4f6;
+        }
+        
+        .card-image-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .remove-favorite-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        .remove-favorite-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: #ef4444;
+        }
+        
+        .card-content {
+            padding: 0.75rem;
+        }
+        
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .card-info {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-price {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #10b981;
+        }
+        
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem 1.5rem;
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.2rem;
+            margin: 0 0 0.5rem 0;
+        }
+        
+        .empty-state p {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+        
+        .empty-state-btn {
+            background-color: #ef4444;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .app-header {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .app-header h1 {
+            font-size: 1.25rem;
+            margin: 0;
+            flex: 1;
+            text-align: center;
+        }
+
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+            padding: 0.5rem;
+        }
+
+        .header-spacer {
+            width: 2rem;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <a href="profile.html" class="back-btn">&#8592;</a>
+        <h1 data-i18n="favorites_title">Meine Favoriten</h1>
+        <div class="header-spacer"></div>
+    </header>
+    
+    <div class="favorites-header">
+        <h1>&#10084; <span data-i18n="favorites_saved_items" id="headerTitle">Gespeicherte Inserate</span></h1>
+        <p data-i18n="favorites_subtitle" id="headerSubtitle">Deine Favoriten an einem Ort</p>
+    </div>
+    
+    <div class="favorites-tabs">
+        <button class="tab-btn active" data-type="wohnung" id="tabHousing">Wohnungen</button>
+        <button class="tab-btn" data-type="gegenstand" id="tabMarketplace">Marktplatz</button>
+    </div>
+    
+    <main class="app-content" style="padding: 0;">
+        <div class="listings-grid" id="favoritesGrid">
+            <p style="padding: 1.5rem; grid-column: 1/-1; text-align: center; color: #6b7280;" id="loadingText">Lade Favoriten...</p>
+        </div>
+    </main>
+    
+    <footer class="app-footer-nav" id="app-footer-nav"></footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    var favoritesGrid = document.getElementById('favoritesGrid');
+    var currentType = 'wohnung';
+    var currentUser = null;
+
+    // Translations
+    var favTranslations = {
+        de: {
+            title: 'Meine Favoriten',
+            saved_items: 'Gespeicherte Inserate',
+            subtitle: 'Deine Favoriten an einem Ort',
+            tab_housing: 'Wohnungen',
+            tab_marketplace: 'Marktplatz',
+            loading: 'Lade Favoriten...',
+            no_favorites: 'Noch keine Favoriten',
+            no_favorites_hint_housing: 'Fuege Wohnungen zu deinen Favoriten hinzu!',
+            no_favorites_hint_marketplace: 'Fuege Artikel zu deinen Favoriten hinzu!',
+            browse_housing: 'Wohnungen durchsuchen',
+            browse_marketplace: 'Marktplatz durchsuchen',
+            error_loading: 'Fehler beim Laden der Favoriten.',
+            error_remove: 'Konnte Favorit nicht entfernen.',
+            per_month: '/Monat'
+        },
+        en: {
+            title: 'My Favorites',
+            saved_items: 'Saved Items',
+            subtitle: 'Your favorites in one place',
+            tab_housing: 'Housing',
+            tab_marketplace: 'Marketplace',
+            loading: 'Loading favorites...',
+            no_favorites: 'No favorites yet',
+            no_favorites_hint_housing: 'Start adding housing listings to your favorites!',
+            no_favorites_hint_marketplace: 'Start adding marketplace items to your favorites!',
+            browse_housing: 'Browse Housing',
+            browse_marketplace: 'Browse Marketplace',
+            error_loading: 'Error loading favorites.',
+            error_remove: 'Could not remove favorite.',
+            per_month: '/month'
+        }
+    };
+
+    function getFavText(key) {
+        var lang = localStorage.getItem('room8_language') || localStorage.getItem('language') || 'de';
+        return favTranslations[lang] && favTranslations[lang][key] ? favTranslations[lang][key] : favTranslations['de'][key];
+    }
+
+    function applyFavTranslations() {
+        document.getElementById('headerTitle').textContent = getFavText('saved_items');
+        document.getElementById('headerSubtitle').textContent = getFavText('subtitle');
+        document.getElementById('tabHousing').textContent = getFavText('tab_housing');
+        document.getElementById('tabMarketplace').textContent = getFavText('tab_marketplace');
+        document.getElementById('loadingText').textContent = getFavText('loading');
+        
+        var headerH1 = document.querySelector('.app-header h1');
+        if (headerH1) headerH1.textContent = getFavText('title');
+    }
+
+    function checkAuth() {
+        return supabase.auth.getUser()
+            .then(function(response) {
+                var user = response.data.user;
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return null;
+                }
+                currentUser = user;
+                return user;
+            });
+    }
+
+    function removeFavorite(listingId, cardElement) {
+        supabase
+            .from('favorites')
+            .delete()
+            .eq('user_id', currentUser.id)
+            .eq('listing_id', listingId)
+            .then(function(response) {
+                if (response.error) throw response.error;
+                
+                cardElement.style.transition = 'all 0.3s ease';
+                cardElement.style.opacity = '0';
+                cardElement.style.transform = 'scale(0.9)';
+                
+                setTimeout(function() {
+                    cardElement.remove();
+                    if (favoritesGrid.children.length === 0) {
+                        loadFavorites();
+                    }
+                }, 300);
+            })
+            .catch(function(err) {
+                console.error('Error removing favorite:', err);
+                alert(getFavText('error_remove'));
+            });
+    }
+
+    function renderCard(listing) {
+        var card = document.createElement('div');
+        card.className = 'favorite-card';
+        
+        var imageUrl = 'placeholder.png';
+        if (listing.listing_photos && listing.listing_photos.length > 0) {
+            var data = supabase.storage.from('listing-images')
+                .getPublicUrl(listing.listing_photos[0].storage_path);
+            if (data && data.data) imageUrl = data.data.publicUrl;
+        }
+        
+        var isHousing = listing.type === 'wohnung';
+        var perMonth = getFavText('per_month');
+        var priceDisplay = isHousing 
+            ? listing.monthly_rent + ' EUR' + perMonth
+            : listing.price + ' EUR';
+        
+        var infoDisplay = isHousing
+            ? listing.city
+            : (listing.category || 'Item') + ' - ' + listing.city;
+        
+        card.innerHTML = 
+            '<a href="detail.html?id=' + listing.id + '" style="text-decoration: none; color: inherit;">' +
+                '<div class="card-image-container">' +
+                    '<img src="' + imageUrl + '" alt="' + listing.title + '" onerror="this.src=\'placeholder.png\';">' +
+                '</div>' +
+                '<div class="card-content">' +
+                    '<h3 class="card-title">' + listing.title + '</h3>' +
+                    '<div class="card-info">' + infoDisplay + '</div>' +
+                    '<div class="card-price">' + priceDisplay + '</div>' +
+                '</div>' +
+            '</a>' +
+            '<button class="remove-favorite-btn" data-listing-id="' + listing.id + '">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">' +
+                    '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>' +
+                '</svg>' +
+            '</button>';
+        
+        var removeBtn = card.querySelector('.remove-favorite-btn');
+        removeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            removeFavorite(listing.id, card);
+        });
+        
+        return card;
+    }
+
+    function loadFavorites() {
+        if (!currentUser) return;
+        
+        supabase
+            .from('favorites')
+            .select('listing_id, listings:listing_id (id, title, type, city, monthly_rent, price, category, listing_photos(storage_path))')
+            .eq('user_id', currentUser.id)
+            .then(function(response) {
+                if (response.error) throw response.error;
+                
+                var data = response.data || [];
+                var favorites = data
+                    .map(function(f) { return f.listings; })
+                    .filter(function(l) { return l && l.type === currentType; });
+                
+                favoritesGrid.innerHTML = '';
+                
+                if (favorites.length === 0) {
+                    var isHousing = currentType === 'wohnung';
+                    var noFavHint = isHousing 
+                        ? getFavText('no_favorites_hint_housing')
+                        : getFavText('no_favorites_hint_marketplace');
+                    var browseText = isHousing
+                        ? getFavText('browse_housing')
+                        : getFavText('browse_marketplace');
+                    var browseLink = isHousing ? 'wohnungen.html' : 'gegenstaende.html';
+                    
+                    favoritesGrid.innerHTML = 
+                        '<div class="empty-state">' +
+                            '<div class="empty-state-icon">&#10084;</div>' +
+                            '<h3>' + getFavText('no_favorites') + '</h3>' +
+                            '<p>' + noFavHint + '</p>' +
+                            '<a href="' + browseLink + '" class="empty-state-btn">' + browseText + '</a>' +
+                        '</div>';
+                } else {
+                    favorites.forEach(function(listing) {
+                        favoritesGrid.appendChild(renderCard(listing));
+                    });
+                }
+            })
+            .catch(function(err) {
+                console.error('Error loading favorites:', err);
+                favoritesGrid.innerHTML = '<p style="color: red; grid-column: 1/-1; text-align: center;">' + getFavText('error_loading') + '</p>';
+            });
+    }
+
+    // Tab switching
+    var tabBtns = document.querySelectorAll('.tab-btn');
+    for (var i = 0; i < tabBtns.length; i++) {
+        tabBtns[i].addEventListener('click', function(e) {
+            var activeTab = document.querySelector('.tab-btn.active');
+            if (activeTab) activeTab.classList.remove('active');
+            e.target.classList.add('active');
+            currentType = e.target.getAttribute('data-type');
+            loadFavorites();
+        });
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', function() {
+        applyFavTranslations();
+        checkAuth().then(function() {
+            loadFavorites();
+        });
+    });
+</script>
+<script src="navigation.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>

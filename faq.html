@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title data-i18n="faq_page_title">Hilfe & FAQ - Room8</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .faq-content { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; padding-bottom: 3rem; }
+    .faq-header { text-align: center; margin-bottom: 2rem; }
+    .faq-header h1 { color: #1e40af; margin-bottom: 0.5rem; font-size: 2rem; }
+    .faq-header p { color: #6b7280; font-size: 1.1rem; }
+    .faq-search { position: relative; margin-bottom: 2rem; }
+    .faq-search input { width: 100%; padding: 1rem 1rem 1rem 3rem; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 1rem; }
+    .faq-search input:focus { outline: none; border-color: #3b82f6; }
+    .faq-search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-size: 1.25rem; }
+    .faq-category { margin-bottom: 2rem; }
+    .faq-category-title { display: flex; align-items: center; gap: 0.75rem; font-size: 1.25rem; font-weight: 700; color: #374151; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e5e7eb; }
+    .faq-category-icon { font-size: 1.5rem; }
+    .faq-item { background: white; border: 1px solid #e5e7eb; border-radius: 12px; margin-bottom: 0.75rem; overflow: hidden; }
+    .faq-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .faq-question { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; cursor: pointer; font-weight: 600; color: #111827; background: white; }
+    .faq-question:hover { background: #f9fafb; }
+    .faq-question.active { background: #eff6ff; color: #1e40af; }
+    .faq-arrow { font-size: 1.25rem; transition: transform 0.3s; color: #9ca3af; }
+    .faq-question.active .faq-arrow { transform: rotate(180deg); color: #1e40af; }
+    .faq-answer { display: none; padding: 0 1.25rem 1.25rem 1.25rem; color: #4b5563; line-height: 1.7; }
+    .faq-answer.show { display: block; }
+    .faq-answer a { color: #3b82f6; text-decoration: none; }
+    .faq-answer a:hover { text-decoration: underline; }
+    .faq-answer ul, .faq-answer ol { margin: 0.5rem 0; padding-left: 1.5rem; }
+    .faq-answer li { margin-bottom: 0.5rem; }
+    .highlight-box { background: #d1fae5; border-left: 4px solid #10b981; padding: 1rem 1.25rem; border-radius: 0 8px 8px 0; margin: 1rem 0; }
+    .warning-box { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem 1.25rem; border-radius: 0 8px 8px 0; margin: 1rem 0; }
+    .contact-section { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid #e5e7eb; }
+    .contact-section h2 { text-align: center; color: #374151; margin-bottom: 0.5rem; }
+    .contact-section > p { text-align: center; color: #6b7280; margin-bottom: 1.5rem; }
+    .contact-form { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1.5rem; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: #374151; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 1rem; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #3b82f6; }
+    .form-group textarea { resize: vertical; min-height: 120px; }
+    .submit-btn { width: 100%; padding: 1rem; background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
+    .submit-btn:disabled { background: #d1d5db; cursor: not-allowed; transform: none; box-shadow: none; }
+    .form-success { display: none; text-align: center; padding: 2rem; }
+    .form-success.show { display: block; }
+    .form-success-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .form-success h3 { color: #059669; margin-bottom: 0.5rem; }
+    .quick-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .quick-link { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: white; border: 1px solid #e5e7eb; border-radius: 12px; text-decoration: none; color: #374151; }
+    .quick-link:hover { border-color: #3b82f6; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1); transform: translateY(-2px); }
+    .quick-link-icon { font-size: 1.5rem; }
+    .quick-link-text { font-weight: 600; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: #6b7280; text-decoration: none; margin-bottom: 1rem; }
+    .back-link:hover { color: #3b82f6; }
+    .no-results { text-align: center; padding: 2rem; color: #6b7280; display: none; }
+    .no-results.show { display: block; }
+    .email-link { background: #f0fdf4; padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid #86efac; }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <main class="faq-content">
+    <a href="javascript:history.back()" class="back-link">← <span data-i18n="general_back">Zurück</span></a>
+    
+    <div class="faq-header">
+      <h1>🤔 <span data-i18n="faq_title">Hilfe & FAQ</span></h1>
+      <p data-i18n="faq_subtitle">Antworten auf die häufigsten Fragen</p>
+    </div>
+    
+    <div class="quick-links">
+      <a href="nutzungsbedingungen.html#mustervertraege" class="quick-link">
+        <span class="quick-link-icon">📋</span>
+        <span class="quick-link-text" data-i18n="faq_quick_templates">Musterverträge</span>
+      </a>
+      <a href="datenschutz.html" class="quick-link">
+        <span class="quick-link-icon">🔒</span>
+        <span class="quick-link-text" data-i18n="faq_quick_privacy">Datenschutz</span>
+      </a>
+      <a href="nutzungsbedingungen.html" class="quick-link">
+        <span class="quick-link-icon">📜</span>
+        <span class="quick-link-text" data-i18n="faq_quick_terms">AGB</span>
+      </a>
+      <a href="#kontakt" class="quick-link">
+        <span class="quick-link-icon">✉</span>
+        <span class="quick-link-text" data-i18n="faq_quick_contact">Kontakt</span>
+      </a>
+    </div>
+    
+    <div class="faq-search">
+      <span class="faq-search-icon">🔍</span>
+      <input type="text" id="faqSearch" data-i18n-placeholder="faq_search_placeholder" placeholder="Frage suchen...">
+    </div>
+    
+    <div class="no-results" id="noResults">
+      <p>😕 <span data-i18n="faq_no_results">Keine passenden Fragen gefunden.</span></p>
+      <p><span data-i18n="faq_no_results_hint">Stelle deine Frage unten im</span> <a href="#kontakt" data-i18n="faq_contact_form_link">Kontaktformular</a>!</p>
+    </div>
+    
+    <div id="faqContainer">
+      
+      <!-- Category: General -->
+      <div class="faq-category" data-category="allgemein">
+        <div class="faq-category-title">
+          <span class="faq-category-icon">🏠</span>
+          <span data-i18n="faq_cat_general">Allgemein</span>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span data-i18n="faq_q1">Was ist Room8?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p data-i18n="faq_a1_intro">Room8 ist eine kostenlose Plattform für Studierende, um:</p>
+            <ul>
+              <li>🏠 <span data-i18n="faq_a1_item1"><strong>Wohnungen & WG-Zimmer</strong> zu finden oder anzubieten</span></li>
+              <li>🔄 <span data-i18n="faq_a1_item2"><strong>Wohnungen zu tauschen</strong> (z.B. für ein Auslandssemester)</span></li>
+              <li>🛒 <span data-i18n="faq_a1_item3"><strong>Gebrauchte Gegenstände</strong> zu kaufen/verkaufen</span></li>
+              <li>💼 <span data-i18n="faq_a1_item4"><strong>Studentenjobs</strong> zu finden</span></li>
+              <li>🎟 <span data-i18n="faq_a1_item5"><strong>Rabatte & Coupons</strong> zu entdecken</span></li>
+            </ul>
+            <p data-i18n="faq_a1_outro">Unser Ziel: Das Studentenleben einfacher machen!</p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span data-i18n="faq_q2">Ist Room8 wirklich kostenlos?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <div class="highlight-box">
+              <strong>✔ <span data-i18n="faq_a2_highlight">Ja, 100% kostenlos für Studierende!</span></strong>
+            </div>
+            <p data-i18n="faq_a2_text1">Es gibt keine versteckten Gebühren, keine Premium-Mitgliedschaften, keine Provision. Du kannst unbegrenzt Inserate erstellen, Nachrichten schreiben und die Plattform nutzen.</p>
+            <p data-i18n="faq_a2_text2">Wir finanzieren uns durch Partnerschaften mit Unternehmen (Coupons, Jobangebote) - nicht durch dich.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span data-i18n="faq_q3">Wer kann Room8 nutzen?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p data-i18n="faq_a3_intro">Room8 ist exklusiv für Studierende:</p>
+            <ul>
+              <li data-i18n="faq_a3_item1">Eingeschriebene Studierende an Hochschulen/Unis</li>
+              <li data-i18n="faq_a3_item2">Studierende in Übergangsphasen (z.B. zwischen Bachelor & Master)</li>
+              <li data-i18n="faq_a3_item3">Austauschstudierende</li>
+            </ul>
+            <p data-i18n="faq_a3_outro">Um alle Funktionen nutzen zu können, musst du deinen Studentenstatus verifizieren.</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Category: Verification -->
+      <div class="faq-category" data-category="verifizierung">
+        <div class="faq-category-title">
+          <span class="faq-category-icon">🎓</span>
+          <span data-i18n="faq_cat_verification">Verifizierung</span>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span data-i18n="faq_q4">Warum muss ich mich verifizieren?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p data-i18n="faq_a4_intro">Die Verifizierung schützt unsere Community:</p>
+            <ul>
+              <li><strong data-i18n="faq_a4_item1_label">Sicherheit:</strong> <span data-i18n="faq_a4_item1_text">Nur echte Studenten können andere kontaktieren</span></li>
+              <li><strong data-i18n="faq_a4_item2_label">Vertrauen:</strong> <span data-i18n="faq_a4_item2_text">Du weißt, dass dein Gegenüber auch Student ist</span></li>
+              <li><strong data-i18n="faq_a4_item3_label">Weniger Spam:</strong> <span data-i18n="faq_a4_item3_text">Keine unseriösen Anbieter</span></li>
+            </ul>
+            <p data-i18n="faq_a4_outro">Unverifizierte Nutzer können browsen, aber nicht Kontakt aufnehmen oder private Details (Adresse, Telefon) sehen.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span data-i18n="faq_q5">Wie verifiziere ich meinen Studentenstatus?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p data-i18n="faq_a5_intro">Du hast mehrere Möglichkeiten:</p>
+            <ol>
+              <li><strong data-i18n="faq_a5_item1_label">Uni-E-Mail:</strong> <span data-i18n="faq_a5_item1_text">Verifizierung über deine @uni.de E-Mail-Adresse</span></li>
+              <li><strong data-i18n="faq_a5_item2_label">Studentenausweis:</strong> <span data-i18n="faq_a5_item2_text">Foto deines aktuellen Studentenausweises hochladen</span></li>
+              <li><strong data-i18n="faq_a5_item3_label">Immatrikulationsbescheinigung:</strong> <span data-i18n="faq_a5_item3_text">Aktuelles Dokument hochladen</span></li>
+            </ol>
+            <p data-i18n="faq_a5_outro">Die Verifizierung dauert in der Regel wenige Minuten bis maximal 24 Stunden.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span data-i18n="faq_q6">Sind meine Daten sicher?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <div class="highlight-box">
+              <strong>🔒 <span data-i18n="faq_a6_highlight">Ja! Datenschutz hat für uns höchste Priorität.</span></strong>
+            </div>
+            <ul>
+              <li data-i18n="faq_a6_item1">Verifizierungsdokumente werden nach der Prüfung gelöscht</li>
+              <li data-i18n="faq_a6_item2">Wir verkaufen keine Daten an Dritte</li>
+              <li data-i18n="faq_a6_item3">Kein Tracking, keine Werbung basierend auf deinen Daten</li>
+              <li data-i18n="faq_a6_item4">Server in der EU (Deutschland)</li>
+            </ul>
+            <p><span data-i18n="faq_a6_outro">Mehr Details in unserer</span> <a href="datenschutz.html" data-i18n="faq_privacy_link">Datenschutzerklärung</a>.</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Category: Housing -->
+      <div class="faq-category" data-category="wohnungen">
+        <div class="faq-category-title">
+          <span class="faq-category-icon">🏡</span>
+          <span data-i18n="faq_cat_housing">Wohnungen & WGs</span>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span data-i18n="faq_q7">Was bedeutet Angebot / Suche / Tausch?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <ul>
+              <li>🏠 <strong data-i18n="faq_a7_offer_label">Angebot:</strong> <span data-i18n="faq_a7_offer_text">Du hast eine Wohnung/Zimmer und suchst einen Mieter</span></li>
+              <li>🔍 <strong data-i18n="faq_a7_search_label">Suche:</strong> <span data-i18n="faq_a7_search_text">Du suchst eine Wohnung und beschreibst was du brauchst</span></li>
+              <li>🔄 <strong data-i18n="faq_a7_swap_label">Tausch:</strong> <span data-i18n="faq_a7_swap_text">Du möchtest deine Wohnung temporär tauschen (z.B. Auslandssemester)</span></li>
+            </ul>
+            <p data-i18n="faq_a7_outro">Beim Tausch kannst du auch angeben, in welcher Stadt du etwas suchst!</p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span data-i18n="faq_q8">Brauche ich einen schriftlichen Mietvertrag?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <div class="warning-box">
+              <strong>⚠ <span data-i18n="faq_a8_warning">Ja, unbedingt! Auch bei Untervermietung oder unter Freunden.</span></strong>
+            </div>
+            <p data-i18n="faq_a8_intro">Ein schriftlicher Vertrag schützt beide Seiten. Er sollte enthalten:</p>
+            <ul>
+              <li data-i18n="faq_a8_item1">Namen beider Parteien</li>
+              <li data-i18n="faq_a8_item2">Genaue Adresse und Beschreibung des Mietobjekts</li>
+              <li data-i18n="faq_a8_item3">Mietdauer (befristet/unbefristet)</li>
+              <li data-i18n="faq_a8_item4">Monatliche Miete + Nebenkosten</li>
+              <li data-i18n="faq_a8_item5">Höhe der Kaution</li>
+              <li data-i18n="faq_a8_item6">Kündigungsfrist</li>
+            </ul>
+            <p>👉 <span data-i18n="faq_a8_outro">Nutze unsere kostenlosen</span> <a href="nutzungsbedingungen.html#mustervertraege" data-i18n="faq_templates_link">Musterverträge</a>!</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Category: Security -->
+      <div class="faq-category" data-category="sicherheit">
+        <div class="faq-category-title">
+          <span class="faq-category-icon">🛡</span>
+          <span data-i18n="faq_cat_security">Sicherheit & Betrug</span>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span data-i18n="faq_q9">Wie erkenne ich Betrug?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <div class="warning-box">
+              <strong>🚨 <span data-i18n="faq_a9_warning_title">Warnsignale:</span></strong>
+            </div>
+            <ul>
+              <li>❌ <span data-i18n="faq_a9_warn1">Vermieter ist "im Ausland" und kann nicht zeigen</span></li>
+              <li>❌ <span data-i18n="faq_a9_warn2">Preis ist unrealistisch günstig</span></li>
+              <li>❌ <span data-i18n="faq_a9_warn3">Kaution/Miete soll vorab überwiesen werden</span></li>
+              <li>❌ <span data-i18n="faq_a9_warn4">Druck zur schnellen Entscheidung</span></li>
+              <li>❌ <span data-i18n="faq_a9_warn5">Kommunikation nur per E-Mail, kein Telefon</span></li>
+              <li>❌ <span data-i18n="faq_a9_warn6">Schlüssel sollen per Post geschickt werden</span></li>
+            </ul>
+            <div class="highlight-box">
+              <strong>✔ <span data-i18n="faq_a9_safe_title">So gehst du sicher:</span></strong>
+              <ul>
+                <li data-i18n="faq_a9_safe1">Wohnung immer persönlich besichtigen</li>
+                <li data-i18n="faq_a9_safe2">Vermieter/Mitbewohner persönlich treffen</li>
+                <li data-i18n="faq_a9_safe3">Nie Geld überweisen ohne die Wohnung gesehen zu haben</li>
+                <li data-i18n="faq_a9_safe4">Vertrag genau lesen vor der Unterschrift</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span data-i18n="faq_q10">Wie kann ich ein verdächtiges Inserat melden?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p data-i18n="faq_a10_intro">Du hast mehrere Möglichkeiten:</p>
+            <ol>
+              <li><strong data-i18n="faq_a10_item1_label">Meldefunktion:</strong> <span data-i18n="faq_a10_item1_text">Direkt beim Inserat auf "Melden" klicken</span></li>
+              <li><strong data-i18n="faq_a10_item2_label">E-Mail:</strong> <a href="mailto:help@room8.club" class="email-link">help@room8.club</a></li>
+              <li><strong data-i18n="faq_a10_item3_label">Kontaktformular:</strong> <span data-i18n="faq_a10_item3_text">Unten auf dieser Seite</span></li>
+            </ol>
+            <p data-i18n="faq_a10_outro">Wir prüfen jede Meldung und reagieren schnell!</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Category: Account -->
+      <div class="faq-category" data-category="account">
+        <div class="faq-category-title">
+          <span class="faq-category-icon">👤</span>
+          <span data-i18n="faq_cat_account">Account & Profil</span>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span data-i18n="faq_q11">Wie lösche ich meinen Account?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p data-i18n="faq_a11_intro">Du kannst deinen Account jederzeit löschen:</p>
+            <ol>
+              <li data-i18n="faq_a11_step1">Gehe zu <strong>Einstellungen</strong></li>
+              <li data-i18n="faq_a11_step2">Scrolle nach unten zu <strong>"Account löschen"</strong></li>
+              <li data-i18n="faq_a11_step3">Bestätige die Löschung</li>
+            </ol>
+            <p data-i18n="faq_a11_outro">Bei der Löschung werden alle deine Daten, Inserate und Nachrichten unwiderruflich entfernt.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span data-i18n="faq_q12">Ich habe mein Passwort vergessen</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <ol>
+              <li data-i18n="faq_a12_step1">Gehe zur <a href="login.html">Login-Seite</a></li>
+              <li data-i18n="faq_a12_step2">Klicke auf <strong>"Passwort vergessen"</strong></li>
+              <li data-i18n="faq_a12_step3">Gib deine E-Mail-Adresse ein</li>
+              <li data-i18n="faq_a12_step4">Du erhältst einen Link zum Zurücksetzen</li>
+            </ol>
+            <p data-i18n="faq_a12_outro">Der Link ist 24 Stunden gültig. Checke auch deinen Spam-Ordner!</p>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- Contact Section -->
+    <div class="contact-section" id="kontakt">
+      <h2>📬 <span data-i18n="faq_contact_title">Noch Fragen?</span></h2>
+      <p data-i18n="faq_contact_subtitle">Deine Frage war nicht dabei? Schreib uns!</p>
+      
+      <div class="contact-form" id="contactForm">
+        <div class="form-group">
+          <label for="contactName" data-i18n="faq_form_name">Dein Name</label>
+          <input type="text" id="contactName" data-i18n-placeholder="faq_form_name_placeholder" placeholder="Max Mustermann" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="contactEmail" data-i18n="faq_form_email">Deine E-Mail</label>
+          <input type="email" id="contactEmail" data-i18n-placeholder="faq_form_email_placeholder" placeholder="max@uni.de" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="contactCategory" data-i18n="faq_form_category">Kategorie</label>
+          <select id="contactCategory" required>
+            <option value="" data-i18n="faq_form_category_select">Bitte wählen...</option>
+            <option value="frage" data-i18n="faq_form_category_question">Allgemeine Frage</option>
+            <option value="problem" data-i18n="faq_form_category_problem">Technisches Problem</option>
+            <option value="meldung" data-i18n="faq_form_category_report">Inserat/Nutzer melden</option>
+            <option value="feedback" data-i18n="faq_form_category_feedback">Feedback & Vorschläge</option>
+            <option value="gewerbe" data-i18n="faq_form_category_business">Gewerbliche Anfrage</option>
+            <option value="sonstiges" data-i18n="faq_form_category_other">Sonstiges</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="contactMessage" data-i18n="faq_form_message">Deine Nachricht</label>
+          <textarea id="contactMessage" data-i18n-placeholder="faq_form_message_placeholder" placeholder="Beschreibe dein Anliegen so genau wie möglich..." required></textarea>
+        </div>
+        
+        <button type="button" class="submit-btn" id="submitBtn" onclick="submitContactForm()" data-i18n="faq_form_submit">
+          Nachricht senden
+        </button>
+      </div>
+      
+      <div class="form-success" id="formSuccess">
+        <div class="form-success-icon">✔</div>
+        <h3 data-i18n="faq_form_success_title">Nachricht gesendet!</h3>
+        <p data-i18n="faq_form_success_text">Wir melden uns so schnell wie möglich bei dir.</p>
+        <p style="color: #6b7280; margin-top: 1rem;" data-i18n="faq_form_success_time">
+          Normalerweise antworten wir innerhalb von 24-48 Stunden.
+        </p>
+      </div>
+    </div>
+    
+    <p style="margin-top: 3rem; text-align: center; color: #9ca3af; font-size: 0.875rem;">
+      <span data-i18n="faq_last_updated">Stand:</span> Dezember 2024
+    </p>
+  </main>
+  
+  <!-- NO NAVIGATION -->
+</div>
+
+<script src="config.js"></script>
+<script src="translations.js"></script>
+<script>
+  function toggleFaq(element) {
+    var answer = element.nextElementSibling;
+    var isActive = element.classList.contains('active');
+    
+    document.querySelectorAll('.faq-question.active').forEach(function(q) {
+      q.classList.remove('active');
+      q.nextElementSibling.classList.remove('show');
+    });
+    
+    if (!isActive) {
+      element.classList.add('active');
+      answer.classList.add('show');
+    }
+  }
+  
+  document.getElementById('faqSearch').addEventListener('input', function(e) {
+    var query = e.target.value.toLowerCase().trim();
+    var items = document.querySelectorAll('.faq-item');
+    var categories = document.querySelectorAll('.faq-category');
+    var anyVisible = false;
+    
+    if (query === '') {
+      items.forEach(function(item) { item.style.display = 'block'; });
+      categories.forEach(function(cat) { cat.style.display = 'block'; });
+      document.getElementById('noResults').classList.remove('show');
+      return;
+    }
+    
+    categories.forEach(function(category) {
+      var categoryHasVisible = false;
+      
+      category.querySelectorAll('.faq-item').forEach(function(item) {
+        var question = item.querySelector('.faq-question span').textContent.toLowerCase();
+        var answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+        
+        if (question.indexOf(query) !== -1 || answer.indexOf(query) !== -1) {
+          item.style.display = 'block';
+          categoryHasVisible = true;
+          anyVisible = true;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+      
+      category.style.display = categoryHasVisible ? 'block' : 'none';
+    });
+    
+    if (anyVisible) {
+      document.getElementById('noResults').classList.remove('show');
+    } else {
+      document.getElementById('noResults').classList.add('show');
+    }
+  });
+  
+  function submitContactForm() {
+    var lang = localStorage.getItem('room8_language') || 'de';
+    var name = document.getElementById('contactName').value.trim();
+    var email = document.getElementById('contactEmail').value.trim();
+    var category = document.getElementById('contactCategory').value;
+    var message = document.getElementById('contactMessage').value.trim();
+    
+    var alertMsg = lang === 'de' ? 'Bitte fülle alle Felder aus.' : 'Please fill in all fields.';
+    if (!name || !email || !category || !message) {
+      alert(alertMsg);
+      return;
+    }
+    
+    var btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = lang === 'de' ? 'Wird gesendet...' : 'Sending...';
+    
+    var subject = encodeURIComponent('[Room8 ' + category + '] ' + (lang === 'de' ? 'Nachricht von ' : 'Message from ') + name);
+    var body = encodeURIComponent(
+      (lang === 'de' ? 'Name: ' : 'Name: ') + name + '\n' +
+      (lang === 'de' ? 'E-Mail: ' : 'Email: ') + email + '\n' +
+      (lang === 'de' ? 'Kategorie: ' : 'Category: ') + category + '\n\n' +
+      (lang === 'de' ? 'Nachricht:\n' : 'Message:\n') + message
+    );
+    
+    window.location.href = 'mailto:help@room8.club?subject=' + subject + '&body=' + body;
+    
+    setTimeout(function() {
+      document.getElementById('contactForm').style.display = 'none';
+      document.getElementById('formSuccess').classList.add('show');
+    }, 1000);
+  }
+</script>
+</body>
+</html>

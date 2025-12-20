@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Coupon Details - Roommate</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .detail-hero {
+            position: relative;
+            width: 100%;
+            padding-top: 60%;
+            background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+            overflow: hidden;
+        }
+        
+        .detail-hero img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .discount-badge-large {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: #8b5cf6;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+        
+        .detail-content {
+            padding: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .business-header {
+            margin-bottom: 1rem;
+        }
+        
+        .business-name {
+            font-size: 1rem;
+            color: #8b5cf6;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .coupon-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0 0 1rem 0;
+            line-height: 1.2;
+        }
+        
+        .info-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .info-tag {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #f3f4f6;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+        
+        .coupon-description {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            line-height: 1.6;
+        }
+        
+        .coupon-code-section {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+        
+        .code-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+        
+        .code-display {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+            margin-bottom: 1rem;
+        }
+        
+        .code-value {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .copy-btn {
+            background: white;
+            color: #8b5cf6;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 999px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+        }
+        
+        .validity-section {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .validity-section svg {
+            width: 24px;
+            height: 24px;
+            color: #f59e0b;
+            flex-shrink: 0;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        
+        .action-btn-primary {
+            background: #10b981;
+            color: white;
+            border: none;
+        }
+        
+        .action-btn-primary:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        
+        .action-btn-secondary {
+            background: white;
+            color: #6b7280;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .action-btn-secondary:hover {
+            border-color: #8b5cf6;
+            color: #8b5cf6;
+        }
+        
+        @media (max-width: 768px) {
+            .detail-hero {
+                padding-top: 80%;
+            }
+            
+            .coupon-title {
+                font-size: 1.5rem;
+            }
+            
+            .code-value {
+                font-size: 1.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <a href="coupons.html" class="back-arrow">&#8592;</a>
+        <h1>Coupon Details</h1>
+    </header>
+    
+    <main class="app-content" style="padding: 0;" id="mainContent">
+        <p style="padding: 2rem; text-align: center; color: #6b7280;">Loading coupon...</p>
+    </main>
+    
+    <footer class="app-footer-nav" id="app-footer-nav"></footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    var mainContent = document.getElementById('mainContent');
+    var urlParams = new URLSearchParams(window.location.search);
+    var couponId = urlParams.get('id');
+
+    async function loadCoupon() {
+        if (!couponId) {
+            mainContent.innerHTML = '<p style="padding: 2rem; text-align: center; color: red;">Invalid coupon ID</p>';
+            return;
+        }
+        
+        try {
+            var { data: coupon, error } = await supabase
+                .from('coupons')
+                .select(`
+                    *,
+                    coupon_photos(storage_path)
+                `)
+                .eq('id', couponId)
+                .single();
+            
+            if (error) throw error;
+            if (!coupon) throw new Error('Coupon not found');
+            
+            renderCoupon(coupon);
+            
+        } catch (err) {
+            console.error('Error loading coupon:', err);
+            mainContent.innerHTML = '<p style="padding: 2rem; text-align: center; color: red;">Error loading coupon</p>';
+        }
+    }
+
+    function renderCoupon(coupon) {
+        var imageUrl = 'placeholder.png';
+        if (coupon.coupon_photos && coupon.coupon_photos.length > 0) {
+            var { data } = supabase.storage.from('listing-images')
+                .getPublicUrl(coupon.coupon_photos[0].storage_path);
+            if (data) imageUrl = data.publicUrl;
+        }
+        
+        var validUntil = new Date(coupon.valid_until).toLocaleDateString('de-DE', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric'
+        });
+        
+        var daysLeft = Math.ceil((new Date(coupon.valid_until) - new Date()) / (1000 * 60 * 60 * 24));
+        
+        mainContent.innerHTML = `
+            <div class="detail-hero">
+                <img src="${imageUrl}" alt="${coupon.business_name}" onerror="this.src='placeholder.png';">
+                <div class="discount-badge-large">${coupon.discount_value}</div>
+            </div>
+            
+            <div class="detail-content">
+                <div class="business-header">
+                    <div class="business-name">${coupon.business_name}</div>
+                    <h1 class="coupon-title">${coupon.title}</h1>
+                </div>
+                
+                <div class="info-tags">
+                    <div class="info-tag">
+                        <span>&#128205;</span>
+                        <span>${coupon.city}</span>
+                    </div>
+                    <div class="info-tag">
+                        <span>&#127991;</span>
+                        <span>${coupon.category}</span>
+                    </div>
+                </div>
+                
+                <div class="validity-section">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <div>
+                        <strong>Valid until ${validUntil}</strong><br>
+                        <span style="font-size: 0.9rem; color: #92400e;">${daysLeft} days left</span>
+                    </div>
+                </div>
+                
+                <div class="coupon-description">
+                    <p>${coupon.description}</p>
+                </div>
+                
+                <div class="coupon-code-section">
+                    <div class="code-label">Use this code at checkout:</div>
+                    <div class="code-display">
+                        <div class="code-value" id="codeValue">${coupon.discount_code}</div>
+                    </div>
+                    <button class="copy-btn" id="copyBtn">
+                        &#128203; Copy Code
+                    </button>
+                </div>
+                
+                <div class="action-buttons">
+                    <a href="coupons.html" class="action-btn action-btn-secondary">
+                        Browse More Offers
+                    </a>
+                </div>
+            </div>
+        `;
+        
+        // Copy code functionality
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            var code = document.getElementById('codeValue').textContent;
+            navigator.clipboard.writeText(code).then(function() {
+                var btn = document.getElementById('copyBtn');
+                btn.textContent = 'âœ“ Copied!';
+                setTimeout(function() {
+                    btn.textContent = 'ðŸ“‹ Copy Code';
+                }, 2000);
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', loadCoupon);
+</script>
+<!-- Navigation Component -->
+<script src="config.js"></script>
+<script src="navigation.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>

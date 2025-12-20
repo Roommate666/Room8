@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title data-i18n="messages_title">Nachrichten - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .search-bar-messages {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            background: white;
+        }
+        .search-bar-messages input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 999px;
+            border: 1px solid #e5e7eb;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+        }
+        .conversations-list {
+            background-color: white;
+        }
+        .conversation-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            text-decoration: none;
+            color: #111827;
+        }
+        .conversation-item:hover {
+            background-color: #f9fafb;
+        }
+        .avatar-placeholder {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        .convo-details {
+            flex-grow: 1;
+            min-width: 0;
+        }
+        .convo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.25rem;
+        }
+        .convo-header h4 {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .timestamp {
+            font-size: 0.75rem;
+            color: #6b7280;
+            white-space: nowrap;
+            margin-left: 0.5rem;
+        }
+        .convo-preview {
+            color: #6b7280;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin: 0;
+        }
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1.5rem;
+            text-align: center;
+        }
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        .empty-state h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.2rem;
+        }
+        .empty-state p {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+        .browse-btn {
+            background: #10b981;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .app-header h1 {
+            font-size: 1.25rem;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <h1 data-i18n="messages_title">Nachrichten</h1>
+    </header>
+
+    <div class="search-bar-messages">
+        <input type="text" id="search-input" data-i18n-placeholder="messages_search_placeholder" placeholder="Nachrichten suchen...">
+    </div>
+
+    <main class="app-content" style="padding: 0; padding-bottom: 5rem;">
+        <div class="conversations-list" id="inbox-container">
+            <p style="padding: 1.5rem; text-align: center; color: #6b7280;" id="loadingText" data-i18n="loading">Lade Nachrichten...</p>
+        </div>
+    </main>
+
+    <footer class="app-footer-nav" id="app-footer-nav"></footer>
+</div>
+
+<script src="translations.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    var inboxContainer = document.getElementById('inbox-container');
+    var searchInput = document.getElementById('search-input');
+    var allConversations = [];
+
+    // Nutze globale translations.js
+    function getText(key) {
+        if (typeof t === 'function') {
+            return t(key);
+        }
+        // Fallback
+        var lang = localStorage.getItem('room8_language') || localStorage.getItem('language') || 'de';
+        var fallbacks = {
+            de: {
+                messages_title: 'Nachrichten',
+                messages_search_placeholder: 'Nachrichten suchen...',
+                loading: 'Lade Nachrichten...',
+                messages_no_messages: 'Noch keine Nachrichten',
+                messages_no_messages_hint: 'Starte einen Chat mit Verkäufern um deine Konversationen hier zu sehen!',
+                messages_browse_marketplace: 'Marktplatz durchsuchen',
+                messages_error_loading: 'Fehler beim Laden der Nachrichten',
+                messages_unknown_user: 'Unbekannter Nutzer',
+                messages_unknown_listing: 'Unbekanntes Inserat'
+            },
+            en: {
+                messages_title: 'Messages',
+                messages_search_placeholder: 'Search messages...',
+                loading: 'Loading messages...',
+                messages_no_messages: 'No messages yet',
+                messages_no_messages_hint: 'Start chatting with sellers to see your conversations here!',
+                messages_browse_marketplace: 'Browse Marketplace',
+                messages_error_loading: 'Error loading messages',
+                messages_unknown_user: 'Unknown User',
+                messages_unknown_listing: 'Unknown Listing'
+            }
+        };
+        return fallbacks[lang] && fallbacks[lang][key] ? fallbacks[lang][key] : fallbacks['de'][key] || key;
+    }
+
+    function createConversationItem(convo) {
+        var item = document.createElement('a');
+        item.href = 'chat.html?listingId=' + convo.listing_id + '&sellerId=' + convo.other_user_id;
+        item.className = 'conversation-item';
+        
+        var date = new Date(convo.last_message_time);
+        var timestamp = date.getDate() + '.' + (date.getMonth() + 1) + '.';
+        var initial = convo.other_user_name ? convo.other_user_name.charAt(0).toUpperCase() : '?';
+
+        item.innerHTML = 
+            '<div class="avatar-placeholder">' + initial + '</div>' +
+            '<div class="convo-details">' +
+                '<div class="convo-header">' +
+                    '<h4>' + (convo.other_user_name || getText('messages_unknown_user')) + ' - ' + (convo.listing_title || '') + '</h4>' +
+                    '<span class="timestamp">' + timestamp + '</span>' +
+                '</div>' +
+                '<p class="convo-preview">' + convo.last_message + '</p>' +
+            '</div>';
+        return item;
+    }
+
+    function loadInbox() {
+        supabase.auth.getUser()
+            .then(function(response) {
+                var user = response.data.user;
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                return supabase
+                    .from('messages')
+                    .select('id, sender_id, receiver_id, listing_id, content, created_at')
+                    .or('sender_id.eq.' + user.id + ',receiver_id.eq.' + user.id)
+                    .order('created_at', { ascending: false })
+                    .then(function(msgResponse) {
+                        if (msgResponse.error) throw msgResponse.error;
+                        
+                        var messages = msgResponse.data || [];
+                        
+                        if (messages.length === 0) {
+                            inboxContainer.innerHTML = 
+                                '<div class="empty-state">' +
+                                    '<div class="empty-state-icon">💬</div>' +
+                                    '<h3>' + getText('messages_no_messages') + '</h3>' +
+                                    '<p>' + getText('messages_no_messages_hint') + '</p>' +
+                                    '<a href="gegenstaende.html" class="browse-btn">' + getText('messages_browse_marketplace') + '</a>' +
+                                '</div>';
+                            return;
+                        }
+
+                        // Group by conversation
+                        var conversationsMap = {};
+                        
+                        messages.forEach(function(msg) {
+                            var otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
+                            var key = msg.listing_id + '-' + otherUserId;
+                            
+                            if (!conversationsMap[key]) {
+                                conversationsMap[key] = {
+                                    listing_id: msg.listing_id,
+                                    other_user_id: otherUserId,
+                                    other_user_name: null,
+                                    listing_title: null,
+                                    last_message: msg.content,
+                                    last_message_time: msg.created_at
+                                };
+                            }
+                        });
+
+                        // Load user and listing info
+                        var keys = Object.keys(conversationsMap);
+                        var loadPromises = keys.map(function(key) {
+                            var convo = conversationsMap[key];
+                            
+                            return Promise.all([
+                                supabase.from('profiles').select('username').eq('id', convo.other_user_id).single(),
+                                supabase.from('listings').select('title').eq('id', convo.listing_id).single()
+                            ]).then(function(results) {
+                                var userRes = results[0];
+                                var listingRes = results[1];
+                                
+                                convo.other_user_name = userRes.data ? userRes.data.username : getText('messages_unknown_user');
+                                convo.listing_title = listingRes.data ? listingRes.data.title : getText('messages_unknown_listing');
+                            });
+                        });
+
+                        return Promise.all(loadPromises).then(function() {
+                            allConversations = Object.values(conversationsMap);
+                            renderConversations(allConversations);
+                        });
+                    });
+            })
+            .catch(function(error) {
+                console.error('Error loading inbox:', error);
+                inboxContainer.innerHTML = '<div class="empty-state"><h3>' + getText('messages_error_loading') + '</h3></div>';
+            });
+    }
+
+    function renderConversations(conversations) {
+        inboxContainer.innerHTML = '';
+        conversations.forEach(function(convo) {
+            inboxContainer.appendChild(createConversationItem(convo));
+        });
+    }
+
+    searchInput.addEventListener('input', function(e) {
+        var query = e.target.value.toLowerCase().trim();
+        if (!query) {
+            renderConversations(allConversations);
+            return;
+        }
+        var filtered = allConversations.filter(function(convo) {
+            return convo.other_user_name.toLowerCase().indexOf(query) !== -1 ||
+                   convo.last_message.toLowerCase().indexOf(query) !== -1;
+        });
+        renderConversations(filtered);
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadInbox();
+    });
+</script>
+<script src="navigation.js"></script>
+</body>
+</html>

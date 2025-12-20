@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Login - Room8</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <header class="app-header"><h1 data-i18n="auth_login_title">Welcome Back</h1></header>
+    <main class="app-content">
+      <form id="loginForm" style="margin-top: 2rem;">
+        <div class="form-group"><label for="loginEmail" data-i18n="auth_email">Email</label><input type="email" id="loginEmail" required data-i18n-placeholder="auth_email_placeholder" placeholder="Enter your email"></div>
+        <div class="form-group"><label for="loginPassword" data-i18n="auth_password">Password</label><input type="password" id="loginPassword" required data-i18n-placeholder="auth_password_placeholder" placeholder="Enter your password"></div>
+        <button type="submit" class="submit-btn" style="margin-top: 1rem;" data-i18n="auth_btn_login">Log In</button>
+      </form>
+      <p style="text-align:center; margin-top:2rem;"><span data-i18n="auth_no_account">Don't have an account?</span> <a href="register.html" data-i18n="auth_signup_link">Sign up</a></p>
+    </main>
+    <footer class="app-footer-nav" id="app-footer-nav"></footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var email = document.getElementById('loginEmail').value.trim();
+      var password = document.getElementById('loginPassword').value;
+      
+      supabase.auth.signInWithPassword({ email: email, password: password })
+        .then(function(response) {
+          if (response.error) { 
+            alert('Login failed: ' + response.error.message);
+          } else { 
+            window.location.href = 'profile.html'; 
+          }
+        })
+        .catch(function(err) {
+          alert('Login failed: ' + err.message);
+        });
+    });
+  </script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+  <script src="translations.js"></script>
+</body>
+</html>

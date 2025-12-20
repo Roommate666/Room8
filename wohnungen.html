@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title data-i18n="housing_page_title">Wohnungen - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .app-container { --primary-color: #3b82f6; --primary-dark: #1e40af; padding-bottom: 80px; }
+        
+        .app-header { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            color: white;
+        }
+        .app-header h1 { color: white; margin: 0; font-size: 1.25rem; }
+        
+        .search-section {
+            padding: 1rem 1.5rem 1.5rem 1.5rem;
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .search-bar {
+            position: relative;
+            margin-bottom: 1.25rem;
+        }
+        
+        .search-bar input { 
+            width: 100%; 
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border-radius: 999px; 
+            border: 1px solid var(--border-color); 
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+        .search-bar input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            color: #9ca3af;
+        }
+        
+        .filter-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+        
+        .filter-bar { 
+            display: flex; 
+            gap: 0.625rem; 
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+        .filter-bar::-webkit-scrollbar { height: 4px; }
+        .filter-bar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        
+        .filter-row-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.65rem;
+        }
+        
+        .filter-btn { 
+            padding: 0.625rem 1.25rem; 
+            border-radius: 999px; 
+            border: 1px solid var(--border-color); 
+            background-color: white; 
+            cursor: pointer; 
+            font-size: 0.875rem; 
+            white-space: nowrap;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .filter-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        .filter-btn.active { 
+            background-color: #3b82f6; 
+            color: white; 
+            border-color: #3b82f6; 
+        }
+        
+        .listings-grid { 
+            padding: 1.5rem; 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        @media (min-width: 768px) {
+            .listings-grid { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        }
+        @media (min-width: 1024px) {
+            .listings-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        
+        .housing-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+        }
+        .housing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        
+        .card-image-container {
+            position: relative;
+            width: 100%;
+            padding-top: 75%;
+            overflow: hidden;
+            background-color: #f3f4f6;
+        }
+        .card-image-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .listing-mode-badge {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            z-index: 5;
+        }
+        .listing-mode-badge.offer {
+            background: rgba(209, 250, 229, 0.95);
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+        .listing-mode-badge.search {
+            background: rgba(254, 215, 170, 0.95);
+            color: #92400e;
+            border: 2px solid #f59e0b;
+        }
+        .listing-mode-badge.swap {
+            background: rgba(219, 234, 254, 0.95);
+            color: #1e40af;
+            border: 2px solid #3b82f6;
+        }
+        
+        .favorite-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s;
+        }
+        .favorite-btn:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+        .favorite-btn svg {
+            width: 20px;
+            height: 20px;
+            transition: all 0.2s;
+        }
+        .favorite-btn.favorited svg {
+            fill: #ef4444;
+            stroke: #ef4444;
+        }
+        
+        .card-content {
+            padding: 0.75rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 0 0 0.25rem 0;
+            color: #1f2937;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.3;
+        }
+        .card-location {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .card-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            margin-top: auto;
+            padding-top: 0.5rem;
+            border-top: 1px solid #f3f4f6;
+        }
+        .card-price {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+        .card-stats {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 0.7rem;
+            color: #9ca3af;
+        }
+        .card-stats span {
+            display: flex;
+            align-items: center;
+            gap: 0.15rem;
+        }
+        
+        .empty-state-container { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 4rem 1.5rem; 
+            text-align: center; 
+            grid-column: 1 / -1; 
+        }
+        .empty-state-icon { 
+            width: 80px; 
+            height: 80px; 
+            stroke-width: 1.5; 
+            color: #3b82f6; 
+            margin-bottom: 1.5rem;
+            opacity: 0.7;
+        }
+        .empty-state-container h3 {
+            font-size: 1.3rem;
+            margin: 0 0 0.5rem 0;
+            color: #1f2937;
+        }
+        .empty-state-container p {
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+        
+        .fab {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+            text-decoration: none;
+        }
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+        }
+        .fab svg {
+            width: 28px;
+            height: 28px;
+            stroke: white;
+            stroke-width: 2.5;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <h1 data-i18n="housing_header">Wohnungen</h1>
+    </header>
+    
+    <div class="search-section">
+        <div class="search-bar">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input type="text" id="searchInput" data-i18n-placeholder="housing_search_placeholder" placeholder="Nach Stadt oder Titel suchen...">
+        </div>
+        
+        <div class="filter-container">
+            <div>
+                <div class="filter-row-label" data-i18n="filter_mode">Modus</div>
+                <div class="filter-bar" id="modeFilter">
+                    <button class="filter-btn active" data-filter="all" data-i18n="filter_all">Alle</button>
+                    <button class="filter-btn" data-filter="offer" data-i18n="filter_offers">Angebote</button>
+                    <button class="filter-btn" data-filter="search" data-i18n="filter_searches">Gesuche</button>
+                    <button class="filter-btn" data-filter="swap" data-i18n="filter_swaps">Tausch</button>
+                </div>
+            </div>
+            
+            <div>
+                <div class="filter-row-label" data-i18n="filter_sort">Sortieren</div>
+                <div class="filter-bar" id="sortFilter">
+                    <button class="filter-btn" data-filter="price-low" data-i18n="sort_price_low">Preis: Niedrig bis Hoch</button>
+                    <button class="filter-btn" data-filter="price-high" data-i18n="sort_price_high">Preis: Hoch bis Niedrig</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <main class="app-content" style="padding: 0;">
+        <div class="listings-grid" id="listingsContainer">
+            <p style="padding: 1.5rem; grid-column: 1/-1; text-align: center; color: #6b7280;" data-i18n="general_loading">Lade Inserate...</p>
+        </div>
+    </main>
+    
+    <a href="choose-listing.html" class="fab" title="Neues Inserat erstellen">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+    </a>
+    
+    <!-- Navigation Container -->
+    <div id="app-navigation"></div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+    // Initialize Supabase
+    var supabase = window.supabase.createClient(APP_CONFIG.supabase.url, APP_CONFIG.supabase.anonKey);
+    
+    var listingsContainer = document.getElementById('listingsContainer');
+    var searchInput = document.getElementById('searchInput');
+    var modeFilter = document.getElementById('modeFilter');
+    var sortFilter = document.getElementById('sortFilter');
+    
+    var allListings = [];
+    var currentFilter = 'all';
+    var searchQuery = '';
+    var currentUserId = null;
+    var userFavorites = {};
+    
+    // Get current language
+    function getLang() {
+        return localStorage.getItem('room8_language') || localStorage.getItem('language') || 'de';
+    }
+    
+    // Translation helper for dynamic content
+    function getT(key) {
+        var lang = getLang();
+        var trans = {
+            de: { 
+                offer: 'ANGEBOT', 
+                search: 'SUCHE', 
+                swap: 'TAUSCH', 
+                per_month: '€/Mo', 
+                budget: 'Budget', 
+                up_to: 'Bis', 
+                price_on_request: 'Preis auf Anfrage',
+                no_listings: 'Keine Inserate gefunden',
+                no_listings_hint: 'Versuche andere Filter oder Suchbegriffe.',
+                views: 'Aufrufe',
+                favorites: 'Favoriten'
+            },
+            en: { 
+                offer: 'OFFER', 
+                search: 'SEARCH', 
+                swap: 'SWAP', 
+                per_month: '€/mo', 
+                budget: 'Budget', 
+                up_to: 'Up to', 
+                price_on_request: 'Price on request',
+                no_listings: 'No listings found',
+                no_listings_hint: 'Try adjusting your filters or search query.',
+                views: 'Views',
+                favorites: 'Favorites'
+            }
+        };
+        return (trans[lang] && trans[lang][key]) ? trans[lang][key] : key;
+    }
+    
+    function loadCurrentUser() {
+        supabase.auth.getUser().then(function(response) {
+            var user = response.data.user;
+            if (user) {
+                currentUserId = user.id;
+                loadUserFavorites();
+            }
+        });
+    }
+    
+    function loadUserFavorites() {
+        if (!currentUserId) return;
+        supabase
+            .from('favorites')
+            .select('listing_id')
+            .eq('user_id', currentUserId)
+            .then(function(response) {
+                if (response.data) {
+                    userFavorites = {};
+                    for (var i = 0; i < response.data.length; i++) {
+                        userFavorites[response.data[i].listing_id] = true;
+                    }
+                }
+            });
+    }
+    
+    function toggleFavorite(listingId, btnElement) {
+        if (!currentUserId) {
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        var isFavorited = userFavorites[listingId];
+        
+        if (isFavorited) {
+            supabase.from('favorites').delete()
+                .eq('user_id', currentUserId)
+                .eq('listing_id', listingId)
+                .then(function() {
+                    delete userFavorites[listingId];
+                    btnElement.classList.remove('favorited');
+                    btnElement.querySelector('svg').setAttribute('fill', 'none');
+                });
+        } else {
+            supabase.from('favorites').insert({
+                user_id: currentUserId,
+                listing_id: listingId
+            }).then(function() {
+                userFavorites[listingId] = true;
+                btnElement.classList.add('favorited');
+                btnElement.querySelector('svg').setAttribute('fill', '#ef4444');
+            });
+        }
+    }
+    
+    function renderHousingCard(listing) {
+        var card = document.createElement('a');
+        card.href = 'detail.html?id=' + listing.id + '&from=housing';
+        card.className = 'housing-card';
+        
+        var imageUrl = 'placeholder.png';
+        if (listing.listing_photos && listing.listing_photos.length > 0) {
+            var path = listing.listing_photos[0].storage_path;
+            var urlData = supabase.storage.from('listing-images').getPublicUrl(path);
+            if (urlData && urlData.data) imageUrl = urlData.data.publicUrl;
+        }
+        
+        // Show price based on listing mode
+        var priceStr = getT('price_on_request');
+        if (listing.listing_mode === 'search') {
+            if (listing.price_range_min && listing.price_range_max) {
+                priceStr = listing.price_range_min + '-' + listing.price_range_max + ' ' + getT('per_month');
+            } else if (listing.price_range_min) {
+                priceStr = listing.price_range_min + '+ ' + getT('per_month');
+            } else if (listing.price_range_max) {
+                priceStr = getT('up_to') + ' ' + listing.price_range_max + ' ' + getT('per_month');
+            }
+        } else {
+            priceStr = listing.monthly_rent 
+                ? Number(listing.monthly_rent).toFixed(0) + ' ' + getT('per_month')
+                : getT('price_on_request');
+        }
+        
+        var listingMode = listing.listing_mode || 'offer';
+        var modeBadgeText = getT(listingMode);
+        var modeBadgeClass = listingMode;
+        
+        var isFavorited = userFavorites[listing.id];
+        
+        card.innerHTML = 
+            '<div class="card-image-container">' +
+                '<img src="' + imageUrl + '" alt="' + listing.title + '" onerror="this.src=\'placeholder.png\';">' +
+                '<span class="listing-mode-badge ' + modeBadgeClass + '">' + modeBadgeText + '</span>' +
+                '<button class="favorite-btn ' + (isFavorited ? 'favorited' : '') + '" data-listing-id="' + listing.id + '">' +
+                    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="' + (isFavorited ? '#ef4444' : 'none') + '" stroke="currentColor" stroke-width="2">' +
+                        '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>' +
+                    '</svg>' +
+                '</button>' +
+            '</div>' +
+            '<div class="card-content">' +
+                '<h3 class="card-title">' + listing.title + '</h3>' +
+                '<div class="card-location">' +
+                    '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                        '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>' +
+                        '<circle cx="12" cy="10" r="3"></circle>' +
+                    '</svg>' +
+                    (listing.city || 'Unbekannt') + (listing.district ? ', ' + listing.district : '') +
+                '</div>' +
+                '<div class="card-footer">' +
+                    '<span class="card-price">' + priceStr + '</span>' +
+                    '<span class="card-stats">' +
+                        '<span title="' + getT('views') + '">👁 ' + (listing.view_count || 0) + '</span>' +
+                        '<span title="' + getT('favorites') + '">❤️ ' + (listing.favorites_count || 0) + '</span>' +
+                    '</span>' +
+                '</div>' +
+            '</div>';
+        
+        var favoriteBtn = card.querySelector('.favorite-btn');
+        favoriteBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleFavorite(listing.id, favoriteBtn);
+        });
+        
+        return card;
+    }
+    
+    function renderListings(listings) {
+        listingsContainer.innerHTML = '';
+        if (listings && listings.length > 0) {
+            for (var i = 0; i < listings.length; i++) {
+                listingsContainer.appendChild(renderHousingCard(listings[i]));
+            }
+        } else {
+            listingsContainer.innerHTML = 
+                '<div class="empty-state-container">' +
+                    '<svg class="empty-state-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">' +
+                        '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>' +
+                        '<polyline points="9 22 9 12 15 12 15 22"></polyline>' +
+                    '</svg>' +
+                    '<h3>' + getT('no_listings') + '</h3>' +
+                    '<p>' + getT('no_listings_hint') + '</p>' +
+                '</div>';
+        }
+    }
+    
+    function filterAndSearchListings() {
+        var filtered = allListings.slice();
+        
+        if (currentFilter && currentFilter !== 'all' && currentFilter.indexOf('price-') !== 0) {
+            filtered = filtered.filter(function(listing) {
+                var mode = listing.listing_mode || 'offer';
+                return mode === currentFilter;
+            });
+        }
+        
+        if (searchQuery) {
+            filtered = filtered.filter(function(listing) {
+                return listing.title.toLowerCase().indexOf(searchQuery) !== -1 ||
+                    (listing.city && listing.city.toLowerCase().indexOf(searchQuery) !== -1);
+            });
+        }
+        
+        if (currentFilter === 'price-low') {
+            filtered.sort(function(a, b) {
+                var priceA = a.monthly_rent || a.price_range_min || a.price_range_max || 0;
+                var priceB = b.monthly_rent || b.price_range_min || b.price_range_max || 0;
+                return priceA - priceB;
+            });
+        } else if (currentFilter === 'price-high') {
+            filtered.sort(function(a, b) {
+                var priceA = a.monthly_rent || a.price_range_min || a.price_range_max || 0;
+                var priceB = b.monthly_rent || b.price_range_min || b.price_range_max || 0;
+                return priceB - priceA;
+            });
+        }
+        
+        renderListings(filtered);
+    }
+    
+    function loadWohnungen() {
+        supabase
+            .from('listings')
+            .select('id, title, city, district, monthly_rent, listing_mode, price_range_min, price_range_max, view_count, favorites_count, listing_photos(storage_path)')
+            .eq('type', 'wohnung')
+            .eq('is_active', true)
+            .order('created_at', { ascending: false })
+            .then(function(response) {
+                if (response.error) {
+                    console.error('Error loading listings:', response.error);
+                    listingsContainer.innerHTML = '<p style="padding:1.5rem;color:red;grid-column:1/-1;text-align:center;">Error: ' + response.error.message + '</p>';
+                    return;
+                }
+                allListings = response.data || [];
+                filterAndSearchListings();
+            });
+    }
+    
+    // Event Listeners
+    modeFilter.addEventListener('click', function(e) {
+        if (e.target.tagName !== 'BUTTON') return;
+        var activeBtn = modeFilter.querySelector('.filter-btn.active');
+        if (activeBtn) activeBtn.classList.remove('active');
+        e.target.classList.add('active');
+        currentFilter = e.target.getAttribute('data-filter');
+        filterAndSearchListings();
+    });
+    
+    sortFilter.addEventListener('click', function(e) {
+        if (e.target.tagName !== 'BUTTON') return;
+        var activeBtn = sortFilter.querySelector('.filter-btn.active');
+        if (activeBtn) activeBtn.classList.remove('active');
+        e.target.classList.add('active');
+        currentFilter = e.target.getAttribute('data-filter');
+        filterAndSearchListings();
+    });
+    
+    searchInput.addEventListener('input', function(e) {
+        searchQuery = e.target.value.toLowerCase();
+        filterAndSearchListings();
+    });
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        loadCurrentUser();
+        loadWohnungen();
+    });
+</script>
+<script src="navigation.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>

@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Panel - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        * { box-sizing: border-box; }
+        body { background: #f3f4f6; }
+        
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-header h1 { margin: 0 0 0.5rem 0; font-size: 1.75rem; }
+        .admin-header p { margin: 0; opacity: 0.8; }
+        .admin-header .back-link { color: white; text-decoration: none; opacity: 0.8; }
+        .admin-header .back-link:hover { opacity: 1; }
+        
+        /* Tabs */
+        .admin-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e5e7eb;
+            overflow-x: auto;
+            background: white;
+            border-radius: 12px 12px 0 0;
+            padding: 0 1rem;
+        }
+        
+        .admin-tab {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #6b7280;
+            transition: all 0.2s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .admin-tab:hover { color: #8b5cf6; }
+        .admin-tab.active { color: #8b5cf6; border-bottom-color: #8b5cf6; }
+        
+        .tab-badge {
+            background: #ef4444;
+            color: white;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.25rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        
+        .stat-card.highlight { border-left: 4px solid #8b5cf6; }
+        .stat-card.warning { border-left: 4px solid #f59e0b; }
+        .stat-card.success { border-left: 4px solid #10b981; }
+        .stat-card.danger { border-left: 4px solid #ef4444; }
+        
+        .stat-label { font-size: 0.85rem; color: #6b7280; margin-bottom: 0.25rem; }
+        .stat-value { font-size: 1.75rem; font-weight: 700; color: #1f2937; }
+        .stat-sub { font-size: 0.8rem; color: #9ca3af; margin-top: 0.25rem; }
+        
+        /* Sections */
+        .admin-section { display: none; }
+        .admin-section.active { display: block; }
+        
+        /* Cards List */
+        .cards-list { display: flex; flex-direction: column; gap: 1rem; }
+        
+        .admin-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        
+        .admin-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .admin-card-title { font-weight: 600; font-size: 1rem; margin: 0 0 0.25rem 0; }
+        .admin-card-subtitle { font-size: 0.85rem; color: #6b7280; }
+        
+        .admin-card-body { font-size: 0.9rem; color: #4b5563; }
+        
+        .admin-card-footer {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        
+        .btn-approve { background: #10b981; color: white; }
+        .btn-approve:hover { background: #059669; }
+        .btn-reject { background: #ef4444; color: white; }
+        .btn-reject:hover { background: #dc2626; }
+        .btn-view { background: #3b82f6; color: white; }
+        .btn-view:hover { background: #2563eb; }
+        .btn-warn { background: #f59e0b; color: white; }
+        .btn-warn:hover { background: #d97706; }
+        .btn-delete { background: #fee2e2; color: #dc2626; }
+        .btn-delete:hover { background: #fecaca; }
+        .btn-secondary { background: #f3f4f6; color: #374151; }
+        .btn-secondary:hover { background: #e5e7eb; }
+        
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-verified { background: #d1fae5; color: #065f46; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+        .status-new { background: #dbeafe; color: #1e40af; }
+        .status-open { background: #fef3c7; color: #92400e; }
+        .status-resolved { background: #d1fae5; color: #065f46; }
+        
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filter-bar input, .filter-bar select {
+            padding: 0.6rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .filter-bar input:focus, .filter-bar select:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+        
+        .search-input { flex: 1; min-width: 200px; }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+        
+        .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+        
+        /* Table */
+        .data-table {
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        
+        .data-table table { width: 100%; border-collapse: collapse; }
+        .data-table th { background: #f9fafb; padding: 1rem; text-align: left; font-weight: 600; color: #374151; font-size: 0.85rem; }
+        .data-table td { padding: 1rem; border-top: 1px solid #e5e7eb; font-size: 0.9rem; }
+        .data-table tr:hover { background: #f9fafb; }
+        
+        /* Document Preview */
+        .doc-preview {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: #f3f4f6;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .doc-preview:hover { background: #e5e7eb; }
+        
+        /* User Info */
+        .user-info { display: flex; align-items: center; gap: 0.75rem; }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        /* Report Card */
+        .report-reason {
+            background: #fef3c7;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-top: 0.75rem;
+            border-left: 3px solid #f59e0b;
+        }
+        
+        /* Loading */
+        .loading { text-align: center; padding: 2rem; color: #6b7280; }
+        
+        /* Access Denied */
+        .access-denied {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+            margin: 2rem auto;
+            max-width: 500px;
+        }
+        
+        .access-denied h2 { color: #dc2626; margin-bottom: 1rem; }
+        .access-denied p { color: #6b7280; margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Access Denied (shown if not admin) -->
+        <div class="access-denied" id="accessDenied" style="display: none;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🚫</div>
+            <h2>Zugriff verweigert</h2>
+            <p>Du hast keine Berechtigung für das Admin Panel.</p>
+            <a href="index.html" class="btn btn-secondary">Zur Startseite</a>
+        </div>
+        
+        <!-- Admin Content (shown if admin) -->
+        <div id="adminContent" style="display: none;">
+            <header class="admin-header">
+                <div>
+                    <h1>🛠️ Admin Panel</h1>
+                    <p>Room8 Verwaltung</p>
+                </div>
+                <a href="settings.html" class="back-link">← Zurück</a>
+            </header>
+            
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card highlight">
+                    <div class="stat-label">Benutzer gesamt</div>
+                    <div class="stat-value" id="statTotalUsers">-</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-label">Verifiziert</div>
+                    <div class="stat-value" id="statVerified">-</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-label">Ausstehend</div>
+                    <div class="stat-value" id="statPending">-</div>
+                    <div class="stat-sub">Verifizierungen</div>
+                </div>
+                <div class="stat-card danger">
+                    <div class="stat-label">Meldungen</div>
+                    <div class="stat-value" id="statReports">-</div>
+                    <div class="stat-sub">Offen</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Inserate aktiv</div>
+                    <div class="stat-value" id="statListings">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Heute neu</div>
+                    <div class="stat-value" id="statNewToday">-</div>
+                    <div class="stat-sub">Benutzer</div>
+                </div>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-tab="verifications">
+                    ✅ Verifizierungen
+                    <span class="tab-badge" id="pendingBadge" style="display: none;">0</span>
+                </button>
+                <button class="admin-tab" data-tab="reports">
+                    ⚠️ Meldungen
+                    <span class="tab-badge" id="reportsBadge" style="display: none;">0</span>
+                </button>
+                <button class="admin-tab" data-tab="users">
+                    👥 Benutzer
+                </button>
+                <button class="admin-tab" data-tab="listings">
+                    🏠 Inserate
+                </button>
+            </div>
+            
+            <!-- Verifications Section -->
+            <div class="admin-section active" id="verifications-section">
+                <div class="filter-bar">
+                    <select id="verificationFilter">
+                        <option value="pending">⏳ Ausstehend</option>
+                        <option value="all">Alle</option>
+                        <option value="approved">✅ Genehmigt</option>
+                        <option value="rejected">❌ Abgelehnt</option>
+                    </select>
+                    <input type="text" class="search-input" id="verificationSearch" placeholder="Suche nach Name oder E-Mail...">
+                </div>
+                <div id="verificationsContent" class="cards-list">
+                    <div class="loading">Lade Verifizierungen...</div>
+                </div>
+            </div>
+            
+            <!-- Reports Section -->
+            <div class="admin-section" id="reports-section">
+                <div class="filter-bar">
+                    <select id="reportFilter">
+                        <option value="open">🔴 Offen</option>
+                        <option value="all">Alle</option>
+                        <option value="resolved">✅ Erledigt</option>
+                    </select>
+                    <select id="reportTypeFilter">
+                        <option value="all">Alle Typen</option>
+                        <option value="user">👤 Benutzer</option>
+                        <option value="listing">🏠 Inserat</option>
+                        <option value="message">💬 Nachricht</option>
+                    </select>
+                </div>
+                <div id="reportsContent" class="cards-list">
+                    <div class="loading">Lade Meldungen...</div>
+                </div>
+            </div>
+            
+            <!-- Users Section -->
+            <div class="admin-section" id="users-section">
+                <div class="filter-bar">
+                    <input type="text" class="search-input" id="userSearch" placeholder="Suche nach Name oder E-Mail...">
+                    <select id="userFilter">
+                        <option value="all">Alle Benutzer</option>
+                        <option value="verified">✅ Verifiziert</option>
+                        <option value="unverified">❌ Nicht verifiziert</option>
+                        <option value="banned">🚫 Gesperrt</option>
+                    </select>
+                </div>
+                <div id="usersContent" class="data-table">
+                    <div class="loading">Lade Benutzer...</div>
+                </div>
+            </div>
+            
+            <!-- Listings Section -->
+            <div class="admin-section" id="listings-section">
+                <div class="filter-bar">
+                    <input type="text" class="search-input" id="listingSearch" placeholder="Suche nach Titel oder Stadt...">
+                    <select id="listingTypeFilter">
+                        <option value="all">Alle Typen</option>
+                        <option value="wohnung">🏠 Wohnungen</option>
+                        <option value="gegenstand">📦 Artikel</option>
+                        <option value="job">💼 Jobs</option>
+                    </select>
+                    <select id="listingStatusFilter">
+                        <option value="active">✅ Aktiv</option>
+                        <option value="all">Alle</option>
+                        <option value="inactive">❌ Inaktiv</option>
+                    </select>
+                </div>
+                <div id="listingsContent" class="data-table">
+                    <div class="loading">Lade Inserate...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    var currentUser = null;
+    var isAdmin = false;
+
+    // Check Admin Auth
+    async function checkAdminAuth() {
+        try {
+            var userResponse = await supabase.auth.getUser();
+            var user = userResponse.data.user;
+            
+            if (!user) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            
+            currentUser = user;
+            
+            // Check if user is admin
+            var profileResponse = await supabase
+                .from('profiles')
+                .select('is_admin, role')
+                .eq('id', user.id)
+                .single();
+            
+            if (profileResponse.error) {
+                console.error('Profile error:', profileResponse.error);
+                showAccessDenied();
+                return false;
+            }
+            
+            var profile = profileResponse.data;
+            isAdmin = profile.is_admin === true || profile.role === 'admin';
+            
+            if (!isAdmin) {
+                showAccessDenied();
+                return false;
+            }
+            
+            document.getElementById('adminContent').style.display = 'block';
+            return true;
+            
+        } catch (error) {
+            console.error('Auth error:', error);
+            showAccessDenied();
+            return false;
+        }
+    }
+
+    function showAccessDenied() {
+        document.getElementById('accessDenied').style.display = 'block';
+        document.getElementById('adminContent').style.display = 'none';
+    }
+
+    // Load Stats
+    async function loadStats() {
+        try {
+            // Total users
+            var usersResponse = await supabase.from('profiles').select('id', { count: 'exact', head: true });
+            document.getElementById('statTotalUsers').textContent = usersResponse.count || 0;
+            
+            // Verified users
+            var verifiedResponse = await supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_verified', true);
+            document.getElementById('statVerified').textContent = verifiedResponse.count || 0;
+            
+            // Pending verifications
+            var pendingResponse = await supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending');
+            var pendingCount = pendingResponse.count || 0;
+            document.getElementById('statPending').textContent = pendingCount;
+            
+            // Update badge
+            var pendingBadge = document.getElementById('pendingBadge');
+            if (pendingCount > 0) {
+                pendingBadge.textContent = pendingCount;
+                pendingBadge.style.display = 'inline';
+            } else {
+                pendingBadge.style.display = 'none';
+            }
+            
+            // Open reports
+            var reportsResponse = await supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'open');
+            var reportsCount = reportsResponse.count || 0;
+            document.getElementById('statReports').textContent = reportsCount;
+            
+            // Update badge
+            var reportsBadge = document.getElementById('reportsBadge');
+            if (reportsCount > 0) {
+                reportsBadge.textContent = reportsCount;
+                reportsBadge.style.display = 'inline';
+            } else {
+                reportsBadge.style.display = 'none';
+            }
+            
+            // Active listings
+            var listingsResponse = await supabase.from('listings').select('id', { count: 'exact', head: true }).eq('is_active', true);
+            document.getElementById('statListings').textContent = listingsResponse.count || 0;
+            
+            // New today
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            var newTodayResponse = await supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', today.toISOString());
+            document.getElementById('statNewToday').textContent = newTodayResponse.count || 0;
+            
+        } catch (error) {
+            console.error('Stats error:', error);
+        }
+    }
+
+    // Load Verifications
+    async function loadVerifications() {
+        var container = document.getElementById('verificationsContent');
+        container.innerHTML = '<div class="loading">Lade Verifizierungen...</div>';
+        
+        try {
+            var filter = document.getElementById('verificationFilter').value;
+            var search = document.getElementById('verificationSearch').value.toLowerCase();
+            
+            var query = supabase.from('profiles').select('*').order('created_at', { ascending: false });
+            
+            if (filter === 'pending') {
+                query = query.eq('verification_status', 'pending');
+            } else if (filter === 'approved') {
+                query = query.eq('is_verified', true);
+            } else if (filter === 'rejected') {
+                query = query.eq('verification_status', 'rejected');
+            }
+            
+            var response = await query;
+            
+            if (response.error) throw response.error;
+            
+            var profiles = response.data || [];
+            
+            // Filter by search
+            if (search) {
+                profiles = profiles.filter(function(p) {
+                    var name = (p.full_name || p.username || '').toLowerCase();
+                    var email = (p.email || '').toLowerCase();
+                    return name.indexOf(search) !== -1 || email.indexOf(search) !== -1;
+                });
+            }
+            
+            if (profiles.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><p>Keine Verifizierungen gefunden</p></div>';
+                return;
+            }
+            
+            var html = profiles.map(function(profile) {
+                var name = profile.full_name || profile.username || 'Unbekannt';
+                var email = profile.email || '-';
+                var initial = name.charAt(0).toUpperCase();
+                var method = profile.verification_method === 'uni-email' ? '📧 Uni-Email' : profile.verification_method === 'document' ? '📄 Dokument' : '-';
+                var date = new Date(profile.created_at).toLocaleDateString('de-DE');
+                
+                var statusClass = profile.is_verified ? 'status-verified' : profile.verification_status === 'pending' ? 'status-pending' : profile.verification_status === 'rejected' ? 'status-rejected' : '';
+                var statusText = profile.is_verified ? '✅ Verifiziert' : profile.verification_status === 'pending' ? '⏳ Ausstehend' : profile.verification_status === 'rejected' ? '❌ Abgelehnt' : 'Nicht gestartet';
+                
+                var actions = '';
+                if (!profile.is_verified && profile.verification_status !== 'rejected') {
+                    actions = '<button class="btn btn-approve" onclick="approveVerification(\'' + profile.id + '\', \'' + email + '\', \'' + name.replace(/'/g, "\\'") + '\')">✓ Genehmigen</button>' +
+                              '<button class="btn btn-reject" onclick="rejectVerification(\'' + profile.id + '\', \'' + email + '\', \'' + name.replace(/'/g, "\\'") + '\')">✗ Ablehnen</button>';
+                } else if (profile.is_verified) {
+                    actions = '<span style="color: #10b981; font-weight: 600;">✅ Genehmigt</span>';
+                } else {
+                    actions = '<span style="color: #ef4444; font-weight: 600;">❌ Abgelehnt</span>';
+                }
+                
+                var docButton = '';
+                if (profile.verification_document_url) {
+                    docButton = '<button class="btn btn-view" onclick="viewDocument(\'' + profile.verification_document_url + '\')">📄 Dokument ansehen</button>';
+                }
+                
+                return '<div class="admin-card">' +
+                    '<div class="admin-card-header">' +
+                        '<div class="user-info">' +
+                            '<div class="user-avatar">' + initial + '</div>' +
+                            '<div>' +
+                                '<div class="admin-card-title">' + name + '</div>' +
+                                '<div class="admin-card-subtitle">' + email + '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<span class="status-badge ' + statusClass + '">' + statusText + '</span>' +
+                    '</div>' +
+                    '<div class="admin-card-body">' +
+                        '<p><strong>Methode:</strong> ' + method + ' | <strong>Registriert:</strong> ' + date + '</p>' +
+                        (profile.uni_email ? '<p><strong>Uni-Email:</strong> ' + profile.uni_email + '</p>' : '') +
+                    '</div>' +
+                    '<div class="admin-card-footer">' +
+                        docButton +
+                        actions +
+                    '</div>' +
+                '</div>';
+            }).join('');
+            
+            container.innerHTML = html;
+            
+        } catch (error) {
+            console.error('Verifications error:', error);
+            container.innerHTML = '<div class="empty-state"><p>Fehler beim Laden: ' + error.message + '</p></div>';
+        }
+    }
+
+    // Load Reports
+    async function loadReports() {
+        var container = document.getElementById('reportsContent');
+        container.innerHTML = '<div class="loading">Lade Meldungen...</div>';
+        
+        try {
+            var filter = document.getElementById('reportFilter').value;
+            var typeFilter = document.getElementById('reportTypeFilter').value;
+            
+            var query = supabase.from('reports').select('*, reporter:reporter_id(full_name, username, email), reported_user:reported_user_id(full_name, username, email)').order('created_at', { ascending: false });
+            
+            if (filter === 'open') {
+                query = query.eq('status', 'open');
+            } else if (filter === 'resolved') {
+                query = query.eq('status', 'resolved');
+            }
+            
+            if (typeFilter !== 'all') {
+                query = query.eq('type', typeFilter);
+            }
+            
+            var response = await query;
+            
+            if (response.error) throw response.error;
+            
+            var reports = response.data || [];
+            
+            if (reports.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><p>Keine Meldungen gefunden</p></div>';
+                return;
+            }
+            
+            var html = reports.map(function(report) {
+                var reporterName = report.reporter ? (report.reporter.full_name || report.reporter.username || 'Unbekannt') : 'Unbekannt';
+                var reportedName = report.reported_user ? (report.reported_user.full_name || report.reported_user.username || 'Unbekannt') : 'Unbekannt';
+                var date = new Date(report.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                
+                var typeIcon = report.type === 'user' ? '👤' : report.type === 'listing' ? '🏠' : '💬';
+                var statusClass = report.status === 'open' ? 'status-open' : 'status-resolved';
+                var statusText = report.status === 'open' ? '🔴 Offen' : '✅ Erledigt';
+                
+                var actions = '';
+                if (report.status === 'open') {
+                    actions = '<button class="btn btn-warn" onclick="warnUser(\'' + report.reported_user_id + '\')">⚠️ Verwarnen</button>' +
+                              '<button class="btn btn-reject" onclick="banUser(\'' + report.reported_user_id + '\')">🚫 Sperren</button>' +
+                              '<button class="btn btn-secondary" onclick="resolveReport(\'' + report.id + '\')">✓ Erledigt</button>' +
+                              '<button class="btn btn-delete" onclick="deleteReport(\'' + report.id + '\')">🗑️</button>';
+                }
+                
+                return '<div class="admin-card">' +
+                    '<div class="admin-card-header">' +
+                        '<div>' +
+                            '<div class="admin-card-title">' + typeIcon + ' ' + reportedName + ' wurde gemeldet</div>' +
+                            '<div class="admin-card-subtitle">Von: ' + reporterName + ' | ' + date + '</div>' +
+                        '</div>' +
+                        '<span class="status-badge ' + statusClass + '">' + statusText + '</span>' +
+                    '</div>' +
+                    '<div class="admin-card-body">' +
+                        '<div class="report-reason">' +
+                            '<strong>Grund:</strong> ' + (report.reason || 'Kein Grund angegeben') +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="admin-card-footer">' +
+                        actions +
+                    '</div>' +
+                '</div>';
+            }).join('');
+            
+            container.innerHTML = html;
+            
+        } catch (error) {
+            console.error('Reports error:', error);
+            container.innerHTML = '<div class="empty-state"><p>Fehler beim Laden: ' + error.message + '</p></div>';
+        }
+    }
+
+    // Load Users
+    async function loadUsers() {
+        var container = document.getElementById('usersContent');
+        container.innerHTML = '<div class="loading">Lade Benutzer...</div>';
+        
+        try {
+            var search = document.getElementById('userSearch').value.toLowerCase();
+            var filter = document.getElementById('userFilter').value;
+            
+            var query = supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(100);
+            
+            if (filter === 'verified') {
+                query = query.eq('is_verified', true);
+            } else if (filter === 'unverified') {
+                query = query.eq('is_verified', false);
+            } else if (filter === 'banned') {
+                query = query.eq('is_banned', true);
+            }
+            
+            var response = await query;
+            
+            if (response.error) throw response.error;
+            
+            var users = response.data || [];
+            
+            // Filter by search
+            if (search) {
+                users = users.filter(function(u) {
+                    var name = (u.full_name || u.username || '').toLowerCase();
+                    var email = (u.email || '').toLowerCase();
+                    return name.indexOf(search) !== -1 || email.indexOf(search) !== -1;
+                });
+            }
+            
+            if (users.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>Keine Benutzer gefunden</p></div>';
+                return;
+            }
+            
+            var rows = users.map(function(user) {
+                var name = user.full_name || user.username || 'Unbekannt';
+                var email = user.email || '-';
+                var date = new Date(user.created_at).toLocaleDateString('de-DE');
+                var statusClass = user.is_verified ? 'status-verified' : 'status-pending';
+                var statusText = user.is_verified ? '✅' : '❌';
+                var bannedText = user.is_banned ? '<span style="color: #dc2626;">🚫 Gesperrt</span>' : '';
+                
+                return '<tr>' +
+                    '<td>' +
+                        '<div class="user-info">' +
+                            '<div class="user-avatar">' + name.charAt(0).toUpperCase() + '</div>' +
+                            '<div><strong>' + name + '</strong><br><span style="color: #6b7280; font-size: 0.85rem;">' + user.id.substring(0, 8) + '...</span></div>' +
+                        '</div>' +
+                    '</td>' +
+                    '<td>' + email + '</td>' +
+                    '<td>' + statusText + ' ' + bannedText + '</td>' +
+                    '<td>' + date + '</td>' +
+                    '<td>' +
+                        '<button class="btn btn-secondary" onclick="viewUserProfile(\'' + user.id + '\')">👁️</button> ' +
+                        (!user.is_verified ? '<button class="btn btn-approve" onclick="manualVerify(\'' + user.id + '\')">✓</button> ' : '') +
+                        (!user.is_banned ? '<button class="btn btn-reject" onclick="banUser(\'' + user.id + '\')">🚫</button>' : '<button class="btn btn-approve" onclick="unbanUser(\'' + user.id + '\')">✓ Entsperren</button>') +
+                    '</td>' +
+                '</tr>';
+            }).join('');
+            
+            container.innerHTML = '<table>' +
+                '<thead><tr><th>Benutzer</th><th>E-Mail</th><th>Status</th><th>Registriert</th><th>Aktionen</th></tr></thead>' +
+                '<tbody>' + rows + '</tbody>' +
+            '</table>';
+            
+        } catch (error) {
+            console.error('Users error:', error);
+            container.innerHTML = '<div class="empty-state"><p>Fehler: ' + error.message + '</p></div>';
+        }
+    }
+
+    // Load Listings
+    async function loadListings() {
+        var container = document.getElementById('listingsContent');
+        container.innerHTML = '<div class="loading">Lade Inserate...</div>';
+        
+        try {
+            var search = document.getElementById('listingSearch').value.toLowerCase();
+            var typeFilter = document.getElementById('listingTypeFilter').value;
+            var statusFilter = document.getElementById('listingStatusFilter').value;
+            
+            var query = supabase.from('listings').select('*, owner:owner_id(full_name, username, email)').order('created_at', { ascending: false }).limit(100);
+            
+            if (typeFilter !== 'all') {
+                query = query.eq('type', typeFilter);
+            }
+            
+            if (statusFilter === 'active') {
+                query = query.eq('is_active', true);
+            } else if (statusFilter === 'inactive') {
+                query = query.eq('is_active', false);
+            }
+            
+            var response = await query;
+            
+            if (response.error) throw response.error;
+            
+            var listings = response.data || [];
+            
+            // Filter by search
+            if (search) {
+                listings = listings.filter(function(l) {
+                    var title = (l.title || '').toLowerCase();
+                    var city = (l.city || '').toLowerCase();
+                    return title.indexOf(search) !== -1 || city.indexOf(search) !== -1;
+                });
+            }
+            
+            if (listings.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>Keine Inserate gefunden</p></div>';
+                return;
+            }
+            
+            var rows = listings.map(function(listing) {
+                var ownerName = listing.owner ? (listing.owner.full_name || listing.owner.username || 'Unbekannt') : 'Unbekannt';
+                var date = new Date(listing.created_at).toLocaleDateString('de-DE');
+                var typeIcon = listing.type === 'wohnung' ? '🏠' : listing.type === 'gegenstand' ? '📦' : '💼';
+                var statusText = listing.is_active ? '<span style="color: #10b981;">✅ Aktiv</span>' : '<span style="color: #6b7280;">❌ Inaktiv</span>';
+                
+                return '<tr>' +
+                    '<td><strong>' + (listing.title || 'Ohne Titel') + '</strong><br><span style="color: #6b7280; font-size: 0.85rem;">' + listing.id.substring(0, 8) + '...</span></td>' +
+                    '<td>' + typeIcon + ' ' + (listing.type || '-') + '</td>' +
+                    '<td>' + ownerName + '</td>' +
+                    '<td>' + (listing.city || '-') + '</td>' +
+                    '<td>' + statusText + '</td>' +
+                    '<td>' + date + '</td>' +
+                    '<td>' +
+                        '<button class="btn btn-secondary" onclick="viewListing(\'' + listing.id + '\')">👁️</button> ' +
+                        (listing.is_active ? '<button class="btn btn-warn" onclick="deactivateListing(\'' + listing.id + '\')">⏸️</button>' : '<button class="btn btn-approve" onclick="activateListing(\'' + listing.id + '\')">▶️</button>') +
+                        ' <button class="btn btn-delete" onclick="deleteListing(\'' + listing.id + '\')">🗑️</button>' +
+                    '</td>' +
+                '</tr>';
+            }).join('');
+            
+            container.innerHTML = '<table>' +
+                '<thead><tr><th>Titel</th><th>Typ</th><th>Ersteller</th><th>Stadt</th><th>Status</th><th>Datum</th><th>Aktionen</th></tr></thead>' +
+                '<tbody>' + rows + '</tbody>' +
+            '</table>';
+            
+        } catch (error) {
+            console.error('Listings error:', error);
+            container.innerHTML = '<div class="empty-state"><p>Fehler: ' + error.message + '</p></div>';
+        }
+    }
+
+    // Action Functions
+    window.viewDocument = async function(documentUrl) {
+        try {
+            var response = await supabase.storage.from('verification-documents').createSignedUrl(documentUrl, 300);
+            if (response.error) throw response.error;
+            window.open(response.data.signedUrl, '_blank');
+        } catch (error) {
+            alert('Fehler: ' + error.message);
+        }
+    };
+
+    window.approveVerification = async function(userId, email, name) {
+        if (!confirm('Verifizierung für ' + name + ' genehmigen?')) return;
+        
+        try {
+            var response = await supabase.from('profiles').update({
+                is_verified: true,
+                is_student: true,
+                verification_status: 'approved',
+                verified_at: new Date().toISOString()
+            }).eq('id', userId);
+            
+            if (response.error) throw response.error;
+            
+            alert('✅ ' + name + ' wurde verifiziert!');
+            loadVerifications();
+            loadStats();
+        } catch (error) {
+            alert('Fehler: ' + error.message);
+        }
+    };
+
+    window.rejectVerification = async function(userId, email, name) {
+        var reason = prompt('Grund für Ablehnung (optional):');
+        if (reason === null) return;
+        
+        try {
+            var response = await supabase.from('profiles').update({
+                is_verified: false,
+                verification_status: 'rejected',
+                verification_rejection_reason: reason || null
+            }).eq('id', userId);
+            
+            if (response.error) throw response.error;
+            
+            alert('❌ Verifizierung für ' + name + ' abgelehnt.');
+            loadVerifications();
+            loadStats();
+        } catch (error) {
+            alert('Fehler: ' + error.message);
+        }
+    };
+
+    window.resolveReport = async function(reportId) {
+        try {
+            var response = await supabase.from('reports').update({ status: 'resolved', resolved_at: new Date().toISOString() }).eq('id', reportId);
+            if (response.error) throw response.error;
+            alert('✅ Meldung als erledigt markiert.');
+            loadReports();
+            loadStats();
+        } catch (error) {
+            alert('Fehler: ' + error.message);
+        }
+    };
+
+    window.deleteReport = async function(reportId) {
+        if (!confirm('Meldung wirklich löschen?')) return;
+        try {
+            var response = await supabase.from('reports').delete().eq('id', reportId);
+            if (response.error) throw response.error;
+            alert('🗑️ Meldung gelöscht.');
+            loadReports();
+            loadStats();
+        } catch (error) {
+            alert('Fehler: ' + error.message);
+        }
+    };
+
+    window.banUser = async function(userId) {
+        if (!confirm('Benutzer wirklich sperren?')) return;
+        try {
+            var response = await supabase.from('profiles').update({ is_banned: true, banned_at: new Date().toISOString() }).eq('id', userId);
+            if (response.error) throw response.error;
+            alert('🚫 Benutzer gesperrt.');
+            loadUsers();
+            loadReports();
+        } catch (error) {
+            alert('Fehler: ' + error.message);
+        }
+    };
+
+    window.unbanUser = async function(userId) {
+        if (!confirm('Benutzer entsperren?')) return;
+        try {
+            var response = await supabase.from('profiles').update({ is_banned: false, banned_at: null }).eq('id', userId);
+            if (response.error) throw response.error;
+            alert('✅ Benutzer entsperrt.');
+            loadUsers();
+        } catch (error) {
+            alert('Fehler: ' + error.message);
+        }
+    };
+
+    window.warnUser = async function(userId) {
+        var message = prompt('Warnungsnachricht:');
+        if (!message) return;
+        alert('⚠️ Warnung würde an Benutzer gesendet (Feature noch nicht implementiert)');
+    };
+
+    window.manualVerify = async function(userId) {
+        if (!confirm('Benutzer manuell verifizieren?')) return;
+        try {
+            var response = await supabase.from('profiles').update({
+                is_verified: true,
+                is_student: true,
+                verification_status: 'approved',
+                verification_method: 'manual',
+                verified_at: new Date().toISOString()
+            }).eq('id', userId);
+            if (response.error) throw response.error;
+            alert('✅ Benutzer manuell verifiziert.');
+            loadUsers();
+            loadStats();
+        } catch (error) {
+            alert('Fehler: ' + error.message);
+        }
+    };
+
+    window.viewUserProfile = function(userId) {
+        window.open('public-profile.html?id=' + userId, '_blank');
+    };
+
+    window.viewListing = function(listingId) {
+        window.open('detail.html?id=' + listingId, '_blank');
+    };
+
+    window.deactivateListing = async function(listingId) {
+        if (!confirm('Inserat deaktivieren?')) return;
+        try {
+            var response = await supabase.from('listings').update({ is_active: false }).eq('id', listingId);
+            if (response.error) throw response.error;
+            alert('⏸️ Inserat deaktiviert.');
+            loadListings();
+            loadStats();
+        } catch (error) {
+            alert('Fehler: ' + error.message);
+        }
+    };
+
+    window.activateListing = async function(listingId) {
+        try {
+            var response = await supabase.from('listings').update({ is_active: true }).eq('id', listingId);
+            if (response.error) throw response.error;
+            alert('▶️ Inserat aktiviert.');
+            loadListings();
+            loadStats();
+        } catch (error) {
+            alert('Fehler: ' + error.message);
+        }
+    };
+
+    window.deleteListing = async function(listingId) {
+        if (!confirm('Inserat wirklich löschen? Dies kann nicht rückgängig gemacht werden!')) return;
+        try {
+            var response = await supabase.from('listings').delete().eq('id', listingId);
+            if (response.error) throw response.error;
+            alert('🗑️ Inserat gelöscht.');
+            loadListings();
+            loadStats();
+        } catch (error) {
+            alert('Fehler: ' + error.message);
+        }
+    };
+
+    // Tab switching
+    document.querySelectorAll('.admin-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.admin-tab').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.admin-section').forEach(function(s) { s.classList.remove('active'); });
+            
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.tab + '-section').classList.add('active');
+            
+            // Load data
+            if (tab.dataset.tab === 'verifications') loadVerifications();
+            else if (tab.dataset.tab === 'reports') loadReports();
+            else if (tab.dataset.tab === 'users') loadUsers();
+            else if (tab.dataset.tab === 'listings') loadListings();
+        });
+    });
+
+    // Filter change listeners
+    document.getElementById('verificationFilter').addEventListener('change', loadVerifications);
+    document.getElementById('verificationSearch').addEventListener('input', debounce(loadVerifications, 300));
+    document.getElementById('reportFilter').addEventListener('change', loadReports);
+    document.getElementById('reportTypeFilter').addEventListener('change', loadReports);
+    document.getElementById('userSearch').addEventListener('input', debounce(loadUsers, 300));
+    document.getElementById('userFilter').addEventListener('change', loadUsers);
+    document.getElementById('listingSearch').addEventListener('input', debounce(loadListings, 300));
+    document.getElementById('listingTypeFilter').addEventListener('change', loadListings);
+    document.getElementById('listingStatusFilter').addEventListener('change', loadListings);
+
+    function debounce(func, wait) {
+        var timeout;
+        return function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(func, wait);
+        };
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', async function() {
+        var authorized = await checkAdminAuth();
+        if (authorized) {
+            loadStats();
+            loadVerifications();
+        }
+    });
+</script>
+</body>
+</html>

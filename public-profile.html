@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Profil - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+        .avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            overflow: hidden;
+        }
+        .avatar-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-header h2 {
+            margin: 0 0 0.5rem;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+            font-size: 0.8rem;
+        }
+        .profile-meta {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        .rating-summary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        .rating-number {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .stars {
+            color: #fbbf24;
+            font-size: 1.1rem;
+        }
+        .profile-content {
+            padding: 1.5rem;
+            padding-bottom: 5rem;
+        }
+        .info-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .info-section:last-child {
+            border-bottom: none;
+        }
+        .info-section h3 {
+            font-size: 1rem;
+            margin: 0 0 1rem 0;
+            color: #111827;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .info-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+        .info-value {
+            font-size: 0.95rem;
+            color: #111827;
+            font-weight: 600;
+        }
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .tag {
+            padding: 0.4rem 0.8rem;
+            background-color: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 999px;
+            font-size: 0.8rem;
+        }
+        .review-item {
+            padding: 1rem;
+            background-color: #f9fafb;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .review-author {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .review-stars {
+            color: #fbbf24;
+        }
+        .review-date {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+        .review-comment {
+            font-size: 0.9rem;
+            color: #374151;
+            margin-top: 0.5rem;
+        }
+        .contact-btn {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background: #10b981;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            margin-top: 1rem;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .contact-btn:hover {
+            background: #059669;
+        }
+        .app-header {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .app-header h1 {
+            font-size: 1.25rem;
+            margin: 0;
+            flex: 1;
+            text-align: center;
+        }
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+            padding: 0.5rem;
+        }
+        .header-spacer {
+            width: 2rem;
+        }
+        .error-message {
+            text-align: center;
+            padding: 3rem;
+            color: #ef4444;
+        }
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+        
+        /* Listings Section */
+        .listings-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        .listing-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .listing-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .listing-image {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            background: #f3f4f6;
+        }
+        .listing-info {
+            padding: 0.75rem;
+        }
+        .listing-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0 0 0.25rem 0;
+            color: #111827;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .listing-price {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #10b981;
+        }
+        .listing-type-badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .type-wohnung {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .type-gegenstand {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .no-listings {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+        
+        /* Tabs */
+        .profile-tabs {
+            display: flex;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 1rem;
+        }
+        .profile-tab {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            font-weight: 600;
+            color: #6b7280;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+        .profile-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-btn">←</a>
+        <h1 id="pageTitle">Profil</h1>
+        <div class="header-spacer"></div>
+    </header>
+
+    <div id="profileContainer">
+        <div class="loading" id="loadingText">Lade Profil...</div>
+    </div>
+
+    <footer class="app-footer-nav" id="app-footer-nav"></footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    var profileContainer = document.getElementById('profileContainer');
+    var currentUserId = null;
+    var viewedUserId = null;
+
+    // Translations
+    var ppTranslations = {
+        de: {
+            page_title: 'Profil',
+            loading: 'Lade Profil...',
+            error_no_id: 'Fehler: Keine Benutzer-ID angegeben.',
+            error_not_found: 'Benutzer nicht gefunden.',
+            member_since: 'Mitglied seit',
+            verified: 'Verifiziert',
+            section_about: 'Über mich',
+            section_details: 'Details',
+            section_interests: 'Interessen',
+            section_reviews: 'Bewertungen',
+            section_listings: 'Inserate',
+            label_city: 'Stadt',
+            label_university: 'Universität',
+            label_field: 'Studiengang',
+            label_semester: 'Semester',
+            label_age: 'Alter',
+            label_languages: 'Sprachen',
+            no_reviews: 'Noch keine Bewertungen',
+            no_listings: 'Keine aktiven Inserate',
+            reviews_count: 'Bewertungen',
+            contact: 'Nachricht senden',
+            report: 'Melden',
+            tab_info: 'Info',
+            tab_listings: 'Inserate',
+            tab_reviews: 'Bewertungen',
+            housing: 'Wohnung',
+            item: 'Artikel',
+            per_month: '/Monat'
+        },
+        en: {
+            page_title: 'Profile',
+            loading: 'Loading profile...',
+            error_no_id: 'Error: No user ID provided.',
+            error_not_found: 'User not found.',
+            member_since: 'Member since',
+            verified: 'Verified',
+            section_about: 'About',
+            section_details: 'Details',
+            section_interests: 'Interests',
+            section_reviews: 'Reviews',
+            section_listings: 'Listings',
+            label_city: 'City',
+            label_university: 'University',
+            label_field: 'Field of Study',
+            label_semester: 'Semester',
+            label_age: 'Age',
+            label_languages: 'Languages',
+            no_reviews: 'No reviews yet',
+            no_listings: 'No active listings',
+            reviews_count: 'reviews',
+            contact: 'Send Message',
+            report: 'Report',
+            tab_info: 'Info',
+            tab_listings: 'Listings',
+            tab_reviews: 'Reviews',
+            housing: 'Housing',
+            item: 'Item',
+            per_month: '/month'
+        }
+    };
+
+    function getPPText(key) {
+        var lang = localStorage.getItem('room8_language') || localStorage.getItem('language') || 'de';
+        return ppTranslations[lang] && ppTranslations[lang][key] ? ppTranslations[lang][key] : ppTranslations['de'][key];
+    }
+
+    function applyPPTranslations() {
+        document.getElementById('pageTitle').textContent = getPPText('page_title');
+        document.getElementById('loadingText').textContent = getPPText('loading');
+    }
+
+    function generateStars(rating) {
+        var fullStars = Math.floor(rating);
+        var html = '';
+        for (var i = 0; i < 5; i++) {
+            html += i < fullStars ? '★' : '☆';
+        }
+        return html;
+    }
+
+    function renderProfile(profile, reviews, listings) {
+        var memberDate = new Date(profile.created_at).toLocaleDateString();
+        var initial = profile.username ? profile.username.charAt(0).toUpperCase() : '?';
+        
+        // Calculate average rating
+        var avgRating = 0;
+        if (reviews.length > 0) {
+            var sum = reviews.reduce(function(acc, r) { return acc + r.rating; }, 0);
+            avgRating = (sum / reviews.length).toFixed(1);
+        }
+
+        // Avatar
+        var avatarContent = initial;
+        if (profile.avatar_url) {
+            avatarContent = '<img src="' + profile.avatar_url + '" alt="Avatar" onerror="this.parentElement.innerHTML=\'' + initial + '\'">';
+        }
+
+        var html = 
+            '<div class="profile-header">' +
+                '<div class="avatar-large">' + avatarContent + '</div>' +
+                '<h2>' + (profile.username || 'User') +
+                    (profile.is_verified || profile.is_student_verified ? ' <span class="verified-badge">✓</span>' : '') +
+                '</h2>' +
+                '<div class="profile-meta">' +
+                    '<span>📅 ' + getPPText('member_since') + ' ' + memberDate + '</span>' +
+                    (profile.city ? '<span>📍 ' + profile.city + '</span>' : '') +
+                '</div>';
+        
+        if (reviews.length > 0) {
+            html += 
+                '<div class="rating-summary">' +
+                    '<span class="rating-number">' + avgRating + '</span>' +
+                    '<div>' +
+                        '<div class="stars">' + generateStars(avgRating) + '</div>' +
+                        '<div>' + reviews.length + ' ' + getPPText('reviews_count') + '</div>' +
+                    '</div>' +
+                '</div>';
+        }
+        
+        html += '</div>';
+        
+        // Tabs
+        html += '<div class="profile-content">';
+        html += 
+            '<div class="profile-tabs">' +
+                '<div class="profile-tab active" data-tab="info">📋 ' + getPPText('tab_info') + '</div>' +
+                '<div class="profile-tab" data-tab="listings">🏠 ' + getPPText('tab_listings') + ' (' + listings.length + ')</div>' +
+                '<div class="profile-tab" data-tab="reviews">⭐ ' + getPPText('tab_reviews') + ' (' + reviews.length + ')</div>' +
+            '</div>';
+        
+        // Tab: Info
+        html += '<div class="tab-content active" id="tab-info">';
+        
+        // About section
+        if (profile.bio) {
+            html += 
+                '<div class="info-section">' +
+                    '<h3>👤 ' + getPPText('section_about') + '</h3>' +
+                    '<p>' + profile.bio + '</p>' +
+                '</div>';
+        }
+        
+        // Details section
+        html += '<div class="info-section">';
+        html += '<h3>📋 ' + getPPText('section_details') + '</h3>';
+        html += '<div class="info-grid">';
+        
+        if (profile.city) {
+            html += '<div class="info-item"><span class="info-label">' + getPPText('label_city') + '</span><span class="info-value">' + profile.city + '</span></div>';
+        }
+        if (profile.university) {
+            html += '<div class="info-item"><span class="info-label">' + getPPText('label_university') + '</span><span class="info-value">' + profile.university + '</span></div>';
+        }
+        if (profile.study_field) {
+            html += '<div class="info-item"><span class="info-label">' + getPPText('label_field') + '</span><span class="info-value">' + profile.study_field + '</span></div>';
+        }
+        if (profile.semester) {
+            html += '<div class="info-item"><span class="info-label">' + getPPText('label_semester') + '</span><span class="info-value">' + profile.semester + '</span></div>';
+        }
+        
+        html += '</div></div>';
+        
+        // Interests
+        var interestsArray = [];
+        if (profile.interests) {
+            if (Array.isArray(profile.interests)) {
+                interestsArray = profile.interests;
+            } else if (typeof profile.interests === 'string') {
+                interestsArray = profile.interests.split(',').map(function(i) { return i.trim(); }).filter(function(i) { return i; });
+            }
+        }
+        
+        if (interestsArray.length > 0) {
+            html += '<div class="info-section">';
+            html += '<h3>🎯 ' + getPPText('section_interests') + '</h3>';
+            html += '<div class="tags-container">';
+            interestsArray.forEach(function(interest) {
+                html += '<span class="tag">' + interest + '</span>';
+            });
+            html += '</div></div>';
+        }
+        
+        html += '</div>'; // end tab-info
+        
+        // Tab: Listings
+        html += '<div class="tab-content" id="tab-listings">';
+        html += '<div class="listings-grid">';
+        
+        if (listings.length === 0) {
+            html += '<p class="no-listings">' + getPPText('no_listings') + '</p>';
+        } else {
+            listings.forEach(function(listing) {
+                var imageUrl = 'placeholder.png';
+                if (listing.listing_photos && listing.listing_photos.length > 0) {
+                    var urlData = supabase.storage.from('listing-images').getPublicUrl(listing.listing_photos[0].storage_path);
+                    if (urlData && urlData.data) imageUrl = urlData.data.publicUrl;
+                }
+                
+                var priceStr = '';
+                if (listing.type === 'wohnung') {
+                    priceStr = listing.monthly_rent ? listing.monthly_rent + '€' + getPPText('per_month') : '';
+                } else {
+                    priceStr = listing.price ? listing.price + '€' : '';
+                }
+                
+                var typeClass = listing.type === 'wohnung' ? 'type-wohnung' : 'type-gegenstand';
+                var typeText = listing.type === 'wohnung' ? getPPText('housing') : getPPText('item');
+                
+                html += 
+                    '<a href="detail.html?id=' + listing.id + '" class="listing-card">' +
+                        '<img src="' + imageUrl + '" alt="' + listing.title + '" class="listing-image" onerror="this.src=\'placeholder.png\';">' +
+                        '<div class="listing-info">' +
+                            '<span class="listing-type-badge ' + typeClass + '">' + typeText + '</span>' +
+                            '<h4 class="listing-title">' + listing.title + '</h4>' +
+                            (priceStr ? '<span class="listing-price">' + priceStr + '</span>' : '') +
+                        '</div>' +
+                    '</a>';
+            });
+        }
+        
+        html += '</div></div>'; // end tab-listings
+        
+        // Tab: Reviews
+        html += '<div class="tab-content" id="tab-reviews">';
+        
+        if (reviews.length === 0) {
+            html += '<p style="color: #6b7280; text-align: center; padding: 2rem;">' + getPPText('no_reviews') + '</p>';
+        } else {
+            reviews.forEach(function(review) {
+                var reviewDate = new Date(review.created_at).toLocaleDateString();
+                var reviewerName = review.reviewer ? review.reviewer.username : 'Anonym';
+                
+                html += 
+                    '<div class="review-item">' +
+                        '<div class="review-header">' +
+                            '<span class="review-author">' + reviewerName + '</span>' +
+                            '<span class="review-stars">' + generateStars(review.rating) + '</span>' +
+                        '</div>' +
+                        '<div class="review-date">' + reviewDate + '</div>' +
+                        (review.comment ? '<div class="review-comment">' + review.comment + '</div>' : '') +
+                    '</div>';
+            });
+        }
+        
+        html += '</div>'; // end tab-reviews
+        
+        // Contact Button (only if not own profile)
+        if (currentUserId && currentUserId !== viewedUserId) {
+            html += '<button class="contact-btn" onclick="startChat()">💬 ' + getPPText('contact') + '</button>';
+        }
+        
+        html += '</div>'; // end profile-content
+        
+        profileContainer.innerHTML = html;
+        
+        // Tab switching
+        document.querySelectorAll('.profile-tab').forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.profile-tab').forEach(function(t) { t.classList.remove('active'); });
+                document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+                this.classList.add('active');
+                document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+            });
+        });
+    }
+
+    function startChat() {
+        // Navigate to chat with this user
+        window.location.href = 'chat.html?user=' + viewedUserId;
+    }
+
+    function loadPublicProfile() {
+        var params = new URLSearchParams(window.location.search);
+        viewedUserId = params.get('id');
+
+        if (!viewedUserId) {
+            profileContainer.innerHTML = '<p class="error-message">' + getPPText('error_no_id') + '</p>';
+            return;
+        }
+
+        // Check current user
+        supabase.auth.getUser().then(function(authRes) {
+            if (authRes.data.user) {
+                currentUserId = authRes.data.user.id;
+            }
+        });
+
+        // Load profile
+        supabase
+            .from('profiles')
+            .select('id, username, city, bio, avatar_url, created_at, is_verified, is_student_verified, university, study_field, semester, age, languages, interests')
+            .eq('id', viewedUserId)
+            .single()
+            .then(function(profileResponse) {
+                if (profileResponse.error) throw new Error(getPPText('error_not_found'));
+                
+                var profile = profileResponse.data;
+                
+                // Load reviews
+                return supabase
+                    .from('reviews')
+                    .select('*, reviewer:profiles!reviewer_id(username)')
+                    .eq('reviewee_id', viewedUserId)
+                    .order('created_at', { ascending: false })
+                    .then(function(reviewsResponse) {
+                        var reviews = reviewsResponse.data || [];
+                        
+                        // Load listings
+                        return supabase
+                            .from('listings')
+                            .select('id, title, type, price, monthly_rent, listing_photos(storage_path)')
+                            .eq('owner_id', viewedUserId)
+                            .eq('is_active', true)
+                            .order('created_at', { ascending: false })
+                            .then(function(listingsResponse) {
+                                var listings = listingsResponse.data || [];
+                                renderProfile(profile, reviews, listings);
+                            });
+                    });
+            })
+            .catch(function(error) {
+                console.error('Error loading profile:', error);
+                profileContainer.innerHTML = '<p class="error-message">' + error.message + '</p>';
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        applyPPTranslations();
+        loadPublicProfile();
+    });
+</script>
+<script src="navigation.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>

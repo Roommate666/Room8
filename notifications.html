@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Benachrichtigungen - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        html, body {
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 100vw;
+            min-height: 100vh;
+            background: #f9fafb;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+        }
+
+        .notifications-header {
+            width: 100%;
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notifications-header h1 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #111827;
+        }
+
+        .mark-all-read-btn {
+            background: none;
+            border: none;
+            color: #3b82f6;
+            font-size: 0.8rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .mark-all-read-btn:disabled {
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .notifications-content {
+            width: 100%;
+            max-width: 100%;
+            padding: 0.75rem;
+            overflow-x: hidden;
+        }
+
+        .notification-item {
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .notification-item.unread {
+            background: #eff6ff;
+            border-color: #3b82f6;
+        }
+
+        .notification-item.unread::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #3b82f6;
+            border-radius: 12px 0 0 12px;
+        }
+
+        .notification-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .notification-icon {
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .notification-icon.chat { background: #fef2f2; }
+        .notification-icon.review { background: #fef3c7; }
+        .notification-icon.admin { background: #ede9fe; }
+        .notification-icon.job { background: #dbeafe; }
+        .notification-icon.listing { background: #d1fae5; }
+
+        .notification-body {
+            flex: 1;
+            min-width: 0;
+            max-width: calc(100% - 46px);
+            overflow: hidden;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: #111827;
+            font-size: 0.9rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .notification-message {
+            color: #6b7280;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            margin-top: 0.25rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .notification-time {
+            color: #9ca3af;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .notification-btn {
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .notification-btn.primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .notification-btn.secondary {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 0.4rem;
+            margin-bottom: 0.75rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+        }
+
+        .filter-tab {
+            padding: 0.4rem 0.75rem;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            color: #6b7280;
+            font-size: 0.75rem;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .filter-tab.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="notifications-header">
+            <h1 data-i18n="notifications_title">Benachrichtigungen</h1>
+            <button class="mark-all-read-btn" id="markAllReadBtn" data-i18n="notifications_mark_all_read">Alle gelesen</button>
+        </div>
+
+        <div class="notifications-content">
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all" data-i18n="notifications_filter_all">Alle</button>
+                <button class="filter-tab" data-filter="unread" data-i18n="notifications_filter_unread">Ungelesen</button>
+                <button class="filter-tab" data-filter="chat_message">Chat</button>
+                <button class="filter-tab" data-filter="review" data-i18n="notifications_filter_reviews">Bewertungen</button>
+            </div>
+
+            <div id="notificationsList">
+                <div class="empty-state">
+                    <div class="empty-state-icon">&#128276;</div>
+                    <h3>Laden...</h3>
+                </div>
+            </div>
+        </div>
+
+        <footer class="app-footer-nav" id="app-footer-nav"></footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script>
+        var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        var allNotifications = [];
+        var currentFilter = 'all';
+
+        var iconMap = {
+            chat_message: { emoji: '&#128172;', cls: 'chat' },
+            review: { emoji: '&#11088;', cls: 'review' },
+            admin_notification: { emoji: '&#128227;', cls: 'admin' },
+            job_application: { emoji: '&#128188;', cls: 'job' },
+            new_listing: { emoji: '&#127968;', cls: 'listing' },
+            favorite: { emoji: '&#10084;', cls: 'chat' },
+            verification: { emoji: '&#9989;', cls: 'listing' }
+        };
+
+        function timeAgo(dateString) {
+            var date = new Date(dateString);
+            var seconds = Math.floor((new Date() - date) / 1000);
+            
+            if (seconds < 60) return 'Gerade eben';
+            if (seconds < 3600) return 'vor ' + Math.floor(seconds / 60) + ' Min';
+            if (seconds < 86400) return 'vor ' + Math.floor(seconds / 3600) + ' Std';
+            if (seconds < 604800) return 'vor ' + Math.floor(seconds / 86400) + ' Tagen';
+            return 'vor ' + Math.floor(seconds / 604800) + ' Wochen';
+        }
+
+        function renderNotifications() {
+            var container = document.getElementById('notificationsList');
+            
+            var filtered = allNotifications;
+            
+            if (currentFilter === 'unread') {
+                filtered = allNotifications.filter(function(n) { return !n.is_read; });
+            } else if (currentFilter !== 'all') {
+                filtered = allNotifications.filter(function(n) { return n.type === currentFilter; });
+            }
+
+            if (filtered.length === 0) {
+                var emptyMsg = currentFilter === 'unread' ? 'Du hast alle Benachrichtigungen gelesen' : 'Hier erscheinen deine Benachrichtigungen';
+                container.innerHTML = 
+                    '<div class="empty-state">' +
+                        '<div class="empty-state-icon">&#128276;</div>' +
+                        '<h3>Keine Benachrichtigungen</h3>' +
+                        '<p>' + emptyMsg + '</p>' +
+                    '</div>';
+                return;
+            }
+
+            var html = '';
+            for (var i = 0; i < filtered.length; i++) {
+                var notification = filtered[i];
+                var icon = iconMap[notification.type] || { emoji: '&#128276;', cls: 'listing' };
+                var isUnread = !notification.is_read;
+                var unreadClass = isUnread ? 'unread' : '';
+                
+                html += '<div class="notification-item ' + unreadClass + '" data-id="' + notification.id + '">';
+                html += '<div class="notification-header">';
+                html += '<div class="notification-icon ' + icon.cls + '">' + icon.emoji + '</div>';
+                html += '<div class="notification-body">';
+                html += '<div class="notification-title">' + notification.title + '</div>';
+                html += '<div class="notification-message">' + notification.message + '</div>';
+                html += '<div class="notification-time">' + timeAgo(notification.created_at) + '</div>';
+                html += '</div></div>';
+                
+                if (notification.link) {
+                    html += '<div class="notification-actions">';
+                    html += '<button class="notification-btn primary" onclick="openLink(\'' + notification.link + '\', \'' + notification.id + '\')">Ansehen</button>';
+                    if (isUnread) {
+                        html += '<button class="notification-btn secondary" onclick="markAsRead(\'' + notification.id + '\')">Gelesen</button>';
+                    }
+                    html += '</div>';
+                }
+                html += '</div>';
+            }
+            
+            container.innerHTML = html;
+            
+            var hasUnread = allNotifications.some(function(n) { return !n.is_read; });
+            document.getElementById('markAllReadBtn').disabled = !hasUnread;
+        }
+
+        function loadNotifications() {
+            supabase.auth.getUser()
+                .then(function(response) {
+                    var user = response.data.user;
+                    if (!user) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    return supabase
+                        .from('notifications')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .order('created_at', { ascending: false });
+                })
+                .then(function(result) {
+                    if (result && result.data) {
+                        allNotifications = result.data;
+                        renderNotifications();
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Error loading notifications:', error);
+                    document.getElementById('notificationsList').innerHTML = 
+                        '<div class="empty-state">' +
+                            '<div class="empty-state-icon">&#10060;</div>' +
+                            '<h3>Fehler beim Laden</h3>' +
+                            '<p>Bitte versuche es erneut</p>' +
+                        '</div>';
+                });
+        }
+
+        window.markAsRead = function(notificationId) {
+            supabase
+                .from('notifications')
+                .update({ is_read: true })
+                .eq('id', notificationId)
+                .then(function() {
+                    var notification = allNotifications.find(function(n) { return n.id === notificationId; });
+                    if (notification) {
+                        notification.is_read = true;
+                    }
+                    renderNotifications();
+                })
+                .catch(function(error) {
+                    console.error('Error:', error);
+                });
+        };
+
+        window.openLink = function(link, notificationId) {
+            if (link && link !== 'null') {
+                markAsRead(notificationId);
+                window.location.href = link;
+            }
+        };
+
+        document.getElementById('markAllReadBtn').addEventListener('click', function() {
+            supabase.auth.getUser()
+                .then(function(response) {
+                    var user = response.data.user;
+                    if (!user) return;
+
+                    return supabase
+                        .from('notifications')
+                        .update({ is_read: true })
+                        .eq('user_id', user.id)
+                        .eq('is_read', false);
+                })
+                .then(function() {
+                    allNotifications.forEach(function(n) { n.is_read = true; });
+                    renderNotifications();
+                })
+                .catch(function(error) {
+                    console.error('Error:', error);
+                });
+        });
+
+        // Filter tabs
+        var filterTabs = document.querySelectorAll('.filter-tab');
+        for (var i = 0; i < filterTabs.length; i++) {
+            filterTabs[i].addEventListener('click', function(e) {
+                for (var j = 0; j < filterTabs.length; j++) {
+                    filterTabs[j].classList.remove('active');
+                }
+                e.target.classList.add('active');
+                currentFilter = e.target.dataset.filter;
+                renderNotifications();
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', loadNotifications);
+    </script>
+    <script src="notificationBell.js"></script>
+    <script src="navigation.js"></script>
+    <script src="translations.js"></script>
+</body>
+</html>

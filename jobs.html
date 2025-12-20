@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title data-i18n="jobs_page_title">Jobs &amp; Karriere - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .app-container { 
+            --primary-color: #f59e0b; 
+            --secondary-color: #d97706;
+            padding-bottom: 80px;
+        }
+        
+        .app-header { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+        .app-header h1 { color: white; margin: 0; font-size: 1.25rem; }
+        
+        /* MARKETING SECTION */
+        .marketing-section {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            padding: 2rem 1.5rem;
+            text-align: center;
+            border-bottom: 2px solid #fcd34d;
+        }
+        .marketing-section h2 {
+            font-size: 1.5rem;
+            color: #92400e;
+            margin: 0 0 1rem 0;
+        }
+        .marketing-section > p {
+            color: #b45309;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .demo-job-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            max-width: 600px;
+            margin: 0 auto 1.5rem auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: left;
+            position: relative;
+            border: 3px dashed #f59e0b;
+        }
+        
+        .demo-badge {
+            position: absolute;
+            top: -10px;
+            right: 15px;
+            background: #fbbf24;
+            color: #78350f;
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .company-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f3f4f6;
+        }
+        .company-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 700;
+            color: white;
+        }
+        .company-info h3 {
+            margin: 0;
+            font-size: 1rem;
+            color: #1f2937;
+        }
+        .company-info a {
+            color: #f59e0b;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        
+        .job-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #111827;
+            margin: 0 0 1rem 0;
+        }
+        
+        .job-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .meta-tag {
+            background: #f3f4f6;
+            padding: 0.4rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #4b5563;
+        }
+        .meta-tag.highlight {
+            background: #fef3c7;
+            color: #92400e;
+            font-weight: 600;
+        }
+        
+        .job-description {
+            color: #4b5563;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .info-section {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+        .info-section h4 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #374151;
+            margin: 0 0 0.5rem 0;
+        }
+        .info-list {
+            display: grid;
+            gap: 0.4rem;
+        }
+        .info-item {
+            font-size: 0.85rem;
+            color: #4b5563;
+            padding-left: 1.25rem;
+            position: relative;
+        }
+        .info-item::before {
+            content: "✓";
+            color: #10b981;
+            font-weight: 700;
+            position: absolute;
+            left: 0;
+        }
+        
+        .cta-section {
+            background: #fffbeb;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 1rem;
+            border: 2px solid #fcd34d;
+        }
+        .cta-section h4 {
+            margin: 0 0 0.25rem 0;
+            color: #92400e;
+            font-size: 0.95rem;
+        }
+        .cta-section p {
+            color: #b45309;
+            font-size: 0.85rem;
+            margin: 0.5rem 0;
+        }
+        
+        .marketing-cta {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            max-width: 500px;
+            margin: 1.5rem auto 0;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .marketing-cta h3 {
+            color: #111827;
+            margin: 0 0 0.5rem 0;
+            font-size: 1.1rem;
+        }
+        .marketing-cta p {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        .marketing-cta ul {
+            text-align: left;
+            padding-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .marketing-cta li {
+            color: #374151;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .contact-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .contact-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+        
+        /* JOBS SECTION */
+        .jobs-section {
+            padding: 1.5rem;
+        }
+        .jobs-section h2 {
+            font-size: 1.2rem;
+            color: #1f2937;
+            margin: 0 0 1rem 0;
+        }
+        .jobs-grid {
+            display: grid;
+            gap: 1rem;
+        }
+        .job-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid #e5e7eb;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .job-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .empty-state h3 {
+            margin: 0 0 0.5rem 0;
+            color: #374151;
+        }
+        .empty-state p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <h1 data-i18n="jobs_header">💼 Jobs &amp; Karriere</h1>
+    </header>
+    
+    <!-- MARKETING SECTION -->
+    <section class="marketing-section">
+        <h2 data-i18n="jobs_marketing_title">🎯 Erreichen Sie qualifizierte Studenten!</h2>
+        <p><span data-i18n="jobs_marketing_subtitle">Präsentieren Sie Ihre Job-Angebote direkt in unserer aktiven Campus-Community.</span><br><span data-i18n="jobs_marketing_demo">So könnte Ihre Anzeige aussehen:</span></p>
+        
+        <!-- DEMO JOB CARD -->
+        <div class="demo-job-card">
+            <span class="demo-badge" data-i18n="jobs_demo_badge">📋 BEISPIEL</span>
+            
+            <div class="company-header">
+                <div class="company-logo">R8</div>
+                <div class="company-info">
+                    <h3>Room8 Technologies GmbH</h3>
+                    <a href="https://room8.app" target="_blank">🌐 room8.app</a>
+                </div>
+            </div>
+            
+            <h2 class="job-title" data-i18n="jobs_demo_title">Full-Stack Developer (m/w/d) - Werkstudent</h2>
+            
+            <div class="job-meta">
+                <span class="meta-tag highlight" data-i18n="jobs_demo_salary">💰 15-18 €/Stunde</span>
+                <span class="meta-tag" data-i18n="jobs_demo_hours">⏰ 15-20h/Woche</span>
+                <span class="meta-tag" data-i18n="jobs_demo_remote">🏠 Remote möglich</span>
+                <span class="meta-tag">📍 Berlin</span>
+                <span class="meta-tag">🚀 Startup</span>
+            </div>
+            
+            <div class="job-description" data-i18n="jobs_demo_description">
+                Werde Teil unseres Teams und gestalte die Zukunft der Campus-Community mit! Wir bei Room8 entwickeln die führende Plattform für Studenten zum Finden von Wohnungen, Verkaufen von Gegenständen und Vernetzen auf dem Campus.
+            </div>
+            
+            <div class="info-section">
+                <h4 data-i18n="jobs_demo_tasks_title">🎯 Deine Aufgaben</h4>
+                <div class="info-list">
+                    <div class="info-item" data-i18n="jobs_demo_task1">Entwicklung neuer Features für unsere Web-App</div>
+                    <div class="info-item" data-i18n="jobs_demo_task2">Code-Reviews und Bugfixing</div>
+                    <div class="info-item" data-i18n="jobs_demo_task3">Optimierung der User Experience</div>
+                    <div class="info-item" data-i18n="jobs_demo_task4">Integration neuer APIs und Services</div>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <h4 data-i18n="jobs_demo_requirements_title">📚 Das bringst du mit</h4>
+                <div class="info-list">
+                    <div class="info-item" data-i18n="jobs_demo_req1">Laufendes Studium (Informatik, Wirtschaftsinformatik o.ä.)</div>
+                    <div class="info-item" data-i18n="jobs_demo_req2">Gute Kenntnisse in JavaScript/TypeScript</div>
+                    <div class="info-item" data-i18n="jobs_demo_req3">Erfahrung mit React oder ähnlichen Frameworks</div>
+                    <div class="info-item" data-i18n="jobs_demo_req4">Grundverständnis von Datenbanken (PostgreSQL)</div>
+                    <div class="info-item" data-i18n="jobs_demo_req5">Git &amp; GitHub Workflow</div>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <h4 data-i18n="jobs_demo_benefits_title">🎁 Das bieten wir</h4>
+                <div class="info-list">
+                    <div class="info-item" data-i18n="jobs_demo_benefit1">Flexible Arbeitszeiten</div>
+                    <div class="info-item" data-i18n="jobs_demo_benefit2">Remote Work möglich</div>
+                    <div class="info-item" data-i18n="jobs_demo_benefit3">Moderner Tech-Stack (React, Supabase, Vercel)</div>
+                    <div class="info-item" data-i18n="jobs_demo_benefit4">Flache Hierarchien &amp; Startup-Atmosphäre</div>
+                    <div class="info-item" data-i18n="jobs_demo_benefit5">MacBook Pro</div>
+                    <div class="info-item" data-i18n="jobs_demo_benefit6">Weiterbildungsbudget</div>
+                </div>
+            </div>
+            
+            <div class="cta-section">
+                <h4 data-i18n="jobs_demo_apply_title">💌 Interesse geweckt?</h4>
+                <p data-i18n="jobs_demo_apply_text">Bewerbungen bitte mit Lebenslauf und kurzem Motivationsschreiben an:</p>
+                <strong style="color: #f59e0b; font-size: 1rem;">admin@room8.club</strong>
+                <p><span data-i18n="jobs_demo_deadline">Bewerbungsfrist</span>: 31.01.2026</p>
+            </div>
+        </div>
+        
+        <!-- MARKETING CTA -->
+        <div class="marketing-cta">
+            <h3 data-i18n="jobs_cta_title">🚀 Interessiert an einer Job-Anzeige?</h3>
+            <p data-i18n="jobs_cta_subtitle">Erreichen Sie genau die richtigen Kandidaten - aktive Studenten, die bereits unsere Plattform nutzen!</p>
+            <ul>
+                <li data-i18n="jobs_cta_benefit1">Verifizierte Studenten-Community</li>
+                <li data-i18n="jobs_cta_benefit2">Zielgruppengerechte Platzierung</li>
+                <li data-i18n="jobs_cta_benefit3">Direkter Kontakt zu Bewerbern</li>
+                <li data-i18n="jobs_cta_benefit4">Flexible Laufzeiten</li>
+            </ul>
+            <a href="mailto:admin@room8.club" class="contact-link" data-i18n="jobs_cta_button">📧 Jetzt Anfrage senden</a>
+            <p style="margin-top: 1rem; font-size: 0.85rem;"><span data-i18n="jobs_cta_email">oder schreiben Sie uns an:</span> <strong>admin@room8.club</strong></p>
+        </div>
+    </section>
+    
+    <!-- REAL JOBS SECTION -->
+    <section class="jobs-section">
+        <h2 data-i18n="jobs_current_listings">📋 Aktuelle Stellenangebote</h2>
+        <div class="jobs-grid" id="jobsGrid">
+            <div class="empty-state" id="emptyState">
+                <div class="empty-state-icon">💼</div>
+                <h3 data-i18n="jobs_no_listings">Keine aktiven Stellenangebote</h3>
+                <p data-i18n="jobs_no_listings_hint">Bald finden Sie hier spannende Job-Angebote von verifizierten Unternehmen!</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Navigation Container -->
+    <div id="app-navigation"></div>
+</div>
+
+<!-- Scripts -->
+<script src="translations.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+    // Initialize Supabase
+    var supabaseClient = window.supabase.createClient(APP_CONFIG.supabase.url, APP_CONFIG.supabase.anonKey);
+    
+    // Get current language
+    function getLang() {
+        return localStorage.getItem('room8_language') || localStorage.getItem('language') || 'de';
+    }
+    
+    // Load jobs from database
+    function loadJobs() {
+        supabaseClient
+            .from('listings')
+            .select('*')
+            .eq('type', 'job')
+            .eq('is_demo', false)
+            .order('created_at', { ascending: false })
+            .then(function(response) {
+                if (response.error) {
+                    console.error('Error loading jobs:', response.error);
+                    return;
+                }
+                
+                var data = response.data;
+                var grid = document.getElementById('jobsGrid');
+                
+                if (!data || data.length === 0) {
+                    return; // Keep empty state
+                }
+                
+                var lang = getLang();
+                var perHourText = lang === 'en' ? '/hour' : '/Stunde';
+                var perMonthText = lang === 'en' ? '/month' : '/Monat';
+                var perWeekText = lang === 'en' ? '/week' : '/Woche';
+                var remoteText = '🏠 Remote';
+                var websiteText = '🌐 Website';
+                
+                var html = '';
+                for (var i = 0; i < data.length; i++) {
+                    var job = data[i];
+                    var salaryDisplay = job.salary_type === 'per_hour' 
+                        ? '€' + job.salary_min + '-' + job.salary_max + perHourText
+                        : '€' + job.salary_amount + perMonthText;
+                    var hoursDisplay = job.min_hours_per_week + '-' + job.max_hours_per_week + 'h' + perWeekText;
+                    
+                    html += '<a href="detail.html?id=' + job.id + '" class="job-card">';
+                    html += '<div class="company-header">';
+                    html += '<div class="company-logo">' + job.company_name.substring(0, 2).toUpperCase() + '</div>';
+                    html += '<div class="company-info">';
+                    html += '<h3>' + job.company_name + '</h3>';
+                    if (job.company_website) {
+                        html += '<a href="' + job.company_website + '" target="_blank" onclick="event.stopPropagation()">' + websiteText + '</a>';
+                    }
+                    html += '</div></div>';
+                    html += '<h2 class="job-title">' + job.title + '</h2>';
+                    html += '<div class="job-meta">';
+                    html += '<span class="meta-tag highlight">' + salaryDisplay + '</span>';
+                    html += '<span class="meta-tag">' + hoursDisplay + '</span>';
+                    if (job.remote_possible) {
+                        html += '<span class="meta-tag">' + remoteText + '</span>';
+                    }
+                    html += '<span class="meta-tag">📍 ' + (job.location || job.city) + '</span>';
+                    html += '</div>';
+                    html += '<div class="job-description">' + job.description.substring(0, 150) + '...</div>';
+                    html += '</a>';
+                }
+                grid.innerHTML = html;
+            })
+            .catch(function(err) {
+                console.error('Error:', err);
+            });
+    }
+    
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadJobs();
+    });
+</script>
+<script src="navigation.js"></script>
+</body>
+</html>
