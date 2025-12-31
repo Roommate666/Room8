@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">  <title>Verify Student Status – Room8</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .verification-container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 2rem;
+    }
+    
+    .verification-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .verification-header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .verification-options {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    
+    .verification-option {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: white;
+    }
+    
+    .verification-option:hover {
+      border-color: var(--primary-color);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .verification-option.selected {
+      border-color: var(--primary-color);
+      background: #eff6ff;
+    }
+    
+    .option-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .option-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    
+    .option-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    
+    .option-description {
+      color: #666;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+    
+    .option-badge {
+      display: inline-block;
+      background: #10b981;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+    
+    .input-section {
+      margin-top: 1rem;
+      display: none;
+    }
+    
+    .input-section.active {
+      display: block;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+    
+    .upload-section {
+      margin-top: 1rem;
+      display: none;
+    }
+    
+    .upload-section.active {
+      display: block;
+    }
+    
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+    
+    .file-input-label {
+      display: block;
+      padding: 0.75rem;
+      background: white;
+      border: 2px dashed #d1d5db;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .file-input-label:hover {
+      border-color: var(--primary-color);
+      background: #eff6ff;
+    }
+    
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      left: -9999px;
+    }
+    
+    .file-preview {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      display: none;
+    }
+    
+    .file-preview.active {
+      display: block;
+    }
+    
+    .consent-section {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #fef3c7;
+      border: 1px solid #fbbf24;
+      border-radius: 8px;
+      display: none;
+    }
+    
+    .consent-section.active {
+      display: block;
+    }
+    
+    .consent-checkbox {
+      display: flex;
+      align-items: start;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    
+    .consent-checkbox input[type="checkbox"] {
+      margin-top: 0.25rem;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    
+    .consent-checkbox label {
+      font-size: 0.9rem;
+      color: #78350f;
+      cursor: pointer;
+    }
+    
+    .info-notice {
+      background: #dbeafe;
+      border: 1px solid #3b82f6;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      color: #1e40af;
+    }
+    
+    .submit-btn {
+      margin-top: 2rem;
+      width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    #msg {
+      margin-top: 1rem;
+      text-align: center;
+      font-weight: 600;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    
+    #msg.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    #msg.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <header class="app-header">
+      <a href="edit-profile.html" class="back-arrow">←</a>
+      <h1>Verify Student Status</h1>
+    </header>
+    
+    <main class="app-content">
+      <div class="verification-container">
+        <div class="verification-header">
+          <h1>🎓 Verify Your Student Status</h1>
+          <p>Choose your verification method</p>
+        </div>
+
+        <div class="verification-options">
+          <!-- Option 1: University Email -->
+          <div class="verification-option" data-method="uni-email">
+            <div class="option-header">
+              <div class="option-icon">✉️</div>
+              <div class="option-title">University Email Verification</div>
+            </div>
+            <div class="option-description">
+              Verify with your university email address (.edu, .ac.uk, etc.)
+            </div>
+            <span class="option-badge">✓ Instant</span>
+            
+            <div class="input-section" id="uniEmailSection">
+              <div class="form-group">
+                <label for="uniEmail">University Email Address</label>
+                <input 
+                  type="email" 
+                  id="uniEmail" 
+                  placeholder="student@university.edu"
+                >
+                <small style="color: #6b7280; font-size: 0.85rem;">
+                  Must be a university email (not Gmail, Yahoo, etc.)
+                </small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Option 2: Document Upload -->
+          <div class="verification-option" data-method="document">
+            <div class="option-header">
+              <div class="option-icon">📄</div>
+              <div class="option-title">Enrollment Certificate</div>
+            </div>
+            <div class="option-description">
+              Upload your enrollment certificate. Reviewed within 24 hours.
+            </div>
+            
+            <div class="upload-section" id="uploadSection">
+              <div class="file-input-wrapper">
+                <label for="documentUpload" class="file-input-label">
+                  <span id="uploadText">📎 Choose file (PDF, JPG, PNG - max 5MB)</span>
+                </label>
+                <input type="file" id="documentUpload" accept=".pdf,.jpg,.jpeg,.png">
+              </div>
+              
+              <div class="file-preview" id="filePreview">
+                <p><strong>Selected file:</strong></p>
+                <p id="fileName"></p>
+                <p id="fileSize"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- INFO NOTICE -->
+        <div class="info-notice">
+          <strong>💡 University email not working?</strong><br>
+          No problem! Just use the document upload option instead.
+        </div>
+
+        <!-- CONSENT (for document only) -->
+        <div class="consent-section" id="consentSection">
+          <p style="font-size: 0.9rem; color: #92400e; margin: 0 0 1rem 0;">
+            <strong>🔒 Privacy Notice:</strong><br>
+            Your enrollment certificate will be used exclusively to verify your student status and will be deleted after successful verification.
+          </p>
+          
+          <div class="consent-checkbox">
+            <input type="checkbox" id="consentCheckbox">
+            <label for="consentCheckbox">
+              I agree to the processing of my data for verification purposes. 
+              <a href="datenschutz.html" target="_blank" style="color: #1e40af;">Learn more</a>
+            </label>
+          </div>
+        </div>
+
+        <button id="submitBtn" class="submit-btn" disabled>Continue</button>
+        <p id="msg"></p>
+      </div>
+    </main>
+    
+    <footer class="app-footer-nav" id="app-footer-nav"></footer>
+  </div>
+
+  <script type="module">
+    import { supabase } from './supabaseClient.js';
+
+    const msg = document.getElementById('msg');
+    const submitBtn = document.getElementById('submitBtn');
+    const uniEmailSection = document.getElementById('uniEmailSection');
+    const uploadSection = document.getElementById('uploadSection');
+    const consentSection = document.getElementById('consentSection');
+    const consentCheckbox = document.getElementById('consentCheckbox');
+    const documentUpload = document.getElementById('documentUpload');
+    const filePreview = document.getElementById('filePreview');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const uploadText = document.getElementById('uploadText');
+    const uniEmailInput = document.getElementById('uniEmail');
+
+    let selectedMethod = null;
+    let selectedFile = null;
+    let userId = null;
+    let userEmail = null;
+
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+    // BLOCKLIST for uni email option
+    const BLOCKED_DOMAINS = [
+      'gmail.com', 'googlemail.com',
+      'yahoo.com', 'yahoo.de',
+      'outlook.com', 'hotmail.com', 'live.com',
+      'web.de', 'gmx.de', 'gmx.net',
+      't-online.de', 'freenet.de',
+      'icloud.com', 'me.com',
+      'aol.com', 'mail.com'
+    ];
+
+    function setMsg(text, isSuccess = false) {
+      msg.textContent = text;
+      msg.className = isSuccess ? 'success' : 'error';
+    }
+
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      userId = user.id;
+      userEmail = user.email;
+    } else {
+      setMsg('❌ Not logged in. Please log in first.');
+      setTimeout(() => window.location.href = 'login.html', 2000);
+    }
+
+    // Select verification option
+    document.querySelectorAll('.verification-option').forEach(option => {
+      option.addEventListener('click', function() {
+        document.querySelectorAll('.verification-option').forEach(opt => {
+          opt.classList.remove('selected');
+        });
+        
+        this.classList.add('selected');
+        selectedMethod = this.dataset.method;
+        
+        if (selectedMethod === 'uni-email') {
+          uniEmailSection.classList.add('active');
+          uploadSection.classList.remove('active');
+          consentSection.classList.remove('active');
+          submitBtn.disabled = false;
+        } else if (selectedMethod === 'document') {
+          uniEmailSection.classList.remove('active');
+          uploadSection.classList.add('active');
+          consentSection.classList.add('active');
+          submitBtn.disabled = !(selectedFile && consentCheckbox.checked);
+        }
+      });
+    });
+
+    // Consent checkbox
+    consentCheckbox.addEventListener('change', function() {
+      if (selectedMethod === 'document') {
+        submitBtn.disabled = !(selectedFile && this.checked);
+      }
+    });
+
+    // File upload
+    documentUpload.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        if (file.size > MAX_FILE_SIZE) {
+          setMsg('❌ File too large! Maximum 5MB allowed.');
+          this.value = '';
+          return;
+        }
+
+        selectedFile = file;
+        fileName.textContent = file.name;
+        fileSize.textContent = `Size: ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+        filePreview.classList.add('active');
+        uploadText.textContent = '✓ File selected - Choose new file';
+        
+        if (selectedMethod === 'document' && consentCheckbox.checked) {
+          submitBtn.disabled = false;
+        }
+      }
+    });
+
+    // Submit
+    submitBtn.addEventListener('click', async () => {
+      submitBtn.disabled = true;
+      setMsg('');
+
+      if (selectedMethod === 'uni-email') {
+        const uniEmail = uniEmailInput.value.trim().toLowerCase();
+        
+        if (!uniEmail) {
+          setMsg('❌ Please enter your university email.');
+          submitBtn.disabled = false;
+          return;
+        }
+
+        // Check blocklist
+        const domain = uniEmail.split('@')[1];
+        if (BLOCKED_DOMAINS.includes(domain)) {
+          setMsg('❌ Please use your university email, not a personal email (Gmail, Yahoo, etc.)');
+          submitBtn.disabled = false;
+          return;
+        }
+
+        setMsg('⏳ Sending verification email to your university address...', true);
+
+        try {
+          // Generate verification token
+          const token = crypto.randomUUID();
+
+          // Save uni email and token
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({
+              uni_email: uniEmail,
+              uni_email_verification_token: token,
+              verification_method: 'uni-email',
+              verification_status: 'pending'
+            })
+            .eq('id', userId);
+
+          if (updateError) throw updateError;
+
+          // Send verification email to uni address
+          const verificationLink = `${window.location.origin}/verify-uni-email.html?token=${token}`;
+          
+          const { error: emailError } = await supabase.functions.invoke('send-notification', {
+            body: {
+              to: uniEmail,
+              type: 'uni_email_verification',
+              data: {
+                verificationLink: verificationLink
+              }
+            }
+          });
+
+          if (emailError) throw emailError;
+
+          setMsg('✅ Verification email sent! Please check your university inbox and click the link.', true);
+          
+          setTimeout(() => {
+            window.location.href = 'profile.html';
+          }, 2000);
+
+        } catch (error) {
+          console.error('Error:', error);
+          setMsg('❌ Error: ' + error.message);
+          submitBtn.disabled = false;
+        }
+
+      } else if (selectedMethod === 'document') {
+        if (!selectedFile) {
+          setMsg('❌ Please select a file.');
+          submitBtn.disabled = false;
+          return;
+        }
+
+        if (!consentCheckbox.checked) {
+          setMsg('❌ Please agree to data processing.');
+          submitBtn.disabled = false;
+          return;
+        }
+
+        setMsg('⏳ Uploading...', true);
+
+        const fileExt = selectedFile.name.split('.').pop();
+        const fileName = `${userId}_${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('verification-documents')
+          .upload(fileName, selectedFile);
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          setMsg('❌ Upload error: ' + uploadError.message);
+          submitBtn.disabled = false;
+          return;
+        }
+
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            verification_method: 'document',
+            verification_status: 'pending',
+            verification_document_url: fileName,
+            consent_given: true,
+            consent_given_at: new Date().toISOString()
+          })
+          .eq('id', userId);
+
+        if (updateError) {
+          setMsg('❌ Error: ' + updateError.message);
+          submitBtn.disabled = false;
+          return;
+        }
+
+        // Send admin email
+        try {
+          // Get user profile for better info
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('username, full_name, email, uni_email, created_at')
+            .eq('id', userId)
+            .single();
+
+          await supabase.functions.invoke('send-notification', {
+            body: {
+              to: 'admin@room8.club',
+              type: 'admin_verification_request',
+              data: {
+                userName: profile?.username || profile?.full_name || userEmail.split('@')[0],
+                userEmail: profile?.email || userEmail,
+                emailDomain: profile?.uni_email ? profile.uni_email.split('@')[1] : 'Document Upload',
+                registeredAt: profile?.created_at ? new Date(profile.created_at).toLocaleDateString('de-DE') : new Date().toLocaleDateString('de-DE'),
+                documentUploaded: true
+              }
+            }
+          });
+        } catch (emailError) {
+          console.log('Admin email error:', emailError);
+        }
+
+        setMsg('✅ Document uploaded! You will be notified once verified.', true);
+        setTimeout(() => window.location.href = 'profile.html', 2000);
+      }
+    });
+  </script>
+<script src="translations.js"></script>
+</body>
+</html>

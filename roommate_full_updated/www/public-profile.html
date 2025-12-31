@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">    <title>Profile - Roommate</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            margin: 0 auto 1rem;
+        }
+        .profile-header h2 {
+            margin: 0 0 0.5rem;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+        }
+        .verified-badge svg {
+            width: 16px;
+            height: 16px;
+            stroke: white;
+            stroke-width: 3;
+        }
+        .profile-meta {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .profile-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        /* BEWERTUNGS-BEREICH */
+        .rating-summary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        .rating-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        .rating-details {
+            text-align: left;
+        }
+        .stars {
+            color: #fbbf24;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+        .rating-count {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        .profile-content {
+            padding: 1.5rem;
+        }
+        .info-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .info-section:last-child {
+            border-bottom: none;
+        }
+        .info-section h3 {
+            font-size: 1.1rem;
+            margin: 0 0 1rem 0;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .info-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+        .info-value {
+            font-size: 1rem;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .tag {
+            padding: 0.4rem 0.8rem;
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            font-size: 0.85rem;
+            color: var(--text-color);
+        }
+        
+        /* BEWERTUNGEN LISTE */
+        .review-item {
+            padding: 1rem;
+            background-color: #f9fafb;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+        }
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .review-author {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        .review-stars {
+            color: #fbbf24;
+        }
+        .review-date {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+        .review-comment {
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+        .empty-reviews {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+        }
+        
+        .login-prompt {
+            background-color: #fffbeb;
+            border: 1px solid #fcd34d;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .login-prompt p {
+            margin: 0 0 0.5rem 0;
+            color: #92400e;
+        }
+        .login-prompt a {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .error-message {
+            color: red;
+            text-align: center;
+            padding: 2rem;
+        }
+        @media (max-width: 600px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-arrow">&larr;</a>
+        <h1 data-i18n="public_profile_title">Profile</h1>
+    </header>
+
+    <main class="app-content" id="profile-container" style="padding: 0;">
+        <p style="text-align:center; padding: 2rem;" data-i18n="public_profile_loading">Loading profile...</p>
+    </main>
+
+    <footer class="app-footer-nav" id="app-footer-nav"></footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<script type="module">
+    import { supabase } from './supabaseClient.js';
+
+    const profileContainer = document.getElementById('profile-container');
+
+
+    function renderProfile(profile, reviews, isLoggedIn) {
+        const memberSince = new Date(profile.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+        const avatarUrl = profile.avatar_url || 'placeholder.png';
+        const isVerified = profile.is_verified || profile.is_student_verified;
+
+        // BEWERTUNGEN BERECHNEN
+        const totalReviews = reviews.length;
+        const averageRating = totalReviews > 0 
+            ? (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(1)
+            : 0;
+        const stars = '★'.repeat(Math.round(averageRating)) + '☆'.repeat(5 - Math.round(averageRating));
+
+        let profileHTML = `
+            <div class="profile-header">
+                ${isLoggedIn ? `<button class="report-btn-icon" onclick="openReportModal('user', '${profile.id}')" title="User melden" style="position: absolute; top: 1rem; right: 1rem; background: #fee2e2; color: #ef4444; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">⚠️</button>` : ''}
+                <img src="${avatarUrl}" alt="${profile.username}'s Avatar" class="avatar-large" onerror="this.src='placeholder.png';">
+                <h2>
+                    ${profile.username || 'Anonymous User'}
+                    ${isVerified ? '<span class="verified-badge"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>' : ''}
+                </h2>
+                <div class="profile-meta">
+                    <span>📍 ${profile.city || 'Unknown'}</span>
+                    <span>📅 Member since ${memberSince}</span>
+                </div>
+                ${totalReviews > 0 ? `
+                    <div class="rating-summary">
+                        <div class="rating-number">${averageRating}</div>
+                        <div class="rating-details">
+                            <div class="stars">${stars}</div>
+                            <div class="rating-count">${totalReviews} review${totalReviews !== 1 ? 's' : ''}</div>
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+
+        profileHTML += '<div class="profile-content">';
+
+        // Ãœber mich
+        if (profile.bio) {
+            profileHTML += `
+                <div class="info-section">
+                    <h3>💬 About me</h3>
+                    <p>${profile.bio}</p>
+                </div>
+            `;
+        }
+
+        // Interessen
+        if (profile.interests) {
+            const interestsList = profile.interests.split(',').map(i => i.trim()).filter(i => i);
+            if (interestsList.length > 0) {
+                profileHTML += `
+                    <div class="info-section">
+                        <h3>🎯 Interests & Hobbies</h3>
+                        <div class="tags-container">
+                            ${interestsList.map(interest => `<span class="tag">${interest}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Erweiterte Infos (nur fÃ¼r eingeloggte User)
+        if (isLoggedIn) {
+            const hasExtendedInfo = profile.university || profile.study_field || profile.semester || profile.languages || profile.age;
+            
+            if (hasExtendedInfo) {
+                profileHTML += `<div class="info-section"><h3>🎓 Study & Details</h3><div class="info-grid">`;
+
+                if (profile.university) profileHTML += `<div class="info-item"><span class="info-label">University</span><span class="info-value">${profile.university}</span></div>`;
+                if (profile.study_field) profileHTML += `<div class="info-item"><span class="info-label">Field of Study</span><span class="info-value">${profile.study_field}</span></div>`;
+                if (profile.semester) profileHTML += `<div class="info-item"><span class="info-label">Semester</span><span class="info-value">${profile.semester}. Semester</span></div>`;
+                if (profile.age) profileHTML += `<div class="info-item"><span class="info-label">Age</span><span class="info-value">${profile.age} years</span></div>`;
+
+                profileHTML += '</div>';
+
+                if (profile.languages) {
+                    const languagesList = profile.languages.split(',').map(l => l.trim()).filter(l => l);
+                    if (languagesList.length > 0) {
+                        profileHTML += `
+                            <div style="margin-top: 1rem;">
+                                <span class="info-label">Languages</span>
+                                <div class="tags-container" style="margin-top: 0.5rem;">
+                                    ${languagesList.map(lang => `<span class="tag">🗣 ${lang}</span>`).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+
+                profileHTML += '</div>';
+            }
+        } else {
+            profileHTML += `
+                <div class="login-prompt">
+                    <p><strong>🔒 Learn more?</strong></p>
+                    <p>Log in to see extended profile information like university, field of study, and languages.</p>
+                    <a href="login.html">Log in now</a>
+                </div>
+            `;
+        }
+
+        // BEWERTUNGEN
+        if (totalReviews > 0) {
+            profileHTML += `
+                <div class="info-section">
+                    <h3>⭐ Reviews (${totalReviews})</h3>
+            `;
+            
+            reviews.forEach(review => {
+                const reviewDate = new Date(review.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                const reviewStars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                
+                profileHTML += `
+                    <div class="review-item">
+                        <div class="review-header">
+                            <span class="review-author">${review.reviewer.username || 'Anonymous'}</span>
+                            <span class="review-stars">${reviewStars}</span>
+                        </div>
+                        <div class="review-date">${reviewDate}</div>
+                        ${review.comment ? `<div class="review-comment">${review.comment}</div>` : ''}
+                    </div>
+                `;
+            });
+            
+            profileHTML += '</div>';
+        }
+
+        profileHTML += '</div>';
+
+        profileContainer.innerHTML = profileHTML;
+    }
+
+    async function loadPublicProfile() {
+        const params = new URLSearchParams(window.location.search);
+        const userId = params.get('id');
+
+        if (!userId) {
+            profileContainer.innerHTML = '<p class="error-message">Error: No user ID provided.</p>';
+            return;
+        }
+
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            const isLoggedIn = !!user;
+
+            // Profil laden
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('id, username, city, bio, avatar_url, created_at, is_verified, is_student_verified, university, study_field, semester, age, languages, interests')
+                .eq('id', userId)
+                .single();
+
+            if (profileError) throw new Error("User not found or access denied.");
+
+            // Bewertungen laden
+            const { data: reviews, error: reviewsError } = await supabase
+                .from('reviews')
+                .select('*, reviewer:profiles!reviewer_id(username)')
+                .eq('reviewee_id', userId)
+                .order('created_at', { ascending: false });
+
+            if (reviewsError) throw reviewsError;
+
+            renderProfile(profile, reviews || [], isLoggedIn);
+
+        } catch (err) {
+            console.error("Error loading public profile:", err);
+            profileContainer.innerHTML = `<p class="error-message">${err.message}</p>`;
+        } finally {
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadPublicProfile);
+</script>
+
+<!-- REPORT MODAL -->
+<div id="reportModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 16px; padding: 2rem; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0; font-size: 1.3rem; color: #1f2937;" data-i18n="public_profile_report_user">Nutzer melden</h3>
+            <button id="reportModalClose" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6b7280; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s;">&times;</button>
+        </div>
+        
+        <form id="reportForm">
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Grund der Meldung *</label>
+                <div style="display: grid; gap: 0.75rem;">
+                    <label class="report-reason-option" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="reason" value="spam" required style="width: 20px; height: 20px; cursor: pointer;">
+                        <div>
+                            <strong>Spam</strong>
+                            <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Unerwünschte Werbung oder wiederholte Inhalte</p>
+                        </div>
+                    </label>
+                    
+                    <label class="report-reason-option" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="reason" value="inappropriate_content" required style="width: 20px; height: 20px; cursor: pointer;">
+                        <div>
+                            <strong>Unangemessener Inhalt</strong>
+                            <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Anstößige oder unpassende Inhalte</p>
+                        </div>
+                    </label>
+                    
+                    <label class="report-reason-option" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="reason" value="harassment" required style="width: 20px; height: 20px; cursor: pointer;">
+                        <div>
+                            <strong>Belästigung</strong>
+                            <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Beleidigung oder Bedrohung</p>
+                        </div>
+                    </label>
+                    
+                    <label class="report-reason-option" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="reason" value="fake_listing" required style="width: 20px; height: 20px; cursor: pointer;">
+                        <div>
+                            <strong>Fake/Betrug</strong>
+                            <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Gefälschtes Inserat oder Betrugsversuch</p>
+                        </div>
+                    </label>
+                    
+                    <label class="report-reason-option" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="reason" value="scam" required style="width: 20px; height: 20px; cursor: pointer;">
+                        <div>
+                            <strong>Betrügerische Absicht</strong>
+                            <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Verdacht auf Betrug oder Abzocke</p>
+                        </div>
+                    </label>
+                    
+                    <label class="report-reason-option" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="reason" value="other" required style="width: 20px; height: 20px; cursor: pointer;">
+                        <div>
+                            <strong>Anderes</strong>
+                            <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Sonstiger Grund</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label for="reportDescription" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Zusätzliche Informationen (optional)</label>
+                <textarea id="reportDescription" placeholder="Beschreibe das Problem genauer..." style="width: 100%; min-height: 100px; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-family: inherit; resize: vertical;"></textarea>
+            </div>
+            
+            <button type="submit" id="reportSubmitBtn" style="width: 100%; padding: 1rem; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;" data-i18n="detail_report_submit">
+                Meldung absenden
+            </button>
+        </form>
+    </div>
+</div>
+
+<script type="module">
+    import { supabase, requireAuth } from './supabaseClient.js';
+    
+    const reportModal = document.getElementById('reportModal');
+    const reportForm = document.getElementById('reportForm');
+    const reportModalClose = document.getElementById('reportModalClose');
+    const reportSubmitBtn = document.getElementById('reportSubmitBtn');
+    
+    let currentReportType = null;
+    let currentReportId = null;
+    
+    // Open modal function (global)
+    window.openReportModal = function(type, id) {
+        currentReportType = type;
+        currentReportId = id;
+        reportModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    };
+    
+    // Close modal
+    function closeReportModal() {
+        reportModal.style.display = 'none';
+        document.body.style.overflow = '';
+        reportForm.reset();
+        currentReportType = null;
+        currentReportId = null;
+    }
+    
+    reportModalClose.addEventListener('click', closeReportModal);
+    reportModal.addEventListener('click', (e) => {
+        if (e.target === reportModal) closeReportModal();
+    });
+    
+    // Radio button styling
+    document.querySelectorAll('.report-reason-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.report-reason-option').forEach(o => o.style.borderColor = '#e5e7eb');
+            this.style.borderColor = '#ef4444';
+            this.style.background = '#fef2f2';
+            this.querySelector('input[type="radio"]').checked = true;
+        });
+    });
+    
+    // Form submit
+    reportForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        if (!currentReportType || !currentReportId) {
+            alert('Fehler: Keine Meldung ausgewählt');
+            return;
+        }
+        
+        try {
+            const user = await requireAuth();
+            
+            const reason = document.querySelector('input[name="reason"]:checked').value;
+            const description = document.getElementById('reportDescription').value.trim();
+            
+            reportSubmitBtn.disabled = true;
+            reportSubmitBtn.textContent = 'Wird gesendet...';
+            
+            const { error } = await supabase
+                .from('reports')
+                .insert({
+                    reporter_id: user.id,
+                    reported_type: currentReportType,
+                    reported_id: currentReportId,
+                    reason: reason,
+                    description: description || null,
+                    status: 'pending'
+                });
+            
+            if (error) throw error;
+            
+            alert('Vielen Dank für deine Meldung! Wir werden sie prüfen.');
+            closeReportModal();
+            
+        } catch (err) {
+            console.error('Error submitting report:', err);
+            
+            if (err.code === '23505' || (err.message && err.message.includes('duplicate'))) {
+                alert('Du hast diesen User bereits gemeldet.');
+            } else if (err.code === '42501') {
+                alert('Keine Berechtigung. Bist du eingeloggt?');
+            } else {
+                alert('Fehler beim Senden der Meldung: ' + (err.message || 'Unbekannter Fehler'));
+            }
+            
+            reportSubmitBtn.disabled = false;
+            reportSubmitBtn.textContent = 'Meldung absenden';
+        }
+    });
+</script>
+
+<!-- Navigation Component -->
+<script src="config.js"></script>
+<script src="navigation.js"></script>
+<script src="translations.js"></script>
+</body>
+</body>
+</html>

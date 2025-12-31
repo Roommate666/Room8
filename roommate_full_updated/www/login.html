@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Login – Room8</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Load Supabase via script tag (WebView compatible) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    <header class="app-header"><h1 data-i18n="auth_login_title">Welcome Back</h1></header>
+    <main class="app-content">
+      <form id="loginForm" style="margin-top: 2rem;">
+        <div class="form-group"><label for="loginEmail" data-i18n="auth_email">Email</label><input type="email" id="loginEmail" required data-i18n-placeholder="auth_email_placeholder" placeholder="Enter your email"></div>
+        <div class="form-group"><label for="loginPassword" data-i18n="auth_password">Password</label><input type="password" id="loginPassword" required data-i18n-placeholder="auth_password_placeholder" placeholder="Enter your password"></div>
+        <p id="loginMsg" style="text-align:center; margin-top:1rem; font-weight:600;"></p>
+        <button type="submit" class="submit-btn" id="loginBtn" style="margin-top: 1rem;" data-i18n="auth_btn_login">Log In</button>
+      </form>
+      <p style="text-align:center; margin-top:2rem;"><span data-i18n="auth_no_account">Don't have an account?</span> <a href="register.html" data-i18n="auth_signup_link">Sign up</a></p>
+    </main>
+    <footer class="app-footer-nav" id="app-footer-nav"></footer>
+  </div>
+
+  <script>
+    // Initialize Supabase
+    const SUPABASE_URL = "https://tvnvmogaqmduzcycmvby.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw";
+    
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const loginBtn = document.getElementById('loginBtn');
+      const loginMsg = document.getElementById('loginMsg');
+      
+      loginBtn.disabled = true;
+      loginMsg.textContent = '⏳ Logging in...';
+      loginMsg.style.color = '#3b82f6';
+      
+      try {
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        
+        if (error) { 
+          loginMsg.textContent = '❌ ' + error.message;
+          loginMsg.style.color = '#ef4444';
+          loginBtn.disabled = false;
+        } else { 
+          loginMsg.textContent = '✅ Success! Redirecting...';
+          loginMsg.style.color = '#10b981';
+          window.location.href = 'profile.html'; 
+        }
+      } catch (err) {
+        loginMsg.textContent = '❌ ' + err.message;
+        loginMsg.style.color = '#ef4444';
+        loginBtn.disabled = false;
+      }
+    });
+  </script>
+  
+  <script src="translations.js"></script>
+</body>
+</html>

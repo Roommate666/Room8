@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">    <title>Benachrichtigungs-Einstellungen - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .settings-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .settings-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.8rem;
+            color: #111827;
+        }
+
+        .settings-header p {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .settings-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .settings-section h2 {
+            margin: 0 0 1.5rem 0;
+            font-size: 1.3rem;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            transition: background 0.2s;
+            gap: 2rem;
+        }
+
+        .setting-item:hover {
+            background: #f9fafb;
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-info h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.05rem;
+            color: #111827;
+            font-weight: 600;
+        }
+
+        .setting-info p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 56px;
+            height: 32px;
+            flex-shrink: 0;
+            margin-left: 1rem;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #d1d5db;
+            transition: 0.3s;
+            border-radius: 32px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #10b981;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 1rem;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .save-btn:hover {
+            background: #059669;
+        }
+
+        .save-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <a href="settings.html" class="back-arrow">←</a>
+            <h1>Benachrichtigungen</h1>
+        </header>
+
+        <div class="settings-container">
+            <div class="settings-header">
+                <h1>🔔 Benachrichtigungs-Einstellungen</h1>
+                <p>Wähle aus, worüber du informiert werden möchtest</p>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                ✅ Einstellungen erfolgreich gespeichert!
+            </div>
+
+            <div id="loadingState" class="loading">
+                Lade Einstellungen...
+            </div>
+
+            <div id="settingsContent" style="display: none;">
+                <!-- Chat & Kommunikation -->
+                <div class="settings-section">
+                    <h2>💬 Chat & Kommunikation</h2>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Neue Chat-Nachrichten</h3>
+                            <p>Benachrichtigung wenn dir jemand schreibt</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="chat_message" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Neue Bewertungen</h3>
+                            <p>Benachrichtigung wenn du bewertet wirst</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="review" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Deine Inserate -->
+                <div class="settings-section">
+                    <h2>📋 Deine Inserate</h2>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Favoriten</h3>
+                            <p>Wenn jemand dein Inserat favorisiert</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="favorite" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Interesse-Anfragen</h3>
+                            <p>Wenn jemand Interesse an deinem Inserat zeigt</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="interest" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Neue Inserate in deiner Stadt -->
+                <div class="settings-section">
+                    <h2>🏙️ Neue Inserate in deiner Stadt</h2>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Neue Wohnungen & Gegenstände</h3>
+                            <p>Benachrichtigung bei neuen Listings in deiner Stadt</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="new_listing_city" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Neue Jobs</h3>
+                            <p>Benachrichtigung bei neuen Jobs in deiner Stadt</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="new_job_city" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Neue Coupons</h3>
+                            <p>Benachrichtigung bei neuen Coupons in deiner Stadt</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="new_coupon_city" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Gespeicherte Suchen -->
+                <div class="settings-section">
+                    <h2>🔍 Gespeicherte Suchen</h2>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Treffer für gespeicherte Suchen</h3>
+                            <p>Benachrichtigung wenn ein Inserat zu deiner Suche passt</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="saved_search_match" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <button class="save-btn" id="saveBtn">Einstellungen speichern</button>
+            </div>
+        </div>
+
+        <footer class="app-footer-nav" id="app-footer-nav"></footer>
+    </div>
+
+    <script type="module">
+        import { supabase, requireAuth } from './supabaseClient.js';
+        import { updateNotificationSettings, getNotificationSettings } from './notificationHelpers.js';
+
+        let currentUser = null;
+        let currentSettings = {};
+
+        async function loadSettings() {
+            try {
+                currentUser = await requireAuth();
+                
+                // Lade Einstellungen
+                currentSettings = await getNotificationSettings();
+                
+                // Setze Checkboxen
+                Object.keys(currentSettings).forEach(key => {
+                    const checkbox = document.getElementById(key);
+                    if (checkbox) {
+                        checkbox.checked = currentSettings[key];
+                    }
+                });
+
+                // Zeige Content
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('settingsContent').style.display = 'block';
+
+            } catch (error) {
+                console.error('Error loading settings:', error);
+                alert('Fehler beim Laden der Einstellungen');
+            }
+        }
+
+        document.getElementById('saveBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('saveBtn');
+            btn.disabled = true;
+            btn.textContent = 'Speichere...';
+
+            try {
+                // Sammle alle Einstellungen
+                const newSettings = {
+                    chat_message: document.getElementById('chat_message').checked,
+                    review: document.getElementById('review').checked,
+                    favorite: document.getElementById('favorite').checked,
+                    interest: document.getElementById('interest').checked,
+                    new_listing_city: document.getElementById('new_listing_city').checked,
+                    new_job_city: document.getElementById('new_job_city').checked,
+                    new_coupon_city: document.getElementById('new_coupon_city').checked,
+                    saved_search_match: document.getElementById('saved_search_match').checked
+                };
+
+                // Speichere in Datenbank
+                const result = await updateNotificationSettings(newSettings);
+
+                if (result.success) {
+                    // Zeige Success-Nachricht
+                    const successMsg = document.getElementById('successMessage');
+                    successMsg.style.display = 'block';
+                    setTimeout(() => {
+                        successMsg.style.display = 'none';
+                    }, 3000);
+                } else {
+                    throw new Error('Fehler beim Speichern');
+                }
+
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                alert('Fehler beim Speichern der Einstellungen');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Einstellungen speichern';
+            }
+        });
+
+        // Lade Einstellungen beim Start
+        loadSettings();
+    </script>
+
+    <script src="config.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>

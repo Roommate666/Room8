@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Room8</string>
+    <string name="title_activity_main">Room8</string>
+    <string name="package_name">club.room8.app</string>
+    <string name="custom_url_scheme">club.room8.app</string>
+</resources>

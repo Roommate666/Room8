@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">    <title>Benachrichtigungen - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .app-container {
+            min-height: 100vh;
+            background: #f9fafb;
+            padding-bottom: 80px;
+        }
+
+        .notifications-header {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notifications-header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #111827;
+        }
+
+        .mark-all-read-btn {
+            background: none;
+            border: none;
+            color: #3b82f6;
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: color 0.2s;
+        }
+
+        .mark-all-read-btn:hover {
+            color: #2563eb;
+        }
+
+        .mark-all-read-btn:disabled {
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .notifications-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .notification-item {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .notification-item:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .notification-item.unread {
+            background: #eff6ff;
+            border-color: #3b82f6;
+        }
+
+        .notification-item.unread::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #3b82f6;
+            border-radius: 12px 0 0 12px;
+        }
+
+        .notification-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.25rem;
+        }
+
+        .notification-icon.chat { background: #fef2f2; }
+        .notification-icon.review { background: #fef3c7; }
+        .notification-icon.admin { background: #ede9fe; }
+        .notification-icon.job { background: #dbeafe; }
+        .notification-icon.listing { background: #d1fae5; }
+
+        .notification-body {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+        }
+
+        .notification-message {
+            color: #6b7280;
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+
+        .notification-time {
+            color: #9ca3af;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .notification-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .notification-btn.primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .notification-btn.primary:hover {
+            background: #2563eb;
+        }
+
+        .notification-btn.secondary {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .notification-btn.secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .filter-tab {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            color: #6b7280;
+            font-size: 0.875rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .filter-tab:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .filter-tab.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="notifications-header">
+            <h1 data-i18n="notifications_title">🔔 Benachrichtigungen</h1>
+            <button class="mark-all-read-btn" id="markAllReadBtn" data-i18n="notifications_mark_all_read">Alle als gelesen markieren</button>
+        </div>
+
+        <div class="notifications-content">
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all" data-i18n="notifications_filter_all">Alle</button>
+                <button class="filter-tab" data-filter="unread" data-i18n="notifications_filter_unread">Ungelesen</button>
+                <button class="filter-tab" data-filter="chat_message">💬 Chat</button>
+                <button class="filter-tab" data-filter="review" data-i18n="notifications_filter_reviews">⭐ Bewertungen</button>
+                <button class="filter-tab" data-filter="admin_message">📢 Admin</button>
+                <button class="filter-tab" data-filter="saved_search_match" data-i18n="notifications_filter_saved">🔍 Saved Searches</button>
+                <button class="filter-tab" data-filter="new_listing">🏠 Neue Inserate</button>
+            </div>
+
+            <div id="notificationsList">
+                <div class="loading">Lade Benachrichtigungen...</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabaseClient.js';
+
+        let currentFilter = 'all';
+        let allNotifications = [];
+        let realtimeSubscription = null;
+
+        // Icon mapping - FIXED: Added saved_search_match
+        const iconMap = {
+            'chat_message': { emoji: '💬', class: 'chat' },
+            'review': { emoji: '⭐', class: 'review' },
+            'admin_message': { emoji: '📢', class: 'admin' },
+            'job_application': { emoji: '💼', class: 'job' },
+            'new_listing': { emoji: '🏠', class: 'listing' },
+            'new_job': { emoji: '💼', class: 'job' },
+            'new_coupon': { emoji: '🎟️', class: 'listing' },
+            'saved_search_match': { emoji: '🔍', class: 'listing' }  // ADDED THIS LINE
+        };
+
+        // Format time ago
+        function timeAgo(date) {
+            const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+            
+            const intervals = {
+                Jahr: 31536000,
+                Monat: 2592000,
+                Woche: 604800,
+                Tag: 86400,
+                Stunde: 3600,
+                Minute: 60
+            };
+
+            for (const [name, secondsInInterval] of Object.entries(intervals)) {
+                const interval = Math.floor(seconds / secondsInInterval);
+                if (interval >= 1) {
+                    return `vor ${interval} ${name}${interval !== 1 ? (name === 'Monat' ? 'en' : name === 'Jahr' ? 'en' : 'n') : ''}`;
+                }
+            }
+
+            return 'Gerade eben';
+        }
+
+        // Render notifications
+        function renderNotifications() {
+            const container = document.getElementById('notificationsList');
+            
+            let filtered = allNotifications;
+            
+            if (currentFilter === 'unread') {
+                filtered = allNotifications.filter(n => !n.is_read);
+            } else if (currentFilter !== 'all') {
+                filtered = allNotifications.filter(n => n.type === currentFilter);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔔</div>
+                        <h3>Keine Benachrichtigungen</h3>
+                        <p>${currentFilter === 'unread' ? 'Du hast alle Benachrichtigungen gelesen' : 'Hier erscheinen deine Benachrichtigungen'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(notification => {
+                const icon = iconMap[notification.type] || { emoji: '🔔', class: 'listing' };
+                const isUnread = !notification.is_read;
+
+                return `
+                    <div class="notification-item ${isUnread ? 'unread' : ''}" data-id="${notification.id}" data-link="${notification.link || ''}">
+                        <div class="notification-header">
+                            <div class="notification-icon ${icon.class}">
+                                ${icon.emoji}
+                            </div>
+                            <div class="notification-body">
+                                <div class="notification-title">${notification.title}</div>
+                                <div class="notification-message">${notification.message}</div>
+                                <div class="notification-time">${timeAgo(notification.created_at)}</div>
+                            </div>
+                        </div>
+                        ${notification.link ? `
+                            <div class="notification-actions">
+                                <button class="notification-btn primary" onclick="openNotificationLink('${notification.link}', '${notification.id}')">
+                                    Ansehen
+                                </button>
+                                ${isUnread ? `
+                                    <button class="notification-btn secondary" onclick="markAsRead('${notification.id}')">
+                                        Als gelesen markieren
+                                    </button>
+                                ` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            // Update mark all read button
+            const hasUnread = allNotifications.some(n => !n.is_read);
+            document.getElementById('markAllReadBtn').disabled = !hasUnread;
+        }
+
+        // Load notifications
+        async function loadNotifications() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const { data, error } = await supabase
+                    .from('notifications')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                allNotifications = data || [];
+                renderNotifications();
+                updateBadgeCount();
+
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                document.getElementById('notificationsList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <h3>Fehler beim Laden</h3>
+                        <p>Benachrichtigungen konnten nicht geladen werden</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Mark as read
+        window.markAsRead = async function(notificationId) {
+            try {
+                const { error } = await supabase
+                    .from('notifications')
+                    .update({ is_read: true })
+                    .eq('id', notificationId);
+
+                if (error) throw error;
+
+                // Update local state
+                const notification = allNotifications.find(n => n.id === notificationId);
+                if (notification) {
+                    notification.is_read = true;
+                }
+
+                renderNotifications();
+                updateBadgeCount();
+
+            } catch (error) {
+                console.error('Error marking notification as read:', error);
+                alert('Fehler beim Markieren der Benachrichtigung');
+            }
+        };
+
+        // Mark all as read
+        document.getElementById('markAllReadBtn').addEventListener('click', async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return;
+
+                const { error } = await supabase
+                    .from('notifications')
+                    .update({ is_read: true })
+                    .eq('user_id', user.id)
+                    .eq('is_read', false);
+
+                if (error) throw error;
+
+                // Update local state
+                allNotifications.forEach(n => n.is_read = true);
+                renderNotifications();
+                updateBadgeCount();
+
+            } catch (error) {
+                console.error('Error marking all as read:', error);
+                alert('Fehler beim Markieren aller Benachrichtigungen');
+            }
+        });
+
+        // Open notification link
+        window.openNotificationLink = async function(link, notificationId) {
+            if (link && link !== 'null' && link !== 'undefined') {
+                await markAsRead(notificationId);
+                window.location.href = link;
+            }
+        };
+
+        // Filter tabs
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentFilter = tab.dataset.filter;
+                renderNotifications();
+            });
+        });
+
+        // Update badge count in navigation
+        function updateBadgeCount() {
+            const unreadCount = allNotifications.filter(n => !n.is_read).length;
+            const badge = document.querySelector('.notification-badge');
+            if (badge) {
+                if (unreadCount > 0) {
+                    badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+
+        // Setup realtime subscription
+        async function setupRealtime() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            realtimeSubscription = supabase
+                .channel('notifications')
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'notifications',
+                    filter: `user_id=eq.${user.id}`
+                }, (payload) => {
+                    console.log('Realtime notification event:', payload);
+                    if (payload.eventType === 'INSERT') {
+                        allNotifications.unshift(payload.new);
+                    } else if (payload.eventType === 'UPDATE') {
+                        const index = allNotifications.findIndex(n => n.id === payload.new.id);
+                        if (index !== -1) {
+                            allNotifications[index] = payload.new;
+                        }
+                    } else if (payload.eventType === 'DELETE') {
+                        allNotifications = allNotifications.filter(n => n.id !== payload.old.id);
+                    }
+                    renderNotifications();
+                    updateBadgeCount();
+                })
+                .subscribe();
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (realtimeSubscription) {
+                supabase.removeChannel(realtimeSubscription);
+            }
+        });
+
+        // Initialize
+        loadNotifications();
+        setupRealtime();
+    </script>
+
+    <script src="config.js"></script>
+    <script src="navigation.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>

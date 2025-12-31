@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">  <title>My Messages - Roommate</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .search-bar-messages {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      background: white;
+    }
+    .search-bar-messages input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--border-color);
+      font-size: 0.95rem;
+    }
+    .conversations-list {
+      background-color: white;
+    }
+    .conversation-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      text-decoration: none;
+      color: var(--text-color);
+      transition: background-color 0.2s;
+    }
+    .conversation-item:hover {
+      background-color: #f9fafb;
+    }
+    .avatar-placeholder {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-right: 1rem;
+      flex-shrink: 0;
+    }
+    .convo-details {
+      flex-grow: 1;
+      min-width: 0;
+    }
+    .convo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.25rem;
+    }
+    .convo-header h4 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .timestamp {
+      font-size: 0.75rem;
+      color: #6b7280;
+      white-space: nowrap;
+    }
+    .convo-preview {
+      color: #6b7280;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin: 0;
+    }
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+    .empty-state svg {
+      width: 60px;
+      height: 60px;
+      color: #10b981;
+      margin-bottom: 1rem;
+      opacity: 0.7;
+    }
+    .empty-state h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.2rem;
+    }
+    .empty-state p {
+      color: #6b7280;
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <header class="app-header">
+      <h1 data-i18n="messages_title">Messages</h1>
+    </header>
+
+    <div class="search-bar-messages">
+      <input type="text" id="search-input" data-i18n-placeholder="messages_search_placeholder" placeholder="Search messages...">
+    </div>
+
+    <main class="app-content" style="padding: 0;">
+      <div class="conversations-list" id="inbox-container">
+        <p style="padding: 1.5rem; text-align: center; color: #6b7280;" data-i18n="messages_loading">Loading messages...</p>
+      </div>
+    </main>
+
+    <footer class="app-footer-nav" id="app-footer-nav"></footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+  <script type="module">
+    import { supabase, requireAuth } from './supabaseClient.js';
+
+    const inboxContainer = document.getElementById('inbox-container');
+    const searchInput = document.getElementById('search-input');
+    let allConversations = [];
+
+    // Get translations
+    function getTranslation(key, fallback) {
+      const lang = localStorage.getItem('room8_language') || 'en';
+      const translations = {
+        de: {
+          no_messages: 'Noch keine Nachrichten',
+          no_messages_hint: 'Starte einen Chat mit Verkäufern um deine Konversationen hier zu sehen!',
+          browse_marketplace: 'Marktplatz durchsuchen',
+          error_loading: 'Fehler beim Laden der Nachrichten',
+          unknown_user: 'Unbekannter Nutzer',
+          unknown_listing: 'Unbekanntes Inserat'
+        },
+        en: {
+          no_messages: 'No messages yet',
+          no_messages_hint: 'Start chatting with sellers to see your conversations here!',
+          browse_marketplace: 'Browse Marketplace',
+          error_loading: 'Error loading messages',
+          unknown_user: 'Unknown User',
+          unknown_listing: 'Unknown Listing'
+        }
+      };
+      return translations[lang]?.[key] || fallback;
+    }
+
+    function createConversationItem(convo) {
+      const item = document.createElement('a');
+      item.href = `chat.html?listingId=${convo.listing_id}&sellerId=${convo.other_user_id}`;
+      item.className = 'conversation-item';
+      
+      const timestamp = new Date(convo.last_message_time).toLocaleDateString('en-US', {day: '2-digit', month: 'short'});
+      const initial = convo.other_user_name ? convo.other_user_name.charAt(0).toUpperCase() : '?';
+
+      item.innerHTML = `
+        <div class="avatar-placeholder">${initial}</div>
+        <div class="convo-details">
+          <div class="convo-header">
+            <h4>${convo.other_user_name || getTranslation('unknown_user', 'Unknown User')} - ${convo.listing_title || ''}</h4>
+            <span class="timestamp">${timestamp}</span>
+          </div>
+          <p class="convo-preview">${convo.last_message}</p>
+        </div>
+      `;
+      return item;
+    }
+
+    async function loadInbox() {
+      try {
+        const user = await requireAuth();
+
+        // Lade Messages mit deiner aktuellen Datenbank-Struktur
+        const { data: messages, error } = await supabase
+          .from('messages')
+          .select(`
+            id,
+            sender_id,
+            receiver_id,
+            listing_id,
+            content,
+            created_at
+          `)
+          .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        if (!messages || messages.length === 0) {
+          inboxContainer.innerHTML = `
+            <div class="empty-state">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <h3>${getTranslation('no_messages', 'No messages yet')}</h3>
+              <p>${getTranslation('no_messages_hint', 'Start chatting with sellers to see your conversations here!')}</p>
+              <a href="gegenstaende.html" class="submit-btn" style="display:inline-block;background-color:#10b981;">${getTranslation('browse_marketplace', 'Browse Marketplace')}</a>
+            </div>
+          `;
+          return;
+        }
+
+        // Nach Konversation gruppieren (listing + anderer User)
+        const conversationsMap = {};
+        
+        for (const msg of messages) {
+          const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
+          const key = `${msg.listing_id}-${otherUserId}`;
+          
+          if (!conversationsMap[key]) {
+            // User-Info laden
+            const { data: otherUser } = await supabase
+              .from('profiles')
+              .select('username')
+              .eq('id', otherUserId)
+              .single();
+            
+            // Listing-Info laden für den Titel
+            const { data: listing } = await supabase
+              .from('listings')
+              .select('title')
+              .eq('id', msg.listing_id)
+              .single();
+            
+            conversationsMap[key] = {
+              listing_id: msg.listing_id,
+              other_user_id: otherUserId,
+              other_user_name: otherUser?.username || getTranslation('unknown_user', 'Unknown User'),
+              listing_title: listing?.title || getTranslation('unknown_listing', 'Unknown Listing'),
+              last_message: msg.content,
+              last_message_time: msg.created_at
+            };
+          }
+        }
+
+        allConversations = Object.values(conversationsMap);
+        renderConversations(allConversations);
+
+      } catch (error) {
+        console.error('Error loading inbox:', error);
+        inboxContainer.innerHTML = `<div class="empty-state"><h3>${getTranslation('error_loading', 'Error loading messages')}</h3><p>${error.message}</p></div>`;
+      }
+    }
+
+    function renderConversations(conversations) {
+      inboxContainer.innerHTML = '';
+      conversations.forEach(convo => {
+        inboxContainer.appendChild(createConversationItem(convo));
+      });
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase().trim();
+      if (!query) {
+        renderConversations(allConversations);
+        return;
+      }
+      const filtered = allConversations.filter(convo =>
+        convo.other_user_name.toLowerCase().includes(query) ||
+        convo.last_message.toLowerCase().includes(query)
+      );
+      renderConversations(filtered);
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadInbox();
+    });
+  </script>
+<!-- Navigation Component -->
+ <script type="module" src="notificationBell.js"></script>
+<script src="config.js"></script>
+<script src="navigation.js"></script>
+<script type="module" src="notificationBell.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>

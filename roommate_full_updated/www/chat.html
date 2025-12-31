@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">    <title>Chat - Roommate</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .app-container { height: 100vh; display: flex; flex-direction: column; }
+        .chat-header {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: white;
+            gap: 1rem;
+        }
+        .chat-header .back-arrow { 
+            font-size: 1.5rem; 
+            text-decoration: none; 
+            color: var(--text-color);
+            flex-shrink: 0;
+        }
+        .chat-header-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #e5e7eb;
+        }
+        .chat-header-info { 
+            flex-grow: 1; 
+            min-width: 0;
+        }
+        .chat-header-info h2 { 
+            margin: 0; 
+            font-size: 1.1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .chat-header-info h2:hover {
+            color: var(--primary-color);
+        }
+        .chat-header-info p { 
+            margin: 0; 
+            font-size: 0.8rem; 
+            color: #6b7280; 
+        }
+        .chat-header-info a {
+            color: #6b7280;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .chat-header-info a:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+        .review-btn {
+            text-decoration: none;
+            background: #10b981;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .review-btn:hover {
+            background: #059669;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            background-color: #f9fafb;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .chat-message {
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            max-width: 75%;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        .chat-message.sent {
+            background-color: #10b981;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-message.received {
+            background-color: white;
+            color: var(--text-color);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #e5e7eb;
+        }
+        .chat-message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 0.25rem;
+        }
+        .message-form {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            background: white;
+            gap: 0.5rem;
+        }
+        .message-form input {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            font-size: 0.95rem;
+        }
+        .message-form button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .message-form button:hover {
+            background: #059669;
+        }
+        .message-form button:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="chat-header">
+         <a href="nachrichten.html" class="back-arrow">&larr;</a>
+         <img id="chat-avatar" class="chat-header-avatar" src="placeholder.png" alt="Avatar">
+        <div class="chat-header-info">
+            <h2 id="chat-title" data-i18n="chat_title">Chat</h2>
+            <p id="chat-subtitle" data-i18n="general_loading">Loading...</p>
+        </div>
+         <a href="#" id="review-btn" class="review-btn" style="display:none;" data-i18n="chat_review">⭐ Review</a>
+    </header>
+    
+    <!-- VERIFICATION BANNER FOR CHAT -->
+    <div id="chatVerificationBanner" style="display: none; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); padding: 1.5rem; margin: 1rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);">
+      <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px;">
+          <h3 style="margin: 0; color: #78350f; font-size: 1.1rem;" data-i18n="chat_verify_title">
+            🎓 Verify Your Student Status to Send Messages
+          </h3>
+          <p style="margin: 0.5rem 0 0 0; color: #92400e; font-size: 0.9rem;" data-i18n="chat_verify_desc">
+            You need to verify your student status before you can chat with other users.
+          </p>
+        </div>
+        <a href="verify-options.html" style="background: white; color: #f59e0b; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" data-i18n="chat_verify_now">
+          Verify Now →
+        </a>
+      </div>
+    </div>
+    
+    <!-- TIPP: MUSTERVERTRÄGE BANNER -->
+    <div id="contractTipBanner" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 0.75rem 1rem; margin: 0.5rem 1rem; border-radius: 8px; display: flex; align-items: center; gap: 0.75rem; border: 1px solid #93c5fd;">
+      <span style="font-size: 1.1rem;">💡</span>
+      <p style="margin: 0; font-size: 0.8rem; color: #1e40af; flex: 1;" id="contractTipText">
+        <strong>Tipp:</strong> Nutze unsere <a href="nutzungsbedingungen.html#mustervertraege" style="color: #1e40af; text-decoration: underline;">Musterverträge</a> für sichere Absprachen!
+      </p>
+      <button onclick="this.parentElement.style.display='none'; localStorage.setItem('hideChatTip','true');" style="background: none; border: none; color: #6b7280; cursor: pointer; font-size: 1.1rem; padding: 0; line-height: 1;">&times;</button>
+    </div>
+    
+    <script>
+      // Hide tip if already dismissed
+      if (localStorage.getItem('hideChatTip') === 'true') {
+        document.getElementById('contractTipBanner').style.display = 'none';
+      }
+      // Language support for tip
+      const tipLang = localStorage.getItem('room8_language') || 'de';
+      if (tipLang === 'en') {
+        document.getElementById('contractTipText').innerHTML = '<strong>Tip:</strong> Use our <a href="nutzungsbedingungen.html#mustervertraege" style="color: #1e40af; text-decoration: underline;">contract templates</a> for safe agreements!';
+      }
+    </script>
+    
+    <main class="chat-messages" id="chat-messages"></main>
+    <form class="message-form" id="message-form">
+        <input type="text" id="message-input" data-i18n-placeholder="chat_placeholder" placeholder="Type a message..." required autocomplete="off">
+        <button type="submit" data-i18n="chat_send">Send</button>
+    </form>
+</div>
+
+<script type="module">
+    import { supabase, requireAuth } from './supabaseClient.js';
+    
+    const messagesContainer = document.getElementById('chat-messages');
+    const messageForm = document.getElementById('message-form');
+    const messageInput = document.getElementById('message-input');
+    const chatTitle = document.getElementById('chat-title');
+    const chatSubtitle = document.getElementById('chat-subtitle');
+    const reviewBtn = document.getElementById('review-btn');
+    
+    const params = new URLSearchParams(window.location.search);
+    const listingId = params.get('listingId');
+    const sellerId = params.get('sellerId');
+    
+    let currentUser = null;
+    let subscription = null;
+
+    // Get translations
+    function getTranslation(key, fallback) {
+        const lang = localStorage.getItem('room8_language') || 'en';
+        const translations = {
+            de: {
+                loading: 'Lädt...',
+                chat_with: 'Chat mit',
+                verify_placeholder: 'Verifiziere deinen Studentenstatus um Nachrichten zu senden',
+                error: 'Fehler',
+                error_sending: 'Fehler beim Senden der Nachricht'
+            },
+            en: {
+                loading: 'Loading...',
+                chat_with: 'Chat with',
+                verify_placeholder: 'Verify your student status to send messages',
+                error: 'Error',
+                error_sending: 'Error sending message'
+            }
+        };
+        return translations[lang]?.[key] || fallback;
+    }
+
+    function formatTime(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function renderMessage(msg, isOwnMessage) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `chat-message ${isOwnMessage ? 'sent' : 'received'}`;
+        msgDiv.innerHTML = `
+            <div>${msg.content}</div>
+            <div class="chat-message-time">${formatTime(msg.created_at)}</div>
+        `;
+        messagesContainer.appendChild(msgDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    async function loadChat() {
+        try {
+            currentUser = await requireAuth();
+            
+            // Check verification status
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('is_verified')
+                .eq('id', currentUser.id)
+                .single();
+
+            const isVerified = profile?.is_verified || false;
+
+            if (!isVerified) {
+                // Show banner and disable chat
+                document.getElementById('chatVerificationBanner').style.display = 'block';
+                messageInput.disabled = true;
+                messageInput.placeholder = getTranslation('verify_placeholder', 'Verify your student status to send messages');
+                const submitBtn = messageForm.querySelector('button');
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.5';
+                submitBtn.style.cursor = 'not-allowed';
+            }
+            
+            // Listing-Info laden
+            const { data: listing, error: listingError } = await supabase
+                .from('listings')
+                .select('title, owner_id')
+                .eq('id', listingId)
+                .single();
+            
+            if (listingError) throw listingError;
+            
+            // Owner separat laden
+            let ownerUsername = 'Unknown';
+            let ownerAvatar = 'placeholder.png';
+            let ownerId = listing.owner_id;
+            if (listing.owner_id) {
+                const { data: owner } = await supabase
+                    .from('profiles')
+                    .select('username, avatar_url')
+                    .eq('id', listing.owner_id)
+                    .single();
+                if (owner) {
+                    ownerUsername = owner.username;
+                    ownerAvatar = owner.avatar_url || 'placeholder.png';
+                }
+            }
+            
+            // Avatar oben setzen
+            const chatAvatar = document.getElementById('chat-avatar');
+            chatAvatar.src = ownerAvatar;
+            chatAvatar.onerror = () => { chatAvatar.src = 'placeholder.png'; };
+            
+            chatTitle.textContent = listing.title;
+            
+            // Titel klickbar machen - führt zum Inserat
+            chatTitle.addEventListener('click', () => {
+                window.location.href = `detail.html?id=${listingId}`;
+            });
+            
+            const chatWithText = getTranslation('chat_with', 'Chat with');
+            chatSubtitle.innerHTML = `<a href="public-profile.html?id=${ownerId}">${chatWithText} ${ownerUsername}</a>`;
+            
+            // Review-Button anzeigen (nur wenn Chat mit Verkaeufer und nicht der eigene Chat)
+            if (sellerId && sellerId !== currentUser.id) {
+                reviewBtn.style.display = 'block';
+                reviewBtn.href = `review.html?listingId=${listingId}&revieweeId=${sellerId}`;
+            }
+            
+            // Nachrichten laden
+            const { data: messages, error: msgError } = await supabase
+                .from('messages')
+                .select('*')
+                .eq('listing_id', listingId)
+                .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${sellerId}),and(sender_id.eq.${sellerId},receiver_id.eq.${currentUser.id})`)
+                .order('created_at', { ascending: true });
+            
+            if (msgError) throw msgError;
+            
+            messagesContainer.innerHTML = '';
+            messages.forEach(msg => renderMessage(msg, msg.sender_id === currentUser.id));
+            
+            // Realtime-Subscription
+            subscription = supabase
+                .channel(`chat-${listingId}`)
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'messages',
+                    filter: `listing_id=eq.${listingId}`
+                }, (payload) => {
+                    const newMsg = payload.new;
+                    const isFromSeller = newMsg.sender_id === sellerId;
+                    const isFromMe = newMsg.sender_id === currentUser.id;
+                    
+                    // Nur Nachrichten vom anderen User anzeigen (eigene wurden schon sofort angezeigt)
+                    if (isFromSeller && !isFromMe) {
+                        renderMessage(newMsg, false);
+                    }
+                })
+                .subscribe();
+            
+        } catch(error) {
+            console.error('Error loading chat:', error);
+            messagesContainer.innerHTML = `<p style="text-align:center;color:red;padding:2rem;">${getTranslation('error', 'Error')}: ${error.message}</p>`;
+        }
+    }
+
+    messageForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const content = messageInput.value.trim();
+        if (!content || !currentUser) return;
+        
+        const submitBtn = messageForm.querySelector('button');
+        submitBtn.disabled = true;
+        
+        try {
+            // SOFORT die Nachricht anzeigen (optimistische UI)
+            const tempMsg = {
+                content: content,
+                created_at: new Date().toISOString(),
+                sender_id: currentUser.id
+            };
+            renderMessage(tempMsg, true);
+            
+            // Input leeren
+            messageInput.value = '';
+            
+            // Dann zur Datenbank senden
+            const { error } = await supabase.from('messages').insert({
+                sender_id: currentUser.id,
+                receiver_id: sellerId,
+                listing_id: listingId,
+                content: content
+            });
+            
+            if (error) throw error;
+            
+            messageInput.focus();
+        } catch(error) {
+            console.error('Error sending message:', error);
+            alert(getTranslation('error_sending', 'Error sending message') + ': ' + error.message);
+        } finally {
+            submitBtn.disabled = false;
+        }
+    });
+    
+    window.addEventListener('beforeunload', () => {
+        if (subscription) subscription.unsubscribe();
+    });
+    
+    document.addEventListener('DOMContentLoaded', loadChat);
+</script>
+<script src="translations.js"></script>
+</body>
+</html>

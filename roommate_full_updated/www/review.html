@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">   <title>Leave a Review - Roommate</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .review-page-container {
+      min-height: 100vh;
+      background-color: var(--background-color);
+      padding-bottom: 2rem;
+    }
+    .review-header-bar {
+      display: flex;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: white;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .review-header-bar .back-arrow {
+      font-size: 1.5rem;
+      text-decoration: none;
+      color: var(--text-color);
+      margin-right: 1rem;
+    }
+    .review-header-bar h1 {
+      font-size: 1.2rem;
+      margin: 0;
+    }
+    .review-form-card {
+      max-width: 500px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+    .star-rating {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 2.5rem;
+      margin: 1rem 0;
+    }
+    .star-rating input {
+      display: none;
+    }
+    .star-rating label {
+      color: #d1d5db;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .star-rating input:checked ~ label,
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+      color: #fbbf24;
+    }
+    #review-context {
+      text-align: center;
+      color: var(--text-light);
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+    .seller-info-box {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background-color: #f9fafb;
+      border-radius: var(--border-radius);
+      margin-bottom: 1.5rem;
+    }
+    .seller-avatar-review {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      background-color: #e5e7eb;
+    }
+    .seller-name-review {
+      font-weight: 600;
+      color: var(--text-color);
+    }
+  </style>
+</head>
+<body>
+  
+  <main id="review-page-container" class="review-page-container">
+    <div class="review-header-bar">
+       <a href="javascript:history.back()" class="back-arrow">&larr;</a>
+      <h1>Leave a Review</h1>
+    </div>
+    
+    <div id="review-content" class="review-form-card">
+      <h2 style="font-size: 1.2rem; margin-bottom: 0.5rem; text-align: center;">Rate your experience</h2>
+      <p id="review-context">Loading...</p>
+      
+      <div id="seller-info-container"></div>
+      
+      <form id="reviewForm">
+        <div class="form-group">
+          <label style="text-align: center; display: block;">Your Rating *</label>
+          <div class="star-rating">
+            <input type="radio" id="star5" name="rating" value="5" required/>
+             <label for="star5">★</label>
+            <input type="radio" id="star4" name="rating" value="4" />
+             <label for="star4">★</label>
+            <input type="radio" id="star3" name="rating" value="3" />
+             <label for="star3">★</label>
+            <input type="radio" id="star2" name="rating" value="2" />
+             <label for="star2">★</label>
+            <input type="radio" id="star1" name="rating" value="1" />
+             <label for="star1">★</label>
+          </div>
+        </div>
+        <div class="form-group" style="text-align: left;">
+          <label for="comment">Comment (Optional)</label>
+          <textarea id="comment" placeholder="Tell us more about your experience..." style="min-height: 120px;"></textarea>
+        </div>
+        <div id="form-message" style="margin-bottom: 15px; font-weight: bold; text-align: center;"></div>
+        <button type="submit" class="submit-btn" style="width: 100%; background-color: #10b981;">Submit Review</button>
+      </form>
+    </div>
+  </main>
+
+  <script type="module">
+    import { supabase, requireAuth } from './supabaseClient.js';
+    
+    const form = document.getElementById('reviewForm');
+    const msgContainer = document.getElementById('form-message');
+    const contextP = document.getElementById('review-context');
+    const sellerInfoContainer = document.getElementById('seller-info-container');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const listingId = urlParams.get('listingId');
+    const revieweeId = urlParams.get('revieweeId');
+
+    function setFormMessage(text, isSuccess) {
+        msgContainer.textContent = text;
+        msgContainer.style.color = isSuccess ? 'green' : 'red';
+    }
+
+    async function loadContext() {
+      if (!listingId || !revieweeId) {
+        contextP.textContent = "Missing information to leave a review.";
+        submitBtn.disabled = true;
+        return;
+      }
+
+      try {
+        // Listing-Info laden
+        const { data: listing, error: listingError } = await supabase
+          .from('listings')
+          .select('title')
+          .eq('id', listingId)
+          .single();
+        
+        if (listingError) throw listingError;
+        contextP.textContent = `Transaction for "${listing.title}"`;
+
+         // Verkäufer-Info laden
+        const { data: seller, error: sellerError } = await supabase
+          .from('profiles')
+          .select('username, avatar_url')
+          .eq('id', revieweeId)
+          .single();
+        
+        if (sellerError) throw sellerError;
+
+        const sellerAvatar = seller.avatar_url || 'placeholder.png';
+        sellerInfoContainer.innerHTML = `
+          <div class="seller-info-box">
+            <img src="${sellerAvatar}" alt="${seller.username}" class="seller-avatar-review" onerror="this.src='placeholder.png';">
+            <div>
+              <div style="font-size: 0.8rem; color: #6b7280; margin-bottom: 2px;">Rating for</div>
+              <a href="public-profile.html?id=${revieweeId}" class="seller-name-review" style="text-decoration: none; color: var(--text-color); transition: color 0.2s;">${seller.username || 'Anonymous'}</a>
+            </div>
+          </div>
+        `;
+
+      } catch (error) {
+        console.error('Error loading context:', error);
+        contextP.textContent = "Error loading information.";
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      setFormMessage('');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+
+      try {
+        const user = await requireAuth();
+        const rating = new FormData(form).get('rating');
+        const comment = document.getElementById('comment').value.trim();
+
+        if (!rating) {
+          throw new Error('Please select a star rating.');
+        }
+
+         // Prüfen, ob bereits eine Bewertung existiert
+        const { data: existing } = await supabase
+          .from('reviews')
+          .select('id')
+          .eq('reviewer_id', user.id)
+          .eq('reviewee_id', revieweeId)
+          .eq('listing_id', listingId)
+          .single();
+
+        if (existing) {
+          throw new Error('You have already reviewed this transaction.');
+        }
+
+        const { error } = await supabase
+          .from('reviews')
+          .insert({
+            reviewer_id: user.id,
+            reviewee_id: revieweeId,
+            listing_id: listingId,
+            rating: parseInt(rating),
+            comment: comment || null
+          });
+
+        if (error) throw error;
+        
+         setFormMessage('✓ Thank you for your review!', true);
+        form.reset();
+        
+        setTimeout(() => { 
+          window.location.href = `public-profile.html?id=${revieweeId}`; 
+        }, 1500);
+
+      } catch (err) {
+        setFormMessage('Error: ' + err.message, false);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Review';
+      }
+    });
+    
+    document.addEventListener('DOMContentLoaded', loadContext);
+  </script>
+  <!-- Navigation Component -->
+<script src="config.js"></script>
+<script src="navigation.js"></script>
+<script src="translations.js"></script>
+</body>
+</body>
+</html>

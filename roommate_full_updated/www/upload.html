@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en"> <!-- Sprache auf Englisch geändert -->
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">  <title>Upload Proof of Enrollment – Roommate</title> <!-- Titel übersetzt -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <header class="app-header">
+      <h1>Final Step</h1> <!-- Übersetzt -->
+    </header>
+
+    <main class="app-content">
+      <div style="text-align: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary-color); margin-bottom: 1rem;">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line>
+        </svg>
+        <h2 style="margin-bottom: 1rem;">Upload Proof of Enrollment</h2> <!-- Übersetzt -->
+        <p style="color: var(--text-light); margin-bottom: 2rem;">
+          Please upload your current certificate of enrollment. After a successful review by our team, your account will be fully activated. <!-- Übersetzt -->
+        </p>
+      </div>
+
+      <form id="uploadForm">
+        <div class="form-group">
+          <label for="enrollmentCertificate">Certificate (PDF or Image)</label> <!-- Übersetzt -->
+          <input type="file" id="enrollmentCertificate" accept=".pdf,image/*" required style="padding: 0.5rem; border-style: dashed;">
+        </div>
+        
+        <div id="form-message" style="margin-bottom: 15px; font-weight: bold; text-align: center;"></div>
+        <button type="submit" class="submit-btn">Upload & Await Review</button> <!-- Übersetzt -->
+      </form>
+    </main>
+
+    <footer class="app-footer-nav" id="app-footer-nav">
+      <!-- Die Navigation wird hier dynamisch von JavaScript eingefügt -->
+    </footer>
+  </div>
+
+  <!-- Dieses Skript ist nur für die Logik DIESER SEITE -->
+  <script type="module">
+    import { supabase, requireAuth } from './supabaseClient.js';
+
+    const form = document.getElementById('uploadForm');
+    const msgContainer = document.getElementById('form-message');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    function setFormMessage(text, isSuccess) {
+      msgContainer.textContent = text;
+      msgContainer.style.color = isSuccess ? 'green' : 'red';
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      setFormMessage('');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Uploading...'; // Übersetzt
+
+      try {
+        const { data: { user } } = await requireAuth();
+        const file = document.getElementById('enrollmentCertificate').files[0];
+        
+        if (!file) {
+          throw new Error('Please select a file.'); // Übersetzt
+        }
+
+        const path = `${user.id}/${Date.now()}_${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from('enrollment-certificates')
+          .upload(path, file);
+        
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage
+          .from('enrollment-certificates')
+          .getPublicUrl(path);
+
+        const { error: profileErr } = await supabase
+          .from('profiles')
+          .update({ enrollment_certificate_url: urlData.publicUrl })
+          .eq('id', user.id);
+        
+        if (profileErr) throw profileErr;
+        
+        setFormMessage('Upload successful! Your account is now under review. You will be logged out.', true); // Übersetzt
+        
+        setTimeout(async () => {
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
+        }, 3000);
+
+      } catch (error) {
+        setFormMessage('Error: ' + error.message, false); // Übersetzt
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Upload & Await Review'; // Übersetzt
+      }
+    });
+  </script>
+
+  <!-- Feather Icons & Navigations-Skript -->
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+  <script type="module">
+    import { supabase } from './supabaseClient.js';
+    const navContainer = document.getElementById('app-footer-nav');
+    // ... der universelle Navigations-Code ...
+  </script>
+<script src="translations.js"></script>
+</body>
+</html>

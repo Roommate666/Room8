@@ -1,0 +1,27 @@
+{
+  "name": "Room8 - Dein Campus. Dein Deal.",
+  "short_name": "Room8",
+  "description": "Die exklusive Plattform von Studenten, für Studenten. Finde Wohnungen, verkaufe Gegenstände und finde Jobs.",
+  "start_url": "/wohnungen.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "social", "shopping"],
+  "lang": "de",
+  "dir": "ltr"
+}

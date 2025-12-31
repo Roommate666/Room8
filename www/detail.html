@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Details - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        #listing-detail-container { padding: 0; }
+        
+        .image-gallery-container {
+            position: relative;
+            width: 100%;
+            max-height: 50vh;
+            overflow: hidden;
+            background: #ffffff;
+        }
+        
+        .image-gallery {
+            display: flex;
+            transition: transform 0.3s ease;
+            height: 50vh;
+        }
+        
+        .gallery-image {
+            min-width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background-color: #ffffff;
+        }
+        
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #e5e7eb;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .gallery-nav:hover {
+            background: #ffffff;
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .gallery-nav.prev { left: 10px; }
+        .gallery-nav.next { right: 10px; }
+        
+        .gallery-nav svg {
+            width: 20px;
+            height: 20px;
+            stroke: #10b981;
+            stroke-width: 2.5;
+        }
+        
+        .gallery-dots {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+        
+        .gallery-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #d1d5db;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .gallery-dot.active {
+            background: #10b981;
+            width: 24px;
+            border-radius: 4px;
+            border-color: #10b981;
+        }
+        
+        .blurred-image {
+            filter: blur(20px);
+            pointer-events: none;
+        }
+        
+        .privacy-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            z-index: 20;
+        }
+        
+        .privacy-overlay svg {
+            width: 64px;
+            height: 64px;
+            color: #3b82f6;
+            margin-bottom: 1rem;
+        }
+        
+        .privacy-overlay h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.3rem;
+            color: #1f2937;
+        }
+        
+        .privacy-overlay p {
+            color: #6b7280;
+            margin: 0 0 1.5rem 0;
+            line-height: 1.5;
+        }
+        
+        .privacy-overlay .submit-btn {
+            display: inline-block;
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .privacy-overlay .submit-btn:hover {
+            background-color: #1e40af;
+            transform: translateY(-2px);
+        }
+        
+        .hidden-address {
+            color: #9ca3af;
+            font-style: italic;
+        }
+        
+        .listing-mode-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+        }
+        .listing-mode-badge.offer {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+        }
+        .listing-mode-badge.search {
+            background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+            color: #92400e;
+        }
+        .listing-mode-badge.swap {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+        }
+        
+        .detail-content {
+            padding: 1.5rem;
+        }
+        
+        .price-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 1rem 0;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+        
+        .detail-specs {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .spec-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .spec-item:last-child {
+            border-bottom: none;
+        }
+        .spec-item span:first-child {
+            color: #6b7280;
+            font-weight: 500;
+        }
+        .spec-item span:last-child {
+            color: #1f2937;
+            font-weight: 600;
+        }
+        
+        .seller-info {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .seller-info h4 {
+            margin: 0 0 0.75rem 0;
+            color: #6b7280;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .seller-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .seller-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .seller-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .detail-action-bar-container {
+            position: fixed;
+            bottom: 80px;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            background: linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.95) 80%, rgba(255,255,255,0) 100%);
+            z-index: 100;
+        }
+        
+        .category-badge {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 0.375rem 0.875rem;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <a href="javascript:history.back()" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m15 18-6-6 6-6"/>
+            </svg>
+            <span data-i18n="general_back">Zurück</span>
+        </a>
+        <button id="reportListingBtn" style="display: none; background: #fee2e2; color: #ef4444; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; align-items: center; justify-content: center; transition: all 0.2s;">&#9888;</button>
+    </header>
+    
+    <main class="app-content" style="padding-bottom: 160px;">
+        <div id="listing-detail-container">
+            <p style="text-align:center; padding: 2rem; color:#6b7280;" data-i18n="detail_loading">Lade Details...</p>
+        </div>
+        <div id="action-bar-container"></div>
+    </main>
+    
+    <footer class="app-footer-nav" id="app-footer-nav"></footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    function getT(key) {
+        var lang = localStorage.getItem('room8_language') || localStorage.getItem('language') || 'de';
+        var t = {
+            de: {
+                offering: '&#127968; ANGEBOT', searching: '&#128269; SUCHE', swap: '&#128260; TAUSCH',
+                for_sale: '&#127968; ZU VERKAUFEN', wanted: '&#128269; GESUCHT',
+                monthly_rent: 'Monatliche Miete', budget_range: 'Budget',
+                deposit: 'Kaution', city: 'Stadt', district: 'Stadtteil',
+                address: 'Adresse', available_from: 'Verfügbar ab',
+                available_until: 'Verfügbar bis', open: 'Offen',
+                room_features: 'Zimmermerkmale', room_type: 'Zimmertyp',
+                number_of_rooms: 'Anzahl Zimmer', bathroom: 'Badezimmer',
+                kitchen: 'Küche', private: 'Privat', shared: 'Geteilt',
+                other_features: 'Sonstige Merkmale', utilities: 'Nebenkosten',
+                electricity: 'Strom', water: 'Wasser', heating: 'Heizung',
+                internet: 'Internet', included: 'Inklusive',
+                not_specified: 'Nicht angegeben', furniture: 'Möblierung',
+                bed: 'Bett', desk: 'Schreibtisch', wardrobe: 'Kleiderschrank',
+                fully_equipped: 'Voll ausgestattet', additional: 'Zusätzlich',
+                yes: 'Ja', price: 'Preis', condition: 'Zustand',
+                category: 'Kategorie', location: 'Standort',
+                seller: 'Verkäufer', searcher: 'Suchender', swapper: 'Tauschpartner',
+                edit_listing: 'Inserat bearbeiten',
+                contact_seller: '&#127968; Verkäufer kontaktieren',
+                contact_owner: '&#127968; Vermieter kontaktieren',
+                i_have_what_you_need: '&#127968; Ich habe was du suchst!',
+                lets_swap: '&#128260; Lass uns tauschen!',
+                login_to_contact: 'Anmelden um zu kontaktieren',
+                verify_to_contact: '&#128274; Verifizieren um zu kontaktieren',
+                price_on_request: 'Preis auf Anfrage', per_month: '/Monat',
+                swap_target: '&#128260; Tauschziel', looking_to_swap: 'Tauschen nach',
+                duration: 'Dauer', privacy_protected: '&#128274; Privatsphäre geschützt',
+                privacy_text: 'Bilder und Adresse sind nur für verifizierte Studenten sichtbar.',
+                verify_now: 'Jetzt verifizieren',
+                address_hidden: '&#128274; Adresse nur für verifizierte Studenten sichtbar',
+                exact_location_hidden: '(genaue Lage verborgen)',
+                wg_room: 'WG-Zimmer', entire_apartment: 'Ganze Wohnung',
+                studio: 'Studio', na: 'k.A.',
+                'New': 'Neu', 'Like New': 'Wie neu', 'Good': 'Gut', 'Fair': 'Akzeptabel', 'Poor': 'Gebraucht',
+                'Furniture & Home': 'Möbel & Wohnen', 'Electronics & Tech': 'Elektronik & Technik',
+                'Books & Study': 'Bücher & Studium', 'Clothing & Fashion': 'Kleidung & Mode',
+                'Kitchen & Appliances': 'Küche & Geräte', 'Sports & Outdoor': 'Sport & Outdoor',
+                'Bikes & Transport': 'Fahrräder & Transport', 'Music & Instruments': 'Musik & Instrumente',
+                'Others': 'Sonstiges'
+            },
+            en: {
+                offering: '&#127968; OFFERING', searching: '&#128269; SEARCHING', swap: '&#128260; SWAP',
+                for_sale: '&#127968; FOR SALE', wanted: '&#128269; WANTED',
+                monthly_rent: 'Monthly Rent', budget_range: 'Budget Range',
+                deposit: 'Deposit', city: 'City', district: 'District',
+                address: 'Address', available_from: 'Available From',
+                available_until: 'Available Until', open: 'Open',
+                room_features: 'Room Features', room_type: 'Room Type',
+                number_of_rooms: 'Number of Rooms', bathroom: 'Bathroom',
+                kitchen: 'Kitchen', private: 'Private', shared: 'Shared',
+                other_features: 'Other Features', utilities: 'Utilities',
+                electricity: 'Electricity', water: 'Water', heating: 'Heating',
+                internet: 'Internet', included: 'Included',
+                not_specified: 'Not specified', furniture: 'Furniture',
+                bed: 'Bed', desk: 'Desk', wardrobe: 'Wardrobe',
+                fully_equipped: 'Fully Equipped', additional: 'Additional',
+                yes: 'Yes', price: 'Price', condition: 'Condition',
+                category: 'Category', location: 'Location',
+                seller: 'Seller', searcher: 'Searcher', swapper: 'Swapper',
+                edit_listing: 'Edit Your Listing',
+                contact_seller: '&#127968; Contact Seller',
+                contact_owner: '&#127968; Contact Owner',
+                i_have_what_you_need: '&#127968; I have what you need!',
+                lets_swap: '&#128260; Let\'s swap!',
+                login_to_contact: 'Login to Contact Seller',
+                verify_to_contact: '&#128274; Verify to Contact',
+                price_on_request: 'Price on request', per_month: '/month',
+                swap_target: '&#128260; Swap Target', looking_to_swap: 'Looking to swap to',
+                duration: 'Duration', privacy_protected: '&#128274; Privacy Protected',
+                privacy_text: 'Images and address are visible to verified students only.',
+                verify_now: 'Verify Now',
+                address_hidden: '&#128274; Address visible for verified students only',
+                exact_location_hidden: '(exact location hidden)',
+                wg_room: 'WG Room (Shared Apartment)', entire_apartment: 'Entire Apartment',
+                studio: 'Studio', na: 'N/A',
+                'New': 'New', 'Like New': 'Like New', 'Good': 'Good', 'Fair': 'Fair', 'Poor': 'Poor',
+                'Furniture & Home': 'Furniture & Home', 'Electronics & Tech': 'Electronics & Tech',
+                'Books & Study': 'Books & Study', 'Clothing & Fashion': 'Clothing & Fashion',
+                'Kitchen & Appliances': 'Kitchen & Appliances', 'Sports & Outdoor': 'Sports & Outdoor',
+                'Bikes & Transport': 'Bikes & Transport', 'Music & Instruments': 'Music & Instruments',
+                'Others': 'Others'
+            }
+        };
+        var langObj = t[lang] || t.de;
+        return langObj[key] || key;
+    }
+    
+    var listingId = new URLSearchParams(window.location.search).get('id');
+    var detailContainer = document.getElementById('listing-detail-container');
+    var actionBarContainer = document.getElementById('action-bar-container');
+    
+    var currentImageIndex = 0;
+    var totalImages = 0;
+    
+    function initImageGallery(photos) {
+        if (!photos || photos.length === 0) return;
+        
+        totalImages = photos.length;
+        var prevBtn = document.querySelector('.gallery-nav.prev');
+        var nextBtn = document.querySelector('.gallery-nav.next');
+        var dotsContainer = document.querySelector('.gallery-dots');
+        
+        if (!prevBtn || !nextBtn) return;
+        
+        prevBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            navigateGallery(-1);
+        });
+        
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            navigateGallery(1);
+        });
+        
+        if (dotsContainer) {
+            dotsContainer.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (e.target.classList.contains('gallery-dot')) {
+                    var index = parseInt(e.target.dataset.index);
+                    currentImageIndex = index;
+                    updateGallery();
+                }
+            });
+        }
+        
+        updateGalleryControls();
+    }
+    
+    function navigateGallery(direction) {
+        currentImageIndex += direction;
+        if (currentImageIndex < 0) currentImageIndex = totalImages - 1;
+        if (currentImageIndex >= totalImages) currentImageIndex = 0;
+        updateGallery();
+    }
+    
+    function updateGallery() {
+        var gallery = document.querySelector('.image-gallery');
+        if (gallery) {
+            gallery.style.transform = 'translateX(-' + (currentImageIndex * 100) + '%)';
+        }
+        updateGalleryControls();
+    }
+    
+    function updateGalleryControls() {
+        var dots = document.querySelectorAll('.gallery-dot');
+        dots.forEach(function(dot, index) {
+            if (index === currentImageIndex) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    }
+    
+    function loadListingDetails() {
+        if (!listingId) {
+            detailContainer.innerHTML = '<p style="text-align:center; padding: 2rem; color:red;">Keine Listing-ID angegeben.</p>';
+            return;
+        }
+        
+        var currentUser = null;
+        var currentUserProfile = null;
+        
+        supabase.auth.getUser()
+            .then(function(response) {
+                currentUser = response.data.user;
+                
+                if (currentUser) {
+                    return supabase
+                        .from('profiles')
+                        .select('is_verified, is_student_verified')
+                        .eq('id', currentUser.id)
+                        .single();
+                }
+                return { data: null };
+            })
+            .then(function(profileResponse) {
+                currentUserProfile = profileResponse.data;
+                
+                return supabase
+                    .from('listings')
+                    .select('*, listing_photos(storage_path)')
+                    .eq('id', listingId)
+                    .single();
+            })
+            .then(function(listingResponse) {
+                if (listingResponse.error) throw listingResponse.error;
+                var listing = listingResponse.data;
+                if (!listing) throw new Error('Listing nicht gefunden.');
+                
+                var ownerPromise = listing.owner_id 
+                    ? supabase.from('profiles').select('id, username, avatar_url, is_verified, university').eq('id', listing.owner_id).single()
+                    : Promise.resolve({ data: null });
+                
+                return ownerPromise.then(function(ownerResponse) {
+                    listing.profiles = ownerResponse.data;
+                    return listing;
+                });
+            })
+            .then(function(listing) {
+                var isOwner = currentUser && currentUser.id === listing.owner_id;
+                var isVerified = (currentUserProfile && (currentUserProfile.is_verified || currentUserProfile.is_student_verified)) || false;
+                var showPrivateInfo = isOwner || isVerified;
+                
+                // Increment view count
+                if (!isOwner) {
+                    supabase.rpc('increment_view_count', { listing_id: listingId })
+                        .then(function() {})
+                        .catch(function() {
+                            supabase.from('listings')
+                                .update({ view_count: (listing.view_count || 0) + 1 })
+                                .eq('id', listingId)
+                                .then(function() {});
+                        });
+                }
+                
+                var photos = listing.listing_photos || [];
+                var contentHTML = '';
+                
+                if (photos.length > 0) {
+                    var shouldBlur = listing.type === 'wohnung' && !showPrivateInfo;
+                    var imageHTML = '';
+                    var dotsHTML = '';
+                    
+                    photos.forEach(function(photo, index) {
+                        var urlData = supabase.storage.from('listing-images').getPublicUrl(photo.storage_path);
+                        var blurClass = shouldBlur ? ' blurred-image' : '';
+                        imageHTML += '<img src="' + urlData.data.publicUrl + '" alt="Foto ' + (index + 1) + '" class="gallery-image' + blurClass + '" onerror="this.src=\'placeholder.png\';">';
+                        dotsHTML += '<div class="gallery-dot' + (index === 0 ? ' active' : '') + '" data-index="' + index + '"></div>';
+                    });
+                    
+                    contentHTML += '<div class="image-gallery-container">';
+                    contentHTML += '<div class="image-gallery">' + imageHTML + '</div>';
+                    
+                    if (photos.length > 1) {
+                        contentHTML += '<button class="gallery-nav prev" aria-label="Vorheriges Bild">';
+                        contentHTML += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>';
+                        contentHTML += '</button>';
+                        contentHTML += '<button class="gallery-nav next" aria-label="Nächstes Bild">';
+                        contentHTML += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
+                        contentHTML += '</button>';
+                        contentHTML += '<div class="gallery-dots">' + dotsHTML + '</div>';
+                    }
+                    
+                    if (shouldBlur) {
+                        contentHTML += '<div class="privacy-overlay">';
+                        contentHTML += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
+                        contentHTML += '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>';
+                        contentHTML += '<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>';
+                        contentHTML += '</svg>';
+                        contentHTML += '<h3>' + getT('privacy_protected') + '</h3>';
+                        contentHTML += '<p>' + getT('privacy_text') + '</p>';
+                        contentHTML += '<a href="verify-options.html" class="submit-btn">' + getT('verify_now') + '</a>';
+                        contentHTML += '</div>';
+                    }
+                    
+                    contentHTML += '</div>';
+                }
+                
+                contentHTML += '<div class="detail-content">';
+                
+                if (listing.type === 'wohnung') {
+                    var modeBadges = {
+                        offer: { text: getT('offering'), cls: 'offer' },
+                        search: { text: getT('searching'), cls: 'search' },
+                        swap: { text: getT('swap'), cls: 'swap' }
+                    };
+                    var listingMode = listing.listing_mode || 'offer';
+                    var modeBadge = modeBadges[listingMode] || modeBadges.offer;
+                    
+                    contentHTML += '<span class="listing-mode-badge ' + modeBadge.cls + '">' + modeBadge.text + '</span>';
+                    
+                    var addressDisplay = showPrivateInfo 
+                        ? (listing.address_line || getT('na'))
+                        : '<span class="hidden-address">' + getT('address_hidden') + '</span>';
+                    
+                    var locationDisplay = showPrivateInfo
+                        ? (listing.city || 'Unbekannte Stadt') + (listing.district ? ', ' + listing.district : '')
+                        : (listing.city || 'Unbekannte Stadt') + ' ' + getT('exact_location_hidden');
+                    
+                    contentHTML += '<h2>' + (listing.title || 'Kein Titel') + '</h2>';
+                    contentHTML += '<p style="color:#6b7280; margin: 0.5rem 0;">' + locationDisplay + '</p>';
+                    
+                    // Price display
+                    if (listing.listing_mode === 'search' && listing.price_range_min && listing.price_range_max) {
+                        contentHTML += '<div class="price-tag">' + getT('budget_range') + ': &#8364;' + listing.price_range_min + ' - &#8364;' + listing.price_range_max + getT('per_month') + '</div>';
+                    } else if (listing.listing_mode === 'search' && (listing.price_range_min || listing.price_range_max)) {
+                        var priceText = listing.price_range_min ? '&#8364;' + listing.price_range_min + '+' : 'Bis &#8364;' + listing.price_range_max;
+                        contentHTML += '<div class="price-tag">' + getT('budget_range') + ': ' + priceText + getT('per_month') + '</div>';
+                    } else if (listing.monthly_rent) {
+                        contentHTML += '<div class="price-tag">&#8364;' + listing.monthly_rent + getT('per_month') + '</div>';
+                    } else {
+                        contentHTML += '<div class="price-tag">' + getT('price_on_request') + '</div>';
+                    }
+                    
+                    contentHTML += '<p style="line-height:1.6;">' + (listing.description || 'Keine Beschreibung verfügbar.') + '</p>';
+                    
+                    // Swap target info
+                    if (listing.listing_mode === 'swap' && listing.swap_target_data) {
+                        contentHTML += '<div style="background: #eff6ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0;">';
+                        contentHTML += '<h3 style="margin: 0 0 1rem 0; font-size: 1.2rem; color: #1e40af;">' + getT('swap_target') + '</h3>';
+                        contentHTML += '<div style="display: grid; gap: 0.75rem;">';
+                        contentHTML += '<div><strong>' + getT('looking_to_swap') + ':</strong> ' + (listing.swap_target_data.target_city || getT('na')) + (listing.swap_target_data.target_district ? ', ' + listing.swap_target_data.target_district : '') + '</div>';
+                        if (listing.swap_target_data.target_room_type) {
+                            contentHTML += '<div><strong>' + getT('room_type') + ':</strong> ' + getT(listing.swap_target_data.target_room_type) + '</div>';
+                        }
+                        if (listing.swap_target_data.swap_duration) {
+                            contentHTML += '<div><strong>' + getT('duration') + ':</strong> ' + listing.swap_target_data.swap_duration + '</div>';
+                        }
+                        contentHTML += '</div></div>';
+                    }
+                    
+                    // Specs
+                    contentHTML += '<div class="detail-specs">';
+                    if (listing.listing_mode === 'search') {
+                        if (listing.price_range_min || listing.price_range_max) {
+                            var minPrice = listing.price_range_min ? '&#8364;' + listing.price_range_min : 'Beliebig';
+                            var maxPrice = listing.price_range_max ? '&#8364;' + listing.price_range_max : 'Beliebig';
+                            contentHTML += '<div class="spec-item"><span>' + getT('budget_range') + '</span><span>' + minPrice + ' - ' + maxPrice + getT('per_month') + '</span></div>';
+                        }
+                    } else if (listing.monthly_rent) {
+                        contentHTML += '<div class="spec-item"><span>' + getT('monthly_rent') + '</span><span>&#8364;' + listing.monthly_rent + '</span></div>';
+                    }
+                    if (listing.listing_mode !== 'search') {
+                        contentHTML += '<div class="spec-item"><span>' + getT('deposit') + '</span><span>&#8364;' + (listing.deposit || getT('na')) + '</span></div>';
+                    }
+                    contentHTML += '<div class="spec-item"><span>' + getT('city') + '</span><span>' + (listing.city || getT('na')) + '</span></div>';
+                    if (listing.district && showPrivateInfo) {
+                        contentHTML += '<div class="spec-item"><span>' + getT('district') + '</span><span>' + listing.district + '</span></div>';
+                    }
+                    if (listing.listing_mode !== 'search') {
+                        contentHTML += '<div class="spec-item"><span>' + getT('address') + '</span><span>' + addressDisplay + '</span></div>';
+                    }
+                    
+                    var availFrom = listing.available_from ? new Date(listing.available_from).toLocaleDateString('de-DE') : getT('na');
+                    var availTo = listing.available_to ? new Date(listing.available_to).toLocaleDateString('de-DE') : getT('open');
+                    contentHTML += '<div class="spec-item" style="grid-column: 1 / -1; display: flex; justify-content: space-between; border-bottom: none; padding-bottom: 0;">';
+                    contentHTML += '<div style="flex: 1;"><div style="color: #6b7280; font-weight: 500; margin-bottom: 0.25rem;">' + getT('available_from') + '</div><div style="color: #1f2937; font-weight: 600;">' + availFrom + '</div></div>';
+                    contentHTML += '<div style="flex: 1; text-align: right;"><div style="color: #6b7280; font-weight: 500; margin-bottom: 0.25rem;">' + getT('available_until') + '</div><div style="color: #1f2937; font-weight: 600;">' + availTo + '</div></div>';
+                    contentHTML += '</div></div>';
+                    
+                    // Room features
+                    if (listing.room_features) {
+                        contentHTML += '<h3 style="margin: 2rem 0 1rem 0; font-size: 1.1rem;">' + getT('room_features') + '</h3>';
+                        contentHTML += '<div class="detail-specs">';
+                        if (listing.room_type) {
+                            var roomTypeText = listing.room_type === 'wg_room' ? getT('wg_room') : listing.room_type === 'entire_apartment' ? getT('entire_apartment') : listing.room_type === 'studio' ? getT('studio') : listing.room_type;
+                            contentHTML += '<div class="spec-item"><span>' + getT('room_type') + '</span><span>' + roomTypeText + '</span></div>';
+                        }
+                        if (listing.number_of_rooms) {
+                            contentHTML += '<div class="spec-item"><span>' + getT('number_of_rooms') + '</span><span>' + listing.number_of_rooms + '</span></div>';
+                        }
+                        if (listing.room_features.private_bathroom) {
+                            contentHTML += '<div class="spec-item"><span>' + getT('bathroom') + '</span><span>' + getT('private') + '</span></div>';
+                        }
+                        if (listing.room_features.shared_bathroom) {
+                            contentHTML += '<div class="spec-item"><span>' + getT('bathroom') + '</span><span>' + getT('shared') + '</span></div>';
+                        }
+                        if (listing.room_features.private_kitchen) {
+                            contentHTML += '<div class="spec-item"><span>' + getT('kitchen') + '</span><span>' + getT('private') + '</span></div>';
+                        }
+                        if (listing.room_features.shared_kitchen) {
+                            contentHTML += '<div class="spec-item"><span>' + getT('kitchen') + '</span><span>' + getT('shared') + '</span></div>';
+                        }
+                        if (listing.room_features.other_features) {
+                            contentHTML += '<div class="spec-item"><span>' + getT('other_features') + '</span><span>' + listing.room_features.other_features + '</span></div>';
+                        }
+                        contentHTML += '</div>';
+                    }
+                    
+                    // Utilities
+                    if (listing.utilities_data) {
+                        contentHTML += '<h3 style="margin: 2rem 0 1rem 0; font-size: 1.1rem;">' + getT('utilities') + '</h3>';
+                        contentHTML += '<div class="detail-specs">';
+                        var elecVal = listing.utilities_data.electricity ? getT('included') : (listing.utilities_data.electricity_cost ? '&#8364;' + listing.utilities_data.electricity_cost + getT('per_month') : getT('not_specified'));
+                        var waterVal = listing.utilities_data.water ? getT('included') : (listing.utilities_data.water_cost ? '&#8364;' + listing.utilities_data.water_cost + getT('per_month') : getT('not_specified'));
+                        var heatVal = listing.utilities_data.heating ? getT('included') : (listing.utilities_data.heating_cost ? '&#8364;' + listing.utilities_data.heating_cost + getT('per_month') : getT('not_specified'));
+                        var netVal = listing.utilities_data.internet ? getT('included') : (listing.utilities_data.internet_cost ? '&#8364;' + listing.utilities_data.internet_cost + getT('per_month') : getT('not_specified'));
+                        var gezVal = listing.utilities_data.gez ? getT('included') : (listing.utilities_data.gez_cost ? '&#8364;' + listing.utilities_data.gez_cost + getT('per_month') : getT('not_specified'));
+                        contentHTML += '<div class="spec-item"><span>' + getT('electricity') + '</span><span>' + elecVal + '</span></div>';
+                        contentHTML += '<div class="spec-item"><span>' + getT('water') + '</span><span>' + waterVal + '</span></div>';
+                        contentHTML += '<div class="spec-item"><span>' + getT('heating') + '</span><span>' + heatVal + '</span></div>';
+                        contentHTML += '<div class="spec-item"><span>' + getT('internet') + '</span><span>' + netVal + '</span></div>';
+                        contentHTML += '<div class="spec-item"><span>GEZ</span><span>' + gezVal + '</span></div>';
+                        contentHTML += '</div>';
+                    }
+                    
+                    // Furniture
+                    if (listing.furniture_data) {
+                        contentHTML += '<h3 style="margin: 2rem 0 1rem 0; font-size: 1.1rem;">' + getT('furniture') + '</h3>';
+                        contentHTML += '<div class="detail-specs">';
+                        if (listing.furniture_data.bed) {
+                            contentHTML += '<div class="spec-item"><span>' + getT('bed') + '</span><span>' + getT('yes') + '</span></div>';
+                        }
+                        if (listing.furniture_data.desk) {
+                            contentHTML += '<div class="spec-item"><span>' + getT('desk') + '</span><span>' + getT('yes') + '</span></div>';
+                        }
+                        if (listing.furniture_data.wardrobe) {
+                            contentHTML += '<div class="spec-item"><span>' + getT('wardrobe') + '</span><span>' + getT('yes') + '</span></div>';
+                        }
+                        if (listing.furniture_data.kitchen_equipped) {
+                            contentHTML += '<div class="spec-item"><span>' + getT('kitchen') + '</span><span>' + getT('fully_equipped') + '</span></div>';
+                        }
+                        if (listing.furniture_data.additional_furniture) {
+                            contentHTML += '<div class="spec-item"><span>' + getT('additional') + '</span><span>' + listing.furniture_data.additional_furniture + '</span></div>';
+                        }
+                        contentHTML += '</div>';
+                    }
+                    
+                } else if (listing.type === 'gegenstand') {
+                    var itemModeBadges = {
+                        offer: { text: getT('for_sale'), cls: 'offer' },
+                        search: { text: getT('wanted'), cls: 'search' }
+                    };
+                    var itemMode = listing.listing_mode || 'offer';
+                    var itemBadge = itemModeBadges[itemMode] || itemModeBadges.offer;
+                    
+                    contentHTML += '<span class="listing-mode-badge ' + itemBadge.cls + '">' + itemBadge.text + '</span>';
+                    contentHTML += '<span class="category-badge">' + (getT(listing.category) || getT('Others')) + '</span>';
+                    contentHTML += '<h2>' + (listing.title || 'Kein Titel') + '</h2>';
+                    contentHTML += '<p style="color:#6b7280; margin: 0.5rem 0;">';
+                    contentHTML += '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>';
+                    contentHTML += (listing.city || 'Unbekannte Stadt') + '</p>';
+                    
+                    // Item price
+                    if (listing.listing_mode === 'search' && listing.price_range_min && listing.price_range_max) {
+                        contentHTML += '<div class="price-tag">' + getT('budget_range') + ': &#8364;' + listing.price_range_min + ' - &#8364;' + listing.price_range_max + '</div>';
+                    } else if (listing.listing_mode === 'search' && (listing.price_range_min || listing.price_range_max)) {
+                        var itemPriceText = listing.price_range_min ? '&#8364;' + listing.price_range_min + '+' : 'Bis &#8364;' + listing.price_range_max;
+                        contentHTML += '<div class="price-tag">' + getT('budget_range') + ': ' + itemPriceText + '</div>';
+                    } else if (listing.price != null) {
+                        contentHTML += '<div class="price-tag">&#8364;' + Number(listing.price).toFixed(2) + '</div>';
+                    } else {
+                        contentHTML += '<div class="price-tag">' + getT('price_on_request') + '</div>';
+                    }
+                    
+                    contentHTML += '<p style="line-height:1.6;">' + (listing.description || 'Keine Beschreibung verfügbar.') + '</p>';
+                    
+                    // Item specs
+                    contentHTML += '<div class="detail-specs">';
+                    if (listing.listing_mode === 'search' && (listing.price_range_min || listing.price_range_max)) {
+                        var minP = listing.price_range_min ? '&#8364;' + listing.price_range_min : 'Beliebig';
+                        var maxP = listing.price_range_max ? '&#8364;' + listing.price_range_max : 'Beliebig';
+                        contentHTML += '<div class="spec-item"><span>' + getT('budget_range') + '</span><span>' + minP + ' - ' + maxP + '</span></div>';
+                    } else if (listing.price != null) {
+                        contentHTML += '<div class="spec-item"><span>' + getT('price') + '</span><span>&#8364;' + Number(listing.price).toFixed(2) + '</span></div>';
+                    }
+                    contentHTML += '<div class="spec-item"><span>' + getT('condition') + '</span><span>' + (getT(listing.condition) || 'Good') + '</span></div>';
+                    contentHTML += '<div class="spec-item"><span>' + getT('category') + '</span><span>' + (getT(listing.category) || 'Others') + '</span></div>';
+                    contentHTML += '<div class="spec-item"><span>' + getT('location') + '</span><span>' + (listing.city || getT('na')) + '</span></div>';
+                    contentHTML += '</div>';
+                }
+                
+                // Seller info
+                if (!isOwner && listing.profiles) {
+                    var ownerAvatar = listing.profiles.avatar_url || 'placeholder.png';
+                    var userLabel = getT('seller');
+                    if (listing.listing_mode === 'search') userLabel = getT('searcher');
+                    else if (listing.listing_mode === 'swap') userLabel = getT('swapper');
+                    
+                    contentHTML += '<div class="seller-info">';
+                    contentHTML += '<h4>' + userLabel + '</h4>';
+                    contentHTML += '<a href="public-profile.html?id=' + listing.profiles.id + '" class="seller-profile" style="text-decoration:none;color:inherit;">';
+                    contentHTML += '<img src="' + ownerAvatar + '" alt="' + (listing.profiles.username || 'Anonym') + '" class="seller-avatar" onerror="this.src=\'placeholder.png\';">';
+                    contentHTML += '<span class="seller-name">' + (listing.profiles.username || 'Anonym') + '</span>';
+                    contentHTML += '</a></div>';
+                }
+                
+                contentHTML += '</div>';
+                detailContainer.innerHTML = contentHTML;
+                
+                initImageGallery(photos);
+                
+                // Action bar
+                var actionBarHTML = '';
+                if (isOwner) {
+                    var editPage = 'gegenstand.html';
+                    var buttonColor = '#10b981';
+                    if (listing.type === 'wohnung') {
+                        editPage = 'wohnung.html';
+                        buttonColor = '#3b82f6';
+                    } else if (listing.type === 'job') {
+                        editPage = 'job-create.html';
+                        buttonColor = '#8b5cf6';
+                    }
+                    actionBarHTML = '<a href="' + editPage + '?id=' + listing.id + '" class="submit-btn" style="background-color:' + buttonColor + '">' + getT('edit_listing') + '</a>';
+                } else if (listing.type === 'wohnung' && !showPrivateInfo) {
+                    actionBarHTML = '<a href="verify-options.html" class="submit-btn" style="background-color:#f59e0b;">' + getT('verify_to_contact') + '</a>';
+                } else if (currentUser) {
+                    var buttonText = getT('contact_seller');
+                    if (listing.listing_mode === 'offer') buttonText = getT('contact_owner');
+                    else if (listing.listing_mode === 'search') buttonText = getT('i_have_what_you_need');
+                    else if (listing.listing_mode === 'swap') buttonText = getT('lets_swap');
+                    actionBarHTML = '<a href="chat.html?listingId=' + listingId + '&sellerId=' + listing.owner_id + '" class="submit-btn" style="background-color:#3b82f6;">' + buttonText + '</a>';
+                } else {
+                    actionBarHTML = '<a href="login.html" class="submit-btn">' + getT('login_to_contact') + '</a>';
+                }
+                
+                actionBarContainer.innerHTML = '<div class="detail-action-bar-container">' + actionBarHTML + '</div>';
+            })
+            .catch(function(error) {
+                console.error('Fehler beim Laden:', error);
+                detailContainer.innerHTML = '<p style="text-align:center; padding: 2rem; color:red;"><b>Fehler:</b> ' + error.message + '</p>';
+            });
+    }
+    
+    document.addEventListener('DOMContentLoaded', loadListingDetails);
+</script>
+
+<!-- REPORT MODAL -->
+<div id="reportModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 16px; padding: 2rem; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0; font-size: 1.3rem; color: #1f2937;" data-i18n="detail_report_title">Inserat melden</h3>
+            <button id="reportModalClose" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6b7280; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s;">&times;</button>
+        </div>
+        
+        <form id="reportForm">
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Grund der Meldung *</label>
+                <div style="display: grid; gap: 0.75rem;">
+                    <label class="report-reason-option" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="reason" value="spam" required style="width: 20px; height: 20px; cursor: pointer;">
+                        <div>
+                            <strong>Spam</strong>
+                            <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Unerwünschte Werbung oder wiederholte Inhalte</p>
+                        </div>
+                    </label>
+                    
+                    <label class="report-reason-option" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="reason" value="inappropriate_content" required style="width: 20px; height: 20px; cursor: pointer;">
+                        <div>
+                            <strong>Unangemessener Inhalt</strong>
+                            <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Anstößige oder unpassende Inhalte</p>
+                        </div>
+                    </label>
+                    
+                    <label class="report-reason-option" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="reason" value="fake_listing" required style="width: 20px; height: 20px; cursor: pointer;">
+                        <div>
+                            <strong>Fake/Betrug</strong>
+                            <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Gefälschtes Inserat oder Betrugsversuch</p>
+                        </div>
+                    </label>
+                    
+                    <label class="report-reason-option" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="reason" value="scam" required style="width: 20px; height: 20px; cursor: pointer;">
+                        <div>
+                            <strong>Betrügerische Absicht</strong>
+                            <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Verdacht auf Betrug oder Abzocke</p>
+                        </div>
+                    </label>
+                    
+                    <label class="report-reason-option" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="reason" value="other" required style="width: 20px; height: 20px; cursor: pointer;">
+                        <div>
+                            <strong>Anderes</strong>
+                            <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Sonstiger Grund</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label for="reportDescription" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Zusätzliche Informationen (optional)</label>
+                <textarea id="reportDescription" placeholder="Beschreibe das Problem genauer..." style="width: 100%; min-height: 100px; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-family: inherit; resize: vertical;"></textarea>
+            </div>
+            
+            <button type="submit" id="reportSubmitBtn" style="width: 100%; padding: 1rem; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;" data-i18n="detail_report_submit">
+                Meldung absenden
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    var reportModal = document.getElementById('reportModal');
+    var reportForm = document.getElementById('reportForm');
+    var reportModalClose = document.getElementById('reportModalClose');
+    var reportSubmitBtn = document.getElementById('reportSubmitBtn');
+    var reportListingBtn = document.getElementById('reportListingBtn');
+    var currentReportListingId = null;
+    
+    function checkLoginAndShowReportBtn() {
+        supabase.auth.getUser().then(function(response) {
+            var user = response.data.user;
+            if (user) {
+                var params = new URLSearchParams(window.location.search);
+                currentReportListingId = params.get('id');
+                if (currentReportListingId) {
+                    reportListingBtn.style.display = 'flex';
+                }
+            }
+        });
+    }
+    
+    reportListingBtn.addEventListener('click', function() {
+        reportModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    });
+    
+    function closeReportModal() {
+        reportModal.style.display = 'none';
+        document.body.style.overflow = '';
+        reportForm.reset();
+        document.querySelectorAll('.report-reason-option').forEach(function(o) {
+            o.style.borderColor = '#e5e7eb';
+            o.style.background = 'white';
+        });
+    }
+    
+    reportModalClose.addEventListener('click', closeReportModal);
+    reportModal.addEventListener('click', function(e) {
+        if (e.target === reportModal) closeReportModal();
+    });
+    
+    document.querySelectorAll('.report-reason-option').forEach(function(option) {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.report-reason-option').forEach(function(o) {
+                o.style.borderColor = '#e5e7eb';
+                o.style.background = 'white';
+            });
+            this.style.borderColor = '#ef4444';
+            this.style.background = '#fef2f2';
+            this.querySelector('input[type="radio"]').checked = true;
+        });
+    });
+    
+    reportForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!currentReportListingId) {
+            alert('Fehler: Keine Listing-ID gefunden');
+            return;
+        }
+        
+        supabase.auth.getUser().then(function(response) {
+            var user = response.data.user;
+            if (!user) {
+                alert('Bitte logge dich ein um zu melden');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            var reasonInput = document.querySelector('input[name="reason"]:checked');
+            if (!reasonInput) {
+                alert('Bitte wähle einen Grund aus');
+                return;
+            }
+            var reason = reasonInput.value;
+            var description = document.getElementById('reportDescription').value.trim();
+            
+            reportSubmitBtn.disabled = true;
+            reportSubmitBtn.textContent = 'Wird gesendet...';
+            
+            return supabase.from('reports').insert({
+                reporter_id: user.id,
+                reported_type: 'listing',
+                reported_id: currentReportListingId,
+                reason: reason,
+                description: description || null,
+                status: 'pending'
+            });
+        }).then(function(result) {
+            if (result && result.error) throw result.error;
+            alert('Vielen Dank für deine Meldung! Wir werden sie prüfen.');
+            closeReportModal();
+        }).catch(function(err) {
+            console.error('Fehler beim Senden:', err);
+            if (err.code === '23505' || (err.message && err.message.indexOf('duplicate') !== -1)) {
+                alert('Du hast dieses Inserat bereits gemeldet.');
+            } else if (err.code === '42501') {
+                alert('Keine Berechtigung. Bist du eingeloggt?');
+            } else {
+                alert('Fehler beim Senden der Meldung: ' + (err.message || 'Unbekannter Fehler'));
+            }
+        }).finally(function() {
+            reportSubmitBtn.disabled = false;
+            reportSubmitBtn.textContent = 'Meldung absenden';
+        });
+    });
+    
+    checkLoginAndShowReportBtn();
+</script>
+
+<script src="navigation.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>

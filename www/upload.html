@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Immatrikulationsbescheinigung hochladen - Room8</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <header class="app-header">
+      <h1 data-i18n="upload_title">Letzter Schritt</h1>
+    </header>
+
+    <main class="app-content">
+      <div style="text-align: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary-color); margin-bottom: 1rem;">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line>
+        </svg>
+        <h2 style="margin-bottom: 1rem;" data-i18n="upload_heading">Immatrikulationsbescheinigung hochladen</h2>
+        <p style="color: var(--text-light); margin-bottom: 2rem;" data-i18n="upload_description">
+          Bitte lade deine aktuelle Immatrikulationsbescheinigung hoch. Nach erfolgreicher Prüfung durch unser Team wird dein Account vollständig aktiviert.
+        </p>
+      </div>
+
+      <form id="uploadForm">
+        <div class="form-group">
+          <label for="enrollmentCertificate" data-i18n="upload_label">Bescheinigung (PDF oder Bild)</label>
+          <input type="file" id="enrollmentCertificate" accept=".pdf,image/*" required style="padding: 0.5rem; border-style: dashed;">
+        </div>
+        
+        <div id="form-message" style="margin-bottom: 15px; font-weight: bold; text-align: center;"></div>
+        <button type="submit" class="submit-btn" data-i18n="upload_button">Hochladen & auf Prüfung warten</button>
+      </form>
+    </main>
+
+    <footer class="app-footer-nav" id="app-footer-nav"></footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    var form = document.getElementById('uploadForm');
+    var msgContainer = document.getElementById('form-message');
+    var submitBtn = form.querySelector('button[type="submit"]');
+
+    function getTranslation(key, fallback) {
+      var lang = localStorage.getItem('room8_language') || 'de';
+      var translations = {
+        de: {
+          uploading: 'Wird hochgeladen...',
+          select_file: 'Bitte wähle eine Datei aus.',
+          success: 'Upload erfolgreich! Dein Account wird nun geprüft. Du wirst ausgeloggt.',
+          error: 'Fehler',
+          button_text: 'Hochladen & auf Prüfung warten'
+        },
+        en: {
+          uploading: 'Uploading...',
+          select_file: 'Please select a file.',
+          success: 'Upload successful! Your account is now under review. You will be logged out.',
+          error: 'Error',
+          button_text: 'Upload & Await Review'
+        }
+      };
+      var langObj = translations[lang] || translations.de;
+      return langObj[key] || fallback;
+    }
+
+    function setFormMessage(text, isSuccess) {
+      msgContainer.textContent = text;
+      msgContainer.style.color = isSuccess ? 'green' : 'red';
+    }
+
+    function requireAuth() {
+      return supabase.auth.getUser().then(function(response) {
+        var user = response.data.user;
+        if (!user) {
+          window.location.href = 'login.html';
+          throw new Error('User not authenticated');
+        }
+        return user;
+      });
+    }
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      setFormMessage('', true);
+      submitBtn.disabled = true;
+      submitBtn.textContent = getTranslation('uploading', 'Wird hochgeladen...');
+
+      requireAuth()
+        .then(function(user) {
+          var file = document.getElementById('enrollmentCertificate').files[0];
+          
+          if (!file) {
+            throw new Error(getTranslation('select_file', 'Bitte wähle eine Datei aus.'));
+          }
+
+          var path = user.id + '/' + Date.now() + '_' + file.name;
+          
+          return supabase.storage
+            .from('enrollment-certificates')
+            .upload(path, file)
+            .then(function(uploadResponse) {
+              if (uploadResponse.error) throw uploadResponse.error;
+              
+              var urlData = supabase.storage
+                .from('enrollment-certificates')
+                .getPublicUrl(path);
+
+              return supabase
+                .from('profiles')
+                .update({ enrollment_certificate_url: urlData.data.publicUrl })
+                .eq('id', user.id);
+            });
+        })
+        .then(function(profileResponse) {
+          if (profileResponse.error) throw profileResponse.error;
+          
+          setFormMessage(getTranslation('success', 'Upload erfolgreich!'), true);
+          
+          setTimeout(function() {
+            supabase.auth.signOut().then(function() {
+              window.location.href = 'login.html';
+            });
+          }, 3000);
+        })
+        .catch(function(error) {
+          setFormMessage(getTranslation('error', 'Fehler') + ': ' + error.message, false);
+          submitBtn.disabled = false;
+          submitBtn.textContent = getTranslation('button_text', 'Hochladen & auf Prüfung warten');
+        });
+    });
+  </script>
+
+  <script src="navigation.js"></script>
+  <script src="translations.js"></script>
+</body>
+</html>

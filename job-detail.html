@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Job - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .app-container { background: white; padding-bottom: 80px; }
+        
+        .job-hero { text-align: center; padding: 2rem 1.5rem; background: #F9FAFB; }
+        .job-logo { width: 80px; height: 80px; border-radius: 16px; object-fit: cover; margin-bottom: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .job-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.2; }
+        .job-company { color: #6B7280; font-weight: 500; }
+        
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 1.5rem; border-bottom: 1px solid #F3F4F6; }
+        .info-item { text-align: center; }
+        .info-label { font-size: 0.75rem; color: #9CA3AF; text-transform: uppercase; margin-bottom: 0.25rem; }
+        .info-value { font-weight: 600; font-size: 0.95rem; }
+        
+        .content-section { padding: 1.5rem; }
+        .content-section h3 { margin-bottom: 0.75rem; font-size: 1.1rem; }
+        .content-section p, .content-section li { color: #4B5563; line-height: 1.6; font-size: 0.95rem; }
+        .content-section ul { padding-left: 1.2rem; }
+
+        .apply-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            padding: 1rem 1.5rem; background: white; border-top: 1px solid #E5E7EB;
+            display: flex; justify-content: center; box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+        }
+        .apply-btn {
+            background: #8B5CF6; color: white; border: none; width: 100%; max-width: 600px;
+            padding: 1rem; border-radius: 999px; font-weight: 700; font-size: 1rem; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header" style="background:transparent; color:#374151; box-shadow:none; border:none; position:absolute; width:100%;">
+        <a href="javascript:history.back()" class="back-arrow" style="color:#374151;">&#8592;</a>
+    </header>
+
+    <div id="loading" style="text-align:center; padding:5rem;">Lade Job...</div>
+
+    <div id="content" style="display:none;">
+        <div class="job-hero">
+            <img src="placeholder.png" id="logo" class="job-logo" onerror="this.src='https://via.placeholder.com/80'">
+            <h1 id="title" class="job-title"></h1>
+            <div id="company" class="job-company"></div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item"><div class="info-label">Gehalt</div><div id="salary" class="info-value"></div></div>
+            <div class="info-item"><div class="info-label">Typ</div><div id="type" class="info-value"></div></div>
+            <div class="info-item"><div class="info-label">Ort</div><div id="location" class="info-value"></div></div>
+            <div class="info-item"><div class="info-label">Start</div><div id="start" class="info-value">Sofort</div></div>
+        </div>
+
+        <div class="content-section">
+            <h3>Beschreibung</h3>
+            <p id="desc"></p>
+        </div>
+
+        <div class="content-section" id="reqSection" style="display:none;">
+            <h3>Das bringst du mit</h3>
+            <ul id="reqList"></ul>
+        </div>
+
+        <div class="content-section" id="benSection" style="display:none;">
+            <h3>Das bieten wir</h3>
+            <ul id="benList"></ul>
+        </div>
+        
+        <div style="height:2rem;"></div>
+    </div>
+
+    <div class="apply-bar">
+        <button class="apply-btn" id="applyBtn">Jetzt bewerben</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+    if (typeof SUPABASE_URL === 'undefined') { var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co'; var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw'; }
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const id = new URLSearchParams(window.location.search).get('id');
+
+    async function load() {
+        if (!id) return;
+        const { data: job } = await supabase.from('listings').select('*, listing_photos(storage_path)').eq('id', id).single();
+        
+        if (job) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+
+            document.getElementById('title').textContent = job.title;
+            document.getElementById('company').textContent = job.company_name;
+            document.getElementById('location').textContent = job.city;
+            document.getElementById('type').textContent = (job.job_type || '').toUpperCase();
+            
+            let salary = job.salary_amount + ' €';
+            if (job.salary_type === 'per_hour') salary += '/h';
+            else salary += '/Monat';
+            document.getElementById('salary').textContent = salary;
+            
+            document.getElementById('desc').textContent = job.description;
+
+            // Logo
+            if (job.listing_photos && job.listing_photos.length > 0) {
+                const { data } = supabase.storage.from('listing-images').getPublicUrl(job.listing_photos[0].storage_path);
+                document.getElementById('logo').src = data.publicUrl;
+            }
+
+            // Arrays
+            if (job.requirements && job.requirements.length > 0) {
+                document.getElementById('reqSection').style.display = 'block';
+                document.getElementById('reqList').innerHTML = job.requirements.map(i => `<li>${i}</li>`).join('');
+            }
+            if (job.benefits && job.benefits.length > 0) {
+                document.getElementById('benSection').style.display = 'block';
+                document.getElementById('benList').innerHTML = job.benefits.map(i => `<li>${i}</li>`).join('');
+            }
+
+            // Apply Button
+            document.getElementById('applyBtn').onclick = () => {
+                if (job.application_url) window.open(job.application_url, '_blank');
+                else if (job.application_email) window.location.href = `mailto:${job.application_email}`;
+                else alert("Bitte direkt beim Anbieter melden.");
+            };
+        }
+    }
+    load();
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "appId": "com.room8.app",
+  "appName": "Room8",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

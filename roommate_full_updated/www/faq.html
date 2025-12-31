@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">  <title>Hilfe & FAQ – Room8</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .faq-content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    
+    .faq-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .faq-header h1 {
+      color: #1e40af;
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+    
+    .faq-header p {
+      color: #6b7280;
+      font-size: 1.1rem;
+    }
+    
+    .faq-search {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+    
+    .faq-search input {
+      width: 100%;
+      padding: 1rem 1rem 1rem 3rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+    
+    .faq-search input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    
+    .faq-search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.25rem;
+    }
+    
+    .faq-category {
+      margin-bottom: 2rem;
+    }
+    
+    .faq-category-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .faq-category-icon {
+      font-size: 1.5rem;
+    }
+    
+    .faq-item {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    
+    .faq-item:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    .faq-question {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      font-weight: 600;
+      color: #111827;
+      background: white;
+      transition: background 0.2s;
+    }
+    
+    .faq-question:hover {
+      background: #f9fafb;
+    }
+    
+    .faq-question.active {
+      background: #eff6ff;
+      color: #1e40af;
+    }
+    
+    .faq-arrow {
+      font-size: 1.25rem;
+      transition: transform 0.3s;
+      color: #9ca3af;
+    }
+    
+    .faq-question.active .faq-arrow {
+      transform: rotate(180deg);
+      color: #1e40af;
+    }
+    
+    .faq-answer {
+      display: none;
+      padding: 0 1.25rem 1.25rem 1.25rem;
+      color: #4b5563;
+      line-height: 1.7;
+    }
+    
+    .faq-answer.show {
+      display: block;
+    }
+    
+    .faq-answer a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+    
+    .faq-answer a:hover {
+      text-decoration: underline;
+    }
+    
+    .faq-answer ul {
+      margin: 0.5rem 0;
+      padding-left: 1.5rem;
+    }
+    
+    .faq-answer li {
+      margin-bottom: 0.5rem;
+    }
+    
+    .highlight-box {
+      background: #d1fae5;
+      border-left: 4px solid #10b981;
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1rem 0;
+    }
+    
+    .warning-box {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1rem 0;
+    }
+    
+    /* Contact Form */
+    .contact-section {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 2px solid #e5e7eb;
+    }
+    
+    .contact-section h2 {
+      text-align: center;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+    
+    .contact-section > p {
+      text-align: center;
+      color: #6b7280;
+      margin-bottom: 1.5rem;
+    }
+    
+    .contact-form {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #374151;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    
+    .form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+    
+    .submit-btn {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+    
+    .submit-btn:disabled {
+      background: #d1d5db;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .form-success {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+    }
+    
+    .form-success.show {
+      display: block;
+    }
+    
+    .form-success-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    
+    .form-success h3 {
+      color: #059669;
+      margin-bottom: 0.5rem;
+    }
+    
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .quick-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      text-decoration: none;
+      color: #374151;
+      transition: all 0.2s;
+    }
+    
+    .quick-link:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .quick-link-icon {
+      font-size: 1.5rem;
+    }
+    
+    .quick-link-text {
+      font-weight: 600;
+    }
+    
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #6b7280;
+      text-decoration: none;
+      margin-bottom: 1rem;
+    }
+    
+    .back-link:hover {
+      color: #3b82f6;
+    }
+    
+    .no-results {
+      text-align: center;
+      padding: 2rem;
+      color: #6b7280;
+      display: none;
+    }
+    
+    .no-results.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <main class="faq-content">
+    <a href="javascript:history.back()" class="back-link">&larr; Zurück</a>
+    
+    <div class="faq-header">
+      <h1>🤔 Hilfe & FAQ</h1>
+      <p>Antworten auf die häufigsten Fragen</p>
+    </div>
+    
+    <!-- Quick Links -->
+    <div class="quick-links">
+      <a href="nutzungsbedingungen.html#mustervertraege" class="quick-link">
+        <span class="quick-link-icon">📋</span>
+        <span class="quick-link-text">Musterverträge</span>
+      </a>
+      <a href="datenschutz.html" class="quick-link">
+        <span class="quick-link-icon">🔒</span>
+        <span class="quick-link-text">Datenschutz</span>
+      </a>
+      <a href="nutzungsbedingungen.html" class="quick-link">
+        <span class="quick-link-icon">📜</span>
+        <span class="quick-link-text">AGB</span>
+      </a>
+      <a href="#kontakt" class="quick-link">
+        <span class="quick-link-icon">✉️</span>
+        <span class="quick-link-text">Kontakt</span>
+      </a>
+    </div>
+    
+    <!-- Search -->
+    <div class="faq-search">
+      <span class="faq-search-icon">🔍</span>
+      <input type="text" id="faqSearch" placeholder="Frage suchen...">
+    </div>
+    
+    <div class="no-results" id="noResults">
+      <p>😕 Keine passenden Fragen gefunden.</p>
+      <p>Stelle deine Frage unten im <a href="#kontakt">Kontaktformular</a>!</p>
+    </div>
+    
+    <!-- FAQ Categories -->
+    <div id="faqContainer">
+      
+      <!-- Allgemein -->
+      <div class="faq-category" data-category="allgemein">
+        <div class="faq-category-title">
+          <span class="faq-category-icon">🏠</span>
+          Allgemein
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>Was ist Room8?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p>Room8 ist eine <strong>kostenlose Plattform für Studierende</strong>, um:</p>
+            <ul>
+              <li>🏠 <strong>Wohnungen & WG-Zimmer</strong> zu finden oder anzubieten</li>
+              <li>🔄 <strong>Wohnungen zu tauschen</strong> (z.B. für ein Auslandssemester)</li>
+              <li>🛋️ <strong>Gebrauchte Gegenstände</strong> zu kaufen/verkaufen</li>
+              <li>💼 <strong>Studentenjobs</strong> zu finden</li>
+              <li>🎟️ <strong>Rabatte & Coupons</strong> zu entdecken</li>
+            </ul>
+            <p>Unser Ziel: Das Studentenleben einfacher machen!</p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>Ist Room8 wirklich kostenlos?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <div class="highlight-box">
+              <strong>✅ Ja, 100% kostenlos für Studierende!</strong>
+            </div>
+            <p>Es gibt keine versteckten Gebühren, keine Premium-Mitgliedschaften, keine Provision. 
+            Du kannst unbegrenzt Inserate erstellen, Nachrichten schreiben und die Plattform nutzen.</p>
+            <p>Wir finanzieren uns durch Partnerschaften mit Unternehmen (Coupons, Jobangebote) – 
+            nicht durch dich.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>Wer kann Room8 nutzen?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p>Room8 ist <strong>exklusiv für Studierende</strong>:</p>
+            <ul>
+              <li>Eingeschriebene Studierende an Hochschulen/Unis</li>
+              <li>Studierende in Übergangsphasen (z.B. zwischen Bachelor & Master)</li>
+              <li>Austauschstudierende</li>
+            </ul>
+            <p>Um alle Funktionen nutzen zu können, musst du deinen Studentenstatus verifizieren.</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Verifizierung -->
+      <div class="faq-category" data-category="verifizierung">
+        <div class="faq-category-title">
+          <span class="faq-category-icon">🎓</span>
+          Verifizierung
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>Warum muss ich mich verifizieren?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p>Die Verifizierung schützt unsere Community:</p>
+            <ul>
+              <li><strong>Sicherheit:</strong> Nur echte Studenten können andere kontaktieren</li>
+              <li><strong>Vertrauen:</strong> Du weißt, dass dein Gegenüber auch Student ist</li>
+              <li><strong>Weniger Spam:</strong> Keine unseriösen Anbieter</li>
+            </ul>
+            <p>Unverifizierte Nutzer können browsen, aber nicht Kontakt aufnehmen oder 
+            private Details (Adresse, Telefon) sehen.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>Wie verifiziere ich meinen Studentenstatus?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p>Du hast mehrere Möglichkeiten:</p>
+            <ol>
+              <li><strong>Uni-E-Mail:</strong> Verifizierung über deine @uni.de E-Mail-Adresse</li>
+              <li><strong>Studentenausweis:</strong> Foto deines aktuellen Studentenausweises hochladen</li>
+              <li><strong>Immatrikulationsbescheinigung:</strong> Aktuelles Dokument hochladen</li>
+            </ol>
+            <p>Die Verifizierung dauert in der Regel wenige Minuten bis maximal 24 Stunden.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>Sind meine Daten sicher?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <div class="highlight-box">
+              <strong>🔒 Ja! Datenschutz hat für uns höchste Priorität.</strong>
+            </div>
+            <ul>
+              <li>Verifizierungsdokumente werden nach der Prüfung gelöscht</li>
+              <li>Wir verkaufen keine Daten an Dritte</li>
+              <li>Kein Tracking, keine Werbung basierend auf deinen Daten</li>
+              <li>Server in der EU (Deutschland)</li>
+            </ul>
+            <p>Mehr Details in unserer <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Wohnungen -->
+      <div class="faq-category" data-category="wohnungen">
+        <div class="faq-category-title">
+          <span class="faq-category-icon">🏡</span>
+          Wohnungen & WGs
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>Was bedeutet Angebot / Suche / Tausch?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <ul>
+              <li><strong>🏠 Angebot:</strong> Du hast eine Wohnung/Zimmer und suchst einen Mieter</li>
+              <li><strong>🔍 Suche:</strong> Du suchst eine Wohnung und beschreibst was du brauchst</li>
+              <li><strong>🔄 Tausch:</strong> Du möchtest deine Wohnung temporär tauschen (z.B. Auslandssemester)</li>
+            </ul>
+            <p>Beim Tausch kannst du auch angeben, in welcher Stadt du etwas suchst!</p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>Worauf sollte ich bei der Besichtigung achten?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p>Nutze unsere <a href="nutzungsbedingungen.html#mustervertraege">Checkliste für Wohnungsbesichtigungen</a>!</p>
+            <p>Die wichtigsten Punkte:</p>
+            <ul>
+              <li>✅ Zustand von Wänden, Böden, Fenstern</li>
+              <li>✅ Heizung und Warmwasser testen</li>
+              <li>✅ Schimmel im Bad checken</li>
+              <li>✅ Internetanschluss und Handyempfang</li>
+              <li>✅ Mitbewohner kennenlernen (bei WG)</li>
+              <li>✅ Mietvertrag genau lesen!</li>
+            </ul>
+            <div class="warning-box">
+              <strong>⚠️ Wichtig:</strong> Zahle niemals Kaution oder Miete bevor du die Wohnung 
+              persönlich gesehen hast!
+            </div>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>Brauche ich einen schriftlichen Mietvertrag?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <div class="warning-box">
+              <strong>⚠️ Ja, unbedingt!</strong> Auch bei Untervermietung oder unter Freunden.
+            </div>
+            <p>Ein schriftlicher Vertrag schützt beide Seiten. Er sollte enthalten:</p>
+            <ul>
+              <li>Namen beider Parteien</li>
+              <li>Genaue Adresse und Beschreibung des Mietobjekts</li>
+              <li>Mietdauer (befristet/unbefristet)</li>
+              <li>Monatliche Miete + Nebenkosten</li>
+              <li>Höhe der Kaution</li>
+              <li>Kündigungsfrist</li>
+            </ul>
+            <p>👉 Nutze unsere kostenlosen <a href="nutzungsbedingungen.html#mustervertraege">Musterverträge</a>!</p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>Was ist ein Übergabeprotokoll und brauche ich das?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <div class="highlight-box">
+              <strong>✅ Ja, unbedingt!</strong> Das ist dein wichtigster Schutz.
+            </div>
+            <p>Ein Übergabeprotokoll dokumentiert den Zustand der Wohnung bei Ein- und Auszug:</p>
+            <ul>
+              <li>📸 Fotos von allen Räumen</li>
+              <li>📝 Vorhandene Mängel notieren</li>
+              <li>🔢 Zählerstände (Strom, Gas, Wasser)</li>
+              <li>🔑 Anzahl der übergebenen Schlüssel</li>
+            </ul>
+            <p>Ohne Protokoll kann der Vermieter dir beim Auszug Schäden anlasten, die schon 
+            vorher da waren!</p>
+            <p>👉 <a href="nutzungsbedingungen.html#mustervertraege">Übergabeprotokoll-Vorlage herunterladen</a></p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sicherheit -->
+      <div class="faq-category" data-category="sicherheit">
+        <div class="faq-category-title">
+          <span class="faq-category-icon">🛡️</span>
+          Sicherheit & Betrug
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>Wie erkenne ich Betrug?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <div class="warning-box">
+              <strong>🚨 Warnsignale:</strong>
+            </div>
+            <ul>
+              <li>❌ Vermieter ist "im Ausland" und kann nicht zeigen</li>
+              <li>❌ Preis ist unrealistisch günstig</li>
+              <li>❌ Kaution/Miete soll vorab überwiesen werden</li>
+              <li>❌ Druck zur schnellen Entscheidung</li>
+              <li>❌ Kommunikation nur per E-Mail, kein Telefon</li>
+              <li>❌ Schlüssel sollen per Post geschickt werden</li>
+            </ul>
+            <div class="highlight-box">
+              <strong>✅ So gehst du sicher:</strong>
+              <ul>
+                <li>Wohnung immer persönlich besichtigen</li>
+                <li>Vermieter/Mitbewohner persönlich treffen</li>
+                <li>Nie Geld überweisen ohne die Wohnung gesehen zu haben</li>
+                <li>Vertrag genau lesen vor der Unterschrift</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>Was mache ich, wenn ich betrogen wurde?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <ol>
+              <li><strong>Beweise sichern:</strong> Screenshots von Nachrichten, E-Mails, Überweisungen</li>
+              <li><strong>Bank kontaktieren:</strong> Eventuell kann eine Überweisung noch gestoppt werden</li>
+              <li><strong>Polizei:</strong> Anzeige erstatten (auch online möglich)</li>
+              <li><strong>Uns melden:</strong> <a href="/cdn-cgi/l/email-protection#1b72757d745b69747476233578776e79"><span class="__cf_email__" data-cfemail="acc5c2cac3ecdec3c3c19482cfc0d9ce">[email&#160;protected]</span></a> – 
+              wir sperren den Account sofort</li>
+            </ol>
+            <p>Leider können wir kein Geld zurückholen, aber wir können verhindern, 
+            dass andere auf denselben Betrüger reinfallen.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>Wie kann ich ein verdächtiges Inserat melden?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p>Du hast mehrere Möglichkeiten:</p>
+            <ol>
+              <li><strong>Meldefunktion:</strong> Direkt beim Inserat auf "Melden" klicken</li>
+              <li><strong>E-Mail:</strong> <a href="/cdn-cgi/l/email-protection#6900070f06291b06060451470a051c0b"><span class="__cf_email__" data-cfemail="8de4e3ebe2cdffe2e2e0b5a3eee1f8ef">[email&#160;protected]</span></a></li>
+              <li><strong>Kontaktformular:</strong> Unten auf dieser Seite</li>
+            </ol>
+            <p>Wir prüfen jede Meldung und reagieren schnell!</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Marktplatz -->
+      <div class="faq-category" data-category="marktplatz">
+        <div class="faq-category-title">
+          <span class="faq-category-icon">🛒</span>
+          Marktplatz
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>Was kann ich auf dem Marktplatz verkaufen?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p>Alles, was für Studenten nützlich sein könnte:</p>
+            <ul>
+              <li>📚 Bücher & Lernmaterial</li>
+              <li>🛋️ Möbel (Schreibtisch, Stuhl, Regal...)</li>
+              <li>💻 Elektronik (Laptop, Monitor, Drucker...)</li>
+              <li>👕 Kleidung</li>
+              <li>🚲 Fahrräder</li>
+              <li>🎸 Musikinstrumente</li>
+              <li>🍳 Küchengeräte</li>
+            </ul>
+            <p><strong>Nicht erlaubt:</strong> Illegale Waren, Waffen, Medikamente, lebende Tiere.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>Wie läuft die Bezahlung ab?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p>Room8 wickelt <strong>keine Zahlungen</strong> ab. Das macht ihr direkt untereinander:</p>
+            <ul>
+              <li><strong>Empfohlen:</strong> Barzahlung bei Abholung</li>
+              <li><strong>Möglich:</strong> PayPal, Überweisung</li>
+            </ul>
+            <div class="warning-box">
+              <strong>⚠️ Tipp:</strong> Bei wertvollen Gegenständen nutze unsere 
+              <a href="nutzungsbedingungen.html#mustervertraege">Kaufvertrags-Vorlage</a>!
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Account -->
+      <div class="faq-category" data-category="account">
+        <div class="faq-category-title">
+          <span class="faq-category-icon">👤</span>
+          Account & Profil
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>Wie lösche ich meinen Account?</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p>Du kannst deinen Account jederzeit löschen:</p>
+            <ol>
+              <li>Gehe zu <strong>Einstellungen</strong></li>
+              <li>Scrolle nach unten zu <strong>"Account löschen"</strong></li>
+              <li>Bestätige die Löschung</li>
+            </ol>
+            <p>Bei der Löschung werden alle deine Daten, Inserate und Nachrichten 
+            unwiderruflich entfernt.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>Ich habe mein Passwort vergessen</span>
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <ol>
+              <li>Gehe zur <a href="login.html">Login-Seite</a></li>
+              <li>Klicke auf <strong>"Passwort vergessen"</strong></li>
+              <li>Gib deine E-Mail-Adresse ein</li>
+              <li>Du erhältst einen Link zum Zurücksetzen</li>
+            </ol>
+            <p>Der Link ist 24 Stunden gültig. Checke auch deinen Spam-Ordner!</p>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- Contact Form -->
+    <div class="contact-section" id="kontakt">
+      <h2>📬 Noch Fragen?</h2>
+      <p>Deine Frage war nicht dabei? Schreib uns!</p>
+      
+      <div class="contact-form" id="contactForm">
+        <div class="form-group">
+          <label for="contactName">Dein Name</label>
+          <input type="text" id="contactName" placeholder="Max Mustermann" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="contactEmail">Deine E-Mail</label>
+          <input type="email" id="contactEmail" placeholder="max@uni.de" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="contactCategory">Kategorie</label>
+          <select id="contactCategory" required>
+            <option value="">Bitte wählen...</option>
+            <option value="frage">Allgemeine Frage</option>
+            <option value="problem">Technisches Problem</option>
+            <option value="meldung">Inserat/Nutzer melden</option>
+            <option value="feedback">Feedback & Vorschläge</option>
+            <option value="gewerbe">Gewerbliche Anfrage</option>
+            <option value="sonstiges">Sonstiges</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="contactMessage">Deine Nachricht</label>
+          <textarea id="contactMessage" placeholder="Beschreibe dein Anliegen so genau wie möglich..." required></textarea>
+        </div>
+        
+        <button type="button" class="submit-btn" id="submitBtn" onclick="submitContactForm()">
+          Nachricht senden
+        </button>
+      </div>
+      
+      <div class="form-success" id="formSuccess">
+        <div class="form-success-icon">✅</div>
+        <h3>Nachricht gesendet!</h3>
+        <p>Wir melden uns so schnell wie möglich bei dir.</p>
+        <p style="color: #6b7280; margin-top: 1rem;">
+          Normalerweise antworten wir innerhalb von 24-48 Stunden.
+        </p>
+      </div>
+    </div>
+    
+    <p style="margin-top: 3rem; text-align: center; color: #9ca3af; font-size: 0.875rem;">
+      Stand: November 2024
+    </p>
+  </main>
+  
+  <footer class="app-footer-nav" id="app-footer-nav"></footer>
+</div>
+
+<script>
+  // Toggle FAQ answers
+  function toggleFaq(element) {
+    const answer = element.nextElementSibling;
+    const isActive = element.classList.contains('active');
+    
+    // Close all others
+    document.querySelectorAll('.faq-question.active').forEach(q => {
+      q.classList.remove('active');
+      q.nextElementSibling.classList.remove('show');
+    });
+    
+    // Toggle current
+    if (!isActive) {
+      element.classList.add('active');
+      answer.classList.add('show');
+    }
+  }
+  
+  // Search functionality
+  document.getElementById('faqSearch').addEventListener('input', function(e) {
+    const query = e.target.value.toLowerCase().trim();
+    const items = document.querySelectorAll('.faq-item');
+    const categories = document.querySelectorAll('.faq-category');
+    let anyVisible = false;
+    
+    if (query === '') {
+      // Show all
+      items.forEach(item => item.style.display = 'block');
+      categories.forEach(cat => cat.style.display = 'block');
+      document.getElementById('noResults').classList.remove('show');
+      return;
+    }
+    
+    categories.forEach(category => {
+      let categoryHasVisible = false;
+      
+      category.querySelectorAll('.faq-item').forEach(item => {
+        const question = item.querySelector('.faq-question span').textContent.toLowerCase();
+        const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+        
+        if (question.includes(query) || answer.includes(query)) {
+          item.style.display = 'block';
+          categoryHasVisible = true;
+          anyVisible = true;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+      
+      category.style.display = categoryHasVisible ? 'block' : 'none';
+    });
+    
+    document.getElementById('noResults').classList.toggle('show', !anyVisible);
+  });
+  
+  // Contact form submission
+  function submitContactForm() {
+    const name = document.getElementById('contactName').value.trim();
+    const email = document.getElementById('contactEmail').value.trim();
+    const category = document.getElementById('contactCategory').value;
+    const message = document.getElementById('contactMessage').value.trim();
+    
+    if (!name || !email || !category || !message) {
+      alert('Bitte fülle alle Felder aus.');
+      return;
+    }
+    
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Wird gesendet...';
+    
+    // Create mailto link
+    const subject = encodeURIComponent('[Room8 ' + category + '] Nachricht von ' + name);
+    const body = encodeURIComponent(
+      'Name: ' + name + '\n' +
+      'E-Mail: ' + email + '\n' +
+      'Kategorie: ' + category + '\n\n' +
+      'Nachricht:\n' + message
+    );
+    
+    // Open email client
+    window.location.href = 'mailto:info@room8.club?subject=' + subject + '&body=' + body;
+    
+    // Show success after short delay
+    setTimeout(function() {
+      document.getElementById('contactForm').style.display = 'none';
+      document.getElementById('formSuccess').classList.add('show');
+    }, 500);
+  }
+</script>
+
+<script src="config.js"></script>
+<script src="navigation.js"></script>
+</body>
+</html>

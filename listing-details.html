@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Details - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* === HERO IMAGE SLIDER === */
+        .image-slider {
+            height: 300px;
+            background-color: #e5e7eb;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slider-wrapper {
+            display: flex;
+            height: 100%;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none; /* Firefox */
+        }
+        .slider-wrapper::-webkit-scrollbar { display: none; }
+
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            scroll-snap-align: center;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .slider-dots {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transition: all 0.2s;
+        }
+        .dot.active { background: white; transform: scale(1.2); }
+
+        /* BACK BUTTON OVERLAY */
+        .back-btn-overlay {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            z-index: 10;
+        }
+
+        /* NOTIFICATION BELL OVERLAY (NEU) */
+        .notification-btn-overlay {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            z-index: 10;
+        }
+
+        /* === CONTENT === */
+        .detail-content {
+            padding: 1.5rem;
+            padding-bottom: 100px; /* Platz für Sticky Footer */
+            background: white;
+            border-radius: 20px 20px 0 0;
+            margin-top: -20px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .header-section { margin-bottom: 1.5rem; }
+        
+        .listing-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0 0 0.5rem 0;
+            line-height: 1.2;
+        }
+
+        .listing-price {
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .price-badge {
+            background: #ECFDF5;
+            color: #065F46;
+            font-size: 0.8rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .location-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        /* ATTRIBUTES GRID */
+        .attributes-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: #F9FAFB;
+            border-radius: 12px;
+        }
+
+        .attr-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .attr-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .attr-value { font-size: 1rem; font-weight: 600; color: var(--text-main); }
+
+        /* DESCRIPTION */
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 1.5rem 0 0.75rem 0;
+            color: var(--text-main);
+        }
+
+        .section-subtitle {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 1rem 0 0.5rem 0;
+            color: var(--text-muted);
+        }
+
+        .description-text {
+            color: #4B5563;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            white-space: pre-line; /* Erhält Zeilenumbrüche */
+        }
+
+        /* FEATURES TAGS */
+        .features-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .feature-tag {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .feature-tag.highlight {
+            background: #ECFDF5;
+            border-color: #10B981;
+            color: #065F46;
+        }
+
+        .feature-tag.info {
+            background: #EEF2FF;
+            border-color: #6366F1;
+            color: #4338CA;
+        }
+
+        /* ROOMS INFO BOX */
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .room-item {
+            background: #F9FAFB;
+            border-radius: 8px;
+            padding: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .room-item .room-icon {
+            font-size: 1.2rem;
+        }
+
+        .room-item .room-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .room-item .room-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .room-item .room-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* SEEKER PROFILE BOX */
+        .seeker-profile-box {
+            background: linear-gradient(135deg, #EEF2FF 0%, #F5F3FF 100%);
+            border: 1px solid #C7D2FE;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 0.75rem;
+        }
+
+        .seeker-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .seeker-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #C7D2FE;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .seeker-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .seeker-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .seeker-about {
+            font-size: 0.9rem;
+            color: #4B5563;
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+        }
+
+        .hobby-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .hobby-tag {
+            background: white;
+            border: 1px solid #E5E7EB;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+
+        /* SWAP INFO BOX */
+        .swap-info-box {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+            border: 1px solid #F59E0B;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 0.75rem;
+        }
+
+        .swap-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #92400E;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .swap-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(146, 64, 14, 0.1);
+            font-size: 0.85rem;
+        }
+
+        .swap-detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .swap-label {
+            color: #92400E;
+        }
+
+        .swap-value {
+            font-weight: 600;
+            color: #78350F;
+        }
+
+        /* OWNER PROFILE */
+        .owner-card {
+            display: flex;
+            align-items: center;
+            margin-top: 2rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer; /* Zeigt Klickbarkeit an */
+            transition: background-color 0.2s;
+        }
+        
+        .owner-card:active {
+            background-color: #F3F4F6;
+        }
+
+        .owner-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            margin-right: 1rem;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .owner-info h4 { margin: 0; font-size: 1rem; }
+        .owner-info p { margin: 0; font-size: 0.8rem; color: var(--text-muted); }
+        .owner-arrow { margin-left: auto; color: #D1D5DB; }
+
+        /* REPORT BUTTON */
+        .report-section {
+            margin-top: 2rem;
+            text-align: center;
+            border-top: 1px solid #F3F4F6;
+            padding-top: 1rem;
+        }
+        
+        .btn-report {
+            background: none;
+            border: none;
+            color: #EF4444;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+        
+        .btn-report:hover {
+            text-decoration: underline;
+        }
+
+        /* STICKY FOOTER ACTION BAR */
+        .action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 1rem;
+            z-index: 100;
+            padding-bottom: max(1rem, env(safe-area-inset-bottom));
+        }
+
+        .btn-fav {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #d1d5db; /* Default grau */
+            transition: all 0.2s;
+        }
+        .btn-fav.active {
+            color: #EF4444;
+            border-color: #EF4444;
+            background: #FEF2F2;
+        }
+
+        .btn-contact {
+            flex: 1;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-glow);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Image Slider -->
+    <div class="image-slider">
+        <a href="javascript:history.back()" class="back-btn-overlay">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        
+        <!-- NEU: Benachrichtigungs-Glocke oben rechts -->
+        <a href="notifications.html" class="notification-btn-overlay">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        </a>
+        
+        <div class="slider-wrapper" id="sliderWrapper">
+            <!-- Bilder werden per JS geladen -->
+            <div class="slide"><img src="assets/placeholder.jpg" id="placeholderImg" onerror="this.src='https://via.placeholder.com/400x300?text=Lade+Bilder...'"></div>
+        </div>
+        
+        <div class="slider-dots" id="sliderDots"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="detail-content">
+        <div class="header-section">
+            <div class="price-badge" id="typeBadge" style="display:inline-block; margin-bottom:0.5rem;">Angebot</div>
+            <h1 class="listing-title" id="title">Lädt Details...</h1>
+            <div class="listing-price" id="price">-- €</div>
+            <div class="location-row">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span id="location">Stadt, Viertel</span>
+            </div>
+        </div>
+
+        <div class="attributes-grid" id="attributesGrid">
+            <!-- Dynamische Attribute wie Größe, Zimmer etc. -->
+        </div>
+
+        <div class="section-title">Beschreibung</div>
+        <div class="description-text" id="description">
+            Lade Beschreibung...
+        </div>
+
+        <!-- Sucher-Profil (Nur bei Gesuch) -->
+        <div id="seekerProfileSection" style="display:none;">
+            <div class="section-title">👤 Über den Suchenden</div>
+            <div class="seeker-profile-box" id="seekerProfileBox">
+                <!-- Wird per JS gefüllt -->
+            </div>
+        </div>
+
+        <!-- WG Präferenzen (Nur bei Gesuch) -->
+        <div id="wgPreferencesSection" style="display:none;">
+            <div class="section-title">🏠 WG Präferenzen</div>
+            <div class="features-wrap" id="wgPreferencesList"></div>
+        </div>
+
+        <!-- Tausch-Details (Nur bei Tausch) -->
+        <div id="swapSection" style="display:none;">
+            <div class="section-title">🔄 Tausch-Details</div>
+            <div class="swap-info-box" id="swapInfoBox">
+                <!-- Wird per JS gefüllt -->
+            </div>
+        </div>
+
+        <!-- Räume (Eigen/Geteilt) -->
+        <div id="roomsSection" style="display:none;">
+            <div class="section-title">🚪 Räume</div>
+            <div class="rooms-grid" id="roomsGrid"></div>
+        </div>
+
+        <!-- Badezimmer Details -->
+        <div id="bathroomSection" style="display:none;">
+            <div class="section-title">🚿 Badezimmer</div>
+            <div class="features-wrap" id="bathroomList"></div>
+        </div>
+
+        <!-- Küchen Details -->
+        <div id="kitchenSection" style="display:none;">
+            <div class="section-title">🍳 Küche</div>
+            <div class="features-wrap" id="kitchenList"></div>
+        </div>
+
+        <!-- WG Details -->
+        <div id="wgDetailsSection" style="display:none;">
+            <div class="section-title">👥 WG-Details</div>
+            <div class="features-wrap" id="wgDetailsList"></div>
+        </div>
+
+        <!-- Ausstattung (Nur Wohnungen) -->
+        <div id="featuresSection" style="display:none;">
+            <div class="section-title">🏠 Ausstattung</div>
+            <div class="features-wrap" id="featuresList"></div>
+        </div>
+
+        <!-- Möbel (Nur Wohnungen) -->
+        <div id="furnitureSection" style="display:none;">
+            <div class="section-title">🛋️ Möblierung</div>
+            <div class="features-wrap" id="furnitureList"></div>
+        </div>
+
+        <!-- Inklusive Kosten (Nur Wohnungen) -->
+        <div id="utilitiesSection" style="display:none;">
+            <div class="section-title">💡 In Miete enthalten</div>
+            <div class="features-wrap" id="utilitiesList"></div>
+        </div>
+
+        <!-- Lage-Infos -->
+        <div id="locationInfoSection" style="display:none;">
+            <div class="section-title">📍 Lage & Anbindung</div>
+            <div class="features-wrap" id="locationInfoList"></div>
+        </div>
+
+        <!-- Sonstiges -->
+        <div id="miscSection" style="display:none;">
+            <div class="section-title">📋 Sonstiges</div>
+            <div class="features-wrap" id="miscList"></div>
+        </div>
+
+        <!-- Besitzer -->
+        <div class="section-title">Anbieter</div>
+        <div class="owner-card" id="ownerCard">
+            <div class="owner-avatar" id="ownerAvatar"></div>
+            <div class="owner-info">
+                <h4 id="ownerName">Gastgeber</h4>
+                <p>Profil ansehen</p>
+            </div>
+            <div class="owner-arrow">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </div>
+        </div>
+
+        <!-- Melden Button -->
+        <div class="report-section">
+            <button class="btn-report" onclick="reportListing()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                Inserat melden
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer Action Bar -->
+    <div class="action-bar">
+        <button class="btn-fav" id="favBtn" onclick="toggleFavorite()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        </button>
+        <button class="btn-contact" id="contactBtn">Nachricht senden</button>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="navigation.js"></script>
+<script>
+    // 1. Config Fallback
+    if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_ANON_KEY === 'undefined') {
+        var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co';
+        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw';
+    }
+
+    var supabase;
+    if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    // URL Params
+    const urlParams = new URLSearchParams(window.location.search);
+    const listingId = urlParams.get('id');
+    
+    var currentListing = null;
+    var isFavorited = false;
+    var currentUserId = null;
+
+    // Navigation Helper
+    function navigateTo(url) {
+        try { window.location.href = url; } catch(e) { console.warn(e); }
+    }
+
+    async function loadDetails() {
+        if (!listingId || !supabase) return;
+
+        try {
+            // 1. User check (für Favorite Button)
+            const { data: { user } } = await supabase.auth.getUser();
+            currentUserId = user ? user.id : null;
+
+            // 2. Listing laden (inkl. Owner Profile)
+            const { data: listing, error } = await supabase
+                .from('listings')
+                .select(`
+                    *,
+                    owner:owner_id (
+                        id,
+                        full_name,
+                        username,
+                        avatar_url,
+                        created_at
+                    )
+                `)
+                .eq('id', listingId)
+                .single();
+
+            if (error) throw error;
+            currentListing = listing;
+
+            // 3. UI befüllen
+            fillUI(listing);
+
+            // 4. Bilder laden
+            loadImages(listingId);
+
+            // 5. Favorite Status checken
+            if (currentUserId) checkFavoriteStatus();
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('title').textContent = "Fehler beim Laden";
+            document.getElementById('description').textContent = err.message;
+        }
+    }
+
+    function fillUI(l) {
+        // Basic Info
+        document.getElementById('title').textContent = l.title;
+        document.getElementById('description').textContent = l.description;
+        document.getElementById('location').textContent = (l.district ? l.district + ', ' : '') + l.city;
+        
+        // Badge
+        const typeMap = { 'offer': 'Angebot', 'search': 'Gesuch', 'swap': 'Tausch' };
+        document.getElementById('typeBadge').textContent = typeMap[l.listing_mode] || 'Inserat';
+
+        // Preis
+        let priceText = '';
+        if (l.listing_mode === 'search') {
+            priceText = `Gesuch: ${l.price_range_min || 0} - ${l.price_range_max || 'open'} €`;
+        } else {
+            priceText = l.type === 'wohnung' 
+                ? (l.monthly_rent ? Number(l.monthly_rent).toFixed(0) + ' € / Monat' : 'VB')
+                : (l.price ? Number(l.price).toFixed(0) + ' €' : 'VB');
+        }
+        document.getElementById('price').textContent = priceText;
+
+        // Owner
+        if (l.owner) {
+            const name = l.owner.full_name || l.owner.username || 'Nutzer';
+            document.getElementById('ownerName').textContent = name;
+            if (l.owner.avatar_url) {
+                document.getElementById('ownerAvatar').style.backgroundImage = `url('${l.owner.avatar_url}')`;
+            } else {
+                document.getElementById('ownerAvatar').textContent = name.charAt(0).toUpperCase();
+                document.getElementById('ownerAvatar').style.display = 'flex';
+                document.getElementById('ownerAvatar').style.alignItems = 'center';
+                document.getElementById('ownerAvatar').style.justifyContent = 'center';
+                document.getElementById('ownerAvatar').style.fontWeight = 'bold';
+            }
+            
+            // Klick auf Owner Card -> Public Profile
+            document.getElementById('ownerCard').onclick = () => {
+                navigateTo(`public-profile.html?id=${l.owner.id}`);
+            };
+        }
+
+        // Contact Button Logic
+        document.getElementById('contactBtn').onclick = () => {
+            if (!currentUserId) {
+                if(confirm("Bitte einloggen um Kontakt aufzunehmen.")) navigateTo('login.html');
+                return;
+            }
+            // Hier später Chat öffnen
+            // navigateTo(`chat.html?listing=${l.id}&user=${l.owner_id}`);
+            alert("Chat-Funktion kommt als nächstes! Hier würde der Chat starten.");
+        };
+
+        // --- GRID ATTRIBUTES ---
+        const grid = document.getElementById('attributesGrid');
+        grid.innerHTML = ''; // Reset
+
+        function addAttr(label, value) {
+            if (!value) return;
+            grid.innerHTML += `
+                <div class="attr-item">
+                    <span class="attr-label">${label}</span>
+                    <span class="attr-value">${value}</span>
+                </div>`;
+        }
+
+        if (l.type === 'wohnung') {
+            addAttr('Zimmerart', formatRoomType(l.room_type));
+            addAttr('Größe', l.room_size ? l.room_size + ' m²' : null);
+            addAttr('Zimmer', l.number_of_rooms);
+            addAttr('Frei ab', formatDate(l.available_from));
+            if(l.deposit) addAttr('Kaution', l.deposit + ' €');
+            
+            // === GESUCH: Sucher-Profil anzeigen ===
+            if (l.listing_mode === 'search' && l.seeker_profile) {
+                renderSeekerProfile(l.seeker_profile);
+            }
+
+            // === GESUCH: WG Präferenzen ===
+            if (l.listing_mode === 'search' && l.wg_preferences) {
+                renderWgPreferences(l.wg_preferences);
+            }
+
+            // === TAUSCH: Tausch-Details ===
+            if (l.listing_mode === 'swap' && l.swap_target_data) {
+                renderSwapDetails(l.swap_target_data);
+            }
+
+            // === RÄUME (Eigen/Geteilt) ===
+            if (l.rooms_data) {
+                renderRooms(l.rooms_data);
+            }
+
+            // === BADEZIMMER DETAILS ===
+            renderTags('bathroomSection', 'bathroomList', l.bathroom_details, {
+                'shower': '🚿 Dusche',
+                'bathtub': '🛁 Badewanne',
+                'towel_heater': '🔥 Handtuchheizung',
+                'window': '🪟 Fenster im Bad'
+            });
+
+            // === KÜCHEN DETAILS ===
+            renderTags('kitchenSection', 'kitchenList', l.kitchen_details, {
+                'stove': '🔥 Herd/Ceranfeld',
+                'oven': '♨️ Backofen',
+                'fridge': '❄️ Kühlschrank',
+                'freezer': '🧊 Gefrierschrank',
+                'dishwasher': '🍽️ Geschirrspüler',
+                'microwave': '📻 Mikrowelle'
+            });
+
+            // === WG DETAILS ===
+            if (l.wg_details) {
+                renderWgDetails(l.wg_details);
+            }
+
+            // === AUSSTATTUNG (erweitert) ===
+            renderTags('featuresSection', 'featuresList', l.room_features, {
+                'balcony': '🌿 Balkon/Terrasse',
+                'garden': '🌳 Garten',
+                'elevator': '🛗 Aufzug',
+                'parking': '🚗 Stellplatz',
+                'cellar': '📦 Keller',
+                'pets_allowed': '🐾 Haustiere erlaubt',
+                'barrier_free': '♿ Barrierefrei',
+                'washing_machine': '🧺 Waschmaschine',
+                'dryer': '💨 Trockner',
+                'storage_room': '🚪 Abstellraum',
+                'attic': '🏠 Dachboden',
+                'bike_room': '🚲 Fahrradkeller',
+                'air_conditioning': '❄️ Klimaanlage',
+                'floor_heating': '🔥 Fußbodenheizung',
+                'shutters': '🪟 Rollläden'
+            });
+            
+            // === MÖBLIERUNG (erweitert) ===
+            renderTags('furnitureSection', 'furnitureList', l.furniture_data, {
+                'bed': '🛏️ Bett',
+                'desk': '🖥️ Schreibtisch',
+                'wardrobe': '🚪 Kleiderschrank',
+                'kitchen': '🍳 Einbauküche',
+                'tv': '📺 TV',
+                'sofa': '🛋️ Sofa',
+                'chair': '🪑 Stuhl',
+                'shelf': '📚 Regal'
+            });
+
+            // === NEBENKOSTEN ===
+            renderTags('utilitiesSection', 'utilitiesList', l.utilities_data, {
+                'electricity': '⚡ Strom',
+                'water': '💧 Wasser',
+                'internet': '📶 Internet',
+                'heating': '🔥 Heizung'
+            });
+
+            // === LAGE-INFOS ===
+            if (l.location_info) {
+                renderLocationInfo(l.location_info);
+            }
+
+            // === SONSTIGES ===
+            if (l.misc_details) {
+                renderMiscDetails(l.misc_details);
+            }
+
+        } else {
+            // Gegenstand
+            addAttr('Kategorie', l.category);
+            addAttr('Zustand', l.condition);
+        }
+    }
+
+    // === RENDER FUNCTIONS ===
+
+    function renderTags(sectionId, listId, dataObj, labelsMap) {
+        if (!dataObj) return;
+        const list = document.getElementById(listId);
+        let hasItems = false;
+        
+        for (const [key, label] of Object.entries(labelsMap)) {
+            if (dataObj[key]) {
+                list.innerHTML += `<span class="feature-tag">✅ ${label}</span>`;
+                hasItems = true;
+            }
+        }
+        
+        if (hasItems) document.getElementById(sectionId).style.display = 'block';
+    }
+
+    function renderRooms(roomsData) {
+        const grid = document.getElementById('roomsGrid');
+        let hasItems = false;
+
+        const roomTypeLabels = {
+            'private': 'Eigen',
+            'shared': 'Geteilt',
+            'none': 'Keins',
+            'in_bath': 'Im Bad',
+            'separate': 'Separat'
+        };
+
+        function addRoom(icon, label, value) {
+            if (!value) return;
+            grid.innerHTML += `
+                <div class="room-item">
+                    <span class="room-icon">${icon}</span>
+                    <div class="room-info">
+                        <span class="room-label">${label}</span>
+                        <span class="room-value">${roomTypeLabels[value] || value}</span>
+                    </div>
+                </div>`;
+            hasItems = true;
+        }
+
+        addRoom('🚿', 'Badezimmer', roomsData.bathroom_type);
+        addRoom('🍳', 'Küche', roomsData.kitchen_type);
+        addRoom('🛋️', 'Wohnzimmer', roomsData.livingroom_type);
+        addRoom('🚽', 'WC', roomsData.toilet_type);
+
+        if (roomsData.bathroom_count && roomsData.bathroom_count > 1) {
+            grid.innerHTML += `
+                <div class="room-item">
+                    <span class="room-icon">🔢</span>
+                    <div class="room-info">
+                        <span class="room-label">Anzahl Bäder</span>
+                        <span class="room-value">${roomsData.bathroom_count}</span>
+                    </div>
+                </div>`;
+            hasItems = true;
+        }
+
+        if (hasItems) document.getElementById('roomsSection').style.display = 'block';
+    }
+
+    function renderWgDetails(wgData) {
+        const list = document.getElementById('wgDetailsList');
+        let hasItems = false;
+
+        const genderLabels = {
+            'female_only': '👩 Nur Frauen',
+            'male_only': '👨 Nur Männer',
+            'mixed': '👥 Gemischt'
+        };
+
+        const typeLabels = {
+            'students': '🎓 Studenten-WG',
+            'working': '💼 Berufs-WG',
+            'mixed': '🔀 Gemischt',
+            'purpose': '🎯 Zweck-WG',
+            'community': '❤️ Gemeinschafts-WG'
+        };
+
+        if (wgData.size) {
+            list.innerHTML += `<span class="feature-tag info">👥 ${wgData.size} Mitbewohner</span>`;
+            hasItems = true;
+        }
+
+        if (wgData.gender && genderLabels[wgData.gender]) {
+            list.innerHTML += `<span class="feature-tag">${genderLabels[wgData.gender]}</span>`;
+            hasItems = true;
+        }
+
+        if (wgData.type && typeLabels[wgData.type]) {
+            list.innerHTML += `<span class="feature-tag">${typeLabels[wgData.type]}</span>`;
+            hasItems = true;
+        }
+
+        if (wgData.smoking) {
+            list.innerHTML += `<span class="feature-tag">🚬 Raucher-WG</span>`;
+            hasItems = true;
+        } else if (wgData.smoking_outside) {
+            list.innerHTML += `<span class="feature-tag">🚭 Rauchen nur draußen</span>`;
+            hasItems = true;
+        }
+
+        if (hasItems) document.getElementById('wgDetailsSection').style.display = 'block';
+    }
+
+    function renderLocationInfo(locInfo) {
+        const list = document.getElementById('locationInfoList');
+        let hasItems = false;
+
+        const transportLabels = {
+            'excellent': '⭐ Sehr gut',
+            'good': '👍 Gut',
+            'medium': '👌 Mittel',
+            'poor': '👎 Schlecht'
+        };
+
+        if (locInfo.uni_distance) {
+            list.innerHTML += `<span class="feature-tag info">🎓 ${locInfo.uni_distance} Min. zur Uni</span>`;
+            hasItems = true;
+        }
+
+        if (locInfo.public_transport && transportLabels[locInfo.public_transport]) {
+            list.innerHTML += `<span class="feature-tag">🚇 ÖPNV: ${transportLabels[locInfo.public_transport]}</span>`;
+            hasItems = true;
+        }
+
+        if (locInfo.uni_name) {
+            list.innerHTML += `<span class="feature-tag">🏫 ${locInfo.uni_name}</span>`;
+            hasItems = true;
+        }
+
+        if (hasItems) document.getElementById('locationInfoSection').style.display = 'block';
+    }
+
+    function renderMiscDetails(miscData) {
+        const list = document.getElementById('miscList');
+        let hasItems = false;
+
+        if (miscData.anmeldung_possible) {
+            list.innerHTML += `<span class="feature-tag highlight">✅ Wohnsitz-Anmeldung möglich</span>`;
+            hasItems = true;
+        }
+
+        if (miscData.commission_free) {
+            list.innerHTML += `<span class="feature-tag highlight">✅ Provisionsfrei</span>`;
+            hasItems = true;
+        }
+
+        if (hasItems) document.getElementById('miscSection').style.display = 'block';
+    }
+
+    function renderSeekerProfile(profile) {
+        const box = document.getElementById('seekerProfileBox');
+        
+        const genderEmoji = {
+            'male': '👨',
+            'female': '👩',
+            'diverse': '🧑',
+            'no_answer': '👤'
+        };
+
+        const hobbyLabels = {
+            'sport': '🏃 Sport',
+            'music': '🎵 Musik',
+            'gaming': '🎮 Gaming',
+            'cooking': '🍳 Kochen',
+            'reading': '📚 Lesen',
+            'movies': '🎬 Filme',
+            'travel': '✈️ Reisen',
+            'party': '🎉 Feiern',
+            'nature': '🌳 Natur',
+            'art': '🎨 Kunst'
+        };
+
+        let html = `<div class="seeker-header">`;
+        html += `<div class="seeker-avatar">${genderEmoji[profile.gender] || '👤'}</div>`;
+        html += `<div>`;
+        
+        let meta = [];
+        if (profile.age) meta.push(profile.age + ' Jahre');
+        if (profile.occupation) meta.push(profile.occupation);
+        if (profile.semester) meta.push(profile.semester);
+        
+        html += `<div class="seeker-name">${meta.length > 0 ? meta[0] : 'Suchende/r'}</div>`;
+        if (meta.length > 1) html += `<div class="seeker-meta">${meta.slice(1).join(' • ')}</div>`;
+        html += `</div></div>`;
+
+        if (profile.about_text) {
+            html += `<div class="seeker-about">${profile.about_text}</div>`;
+        }
+
+        // Situation Tags
+        let tags = [];
+        if (profile.is_smoker) tags.push('🚬 Raucher');
+        if (profile.has_pet) tags.push('🐾 Hat Haustier' + (profile.pet_type ? ` (${profile.pet_type})` : ''));
+        if (profile.needs_anmeldung) tags.push('📋 Braucht Anmeldung');
+        
+        const flexLabels = {
+            'immediate': '⚡ Sofort',
+            '1-2_weeks': '📅 In 1-2 Wochen',
+            '1_month': '🗓️ In ca. 1 Monat',
+            'flexible': '🔄 Flexibel'
+        };
+        if (profile.move_flexibility && flexLabels[profile.move_flexibility]) {
+            tags.push(flexLabels[profile.move_flexibility]);
+        }
+
+        if (tags.length > 0) {
+            html += `<div class="features-wrap" style="margin-bottom: 0.75rem;">`;
+            tags.forEach(t => html += `<span class="feature-tag">${t}</span>`);
+            html += `</div>`;
+        }
+
+        // Hobbys
+        if (profile.hobbies && profile.hobbies.length > 0) {
+            html += `<div class="hobby-tags">`;
+            profile.hobbies.forEach(h => {
+                if (hobbyLabels[h]) html += `<span class="hobby-tag">${hobbyLabels[h]}</span>`;
+            });
+            html += `</div>`;
+        }
+
+        box.innerHTML = html;
+        document.getElementById('seekerProfileSection').style.display = 'block';
+    }
+
+    function renderWgPreferences(prefs) {
+        const list = document.getElementById('wgPreferencesList');
+        let hasItems = false;
+
+        const genderLabels = {
+            'any': '👥 Geschlecht egal',
+            'female_only': '👩 Nur Frauen',
+            'male_only': '👨 Nur Männer',
+            'mixed': '🔀 Gemischt'
+        };
+
+        const typeLabels = {
+            'any': '🏠 WG-Typ egal',
+            'students': '🎓 Studenten-WG',
+            'working': '💼 Berufs-WG',
+            'mixed': '🔀 Gemischt',
+            'purpose': '🎯 Zweck-WG',
+            'community': '❤️ Gemeinschafts-WG'
+        };
+
+        if (prefs.pref_gender && genderLabels[prefs.pref_gender]) {
+            list.innerHTML += `<span class="feature-tag">${genderLabels[prefs.pref_gender]}</span>`;
+            hasItems = true;
+        }
+
+        if (prefs.pref_age_min || prefs.pref_age_max) {
+            let ageText = '👤 Alter: ';
+            if (prefs.pref_age_min && prefs.pref_age_max) {
+                ageText += `${prefs.pref_age_min}-${prefs.pref_age_max}`;
+            } else if (prefs.pref_age_min) {
+                ageText += `ab ${prefs.pref_age_min}`;
+            } else {
+                ageText += `bis ${prefs.pref_age_max}`;
+            }
+            list.innerHTML += `<span class="feature-tag">${ageText}</span>`;
+            hasItems = true;
+        }
+
+        if (prefs.pref_wg_type && typeLabels[prefs.pref_wg_type]) {
+            list.innerHTML += `<span class="feature-tag">${typeLabels[prefs.pref_wg_type]}</span>`;
+            hasItems = true;
+        }
+
+        if (prefs.pref_smoker_ok) {
+            list.innerHTML += `<span class="feature-tag">🚬 Raucher-WG ok</span>`;
+            hasItems = true;
+        }
+
+        if (hasItems) document.getElementById('wgPreferencesSection').style.display = 'block';
+    }
+
+    function renderSwapDetails(swapData) {
+        const box = document.getElementById('swapInfoBox');
+
+        const swapTypeLabels = {
+            'permanent': 'Dauerhaft',
+            'temporary': 'Temporär'
+        };
+
+        const reasonLabels = {
+            'internship': 'Praktikum',
+            'exchange': 'Auslandssemester',
+            'job': 'Job / Werkstudent',
+            'relationship': 'Beziehung',
+            'other': 'Sonstiges'
+        };
+
+        let html = `<div class="swap-title">🔄 Tauschangebot</div>`;
+
+        if (swapData.swap_type) {
+            html += `<div class="swap-detail-row"><span class="swap-label">Art:</span><span class="swap-value">${swapTypeLabels[swapData.swap_type] || swapData.swap_type}</span></div>`;
+        }
+
+        if (swapData.swap_reason) {
+            html += `<div class="swap-detail-row"><span class="swap-label">Grund:</span><span class="swap-value">${reasonLabels[swapData.swap_reason] || swapData.swap_reason}</span></div>`;
+        }
+
+        if (swapData.target_city) {
+            html += `<div class="swap-detail-row"><span class="swap-label">Sucht in:</span><span class="swap-value">${swapData.target_city}${swapData.target_district ? ', ' + swapData.target_district : ''}</span></div>`;
+        }
+
+        if (swapData.min_size) {
+            html += `<div class="swap-detail-row"><span class="swap-label">Min. Größe:</span><span class="swap-value">${swapData.min_size} m²</span></div>`;
+        }
+
+        if (swapData.max_rent) {
+            html += `<div class="swap-detail-row"><span class="swap-label">Max. Miete:</span><span class="swap-value">${swapData.max_rent} €</span></div>`;
+        }
+
+        if (swapData.swap_from && swapData.swap_to) {
+            html += `<div class="swap-detail-row"><span class="swap-label">Zeitraum:</span><span class="swap-value">${formatDate(swapData.swap_from)} - ${formatDate(swapData.swap_to)}</span></div>`;
+        }
+
+        // Flexibilität
+        let flex = [];
+        if (swapData.surcharge_ok) flex.push('💰 Zuschlag ok');
+        if (swapData.time_flexible) flex.push('📅 Zeitlich flexibel');
+        if (swapData.landlord_informed) flex.push('✅ Vermieter informiert');
+
+        if (flex.length > 0) {
+            html += `<div style="margin-top: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.4rem;">`;
+            flex.forEach(f => html += `<span class="feature-tag" style="font-size: 0.75rem;">${f}</span>`);
+            html += `</div>`;
+        }
+
+        box.innerHTML = html;
+        document.getElementById('swapSection').style.display = 'block';
+    }
+
+    async function loadImages(id) {
+        const { data: photos } = await supabase
+            .from('listing_photos')
+            .select('storage_path')
+            .eq('listing_id', id)
+            .order('display_order');
+
+        const wrapper = document.getElementById('sliderWrapper');
+        const dots = document.getElementById('sliderDots');
+        
+        if (photos && photos.length > 0) {
+            wrapper.innerHTML = ''; // Remove placeholder
+            
+            photos.forEach((p, index) => {
+                const { data } = supabase.storage.from('listing-images').getPublicUrl(p.storage_path);
+                if (data) {
+                    // Slide add
+                    const slide = document.createElement('div');
+                    slide.className = 'slide';
+                    slide.innerHTML = `<img src="${data.publicUrl}" loading="lazy">`;
+                    wrapper.appendChild(slide);
+
+                    // Dot add
+                    const dot = document.createElement('div');
+                    dot.className = 'dot' + (index === 0 ? ' active' : '');
+                    dots.appendChild(dot);
+                }
+            });
+        }
+    }
+
+    // Helpers
+    function formatRoomType(type) {
+        const map = { 'wg_room': 'WG-Zimmer', 'entire_apartment': 'Wohnung', 'studio': 'Studio', 'house': 'Haus', 'shared_room': 'Geteiltes Zimmer' };
+        return map[type] || type;
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return 'Sofort';
+        return new Date(dateStr).toLocaleDateString('de-DE');
+    }
+
+    // Favorites Logic
+    async function checkFavoriteStatus() {
+        const { data } = await supabase.from('favorites').select('id').eq('listing_id', listingId).eq('user_id', currentUserId);
+        if (data && data.length > 0) {
+            isFavorited = true;
+            updateFavBtn();
+        }
+    }
+
+    async function toggleFavorite() {
+        if (!currentUserId) {
+            if(confirm("Bitte einloggen.")) navigateTo('login.html');
+            return;
+        }
+
+        const btn = document.getElementById('favBtn');
+        // Optimistic Update
+        isFavorited = !isFavorited;
+        updateFavBtn();
+
+        if (isFavorited) {
+            await supabase.from('favorites').insert({ user_id: currentUserId, listing_id: listingId });
+        } else {
+            await supabase.from('favorites').delete().eq('user_id', currentUserId).eq('listing_id', listingId);
+        }
+    }
+
+    function updateFavBtn() {
+        const btn = document.getElementById('favBtn');
+        if (isFavorited) {
+            btn.classList.add('active');
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#EF4444" stroke="#EF4444" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
+        } else {
+            btn.classList.remove('active');
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
+        }
+    }
+    
+    // Reporting Function
+    function reportListing() {
+        if (!currentUserId) {
+            alert("Bitte logge dich ein, um ein Inserat zu melden.");
+            return;
+        }
+        
+        const reason = prompt("Warum möchtest du dieses Inserat melden? (z.B. Betrug, Spam)");
+        if (reason) {
+            supabase.from('reports').insert({
+                reporter_id: currentUserId,
+                reported_type: 'listing',
+                reported_id: listingId,
+                reason: reason,
+                status: 'open'
+            }).then(({ error }) => {
+                if (error) alert("Fehler beim Melden: " + error.message);
+                else alert("Vielen Dank! Wir werden das Inserat prüfen.");
+            });
+        }
+    }
+
+    // Init
+    loadDetails();
+
+</script>
+</body>
+</html>

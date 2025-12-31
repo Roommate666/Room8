@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">    <title>Einstellungen - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+            padding-bottom: 2rem;
+        }
+
+        .settings-menu {
+            margin-top: 1rem;
+        }
+
+        .settings-section {
+            margin-bottom: 2rem;
+        }
+
+        .settings-section h2 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6b7280;
+            margin: 0 0 0.75rem 0;
+            padding: 0 0.5rem;
+        }
+
+        .settings-item {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .settings-link {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            text-decoration: none;
+            color: #111827;
+            transition: background 0.2s;
+        }
+
+        .settings-link:hover {
+            background: #f9fafb;
+        }
+
+        .settings-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .icon-profile { background: #dbeafe; }
+        .icon-notifications { background: #fef3c7; }
+        .icon-search { background: #d1fae5; }
+        .icon-favorites { background: #fee2e2; }
+        .icon-security { background: #ede9fe; }
+        .icon-help { background: #e0e7ff; }
+        .icon-language { background: #fce7f3; }
+
+        .settings-info {
+            flex: 1;
+        }
+
+        .settings-info h3 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .settings-info p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .settings-arrow {
+            color: #9ca3af;
+            font-size: 1.25rem;
+        }
+
+        .logout-section {
+            margin-top: 2rem;
+            text-align: center;
+            padding-bottom: 2rem;
+        }
+
+        .logout-btn {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #fecaca;
+        }
+
+        .user-info {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .user-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0 0 0.25rem 0;
+        }
+
+        .user-email {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        /* Language Selector Styles */
+        .language-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: auto;
+        }
+
+        .lang-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .lang-btn:hover {
+            border-color: #10b981;
+        }
+
+        .lang-btn.active {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <a href="profile.html" class="back-arrow">←</a>
+            <h1 data-i18n="settings_title">Einstellungen</h1>
+        </header>
+
+        <div class="settings-container">
+            <!-- User Info -->
+            <div class="user-info" id="userInfo">
+                <div class="user-avatar" id="userAvatar">?</div>
+                <h2 class="user-name" id="userName" data-i18n="general_loading">Lädt...</h2>
+                <p class="user-email" id="userEmail" data-i18n="general_loading">Lädt...</p>
+            </div>
+
+            <!-- Settings Menu -->
+            <div class="settings-menu">
+                <!-- Language Settings -->
+                <div class="settings-section">
+                    <h2 data-i18n="settings_language_section">Sprache</h2>
+                    
+                    <div class="settings-item">
+                        <div class="settings-link" style="cursor: default;">
+                            <div class="settings-icon icon-language">🌍</div>
+                            <div class="settings-info">
+                                <h3 data-i18n="settings_language">Sprache wählen</h3>
+                                <p data-i18n="settings_language_desc">Wähle deine bevorzugte Sprache</p>
+                            </div>
+                            <div class="language-selector">
+                                <button class="lang-btn" id="langDE" onclick="switchLanguage('de')">🇩🇪 DE</button>
+                                <button class="lang-btn" id="langEN" onclick="switchLanguage('en')">🇬🇧 EN</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profil & Account -->
+                <div class="settings-section">
+                    <h2 data-i18n="settings_profile_section">Profil & Account</h2>
+                    
+                    <div class="settings-item">
+                        <a href="edit-profile.html" class="settings-link">
+                            <div class="settings-icon icon-profile">👤</div>
+                            <div class="settings-info">
+                                <h3 data-i18n="settings_edit_profile">Profil bearbeiten</h3>
+                                <p data-i18n="settings_edit_profile_desc">Name, Stadt, Uni, Interessen</p>
+                            </div>
+                            <span class="settings-arrow">›</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Benachrichtigungen -->
+                <div class="settings-section">
+                    <h2 data-i18n="settings_notifications_section">Benachrichtigungen</h2>
+                    
+                    <div class="settings-item">
+                        <a href="notification-settings.html" class="settings-link">
+                            <div class="settings-icon icon-notifications">🔔</div>
+                            <div class="settings-info">
+                                <h3 data-i18n="settings_notification_settings">Benachrichtigungs-Einstellungen</h3>
+                                <p data-i18n="settings_notification_settings_desc">Verwalte deine Benachrichtigungen</p>
+                            </div>
+                            <span class="settings-arrow">›</span>
+                        </a>
+                    </div>
+
+                    <div class="settings-item">
+                        <a href="saved-searches.html" class="settings-link">
+                            <div class="settings-icon icon-search">🔍</div>
+                            <div class="settings-info">
+                                <h3 data-i18n="settings_saved_searches">Gespeicherte Suchen</h3>
+                                <p data-i18n="settings_saved_searches_desc">Benachrichtigungen für passende Inserate</p>
+                            </div>
+                            <span class="settings-arrow">›</span>
+                        </a>
+                    </div>
+
+                    <div class="settings-item">
+                        <a href="notifications.html" class="settings-link">
+                            <div class="settings-icon icon-notifications">📬</div>
+                            <div class="settings-info">
+                                <h3 data-i18n="settings_all_notifications">Alle Benachrichtigungen</h3>
+                                <p data-i18n="settings_all_notifications_desc">Übersicht aller Benachrichtigungen</p>
+                            </div>
+                            <span class="settings-arrow">›</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Meine Inhalte -->
+                <div class="settings-section">
+                    <h2 data-i18n="settings_content_section">Meine Inhalte</h2>
+                    
+                    <div class="settings-item">
+                        <a href="favorites.html" class="settings-link">
+                            <div class="settings-icon icon-favorites">❤️</div>
+                            <div class="settings-info">
+                                <h3 data-i18n="settings_my_favorites">Meine Favoriten</h3>
+                                <p data-i18n="settings_my_favorites_desc">Gespeicherte Wohnungen, Gegenstände & Jobs</p>
+                            </div>
+                            <span class="settings-arrow">›</span>
+                        </a>
+                    </div>
+
+                    <div class="settings-item">
+                        <a href="profile.html" class="settings-link">
+                            <div class="settings-icon icon-profile">📋</div>
+                            <div class="settings-info">
+                                <h3 data-i18n="settings_my_listings">Meine Inserate</h3>
+                                <p data-i18n="settings_my_listings_desc">Verwalte deine Anzeigen</p>
+                            </div>
+                            <span class="settings-arrow">›</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Datenschutz & Sicherheit -->
+                <div class="settings-section">
+                    <h2 data-i18n="settings_privacy_section">Datenschutz & Sicherheit</h2>
+                    
+                    <div class="settings-item">
+                        <a href="faq.html" class="settings-link">
+                            <div class="settings-icon" style="background: #dbeafe;">❓</div>
+                            <div class="settings-info">
+                                <h3>Hilfe & FAQ</h3>
+                                <p>Häufige Fragen & Kontakt</p>
+                            </div>
+                            <span class="settings-arrow">›</span>
+                        </a>
+                    </div>
+                    
+                    <div class="settings-item">
+                        <a href="datenschutz.html" class="settings-link">
+                            <div class="settings-icon icon-security">🔒</div>
+                            <div class="settings-info">
+                                <h3 data-i18n="settings_privacy">Datenschutz</h3>
+                                <p data-i18n="settings_privacy_desc">Datenschutzerklärung</p>
+                            </div>
+                            <span class="settings-arrow">›</span>
+                        </a>
+                    </div>
+
+                    <div class="settings-item">
+                        <a href="nutzungsbedingungen.html" class="settings-link">
+                            <div class="settings-icon" style="background: #d1fae5;">📜</div>
+                            <div class="settings-info">
+                                <h3>Nutzungsbedingungen</h3>
+                                <p>AGB & Regeln der Plattform</p>
+                            </div>
+                            <span class="settings-arrow">›</span>
+                        </a>
+                    </div>
+
+                    <div class="settings-item">
+                        <a href="nutzungsbedingungen.html#mustervertraege" class="settings-link">
+                            <div class="settings-icon" style="background: #fef3c7;">📋</div>
+                            <div class="settings-info">
+                                <h3>Musterverträge & Vorlagen</h3>
+                                <p>Untermietvertrag, Kaufvertrag, Checklisten</p>
+                            </div>
+                            <span class="settings-arrow">›</span>
+                        </a>
+                    </div>
+
+                    <div class="settings-item">
+                        <a href="impressum.html" class="settings-link">
+                            <div class="settings-icon icon-help">ℹ️</div>
+                            <div class="settings-info">
+                                <h3 data-i18n="settings_imprint">Impressum</h3>
+                                <p data-i18n="settings_imprint_desc">Rechtliche Informationen</p>
+                            </div>
+                            <span class="settings-arrow">›</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logout -->
+            <div class="logout-section">
+                <button class="logout-btn" id="logoutBtn" data-i18n="settings_logout">Ausloggen</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Language switcher
+        function switchLanguage(lang) {
+            localStorage.setItem('room8_language', lang);
+            
+            // Update buttons
+            document.getElementById('langDE').classList.toggle('active', lang === 'de');
+            document.getElementById('langEN').classList.toggle('active', lang === 'en');
+            
+            // Trigger language change event
+            window.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: lang } }));
+            
+            // Reload page to apply translations
+            window.location.reload();
+        }
+
+        // Set initial language button state
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentLang = localStorage.getItem('room8_language') || 'de';
+            document.getElementById('langDE').classList.toggle('active', currentLang === 'de');
+            document.getElementById('langEN').classList.toggle('active', currentLang === 'en');
+        });
+    </script>
+
+    <script type="module">
+        import { supabase, requireAuth } from './supabaseClient.js';
+
+        // Get translations
+        function getTranslation(key, fallback) {
+            const lang = localStorage.getItem('room8_language') || 'de';
+            const translations = {
+                de: {
+                    loading: 'Lädt...',
+                    logout_confirm: 'Möchtest du dich wirklich ausloggen?'
+                },
+                en: {
+                    loading: 'Loading...',
+                    logout_confirm: 'Do you really want to log out?'
+                }
+            };
+            return translations[lang]?.[key] || fallback;
+        }
+
+        async function init() {
+            try {
+                const user = await requireAuth();
+
+                // Lade Profil-Daten
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('username, full_name, avatar_url')
+                    .eq('id', user.id)
+                    .single();
+
+                // Zeige User-Info
+                if (profile) {
+                    const name = profile.full_name || profile.username || 'User';
+                    const initial = name.charAt(0).toUpperCase();
+                    
+                    document.getElementById('userName').textContent = name;
+                    document.getElementById('userEmail').textContent = user.email;
+                    document.getElementById('userAvatar').textContent = initial;
+
+                    if (profile.avatar_url) {
+                        document.getElementById('userAvatar').style.backgroundImage = `url(${profile.avatar_url})`;
+                        document.getElementById('userAvatar').style.backgroundSize = 'cover';
+                        document.getElementById('userAvatar').textContent = '';
+                    }
+                }
+
+                // Logout Button
+                document.getElementById('logoutBtn').addEventListener('click', async () => {
+                    if (confirm(getTranslation('logout_confirm', 'Möchtest du dich wirklich ausloggen?'))) {
+                        await supabase.auth.signOut();
+                        window.location.href = 'login.html';
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        init();
+    </script>
+
+    <script src="config.js"></script>
+    <script src="translations.js"></script>
+</body>
+</html>

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">    <title>Saved Searches - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .searches-container { max-width: 900px; margin: 0 auto; padding: 1rem; }
+        .searches-header { text-align: center; padding: 2rem 1rem; }
+        .searches-header h1 { margin: 0 0 0.5rem 0; font-size: 1.8rem; }
+        .searches-header p { color: #6b7280; margin: 0 0 1.5rem 0; }
+        .create-search-btn { background: #10b981; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 999px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .create-search-btn:hover { background: #059669; }
+        .search-card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; border: 1px solid #e5e7eb; transition: all 0.2s; }
+        .search-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .search-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+        .search-info h3 { margin: 0 0 0.25rem 0; font-size: 1.1rem; color: #111827; }
+        .search-type-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; margin-top: 0.25rem; }
+        .type-wohnung { background: #dbeafe; color: #1e40af; }
+        .type-gegenstand { background: #d1fae5; color: #065f46; }
+        .search-details { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; color: #6b7280; font-size: 0.9rem; }
+        .search-detail { display: flex; align-items: center; gap: 0.25rem; }
+        .search-actions { display: flex; gap: 0.5rem; }
+        .action-btn { padding: 0.5rem 1rem; border-radius: 8px; border: none; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-delete { background: #fee2e2; color: #dc2626; }
+        .btn-delete:hover { background: #fecaca; }
+        .toggle-active { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: #6b7280; }
+        .empty-state { text-align: center; padding: 4rem 2rem; }
+        .empty-state svg { width: 80px; height: 80px; color: #d1d5db; margin-bottom: 1rem; }
+        .empty-state h3 { margin: 0 0 0.5rem 0; color: #6b7280; }
+        .empty-state p { color: #9ca3af; margin-bottom: 1.5rem; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; padding: 1rem; }
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; border-radius: 12px; padding: 2rem; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
+        .modal-header { margin-bottom: 1.5rem; }
+        .modal-header h2 { margin: 0 0 0.5rem 0; font-size: 1.5rem; }
+        .modal-header p { margin: 0; color: #6b7280; font-size: 0.9rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151; }
+        .form-group input, .form-group select { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; }
+        .form-group small { display: block; margin-top: 0.25rem; color: #6b7280; font-size: 0.8rem; }
+        .form-group .info-text { display: block; margin-top: 0.5rem; padding: 0.75rem; background: #f0f9ff; border-left: 3px solid #3b82f6; color: #1e40af; font-size: 0.85rem; border-radius: 4px; line-height: 1.4; }
+        .price-range { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .date-range { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .modal-actions { display: flex; gap: 1rem; margin-top: 2rem; }
+        .modal-btn { flex: 1; padding: 0.75rem; border-radius: 8px; border: none; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-cancel { background: #f3f4f6; color: #374151; }
+        .btn-cancel:hover { background: #e5e7eb; }
+        .btn-save { background: #10b981; color: white; }
+        .btn-save:hover { background: #059669; }
+        .dynamic-fields { display: none; }
+        .dynamic-fields.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <a href="settings.html" class="back-arrow">←</a>
+            <h1>Saved Searches</h1>
+        </header>
+        <div class="searches-container">
+            <div class="searches-header">
+                <h1>🔍 Saved Searches</h1>
+                <p>Get notified when matching listings are posted</p>
+                <button class="create-search-btn" id="createSearchBtn">+ Create New Search</button>
+            </div>
+            <div id="searchesList"></div>
+        </div>
+        <footer class="app-footer-nav" id="app-footer-nav"></footer>
+    </div>
+
+    <div class="modal" id="searchModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Search</h2>
+                <p>We'll notify you when a matching listing is posted</p>
+            </div>
+            <form id="searchForm">
+                <div class="form-group">
+                    <label>Type *</label>
+                    <select id="searchType" required>
+                        <option value="">Please select</option>
+                        <option value="wohnung">🏠 Apartments</option>
+                        <option value="gegenstand">📦 Items</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="searchQueryGroup">
+                    <label id="searchQueryLabel">Search Title *</label>
+                    <input type="text" id="searchQuery" placeholder="e.g., Samsung TV, Gaming Laptop, 2-Room Apartment">
+                    <small id="searchQueryHelp">Be specific! Example: 'Gaming Laptop Dell XPS' instead of just 'Laptop'</small>
+                </div>
+
+                <!-- ITEMS FIELDS -->
+                <div id="gegenstandFields" class="dynamic-fields">
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="itemCategory">
+                            <option value="">All Categories</option>
+                            <option value="Furniture & Home">Furniture & Home</option>
+                            <option value="Electronics & Tech">Electronics & Tech</option>
+                            <option value="Books & Study">Books & Study</option>
+                            <option value="Clothing & Fashion">Clothing & Fashion</option>
+                            <option value="Kitchen & Appliances">Kitchen & Appliances</option>
+                            <option value="Sports & Outdoor">Sports & Outdoor</option>
+                            <option value="Bikes & Transport">Bikes & Transport</option>
+                            <option value="Music & Instruments">Music & Instruments</option>
+                            <option value="Others">Others</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Condition</label>
+                        <select id="itemCondition">
+                            <option value="">All Conditions</option>
+                            <option value="New">New</option>
+                            <option value="Like New">Like New</option>
+                            <option value="Good">Good</option>
+                            <option value="Fair">Fair</option>
+                            <option value="Poor">Poor</option>
+                        </select>
+                        <span class="info-text">💡 <strong>Tip:</strong> Selecting 'Good' will also show items in 'New' and 'Like New' condition!</span>
+                    </div>
+                </div>
+
+                <!-- APARTMENTS FIELDS -->
+                <div id="wohnungFields" class="dynamic-fields">
+                    <div class="form-group">
+                        <label>Apartment Type</label>
+                        <select id="roomType">
+                            <option value="">All Types</option>
+                            <option value="wg_room">Shared Room (WG)</option>
+                            <option value="entire_apartment">Entire Apartment</option>
+                            <option value="studio">Studio</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Number of Rooms</label>
+                        <input type="number" id="numberOfRooms" min="1" max="10" placeholder="e.g., 2">
+                        <small>Optional: Leave empty for all room numbers</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Availability Period</label>
+                        <div class="date-range">
+                            <div>
+                                <input type="date" id="availableFrom" placeholder="From">
+                                <small>Available from</small>
+                            </div>
+                            <div>
+                                <input type="date" id="availableTo" placeholder="Until">
+                                <small>Available until</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>City</label>
+                    <input type="text" id="searchCity" placeholder="e.g., Berlin, Munich, Hamburg" list="citySuggestions">
+                    <datalist id="citySuggestions">
+                        <option value="Aachen">
+                        <option value="Augsburg">
+                        <option value="Bamberg">
+                        <option value="Bayreuth">
+                        <option value="Berlin">
+                        <option value="Bielefeld">
+                        <option value="Bochum">
+                        <option value="Bonn">
+                        <option value="Braunschweig">
+                        <option value="Bremen">
+                        <option value="Chemnitz">
+                        <option value="Darmstadt">
+                        <option value="Dortmund">
+                        <option value="Dresden">
+                        <option value="Duisburg">
+                        <option value="Düsseldorf">
+                        <option value="Erfurt">
+                        <option value="Erlangen">
+                        <option value="Essen">
+                        <option value="Frankfurt">
+                        <option value="Freiburg">
+                        <option value="Gießen">
+                        <option value="Göttingen">
+                        <option value="Greifswald">
+                        <option value="Halle">
+                        <option value="Hamburg">
+                        <option value="Hannover">
+                        <option value="Heidelberg">
+                        <option value="Jena">
+                        <option value="Kaiserslautern">
+                        <option value="Karlsruhe">
+                        <option value="Kassel">
+                        <option value="Kiel">
+                        <option value="Koblenz">
+                        <option value="Köln">
+                        <option value="Konstanz">
+                        <option value="Leipzig">
+                        <option value="Lübeck">
+                        <option value="Magdeburg">
+                        <option value="Mainz">
+                        <option value="Mannheim">
+                        <option value="Marburg">
+                        <option value="München">
+                        <option value="Münster">
+                        <option value="Nürnberg">
+                        <option value="Oldenburg">
+                        <option value="Osnabrück">
+                        <option value="Paderborn">
+                        <option value="Passau">
+                        <option value="Potsdam">
+                        <option value="Regensburg">
+                        <option value="Rostock">
+                        <option value="Saarbrücken">
+                        <option value="Siegen">
+                        <option value="Stuttgart">
+                        <option value="Trier">
+                        <option value="Tübingen">
+                        <option value="Ulm">
+                        <option value="Weimar">
+                        <option value="Wuppertal">
+                        <option value="Würzburg">
+                    </datalist>
+                    <small>Enter city name - auto-completion with German university cities</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Price Range (optional)</label>
+                    <div class="price-range">
+                        <div><input type="number" id="minPrice" placeholder="Min. €" min="0" max="10000"></div>
+                        <div><input type="number" id="maxPrice" placeholder="Max. €" min="0" max="10000"></div>
+                    </div>
+                    <small>Maximum: €10,000</small>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn btn-cancel" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="modal-btn btn-save" id="saveSearchBtn">Save Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="navigation.js"></script>
+    <script type="module">
+        import { supabase, requireAuth } from './supabaseClient.js';
+        import { addSavedSearch, removeSavedSearch, getUserSavedSearches } from './notificationHelpers.js';
+
+        let currentUser = null;
+        let allSearches = [];
+
+        const typeLabels = {
+            wohnung: { name: 'Apartments', emoji: '🏠', class: 'type-wohnung' },
+            gegenstand: { name: 'Items', emoji: '📦', class: 'type-gegenstand' }
+        };
+
+        const roomTypeLabels = {
+            'wg_room': 'Shared Room (WG)',
+            'entire_apartment': 'Entire Apartment',
+            'studio': 'Studio'
+        };
+
+        const conditionLabels = {
+            'New': 'New',
+            'Like New': 'Like New',
+            'Good': 'Good',
+            'Fair': 'Fair',
+            'Poor': 'Poor'
+        };
+
+        // Handle dynamic field visibility based on search type
+        document.getElementById('searchType').addEventListener('change', function() {
+            const searchType = this.value;
+            const queryGroup = document.getElementById('searchQueryGroup');
+            const queryInput = document.getElementById('searchQuery');
+            const queryLabel = document.getElementById('searchQueryLabel');
+            const queryHelp = document.getElementById('searchQueryHelp');
+            
+            document.getElementById('gegenstandFields').classList.remove('active');
+            document.getElementById('wohnungFields').classList.remove('active');
+            
+            if (searchType === 'gegenstand') {
+                document.getElementById('gegenstandFields').classList.add('active');
+                queryLabel.textContent = 'Search Title *';
+                queryInput.placeholder = 'e.g., Samsung TV 55", Gaming Laptop Dell';
+                queryHelp.textContent = 'Be specific! Example: "Gaming Laptop Dell XPS" instead of just "Laptop"';
+                queryInput.required = true;
+            } else if (searchType === 'wohnung') {
+                document.getElementById('wohnungFields').classList.add('active');
+                queryLabel.textContent = 'Search Description';
+                queryInput.placeholder = 'e.g., 2-Room Apartment near university';
+                queryHelp.textContent = 'Optional: Leave empty to get notified about all apartments matching your criteria';
+                queryInput.required = false;
+            }
+        });
+
+        document.getElementById('createSearchBtn').addEventListener('click', function() {
+            document.getElementById('searchForm').reset();
+            document.getElementById('gegenstandFields').classList.remove('active');
+            document.getElementById('wohnungFields').classList.remove('active');
+            document.getElementById('searchModal').classList.add('active');
+        });
+
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            document.getElementById('searchModal').classList.remove('active');
+        });
+
+        async function loadSearches() {
+            try {
+                currentUser = await requireAuth();
+                allSearches = await getUserSavedSearches();
+                renderSearches();
+            } catch (error) {
+                console.error('Error loading searches:', error);
+            }
+        }
+
+        function renderSearches() {
+            const container = document.getElementById('searchesList');
+            if (allSearches.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        <h3>No saved searches yet</h3>
+                        <p>Create a search and get notified</p>
+                    </div>
+                `;
+                return;
+            }
+            container.innerHTML = allSearches.map(search => {
+                const typeInfo = typeLabels[search.search_type] || { name: search.search_type, emoji: '📋', class: '' };
+                let extraDetails = [];
+                if (search.category) extraDetails.push(`📂 ${search.category}`);
+                if (search.condition) extraDetails.push(`⭐ ${conditionLabels[search.condition] || search.condition}`);
+                if (search.room_type) extraDetails.push(`🏠 ${roomTypeLabels[search.room_type] || search.room_type}`);
+                if (search.number_of_rooms) extraDetails.push(`🚪 ${search.number_of_rooms} rooms`);
+                if (search.available_from) extraDetails.push(`📅 From ${new Date(search.available_from).toLocaleDateString('en-US')}`);
+                if (search.available_to) extraDetails.push(`📅 Until ${new Date(search.available_to).toLocaleDateString('en-US')}`);
+                
+                return `
+                    <div class="search-card">
+                        <div class="search-header">
+                            <div class="search-info">
+                                <h3>${typeInfo.emoji} ${search.search_query || 'All ' + typeInfo.name}</h3>
+                                <span class="search-type-badge ${typeInfo.class}">${typeInfo.name}</span>
+                            </div>
+                            <div class="toggle-active">
+                                <label>
+                                    <input type="checkbox" ${search.is_active ? 'checked' : ''} onchange="window.toggleSearch('${search.id}', this.checked)">
+                                    Active
+                                </label>
+                            </div>
+                        </div>
+                        <div class="search-details">
+                            ${search.city ? `<div class="search-detail">📍 ${search.city}</div>` : ''}
+                            ${search.min_price ? `<div class="search-detail">💰 from €${search.min_price}</div>` : ''}
+                            ${search.max_price ? `<div class="search-detail">💰 up to €${search.max_price}</div>` : ''}
+                            ${extraDetails.map(detail => `<div class="search-detail">${detail}</div>`).join('')}
+                            <div class="search-detail">📅 ${new Date(search.created_at).toLocaleDateString('en-US')}</div>
+                        </div>
+                        <div class="search-actions">
+                            <button class="action-btn btn-delete" onclick="window.deleteSearch('${search.id}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.toggleSearch = async function(searchId, isActive) {
+            try {
+                const { error } = await supabase.from('saved_searches').update({ is_active: isActive }).eq('id', searchId);
+                if (error) throw error;
+                const search = allSearches.find(s => s.id === searchId);
+                if (search) search.is_active = isActive;
+            } catch (error) {
+                console.error('Error toggling search:', error);
+                alert('Error updating search');
+            }
+        };
+
+        window.deleteSearch = async function(searchId) {
+            if (!confirm('Do you really want to delete this saved search?')) return;
+            try {
+                const result = await removeSavedSearch(searchId);
+                if (result.success) {
+                    await loadSearches();
+                } else {
+                    throw new Error('Error deleting');
+                }
+            } catch (error) {
+                console.error('Error deleting search:', error);
+                alert('Error deleting search');
+            }
+        };
+
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveSearchBtn');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            try {
+                const searchType = document.getElementById('searchType').value;
+                const searchQuery = document.getElementById('searchQuery').value.trim();
+                const city = document.getElementById('searchCity').value.trim();
+                const minPrice = document.getElementById('minPrice').value;
+                const maxPrice = document.getElementById('maxPrice').value;
+
+                // Validation for items - title is mandatory
+                if (searchType === 'gegenstand' && !searchQuery) {
+                    alert('Please enter a search title for items!');
+                    btn.disabled = false;
+                    btn.textContent = 'Save Search';
+                    return;
+                }
+
+                if (minPrice && parseFloat(minPrice) > 10000) {
+                    alert('Minimum price cannot exceed €10,000');
+                    btn.disabled = false;
+                    btn.textContent = 'Save Search';
+                    return;
+                }
+                if (maxPrice && parseFloat(maxPrice) > 10000) {
+                    alert('Maximum price cannot exceed €10,000');
+                    btn.disabled = false;
+                    btn.textContent = 'Save Search';
+                    return;
+                }
+
+                let additionalFilters = {};
+                
+                if (searchType === 'gegenstand') {
+                    const category = document.getElementById('itemCategory').value;
+                    const condition = document.getElementById('itemCondition').value;
+                    if (category) additionalFilters.category = category;
+                    if (condition) additionalFilters.condition = condition;
+                } else if (searchType === 'wohnung') {
+                    const roomType = document.getElementById('roomType').value;
+                    const numberOfRooms = document.getElementById('numberOfRooms').value;
+                    const availableFrom = document.getElementById('availableFrom').value;
+                    const availableTo = document.getElementById('availableTo').value;
+                    
+                    if (roomType) additionalFilters.room_type = roomType;
+                    if (numberOfRooms) additionalFilters.number_of_rooms = parseInt(numberOfRooms);
+                    if (availableFrom) additionalFilters.available_from = availableFrom;
+                    if (availableTo) additionalFilters.available_to = availableTo;
+                    
+                    // Date validation
+                    if (availableFrom && availableTo && new Date(availableFrom) > new Date(availableTo)) {
+                        alert('End date must be after start date');
+                        btn.disabled = false;
+                        btn.textContent = 'Save Search';
+                        return;
+                    }
+                }
+
+                const result = await addSavedSearch(
+                    searchType,
+                    searchQuery || (searchType === 'wohnung' ? 'All' : ''),
+                    city || null,
+                    minPrice ? parseFloat(minPrice) : null,
+                    maxPrice ? parseFloat(maxPrice) : null,
+                    additionalFilters
+                );
+
+                if (result.success) {
+                    document.getElementById('searchModal').classList.remove('active');
+                    await loadSearches();
+                } else {
+                    throw new Error(result.error);
+                }
+
+            } catch (error) {
+                console.error('Error saving search:', error);
+                alert('Error saving search: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Save Search';
+            }
+        });
+
+        loadSearches();
+    </script>
+    <script src="translations.js"></script>
+</body>
+</html>

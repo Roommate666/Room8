@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">    <title>Admin Panel - Roommate</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+        }
+        
+        .admin-header p {
+            margin: 0;
+            opacity: 0.8;
+        }
+        
+        .admin-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e5e7eb;
+            overflow-x: auto;
+        }
+        
+        .admin-tab {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #6b7280;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .admin-tab.active {
+            color: #8b5cf6;
+            border-bottom-color: #8b5cf6;
+        }
+        
+        .sub-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .sub-tab {
+            padding: 0.5rem 1rem;
+            background: #f3f4f6;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #6b7280;
+            transition: all 0.2s;
+        }
+        
+        .sub-tab.active {
+            background: white;
+            color: #8b5cf6;
+            border-color: #8b5cf6;
+        }
+        
+        .sub-tab .badge {
+            background: #e5e7eb;
+            color: #374151;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+        
+        .sub-tab.active .badge {
+            background: #ede9fe;
+            color: #7c3aed;
+        }
+        
+        .search-filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+        
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem;
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .filter-select {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+        
+        .admin-section {
+            display: none;
+        }
+        
+        .admin-section.active {
+            display: block;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+        
+        .action-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .action-btn-primary {
+            background: #8b5cf6;
+            color: white;
+        }
+        
+        .action-btn-primary:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+        }
+        
+        .items-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .items-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .items-table th {
+            background: #f9fafb;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            font-size: 0.9rem;
+        }
+        
+        .items-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.9rem;
+        }
+        
+        .items-table tr:hover {
+            background: #f9fafb;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-expired, .status-dismissed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status-draft, .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-resolved {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .item-btn {
+            padding: 0.4rem;
+            border: none;
+            background: #f3f4f6;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.1rem;
+        }
+        
+        .item-btn:hover {
+            background: #e5e7eb;
+            transform: scale(1.1);
+        }
+        
+        .item-btn-delete:hover {
+            background: #fee2e2;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6b7280;
+        }
+        
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 1rem;
+            }
+            
+            .admin-tabs {
+                flex-wrap: nowrap;
+            }
+            
+            .items-table {
+                overflow-x: auto;
+            }
+            
+            .actions-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <a href="profile.html" class="back-arrow">&larr;</a>
+        <h1>Admin Panel</h1>
+    </header>
+    
+    <main class="app-content" style="padding: 0;">
+        <div class="admin-container">
+            <div class="admin-header">
+                <h1>🛡️ Admin Dashboard</h1>
+                <p>Manage all content and users</p>
+            </div>
+            
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-tab="stats">Statistics</button>
+                <button class="admin-tab" data-tab="verifications">🎓 Verifications</button>
+                <button class="admin-tab" data-tab="coupons">Coupons</button>
+                <button class="admin-tab" data-tab="jobs">Jobs</button>
+                <button class="admin-tab" data-tab="reports">Reports</button>
+                <button class="admin-tab" data-tab="users">Users</button>
+            </div>
+            
+            <!-- Statistics Section -->
+            <div class="admin-section active" id="stats-section">
+                <h2 style="margin-bottom: 1.5rem; font-size: 1.3rem;">Overview</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Users</div>
+                        <div class="stat-value" id="totalUsers">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Coupons</div>
+                        <div class="stat-value" id="totalCoupons">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Active Coupons</div>
+                        <div class="stat-value" id="activeCoupons">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Jobs</div>
+                        <div class="stat-value" id="totalJobs">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Active Jobs</div>
+                        <div class="stat-value" id="activeJobs">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Pending Reports</div>
+                        <div class="stat-value" id="pendingReports">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Verifications Section -->
+            <div class="admin-section" id="verifications-section">
+                <h2 style="margin-bottom: 1.5rem; font-size: 1.3rem;">🎓 Studenten-Verifizierungen</h2>
+                
+                <div class="stats-grid" style="margin-bottom: 2rem;">
+                    <div class="stat-card">
+                        <div class="stat-label">Pending</div>
+                        <div class="stat-value" style="color: #f59e0b;" id="pendingVerifications">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Approved</div>
+                        <div class="stat-value" style="color: #10b981;" id="approvedVerifications">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Rejected</div>
+                        <div class="stat-value" style="color: #ef4444;" id="rejectedVerifications">-</div>
+                    </div>
+                </div>
+                
+                <!-- Sub-Tabs -->
+                <div class="sub-tabs">
+                    <button class="sub-tab active" data-status="all" onclick="filterVerifications('all')">
+                        All <span class="badge" id="count-all">0</span>
+                    </button>
+                    <button class="sub-tab" data-status="pending" onclick="filterVerifications('pending')">
+                        ⏳ Pending <span class="badge" id="count-pending">0</span>
+                    </button>
+                    <button class="sub-tab" data-status="approved" onclick="filterVerifications('approved')">
+                        ✓ Approved <span class="badge" id="count-approved">0</span>
+                    </button>
+                    <button class="sub-tab" data-status="rejected" onclick="filterVerifications('rejected')">
+                        ✗ Rejected <span class="badge" id="count-rejected">0</span>
+                    </button>
+                </div>
+                
+                <!-- Search & Filter Bar -->
+                <div class="search-filter-bar">
+                    <div class="search-box">
+                        <input type="text" id="verificationSearch" placeholder="Search by name, email, domain..." onkeyup="searchVerifications()">
+                    </div>
+                    <div class="filter-group">
+                        <select class="filter-select" id="domainFilter" onchange="applyFilters()">
+                            <option value="">All Domains</option>
+                        </select>
+                        <select class="filter-select" id="methodFilter" onchange="applyFilters()">
+                            <option value="">All Methods</option>
+                            <option value="student_email">Student Email</option>
+                            <option value="document_upload">Document Upload</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="items-table" id="verificationsTable">
+                    <p style="padding: 2rem; text-align: center;">Loading...</p>
+                </div>
+            </div>
+            
+            <!-- Coupons Section -->
+            <div class="admin-section" id="coupons-section">
+                <div class="actions-bar">
+                    <h2 style="margin: 0; font-size: 1.3rem;">All Coupons</h2>
+                    <a href="coupon-create.html" class="action-btn action-btn-primary">
+                        <span>+</span> Create Coupon
+                    </a>
+                </div>
+                <div class="items-table" id="couponsTable">
+                    <p style="padding: 2rem; text-align: center;">Loading...</p>
+                </div>
+            </div>
+            
+            <!-- Jobs Section -->
+            <div class="admin-section" id="jobs-section">
+                <div class="actions-bar">
+                    <h2 style="margin: 0; font-size: 1.3rem;">All Jobs</h2>
+                    <a href="job-create.html" class="action-btn action-btn-primary">
+                        <span>+</span> Create Job
+                    </a>
+                </div>
+                <div class="items-table" id="jobsTable">
+                    <p style="padding: 2rem; text-align: center;">Loading...</p>
+                </div>
+            </div>
+            
+            <!-- Reports Section -->
+            <div class="admin-section" id="reports-section">
+                <h2 style="margin-bottom: 1.5rem; font-size: 1.3rem;">Reports & Meldungen</h2>
+                <div class="items-table" id="reportsTable">
+                    <p style="padding: 2rem; text-align: center;">Loading...</p>
+                </div>
+            </div>
+            
+            <!-- Users Section -->
+            <div class="admin-section" id="users-section">
+                <h2 style="margin-bottom: 1.5rem; font-size: 1.3rem;">All Registered Users</h2>
+                <div class="items-table" id="usersTable">
+                    <p style="padding: 2rem; text-align: center;">Loading...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script type="module">
+    import { supabase, requireAuth } from './supabaseClient.js';
+    
+    const ADMIN_USER_ID = '6f7e17b9-3ca8-42f1-90fd-326173fe3de0';
+    let currentUser = null;
+
+    async function checkAdminAuth() {
+        currentUser = await requireAuth();
+        if (currentUser.id !== ADMIN_USER_ID) {
+            alert('Access denied. Admin only!');
+            window.location.href = 'profile.html';
+            return false;
+        }
+        return true;
+    }
+
+    async function loadAllData() {
+        await Promise.all([
+            loadCoupons(),
+            loadJobs(),
+            loadReports(),
+            loadUsers()
+        ]);
+        updateStats();
+    }
+
+    let allCoupons = [];
+    async function loadCoupons() {
+        try {
+            const { data, error } = await supabase
+                .from('coupons')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            allCoupons = data || [];
+            renderCouponsTable();
+        } catch (err) {
+            console.error('Error:', err);
+            document.getElementById('couponsTable').innerHTML = '<p style="padding: 2rem; text-align: center; color: red;">Error loading</p>';
+        }
+    }
+
+    function renderCouponsTable() {
+        const table = document.getElementById('couponsTable');
+        if (allCoupons.length === 0) {
+            table.innerHTML = '<div class="empty-state"><h3>No coupons yet</h3></div>';
+            return;
+        }
+        const rows = allCoupons.map(c => {
+            const validUntil = new Date(c.valid_until).toLocaleDateString('de-DE');
+            const isExpired = new Date(c.valid_until) < new Date();
+            const status = isExpired ? 'expired' : c.status;
+            return `
+                <tr>
+                    <td><strong>${c.business_name}</strong><br><small style="color:#6b7280;">${c.title}</small></td>
+                    <td>${c.discount_value}</td>
+                    <td>${c.discount_code}</td>
+                    <td>${c.category}</td>
+                    <td>${c.city}</td>
+                    <td>${validUntil}</td>
+                    <td><span class="status-badge status-${status}">${status}</span></td>
+                    <td><div class="item-actions">
+                        <button class="item-btn" onclick="viewCoupon('${c.id}')">ðŸ‘ï¸</button>
+                        <button class="item-btn item-btn-delete" onclick="deleteCoupon('${c.id}')">ðŸ—‘ï¸</button>
+                    </div></td>
+                </tr>
+            `;
+        }).join('');
+        table.innerHTML = `<table><thead><tr><th>Business/Title</th><th>Discount</th><th>Code</th><th>Category</th><th>City</th><th>Valid Until</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    let allJobs = [];
+    async function loadJobs() {
+        try {
+            const { data, error } = await supabase
+                .from('jobs')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            allJobs = data || [];
+            renderJobsTable();
+        } catch (err) {
+            console.error('Error:', err);
+            document.getElementById('jobsTable').innerHTML = '<p style="padding: 2rem; text-align: center; color: red;">Error loading</p>';
+        }
+    }
+
+    function renderJobsTable() {
+        const table = document.getElementById('jobsTable');
+        if (allJobs.length === 0) {
+            table.innerHTML = '<div class="empty-state"><h3>No jobs yet</h3></div>';
+            return;
+        }
+        const rows = allJobs.map(j => `
+            <tr>
+                <td><strong>${j.company_name}</strong><br><small style="color:#6b7280;">${j.title}</small></td>
+                <td>${j.job_type}</td>
+                <td>${j.location}</td>
+                <td>${j.salary_range || 'N/A'}</td>
+                <td><span class="status-badge status-${j.status}">${j.status}</span></td>
+                <td><div class="item-actions">
+                    <button class="item-btn" onclick="viewJob('${j.id}')">ðŸ‘ï¸</button>
+                    <button class="item-btn item-btn-delete" onclick="deleteJob('${j.id}')">ðŸ—‘ï¸</button>
+                </div></td>
+            </tr>
+        `).join('');
+        table.innerHTML = `<table><thead><tr><th>Company/Title</th><th>Type</th><th>Location</th><th>Salary</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    let allReports = [];
+    let lastReportCheck = localStorage.getItem('lastReportCheck') || new Date().toISOString();
+    
+    async function loadReports() {
+        try {
+            // Erstmal nur Reports laden ohne Joins
+            const { data, error } = await supabase
+                .from('reports')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            
+            // Dann für jeden Report die zusätzlichen Infos laden
+            const reportsWithDetails = await Promise.all(data.map(async (report) => {
+                let reporterInfo = null;
+                let listingInfo = null;
+                
+                // Lade Reporter Info
+                try {
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('id, username, email')
+                        .eq('id', report.reporter_id)
+                        .single();
+                    reporterInfo = profile;
+                } catch (e) {
+                    console.log('No reporter found for:', report.reporter_id);
+                }
+                
+                // Lade Listing Info (nur wenn es ein Listing Report ist)
+                if (report.reported_type === 'listing') {
+                    try {
+                        const { data: listing } = await supabase
+                            .from('listings')
+                            .select('id, title, city, rent_price')
+                            .eq('id', report.reported_id)
+                            .single();
+                        listingInfo = listing;
+                    } catch (e) {
+                        console.log('No listing found for:', report.reported_id);
+                    }
+                }
+                
+                return {
+                    ...report,
+                    reporter: reporterInfo,
+                    reported_listing: listingInfo
+                };
+            }));
+            
+            allReports = reportsWithDetails;
+            
+            // Check for new pending reports since last check
+            const newPendingReports = allReports.filter(r => 
+                r.status === 'pending' && 
+                new Date(r.created_at) > new Date(lastReportCheck)
+            );
+            
+            // Send email notification for each new report
+            for (const report of newPendingReports) {
+                try {
+                    const reasonLabels = {
+                        spam: '🚫 Spam',
+                        inappropriate_content: '⚠️ Inappropriate',
+                        harassment: '😠 Harassment',
+                        fake_listing: '🎭 Fake',
+                        scam: '💰 Scam',
+                        other: '❓ Other'
+                    };
+                    
+                    await supabase.functions.invoke('send-notification', {
+                        body: {
+                            to: 'admin@room8.club',
+                            type: 'new_report',
+                            data: {
+                                reportId: report.id,
+                                reportedType: report.reported_type,
+                                reportedId: report.reported_id,
+                                reason: reasonLabels[report.reason] || report.reason,
+                                description: report.description,
+                                reporterName: report.reporter?.username || 'Unknown',
+                                reporterEmail: report.reporter?.email || 'Unknown',
+                                listingTitle: report.reported_listing?.title || 'N/A',
+                                listingCity: report.reported_listing?.city || 'N/A',
+                                listingPrice: report.reported_listing?.rent_price || 'N/A',
+                                createdAt: report.created_at
+                            }
+                        }
+                    });
+                    
+                    console.log('✅ Admin notified about new report:', report.id);
+                } catch (emailError) {
+                    console.error('❌ Failed to send report notification:', emailError);
+                    // Don't fail the whole process if email fails
+                }
+            }
+            
+            // Update last check time
+            if (newPendingReports.length > 0) {
+                localStorage.setItem('lastReportCheck', new Date().toISOString());
+            }
+            
+            renderReportsTable();
+        } catch (err) {
+            console.error('Error:', err);
+            document.getElementById('reportsTable').innerHTML = '<p style="padding: 2rem; text-align: center; color: red;">Error loading: ' + err.message + '</p>';
+        }
+    }
+
+    function renderReportsTable() {
+        const table = document.getElementById('reportsTable');
+        if (allReports.length === 0) {
+            table.innerHTML = '<div class="empty-state"><h3>No reports</h3><p>All good! 🎉</p></div>';
+            return;
+        }
+        const reasonLabels = {
+            spam: '🚫 Spam',
+            inappropriate_content: '⚠️ Inappropriate',
+            harassment: '😠 Harassment',
+            fake_listing: '🎭 Fake',
+            scam: '💰 Scam',
+            other: '❓ Other'
+        };
+        const rows = allReports.map(r => {
+            const date = new Date(r.created_at).toLocaleDateString('de-DE');
+            const reporterName = r.reporter?.username || 'Unknown';
+            const reporterEmail = r.reporter?.email || '-';
+            const listingTitle = r.reported_listing?.title || 'N/A';
+            const listingCity = r.reported_listing?.city || '-';
+            const listingPrice = r.reported_listing?.rent_price || '-';
+            
+            return `
+                <tr>
+                    <td>${date}</td>
+                    <td>
+                        <strong>${r.reported_type}</strong><br>
+                        <small style="color:#6b7280;">${r.reported_id.slice(0, 8)}...</small><br>
+                        ${r.reported_type === 'listing' ? `<small style="color:#8b5cf6;">${listingTitle} - ${listingCity} (${listingPrice}€)</small><br>` : ''}
+                        ${r.reported_type === 'listing' ? `<button onclick="window.open('/detail.html?id=${r.reported_id}', '_blank')" style="padding: 0.25rem 0.5rem; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-top: 0.25rem;">📄 View Listing</button>` : ''}
+                    </td>
+                    <td>
+                        <strong>${reporterName}</strong><br>
+                        <small style="color:#6b7280;">${reporterEmail}</small><br>
+                        ${r.reporter?.id ? `<button onclick="window.open('/public-profile.html?id=${r.reporter.id}', '_blank')" style="padding: 0.25rem 0.5rem; background: #8b5cf6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-top: 0.25rem;">👤 View Profile</button>` : ''}
+                    </td>
+                    <td>${reasonLabels[r.reason]}</td>
+                    <td>
+                        ${r.description ? 
+                            (r.description.length > 50 ? 
+                                r.description.substring(0, 50) + '...' : 
+                                r.description
+                            ) : '-'
+                        }
+                        ${r.description && r.description.length > 50 ? 
+                            `<br><button onclick="showReportDetails('${r.id}')" style="padding: 0.25rem 0.5rem; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-top: 0.25rem;">📋 Full Details</button>` 
+                            : ''
+                        }
+                    </td>
+                    <td><span class="status-badge status-${r.status}">${r.status}</span></td>
+                    <td><div class="item-actions">
+                        <button class="item-btn" onclick="resolveReport('${r.id}')" title="Resolve">✅</button>
+                        <button class="item-btn" onclick="dismissReport('${r.id}')" title="Dismiss">❌</button>
+                        <button class="item-btn item-btn-delete" onclick="deleteReport('${r.id}')" title="Delete">🗑️</button>
+                    </div></td>
+                </tr>
+            `;
+        }).join('');
+        table.innerHTML = `<table><thead><tr><th>Date</th><th>Item</th><th>Reporter</th><th>Reason</th><th>Description</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+    
+    window.showReportDetails = function(reportId) {
+        const report = allReports.find(r => r.id === reportId);
+        if (!report) return;
+        
+        const reasonLabels = {
+            spam: '🚫 Spam',
+            inappropriate_content: '⚠️ Inappropriate',
+            harassment: '😠 Harassment',
+            fake_listing: '🎭 Fake',
+            scam: '💰 Scam',
+            other: '❓ Other'
+        };
+        
+        const modalContent = `
+            <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;" onclick="this.remove()">
+                <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 600px; max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
+                    <h2 style="margin: 0 0 1rem 0;">📋 Report Details</h2>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Report ID:</strong><br>
+                        <small style="color: #6b7280;">${report.id}</small>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Reported Item:</strong><br>
+                        ${report.reported_type} (${report.reported_id.slice(0, 8)}...)
+                        ${report.reported_type === 'listing' ? `<br><small>${report.reported_listing?.title || 'N/A'}</small>` : ''}
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Reporter:</strong><br>
+                        ${report.reporter?.username || 'Unknown'} (${report.reporter?.email || '-'})
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Reason:</strong><br>
+                        ${reasonLabels[report.reason]}
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Full Description:</strong><br>
+                        <div style="background: #f3f4f6; padding: 1rem; border-radius: 8px; margin-top: 0.5rem;">
+                            ${report.description || 'No description provided'}
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Status:</strong><br>
+                        <span class="status-badge status-${report.status}">${report.status}</span>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Created:</strong><br>
+                        ${new Date(report.created_at).toLocaleString('de-DE')}
+                    </div>
+                    
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
+                        ${report.reported_type === 'listing' ? `
+                            <button onclick="window.open('/detail.html?id=${report.reported_id}', '_blank')" style="padding: 0.75rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                📄 View Listing
+                            </button>
+                        ` : ''}
+                        ${report.reporter?.id ? `
+                            <button onclick="window.open('/public-profile.html?id=${report.reporter.id}', '_blank')" style="padding: 0.75rem 1rem; background: #8b5cf6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                👤 View Reporter Profile
+                            </button>
+                        ` : ''}
+                        <button onclick="this.closest('div[style*=fixed]').remove()" style="padding: 0.75rem 1rem; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalContent);
+    };
+
+    let allUsers = [];
+    async function loadUsers() {
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            allUsers = data || [];
+            renderUsersTable();
+        } catch (err) {
+            console.error('Error:', err);
+            document.getElementById('usersTable').innerHTML = '<p style="padding: 2rem; text-align: center; color: red;">Error loading</p>';
+        }
+    }
+
+    function renderUsersTable() {
+        const table = document.getElementById('usersTable');
+        if (allUsers.length === 0) {
+            table.innerHTML = '<div class="empty-state"><h3>No users</h3></div>';
+            return;
+        }
+        const rows = allUsers.map(u => {
+            const date = new Date(u.created_at).toLocaleDateString('de-DE');
+            return `
+                <tr>
+                    <td><strong>${u.username || 'N/A'}</strong><br><small style="color:#6b7280;">${u.full_name || '-'}</small></td>
+                    <td>${u.email || '-'}</td>
+                    <td>${date}</td>
+                    <td>
+                        ${u.is_verified ? '<span class="status-badge status-active">✓ Verified</span>' : ''}
+                        ${u.is_student ? '<span class="status-badge status-active">🎓 Student</span>' : ''}
+                    </td>
+                    <td><div class="item-actions">
+                        <button class="item-btn" onclick="viewUserProfile('${u.id}')">👁️</button>
+                    </div></td>
+                </tr>
+            `;
+        }).join('');
+        table.innerHTML = `<table><thead><tr><th>Username/Name</th><th>Email</th><th>Registered</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    function updateStats() {
+        document.getElementById('totalUsers').textContent = allUsers.length;
+        document.getElementById('totalCoupons').textContent = allCoupons.length;
+        document.getElementById('activeCoupons').textContent = allCoupons.filter(c => c.status === 'active' && new Date(c.valid_until) >= new Date()).length;
+        document.getElementById('totalJobs').textContent = allJobs.length;
+        document.getElementById('activeJobs').textContent = allJobs.filter(j => j.status === 'active').length;
+        document.getElementById('pendingReports').textContent = allReports.filter(r => r.status === 'pending').length;
+    }
+
+    window.viewCoupon = (id) => window.location.href = `coupon-detail.html?id=${id}`;
+    window.viewJob = (id) => window.location.href = `jobs.html#${id}`;
+    window.viewUserProfile = (id) => window.location.href = `public-profile.html?id=${id}`;
+
+    window.deleteCoupon = async (id) => {
+        if (!confirm('Delete coupon?')) return;
+        try {
+            const { error } = await supabase.from('coupons').delete().eq('id', id);
+            if (error) throw error;
+            alert('Deleted!');
+            loadCoupons();
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    };
+
+    window.deleteJob = async (id) => {
+        if (!confirm('Delete job?')) return;
+        try {
+            const { error } = await supabase.from('jobs').delete().eq('id', id);
+            if (error) throw error;
+            alert('Deleted!');
+            loadJobs();
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    };
+
+    window.resolveReport = async (id) => {
+        try {
+            const { error } = await supabase.from('reports').update({ status: 'resolved', reviewed_at: new Date().toISOString(), reviewed_by: currentUser.id }).eq('id', id);
+            if (error) throw error;
+            alert('Resolved!');
+            loadReports();
+            updateStats();
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    };
+
+    window.dismissReport = async (id) => {
+        try {
+            const { error } = await supabase.from('reports').update({ status: 'dismissed', reviewed_at: new Date().toISOString(), reviewed_by: currentUser.id }).eq('id', id);
+            if (error) throw error;
+            alert('Dismissed!');
+            loadReports();
+            updateStats();
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    };
+
+    // VERIFIZIERUNGS-FUNKTIONEN
+    let allVerifications = [];
+    let currentFilter = 'all';
+    
+    async function loadVerifications() {
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+
+            allVerifications = data || [];
+
+            // Stats
+            const pending = data.filter(p => p.verification_status === 'pending').length;
+            const approved = data.filter(p => p.verification_status === 'approved' || p.is_verified).length;
+            const rejected = data.filter(p => p.verification_status === 'rejected').length;
+            
+            document.getElementById('pendingVerifications').textContent = pending;
+            document.getElementById('approvedVerifications').textContent = approved;
+            document.getElementById('rejectedVerifications').textContent = rejected;
+            
+            // Update counters
+            updateVerificationCounts();
+            
+            // Populate domain filter
+            populateDomainFilter();
+            
+            // Render table
+            renderVerificationsTable();
+            
+        } catch (err) {
+            console.error('Error loading verifications:', err);
+            document.getElementById('verificationsTable').innerHTML = 
+                `<p style="padding: 2rem; text-align: center; color: red;">Error: ${err.message}</p>`;
+        }
+    }
+    
+    function updateVerificationCounts() {
+        const all = allVerifications.length;
+        const pending = allVerifications.filter(p => p.verification_status === 'pending' || (!p.is_verified && p.email)).length;
+        const approved = allVerifications.filter(p => p.is_verified).length;
+        const rejected = allVerifications.filter(p => p.verification_status === 'rejected').length;
+        
+        document.getElementById('count-all').textContent = all;
+        document.getElementById('count-pending').textContent = pending;
+        document.getElementById('count-approved').textContent = approved;
+        document.getElementById('count-rejected').textContent = rejected;
+    }
+    
+    function populateDomainFilter() {
+        const domains = [...new Set(allVerifications
+            .map(p => p.email_domain || (p.email ? p.email.split('@')[1] : null))
+            .filter(d => d))];
+        
+        const select = document.getElementById('domainFilter');
+        select.innerHTML = '<option value="">All Domains</option>' + 
+            domains.map(d => `<option value="${d}">${d}</option>`).join('');
+    }
+    
+    window.filterVerifications = function(status) {
+        currentFilter = status;
+        
+        // Update active tab
+        document.querySelectorAll('.sub-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelector(`[data-status="${status}"]`).classList.add('active');
+        
+        // Render filtered table
+        renderVerificationsTable();
+    };
+    
+    window.searchVerifications = function() {
+        renderVerificationsTable();
+    };
+    
+    window.applyFilters = function() {
+        renderVerificationsTable();
+    };
+    
+    function renderVerificationsTable() {
+        const searchTerm = document.getElementById('verificationSearch').value.toLowerCase();
+        const domainFilter = document.getElementById('domainFilter').value;
+        const methodFilter = document.getElementById('methodFilter').value;
+        
+        let filtered = allVerifications;
+        
+        // Filter by status
+        if (currentFilter === 'pending') {
+            filtered = filtered.filter(p => p.verification_status === 'pending' || (!p.is_verified && p.email));
+        } else if (currentFilter === 'approved') {
+            filtered = filtered.filter(p => p.is_verified);
+        } else if (currentFilter === 'rejected') {
+            filtered = filtered.filter(p => p.verification_status === 'rejected');
+        }
+        
+        // Filter by search
+        if (searchTerm) {
+            filtered = filtered.filter(p => {
+                const username = (p.username || '').toLowerCase();
+                const email = (p.email || '').toLowerCase();
+                const domain = (p.email_domain || '').toLowerCase();
+                return username.includes(searchTerm) || email.includes(searchTerm) || domain.includes(searchTerm);
+            });
+        }
+        
+        // Filter by domain
+        if (domainFilter) {
+            filtered = filtered.filter(p => {
+                const domain = p.email_domain || (p.email ? p.email.split('@')[1] : '');
+                return domain === domainFilter;
+            });
+        }
+        
+        // Filter by method
+        if (methodFilter) {
+            filtered = filtered.filter(p => p.verification_method === methodFilter);
+        }
+        
+        if (filtered.length === 0) {
+            document.getElementById('verificationsTable').innerHTML = 
+                '<div class="empty-state"><h3>No results found</h3><p>Try adjusting your filters</p></div>';
+            return;
+        }
+        
+        const rows = filtered.map(profile => {
+            const email = profile.email || 'No email';
+            const emailParts = profile.email ? profile.email.split('@') : ['Unknown', 'unknown'];
+            const userName = profile.username || emailParts[0];
+            const domain = profile.email_domain || emailParts[1];
+            
+            return `
+                <tr>
+                    <td>
+                        <div style="font-weight: 600;">${userName}</div>
+                        <div style="font-size: 0.85rem; color: #6b7280;">${profile.id.substring(0, 8)}...</div>
+                    </td>
+                    <td>${email}</td>
+                    <td>
+                        <span style="background: #eff6ff; color: #1e40af; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">
+                            ${domain}
+                        </span>
+                    </td>
+                    <td>
+                        <span style="background: ${
+                            profile.is_verified ? '#d1fae5' : 
+                            profile.verification_status === 'pending' ? '#fef3c7' : 
+                            profile.verification_status === 'rejected' ? '#fee2e2' : '#f3f4f6'
+                        }; color: ${
+                            profile.is_verified ? '#065f46' :
+                            profile.verification_status === 'pending' ? '#92400e' :
+                            profile.verification_status === 'rejected' ? '#991b1b' : '#6b7280'
+                        }; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.85rem; font-weight: 600;">
+                            ${
+                                profile.is_verified ? '✓ Verified' :
+                                profile.verification_status === 'pending' ? '⏳ Pending' :
+                                profile.verification_status === 'rejected' ? '✗ Rejected' : 'Not Started'
+                            }
+                        </span>
+                    </td>
+                    <td>${profile.verification_method || '-'}</td>
+                    <td>${new Date(profile.created_at).toLocaleDateString('de-DE')}</td>
+                    <td>
+                        ${profile.verification_document_url ? 
+                            `<button onclick="viewDocument('${profile.verification_document_url}')" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                                📄 View
+                            </button>` 
+                            : '-'
+                        }
+                    </td>
+                    <td>
+                        ${!profile.is_verified && profile.verification_status !== 'rejected' ? `
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button onclick="approveVerification('${profile.id}', '${email}', '${userName}')" 
+                                        style="padding: 0.5rem 1rem; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                    ✓ Approve
+                                </button>
+                                <button onclick="rejectVerification('${profile.id}', '${email}', '${userName}')" 
+                                        style="padding: 0.5rem 1rem; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                    ✗ Reject
+                                </button>
+                            </div>
+                        ` : profile.is_verified ? '<span style="color: #10b981; font-weight: 600;">✓ Verified</span>' : '<span style="color: #ef4444; font-weight: 600;">✗ Rejected</span>'}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+        
+        const html = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>E-Mail</th>
+                        <th>Domain</th>
+                        <th>Status</th>
+                        <th>Methode</th>
+                        <th>Registriert</th>
+                        <th>Dokument</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rows}
+                </tbody>
+            </table>
+        `;
+        
+        document.getElementById('verificationsTable').innerHTML = html;
+    }
+
+    window.viewDocument = async (documentUrl) => {
+        try {
+            const { data, error } = await supabase.storage
+                .from('verification-documents')
+                .createSignedUrl(documentUrl, 60); // 60 seconds
+
+            if (error) throw error;
+            
+            window.open(data.signedUrl, '_blank');
+        } catch (err) {
+            alert('Error viewing document: ' + err.message);
+        }
+    };
+
+    window.approveVerification = async (userId, userEmail, userName) => {
+        console.log('🔧 approveVerification called with:', { userId, userEmail, userName });
+        
+        if (!confirm('Approve this verification?')) {
+            console.log('❌ User cancelled approval');
+            return;
+        }
+        
+        try {
+            console.log('📝 Updating profile...');
+            
+            // 1. Update profile
+            const { error: updateError } = await supabase
+                .from('profiles')
+                .update({
+                    is_verified: true,
+                    is_student: true,
+                    verification_status: 'approved',
+                    verified_at: new Date().toISOString()
+                })
+                .eq('id', userId);
+
+            if (updateError) {
+                console.error('❌ Update error:', updateError);
+                throw updateError;
+            }
+            
+            console.log('✅ Profile updated successfully!');
+
+            // 2. Send verification email to user
+            try {
+                console.log('📧 Sending email to:', userEmail);
+                
+                await supabase.functions.invoke('send-notification', {
+                    body: {
+                        to: userEmail,
+                        type: 'account_verified',
+                        data: {
+                            userName: userName
+                        }
+                    }
+                });
+                console.log('✅ Verification email sent to:', userEmail);
+            } catch (emailError) {
+                console.error('❌ Email error:', emailError);
+                // Don't fail the approval if email fails
+            }
+
+            alert('✅ Verification approved! User notified via email.');
+            
+            console.log('🔄 Reloading verifications in 1 second...');
+            
+            // Wait a bit for Supabase to propagate changes
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await loadVerifications();
+            await updateStats();
+            
+            console.log('✅ Reload complete!');
+        } catch (err) {
+            console.error('❌ Approval error:', err);
+            alert('Error: ' + err.message);
+        }
+    };
+
+    window.rejectVerification = async (userId, userEmail, userName) => {
+        const reason = prompt('Reason for rejection (optional):');
+        if (reason === null) return; // Cancelled
+        
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    is_verified: false,
+                    is_student: false,
+                    verification_status: 'rejected',
+                    verification_rejection_reason: reason
+                })
+                .eq('id', userId);
+
+            if (error) throw error;
+
+            // Send rejection email to user
+            try {
+                console.log('📧 Sending rejection email to:', userEmail);
+                
+                await supabase.functions.invoke('send-notification', {
+                    body: {
+                        to: userEmail,
+                        type: 'account_rejected',
+                        data: {
+                            userName: userName,
+                            reason: reason || 'No reason provided'
+                        }
+                    }
+                });
+                console.log('✅ Rejection email sent to:', userEmail);
+            } catch (emailError) {
+                console.error('❌ Email error:', emailError);
+                // Don't fail the rejection if email fails
+            }
+
+            alert('❌ Verification rejected. User notified via email.');
+            loadVerifications();
+            updateStats();
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    };
+
+    window.deleteReport = async (id) => {
+        if (!confirm('Delete report?')) return;
+        try {
+            const { error } = await supabase.from('reports').delete().eq('id', id);
+            if (error) throw error;
+            alert('Deleted!');
+            loadReports();
+            updateStats();
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    };
+
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.tab + '-section').classList.add('active');
+            
+            // Load data when tab is clicked
+            if (tab.dataset.tab === 'verifications') {
+                loadVerifications();
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const isAdmin = await checkAdminAuth();
+        if (isAdmin) loadAllData();
+    });
+</script>
+<script src="translations.js"></script>
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">    <title>Profil bearbeiten - Roommate</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .avatar-upload-container { text-align: center; margin-bottom: 2rem; }
+        .avatar-preview { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; background-color: #eee; border: 4px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; }
+        #avatarFile { display: none; }
+        .verification-section { background-color: var(--surface-color); padding: 1.5rem; border-radius: var(--border-radius); margin-top: 2rem; border: 1px solid var(--border-color); }
+        .status-badge { font-weight: bold; padding: 0.4rem 0.8rem; border-radius: 999px; color: white; display: inline-block; font-size: 0.85rem; }
+        .status-unverified { background-color: #ef4444; }
+        .status-pending { background-color: #f59e0b; }
+        .status-verified { background-color: #10b981; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+        }
+        .section-title { font-size: 1.1rem; font-weight: 600; margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border-color); color: var(--text-color); }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header class="app-header">
+        <a href="profile.html" class="back-arrow">&larr;</a>
+        <h1 data-i18n="edit_profile_title">Profil bearbeiten</h1>
+    </header>
+    <main class="app-content">
+        <form id="editProfileForm">
+            <!-- Avatar Upload -->
+            <div class="avatar-upload-container">
+                <label for="avatarFile">
+                    <img src="placeholder.png" alt="Dein Avatar" id="avatar-preview" class="avatar-preview">
+                    <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-light);" data-i18n="edit_profile_change_photo">Klicke, um Bild zu ändern</p>
+                </label>
+                <input type="file" id="avatarFile" accept="image/*">
+            </div>
+
+            <!-- Basis-Informationen -->
+            <h3 class="section-title" data-i18n="edit_profile_basic_info">📋 Basis-Informationen</h3>
+            
+            <div class="form-group">
+                <label for="username" data-i18n="edit_profile_username">Benutzername *</label>
+                <input type="text" id="username" required data-i18n-placeholder="edit_profile_username_placeholder" placeholder="Dein Benutzername">
+            </div>
+
+            <div class="form-group">
+                <label for="full_name" data-i18n="edit_profile_fullname">Vollständiger Name</label>
+                <input type="text" id="full_name" data-i18n-placeholder="edit_profile_fullname_placeholder" placeholder="z.B. Max Mustermann">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="city" data-i18n="edit_profile_city">Stadt</label>
+                    <input type="text" id="city" data-i18n-placeholder="edit_profile_city_placeholder" placeholder="z.B. Berlin">
+                </div>
+                <div class="form-group">
+                    <label for="age" data-i18n="edit_profile_age">Alter</label>
+                    <input type="number" id="age" min="16" max="99" data-i18n-placeholder="edit_profile_age_placeholder" placeholder="z.B. 22">
+                </div>
+            </div>
+
+            <!-- Studium -->
+            <h3 class="section-title" data-i18n="edit_profile_studies">🎓 Studium</h3>
+
+            <div class="form-group">
+                <label for="university" data-i18n="edit_profile_university">Universität</label>
+                <input type="text" id="university" data-i18n-placeholder="edit_profile_university_placeholder" placeholder="z.B. TU Berlin">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="study_field" data-i18n="edit_profile_field">Studienfach</label>
+                    <input type="text" id="study_field" data-i18n-placeholder="edit_profile_field_placeholder" placeholder="z.B. Informatik">
+                </div>
+                <div class="form-group">
+                    <label for="semester" data-i18n="edit_profile_semester">Semester</label>
+                    <select id="semester">
+                        <option value="" data-i18n="edit_profile_select">Bitte wählen</option>
+                        <option value="1">1. Semester</option>
+                        <option value="2">2. Semester</option>
+                        <option value="3">3. Semester</option>
+                        <option value="4">4. Semester</option>
+                        <option value="5">5. Semester</option>
+                        <option value="6">6. Semester</option>
+                        <option value="7">7. Semester</option>
+                        <option value="8">8. Semester</option>
+                        <option value="9">9. Semester</option>
+                        <option value="10">10. Semester</option>
+                        <option value="11">11. Semester</option>
+                        <option value="12">12. Semester</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Persönliches -->
+            <h3 class="section-title" data-i18n="edit_profile_about">💬 Über mich</h3>
+
+            <div class="form-group">
+                <label for="bio" data-i18n="edit_profile_bio">Biografie</label>
+                <textarea id="bio" rows="4" data-i18n-placeholder="edit_profile_bio_placeholder" placeholder="Erzähl etwas über dich..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="languages" data-i18n="edit_profile_languages">Sprachen</label>
+                <input type="text" id="languages" data-i18n-placeholder="edit_profile_languages_placeholder" placeholder="z.B. Deutsch, Englisch, Spanisch">
+                <small style="color: var(--text-light); font-size: 0.8rem;" data-i18n="edit_profile_languages_hint">Mehrere Sprachen mit Komma trennen</small>
+            </div>
+
+            <div class="form-group">
+                <label for="interests" data-i18n="edit_profile_interests">Interessen & Hobbys</label>
+                <textarea id="interests" rows="3" data-i18n-placeholder="edit_profile_interests_placeholder" placeholder="z.B. Fitness, Kochen, Reisen, Gaming..."></textarea>
+            </div>
+            
+            <button type="submit" class="submit-btn" style="margin-top: 2rem;" data-i18n="edit_profile_save">Änderungen speichern</button>
+            
+            <!-- Verifizierungs-Sektion -->
+            <div class="verification-section">
+                <h3 style="margin: 0 0 1rem 0;" data-i18n="edit_profile_verification_title">🎓 Studenten-Verifizierung</h3>
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <p style="margin: 0 0 0.5rem 0; color: var(--text-color); font-weight: 600;">
+                            <span data-i18n="edit_profile_status">Status:</span> <span id="verification-status" class="status-badge" data-i18n="general_loading">Lädt...</span>
+                        </p>
+                        <p id="verification-info" style="margin: 0; color: var(--text-light); font-size: 0.9rem;" data-i18n="edit_profile_checking">
+                            Checking verification status...
+                        </p>
+                    </div>
+                    <a href="verify-options.html" id="verify-btn" class="submit-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); margin: 0; padding: 0.75rem 1.5rem; text-decoration: none; display: inline-block; white-space: nowrap;" data-i18n="edit_profile_verify_btn">
+                        Verify Student Status →
+                    </a>
+                </div>
+            </div>
+            
+            <div id="form-message" style="margin-top: 2rem; text-align: center; font-weight: 600;"></div>
+        </form>
+    </main>
+    <footer class="app-footer-nav" id="app-footer-nav"></footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<script type="module">
+    import { supabase, requireAuth } from './supabaseClient.js';
+
+    const form = document.getElementById('editProfileForm');
+    const usernameInput = document.getElementById('username');
+    const fullNameInput = document.getElementById('full_name');
+    const cityInput = document.getElementById('city');
+    const ageInput = document.getElementById('age');
+    const universityInput = document.getElementById('university');
+    const studyFieldInput = document.getElementById('study_field');
+    const semesterInput = document.getElementById('semester');
+    const bioInput = document.getElementById('bio');
+    const languagesInput = document.getElementById('languages');
+    const interestsInput = document.getElementById('interests');
+    const avatarFileInput = document.getElementById('avatarFile');
+    const avatarPreview = document.getElementById('avatar-preview');
+    const msgContainer = document.getElementById('form-message');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const statusBadge = document.getElementById('verification-status');
+    const verificationInfo = document.getElementById('verification-info');
+    const verifyBtn = document.getElementById('verify-btn');
+
+    let currentUser = null;
+
+    // Get translations
+    function getTranslation(key, fallback) {
+        const lang = localStorage.getItem('room8_language') || 'de';
+        const translations = {
+            de: {
+                saving: 'Speichere...',
+                save: 'Änderungen speichern',
+                success: '✓ Profil erfolgreich aktualisiert!',
+                error: 'Fehler',
+                verified: '✓ Verifiziert',
+                pending: '⏳ Ausstehend',
+                not_verified: '✗ Nicht verifiziert',
+                verified_with: 'Verifiziert mit',
+                verified_info: 'Dein Studentenstatus ist verifiziert',
+                pending_info: 'Deine Verifizierung wird überprüft',
+                not_verified_info: 'Verifiziere deinen Studentenstatus um alle Features freizuschalten',
+                check_status: 'Status prüfen →',
+                verify_now: 'Jetzt verifizieren →'
+            },
+            en: {
+                saving: 'Saving...',
+                save: 'Save Changes',
+                success: '✓ Profile updated successfully!',
+                error: 'Error',
+                verified: '✓ Verified',
+                pending: '⏳ Pending',
+                not_verified: '✗ Not Verified',
+                verified_with: 'Verified with',
+                verified_info: 'Your student status is verified',
+                pending_info: 'Your verification is being reviewed',
+                not_verified_info: 'Verify your student status to unlock all features',
+                check_status: 'Check Status →',
+                verify_now: 'Verify Now →'
+            }
+        };
+        return translations[lang]?.[key] || fallback;
+    }
+
+    async function loadProfileData() {
+        try {
+            currentUser = await requireAuth();
+            const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+
+            if (error) throw error;
+
+            if (profile) {
+                usernameInput.value = profile.username || '';
+                fullNameInput.value = profile.full_name || '';
+                cityInput.value = profile.city || '';
+                ageInput.value = profile.age || '';
+                universityInput.value = profile.university || '';
+                studyFieldInput.value = profile.study_field || '';
+                semesterInput.value = profile.semester || '';
+                bioInput.value = profile.bio || '';
+                languagesInput.value = profile.languages || '';
+                interestsInput.value = profile.interests || '';
+                avatarPreview.src = profile.avatar_url || 'placeholder.png';
+                
+                // Verifizierungs-Status anzeigen
+                const isVerified = profile.is_verified;
+                const verificationStatus = profile.verification_status || 'not_started';
+                const uniEmail = profile.uni_email || profile.edu_email;
+                
+                if (isVerified) {
+                    statusBadge.textContent = getTranslation('verified', '✓ Verified');
+                    statusBadge.className = 'status-badge status-verified';
+                    verificationInfo.textContent = uniEmail 
+                        ? `${getTranslation('verified_with', 'Verified with')} ${uniEmail}` 
+                        : getTranslation('verified_info', 'Your student status is verified');
+                    verifyBtn.style.display = 'none';
+                } else if (verificationStatus === 'pending') {
+                    statusBadge.textContent = getTranslation('pending', '⏳ Pending');
+                    statusBadge.className = 'status-badge status-pending';
+                    verificationInfo.textContent = getTranslation('pending_info', 'Your verification is being reviewed');
+                    verifyBtn.href = 'verification-status.html';
+                    verifyBtn.textContent = getTranslation('check_status', 'Check Status →');
+                } else {
+                    statusBadge.textContent = getTranslation('not_verified', '✗ Not Verified');
+                    statusBadge.className = 'status-badge status-unverified';
+                    verificationInfo.textContent = getTranslation('not_verified_info', 'Verify your student status to unlock all features');
+                    verifyBtn.href = 'verify-options.html';
+                    verifyBtn.textContent = getTranslation('verify_now', 'Verify Now →');
+                }
+            }
+        } catch (err) {
+            console.error("Fehler beim Laden der Profildaten:", err);
+        }
+    }
+
+    avatarFileInput.addEventListener('change', () => {
+        const file = avatarFileInput.files[0];
+        if (file) {
+            avatarPreview.src = URL.createObjectURL(file);
+        }
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        submitBtn.disabled = true;
+        submitBtn.textContent = getTranslation('saving', 'Speichere...');
+        msgContainer.textContent = '';
+        
+        try {
+            const updates = {
+                username: usernameInput.value,
+                full_name: fullNameInput.value,
+                city: cityInput.value,
+                age: ageInput.value ? parseInt(ageInput.value) : null,
+                university: universityInput.value,
+                study_field: studyFieldInput.value,
+                semester: semesterInput.value ? parseInt(semesterInput.value) : null,
+                bio: bioInput.value,
+                languages: languagesInput.value,
+                interests: interestsInput.value,
+                updated_at: new Date(),
+            };
+
+            const file = avatarFileInput.files[0];
+            if (file) {
+                const filePath = `${currentUser.id}/${Date.now()}_${file.name}`;
+                const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
+                if (uploadError) throw uploadError;
+                const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+                updates.avatar_url = urlData.publicUrl;
+            }
+
+            const { error } = await supabase
+                .from('profiles')
+                .update(updates)
+                .eq('id', currentUser.id);
+
+            if (error) throw error;
+
+            msgContainer.style.color = 'green';
+            msgContainer.textContent = getTranslation('success', '✓ Profil erfolgreich aktualisiert!');
+            
+            setTimeout(() => {
+                window.location.href = 'profile.html';
+            }, 1500);
+
+        } catch (error) {
+            msgContainer.style.color = 'red';
+            msgContainer.textContent = getTranslation('error', 'Fehler') + ': ' + error.message;
+            submitBtn.disabled = false;
+            submitBtn.textContent = getTranslation('save', 'Änderungen speichern');
+        }
+    });
+
+    loadProfileData();
+</script>
+
+<script type="module">
+    import { loadNavigation } from './navigation.js';
+    loadNavigation();
+</script>
+<script>
+    feather.replace();
+</script>
+<script src="translations.js"></script>
+</body>
+</html>

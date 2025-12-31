@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">    <title>Coupons & Angebote – Roommate</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .app-container { --primary-color: #8b5cf6; --secondary-color: #7c3aed; }
+        
+        .app-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+        }
+        .app-header h1 { color: white; margin: 0; }
+        
+        /* MARKETING SECTION */
+        .marketing-section {
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+            padding: 3rem 1.5rem;
+            text-align: center;
+            border-bottom: 2px solid #e9d5ff;
+        }
+        .marketing-section h2 {
+            font-size: 1.75rem;
+            color: #581c87;
+            margin: 0 0 1rem 0;
+        }
+        .marketing-section p {
+            color: #7c3aed;
+            font-size: 1.05rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .demo-coupon-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 700px;
+            margin: 0 auto 2rem auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: left;
+            position: relative;
+            border: 3px dashed #8b5cf6;
+        }
+        
+        .demo-badge {
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            background: #fbbf24;
+            color: #78350f;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+        }
+        
+        .business-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f3f4f6;
+        }
+        .business-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+        .business-info h3 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1.1rem;
+            color: #1f2937;
+        }
+        
+        .coupon-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 1rem 0;
+            line-height: 1.3;
+        }
+        
+        .coupon-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .meta-tag {
+            background: #f3f4f6;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #4b5563;
+            font-weight: 500;
+        }
+        .meta-tag.highlight {
+            background: #8b5cf6;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .coupon-description {
+            color: #4b5563;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+        
+        .info-section {
+            margin-bottom: 1.5rem;
+        }
+        .info-section h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0 0 0.75rem 0;
+        }
+        .info-list {
+            display: grid;
+            gap: 0.5rem;
+        }
+        .info-item {
+            background: #f9fafb;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #4b5563;
+            border-left: 3px solid #8b5cf6;
+        }
+        
+        .coupon-code-box {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            margin-bottom: 1.5rem;
+        }
+        .coupon-code-box h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .code-value {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            border: 2px dashed rgba(255,255,255,0.5);
+        }
+        
+        .cta-section {
+            background: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .cta-section h4 {
+            margin: 0 0 0.5rem 0;
+            color: #111827;
+        }
+        .cta-section p {
+            color: #6b7280;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .marketing-cta {
+            background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%);
+            border: 2px solid #67e8f9;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .marketing-cta h3 {
+            color: #111827;
+            margin: 0 0 0.5rem 0;
+        }
+        .marketing-cta p {
+            color: #6b7280;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+        .marketing-cta ul {
+            text-align: left;
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1.5rem 0;
+        }
+        .marketing-cta li {
+            padding: 0.5rem 0;
+            color: #4b5563;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .marketing-cta li::before {
+            content: "✓";
+            color: #10b981;
+            font-weight: 700;
+        }
+        .contact-link {
+            display: inline-block;
+            background: #8b5cf6;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .contact-link:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+        }
+        
+        /* REAL COUPONS SECTION */
+        .coupons-section {
+            padding: 2rem 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .coupons-section h2 {
+            font-size: 1.5rem;
+            margin: 0 0 1.5rem 0;
+            color: #111827;
+            text-align: center;
+        }
+        
+        .coupons-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        @media (min-width: 768px) {
+            .coupons-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .coupon-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .coupon-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            border-color: #8b5cf6;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #9ca3af;
+            grid-column: 1 / -1;
+        }
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        .empty-state h3 {
+            margin: 0 0 0.5rem 0;
+            color: #6b7280;
+        }
+        .empty-state p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <h1>🎟️ Coupons & Angebote</h1>
+    </header>
+    
+    <!-- MARKETING SECTION -->
+    <section class="marketing-section">
+        <h2>🎯 Erreichen Sie aktive Studenten!</h2>
+        <p>Präsentieren Sie Ihre Rabatt-Angebote direkt in unserer aktiven Campus-Community.<br>So könnte Ihre Anzeige aussehen:</p>
+        
+        <!-- DEMO COUPON CARD -->
+        <div class="demo-coupon-card">
+            <span class="demo-badge">📌 BEISPIEL</span>
+            
+            <div class="business-header">
+                <div class="business-logo">☕</div>
+                <div class="business-info">
+                    <h3>Café Roommate - Example</h3>
+                </div>
+            </div>
+            
+            <h2 class="coupon-title">15% Rabatt auf alle Getränke</h2>
+            
+            <div class="coupon-meta">
+                <span class="meta-tag highlight">💰 15% Rabatt</span>
+                <span class="meta-tag">📍 Berlin</span>
+                <span class="meta-tag">☕ Café</span>
+                <span class="meta-tag">📅 Gültig bis: <span id="validUntil">-</span></span>
+            </div>
+            
+            <div class="coupon-description">
+                Werde Teil unserer Community und genieße exklusive Rabatte! Bei Café Roommate erhältst du 15% auf alle Getränke - perfekt für deine Kaffeepause zwischen den Vorlesungen.
+            </div>
+            
+            <div class="info-section">
+                <h4>📍 So löst du den Coupon ein</h4>
+                <div class="info-list">
+                    <div class="info-item">Zeige diesen Code an der Kasse vor</div>
+                    <div class="info-item">Gültig für alle Getränke auf der Karte</div>
+                    <div class="info-item">Nicht kombinierbar mit anderen Aktionen</div>
+                    <div class="info-item">Pro Person einmalig einlösbar</div>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <h4>☕ Was dich erwartet</h4>
+                <div class="info-list">
+                    <div class="info-item">Freshly brewed Coffee & Espresso</div>
+                    <div class="info-item">Leckere Tees und Smoothies</div>
+                    <div class="info-item">Gemütliche Atmosphäre zum Lernen</div>
+                    <div class="info-item">Kostenloses WLAN</div>
+                </div>
+            </div>
+            
+            <div class="coupon-code-box">
+                <h4>Nutze diesen Code:</h4>
+                <div class="code-value">ROOMMATE15</div>
+            </div>
+            
+            <div class="cta-section">
+                <h4>💡 Interesse geweckt?</h4>
+                <p>Besuche uns und löse deinen Coupon ein!</p>
+                <strong style="color: #8b5cf6; font-size: 1rem;">Wir freuen uns auf dich! ☕</strong>
+            </div>
+        </div>
+        
+        <!-- MARKETING CTA -->
+        <div class="marketing-cta">
+            <h3>💡 Interessiert an einer Coupon-Anzeige?</h3>
+            <p>Erreichen Sie genau die richtigen Kunden – aktive Studenten, die bereits unsere Plattform nutzen!</p>
+            <ul>
+                <li>Verifizierte Studenten-Community</li>
+                <li>Zielgruppengerechte Platzierung</li>
+                <li>Direkter Kontakt zu Interessenten</li>
+                <li>Flexible Laufzeiten</li>
+            </ul>
+            <a href="mailto:coupons@room8.app" class="contact-link">📧 Jetzt Anfrage senden</a>
+            <p style="margin-top: 1rem; font-size: 0.85rem;">oder schreiben Sie uns an: <strong>coupons@room8.app</strong></p>
+        </div>
+    </section>
+    
+    <!-- REAL COUPONS SECTION -->
+    <section class="coupons-section">
+        <h2>🎁 Aktuelle Coupons</h2>
+        <div class="coupons-grid" id="couponsGrid">
+            <div class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                </svg>
+                <h3>Keine aktiven Coupons</h3>
+                <p>Bald finden Sie hier spannende Angebote von verifizierten Unternehmen!</p>
+            </div>
+        </div>
+    </section>
+    
+    <footer class="app-footer-nav" id="app-footer-nav"></footer>
+</div>
+
+<script type="module">
+    import { supabase } from './supabaseClient.js';
+    
+    const SYSTEM_USER_ID = '0cc7f9c3-a2e6-410f-9330-b6bf981273fe';
+    
+    // Set demo valid until date
+    const demoDate = new Date();
+    demoDate.setDate(demoDate.getDate() + 90);
+    document.getElementById('validUntil').textContent = demoDate.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'});
+    
+    async function loadCoupons() {
+        try {
+            const { data, error } = await supabase
+                .from('coupons')
+                .select('*')
+                .eq('status', 'active')
+                .gte('valid_until', new Date().toISOString().split('T')[0])
+                .neq('user_id', SYSTEM_USER_ID)
+                .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            
+            const grid = document.getElementById('couponsGrid');
+            
+            if (!data || data.length === 0) return;
+            
+            grid.innerHTML = data.map(c => `
+                <a href="coupon-detail.html?id=${c.id}" class="coupon-card">
+                    <h3>${c.title}</h3>
+                    <p><strong>${c.business_name}</strong></p>
+                    <p>${c.discount_value} Rabatt • ${c.city}</p>
+                    <p><strong>Code: ${c.discount_code}</strong></p>
+                </a>
+            `).join('');
+            
+        } catch (err) {
+            console.error('Error:', err);
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', loadCoupons);
+</script>
+<script type="module" src="notificationBell.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<script src="config.js"></script>
+<script src="navigation.js"></script>
+<script type="module" src="notificationBell.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>

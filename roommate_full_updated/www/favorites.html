@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">    <title>My Favorites - Roommate</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .favorites-header {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+        
+        .favorites-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.8rem;
+        }
+        
+        .favorites-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        
+        .favorites-tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            background-color: white;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 1rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+            transition: all 0.2s;
+        }
+        
+        .tab-btn.active {
+            color: #ef4444;
+            border-bottom-color: #ef4444;
+        }
+        
+        .listings-grid {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        @media (min-width: 768px) {
+            .listings-grid { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        }
+        
+        @media (min-width: 1024px) {
+            .listings-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        
+        .favorite-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text-color);
+            position: relative;
+        }
+        
+        .favorite-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        
+        .card-image-container {
+            position: relative;
+            width: 100%;
+            padding-top: 75%;
+            overflow: hidden;
+            background-color: #f3f4f6;
+        }
+        
+        .card-image-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .remove-favorite-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s;
+        }
+        
+        .remove-favorite-btn:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+        
+        .remove-favorite-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: #ef4444;
+        }
+        
+        .card-content {
+            padding: 0.75rem;
+        }
+        
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .card-info {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #10b981;
+        }
+        
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 1.5rem;
+        }
+        
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            color: #ef4444;
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.3rem;
+            margin: 0 0 0.5rem 0;
+        }
+        
+        .empty-state p {
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+        
+        .empty-state-btn {
+            background-color: #ef4444;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+        
+        .empty-state-btn:hover {
+            background-color: #dc2626;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <a href="profile.html" class="back-arrow">&larr;</a>
+        <h1 data-i18n="favorites_title">My Favorites</h1>
+    </header>
+    
+    <div class="favorites-header">
+        <h1>&#10084; <span data-i18n="favorites_saved_items">Saved Items</span></h1>
+        <p data-i18n="favorites_subtitle">Your favorite listings in one place</p>
+    </div>
+    
+    <div class="favorites-tabs">
+        <button class="tab-btn active" data-type="wohnung" data-i18n="favorites_tab_housing">Housing</button>
+        <button class="tab-btn" data-type="gegenstand" data-i18n="favorites_tab_marketplace">Marketplace</button>
+    </div>
+    
+    <main class="app-content" style="padding: 0;">
+        <div class="listings-grid" id="favoritesGrid">
+            <p style="padding: 1.5rem; grid-column: 1/-1; text-align: center; color: #6b7280;" data-i18n="favorites_loading">Loading favorites...</p>
+        </div>
+    </main>
+    
+    <footer class="app-footer-nav" id="app-footer-nav"></footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<script type="module">
+    import { supabase } from './supabaseClient.js';
+    
+    const favoritesGrid = document.getElementById('favoritesGrid');
+    let currentType = 'wohnung';
+    let currentUser = null;
+
+    // Get translations
+    function getTranslation(key, fallback) {
+        const lang = localStorage.getItem('room8_language') || 'en';
+        const translations = {
+            de: {
+                loading: 'Lade Favoriten...',
+                no_favorites: 'Noch keine Favoriten',
+                no_favorites_hint_housing: 'Füge Wohnungen zu deinen Favoriten hinzu!',
+                no_favorites_hint_marketplace: 'Füge Marktplatz-Artikel zu deinen Favoriten hinzu!',
+                browse_housing: 'Wohnungen durchsuchen',
+                browse_marketplace: 'Marktplatz durchsuchen',
+                error_loading: 'Fehler beim Laden der Favoriten.',
+                error_remove: 'Konnte Favorit nicht entfernen. Bitte erneut versuchen.',
+                per_month: '/Monat'
+            },
+            en: {
+                loading: 'Loading favorites...',
+                no_favorites: 'No favorites yet',
+                no_favorites_hint_housing: 'Start adding housing listings to your favorites!',
+                no_favorites_hint_marketplace: 'Start adding marketplace items to your favorites!',
+                browse_housing: 'Browse Housing',
+                browse_marketplace: 'Browse Marketplace',
+                error_loading: 'Error loading favorites.',
+                error_remove: 'Could not remove favorite. Please try again.',
+                per_month: '/month'
+            }
+        };
+        return translations[lang]?.[key] || fallback;
+    }
+
+    async function checkAuth() {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            window.location.href = 'login.html';
+            return null;
+        }
+        currentUser = user;
+        return user;
+    }
+
+    async function removeFavorite(listingId, cardElement) {
+        try {
+            const { error } = await supabase
+                .from('favorites')
+                .delete()
+                .eq('user_id', currentUser.id)
+                .eq('listing_id', listingId);
+            
+            if (error) throw error;
+            
+            // Animate removal
+            cardElement.style.transition = 'all 0.3s ease';
+            cardElement.style.opacity = '0';
+            cardElement.style.transform = 'scale(0.9)';
+            
+            setTimeout(() => {
+                cardElement.remove();
+                
+                // Check if empty
+                if (favoritesGrid.children.length === 0) {
+                    loadFavorites();
+                }
+            }, 300);
+            
+        } catch (err) {
+            console.error('Error removing favorite:', err);
+            alert(getTranslation('error_remove', 'Could not remove favorite. Please try again.'));
+        }
+    }
+
+    function renderCard(listing) {
+        const card = document.createElement('div');
+        card.className = 'favorite-card';
+        
+        let imageUrl = 'placeholder.png';
+        if (listing.listing_photos && listing.listing_photos.length > 0) {
+            const { data } = supabase.storage.from('listing-images')
+                .getPublicUrl(listing.listing_photos[0].storage_path);
+            if (data) imageUrl = data.publicUrl;
+        }
+        
+        const isHousing = listing.type === 'wohnung';
+        const perMonth = getTranslation('per_month', '/month');
+        const priceDisplay = isHousing 
+            ? `€${listing.monthly_rent}${perMonth}`
+            : `€${Number(listing.price).toFixed(2)}`;
+        
+        const infoDisplay = isHousing
+            ? listing.city
+            : `${listing.category || 'Item'} &bull; ${listing.city}`;
+        
+        card.innerHTML = `
+            <a href="detail.html?id=${listing.id}" style="text-decoration: none; color: inherit;">
+                <div class="card-image-container">
+                    <img src="${imageUrl}" alt="${listing.title}" onerror="this.src='placeholder.png';">
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title">${listing.title}</h3>
+                    <div class="card-info">${infoDisplay}</div>
+                    <div class="card-price">${priceDisplay}</div>
+                </div>
+            </a>
+            <button class="remove-favorite-btn" data-listing-id="${listing.id}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+            </button>
+        `;
+        
+        // Add remove event listener
+        const removeBtn = card.querySelector('.remove-favorite-btn');
+        removeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            removeFavorite(listing.id, card);
+        });
+        
+        return card;
+    }
+
+    async function loadFavorites() {
+        if (!currentUser) return;
+        
+        try {
+            const { data, error } = await supabase
+                .from('favorites')
+                .select(`
+                    listing_id,
+                    listings:listing_id (
+                        id, title, type, city, monthly_rent, price, 
+                        category, listing_photos(storage_path)
+                    )
+                `)
+                .eq('user_id', currentUser.id);
+            
+            if (error) throw error;
+            
+            const favorites = data
+                .map(f => f.listings)
+                .filter(l => l && l.type === currentType);
+            
+            favoritesGrid.innerHTML = '';
+            
+            if (favorites.length === 0) {
+                const isHousing = currentType === 'wohnung';
+                const noFavHint = isHousing 
+                    ? getTranslation('no_favorites_hint_housing', 'Start adding housing listings to your favorites!')
+                    : getTranslation('no_favorites_hint_marketplace', 'Start adding marketplace items to your favorites!');
+                const browseText = isHousing
+                    ? getTranslation('browse_housing', 'Browse Housing')
+                    : getTranslation('browse_marketplace', 'Browse Marketplace');
+                
+                favoritesGrid.innerHTML = `
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                        <h3>${getTranslation('no_favorites', 'No favorites yet')}</h3>
+                        <p>${noFavHint}</p>
+                        <a href="${currentType === 'wohnung' ? 'wohnungen.html' : 'gegenstaende.html'}" class="empty-state-btn">
+                            ${browseText}
+                        </a>
+                    </div>
+                `;
+            } else {
+                favorites.forEach(listing => {
+                    favoritesGrid.appendChild(renderCard(listing));
+                });
+            }
+            
+        } catch (err) {
+            console.error('Error loading favorites:', err);
+            favoritesGrid.innerHTML = `<p style="color: red; grid-column: 1/-1; text-align: center;">${getTranslation('error_loading', 'Error loading favorites.')}</p>`;
+        }
+    }
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelector('.tab-btn.active').classList.remove('active');
+            btn.classList.add('active');
+            currentType = btn.dataset.type;
+            loadFavorites();
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await checkAuth();
+        loadFavorites();
+    });
+</script>
+<!-- Navigation Component -->
+ <script type="module" src="supabaseClient.js"></script>
+<script src="config.js"></script>
+<script src="navigation.js"></script>
+<script type="module" src="notificationBell.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>
