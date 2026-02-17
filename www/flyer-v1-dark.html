@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room8 Flyer - Variante 1 (Dark Gradient)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        @page { size: A4 portrait; margin: 0; }
+        html, body {
+            width: 210mm; height: 297mm;
+            font-family: 'Inter', sans-serif;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        body {
+            background: #e2e8f0;
+            display: flex; justify-content: center; align-items: flex-start;
+            padding: 0;
+        }
+
+        .flyer {
+            width: 210mm; height: 297mm;
+            background: linear-gradient(170deg, #0f172a 0%, #1e1b4b 40%, #1a1a2e 100%);
+            position: relative; overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+
+        /* Colorful glow orbs matching logo colors */
+        .orb { position: absolute; border-radius: 50%; filter: blur(40mm); opacity: 0.25; pointer-events: none; }
+        .orb-blue { width: 120mm; height: 120mm; background: #3b82f6; top: -30mm; left: -20mm; }
+        .orb-green { width: 100mm; height: 100mm; background: #22c55e; top: 60mm; right: -30mm; }
+        .orb-purple { width: 90mm; height: 90mm; background: #8b5cf6; bottom: 40mm; left: -20mm; }
+        .orb-orange { width: 80mm; height: 80mm; background: #f97316; bottom: -20mm; right: 10mm; }
+
+        /* Header */
+        .header { padding: 14mm 12mm 8mm; position: relative; z-index: 1; text-align: center; }
+        .logo-container { margin-bottom: 6mm; }
+        .logo-img { width: 28mm; height: 28mm; border-radius: 6mm; box-shadow: 0 4mm 12mm rgba(0,0,0,0.4); }
+        .app-name { font-size: 16mm; font-weight: 900; color: #fff; letter-spacing: -0.5mm; margin-top: 3mm; }
+        .tagline {
+            font-size: 5mm; font-weight: 700; letter-spacing: 1.5mm;
+            text-transform: uppercase; margin-top: 3mm;
+            background: linear-gradient(90deg, #60a5fa, #34d399, #fbbf24);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Headline */
+        .headline-section { padding: 4mm 12mm 6mm; position: relative; z-index: 1; text-align: center; }
+        .headline-de { font-size: 8.5mm; font-weight: 800; color: #fff; line-height: 1.25; margin-bottom: 2mm; }
+        .headline-en { font-size: 4.5mm; font-weight: 500; color: rgba(255,255,255,0.5); font-style: italic; }
+
+        /* Features */
+        .features { padding: 4mm 10mm; position: relative; z-index: 1; flex: 1; }
+        .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+        .feature-card {
+            background: rgba(255,255,255,0.06);
+            border: 0.3mm solid rgba(255,255,255,0.1);
+            border-radius: 5mm; padding: 5mm 4mm; text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .feature-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1mm;
+            border-radius: 5mm 5mm 0 0;
+        }
+        .feature-card:nth-child(1)::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .feature-card:nth-child(2)::before { background: linear-gradient(90deg, #22c55e, #4ade80); }
+        .feature-card:nth-child(3)::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+        .feature-card:nth-child(4)::before { background: linear-gradient(90deg, #f97316, #fbbf24); }
+
+        .feature-icon { font-size: 11mm; display: block; margin-bottom: 2mm; }
+        .feature-title-de { font-size: 4.5mm; font-weight: 700; color: #fff; margin-bottom: 1mm; }
+        .feature-title-en { font-size: 3.2mm; font-weight: 500; color: rgba(255,255,255,0.45); margin-bottom: 2mm; }
+        .feature-desc { font-size: 3mm; color: rgba(255,255,255,0.65); line-height: 1.45; }
+
+        /* Benefits */
+        .benefits { padding: 4mm 10mm; position: relative; z-index: 1; }
+        .benefits-row { display: flex; justify-content: center; gap: 5mm; flex-wrap: wrap; }
+        .benefit { display: flex; align-items: center; gap: 2mm; }
+        .benefit-dot {
+            width: 5mm; height: 5mm; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 3mm; font-weight: 700; flex-shrink: 0;
+        }
+        .benefit:nth-child(1) .benefit-dot { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+        .benefit:nth-child(2) .benefit-dot { background: linear-gradient(135deg, #22c55e, #4ade80); }
+        .benefit:nth-child(3) .benefit-dot { background: linear-gradient(135deg, #f97316, #fbbf24); }
+        .benefit-text { font-size: 3.2mm; color: rgba(255,255,255,0.8); font-weight: 600; }
+
+        /* Exclusive */
+        .exclusive { padding: 3mm 10mm; position: relative; z-index: 1; text-align: center; }
+        .exclusive-pill {
+            display: inline-flex; align-items: center; gap: 2mm;
+            background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(59,130,246,0.15));
+            border: 0.3mm solid rgba(139,92,246,0.25);
+            border-radius: 10mm; padding: 2.5mm 6mm;
+        }
+        .exclusive-pill .pill-icon { font-size: 4.5mm; }
+        .exclusive-pill .pill-de { font-size: 3.3mm; font-weight: 700; color: #a78bfa; }
+        .exclusive-pill .pill-en { font-size: 2.8mm; color: rgba(167,139,250,0.55); margin-left: 1mm; }
+
+        /* CTA */
+        .cta { padding: 5mm 10mm 4mm; position: relative; z-index: 1; }
+        .cta-box {
+            background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(34,197,94,0.12));
+            border: 0.3mm solid rgba(255,255,255,0.1);
+            border-radius: 6mm; padding: 6mm; display: flex; align-items: center; gap: 6mm;
+        }
+        .qr-area {
+            width: 32mm; height: 32mm; background: #fff;
+            border-radius: 4mm; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .qr-area .qr-icon { font-size: 14mm; color: #1e1b4b; }
+        .qr-area .qr-text { font-size: 2.5mm; color: #64748b; font-weight: 600; margin-top: 1mm; }
+        .cta-right { flex: 1; }
+        .cta-de { font-size: 6mm; font-weight: 800; color: #fff; margin-bottom: 1.5mm; }
+        .cta-en { font-size: 3.8mm; color: rgba(255,255,255,0.5); margin-bottom: 3mm; }
+        .stores { display: flex; gap: 3mm; }
+        .store-btn {
+            background: #fff; color: #0f172a; font-size: 3mm; font-weight: 700;
+            padding: 2.5mm 4mm; border-radius: 2.5mm;
+            display: flex; align-items: center; gap: 1.5mm;
+        }
+        .store-btn .s-icon { font-size: 4mm; }
+
+        /* Footer */
+        .footer { padding: 4mm 10mm 8mm; position: relative; z-index: 1; text-align: center; }
+        .footer-url { font-size: 5mm; font-weight: 700; color: #60a5fa; margin-bottom: 1.5mm; }
+        .footer-social { font-size: 3mm; color: rgba(255,255,255,0.4); }
+        .footer-social span { margin: 0 2mm; }
+
+        @media print {
+            body { padding: 0; background: none; }
+            .flyer { border-radius: 0; }
+            .print-hint { display: none; }
+        }
+        .print-hint {
+            position: fixed; bottom: 3mm; left: 50%; transform: translateX(-50%);
+            background: #1e293b; color: #94a3b8; font-size: 11px;
+            padding: 6px 14px; border-radius: 6px; z-index: 100;
+        }
+    </style>
+</head>
+<body>
+<div class="flyer">
+    <div class="orb orb-blue"></div>
+    <div class="orb orb-green"></div>
+    <div class="orb orb-purple"></div>
+    <div class="orb orb-orange"></div>
+
+    <div class="header">
+        <div class="logo-container">
+            <img src="logo.png" alt="Room8" class="logo-img">
+        </div>
+        <div class="app-name">Room8</div>
+        <div class="tagline">Dein Campus. Dein Deal.</div>
+    </div>
+
+    <div class="headline-section">
+        <div class="headline-de">Die App von Studenten,<br>für Studenten.</div>
+        <div class="headline-en">The app by students, for students.</div>
+    </div>
+
+    <div class="features">
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-icon">🏠</span>
+                <div class="feature-title-de">WG-Suche</div>
+                <div class="feature-title-en">Find Housing</div>
+                <div class="feature-desc">Finde dein Zimmer oder deine WG in deiner Unistadt.<br><em>Find your room in your university city.</em></div>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🛒</span>
+                <div class="feature-title-de">Marktplatz</div>
+                <div class="feature-title-en">Marketplace</div>
+                <div class="feature-desc">Kaufe & verkaufe gebrauchte Sachen.<br><em>Buy & sell used items with students.</em></div>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">💼</span>
+                <div class="feature-title-de">Studentenjobs</div>
+                <div class="feature-title-en">Student Jobs</div>
+                <div class="feature-desc">Entdecke lokale Jobs & Werkstudentenstellen.<br><em>Discover local jobs & positions.</em></div>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🎫</span>
+                <div class="feature-title-de">Coupons & Rabatte</div>
+                <div class="feature-title-en">Coupons & Deals</div>
+                <div class="feature-desc">Exklusive Rabatte von lokalen Partnern.<br><em>Exclusive discounts from local partners.</em></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="benefits">
+        <div class="benefits-row">
+            <div class="benefit"><div class="benefit-dot">&#10003;</div><span class="benefit-text">100% Kostenlos / Free</span></div>
+            <div class="benefit"><div class="benefit-dot">&#10003;</div><span class="benefit-text">Verifizierte Studenten / Verified</span></div>
+            <div class="benefit"><div class="benefit-dot">&#10003;</div><span class="benefit-text">Sicher & Privat / Safe</span></div>
+        </div>
+    </div>
+
+    <div class="exclusive">
+        <div class="exclusive-pill">
+            <span class="pill-icon">🎓</span>
+            <span class="pill-de">Nur für Studenten mit Uni-E-Mail</span>
+            <span class="pill-en">· Students only</span>
+        </div>
+    </div>
+
+    <div class="cta">
+        <div class="cta-box">
+            <div class="qr-area">
+                <span class="qr-icon">⬚</span>
+                <span class="qr-text">QR-Code hier</span>
+            </div>
+            <div class="cta-right">
+                <div class="cta-de">Jetzt herunterladen!</div>
+                <div class="cta-en">Download now for free!</div>
+                <div class="stores">
+                    <div class="store-btn"><span class="s-icon">▶</span> Google Play</div>
+                    <div class="store-btn"><span class="s-icon"></span> App Store</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-url">www.room8.club</div>
+        <div class="footer-social"><span>@room8.app</span> <span>·</span> <span>Instagram</span> <span>·</span> <span>TikTok</span></div>
+    </div>
+</div>
+<div class="print-hint">Variante 1: Dark Gradient — Strg+P zum Drucken (Hintergrundgrafiken aktivieren!)</div>
+</body>
+</html>

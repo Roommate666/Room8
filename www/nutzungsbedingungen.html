@@ -1,508 +1,405 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title data-i18n="terms_page_title">Nutzungsbedingungen - Room8</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        /* Modern Header */
-        .legal-header-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem 1.5rem 3rem;
-            border-bottom-left-radius: 30px;
-            border-bottom-right-radius: 30px;
-            text-align: center;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(118, 75, 162, 0.2);
-            position: relative;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title data-i18n="terms_page_title">Nutzungsbedingungen - Room8</title>
+<link rel="stylesheet" href="style.css">
+<style>
+/* Modern Header */
+.legal-header-bg {
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+color: white;
+padding: 2rem 1.5rem 3rem;
+border-bottom-left-radius: 30px;
+border-bottom-right-radius: 30px;
+text-align: center;
+margin-bottom: 2rem;
+box-shadow: 0 4px 20px rgba(118, 75, 162, 0.2);
+position: relative;
         }
-
-        .back-nav {
-            position: absolute;
-            top: 1.5rem;
-            left: 1.5rem;
-            color: white;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            font-weight: 600;
-            font-size: 0.9rem;
-            opacity: 0.9;
-            transition: opacity 0.2s;
+.back-nav {
+position: absolute;
+top: 1.5rem;
+left: 1.5rem;
+color: white;
+text-decoration: none;
+display: flex;
+align-items: center;
+font-weight: 600;
+font-size: 0.9rem;
+opacity: 0.9;
+transition: opacity 0.2s;
         }
-        .back-nav:hover { opacity: 1; }
-
-        .legal-header-bg h1 { margin: 0.5rem 0 0.25rem; font-size: 1.8rem; font-weight: 700; }
-        .legal-header-bg p { opacity: 0.9; font-size: 1rem; margin: 0; }
-
-        /* Main Content */
-        .legal-content {
-            max-width: 800px;
-            margin: -2.5rem auto 0; /* Overlap Header */
-            padding: 0 1.5rem 4rem;
-            position: relative;
-            z-index: 10;
+.back-nav:hover { opacity: 1; }
+.legal-header-bg h1 { margin: 0.5rem 0 0.25rem; font-size: 1.8rem; font-weight: 700; }
+.legal-header-bg p { opacity: 0.9; font-size: 1rem; margin: 0; }
+/* Main Content */
+.legal-content {
+max-width: 800px;
+margin: -2.5rem auto 0; /* Overlap Header */
+padding: 0 1.5rem 4rem;
+position: relative;
+z-index: 10;
         }
-        
-        .content-card {
-            background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            border: 1px solid var(--border-color);
-            line-height: 1.8;
-            color: #374151;
+.content-card {
+background: white;
+border-radius: 20px;
+padding: 2rem;
+box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+border: 1px solid var(--border-color);
+line-height: 1.8;
+color: #374151;
         }
-
-        .content-card h2 {
-            color: var(--text-main);
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-            font-size: 1.25rem;
-            border-bottom: 2px solid #F3F4F6;
-            padding-bottom: 0.5rem;
+.content-card h2 {
+color: var(--text-main);
+margin-top: 2rem;
+margin-bottom: 1rem;
+font-size: 1.25rem;
+border-bottom: 2px solid #F3F4F6;
+padding-bottom: 0.5rem;
         }
-
-        .content-card h3 {
-            color: var(--text-main);
-            margin-top: 1.5rem;
-            font-size: 1.1rem;
+.content-card h3 {
+color: var(--text-main);
+margin-top: 1.5rem;
+font-size: 1.1rem;
         }
-
-        /* Tabs Styling */
-        .tab-bar {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-            background: rgba(255,255,255,0.2); /* Transparent auf dem Gradient */
-            padding: 4px;
-            border-radius: 16px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.3);
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
+/* Tabs Styling */
+.tab-bar {
+display: flex;
+justify-content: center;
+margin-bottom: 1.5rem;
+background: rgba(255,255,255,0.2); /* Transparent auf dem Gradient */
+padding: 4px;
+border-radius: 16px;
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255,255,255,0.3);
+max-width: 400px;
+margin-left: auto;
+margin-right: auto;
         }
-        
-        .tab-link {
-            flex: 1;
-            text-align: center;
-            padding: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 12px;
-            transition: all 0.2s;
-            color: rgba(255,255,255,0.8);
-            font-size: 0.95rem;
+.tab-link {
+flex: 1;
+text-align: center;
+padding: 0.8rem;
+font-weight: 600;
+cursor: pointer;
+border-radius: 12px;
+transition: all 0.2s;
+color: rgba(255,255,255,0.8);
+font-size: 0.95rem;
         }
-        
-        .tab-link.active {
-            background: white;
-            color: var(--primary-color);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+.tab-link.active {
+background: white;
+color: var(--primary-color);
+box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-
-        /* Info Boxes */
-        .info-box, .warning-box, .success-box {
-            padding: 1rem 1.25rem;
-            border-radius: 8px;
-            margin: 1.5rem 0;
-            font-size: 0.95rem;
+/* Info Boxes */
+.info-box, .warning-box, .success-box {
+padding: 1rem 1.25rem;
+border-radius: 8px;
+margin: 1.5rem 0;
+font-size: 0.95rem;
         }
-        .info-box { background: #EFF6FF; border-left: 4px solid #3B82F6; color: #1E40AF; }
-        .warning-box { background: #FFFBEB; border-left: 4px solid #F59E0B; color: #92400E; }
-        .success-box { background: #ECFDF5; border-left: 4px solid #10B981; color: #065F46; }
-
-        /* Template Box (Verträge) */
-        .template-box {
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-            font-family: 'Courier New', Courier, monospace; /* Schreibmaschinen-Look */
-            font-size: 0.85rem;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            overflow-x: auto;
-            color: #334155;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-            position: relative;
+.info-box { background: #EFF6FF; border-left: 4px solid #3B82F6; color: #1E40AF; }
+.warning-box { background: #FFFBEB; border-left: 4px solid #F59E0B; color: #92400E; }
+.success-box { background: #ECFDF5; border-left: 4px solid #10B981; color: #065F46; }
+/* Template Box (Verträge) */
+.template-box {
+background: #F8FAFC;
+border: 1px solid #E2E8F0;
+border-radius: 12px;
+padding: 1.5rem;
+margin: 1.5rem 0;
+font-family: 'Courier New', Courier, monospace; /* Schreibmaschinen-Look */
+font-size: 0.85rem;
+white-space: pre-wrap;
+word-wrap: break-word;
+overflow-x: auto;
+color: #334155;
+box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+position: relative;
         }
-
-        .template-title {
-            background: #334155;
-            color: white;
-            padding: 0.5rem 1rem;
-            margin: -1.5rem -1.5rem 1rem -1.5rem;
-            border-radius: 12px 12px 0 0;
-            font-family: sans-serif;
-            font-weight: 600;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+.template-title {
+background: #334155;
+color: white;
+padding: 0.5rem 1rem;
+margin: -1.5rem -1.5rem 1rem -1.5rem;
+border-radius: 12px 12px 0 0;
+font-family: sans-serif;
+font-weight: 600;
+font-size: 0.9rem;
+letter-spacing: 0.5px;
+display: flex;
+align-items: center;
+gap: 0.5rem;
         }
-
-        .copy-btn {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-top: 0.5rem;
-            transition: transform 0.1s, box-shadow 0.2s;
-            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
-            width: 100%;
+.copy-btn {
+background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+color: white;
+border: none;
+padding: 0.75rem 1.5rem;
+border-radius: 12px;
+cursor: pointer;
+font-size: 0.9rem;
+font-weight: 600;
+margin-top: 0.5rem;
+transition: transform 0.1s, box-shadow 0.2s;
+box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+width: 100%;
         }
-        .copy-btn:active { transform: scale(0.98); }
-        .copy-btn:hover { box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4); }
-
-        .email-link {
-            background: #EFF6FF;
-            padding: 0.2rem 0.6rem;
-            border-radius: 6px;
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 500;
+.copy-btn:active { transform: scale(0.98); }
+.copy-btn:hover { box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4); }
+.email-link {
+background: #EFF6FF;
+padding: 0.2rem 0.6rem;
+border-radius: 6px;
+color: var(--primary-color);
+text-decoration: none;
+font-weight: 500;
         }
-    </style>
+</style>
 </head>
 <body>
 <div class="app-container" style="background: #F3F4F6;">
-    
-    <!-- Modern Header -->
-    <div class="legal-header-bg">
-        <a href="settings.html" class="back-nav">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="m15 18-6-6 6-6"/></svg>
-            <span data-i18n="general_back">Zurück</span>
-        </a>
-        <h1 data-i18n="terms_title">Rechtliches</h1>
-        <p data-i18n="terms_subtitle">AGB & Kostenlose Vorlagen</p>
-
-        <!-- Tabs directly inside header for nice look -->
-        <div style="margin-top: 1.5rem;">
-            <div class="tab-bar">
-                <div class="tab-link active" onclick="switchTab('agb')">📜 AGB</div>
-                <div class="tab-link" onclick="switchTab('contracts')">📋 Verträge</div>
-            </div>
-        </div>
-    </div>
-
-    <main class="legal-content">
-        
-        <!-- AGB TAB -->
-        <div id="tab-agb" class="content-card">
-            <div class="info-box">
-                <strong data-i18n="terms_summary_label">Zusammenfassung:</strong>
-                <span data-i18n="terms_summary_text">Room8 ist eine kostenlose Vermittlungsplattform. Wir stellen den Kontakt her, sind aber kein Vertragspartner. Verträge schließt ihr direkt miteinander.</span>
-            </div>
-            
-            <h2 data-i18n="terms_scope_title">1. Geltungsbereich</h2>
-            <p data-i18n="terms_scope_text">
+<!-- Modern Header -->
+<div class="legal-header-bg">
+<a href="javascript:history.back()" class="back-nav">
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="m15 18-6-6 6-6"/></svg>
+<span data-i18n="general_back">Zurück</span>
+</a>
+<h1 data-i18n="terms_title">Rechtliches</h1>
+<p data-i18n="terms_subtitle">AGB & Kostenlose Vorlagen</p>
+<!-- Tabs directly inside header for nice look -->
+<div style="margin-top: 1.5rem;">
+<div class="tab-bar">
+<div class="tab-link active" onclick="switchTab('agb')">📜 AGB</div>
+<div class="tab-link" onclick="switchTab('contracts')">📋 Verträge</div>
+</div>
+</div>
+</div>
+<main class="legal-content">
+<!-- AGB TAB -->
+<div id="tab-agb" class="content-card">
+<div class="info-box">
+<strong data-i18n="terms_summary_label">Zusammenfassung:</strong>
+<span data-i18n="terms_summary_text">Room8 ist eine kostenlose Vermittlungsplattform. Wir stellen den Kontakt her, sind aber kein Vertragspartner. Verträge schließt ihr direkt miteinander.</span>
+</div>
+<h2 data-i18n="terms_scope_title">1. Geltungsbereich</h2>
+<p data-i18n="terms_scope_text">
                 Diese Nutzungsbedingungen regeln die Nutzung der App "Room8". Mit der Registrierung akzeptierst du diese Bedingungen.
-            </p>
-            
-            <h2 data-i18n="terms_target_title">2. Zielgruppe</h2>
-            <p data-i18n="terms_target_text">
+</p>
+<h2 data-i18n="terms_target_title">2. Zielgruppe</h2>
+<p data-i18n="terms_target_text">
                 Room8 ist ausschließlich für Studierende gedacht. Mit der Nutzung bestätigst du, dass du an einer Hochschule eingeschrieben bist.
-            </p>
-            
-            <h2 data-i18n="terms_free_title">3. Kostenlose Nutzung</h2>
-            <p data-i18n="terms_free_text">
+</p>
+<h2 data-i18n="terms_free_title">3. Kostenlose Nutzung</h2>
+<p data-i18n="terms_free_text">
                 Die Nutzung ist für Studierende 100% kostenlos. Keine Provisionen, keine Gebühren.
-            </p>
-            
-            <h2 data-i18n="terms_commercial_title">4. Gewerbliche Nutzung</h2>
-            <p>
-                <span data-i18n="terms_commercial_text">Gewerbliche Anbieter benötigen eine Erlaubnis. Kontakt:</span>
-                <a href="mailto:admin@room8.club" class="email-link">admin@room8.club</a>
-            </p>
-            
-            <h2 data-i18n="terms_role_title">5. Unsere Rolle</h2>
-            <div class="warning-box">
-                <strong data-i18n="terms_role_important">Wichtig:</strong>
-                <span data-i18n="terms_role_warning">Wir sind nur Vermittler. Wir prüfen keine Wohnungen vor Ort.</span>
-            </div>
-            <ul>
-                <li data-i18n="terms_role_item1">Wir sind nicht an Mietverträgen beteiligt</li>
-                <li data-i18n="terms_role_item4">Wir haften nicht für Schäden aus Mietverhältnissen</li>
-            </ul>
-            
-            <h2 data-i18n="terms_safety_title">6. Sicherheitstipps</h2>
-            <div class="success-box">
-                <strong data-i18n="terms_safety_label">So bleibst du sicher:</strong>
-                <ul style="margin-bottom: 0;">
-                    <li data-i18n="terms_safety_tip1">Treffe dich persönlich</li>
-                    <li data-i18n="terms_safety_tip3">Zahle nie ohne Besichtigung</li>
-                    <li data-i18n="terms_safety_tip4">Mache immer einen schriftlichen Vertrag</li>
-                </ul>
-            </div>
-            
-            <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e5e7eb;">
-            
-            <p style="text-align: center; color: #9ca3af; font-size: 0.85rem;">
-                <span data-i18n="terms_last_updated">Stand:</span> Dezember 2024
-            </p>
-        </div>
+</p>
+<h2 data-i18n="terms_commercial_title">4. Gewerbliche Nutzung</h2>
+<p>
+<span data-i18n="terms_commercial_text">Gewerbliche Anbieter benötigen eine Erlaubnis. Kontakt:</span>
+<a href="mailto:admin@room8.club" class="email-link">admin@room8.club</a>
+</p>
+<h2 data-i18n="terms_role_title">5. Unsere Rolle</h2>
+<div class="warning-box">
+<strong data-i18n="terms_role_important">Wichtig:</strong>
+<span data-i18n="terms_role_warning">Wir sind nur Vermittler. Wir prüfen keine Wohnungen vor Ort.</span>
+</div>
+<ul>
+<li data-i18n="terms_role_item1">Wir sind nicht an Mietverträgen beteiligt</li>
+<li data-i18n="terms_role_item4">Wir haften nicht für Schäden aus Mietverhältnissen</li>
+</ul>
+<h2 data-i18n="terms_safety_title">6. Sicherheitstipps</h2>
+<div class="success-box">
+<strong data-i18n="terms_safety_label">So bleibst du sicher:</strong>
+<ul style="margin-bottom: 0;">
+<li data-i18n="terms_safety_tip1">Treffe dich persönlich</li>
+<li data-i18n="terms_safety_tip3">Zahle nie ohne Besichtigung</li>
+<li data-i18n="terms_safety_tip4">Mache immer einen schriftlichen Vertrag</li>
+</ul>
+</div>
 
-        <!-- VERTRÄGE TAB -->
-        <div id="tab-contracts" class="content-card" style="display:none;">
-            <p data-i18n="terms_templates_intro">
+<h2>7. Verhaltensregeln und Inhalte</h2>
+<div class="warning-box">
+    <strong>Null-Toleranz-Politik:</strong>
+    Bei Room8 gilt eine strikte Null-Toleranz-Politik für unangemessene Inhalte und missbräuchliches Verhalten.
+</div>
+<p>Folgendes ist strengstens untersagt:</p>
+<ul>
+    <li>Belästigung, Bedrohung oder Diskriminierung anderer Nutzer</li>
+    <li>Veröffentlichung von anstößigen, beleidigenden oder illegalen Inhalten</li>
+    <li>Spam, Betrug oder gefälschte Inserate</li>
+    <li>Jegliche Form von Missbrauch der Plattform</li>
+</ul>
+<p><strong>Verstöße gegen diese Regeln führen zur sofortigen Sperrung des Kontos und Löschung aller Inhalte. Gemeldete Inhalte werden innerhalb von 24 Stunden geprüft und entsprechende Maßnahmen ergriffen.</strong></p>
+
+<hr style="margin: 2rem 0; border: none; border-top: 1px solid #e5e7eb;">
+<p style="text-align: center; color: #9ca3af; font-size: 0.85rem;">
+<span data-i18n="terms_last_updated">Stand:</span> Januar 2026
+</p>
+</div>
+<!-- VERTRÄGE TAB -->
+<div id="tab-contracts" class="content-card" style="display:none;">
+<p data-i18n="terms_templates_intro">
                 Diese Vorlagen sind <strong>kostenlos</strong> und dienen deiner Absicherung. Einfach kopieren, in Word/Google Docs einfügen und ausfüllen.
-            </p>
-            
-            <!-- Template 1: Untermietvertrag -->
-            <div class="template-box" id="template1-de">
-                <div class="template-title">
-                    <span>🏠</span>
-                    <span data-i18n="terms_template1_box_title">Untermietvertrag (WG-Zimmer)</span>
-                </div>
-<span class="template-content-de">UNTERMIETVERTRAG
+</p>
+<!-- Template 1: Untermietvertrag -->
+<div class="template-box" id="template1-de">
+<div class="template-title">
+<span>🏠</span>
+<span>Untermietvertrag</span>
+</div>
+UNTERMIETVERTRAG
 
 Zwischen
 
-Untervermieter/in:
-Name: _________________________________
-Adresse: _________________________________
+Untervermieter:
+Name: ________________________________
+Adresse: ________________________________
 
 und
 
-Untermieter/in:
-Name: _________________________________
-Aktuelle Adresse: _________________________________
+Untermieter:
+Name: ________________________________
+Adresse: ________________________________
 
-§1 MIETGEGENSTAND
-Zimmer in der WG: _________________________________
-Größe: _____ m² | Möbel inklusive: [ ] Ja [ ] Nein
+1. Mietobjekt
+Das Zimmer in der Adresse: ________________________________
+wird ab dem ____________ untervermietet.
 
-§2 MIETDAUER
-Beginn: ________________ | Ende: ________________
-[ ] Befristet [ ] Unbefristet
+2. Mietdauer
+□ Unbefristet mit Kündigungsfrist von ___ Monaten
+□ Befristet bis zum ____________
 
-§3 KOSTEN
-Warmmiete monatlich: _____ Euro
-Kaution: _____ Euro
-Zahlbar bis zum: _____ des Monats
+3. Miete
+Monatliche Warmmiete: ________ €
+Kaution: ________ € (max. 3 Monatsmieten)
+Zahlbar bis zum ___. jedes Monats
 
-§4 SONSTIGES
-_________________________________
+4. Nebenkosten
+□ In der Warmmiete enthalten
+□ Zusätzlich: ________ € Pauschale
+□ Nach Verbrauch abgerechnet
 
-Ort, Datum: _________________________________
+5. Unterschriften
 
-_________________________      _________________________
-Unterschrift Vermieter         Unterschrift Mieter</span>
-<span class="template-content-en" style="display:none;">SUBLEASE AGREEMENT
+________________________          ________________________
+Ort, Datum                         Ort, Datum
 
-Between
+________________________          ________________________
+Untervermieter                     Untermieter
+</div>
+<button class="copy-btn" onclick="copyTemplate('template1-de')">📋 Vorlage kopieren</button>
 
-Sublessor: _________________________________
-and
-Sublessee: _________________________________
+<!-- Template 2: WG-Vereinbarung -->
+<div class="template-box" id="template2-de">
+<div class="template-title">
+<span>👥</span>
+<span>WG-Vereinbarung</span>
+</div>
+WG-VEREINBARUNG
 
-§1 PROPERTY
-Room size: _____ sqm | Furnished: [ ] Yes [ ] No
+WG-Adresse: ________________________________
 
-§2 DURATION
-Start: ________________ | End: ________________
+WG-Mitglieder:
+1. ________________________________
+2. ________________________________
+3. ________________________________
 
-§3 COSTS
-Monthly Rent: _____ Euro
-Deposit: _____ Euro
+1. Gemeinschaftsräume
+Küche, Bad und Flur werden gemeinsam genutzt und sauber gehalten.
 
-Place, Date: _________________________________
+2. Putzplan
+□ Wöchentlich rotierend
+□ Nach Vereinbarung
 
-_________________________      _________________________
-Signature Sublessor            Signature Sublessee</span>
-            </div>
-            <button class="copy-btn" onclick="copyTemplate('template1')" data-i18n="terms_copy_btn">Vorlage kopieren</button>
-            
-            <br><br>
+3. Ruhezeiten
+Von _____ Uhr bis _____ Uhr
 
-            <!-- Template 2: Kaufvertrag -->
-            <div class="template-box" id="template3-de">
-                <div class="template-title">
-                    <span>📦</span>
-                    <span data-i18n="terms_template3_box_title">Kaufvertrag (Privat)</span>
-                </div>
-<span class="template-content-de">KAUFVERTRAG (GEBRAUCHTGEGENSTAND)
+4. Gäste
+Übernachtungsgäste sind □ erlaubt □ nach Absprache □ nicht erlaubt
 
-Verkäufer: _________________________________
-Käufer: _________________________________
+5. Kosten
+Gemeinschaftliche Ausgaben werden geteilt:
+Internet: ________ € / Monat
+Putzmittel: ca. ________ € / Monat
 
-§1 GEGENSTAND
-Bezeichnung: _________________________________
-Zustand: [ ] Neu [ ] Gebraucht [ ] Defekt
-Beschreibung/Mängel: _______________________
+Unterschriften aller WG-Mitglieder:
 
-§2 PREIS & ZAHLUNG
-Kaufpreis: _____ Euro
-Zahlung via: [ ] Bar [ ] PayPal [ ] Überweisung
+________________________
+________________________
+________________________
 
-§3 GEWÄHRLEISTUNG
-Der Verkauf erfolgt unter Ausschluss jeglicher Gewährleistung (Privatverkauf).
+Datum: ________________
+</div>
+<button class="copy-btn" onclick="copyTemplate('template2-de')">📋 Vorlage kopieren</button>
 
-Ort, Datum: _________________________________
+<div class="success-box">
+<strong>💡 Tipp:</strong> Speichere immer eine Kopie für beide Parteien und fotografiere den unterschriebenen Vertrag.
+</div>
 
-_________________________      _________________________
-Unterschrift Verkäufer         Unterschrift Käufer</span>
-<span class="template-content-en" style="display:none;">PURCHASE AGREEMENT (USED ITEM)
-
-Seller: _________________________________
-Buyer: _________________________________
-
-§1 ITEM
-Description: _________________________________
-Condition: [ ] New [ ] Used [ ] Defective
-
-§2 PRICE
-Price: _____ Euro
-
-§3 WARRANTY
-Sold as is, without warranty (private sale).
-
-Place, Date: _________________________________
-
-_________________________      _________________________
-Signature Seller               Signature Buyer</span>
-            </div>
-            <button class="copy-btn" onclick="copyTemplate('template3')" data-i18n="terms_copy_btn">Vorlage kopieren</button>
-
-            <br><br>
-
-            <!-- Template 3: Übergabeprotokoll -->
-            <div class="template-box" id="template4-de">
-                <div class="template-title">
-                    <span>📝</span>
-                    <span>Übergabeprotokoll</span>
-                </div>
-<span class="template-content-de">ÜBERGABEPROTOKOLL (WOHNUNG/ZIMMER)
-
-Einzug / Auszug (bitte kreisen) am: _______________
-
-Objekt: _________________________________
-
-ZÄHLERSTÄNDE
-Strom: __________ | Wasser: __________ | Gas: __________
-
-SCHLÜSSEL
-[ ] Haustür [ ] Wohnung [ ] Zimmer [ ] Briefkasten
-Anzahl gesamt: _____
-
-MÄNGEL / ZUSTAND
-__________________________________________________
-__________________________________________________
-__________________________________________________
-
-Ort, Datum: _________________________________
-
-_________________________      _________________________
-Unterschrift Vermieter         Unterschrift Mieter</span>
-<span class="template-content-en" style="display:none;">HANDOVER PROTOCOL
-
-Move-in / Move-out date: _______________
-
-METER READINGS
-Electricity: __________ | Water: __________
-
-KEYS
-Total count: _____
-
-DEFECTS / CONDITION
-__________________________________________________
-__________________________________________________
-
-Place, Date: _________________________________
-
-_________________________      _________________________
-Signature Landlord             Signature Tenant</span>
-            </div>
-            <button class="copy-btn" onclick="copyTemplate('template4')" data-i18n="terms_copy_btn">Vorlage kopieren</button>
-
-        </div>
-
-    </main>
+</div>
+</main>
 </div>
 
 <script src="config.js"></script>
-<script src="navigation.js"></script>
+<script src="room8-ui.js"></script>
 <script src="translations.js"></script>
 <script>
-// Tab Switching
-function switchTab(tabId) {
-    document.getElementById('tab-agb').style.display = 'none';
-    document.getElementById('tab-contracts').style.display = 'none';
-    
-    document.querySelectorAll('.tab-link').forEach(el => el.classList.remove('active'));
-    
-    document.getElementById('tab-' + tabId).style.display = 'block';
-    
-    // Highlight logic
-    const tabs = document.querySelectorAll('.tab-link');
-    if(tabId === 'agb') tabs[0].classList.add('active');
-    else tabs[1].classList.add('active');
+function switchTab(tab) {
+    var agbTab = document.getElementById('tab-agb');
+    var contractsTab = document.getElementById('tab-contracts');
+    var tabLinks = document.querySelectorAll('.tab-link');
+
+    if (tab === 'agb') {
+        agbTab.style.display = 'block';
+        contractsTab.style.display = 'none';
+        tabLinks[0].classList.add('active');
+        tabLinks[1].classList.remove('active');
+    } else {
+        agbTab.style.display = 'none';
+        contractsTab.style.display = 'block';
+        tabLinks[0].classList.remove('active');
+        tabLinks[1].classList.add('active');
+    }
 }
 
-// Hash check (Direct Link)
-if(window.location.hash === '#mustervertraege') {
-    switchTab('contracts');
-}
-
-// Language Handling for Templates
-function getCurrentLang() {
-    return localStorage.getItem('room8_language') || 'de';
-}
-
-function updateTemplateLanguage() {
-    const lang = getCurrentLang();
-    
-    document.querySelectorAll('.template-content-de').forEach(el => {
-        el.style.display = lang === 'de' ? 'block' : 'none';
-    });
-    
-    document.querySelectorAll('.template-content-en').forEach(el => {
-        el.style.display = lang === 'en' ? 'block' : 'none';
-    });
-    
-    document.querySelectorAll('.copy-btn').forEach(btn => {
-        btn.textContent = lang === 'de' ? 'Vorlage kopieren' : 'Copy Template';
-    });
-}
-
-// Copy Function
 function copyTemplate(templateId) {
-    const lang = getCurrentLang();
-    const templateBox = document.getElementById(templateId + '-de');
-    
-    // Finde den sichtbaren Inhalt
-    const content = templateBox.querySelector('.template-content-' + lang) || templateBox.querySelector('.template-content-de');
-    const text = (content.textContent || content.innerText).trim();
-    
-    const button = event.target;
-    
-    navigator.clipboard.writeText(text).then(() => {
-        const originalText = button.textContent;
-        button.textContent = "Kopiert! ✅";
-        button.style.background = "#10B981"; // Grün
-        
-        setTimeout(() => {
-            button.textContent = originalText;
-            button.style.background = "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"; // Reset Blue
-        }, 2000);
-    }).catch(err => {
-        alert("Fehler beim Kopieren. Bitte manuell auswählen.");
-    });
+    var template = document.getElementById(templateId);
+    var text = template.innerText || template.textContent;
+
+    // Remove the title from the copied text
+    var lines = text.split('\n');
+    lines.shift(); // Remove first line (title)
+    text = lines.join('\n').trim();
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+            Room8UI.success('Vorlage wurde kopiert! Du kannst sie jetzt in Word oder Google Docs einfügen.');
+        }).catch(function() {
+            fallbackCopy(text);
+        });
+    } else {
+        fallbackCopy(text);
+    }
 }
 
-// Init
-window.addEventListener('languageChanged', updateTemplateLanguage);
-document.addEventListener('DOMContentLoaded', updateTemplateLanguage);
+function fallbackCopy(text) {
+    var textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-9999px';
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+        document.execCommand('copy');
+        Room8UI.success('Vorlage wurde kopiert!');
+    } catch (err) {
+        Room8UI.error('Kopieren fehlgeschlagen. Bitte manuell markieren und kopieren.');
+    }
+    document.body.removeChild(textArea);
+}
 </script>
 </body>
 </html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Debug - Room8</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #111827; color: #F3F4F6; padding: 1rem; margin: 0; }
+        h1 { color: #F59E0B; margin-bottom: 1rem; }
+        h2 { color: #60A5FA; margin-top: 2rem; border-bottom: 1px solid #374151; padding-bottom: 0.5rem; }
+        .section { background: #1F2937; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }
+        .success { color: #10B981; }
+        .error { color: #EF4444; }
+        .warning { color: #F59E0B; }
+        pre { background: #374151; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.8rem; }
+        button { background: #3B82F6; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 600; margin: 0.25rem; }
+        button:hover { background: #2563EB; }
+        .back-link { color: #60A5FA; text-decoration: none; display: inline-block; margin-bottom: 1rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid #374151; font-size: 0.85rem; }
+        th { color: #9CA3AF; font-weight: 600; }
+        td { color: #E5E7EB; }
+        .badge { padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+        .badge-job { background: #8B5CF6; }
+        .badge-wohnung { background: #3B82F6; }
+        .badge-gegenstand { background: #10B981; }
+        .badge-coupon { background: #F59E0B; }
+    </style>
+</head>
+<body>
+    <a href="admin.html" class="back-link">← Zurück zum Admin Panel</a>
+    <h1>🔧 Admin Debug Tool</h1>
+
+    <div class="section">
+        <h2>1. Datenbank-Struktur prüfen</h2>
+        <button onclick="checkListingsTable()">Listings-Tabelle prüfen</button>
+        <button onclick="checkCouponsTable()">Coupons-Tabelle prüfen</button>
+        <button onclick="checkProfilesTable()">Profiles-Tabelle prüfen</button>
+        <div id="structureResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. Letzte Listings anzeigen</h2>
+        <button onclick="showRecentListings()">Alle Listings laden</button>
+        <button onclick="showJobListings()">Nur Jobs laden</button>
+        <div id="listingsResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>3. Verifizierungs-Status prüfen</h2>
+        <button onclick="showVerificationProfiles()">Alle Profile mit Verifizierungsdaten</button>
+        <div id="verificationResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>4. Storage Buckets prüfen</h2>
+        <button onclick="checkStorageBuckets()">Buckets prüfen</button>
+        <div id="storageResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>5. Partner Submissions prüfen</h2>
+        <button onclick="checkSubmissions()">Submissions laden</button>
+        <div id="submissionsResult"></div>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="config.js"></script>
+<script>
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function escapeHtml(text) {
+        if (!text) return '-';
+        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    async function checkListingsTable() {
+        const container = document.getElementById('structureResult');
+        container.innerHTML = 'Lade...';
+
+        try {
+            // Lade ein Listing um die Spalten zu sehen
+            const { data, error } = await sb.from('listings').select('*').limit(1);
+
+            if (error) {
+                container.innerHTML = `<p class="error">Fehler: ${error.message}</p>`;
+                return;
+            }
+
+            if (data.length === 0) {
+                container.innerHTML = '<p class="warning">Keine Listings vorhanden</p>';
+                return;
+            }
+
+            const columns = Object.keys(data[0]);
+            const jobColumns = ['type', 'company_name', 'job_type', 'salary_amount', 'salary_type', 'min_hours_per_week', 'requirements', 'benefits', 'application_email'];
+
+            let html = '<h3>Gefundene Spalten in listings:</h3><pre>' + columns.join('\n') + '</pre>';
+
+            html += '<h3>Job-Spalten Status:</h3><ul>';
+            jobColumns.forEach(col => {
+                const exists = columns.includes(col);
+                html += `<li class="${exists ? 'success' : 'error'}">${col}: ${exists ? '✓ vorhanden' : '✗ FEHLT'}</li>`;
+            });
+            html += '</ul>';
+
+            if (!columns.includes('type')) {
+                html += '<p class="error"><strong>WICHTIG:</strong> Die "type" Spalte fehlt! Jobs werden daher als Wohnungen angezeigt. Bitte das SQL ausführen!</p>';
+            }
+
+            container.innerHTML = html;
+        } catch (e) {
+            container.innerHTML = `<p class="error">Fehler: ${e.message}</p>`;
+        }
+    }
+
+    async function checkCouponsTable() {
+        const container = document.getElementById('structureResult');
+        container.innerHTML = 'Lade...';
+
+        try {
+            const { data, error } = await sb.from('coupons').select('*').limit(1);
+
+            if (error) {
+                if (error.message.includes('does not exist')) {
+                    container.innerHTML = '<p class="error">Coupons-Tabelle existiert nicht! Bitte SQL ausführen.</p>';
+                } else {
+                    container.innerHTML = `<p class="error">Fehler: ${error.message}</p>`;
+                }
+                return;
+            }
+
+            if (data.length === 0) {
+                container.innerHTML = '<p class="success">Coupons-Tabelle existiert (aber ist leer)</p>';
+                return;
+            }
+
+            const columns = Object.keys(data[0]);
+            container.innerHTML = '<p class="success">Coupons-Tabelle existiert!</p><h3>Spalten:</h3><pre>' + columns.join('\n') + '</pre>';
+        } catch (e) {
+            container.innerHTML = `<p class="error">Fehler: ${e.message}</p>`;
+        }
+    }
+
+    async function checkProfilesTable() {
+        const container = document.getElementById('structureResult');
+        container.innerHTML = 'Lade...';
+
+        try {
+            const { data, error } = await sb.from('profiles').select('*').limit(1);
+
+            if (error) {
+                container.innerHTML = `<p class="error">Fehler: ${error.message}</p>`;
+                return;
+            }
+
+            const columns = Object.keys(data[0] || {});
+            const verificationColumns = ['verification_status', 'verification_method', 'verification_document_url', 'enrollment_certificate_url', 'student_id_image_url', 'uni_email', 'edu_email', 'is_student_verified', 'is_banned'];
+
+            let html = '<h3>Gefundene Spalten in profiles:</h3><pre>' + columns.join('\n') + '</pre>';
+
+            html += '<h3>Verifizierungs-Spalten Status:</h3><ul>';
+            verificationColumns.forEach(col => {
+                const exists = columns.includes(col);
+                html += `<li class="${exists ? 'success' : 'error'}">${col}: ${exists ? '✓ vorhanden' : '✗ FEHLT'}</li>`;
+            });
+            html += '</ul>';
+
+            container.innerHTML = html;
+        } catch (e) {
+            container.innerHTML = `<p class="error">Fehler: ${e.message}</p>`;
+        }
+    }
+
+    async function showRecentListings() {
+        const container = document.getElementById('listingsResult');
+        container.innerHTML = 'Lade...';
+
+        try {
+            const { data, error } = await sb.from('listings').select('id, title, type, city, is_active, created_at').order('created_at', { ascending: false }).limit(20);
+
+            if (error) {
+                container.innerHTML = `<p class="error">Fehler: ${error.message}</p>`;
+                return;
+            }
+
+            let html = '<table><tr><th>Titel</th><th>Typ</th><th>Stadt</th><th>Aktiv</th><th>Erstellt</th></tr>';
+            data.forEach(l => {
+                const typeBadge = l.type ? `<span class="badge badge-${l.type}">${l.type}</span>` : '<span class="warning">KEIN TYP</span>';
+                html += `<tr>
+                    <td>${escapeHtml(l.title)}</td>
+                    <td>${typeBadge}</td>
+                    <td>${escapeHtml(l.city)}</td>
+                    <td>${l.is_active ? '✓' : '✗'}</td>
+                    <td>${new Date(l.created_at).toLocaleDateString('de-DE')}</td>
+                </tr>`;
+            });
+            html += '</table>';
+
+            container.innerHTML = html;
+        } catch (e) {
+            container.innerHTML = `<p class="error">Fehler: ${e.message}</p>`;
+        }
+    }
+
+    async function showJobListings() {
+        const container = document.getElementById('listingsResult');
+        container.innerHTML = 'Lade...';
+
+        try {
+            const { data, error } = await sb.from('listings').select('id, title, type, company_name, job_type, city, is_active').eq('type', 'job').order('created_at', { ascending: false }).limit(20);
+
+            if (error) {
+                container.innerHTML = `<p class="error">Fehler: ${error.message}</p>`;
+                return;
+            }
+
+            if (data.length === 0) {
+                container.innerHTML = '<p class="warning">Keine Listings mit type="job" gefunden. Entweder existieren keine Jobs oder die type-Spalte fehlt.</p>';
+                return;
+            }
+
+            let html = '<table><tr><th>Titel</th><th>Firma</th><th>Job-Typ</th><th>Stadt</th><th>Aktiv</th></tr>';
+            data.forEach(l => {
+                html += `<tr>
+                    <td>${escapeHtml(l.title)}</td>
+                    <td>${escapeHtml(l.company_name)}</td>
+                    <td>${escapeHtml(l.job_type)}</td>
+                    <td>${escapeHtml(l.city)}</td>
+                    <td>${l.is_active ? '✓' : '✗'}</td>
+                </tr>`;
+            });
+            html += '</table>';
+
+            container.innerHTML = html;
+        } catch (e) {
+            container.innerHTML = `<p class="error">Fehler: ${e.message}</p>`;
+        }
+    }
+
+    async function showVerificationProfiles() {
+        const container = document.getElementById('verificationResult');
+        container.innerHTML = 'Lade...';
+
+        try {
+            const { data, error } = await sb.from('profiles').select('id, email, full_name, verification_status, verification_method, enrollment_certificate_url, verification_document_url, uni_email, edu_email, is_verified, is_student_verified').order('created_at', { ascending: false }).limit(50);
+
+            if (error) {
+                container.innerHTML = `<p class="error">Fehler: ${error.message}</p>`;
+                return;
+            }
+
+            // Filter nur Profile mit Verifizierungsdaten
+            const filtered = data.filter(p =>
+                p.verification_status ||
+                p.enrollment_certificate_url ||
+                p.verification_document_url ||
+                p.uni_email ||
+                p.edu_email
+            );
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<p class="warning">Keine Profile mit Verifizierungsdaten gefunden.</p>';
+                return;
+            }
+
+            let html = '<table><tr><th>Name</th><th>E-Mail</th><th>Status</th><th>Methode</th><th>Dokument</th><th>Verifiziert</th></tr>';
+            filtered.forEach(p => {
+                const hasDoc = p.enrollment_certificate_url || p.verification_document_url || p.uni_email || p.edu_email;
+                html += `<tr>
+                    <td>${escapeHtml(p.full_name)}</td>
+                    <td>${escapeHtml(p.email)}</td>
+                    <td>${escapeHtml(p.verification_status) || 'none'}</td>
+                    <td>${escapeHtml(p.verification_method) || '-'}</td>
+                    <td>${hasDoc ? '✓ vorhanden' : '✗'}</td>
+                    <td>${p.is_verified || p.is_student_verified ? '✓' : '✗'}</td>
+                </tr>`;
+            });
+            html += '</table>';
+
+            // Debug: Zeige Rohdaten
+            html += '<h3>Rohdaten (zum Debuggen):</h3><pre style="max-height:300px;overflow:auto;">' + JSON.stringify(filtered, null, 2) + '</pre>';
+
+            container.innerHTML = html;
+        } catch (e) {
+            container.innerHTML = `<p class="error">Fehler: ${e.message}</p>`;
+        }
+    }
+
+    async function checkStorageBuckets() {
+        const container = document.getElementById('storageResult');
+        container.innerHTML = 'Lade...';
+
+        try {
+            const { data, error } = await sb.storage.listBuckets();
+
+            if (error) {
+                container.innerHTML = `<p class="error">Fehler: ${error.message}</p>`;
+                return;
+            }
+
+            let html = '<h3>Gefundene Storage Buckets:</h3><ul>';
+            data.forEach(b => {
+                html += `<li><strong>${b.name}</strong> - ${b.public ? 'öffentlich' : 'privat'}</li>`;
+            });
+            html += '</ul>';
+
+            const requiredBuckets = ['listing-images', 'verification-documents', 'avatars'];
+            html += '<h3>Benötigte Buckets:</h3><ul>';
+            requiredBuckets.forEach(name => {
+                const exists = data.find(b => b.name === name);
+                html += `<li class="${exists ? 'success' : 'error'}">${name}: ${exists ? '✓ vorhanden' : '✗ FEHLT'}</li>`;
+            });
+            html += '</ul>';
+
+            container.innerHTML = html;
+        } catch (e) {
+            container.innerHTML = `<p class="error">Fehler: ${e.message}</p>`;
+        }
+    }
+
+    async function checkSubmissions() {
+        const container = document.getElementById('submissionsResult');
+        container.innerHTML = 'Lade...';
+
+        try {
+            const { data, error } = await sb.from('partner_submissions').select('*').order('submitted_at', { ascending: false }).limit(10);
+
+            if (error) {
+                if (error.message.includes('does not exist')) {
+                    container.innerHTML = '<p class="warning">partner_submissions Tabelle existiert nicht. Bitte SQL ausführen.</p>';
+                } else {
+                    container.innerHTML = `<p class="error">Fehler: ${error.message}</p>`;
+                }
+                return;
+            }
+
+            if (data.length === 0) {
+                container.innerHTML = '<p class="success">Tabelle existiert, aber keine Einreichungen vorhanden.</p>';
+                return;
+            }
+
+            let html = '<table><tr><th>Typ</th><th>Titel</th><th>Kontakt</th><th>Status</th><th>Eingereicht</th></tr>';
+            data.forEach(s => {
+                html += `<tr>
+                    <td><span class="badge badge-${s.submission_type}">${s.submission_type}</span></td>
+                    <td>${escapeHtml(s.title)}</td>
+                    <td>${escapeHtml(s.contact_email)}</td>
+                    <td>${s.status}</td>
+                    <td>${new Date(s.submitted_at).toLocaleDateString('de-DE')}</td>
+                </tr>`;
+            });
+            html += '</table>';
+
+            container.innerHTML = html;
+        } catch (e) {
+            container.innerHTML = `<p class="error">Fehler: ${e.message}</p>`;
+        }
+    }
+</script>
+</body>
+</html>

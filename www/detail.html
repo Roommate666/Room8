@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Details - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
@@ -179,14 +179,14 @@
         
         .price-tag {
             display: inline-block;
-            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             padding: 0.75rem 1.25rem;
             border-radius: 8px;
             font-size: 1.3rem;
             font-weight: 700;
             margin: 1rem 0;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
         }
         
         .detail-specs {
@@ -273,7 +273,7 @@
 <body>
 <div class="app-container">
     <header class="app-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <a href="javascript:history.back()" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:0.5rem;">
+        <a href="#" onclick="event.preventDefault(); window.history.back();" class="back-arrow" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:0.5rem;">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="m15 18-6-6 6-6"/>
             </svg>
@@ -293,11 +293,15 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="room8-ui.js"></script>
+<script src="room8-utils.js"></script>
 <script>
-    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    var esc = (typeof Room8 !== 'undefined') ? Room8.escapeHtml : function(t) { return t ? String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;") : ''; };
+
     function getT(key) {
         var lang = localStorage.getItem('room8_language') || localStorage.getItem('language') || 'de';
         var t = {
@@ -469,12 +473,12 @@
         var currentUser = null;
         var currentUserProfile = null;
         
-        supabase.auth.getUser()
+        sb.auth.getUser()
             .then(function(response) {
                 currentUser = response.data.user;
                 
                 if (currentUser) {
-                    return supabase
+                    return sb
                         .from('profiles')
                         .select('is_verified, is_student_verified')
                         .eq('id', currentUser.id)
@@ -484,8 +488,8 @@
             })
             .then(function(profileResponse) {
                 currentUserProfile = profileResponse.data;
-                
-                return supabase
+
+                return sb
                     .from('listings')
                     .select('*, listing_photos(storage_path)')
                     .eq('id', listingId)
@@ -497,7 +501,7 @@
                 if (!listing) throw new Error('Listing nicht gefunden.');
                 
                 var ownerPromise = listing.owner_id 
-                    ? supabase.from('profiles').select('id, username, avatar_url, is_verified, university').eq('id', listing.owner_id).single()
+                    ? sb.from('profiles').select('id, username, avatar_url, is_verified, university').eq('id', listing.owner_id).single()
                     : Promise.resolve({ data: null });
                 
                 return ownerPromise.then(function(ownerResponse) {
@@ -512,10 +516,10 @@
                 
                 // Increment view count
                 if (!isOwner) {
-                    supabase.rpc('increment_view_count', { listing_id: listingId })
+                    sb.rpc('increment_view_count', { listing_id: listingId })
                         .then(function() {})
                         .catch(function() {
-                            supabase.from('listings')
+                            sb.from('listings')
                                 .update({ view_count: (listing.view_count || 0) + 1 })
                                 .eq('id', listingId)
                                 .then(function() {});
@@ -531,7 +535,7 @@
                     var dotsHTML = '';
                     
                     photos.forEach(function(photo, index) {
-                        var urlData = supabase.storage.from('listing-images').getPublicUrl(photo.storage_path);
+                        var urlData = sb.storage.from('listing-images').getPublicUrl(photo.storage_path);
                         var blurClass = shouldBlur ? ' blurred-image' : '';
                         imageHTML += '<img src="' + urlData.data.publicUrl + '" alt="Foto ' + (index + 1) + '" class="gallery-image' + blurClass + '" onerror="this.src=\'placeholder.png\';">';
                         dotsHTML += '<div class="gallery-dot' + (index === 0 ? ' active' : '') + '" data-index="' + index + '"></div>';
@@ -586,8 +590,8 @@
                         ? (listing.city || 'Unbekannte Stadt') + (listing.district ? ', ' + listing.district : '')
                         : (listing.city || 'Unbekannte Stadt') + ' ' + getT('exact_location_hidden');
                     
-                    contentHTML += '<h2>' + (listing.title || 'Kein Titel') + '</h2>';
-                    contentHTML += '<p style="color:#6b7280; margin: 0.5rem 0;">' + locationDisplay + '</p>';
+                    contentHTML += '<h2>' + esc(listing.title || 'Kein Titel') + '</h2>';
+                    contentHTML += '<p style="color:#6b7280; margin: 0.5rem 0;">' + esc(locationDisplay) + '</p>';
                     
                     // Price display
                     if (listing.listing_mode === 'search' && listing.price_range_min && listing.price_range_max) {
@@ -600,9 +604,13 @@
                     } else {
                         contentHTML += '<div class="price-tag">' + getT('price_on_request') + '</div>';
                     }
-                    
-                    contentHTML += '<p style="line-height:1.6;">' + (listing.description || 'Keine Beschreibung verfügbar.') + '</p>';
-                    
+
+                    // Referenz-Nummer
+                    var refCode = 'R8-' + listing.id.substring(0, 6).toUpperCase();
+                    contentHTML += '<div style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Referenz-Nr: ' + refCode + '</div>';
+
+                    contentHTML += '<p style="line-height:1.6;">' + esc(listing.description || 'Keine Beschreibung verfügbar.') + '</p>';
+
                     // Swap target info
                     if (listing.listing_mode === 'swap' && listing.swap_target_data) {
                         contentHTML += '<div style="background: #eff6ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0;">';
@@ -725,10 +733,10 @@
                     
                     contentHTML += '<span class="listing-mode-badge ' + itemBadge.cls + '">' + itemBadge.text + '</span>';
                     contentHTML += '<span class="category-badge">' + (getT(listing.category) || getT('Others')) + '</span>';
-                    contentHTML += '<h2>' + (listing.title || 'Kein Titel') + '</h2>';
+                    contentHTML += '<h2>' + esc(listing.title || 'Kein Titel') + '</h2>';
                     contentHTML += '<p style="color:#6b7280; margin: 0.5rem 0;">';
                     contentHTML += '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>';
-                    contentHTML += (listing.city || 'Unbekannte Stadt') + '</p>';
+                    contentHTML += esc(listing.city || 'Unbekannte Stadt') + '</p>';
                     
                     // Item price
                     if (listing.listing_mode === 'search' && listing.price_range_min && listing.price_range_max) {
@@ -742,7 +750,7 @@
                         contentHTML += '<div class="price-tag">' + getT('price_on_request') + '</div>';
                     }
                     
-                    contentHTML += '<p style="line-height:1.6;">' + (listing.description || 'Keine Beschreibung verfügbar.') + '</p>';
+                    contentHTML += '<p style="line-height:1.6;">' + esc(listing.description || 'Keine Beschreibung verfügbar.') + '</p>';
                     
                     // Item specs
                     contentHTML += '<div class="detail-specs">';
@@ -759,6 +767,30 @@
                     contentHTML += '</div>';
                 }
                 
+                // Reinigungsservice Banner (nur für Wohnungen)
+                if (listing.type === 'wohnung') {
+                    var cleaningRefCode = 'R8-' + listing.id.substring(0, 6).toUpperCase();
+                    contentHTML += '<div style="background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%); border-radius: 16px; padding: 1.25rem; color: white; margin: 2rem 0; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);">';
+                    contentHTML += '<div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">';
+                    contentHTML += '<span style="font-size: 1.75rem;">🧹</span>';
+                    contentHTML += '<div><div style="font-weight: 700; font-size: 1.05rem;">Übergabe-Reinigung</div>';
+                    contentHTML += '<div style="font-size: 0.85rem; opacity: 0.9;">15% Studentenrabatt</div></div>';
+                    contentHTML += '</div>';
+
+                    contentHTML += '<div style="background: rgba(255,255,255,0.15); border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">';
+                    contentHTML += '<div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem;">So funktioniert\'s:</div>';
+                    contentHTML += '<div style="font-size: 0.85rem; line-height: 1.6;">';
+                    contentHTML += '1️⃣ Klicke unten auf "Anfrage stellen"<br>';
+                    contentHTML += '2️⃣ Nenne im Formular deine <strong>Referenz-Nr: ' + cleaningRefCode + '</strong><br>';
+                    contentHTML += '3️⃣ Zeig beim Termin deinen <strong>Studentenausweis</strong> = 15% Rabatt';
+                    contentHTML += '</div></div>';
+
+                    contentHTML += '<div style="display: flex; gap: 0.75rem; align-items: center;">';
+                    contentHTML += '<a href="https://www.ayaservice.de" target="_blank" style="flex: 1; background: white; color: #0284C7; text-decoration: none; padding: 0.75rem 1rem; border-radius: 10px; font-weight: 700; text-align: center; font-size: 0.95rem;">Anfrage stellen →</a>';
+                    contentHTML += '<button onclick="navigator.clipboard.writeText(\'' + cleaningRefCode + '\'); Room8UI.success(\'Referenz kopiert!\');" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4); color: white; padding: 0.75rem; border-radius: 10px; cursor: pointer; font-weight: 600;">📋 Kopieren</button>';
+                    contentHTML += '</div></div>';
+                }
+
                 // Seller info
                 if (!isOwner && listing.profiles) {
                     var ownerAvatar = listing.profiles.avatar_url || 'placeholder.png';
@@ -769,8 +801,8 @@
                     contentHTML += '<div class="seller-info">';
                     contentHTML += '<h4>' + userLabel + '</h4>';
                     contentHTML += '<a href="public-profile.html?id=' + listing.profiles.id + '" class="seller-profile" style="text-decoration:none;color:inherit;">';
-                    contentHTML += '<img src="' + ownerAvatar + '" alt="' + (listing.profiles.username || 'Anonym') + '" class="seller-avatar" onerror="this.src=\'placeholder.png\';">';
-                    contentHTML += '<span class="seller-name">' + (listing.profiles.username || 'Anonym') + '</span>';
+                    contentHTML += '<img src="' + esc(ownerAvatar) + '" alt="' + esc(listing.profiles.username || 'Anonym') + '" class="seller-avatar" onerror="this.src=\'placeholder.png\';">';
+                    contentHTML += '<span class="seller-name">' + esc(listing.profiles.username || 'Anonym') + '</span>';
                     contentHTML += '</a></div>';
                 }
                 
@@ -890,7 +922,7 @@
     var currentReportListingId = null;
     
     function checkLoginAndShowReportBtn() {
-        supabase.auth.getUser().then(function(response) {
+        sb.auth.getUser().then(function(response) {
             var user = response.data.user;
             if (user) {
                 var params = new URLSearchParams(window.location.search);
@@ -936,51 +968,51 @@
     
     reportForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        
+
         if (!currentReportListingId) {
-            alert('Fehler: Keine Listing-ID gefunden');
+            Room8UI.error('Fehler: Keine Listing-ID gefunden');
             return;
         }
-        
-        supabase.auth.getUser().then(function(response) {
+
+        sb.auth.getUser().then(function(response) {
             var user = response.data.user;
             if (!user) {
-                alert('Bitte logge dich ein um zu melden');
-                window.location.href = 'login.html';
+                Room8UI.warning('Bitte logge dich ein um zu melden');
+                setTimeout(function() { window.location.href = 'login.html'; }, 1500);
                 return;
             }
-            
+
             var reasonInput = document.querySelector('input[name="reason"]:checked');
             if (!reasonInput) {
-                alert('Bitte wähle einen Grund aus');
+                Room8UI.warning('Bitte wähle einen Grund aus');
                 return;
             }
             var reason = reasonInput.value;
             var description = document.getElementById('reportDescription').value.trim();
-            
+
             reportSubmitBtn.disabled = true;
             reportSubmitBtn.textContent = 'Wird gesendet...';
-            
-            return supabase.from('reports').insert({
+
+            return sb.from('reports').insert({
                 reporter_id: user.id,
                 reported_type: 'listing',
                 reported_id: currentReportListingId,
                 reason: reason,
                 description: description || null,
-                status: 'pending'
+                status: 'open'
             });
         }).then(function(result) {
             if (result && result.error) throw result.error;
-            alert('Vielen Dank für deine Meldung! Wir werden sie prüfen.');
+            Room8UI.success('Vielen Dank für deine Meldung! Wir werden sie prüfen.');
             closeReportModal();
         }).catch(function(err) {
             console.error('Fehler beim Senden:', err);
             if (err.code === '23505' || (err.message && err.message.indexOf('duplicate') !== -1)) {
-                alert('Du hast dieses Inserat bereits gemeldet.');
+                Room8UI.warning('Du hast dieses Inserat bereits gemeldet.');
             } else if (err.code === '42501') {
-                alert('Keine Berechtigung. Bist du eingeloggt?');
+                Room8UI.warning('Keine Berechtigung. Bist du eingeloggt?');
             } else {
-                alert('Fehler beim Senden der Meldung: ' + (err.message || 'Unbekannter Fehler'));
+                Room8UI.error('Fehler beim Senden der Meldung: ' + (err.message || 'Unbekannter Fehler'));
             }
         }).finally(function() {
             reportSubmitBtn.disabled = false;
@@ -992,6 +1024,7 @@
 </script>
 
 <script src="navigation.js"></script>
+<script src="notificationBell.js"></script>
 <script src="translations.js"></script>
 </body>
 </html>

@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Mein Profil - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
@@ -148,7 +148,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
+            z-index: 99999;
             padding: 1rem;
         }
         
@@ -181,19 +181,23 @@
 <body>
 
 <div class="app-container">
-    <header class="app-header">
-        <h1 data-i18n="profile_title">Mein Profil</h1>
-        <div class="header-actions">
+    <header class="app-header" style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+        <h1 data-i18n="profile_title" style="margin: 0; flex-shrink: 0; font-size: 1.25rem; color: #667eea;">Mein Profil</h1>
+        <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
             <!-- Notification Bell -->
-            <a href="notifications.html" class="header-icon-btn" title="Benachrichtigungen" style="position: relative; margin-right: 0.5rem;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <a href="notifications.html" title="Benachrichtigungen" style="position: relative; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: white; border-radius: 50%; color: #667eea; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
                     <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
                 </svg>
-                <span id="notificationBadge" style="display:none; position:absolute; top:-5px; right:-5px; background:#ef4444; color:white; border-radius:50%; width:18px; height:18px; font-size:0.7rem; font-weight:bold; display:flex; align-items:center; justify-content:center;"></span>
+                <span id="notificationBadge" style="display:none; position:absolute; top:-2px; right:-2px; background:#ef4444; color:white; border-radius:50%; min-width:16px; height:16px; font-size:0.6rem; font-weight:bold; align-items:center; justify-content:center; padding: 0 4px;"></span>
             </a>
-            <a href="choose-listing.html" class="header-action-btn" data-i18n="profile_new_listing">+ Neues Inserat</a>
-            <a href="settings.html" class="header-icon-btn" title="Einstellungen" style="font-size: 1.5rem;">&#9881;</a>
+            <!-- Settings -->
+            <a href="settings.html" title="Einstellungen" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: white; border-radius: 50%; color: #667eea; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </a>
+            <!-- New Listing -->
+            <a href="choose-listing.html" data-i18n="profile_new_listing" style="white-space: nowrap; padding: 0.5rem 0.75rem; background: white; color: #667eea; border-radius: 18px; font-weight: 700; font-size: 0.8rem; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">+ Inserat</a>
         </div>
     </header>
 
@@ -269,42 +273,39 @@
     </main>
 
     <div id="app-footer-nav"></div>
-    
-    <!-- Custom Modal für Lösch-Bestätigung -->
-    <div id="deleteModal" class="modal-overlay">
-        <div class="modal-box">
-            <h3 class="modal-title">Inserat löschen?</h3>
-            <p class="modal-text">Dies kann nicht rückgängig gemacht werden.</p>
-            <div class="modal-actions">
-                <button class="modal-btn btn-cancel" onclick="closeDeleteModal()">Abbrechen</button>
-                <button class="modal-btn btn-confirm" id="confirmDeleteBtn">Löschen</button>
-            </div>
+</div>
+
+<!-- Custom Modal für Lösch-Bestätigung (AUSSERHALB app-container für korrektes z-index) -->
+<div id="deleteModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 class="modal-title">Inserat löschen?</h3>
+        <p class="modal-text">Dies kann nicht rückgängig gemacht werden.</p>
+        <div class="modal-actions">
+            <button class="modal-btn btn-cancel" onclick="closeDeleteModal()">Abbrechen</button>
+            <button class="modal-btn btn-confirm" id="confirmDeleteBtn">Löschen</button>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script src="translations.js"></script>
+<script src="room8-utils.js"></script>
 <script>
-    // 1. Config Fallback
-    if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_ANON_KEY === 'undefined') {
-        var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co';
-        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw';
-    }
-
-    // 2. Init
-    var supabase;
-    if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } else if (typeof window.supabaseClient !== 'undefined') {
-        supabase = window.supabaseClient;
-    }
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Helper: Navigation
     function navigateTo(url) {
         try { window.location.href = url; } catch(e) { console.warn(e); }
+    }
+
+    // XSS Protection
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     var listingsContainer = document.getElementById('my-listings-container');
@@ -322,9 +323,9 @@
     var cardToDelete = null;
 
     async function initProfile() {
-        if (!supabase) return;
+        if (!sb) return;
 
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await sb.auth.getUser();
         if (!user) {
             navigateTo('login.html');
             return;
@@ -337,7 +338,7 @@
 
     async function loadProfileData(userId) {
         // Profil
-        const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
+        const { data: profile } = await sb.from('profiles').select('*').eq('id', userId).single();
         if (profile) {
             var username = profile.username || 'User';
             welcomeMessage.childNodes[0].textContent = 'Hallo, ' + username + '! ';
@@ -350,21 +351,26 @@
         }
 
         // Inserate
-        const { data: listings, error } = await supabase
+        console.log("Loading listings for user:", userId);
+        const { data: listings, error } = await sb
             .from('listings')
             .select('id, title, city, type, view_count, listing_photos(storage_path)')
             .eq('owner_id', userId)
             .eq('is_active', true);
 
         if (error) {
-            listingsContainer.innerHTML = '<p style="padding:1.5rem; color:red;">Fehler beim Laden.</p>';
+            console.error("Error loading listings:", error);
+            listingsContainer.innerHTML = '<p style="padding:1.5rem; color:red;">Fehler beim Laden: ' + error.message + '</p>';
             return;
         }
 
         listingsContainer.innerHTML = '';
         if (listings && listings.length > 0) {
             listingCount.textContent = '(' + listings.length + ')';
-            listings.forEach(listing => listingsContainer.appendChild(createListingCard(listing)));
+            listings.forEach(function(listing) {
+                var card = createListingCard(listing);
+                if (card) listingsContainer.appendChild(card);
+            });
         } else {
             listingCount.textContent = '(0)';
             listingsContainer.innerHTML = `
@@ -380,12 +386,19 @@
     }
 
     function createListingCard(listing) {
+        // Skip listings ohne gültige ID
+        if (!listing || !listing.id) {
+            console.warn("Listing ohne ID übersprungen:", listing);
+            return null;
+        }
+        console.log("Creating card for listing:", listing.id, listing.title);
         var card = document.createElement('div');
         card.className = 'listing-card';
+        card.dataset.listingId = String(listing.id); // ID als String speichern
         
         var imageUrl = 'https://via.placeholder.com/300x200?text=Room8';
         if (listing.listing_photos && listing.listing_photos.length > 0) {
-            var urlData = supabase.storage.from('listing-images').getPublicUrl(listing.listing_photos[0].storage_path);
+            var urlData = sb.storage.from('listing-images').getPublicUrl(listing.listing_photos[0].storage_path);
             if (urlData.data) imageUrl = urlData.data.publicUrl;
         }
         
@@ -394,11 +407,11 @@
         
         card.innerHTML = `
             <a href="javascript:void(0)" onclick="navigateTo('detail.html?id=${listing.id}')" class="card-image-link">
-                <img src="${imageUrl}" alt="${listing.title}">
+                <img src="${imageUrl}" alt="${escapeHtml(listing.title)}">
             </a>
             <div class="card-content">
-                <h4>${listing.title}</h4>
-                <p class="card-meta">${listing.city || 'N/A'} - ${listing.type}</p>
+                <h4>${escapeHtml(listing.title)}</h4>
+                <p class="card-meta">${escapeHtml(listing.city) || 'N/A'} - ${escapeHtml(listing.type)}</p>
                 <div class="card-actions">
                     <button class="btn-small btn-edit" onclick="navigateTo('${editUrl}')">Bearbeiten</button>
                     <button class="btn-small btn-delete">Löschen</button>
@@ -407,7 +420,9 @@
         
         card.querySelector('.btn-delete').addEventListener('click', function(e) {
             e.stopPropagation();
-            openDeleteModal(listing.id, card);
+            var id = card.dataset.listingId;
+            console.log("Delete button clicked, ID from data-attr:", id);
+            openDeleteModal(id, card);
         });
         
         return card;
@@ -415,6 +430,11 @@
 
     // Modal Logic
     function openDeleteModal(id, card) {
+        console.log("Delete ID:", id, typeof id);
+        if (!id || id === 'null' || id === 'undefined') {
+            Room8UI.error("Ungültige Inserat-ID");
+            return;
+        }
         listingToDelete = id;
         cardToDelete = card;
         deleteModal.style.display = 'flex';
@@ -427,19 +447,32 @@
     }
 
     confirmDeleteBtn.onclick = async function() {
-        if (!listingToDelete) return;
-        
-        // Optimistisch entfernen
-        cardToDelete.style.opacity = '0.5';
+        if (!listingToDelete || listingToDelete === 'null' || listingToDelete === 'undefined') {
+            Room8UI.error("Keine gültige Inserat-ID");
+            closeDeleteModal();
+            return;
+        }
+
+        // ID und Card LOKAL speichern bevor closeDeleteModal sie nullt
+        var idToDelete = listingToDelete;
+        var cardToRemove = cardToDelete;
+
+        // Modal schließen
         closeDeleteModal();
 
-        const { error } = await supabase.from('listings').delete().eq('id', listingToDelete);
-        
+        // Optimistisch entfernen
+        cardToRemove.style.opacity = '0.5';
+
+        console.log("Deleting listing with ID:", idToDelete);
+        const { error } = await sb.from('listings').delete().eq('id', idToDelete);
+
         if (error) {
-            alert("Fehler beim Löschen.");
-            cardToDelete.style.opacity = '1';
+            console.error("Delete error:", error);
+            Room8UI.error("Fehler: " + error.message);
+            cardToRemove.style.opacity = '1';
         } else {
-            cardToDelete.remove();
+            cardToRemove.remove();
+            Room8UI.success("Inserat gelöscht!");
             // Count update (quick fix regex)
             var count = parseInt(listingCount.textContent.replace(/\D/g,'')) - 1;
             listingCount.textContent = '(' + Math.max(0, count) + ')';
@@ -455,7 +488,7 @@
     }
 
     window.closeBanner = function() {
-        supabase.auth.getUser().then(({data}) => {
+        sb.auth.getUser().then(({data}) => {
             if(data.user) localStorage.setItem('feature_banner_seen_' + data.user.id, 'true');
         });
         document.getElementById('featureBanner').style.display = 'none';
@@ -463,7 +496,7 @@
 
     // Badge update
     async function updateNotificationBadge(userId) {
-        const { count } = await supabase
+        const { count } = await sb
             .from('notifications')
             .select('*', { count: 'exact', head: true })
             .eq('user_id', userId)

@@ -2,8 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Immatrikulationsbescheinigung hochladen - Room8</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">  <title>Immatrikulationsbescheinigung hochladen - Room8</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -39,10 +38,11 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
   <script src="config.js"></script>
   <script>
-    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     var form = document.getElementById('uploadForm');
     var msgContainer = document.getElementById('form-message');
@@ -76,7 +76,7 @@
     }
 
     function requireAuth() {
-      return supabase.auth.getUser().then(function(response) {
+      return sb.auth.getUser().then(function(response) {
         var user = response.data.user;
         if (!user) {
           window.location.href = 'login.html';
@@ -102,13 +102,13 @@
 
           var path = user.id + '/' + Date.now() + '_' + file.name;
           
-          return supabase.storage
+          return sb.storage
             .from('enrollment-certificates')
             .upload(path, file)
             .then(function(uploadResponse) {
               if (uploadResponse.error) throw uploadResponse.error;
               
-              var urlData = supabase.storage
+              var urlData = sb.storage
                 .from('enrollment-certificates')
                 .getPublicUrl(path);
 
@@ -124,7 +124,7 @@
           setFormMessage(getTranslation('success', 'Upload erfolgreich!'), true);
           
           setTimeout(function() {
-            supabase.auth.signOut().then(function() {
+            sb.auth.signOut().then(function() {
               window.location.href = 'login.html';
             });
           }, 3000);

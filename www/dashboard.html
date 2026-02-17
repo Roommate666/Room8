@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Home - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
@@ -112,6 +112,12 @@
 
         .dash-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.1rem; }
         .dash-subtitle { font-size: 0.7rem; color: var(--text-muted); }
+
+        /* Category-specific title colors */
+        .dash-card:nth-child(1) .dash-title { color: #3B82F6; } /* Wohnungen - blue */
+        .dash-card:nth-child(2) .dash-title { color: #10B981; } /* Marktplatz - green */
+        .dash-card:nth-child(3) .dash-title { color: #8B5CF6; } /* Jobs - purple */
+        .dash-card:nth-child(4) .dash-title { color: #F59E0B; } /* Coupons - amber */
 
         /* SECTIONS */
         .content-section { padding: 1rem 1.5rem; margin-top: 1rem; }
@@ -234,17 +240,81 @@
         </div>
     </div>
 
+    <!-- REINIGUNGSSERVICE BANNER (Aufklappbar) -->
+    <div class="content-section" style="padding-top: 0;">
+        <div id="cleaningBanner" style="background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%); border-radius: 16px; padding: 1rem 1.25rem; color: white; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3); cursor: pointer;" onclick="toggleCleaningDetails()">
+
+            <!-- Header (immer sichtbar) -->
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="font-size: 1.75rem;">🧹</div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 700; font-size: 1rem;">Übergabe-Reinigung gesucht?</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9;">15% Studentenrabatt verfügbar</div>
+                </div>
+                <div id="cleaningArrow" style="font-size: 1.2rem; transition: transform 0.3s;">▼</div>
+            </div>
+
+            <!-- Details (versteckt) -->
+            <div id="cleaningDetails" style="display: none; margin-top: 1rem;">
+                <!-- Vorteile -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem; font-size: 0.8rem;">
+                    <div style="background: rgba(255,255,255,0.15); padding: 0.5rem 0.75rem; border-radius: 8px;">✨ Grundreinigung</div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 0.5rem 0.75rem; border-radius: 8px;">🪟 Fenster & Böden</div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 0.5rem 0.75rem; border-radius: 8px;">🚿 Bad & Küche</div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 0.5rem 0.75rem; border-radius: 8px;">📋 Abnahme-Garantie</div>
+                </div>
+
+                <!-- Rabatt-Banner -->
+                <div style="background: rgba(255,255,255,0.2); border-radius: 10px; padding: 0.75rem; margin-bottom: 1rem; text-align: center;">
+                    <div style="font-size: 1.3rem; font-weight: 800;">15% RABATT</div>
+                    <div style="font-size: 0.75rem; opacity: 0.9;">für Studenten mit gültigem Ausweis</div>
+                </div>
+
+                <!-- So gehts -->
+                <div style="background: rgba(0,0,0,0.1); border-radius: 10px; padding: 0.75rem; margin-bottom: 1rem; font-size: 0.8rem;">
+                    <div style="font-weight: 600; margin-bottom: 0.5rem;">📝 So funktioniert's:</div>
+                    <div style="line-height: 1.5;">
+                        1. Öffne eine Wohnung → Referenz-Nr notieren<br>
+                        2. Anfrage auf ayaservice.de stellen<br>
+                        3. Referenz-Nr nennen + Ausweis zeigen<br>
+                        4. 15% Rabatt erhalten!
+                    </div>
+                </div>
+
+                <a href="https://www.ayaservice.de" target="_blank" onclick="event.stopPropagation()" style="display: block; background: white; color: #0284C7; text-decoration: none; padding: 0.85rem 1rem; border-radius: 10px; font-weight: 700; text-align: center; font-size: 0.95rem; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                    Jetzt Anfrage stellen →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleCleaningDetails() {
+            const details = document.getElementById('cleaningDetails');
+            const arrow = document.getElementById('cleaningArrow');
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                arrow.style.transform = 'rotate(180deg)';
+            } else {
+                details.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+    </script>
+
     <div style="height: 2rem;"></div>
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
-<script src="push-logic.js"></script> <!-- Push Service laden -->
+<script src="notificationBell.js"></script>
+<script src="push-logic.js"></script>
 <script>
-    if (typeof SUPABASE_URL === 'undefined') { var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co'; var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw'; }
-    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     function navigateTo(url) {
         try { window.location.href = url; } catch(e) { console.warn(e); }
@@ -254,12 +324,12 @@
         // PUSH STATUS PRÜFEN
         checkPushStatus();
 
-        if (!supabase) return;
-        const { data: { user } } = await supabase.auth.getUser();
+        if (!sb) return;
+        const { data: { user } } = await sb.auth.getUser();
         
         if (!user) { navigateTo('index.html'); return; }
 
-        const { data: profile } = await supabase.from('profiles').select('full_name, username, avatar_url').eq('id', user.id).single();
+        const { data: profile } = await sb.from('profiles').select('full_name, username, avatar_url').eq('id', user.id).single();
 
         if (profile) {
             const name = profile.full_name || profile.username || 'Nutzer';
@@ -295,24 +365,24 @@
                 document.querySelector('.action-cards-container').style.marginTop = '-3rem'; // Reset Layout
                 localStorage.setItem('push_enabled', 'true');
             } else {
-                alert("Erlaubnis verweigert. Bitte in den Einstellungen aktivieren.");
+                Room8UI.warning("Erlaubnis verweigert. Bitte in den Einstellungen aktivieren.");
             }
         } else {
-            alert("Push-Dienst nicht verfügbar (nur in der App).");
+            Room8UI.info("Push-Dienst nicht verfügbar (nur in der App).");
         }
     }
 
     async function loadStats(userId) {
-        const { count: msgCount } = await supabase.from('messages').select('*', { count: 'exact', head: true }).eq('receiver_id', userId).eq('is_read', false);
+        const { count: msgCount } = await sb.from('messages').select('*', { count: 'exact', head: true }).eq('receiver_id', userId).eq('is_read', false);
         document.getElementById('statMsg').textContent = msgCount || 0;
-        const { count: listCount } = await supabase.from('listings').select('*', { count: 'exact', head: true }).eq('owner_id', userId).eq('is_active', true);
+        const { count: listCount } = await sb.from('listings').select('*', { count: 'exact', head: true }).eq('owner_id', userId).eq('is_active', true);
         document.getElementById('statListings').textContent = listCount || 0;
-        const { count: favCount } = await supabase.from('favorites').select('*', { count: 'exact', head: true }).eq('user_id', userId);
+        const { count: favCount } = await sb.from('favorites').select('*', { count: 'exact', head: true }).eq('user_id', userId);
         document.getElementById('statFavs').textContent = favCount || 0;
     }
 
     async function checkNotifications(userId) {
-        const { count } = await supabase.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('is_read', false);
+        const { count } = await sb.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('is_read', false);
         if (count > 0) document.getElementById('notifDot').style.display = 'block';
     }
 

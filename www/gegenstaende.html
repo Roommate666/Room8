@@ -2,22 +2,22 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Marktplatz - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .app-container { --primary-color: #10b981; --primary-dark: #059669; background-color: #f3f4f6; padding-bottom: 80px; }
+        .app-container { --primary-color: #10b981; --primary-dark: #059669; background-color: #f3f4f6; padding-bottom: calc(450px + env(safe-area-inset-bottom, 20px)); }
         
-        /* HEADER FIX: CSS Grid */
-        .app-header { 
-            display: grid; 
+        /* HEADER FIX - Luftiger */
+        .app-header {
+            display: grid;
             grid-template-columns: 40px 1fr 40px;
-            align-items: center; 
-            padding: 1rem 1.5rem;
+            align-items: center;
+            padding: calc(1.5rem + env(safe-area-inset-top)) 1.5rem 1.5rem 1.5rem;
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-            margin-bottom: 1rem;
+            color: white; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
+            margin-bottom: 1.25rem;
         }
         
         .back-btn {
@@ -26,10 +26,10 @@
             font-size: 1.5rem;
         }
         
-        .app-header h1 { 
-            color: white; margin: 0; font-size: 1.3rem; font-weight: 700; 
+        .app-header h1 {
+            color: white; margin: 0; font-size: 1.5rem; font-weight: 800;
             text-align: center;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            letter-spacing: -0.02em;
         }
         
         /* Rest wie gehabt */
@@ -47,35 +47,147 @@
         .filter-btn:hover { transform: translateY(-1px); }
         .filter-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
         
-        .listings-grid { padding: 0 1.5rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; max-width: 1200px; margin: 0 auto; }
-        
-        .item-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.04); transition: transform 0.3s; text-decoration: none; color: var(--text-color); display: flex; flex-direction: column; position: relative; cursor: pointer; }
-        .item-card:hover { transform: translateY(-5px); }
-        .card-image-container { position: relative; width: 100%; padding-top: 100%; overflow: hidden; background-color: #e5e7eb; }
-        .card-image-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-        
-        .listing-mode-badge { position: absolute; top: 10px; left: 10px; padding: 0.3rem 0.7rem; border-radius: 12px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; z-index: 5; backdrop-filter: blur(4px); }
+        .listings-grid {
+            padding: 0 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .item-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            transition: transform 0.2s;
+            text-decoration: none;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: row;
+            position: relative;
+            cursor: pointer;
+            height: 110px;
+        }
+        .item-card:hover { transform: translateY(-3px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+
+        .card-image-container {
+            position: relative;
+            width: 110px;
+            min-width: 110px;
+            height: 100%;
+            overflow: hidden;
+            background-color: #e5e7eb;
+        }
+        .card-image-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .listing-mode-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            padding: 0.2rem 0.5rem;
+            border-radius: 8px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            z-index: 5;
+            backdrop-filter: blur(4px);
+        }
         .listing-mode-badge.offer { background: rgba(255,255,255,0.95); color: #059669; }
         .listing-mode-badge.search { background: rgba(255,255,255,0.95); color: #d97706; }
-        
-        .favorite-btn { position: absolute; top: 10px; right: 10px; background: rgba(255, 255, 255, 0.9); border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
+
+        .favorite-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .favorite-btn svg { width: 16px; height: 16px; }
         .favorite-btn.favorited svg { fill: #ef4444; stroke: #ef4444; }
+
+        .card-content {
+            padding: 0.75rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin: 0;
+            color: #1f2937;
+            line-height: 1.25;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .card-price {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: white;
+            white-space: nowrap;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .card-location {
+            font-size: 0.75rem;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 0.5rem;
+            font-size: 0.7rem;
+            color: #9ca3af;
+        }
         
-        .card-content { padding: 1rem; flex-grow: 1; display: flex; flex-direction: column; }
-        .card-title { font-size: 0.95rem; font-weight: 700; margin: 0 0 0.3rem 0; color: #1f2937; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .card-price { font-size: 1rem; font-weight: 700; color: var(--primary-color); margin-top: auto; }
-        .card-location { font-size: 0.75rem; color: #9CA3AF; margin-top: 0.5rem; display: flex; align-items: center; gap: 4px; }
-        
-        .empty-state-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 1.5rem; text-align: center; grid-column: 1 / -1; }
+        .empty-state-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 1.5rem; text-align: center; width: 100%; }
         .empty-state-icon { width: 80px; height: 80px; color: #d1d5db; margin-bottom: 1rem; }
         
-        .fab { position: fixed; bottom: 90px; right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); cursor: pointer; text-decoration: none; color: white; z-index: 100; }
+        .fab { position: fixed; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); cursor: pointer; text-decoration: none; color: white; z-index: 10000; }
     </style>
 </head>
 <body>
 <div class="app-container">
     <header class="app-header">
-        <a href="choose-listing.html" class="back-btn" onclick="navigateTo('choose-listing.html'); return false;">
+        <a href="javascript:history.back()" class="back-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
         <h1>Marktplatz</h1>
@@ -93,7 +205,7 @@
                 <div class="filter-bar" id="modeFilter">
                     <button class="filter-btn active" data-filter="all">Alle</button>
                     <button class="filter-btn" data-filter="offer">Verkauf</button>
-                    <button class="filter-btn" data-filter="search">Gesuche</button>
+                    <button class="filter-btn" data-filter="search">Gesucht</button>
                 </div>
             </div>
             <div>
@@ -114,9 +226,9 @@
             <div>
                 <div class="filter-label">Sortierung</div>
                 <div class="filter-bar" id="sortFilter">
-                    <button class="filter-btn" data-sort="newest">Neueste</button>
-                    <button class="filter-btn" data-sort="price-asc">Preis aufsteigend</button>
-                    <button class="filter-btn" data-sort="price-desc">Preis absteigend</button>
+                    <button class="filter-btn active" data-sort="newest">Neueste</button>
+                    <button class="filter-btn" data-sort="price-asc">Preis ↑</button>
+                    <button class="filter-btn" data-sort="price-desc">Preis ↓</button>
                 </div>
             </div>
         </div>
@@ -130,19 +242,21 @@
         </div>
     </main>
     
-    <a href="gegenstand.html?mode=offer" class="fab" title="Neues Inserat">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-    </a>
-    
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<a href="gegenstand.html?mode=offer" class="fab" title="Neues Inserat" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4) !important;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+</a>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
 <script src="navigation.js"></script>
+<script src="notificationBell.js"></script>
+<script src="notificationHelpers.js"></script>
 <script>
-    if (typeof SUPABASE_URL === 'undefined') { var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co'; var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw'; }
-    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     function navigateTo(url) {
         try { window.location.href = url; } catch(e) { console.warn("Nav Error:", e); }
@@ -161,20 +275,33 @@
     var searchQuery = '';
     var currentUserId = null;
     var userFavorites = {};
-    
+    var blockedUserIds = [];
+
     function loadCurrentUser() {
-        if(!supabase) return;
-        supabase.auth.getUser().then(function(res) {
+        if(!sb) return;
+        sb.auth.getUser().then(function(res) {
             if (res.data.user) {
                 currentUserId = res.data.user.id;
                 loadUserFavorites();
+                loadBlockedUsers();
             }
         });
+    }
+
+    function loadBlockedUsers() {
+        if (!currentUserId) return;
+        sb.from('blocked_users').select('blocked_id').eq('blocker_id', currentUserId)
+            .then(function(res) {
+                if (res.data) {
+                    blockedUserIds = res.data.map(function(b) { return b.blocked_id; });
+                    if (allItems.length > 0) renderListings(applyFilters(allItems));
+                }
+            });
     }
     
     function loadUserFavorites() {
         if (!currentUserId) return;
-        supabase.from('favorites').select('listing_id').eq('user_id', currentUserId)
+        sb.from('favorites').select('listing_id').eq('user_id', currentUserId)
             .then(function(res) {
                 if (res.data) {
                     userFavorites = {};
@@ -184,9 +311,9 @@
             });
     }
     
-    function toggleFavorite(listingId, btnElement) {
+    async function toggleFavorite(listingId, btnElement) {
         if (!currentUserId) { navigateTo('login.html'); return; }
-        
+
         var isFavorited = userFavorites[listingId];
         var icon = btnElement.querySelector('svg');
 
@@ -195,51 +322,89 @@
             btnElement.classList.remove('favorited');
             icon.setAttribute('fill', 'none');
             icon.setAttribute('stroke', 'currentColor');
-            supabase.from('favorites').delete().eq('user_id', currentUserId).eq('listing_id', listingId).then();
+            sb.from('favorites').delete().eq('user_id', currentUserId).eq('listing_id', listingId).then();
         } else {
             userFavorites[listingId] = true;
             btnElement.classList.add('favorited');
             icon.setAttribute('fill', '#ef4444');
             icon.setAttribute('stroke', '#ef4444');
-            supabase.from('favorites').insert({ user_id: currentUserId, listing_id: listingId }).then();
+            await sb.from('favorites').insert({ user_id: currentUserId, listing_id: listingId });
+
+            // Send notification to listing owner
+            try {
+                var listing = allItems.find(function(item) { return item.id === listingId; });
+                if (listing && listing.owner_id && listing.owner_id !== currentUserId && window.NotificationHelpers) {
+                    var profileRes = await sb.from('profiles').select('username, full_name').eq('id', currentUserId).single();
+                    var faverName = profileRes.data ? (profileRes.data.full_name || profileRes.data.username || 'Jemand') : 'Jemand';
+                    NotificationHelpers.notifyFavorite(listing.owner_id, faverName, listing.title, listingId);
+                }
+            } catch(e) { console.log('Notification error:', e); }
         }
     }
     
     function renderItemCard(item) {
-        var imageUrl = 'https://via.placeholder.com/300x300?text=Room8';
+        var imageUrl = null;
+        var isSearchListing = item.listing_mode === 'search';
+
         if (item.listing_photos && item.listing_photos.length > 0) {
             var path = item.listing_photos[0].storage_path;
-            var urlData = supabase.storage.from('listing-images').getPublicUrl(path);
+            var urlData = sb.storage.from('listing-images').getPublicUrl(path);
             if (urlData && urlData.data) imageUrl = urlData.data.publicUrl;
         }
-        
+
         var priceStr = 'VB';
         if (item.listing_mode === 'search') {
-            if (item.price_range_max) priceStr = 'Bis ' + item.price_range_max + ' €';
-            else if (item.price_range_min) priceStr = 'Ab ' + item.price_range_min + ' €';
+            if (item.price_range_max) priceStr = 'Bis ' + formatPrice(item.price_range_max);
+            else if (item.price_range_min) priceStr = 'Ab ' + formatPrice(item.price_range_min);
         } else {
-            if (item.price) priceStr = Number(item.price).toFixed(0) + ' €';
+            if (item.price) priceStr = formatPrice(item.price);
         }
-        
+
+    function formatPrice(value) {
+        if (!value) return 'VB';
+        return Number(value).toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
         var listingMode = item.listing_mode || 'offer';
-        var modeBadgeText = listingMode === 'search' ? 'Gesuch' : 'Verkauf';
+        var modeBadgeText = listingMode === 'search' ? 'Gesucht' : 'Verkauf';
         var isFavorited = userFavorites[item.id];
-        
+
+        // Placeholder für Gesuche ohne Bild
+        var imageHtml = '';
+        if (isSearchListing && !imageUrl) {
+            imageHtml = `
+                <div class="card-image-container" style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); display: flex; align-items: center; justify-content: center;">
+                    <div style="text-align: center; color: #92400E;">
+                        <div style="font-size: 1.8rem;">🔍</div>
+                        <div style="font-size: 0.65rem; font-weight: 600; margin-top: 0.2rem;">SUCHE</div>
+                    </div>
+                    <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
+                </div>`;
+        } else {
+            imageHtml = `
+                <div class="card-image-container">
+                    <img src="${imageUrl || 'https://via.placeholder.com/300x300?text=Room8'}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/300x300?text=No+Image';">
+                    <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
+                </div>`;
+        }
+
         return `
             <div class="item-card" onclick="navigateTo('listing-details.html?id=${item.id}')">
-                <div class="card-image-container">
-                    <img src="${imageUrl}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/300x300?text=No+Image';">
-                    <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
-                    <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" data-id="${item.id}" onclick="event.stopPropagation(); toggleFavorite('${item.id}', this);">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="${isFavorited ? '#ef4444' : 'none'}" stroke="${isFavorited ? '#ef4444' : 'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                    </button>
-                </div>
+                ${imageHtml}
                 <div class="card-content">
-                    <h3 class="card-title">${item.title}</h3>
-                    <div class="card-price">${priceStr}</div>
+                    <div class="card-header">
+                        <h3 class="card-title">${item.title}</h3>
+                        <span class="card-price">${priceStr}</span>
+                    </div>
                     <div class="card-location">
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                         ${item.city || 'Unbekannt'}
+                    </div>
+                    <div class="card-footer">
+                        <span>${item.category ? item.category.split(' ')[0] : ''}</span>
+                        <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" data-id="${item.id}" onclick="event.stopPropagation(); toggleFavorite('${item.id}', this);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${isFavorited ? '#ef4444' : 'none'}" stroke="${isFavorited ? '#ef4444' : '#9ca3af'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -262,19 +427,26 @@
     
     function applyFilters(list) {
         var filtered = list.slice();
-        
+
+        // Blockierte User ausfiltern
+        if (blockedUserIds.length > 0) {
+            filtered = filtered.filter(function(l) {
+                return blockedUserIds.indexOf(l.owner_id) === -1;
+            });
+        }
+
         if (currentFilter !== 'all') {
             filtered = filtered.filter(function(l) { return (l.listing_mode || 'offer') === currentFilter; });
         }
-        
+
         if (currentCategory !== 'all') {
             filtered = filtered.filter(function(l) { return l.category === currentCategory; });
         }
-        
+
         if (searchQuery) {
             var q = searchQuery.toLowerCase();
             filtered = filtered.filter(function(l) {
-                return (l.title && l.title.toLowerCase().includes(q)) || 
+                return (l.title && l.title.toLowerCase().includes(q)) ||
                        (l.city && l.city.toLowerCase().includes(q));
             });
         }
@@ -291,10 +463,10 @@
     }
     
     function loadItems() {
-        if(!supabase) return;
-        
-        supabase.from('listings')
-            .select('*, listing_photos(storage_path)') 
+        if(!sb) return;
+
+        sb.from('listings')
+            .select('id, title, city, price, price_range_min, price_range_max, listing_mode, category, created_at, owner_id, listing_photos(storage_path)')
             .eq('type', 'gegenstand')
             .eq('is_active', true)
             .order('created_at', { ascending: false })
@@ -326,6 +498,8 @@
 
     sortFilter.addEventListener('click', function(e) {
         if (e.target.tagName !== 'BUTTON') return;
+        sortFilter.querySelector('.active').classList.remove('active');
+        e.target.classList.add('active');
         currentSort = e.target.getAttribute('data-sort');
         renderListings(applyFilters(allItems));
     });

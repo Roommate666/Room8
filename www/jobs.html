@@ -2,21 +2,21 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jobs - Room8</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Jobs - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .app-container { --primary-color: #8B5CF6; --primary-dark: #7C3AED; background-color: #f3f4f6; padding-bottom: 80px; }
+        .app-container { --primary-color: #8B5CF6; --primary-dark: #7C3AED; background-color: #f3f4f6; padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px); }
         
-        .app-header { 
+        /* HEADER - Luftiger */
+        .app-header {
             display: grid;
             grid-template-columns: 40px 1fr 40px;
-            align-items: center; 
-            padding: 1rem 1.5rem;
+            align-items: center;
+            padding: calc(1.5rem + env(safe-area-inset-top)) 1.5rem 1.5rem 1.5rem;
             background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
-            color: white; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
-            margin-bottom: 1rem;
+            color: white; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.25);
+            margin-bottom: 1.25rem;
         }
         
         .back-btn {
@@ -24,9 +24,10 @@
             display: flex; align-items: center; justify-content: center;
         }
         
-        .app-header h1 { 
-            color: white; margin: 0; font-size: 1.3rem; font-weight: 700; 
+        .app-header h1 {
+            color: white; margin: 0; font-size: 1.5rem; font-weight: 800;
             text-align: center;
+            letter-spacing: -0.02em;
         }
         
         /* Example Banner */
@@ -275,7 +276,7 @@
 <body>
 <div class="app-container">
     <header class="app-header">
-        <a href="dashboard.html" class="back-btn" onclick="navigateTo('dashboard.html'); return false;">
+        <a href="javascript:history.back()" class="back-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
         <h1>Studentenjobs</h1>
@@ -349,7 +350,7 @@
                     <li>Übernahmemöglichkeit nach dem Studium</li>
                 </ul>
                 
-                <button class="showcase-apply-btn" onclick="alert('Dies ist ein Beispiel-Inserat. Kontaktieren Sie uns für eine Partnerschaft!')">
+                <button class="showcase-apply-btn" onclick="Room8UI.info('Dies ist ein Beispiel-Inserat. Kontaktieren Sie uns für eine Partnerschaft!')">
                     Jetzt bewerben
                 </button>
             </div>
@@ -382,7 +383,7 @@
         </div>
     </div>
     
-    <h3 class="section-title">Weitere Beispiel-Jobs</h3>
+    <h3 class="section-title" id="jobsSectionTitle">Weitere Beispiel-Jobs</h3>
     
     <main style="flex:1;">
         <div class="jobs-list" id="jobsContainer"></div>
@@ -391,12 +392,14 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
+<script src="notificationBell.js"></script>
 <script>
-    if (typeof SUPABASE_URL === 'undefined') { var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co'; var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw'; }
-    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     function navigateTo(url) {
         try { window.location.href = url; } catch(e) { console.warn("Nav Error:", e); }
@@ -454,7 +457,7 @@
         var logoContent = '';
         if (job.listing_photos && job.listing_photos.length > 0) {
             var path = job.listing_photos[0].storage_path;
-            var urlData = supabase.storage.from('listing-images').getPublicUrl(path);
+            var urlData = sb.storage.from('listing-images').getPublicUrl(path);
             if (urlData.data) logoContent = '<img src="' + urlData.data.publicUrl + '" class="job-logo" style="object-fit:cover;">';
         } else if (job.logo) {
             logoContent = '<div class="job-logo">' + job.logo + '</div>';
@@ -469,7 +472,7 @@
         var jobTypeLabels = { 'werkstudent': 'Werkstudent', 'minijob': 'Minijob', 'praktikum': 'Praktikum', 'teilzeit': 'Teilzeit', 'vollzeit': 'Vollzeit' };
         var jobType = jobTypeLabels[job.job_type] || job.job_type;
         var badge = job.is_demo ? '<span class="example-badge">BEISPIEL</span>' : '';
-        var clickAction = job.is_demo ? 'onclick="alert(\'Dies ist ein Beispiel-Inserat.\')"' : 'onclick="navigateTo(\'job-detail.html?id=' + job.id + '\')"';
+        var clickAction = job.is_demo ? 'onclick="Room8UI.info(\'Dies ist ein Beispiel-Inserat.\')"' : 'onclick="navigateTo(\'job-detail.html?id=' + job.id + '\')"';
 
         return '<div class="job-card" ' + clickAction + '>' +
                 badge +
@@ -505,22 +508,29 @@
     }
     
     function loadJobs() {
-        allJobs = sampleJobs.slice();
-        
         // Versuche echte Jobs zu laden
-        supabase.from('listings')
+        sb.from('listings')
             .select('*, listing_photos(storage_path)')
             .eq('type', 'job')
             .eq('is_active', true)
             .order('created_at', { ascending: false })
             .then(function(res) {
+                console.log("Jobs geladen:", res);
                 if (!res.error && res.data && res.data.length > 0) {
-                    // Echte Jobs gefunden - zeige sie zuerst
-                    allJobs = res.data.concat(sampleJobs);
+                    // Echte Jobs gefunden - NUR diese zeigen (Showcase bleibt für Chefs)
+                    allJobs = res.data;
+                    document.getElementById('jobsSectionTitle').textContent = 'Aktuelle Studentenjobs';
+                } else {
+                    // Keine echten Jobs - leere Liste zeigen
+                    allJobs = [];
+                    document.getElementById('jobsSectionTitle').textContent = 'Noch keine Jobs vorhanden';
+                    console.log("Keine echten Jobs gefunden");
                 }
                 applyFilters();
             })
-            .catch(function() {
+            .catch(function(err) {
+                console.error("Jobs laden fehlgeschlagen:", err);
+                allJobs = sampleJobs.slice();
                 applyFilters();
             });
     }
@@ -538,9 +548,8 @@
         applyFilters(); 
     });
     
-    // Sofort Beispiele anzeigen
-    allJobs = sampleJobs.slice();
-    renderJobs(allJobs);
+    // Sofort laden (keine Beispiele mehr unten)
+    allJobs = [];
     loadJobs();
 </script>
 </body>

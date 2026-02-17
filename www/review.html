@@ -2,8 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Bewertung abgeben - Room8</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">  <title>Bewertung abgeben - Room8</title>
   <link rel="stylesheet" href="style.css">
   <style>
     .review-page-container { min-height: 100vh; background-color: var(--background-color); padding-bottom: 2rem; }
@@ -61,10 +60,12 @@
     </div>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
   <script src="config.js"></script>
+  <script src="notificationHelpers.js"></script>
   <script>
-    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     var form = document.getElementById('reviewForm');
     var msgContainer = document.getElementById('form-message');
@@ -82,33 +83,39 @@
     }
 
     function loadContext() {
-      if (!listingId || !revieweeId) {
+      // revieweeId ist Pflicht, listingId ist optional
+      if (!revieweeId) {
         contextP.textContent = 'Fehlende Informationen für die Bewertung.';
         submitBtn.disabled = true;
         return;
       }
 
-      supabase
-        .from('listings')
-        .select('title')
-        .eq('id', listingId)
-        .single()
-        .then(function(listingResponse) {
-          if (listingResponse.error) throw listingResponse.error;
-          contextP.textContent = 'Transaktion für "' + listingResponse.data.title + '"';
+      // Erst Listing laden (falls vorhanden), dann Profil
+      var loadPromise;
 
-          return supabase
-            .from('profiles')
-            .select('username, avatar_url')
-            .eq('id', revieweeId)
-            .single();
-        })
+      if (listingId) {
+        loadPromise = sb
+          .from('listings')
+          .select('title')
+          .eq('id', listingId)
+          .single()
+          .then(function(listingResponse) {
+            if (listingResponse.error) throw listingResponse.error;
+            contextP.textContent = 'Transaktion für "' + listingResponse.data.title + '"';
+            return sb.from('profiles').select('username, avatar_url').eq('id', revieweeId).single();
+          });
+      } else {
+        contextP.textContent = 'Allgemeine Nutzerbewertung';
+        loadPromise = sb.from('profiles').select('username, avatar_url').eq('id', revieweeId).single();
+      }
+
+      loadPromise
         .then(function(sellerResponse) {
           if (sellerResponse.error) throw sellerResponse.error;
           var seller = sellerResponse.data;
           var sellerAvatar = seller.avatar_url || 'placeholder.png';
-          
-          sellerInfoContainer.innerHTML = 
+
+          sellerInfoContainer.innerHTML =
             '<div class="seller-info-box">' +
               '<img src="' + sellerAvatar + '" alt="' + seller.username + '" class="seller-avatar-review" onerror="this.src=\'placeholder.png\';">' +
               '<div>' +
@@ -129,7 +136,7 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Wird gesendet...';
 
-      supabase.auth.getUser()
+      sb.auth.getUser()
         .then(function(response) {
           var user = response.data.user;
           if (!user) {
@@ -145,37 +152,56 @@
           var rating = ratingInput.value;
           var comment = document.getElementById('comment').value.trim();
 
-          return supabase
+          // Duplikat-Check: Bei listingId prüfe listing_id, sonst prüfe ob bereits eine allgemeine Bewertung existiert
+          var duplicateQuery = sb
             .from('reviews')
             .select('id')
             .eq('reviewer_id', user.id)
-            .eq('reviewee_id', revieweeId)
-            .eq('listing_id', listingId)
-            .single()
+            .eq('reviewee_id', revieweeId);
+
+          if (listingId) {
+            duplicateQuery = duplicateQuery.eq('listing_id', listingId);
+          } else {
+            duplicateQuery = duplicateQuery.is('listing_id', null);
+          }
+
+          return duplicateQuery.single()
             .then(function(existingResponse) {
               if (existingResponse.data) {
-                throw new Error('Du hast diese Transaktion bereits bewertet.');
+                throw new Error(listingId ? 'Du hast diese Transaktion bereits bewertet.' : 'Du hast diesen Nutzer bereits bewertet.');
               }
-              
-              return supabase
+
+              return sb
                 .from('reviews')
                 .insert({
                   reviewer_id: user.id,
                   reviewee_id: revieweeId,
-                  listing_id: listingId,
+                  listing_id: listingId || null,
                   rating: parseInt(rating),
                   comment: comment || null
                 });
             });
         })
-        .then(function(result) {
+        .then(async function(result) {
           if (result && result.error) throw result.error;
-          
+
+          // Benachrichtigung senden
+          try {
+            var auth = await sb.auth.getUser();
+            var reviewer = auth.data.user;
+            if (reviewer && window.NotificationHelpers) {
+              var profileRes = await sb.from('profiles').select('username, full_name').eq('id', reviewer.id).single();
+              var reviewerName = profileRes.data ? (profileRes.data.full_name || profileRes.data.username || 'Jemand') : 'Jemand';
+              var ratingVal = parseInt(document.querySelector('input[name="rating"]:checked').value);
+              NotificationHelpers.notifyReview(revieweeId, reviewerName, ratingVal, listingId || null);
+            }
+          } catch(e) { console.log('Notification error:', e); }
+
           setFormMessage('Danke für deine Bewertung!', true);
           form.reset();
-          
-          setTimeout(function() { 
-            window.location.href = 'public-profile.html?id=' + revieweeId; 
+
+          setTimeout(function() {
+            window.location.href = 'public-profile.html?id=' + revieweeId;
           }, 1500);
         })
         .catch(function(err) {
@@ -189,6 +215,7 @@
   </script>
   
   <script src="navigation.js"></script>
+  <script src="notificationBell.js"></script>
   <script src="translations.js"></script>
 </body>
 </html>

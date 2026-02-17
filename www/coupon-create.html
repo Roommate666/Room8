@@ -2,8 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Coupon erstellen - Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Coupon erstellen - Admin</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .app-container { --primary-color: #111827; }
@@ -214,11 +213,12 @@
     </main>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="room8-ui.js"></script>
 <script>
-    if (typeof SUPABASE_URL === 'undefined') { var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co'; var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw'; }
-    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const ADMIN_EMAIL = 'albayrak_yusuf@icloud.com';
 
     function navigateTo(url) {
@@ -226,36 +226,44 @@
     }
 
     async function checkAdmin() {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user || user.email !== ADMIN_EMAIL) { 
-            alert("Kein Admin-Zugriff!");
-            navigateTo('dashboard.html'); 
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user || user.email !== ADMIN_EMAIL) {
+            Room8UI.error("Kein Admin-Zugriff!");
+            setTimeout(function() { navigateTo('dashboard.html'); }, 1500);
             return null;
         }
         return user;
     }
 
-    // Image Preview
+    // Image Preview mit Bildvorschau
     const fileInput = document.getElementById('imgInput');
     fileInput.addEventListener('change', (e) => {
         if(e.target.files[0]) {
-            document.getElementById('previewContainer').innerHTML = `
-                <div class="upload-preview">
-                    <span>✅</span> ${e.target.files[0].name}
-                </div>
-            `;
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('previewContainer').innerHTML = `
+                    <img src="${event.target.result}" style="max-width:200px; max-height:150px; border-radius:12px; margin-bottom:0.5rem; object-fit:cover;">
+                    <div style="color:#10B981; font-weight:600;">✅ ${file.name}</div>
+                `;
+            };
+            reader.readAsDataURL(file);
         }
     });
-    
-    // Logo Preview
+
+    // Logo Preview mit Bildvorschau
     const logoInput = document.getElementById('logoInput');
     logoInput.addEventListener('change', (e) => {
         if(e.target.files[0]) {
-            document.getElementById('logoPreview').innerHTML = `
-                <div class="upload-preview">
-                    <span>✅</span> ${e.target.files[0].name}
-                </div>
-            `;
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('logoPreview').innerHTML = `
+                    <img src="${event.target.result}" style="max-width:80px; max-height:80px; border-radius:12px; margin-bottom:0.5rem;">
+                    <div style="color:#10B981; font-weight:600;">✅ ${file.name}</div>
+                `;
+            };
+            reader.readAsDataURL(file);
         }
     });
 
@@ -269,17 +277,6 @@
         btn.textContent = 'Wird erstellt...';
 
         try {
-            // Partner-Daten sammeln
-            const partnerData = {
-                business_desc: document.getElementById('businessDesc').value || null,
-                zip_code: document.getElementById('zipCode').value || null,
-                address: document.getElementById('address').value || null,
-                website: document.getElementById('website').value || null,
-                instagram: document.getElementById('instagram').value || null,
-                opening_hours: document.getElementById('openingHours').value || null,
-                phone: document.getElementById('phone').value || null
-            };
-            
             const data = {
                 user_id: user.id,
                 business_name: document.getElementById('businessName').value,
@@ -290,33 +287,32 @@
                 valid_until: document.getElementById('validUntil').value || null,
                 description: document.getElementById('description').value,
                 city: document.getElementById('city').value,
-                partner_data: partnerData,
                 status: 'active'
             };
 
-            const { data: coupon, error } = await supabase.from('coupons').insert(data).select().single();
+            const { data: coupon, error } = await sb.from('coupons').insert(data).select().single();
             if (error) throw error;
 
             // Hauptbild hochladen
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
                 const path = `coupons/${coupon.id}_img.${file.name.split('.').pop()}`;
-                await supabase.storage.from('listing-images').upload(path, file);
-                await supabase.from('coupon_photos').insert({ coupon_id: coupon.id, storage_path: path, photo_type: 'cover' });
+                await sb.storage.from('listing-images').upload(path, file);
+                await sb.from('coupon_photos').insert({ coupon_id: coupon.id, storage_path: path, photo_type: 'cover' });
             }
             
             // Logo hochladen
             if (logoInput.files.length > 0) {
                 const file = logoInput.files[0];
                 const path = `coupons/${coupon.id}_logo.${file.name.split('.').pop()}`;
-                await supabase.storage.from('listing-images').upload(path, file);
-                await supabase.from('coupon_photos').insert({ coupon_id: coupon.id, storage_path: path, photo_type: 'logo' });
+                await sb.storage.from('listing-images').upload(path, file);
+                await sb.from('coupon_photos').insert({ coupon_id: coupon.id, storage_path: path, photo_type: 'logo' });
             }
 
-            alert("Coupon erfolgreich erstellt!");
-            navigateTo("admin.html");
+            Room8UI.success("Coupon erfolgreich erstellt!");
+            setTimeout(function() { navigateTo("admin.html"); }, 1500);
         } catch (err) {
-            alert("Fehler: " + err.message);
+            Room8UI.error("Fehler: " + err.message);
             btn.disabled = false;
             btn.textContent = 'Coupon Veröffentlichen';
         }
@@ -325,5 +321,6 @@
     // Admin Check beim Laden
     checkAdmin();
 </script>
+<script src="notificationBell.js"></script>
 </body>
 </html>

@@ -3,12 +3,20 @@ apply plugin: 'com.android.application'
 android {
     namespace "club.room8.app"
     compileSdk rootProject.ext.compileSdkVersion
+    signingConfigs {
+        release {
+            storeFile file('C:\\Dev\\keys\\room8-release.jks')
+            storePassword 'Albayrak8Para$'
+            keyAlias 'room8'
+            keyPassword 'Albayrak8Para$'
+        }
+    }
     defaultConfig {
         applicationId "club.room8.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 24
-        versionName "1.0"
+        versionCode 27
+        versionName "1.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -18,6 +26,7 @@ android {
     }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

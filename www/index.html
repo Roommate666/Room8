@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Willkommen bei Room8</title>
   <link rel="stylesheet" href="style.css">
   <style>
@@ -93,13 +93,29 @@
     /* --- RESPONSIVE REGELN FÜR DESKTOP --- */
     @media (min-width: 768px) {
       .welcome-actions {
-        flex-direction: row; /* Buttons auf dem Desktop nebeneinander */
+        flex-direction: row;
+        max-width: 500px;
       }
       .welcome-btn {
-        flex: 1; /* Beide Buttons nehmen gleich viel Platz ein */
+        flex: 1;
+        padding: 1.2rem 2rem;
+        font-size: 1.1rem;
       }
       .welcome-content h1 {
-        font-size: 3.5rem; /* Größere Schrift auf dem Desktop */
+        font-size: 3.5rem;
+      }
+      .welcome-content p {
+        max-width: 600px;
+        font-size: 1.2rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .welcome-content h1 {
+        font-size: 4rem;
+      }
+      .welcome-actions {
+        max-width: 550px;
       }
     }
   </style>
@@ -119,20 +135,15 @@
     </div>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
   <script src="config.js"></script>
   <script src="translations.js"></script>
   <script>
-    // FIX: Config Fallback direkt eingebaut, falls config.js nicht lädt
-    if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_ANON_KEY === 'undefined') {
-        var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co';
-        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw';
-    }
-
     // AUTO-REDIRECT: Wenn schon eingeloggt, direkt zum Dashboard
     if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-        var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        supabase.auth.getUser().then(({ data }) => {
+        // Supabase Client - Direkte Initialisierung
+        var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        sb.auth.getUser().then(({ data }) => {
             if (data && data.user) {
                 // User ist eingeloggt -> Weiterleitung zum Dashboard
                 window.location.replace('dashboard.html');

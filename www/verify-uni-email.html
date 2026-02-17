@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>E-Mail wird verifiziert - Room8</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">  <title>E-Mail wird verifiziert - Room8</title>
   <link rel="stylesheet" href="style.css">
   <style>
     .verify-container {
@@ -93,10 +92,11 @@
     </main>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
 <script>
-    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     var icon = document.getElementById('verifyIcon');
     var title = document.getElementById('verifyTitle');
     var message = document.getElementById('verifyMessage');
@@ -113,7 +113,7 @@
         }
 
         // Find profile with this token
-        var { data: profile, error: findError } = await supabase
+        var { data: profile, error: findError } = await sb
           .from('profiles')
           .select('id, uni_email, email')
           .eq('uni_email_verification_token', token)
@@ -124,7 +124,7 @@
         }
 
         // Verify the profile
-        var { error: updateError } = await supabase
+        var { error: updateError } = await sb
           .from('profiles')
           .update({
             is_verified: true,

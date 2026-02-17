@@ -24,7 +24,7 @@
     window.NotificationHelpers = {
 
         /**
-         * BASIS-FUNKTION: Erstelle eine Benachrichtigung
+         * BASIS-FUNKTION: Erstelle eine Benachrichtigung + sende Push
          */
         createNotification: async function(userId, type, title, message, link, referenceId) {
             var sb = getSupabase();
@@ -46,10 +46,45 @@
                     .single();
 
                 if (result.error) throw result.error;
+
+                // Push-Benachrichtigung senden (im Hintergrund, ohne auf Antwort zu warten)
+                this.sendPushNotification(userId, title, message, link).catch(function(e) {
+                    console.log('Push send failed (optional):', e);
+                });
+
                 return result.data;
             } catch (error) {
                 console.error('Error creating notification:', error);
                 return null;
+            }
+        },
+
+        /**
+         * Push-Benachrichtigung via Edge Function senden
+         */
+        sendPushNotification: async function(userId, title, body, url) {
+            var sb = getSupabase();
+            if (!sb) return { success: false };
+
+            try {
+                var result = await sb.functions.invoke('send-push', {
+                    body: {
+                        userId: userId,
+                        title: title,
+                        body: body,
+                        data: { url: url || 'notifications.html' }
+                    }
+                });
+
+                if (result.error) {
+                    console.log('Push invoke error:', result.error);
+                    return { success: false };
+                }
+
+                return result.data || { success: true };
+            } catch (error) {
+                console.log('Push error:', error);
+                return { success: false };
             }
         },
 
@@ -86,6 +121,17 @@
         // ==========================================
         // 2. FAVORITEN
         // ==========================================
+
+        notifyFavorite: async function(listingOwnerId, faverName, listingTitle, listingId) {
+            return await this.createNotification(
+                listingOwnerId,
+                'favorite',
+                '❤️ ' + faverName + ' hat dein Inserat favorisiert',
+                '"' + listingTitle + '" wurde zu den Favoriten hinzugefügt',
+                listingId ? 'listing-details.html?id=' + listingId : null,
+                listingId
+            );
+        },
 
         addFavorite: async function(favoritableType, favoritableId) {
             var sb = getSupabase();
@@ -277,11 +323,12 @@
                 var user = auth.data.user;
                 if (!user) throw new Error('Nicht eingeloggt');
 
+                // search_type und search_query sind NOT NULL
                 var insertData = {
                     user_id: user.id,
-                    search_type: searchType,
-                    search_query: searchQuery,
-                    city: city || null,
+                    search_type: searchType || 'wohnung',
+                    search_query: searchQuery || '',
+                    city: city || '',
                     min_price: minPrice || null,
                     max_price: maxPrice || null,
                     is_active: true

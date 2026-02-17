@@ -1,1 +1,7 @@
 .vercel
+node_modules/
+build-release.bat
+build-log.txt
+android/app/build/
+android/.gradle/
+.temp/

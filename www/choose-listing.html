@@ -2,8 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kategorie wählen - Room8</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Kategorie wählen - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
         /* Spezifische Styles für diese Seite */
@@ -181,41 +180,25 @@
 </div>
 
 <!-- Lade-Reihenfolge ist entscheidend! -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <!-- Erst config.js laden, da hier die URL und KEY definiert sind -->
 <script src="config.js"></script>
 <script src="navigation.js"></script>
+<script src="notificationBell.js"></script>
 
 <script>
-    // Sicherheits-Check: Sind die Variablen definiert?
-    if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_ANON_KEY === 'undefined') {
-        console.error("CRITICAL: Config variables missing! Using hardcoded fallback.");
-        // Fallback, falls config.js nicht lädt (Notlösung)
-        var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co';
-        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw';
-    }
-
-    var supabase;
-    
-    // Initialisierung mit Prüfung
-    if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } else if (typeof window.supabaseClient !== 'undefined') {
-        supabase = window.supabaseClient;
-    } else {
-        console.error("Supabase client could not be initialized.");
-    }
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     async function checkVerification() {
-        if (!supabase) return;
+        if (!sb) return;
 
         try {
             // Prüfen, ob ein User eingeloggt ist
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await sb.auth.getUser();
             if (!user) return;
 
             // Profilstatus abrufen
-            const { data: profile, error } = await supabase
+            const { data: profile, error } = await sb
                 .from('profiles')
                 .select('is_verified, is_student_verified')
                 .eq('id', user.id)
