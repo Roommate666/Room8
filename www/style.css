@@ -923,18 +923,15 @@ body.has-sidebar-nav .app-container {
 
 /* === RESPONSIVE === */
 
-/* Tablet: 768px - 1023px */
+/* Desktop: Gleiches mobiles Erlebnis, zentriert mit Schatten */
 @media (min-width: 768px) {
   .app-container {
-    max-width: 700px;
+    max-width: 500px;
     border-radius: var(--border-radius-lg);
     margin-top: var(--space-lg);
     margin-bottom: var(--space-lg);
     min-height: calc(100vh - var(--space-xl) * 2);
-  }
-
-  .listings-grid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
   }
 
   .sidebar-toggle {
@@ -963,54 +960,6 @@ body.has-sidebar-nav .app-container {
   .create-listing-btn {
     bottom: 40px;
     right: 40px;
-  }
-
-  .app-content {
-    padding: var(--space-lg) var(--space-xl);
-  }
-
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    font-size: 1rem;
-    padding: 14px 16px;
-  }
-}
-
-/* Desktop: 1024px+ */
-@media (min-width: 1024px) {
-  .app-container {
-    max-width: 960px;
-    border-radius: var(--border-radius-lg);
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
-  }
-
-  .listings-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--space-lg);
-  }
-
-  .app-header {
-    padding: var(--space-md) var(--space-xl);
-  }
-
-  .app-header h1 {
-    font-size: 1.4rem;
-  }
-
-  .app-content {
-    padding: var(--space-xl) var(--space-xxl, 2.5rem);
-  }
-}
-
-/* Large Desktop: 1440px+ */
-@media (min-width: 1440px) {
-  .app-container {
-    max-width: 1100px;
-  }
-
-  .listings-grid {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   }
 }
 
