@@ -275,9 +275,36 @@
     // --- LOGIC: EMAIL SUBMIT ---
     document.getElementById('emailForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = document.getElementById('uniEmail').value;
+        const email = document.getElementById('uniEmail').value.trim().toLowerCase();
         const btn = document.getElementById('btnEmail');
-        
+
+        // Block non-university email domains
+        const blockedDomains = [
+            'gmail.com', 'googlemail.com', 'yahoo.com', 'yahoo.de',
+            'hotmail.com', 'hotmail.de', 'outlook.com', 'outlook.de',
+            'live.com', 'live.de', 'aol.com', 'aol.de',
+            'icloud.com', 'me.com', 'mac.com',
+            'mail.com', 'email.de', 'gmx.de', 'gmx.net', 'gmx.at',
+            'web.de', 't-online.de', 'freenet.de', 'posteo.de',
+            'protonmail.com', 'proton.me', 'tutanota.com', 'tuta.io',
+            'zoho.com', 'yandex.com', 'mail.ru',
+            'msn.com', 'windowslive.com'
+        ];
+
+        const domain = email.split('@')[1];
+        if (blockedDomains.includes(domain)) {
+            Room8UI.error('Bitte verwende deine Uni-E-Mail-Adresse (z.B. @uni-koeln.de), keine private E-Mail.');
+            return;
+        }
+
+        // Also check: must contain typical uni patterns like .edu, uni-, .ac., stud., hs-
+        const uniPatterns = ['.edu', 'uni-', 'uni.', '.ac.', 'stud.', 'hs-', 'haw-', 'fh-', 'th-', 'tu-', 'fu-', 'hu-', 'rwth', 'kit.edu', 'lmu.de', 'tum.de', 'fau.de'];
+        const isUniDomain = uniPatterns.some(p => domain.includes(p));
+        if (!isUniDomain) {
+            Room8UI.error('Diese E-Mail sieht nicht nach einer Uni-Adresse aus. Nutze deine offizielle Hochschul-E-Mail.');
+            return;
+        }
+
         btn.disabled = true;
         btn.textContent = "Sende...";
 
