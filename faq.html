@@ -2,8 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title data-i18n="faq_page_title">Hilfe & FAQ - Room8</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title data-i18n="faq_page_title">Hilfe & FAQ - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
         /* Modern Header (Matching Dashboard) */
@@ -232,9 +231,9 @@
     
     <!-- Modern Header -->
     <div class="faq-header-bg">
-        <a href="settings.html" class="back-nav">
+        <a href="javascript:history.back()" class="back-nav">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="m15 18-6-6 6-6"/></svg>
-            <span data-i18n="general_back">Einstellungen</span>
+            <span data-i18n="general_back">Zurück</span>
         </a>
         <h1 data-i18n="faq_title">Hilfe & Support</h1>
         <p data-i18n="faq_subtitle">Wie können wir dir helfen?</p>
@@ -385,7 +384,7 @@
                 </div>
                 <div class="form-group">
                     <label for="contactEmail">Deine E-Mail</label>
-                    <input type="email" id="contactEmail" placeholder="max@uni.de">
+                    <input type="email" id="contactEmail" placeholder="max@email.de">
                 </div>
                 <div class="form-group">
                     <label for="contactCategory">Thema</label>
@@ -417,15 +416,20 @@
     <div id="app-footer-nav"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script src="translations.js"></script>
 <script>
+    // Supabase Client
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     // FAQ Toggle Logic
     function toggleFaq(header) {
         const item = header.parentElement;
         const isActive = item.classList.contains('active');
-        
+
         // Alle schließen
         document.querySelectorAll('.faq-item').forEach(el => {
             el.classList.remove('active');
@@ -444,11 +448,11 @@
         const query = e.target.value.toLowerCase().trim();
         const items = document.querySelectorAll('.faq-item');
         let hasResults = false;
-        
+
         items.forEach(item => {
             const question = item.querySelector('.faq-question').innerText.toLowerCase();
             const answer = item.querySelector('.faq-answer').innerText.toLowerCase();
-            
+
             if (question.includes(query) || answer.includes(query)) {
                 item.style.display = "block";
                 hasResults = true;
@@ -466,14 +470,15 @@
         document.getElementById('noResults').className = hasResults ? 'no-results' : 'no-results show';
     });
 
-    // Contact Form Logic
-    function submitContactForm() {
-        const name = document.getElementById('contactName').value;
-        const email = document.getElementById('contactEmail').value;
-        const msg = document.getElementById('contactMessage').value;
+    // Contact Form Logic - Mit Supabase Speicherung
+    async function submitContactForm() {
+        const name = document.getElementById('contactName').value.trim();
+        const email = document.getElementById('contactEmail').value.trim();
+        const category = document.getElementById('contactCategory').value;
+        const msg = document.getElementById('contactMessage').value.trim();
 
         if (!name || !email || !msg) {
-            alert("Bitte alle Felder ausfüllen.");
+            Room8UI.warning("Bitte alle Felder ausfüllen.");
             return;
         }
 
@@ -481,17 +486,45 @@
         btn.disabled = true;
         btn.innerText = "Sende...";
 
-        // Simulation
-        setTimeout(() => {
+        try {
+            // In Supabase speichern
+            const { error } = await sb
+                .from('contact_messages')
+                .insert({
+                    name: name,
+                    email: email,
+                    category: category || 'allgemein',
+                    message: msg,
+                    created_at: new Date().toISOString(),
+                    is_read: false
+                });
+
+            if (error) {
+                console.error('Supabase error:', error);
+                // Fallback: Mailto öffnen
+                const subject = encodeURIComponent('Room8 Support: ' + (category || 'Anfrage'));
+                const body = encodeURIComponent('Name: ' + name + '\nEmail: ' + email + '\n\nNachricht:\n' + msg);
+                window.location.href = 'mailto:help@room8.club?subject=' + subject + '&body=' + body;
+                return;
+            }
+
+            // Erfolg anzeigen
             document.getElementById('contactForm').style.display = 'none';
             document.getElementById('formSuccess').style.display = 'block';
-            
-            // Mailto Fallback
-            const subject = encodeURIComponent(`Room8 Support: ${document.getElementById('contactCategory').value}`);
-            const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${msg}`);
-            // window.location.href = `mailto:help@room8.club?subject=${subject}&body=${body}`;
-        }, 1000);
+            Room8UI.success("Nachricht gesendet!");
+
+        } catch (err) {
+            console.error('Error:', err);
+            btn.disabled = false;
+            btn.innerText = "Nachricht senden";
+
+            // Fallback: Mailto öffnen
+            const subject = encodeURIComponent('Room8 Support: ' + (category || 'Anfrage'));
+            const body = encodeURIComponent('Name: ' + name + '\nEmail: ' + email + '\n\nNachricht:\n' + msg);
+            window.location.href = 'mailto:help@room8.club?subject=' + subject + '&body=' + body;
+        }
     }
 </script>
+<script src="notificationBell.js"></script>
 </body>
 </html>

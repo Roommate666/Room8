@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Coupon einreichen - Room8 Partner</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+            min-height: 100vh;
+        }
+        .partner-container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 1rem;
+            padding-bottom: 3rem;
+        }
+        .partner-header {
+            text-align: center;
+            color: white;
+            padding: 2rem 1rem;
+        }
+        .partner-header h1 {
+            font-size: 1.8rem;
+            margin: 0 0 0.5rem 0;
+        }
+        .partner-header p {
+            opacity: 0.9;
+            margin: 0;
+        }
+        .partner-logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #374151;
+            margin: 1.5rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #E5E7EB;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .section-title:first-child { margin-top: 0; }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #374151;
+            margin-bottom: 0.4rem;
+        }
+        .form-group label .required {
+            color: #EF4444;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #F59E0B;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .form-group small {
+            display: block;
+            color: #6B7280;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+        }
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        @media (max-width: 500px) {
+            .row { grid-template-columns: 1fr; }
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(245, 158, 11, 0.4);
+        }
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        .success-message h2 {
+            color: #059669;
+            margin: 0 0 1rem 0;
+        }
+        .success-message p {
+            color: #6B7280;
+        }
+        .info-box {
+            background: #FFFBEB;
+            border: 1px solid #FCD34D;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: #92400E;
+        }
+        .discount-preview {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .discount-preview .value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #D97706;
+        }
+        .discount-preview .label {
+            font-size: 0.85rem;
+            color: #92400E;
+        }
+    </style>
+</head>
+<body>
+
+<div class="partner-container">
+    <div class="partner-header">
+        <div class="partner-logo">🎟️</div>
+        <h1>Studentenrabatt einreichen</h1>
+        <p>Biete exklusive Rabatte für tausende Studenten</p>
+    </div>
+
+    <div class="form-card">
+        <div class="info-box">
+            🎓 Dein Angebot wird nach Prüfung in der Room8 App für verifizierte Studenten sichtbar.
+        </div>
+
+        <form id="couponForm">
+            <!-- Unternehmen -->
+            <div class="section-title">🏪 Dein Geschäft</div>
+
+            <div class="form-group">
+                <label>Geschäftsname <span class="required">*</span></label>
+                <input type="text" id="businessName" required placeholder="z.B. Café Sonnenschein">
+            </div>
+
+            <div class="form-group">
+                <label>Kategorie <span class="required">*</span></label>
+                <select id="category" required>
+                    <option value="">Bitte wählen</option>
+                    <option value="food">🍕 Essen & Trinken</option>
+                    <option value="shopping">🛍️ Shopping & Mode</option>
+                    <option value="fitness">💪 Fitness & Sport</option>
+                    <option value="beauty">💅 Beauty & Wellness</option>
+                    <option value="culture">🎭 Kultur & Freizeit</option>
+                    <option value="education">📚 Bildung & Kurse</option>
+                    <option value="tech">💻 Technik & Software</option>
+                    <option value="travel">✈️ Reisen & Mobilität</option>
+                    <option value="services">🔧 Dienstleistungen</option>
+                    <option value="other">📦 Sonstiges</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Kontakt E-Mail <span class="required">*</span></label>
+                <input type="email" id="contactEmail" required placeholder="kontakt@beispiel.de">
+                <small>Für Rückfragen und die Bestätigung</small>
+            </div>
+
+            <!-- Rabatt Details -->
+            <div class="section-title">🏷️ Rabatt Details</div>
+
+            <div class="form-group">
+                <label>Titel des Angebots <span class="required">*</span></label>
+                <input type="text" id="title" required placeholder="z.B. 15% auf alle Getränke">
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>Rabatt-Art <span class="required">*</span></label>
+                    <select id="discountType" required>
+                        <option value="">Bitte wählen</option>
+                        <option value="percent">Prozent-Rabatt (%)</option>
+                        <option value="fixed">Fester Betrag (€)</option>
+                        <option value="free">Gratis-Artikel</option>
+                        <option value="special">Sonder-Angebot</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Rabatt-Wert</label>
+                    <input type="text" id="discountValue" placeholder="z.B. 15 oder 5€">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Beschreibung <span class="required">*</span></label>
+                <textarea id="description" required placeholder="Beschreibe das Angebot genauer..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Bedingungen</label>
+                <textarea id="terms" placeholder="z.B. Gültig ab 10€ Einkaufswert, Nicht mit anderen Rabatten kombinierbar..."></textarea>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>Gültig ab</label>
+                    <input type="date" id="validFrom">
+                </div>
+                <div class="form-group">
+                    <label>Gültig bis</label>
+                    <input type="date" id="validUntil">
+                    <small>Leer = Unbegrenzt</small>
+                </div>
+            </div>
+
+            <!-- Standort -->
+            <div class="section-title">📍 Standort & Kontakt</div>
+
+            <div class="form-group">
+                <label>Adresse <span class="required">*</span></label>
+                <input type="text" id="address" required placeholder="Musterstraße 123">
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>Stadt <span class="required">*</span></label>
+                    <input type="text" id="city" required placeholder="z.B. Berlin">
+                </div>
+                <div class="form-group">
+                    <label>PLZ</label>
+                    <input type="text" id="zip" placeholder="12345">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Website</label>
+                <input type="url" id="website" placeholder="https://www.beispiel.de">
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>Telefon</label>
+                    <input type="tel" id="phone" placeholder="+49 123 456789">
+                </div>
+                <div class="form-group">
+                    <label>Öffnungszeiten</label>
+                    <input type="text" id="openingHours" placeholder="Mo-Fr: 9-18 Uhr">
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">🎟️ Coupon einreichen</button>
+        </form>
+
+        <div class="success-message" id="successMessage">
+            <div class="success-icon">🎉</div>
+            <h2>Vielen Dank!</h2>
+            <p>Dein Coupon wurde erfolgreich eingereicht und wird in Kürze geprüft. Du erhältst eine Bestätigung per E-Mail sobald er live ist.</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="config.js"></script>
+<script>
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    document.getElementById('couponForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Wird gesendet...';
+
+        try {
+            const data = {
+                submission_type: 'coupon',
+                status: 'pending',
+                business_name: document.getElementById('businessName').value,
+                category: document.getElementById('category').value,
+                contact_email: document.getElementById('contactEmail').value,
+                title: document.getElementById('title').value,
+                discount_type: document.getElementById('discountType').value,
+                discount_value: document.getElementById('discountValue').value || null,
+                description: document.getElementById('description').value,
+                terms: document.getElementById('terms').value || null,
+                valid_from: document.getElementById('validFrom').value || null,
+                valid_until: document.getElementById('validUntil').value || null,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                zip: document.getElementById('zip').value || null,
+                website: document.getElementById('website').value || null,
+                phone: document.getElementById('phone').value || null,
+                opening_hours: document.getElementById('openingHours').value || null,
+                submitted_at: new Date().toISOString()
+            };
+
+            const { error } = await sb.from('partner_submissions').insert(data);
+            if (error) throw error;
+
+            document.getElementById('couponForm').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
+
+        } catch (err) {
+            console.error(err);
+            Room8UI.error('Einreichung fehlgeschlagen. Bitte versuche es erneut.');
+            btn.disabled = false;
+            btn.textContent = '🎟️ Coupon einreichen';
+        }
+    });
+</script>
+</body>
+</html>

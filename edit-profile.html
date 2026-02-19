@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Profil bearbeiten - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
@@ -25,7 +25,7 @@
 
 <div class="app-container">
     <header class="app-header">
-        <a href="profile.html" class="back-arrow">
+        <a href="javascript:history.back()" class="back-arrow">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
         <h1 data-i18n="edit_profile_title">Profil bearbeiten</h1>
@@ -36,7 +36,7 @@
             <!-- Avatar Upload -->
             <div class="avatar-upload-container">
                 <label for="avatarFile">
-                    <img src="placeholder.png" alt="Dein Avatar" id="avatar-preview" class="avatar-preview" onerror="this.src='https://via.placeholder.com/150'">
+                    <img src="placeholder.png" alt="Dein Avatar" id="avatar-preview" class="avatar-preview" onerror="this.src='no-image.svg'">
                     <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-light);" data-i18n="edit_profile_change_photo">Klicke, um Bild zu ändern</p>
                 </label>
                 <input type="file" id="avatarFile" accept="image/*">
@@ -144,21 +144,13 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
 <script src="navigation.js"></script>
 <script src="translations.js"></script>
 <script>
-    // 1. Config Fallback
-    if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_ANON_KEY === 'undefined') {
-        var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co';
-        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw';
-    }
-
-    var supabase;
-    if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Helper: Navigation
     function navigateTo(url) {
@@ -193,23 +185,41 @@
     }
 
     async function loadProfileData() {
-        if (!supabase) return;
-
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-            navigateTo('login.html');
+        if (!sb) {
+            console.error('Supabase nicht initialisiert');
             return;
         }
-        currentUser = user;
 
-        const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', currentUser.id)
-            .single();
+        try {
+            var authResult = await sb.auth.getUser();
+            var user = authResult.data ? authResult.data.user : null;
 
-        if (error) {
-            console.error('Fehler beim Laden:', error);
+            if (!user) {
+                navigateTo('login.html');
+                return;
+            }
+            currentUser = user;
+
+            var profileResult = await sb
+                .from('profiles')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+
+            var profile = profileResult.data;
+            var error = profileResult.error;
+
+            if (error && error.code !== 'PGRST116') {
+                console.error('Fehler beim Laden:', error);
+                return;
+            }
+
+            if (!profile) {
+                console.log('Kein Profil gefunden - User kann jetzt eines erstellen');
+                return;
+            }
+        } catch (err) {
+            console.error('Fehler:', err);
             return;
         }
 
@@ -289,15 +299,15 @@
             
             if (file) {
                 var filePath = currentUser.id + '/' + Date.now() + '_' + file.name;
-                var { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
+                var { error: uploadError } = await sb.storage.from('avatars').upload(filePath, file);
                 
                 if (uploadError) throw uploadError;
                 
-                var { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+                var { data } = sb.storage.from('avatars').getPublicUrl(filePath);
                 updates.avatar_url = data.publicUrl;
             }
             
-            var { error } = await supabase
+            var { error } = await sb
                 .from('profiles')
                 .update(updates)
                 .eq('id', currentUser.id);
@@ -314,7 +324,7 @@
         } catch (error) {
             console.error(error);
             msgContainer.style.color = 'red';
-            msgContainer.textContent = 'Fehler: ' + error.message;
+            msgContainer.textContent = 'Profil konnte nicht gespeichert werden. Bitte versuche es erneut.';
             submitBtn.disabled = false;
             submitBtn.textContent = 'Änderungen speichern';
         }
@@ -322,5 +332,6 @@
 
     loadProfileData();
 </script>
+<script src="notificationBell.js"></script>
 </body>
 </html>

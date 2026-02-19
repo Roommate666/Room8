@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Profil - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
@@ -75,6 +75,33 @@
         .badge-verified { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
         .badge-student { background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; }
 
+        /* RATING DISPLAY */
+        .rating-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            background: #FFFBEB;
+            border-radius: 12px;
+            border: 1px solid #FDE68A;
+        }
+        .rating-stars {
+            color: #F59E0B;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+        }
+        .rating-score {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #92400E;
+        }
+        .rating-count {
+            font-size: 0.85rem;
+            color: #B45309;
+        }
+
         /* ACTION BUTTONS */
         .profile-actions {
             display: flex;
@@ -83,35 +110,74 @@
         }
 
         .btn-message {
-            background: var(--primary-gradient);
-            color: white;
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
+            color: white !important;
             border: none;
-            padding: 0.7rem 2rem;
+            padding: 0.85rem 2.5rem;
             border-radius: 99px;
             font-weight: 600;
+            font-size: 1rem;
             cursor: pointer;
             text-decoration: none;
-            display: inline-flex;
+            display: inline-flex !important;
             align-items: center;
             gap: 0.5rem;
-            box-shadow: var(--shadow-glow);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
             transition: transform 0.1s;
+            margin-bottom: 1rem;
         }
         .btn-message:active { transform: scale(0.95); }
 
         .btn-report {
-            background: white;
-            color: var(--text-muted);
-            border: 1px solid var(--border-color);
-            padding: 0.7rem;
-            border-radius: 50%;
+            background: #FEF3C7;
+            color: #D97706;
+            border: 1px solid #FCD34D;
+            padding: 0.7rem 1rem;
+            border-radius: 12px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.2s;
+            gap: 0.4rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
         }
-        .btn-report:hover { background: #FEF2F2; color: #EF4444; border-color: #EF4444; }
+        .btn-report:hover { background: #FDE68A; transform: scale(1.02); }
+
+        .btn-block {
+            background: #FEE2E2;
+            color: #DC2626;
+            border: 1px solid #FCA5A5;
+            padding: 0.7rem 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .btn-block:hover { background: #FECACA; transform: scale(1.02); }
+
+        .btn-review {
+            background: #DBEAFE;
+            color: #1D4ED8;
+            border: 1px solid #93C5FD;
+            padding: 0.7rem 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .btn-review:hover { background: #BFDBFE; transform: scale(1.02); }
 
         /* TABS */
         .profile-tabs {
@@ -251,17 +317,33 @@
                 </h2>
                 <p class="profile-meta" id="profileMeta">Mitglied seit ...</p>
 
+                <!-- Durchschnittsbewertung -->
+                <div class="rating-display" id="ratingDisplay" style="display: none;">
+                    <span class="rating-stars" id="ratingStars"></span>
+                    <span class="rating-score" id="ratingScore"></span>
+                    <span class="rating-count" id="ratingCount"></span>
+                </div>
+
                 <div class="badge-container" id="badges">
                     <!-- Badges werden hier eingefügt -->
                 </div>
 
-                <div class="profile-actions">
+                <div class="profile-actions" style="margin-bottom: 0.5rem;">
                     <button class="btn-message" id="messageBtn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                        Nachricht
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        Nachricht schicken
                     </button>
-                    <button class="btn-report" id="reportBtn" title="Nutzer melden">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                </div>
+                <!-- Melden/Blockieren/Bewerten zentriert -->
+                <div style="display: flex; justify-content: center; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap;">
+                    <button class="btn-review" id="reviewBtn">
+                        ⭐ Bewerten
+                    </button>
+                    <button class="btn-report" id="reportBtn">
+                        ⚠️ Melden
+                    </button>
+                    <button class="btn-block" id="blockBtn">
+                        🚫 Blockieren
                     </button>
                 </div>
             </div>
@@ -313,25 +395,18 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
+<script src="room8-utils.js"></script>
 <script>
-    // Config Fallback
-    if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_ANON_KEY === 'undefined') {
-        var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co';
-        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw';
-    }
-
-    var supabase;
-    if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // URL Params
     const urlParams = new URLSearchParams(window.location.search);
     const userId = urlParams.get('id');
-    
+
     var currentUser = null;
 
     // Helper: Navigation
@@ -339,10 +414,16 @@
         try { window.location.href = url; } catch(e) { console.warn(e); }
     }
 
+    // XSS Protection
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
     function switchTab(tabName) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-        
+
         // Finde den Button, der geklickt wurde (etwas hacky aber funktional)
         const buttons = document.querySelectorAll('.tab-btn');
         if (tabName === 'info') buttons[0].classList.add('active');
@@ -353,28 +434,54 @@
     }
 
     async function initProfile() {
-        if (!userId || !supabase) {
+        if (!userId || !sb) {
             document.getElementById('loading').innerHTML = "Nutzer nicht gefunden.";
             return;
         }
 
         // Auth Check
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await sb.auth.getUser();
         currentUser = user;
 
         // Eigene Profilseite?
         if (currentUser && currentUser.id === userId) {
             document.getElementById('messageBtn').style.display = 'none';
             document.getElementById('reportBtn').style.display = 'none';
+            document.getElementById('blockBtn').style.display = 'none';
+            document.getElementById('reviewBtn').style.display = 'none';
         }
 
         loadUserProfile();
         loadUserListings();
         loadUserReviews();
+        checkBlockStatus();
+    }
+
+    async function checkBlockStatus() {
+        if (!currentUser || currentUser.id === userId) return;
+
+        // Prüfen ob User bereits blockiert ist
+        var { data } = await sb
+            .from('blocked_users')
+            .select('id')
+            .eq('blocker_id', currentUser.id)
+            .eq('blocked_id', userId)
+            .single();
+
+        if (data) {
+            // User ist bereits blockiert - Button zu "Entsperren" ändern
+            var blockBtn = document.getElementById('blockBtn');
+            blockBtn.textContent = '✓ Entsperren';
+            blockBtn.style.background = '#D1FAE5';
+            blockBtn.style.color = '#059669';
+            blockBtn.style.borderColor = '#6EE7B7';
+            blockBtn.dataset.blocked = 'true';
+            blockBtn.dataset.blockId = data.id;
+        }
     }
 
     async function loadUserProfile() {
-        const { data: profile, error } = await supabase
+        const { data: profile, error } = await sb
             .from('profiles')
             .select('*')
             .eq('id', userId)
@@ -425,7 +532,7 @@
         const grid = document.getElementById('detailsGrid');
         
         function addInfo(label, val) {
-            if(val) grid.innerHTML += `<div class="info-item"><span class="info-label">${label}</span><span class="info-value">${val}</span></div>`;
+            if(val) grid.innerHTML += `<div class="info-item"><span class="info-label">${escapeHtml(label)}</span><span class="info-value">${escapeHtml(val)}</span></div>`;
         }
 
         addInfo('Stadt', profile.city);
@@ -440,7 +547,7 @@
             const tagsContainer = document.getElementById('interestsTags');
             const interests = profile.interests.split(',').map(i => i.trim());
             interests.forEach(i => {
-                if(i) tagsContainer.innerHTML += `<span class="tag">${i}</span>`;
+                if(i) tagsContainer.innerHTML += `<span class="tag">${escapeHtml(i)}</span>`;
             });
             document.getElementById('interestsSection').style.display = 'block';
         }
@@ -455,21 +562,103 @@
         };
 
         document.getElementById('reportBtn').onclick = () => {
-            if (!currentUser) return alert("Bitte einloggen.");
-            const reason = prompt("Nutzer melden wegen:");
-            if (reason) {
-                supabase.from('reports').insert({
+            if (!currentUser) return Room8UI.warning("Bitte einloggen.");
+            if (currentUser.id === userId) {
+                return Room8UI.warning("Du kannst dich nicht selbst melden.");
+            }
+            // Vordefinierte Melde-Gründe
+            const reasons = [
+                "Fake-Profil / Identitätsbetrug",
+                "Belästigung / Beleidigung",
+                "Spam / Werbung",
+                "Unangemessene Inhalte",
+                "Betrugsversuch",
+                "Sonstiges"
+            ];
+            const reasonList = reasons.map((r, i) => `${i + 1}. ${r}`).join('\n');
+            const choice = prompt(`Warum möchtest du diesen Nutzer melden?\n\n${reasonList}\n\nGib die Nummer ein (1-6):`);
+            if (choice) {
+                const idx = parseInt(choice) - 1;
+                const reason = (idx >= 0 && idx < reasons.length) ? reasons[idx] : choice;
+                sb.from('reports').insert({
                     reporter_id: currentUser.id,
                     reported_type: 'user',
                     reported_id: userId,
-                    reason: reason
-                }).then(() => alert("Gemeldet. Danke!"));
+                    reason: reason,
+                    status: 'open'
+                }).then(() => Room8UI.success("Gemeldet. Danke für deine Hilfe!"));
             }
+        };
+        document.getElementById('blockBtn').onclick = async () => {
+            if (!currentUser) return Room8UI.warning('Bitte einloggen');
+            if (currentUser.id === userId) {
+                return Room8UI.warning("Du kannst dich nicht selbst blockieren.");
+            }
+
+            var blockBtn = document.getElementById('blockBtn');
+            var isBlocked = blockBtn.dataset.blocked === 'true';
+
+            if (isBlocked) {
+                // ENTSPERREN
+                if (confirm('Möchtest du diesen Nutzer entsperren?')) {
+                    var { error } = await sb.from('blocked_users')
+                        .delete()
+                        .eq('blocker_id', currentUser.id)
+                        .eq('blocked_id', userId);
+
+                    if (error) {
+                        Room8UI.error('Entsperren fehlgeschlagen. Bitte versuche es erneut.');
+                        return;
+                    }
+
+                    Room8UI.success('Nutzer wurde entsperrt.');
+                    blockBtn.textContent = '🚫 Blockieren';
+                    blockBtn.style.background = '#FEE2E2';
+                    blockBtn.style.color = '#DC2626';
+                    blockBtn.style.borderColor = '#FCA5A5';
+                    blockBtn.dataset.blocked = 'false';
+                }
+            } else {
+                // BLOCKIEREN
+                if (confirm('Möchtest du diesen Nutzer wirklich blockieren? Du wirst keine Nachrichten oder Inserate von diesem Nutzer mehr sehen.')) {
+                    var { error } = await sb.from('blocked_users').insert({
+                        blocker_id: currentUser.id,
+                        blocked_id: userId
+                    });
+
+                    if (error) {
+                        console.error('Block error:', error);
+                        if (error.code === '23505') {
+                            Room8UI.warning('Nutzer ist bereits blockiert.');
+                        } else {
+                            Room8UI.error('Blockieren fehlgeschlagen. Bitte versuche es erneut.');
+                        }
+                        return;
+                    }
+
+                    Room8UI.success('Nutzer wurde blockiert.');
+                    blockBtn.textContent = '✓ Entsperren';
+                    blockBtn.style.background = '#D1FAE5';
+                    blockBtn.style.color = '#059669';
+                    blockBtn.style.borderColor = '#6EE7B7';
+                    blockBtn.dataset.blocked = 'true';
+                }
+            }
+        };
+
+        document.getElementById('reviewBtn').onclick = () => {
+            if (!currentUser) {
+                return Room8UI.warning("Bitte einloggen um Bewertungen abzugeben.");
+            }
+            if (currentUser.id === userId) {
+                return Room8UI.warning("Du kannst dich nicht selbst bewerten.");
+            }
+            navigateTo(`review.html?revieweeId=${userId}`);
         };
     }
 
     async function loadUserListings() {
-        const { data: listings } = await supabase
+        const { data: listings } = await sb
             .from('listings')
             .select('id, title, price, monthly_rent, type, listing_photos(storage_path)')
             .eq('owner_id', userId)
@@ -486,9 +675,9 @@
 
         container.innerHTML = '';
         listings.forEach(l => {
-            let imgUrl = 'https://via.placeholder.com/150?text=Room8';
+            let imgUrl = 'no-image.svg';
             if (l.listing_photos && l.listing_photos.length > 0) {
-                const { data } = supabase.storage.from('listing-images').getPublicUrl(l.listing_photos[0].storage_path);
+                const { data } = sb.storage.from('listing-images').getPublicUrl(l.listing_photos[0].storage_path);
                 if (data) imgUrl = data.publicUrl;
             }
 
@@ -511,7 +700,7 @@
     }
 
     async function loadUserReviews() {
-        const { data: reviews } = await supabase
+        const { data: reviews } = await sb
             .from('reviews')
             .select('rating, comment, created_at, reviewer:reviewer_id(username)')
             .eq('reviewee_id', userId)
@@ -519,6 +708,23 @@
 
         document.getElementById('tabReviewsLabel').textContent = `Bewertungen (${reviews ? reviews.length : 0})`;
         const container = document.getElementById('reviewsContainer');
+
+        // Durchschnittsbewertung berechnen und anzeigen
+        if (reviews && reviews.length > 0) {
+            const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+            const avgRating = totalRating / reviews.length;
+            const fullStars = Math.floor(avgRating);
+            const hasHalfStar = avgRating - fullStars >= 0.5;
+
+            let starsHtml = '★'.repeat(fullStars);
+            if (hasHalfStar && fullStars < 5) starsHtml += '½';
+            starsHtml += '☆'.repeat(5 - fullStars - (hasHalfStar ? 1 : 0));
+
+            document.getElementById('ratingStars').textContent = starsHtml;
+            document.getElementById('ratingScore').textContent = avgRating.toFixed(1);
+            document.getElementById('ratingCount').textContent = `(${reviews.length} Bewertung${reviews.length > 1 ? 'en' : ''})`;
+            document.getElementById('ratingDisplay').style.display = 'flex';
+        }
 
         if (!reviews || reviews.length === 0) {
             container.innerHTML = '<div class="empty-state">Noch keine Bewertungen</div>';
@@ -534,11 +740,11 @@
             container.innerHTML += `
                 <div class="review-item">
                     <div class="review-header">
-                        <span class="review-author">${reviewerName}</span>
+                        <span class="review-author">${escapeHtml(reviewerName)}</span>
                         <span class="review-date">${date}</span>
                     </div>
                     <div class="review-stars">${stars}</div>
-                    <p class="review-text">${r.comment || ''}</p>
+                    <p class="review-text">${escapeHtml(r.comment || '')}</p>
                 </div>
             `;
         });
@@ -547,5 +753,6 @@
     // Init
     if(supabase) initProfile();
 </script>
+<script src="notificationBell.js"></script>
 </body>
 </html>

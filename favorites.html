@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Meine Favoriten - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
@@ -49,12 +49,17 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 1rem;
-            padding-bottom: 2rem;
+            padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px));
         }
 
         @media (min-width: 600px) {
             .favorites-grid {
                 grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (min-width: 1100px) {
+            .favorites-grid {
+                grid-template-columns: repeat(3, 1fr);
             }
         }
 
@@ -172,7 +177,7 @@
 
 <div class="app-container">
     <header class="app-header">
-        <a href="settings.html" class="back-arrow">
+        <a href="javascript:history.back()" class="back-arrow">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
         <h1>Meine Favoriten</h1>
@@ -203,23 +208,14 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
+<script src="notificationBell.js"></script>
 <script>
-    // 1. Config Fallback
-    if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_ANON_KEY === 'undefined') {
-        var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co';
-        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw';
-    }
-
-    // 2. Init
-    var supabase;
-    if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } else if (typeof window.supabaseClient !== 'undefined') {
-        supabase = window.supabaseClient;
-    }
+    // Init
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Variablen
     var currentType = 'wohnung';
@@ -254,7 +250,7 @@
         try {
             // User Check
             if (!currentUser) {
-                const { data: { user } } = await supabase.auth.getUser();
+                const { data: { user } } = await sb.auth.getUser();
                 if (!user) {
                     navigateTo('login.html');
                     return;
@@ -267,7 +263,7 @@
             empty.style.display = 'none';
 
             // Favoriten laden & Listings joinen
-            const { data: favorites, error } = await supabase
+            const { data: favorites, error } = await sb
                 .from('favorites')
                 .select(`
                     id,
@@ -296,7 +292,7 @@
             let photosMap = {};
             
             if (listingIds.length > 0) {
-                const { data: photos } = await supabase
+                const { data: photos } = await sb
                     .from('listing_photos')
                     .select('listing_id, storage_path')
                     .in('listing_id', listingIds)
@@ -328,10 +324,10 @@
     }
 
     function renderFavoriteCard(favId, listing, photoPath) {
-        let imageUrl = 'https://via.placeholder.com/300x200?text=Kein+Bild';
+        let imageUrl = 'no-image.svg';
         
         if (photoPath) {
-            const { data } = supabase.storage.from('listing-images').getPublicUrl(photoPath);
+            const { data } = sb.storage.from('listing-images').getPublicUrl(photoPath);
             if (data) imageUrl = data.publicUrl;
         }
 
@@ -347,7 +343,7 @@
         return `
             <div class="fav-card" onclick="navigateTo('listing-details.html?id=${listing.id}')">
                 <div class="fav-image-container">
-                    <img src="${imageUrl}" class="fav-image" alt="${listing.title}" onerror="this.src='https://via.placeholder.com/300x200?text=Error'">
+                    <img src="${imageUrl}" class="fav-image" alt="${listing.title}" onerror="this.src='no-image.svg'">
                     <button class="delete-fav-btn" data-id="${favId}">
                         🗑️
                     </button>
@@ -385,13 +381,13 @@
         }
 
         try {
-            const { error } = await supabase.from('favorites').delete().eq('id', id);
+            const { error } = await sb.from('favorites').delete().eq('id', id);
             if (error) throw error;
             
             // Neu laden
             loadFavorites();
         } catch (err) {
-            alert('Fehler: ' + err.message);
+            Room8UI.error('Favorit konnte nicht entfernt werden. Bitte versuche es erneut.');
             loadFavorites(); // Zurücksetzen bei Fehler
         }
     }

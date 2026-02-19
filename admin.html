@@ -2,8 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin Panel - Room8</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Admin Panel - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
         /* Admin-Spezifische Styles */
@@ -179,6 +178,32 @@
         .loading-state, .empty-state {
             text-align: center; padding: 3rem; color: #6b7280;
         }
+
+        /* Filter Buttons */
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            color: #6b7280;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover { background: #f9fafb; }
+        .filter-btn.active { background: #111827; color: white; border-color: #111827; }
+
+        /* Status Badge */
+        .status-badge {
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-badge.status-pending { background: #FEF3C7; color: #92400E; }
+        .status-badge.status-approved { background: #D1FAE5; color: #065F46; }
+        .status-badge.status-rejected { background: #FEE2E2; color: #991B1B; }
     </style>
 </head>
 <body>
@@ -191,7 +216,10 @@
             <h1>🛡️ Admin Control</h1>
             <p>Angemeldet als: <span id="adminEmail">...</span></p>
         </div>
-        <a href="dashboard.html" class="back-link">← Zur App</a>
+        <div style="display:flex; gap:1rem; align-items:center;">
+            <a href="admin-debug.html" class="back-link" style="font-size:0.85rem;">🔧 Debug</a>
+            <a href="dashboard.html" class="back-link">← Zur App</a>
+        </div>
     </header>
 
     <!-- Stats -->
@@ -212,6 +240,10 @@
             <div class="stat-val" id="statListings">-</div>
             <div class="stat-lbl">🏠 Aktive Inserate</div>
         </div>
+        <div class="stat-box">
+            <div class="stat-val" id="statMessages">-</div>
+            <div class="stat-lbl">📬 Neue Nachrichten</div>
+        </div>
     </div>
 
     <!-- Quick Create -->
@@ -224,6 +256,14 @@
             <span class="qc-icon">🎟️</span>
             <span class="qc-text">Coupon erstellen</span>
         </a>
+        <a href="partner-job.html" class="quick-card" target="_blank">
+            <span class="qc-icon">📄</span>
+            <span class="qc-text">Partner Job-Form</span>
+        </a>
+        <a href="partner-coupon.html" class="quick-card" target="_blank">
+            <span class="qc-icon">📄</span>
+            <span class="qc-text">Partner Coupon-Form</span>
+        </a>
     </div>
 
     <!-- Navigation Tabs -->
@@ -234,11 +274,26 @@
         <button class="admin-tab" onclick="switchTab('verifications')">
             🎓 Verifizierungen <span class="tab-badge" id="badgeVerifications" style="display:none">0</span>
         </button>
+        <button class="admin-tab" onclick="switchTab('submissions')">
+            📬 Einreichungen <span class="tab-badge" id="badgeSubmissions" style="display:none">0</span>
+        </button>
         <button class="admin-tab" onclick="switchTab('users')">
             👥 Nutzer
         </button>
         <button class="admin-tab" onclick="switchTab('listings')">
-            🏠 Inserate
+            🏠 Wohnungen
+        </button>
+        <button class="admin-tab" onclick="switchTab('marktplatz')">
+            📦 Marktplatz
+        </button>
+        <button class="admin-tab" onclick="switchTab('jobs')">
+            💼 Jobs
+        </button>
+        <button class="admin-tab" onclick="switchTab('coupons')">
+            🎟️ Coupons
+        </button>
+        <button class="admin-tab" onclick="switchTab('messages')">
+            📬 Kontakt <span class="tab-badge" id="badgeMessages" style="display:none">0</span>
         </button>
     </div>
 
@@ -251,8 +306,26 @@
 
     <!-- 2. VERIFICATIONS SECTION -->
     <div id="tab-verifications" class="admin-section">
+        <div style="margin-bottom:1rem; display:flex; gap:0.5rem; flex-wrap: wrap;">
+            <button class="filter-btn active" onclick="filterVerifications('pending', this)">⏳ Offen</button>
+            <button class="filter-btn" onclick="filterVerifications('approved', this)">✅ Genehmigt</button>
+            <button class="filter-btn" onclick="filterVerifications('rejected', this)">❌ Abgelehnt</button>
+            <button class="filter-btn" onclick="filterVerifications('all', this)">Alle</button>
+        </div>
         <div id="verificationsList" class="data-list">
             <div class="loading-state">Lade Verifizierungen...</div>
+        </div>
+    </div>
+
+    <!-- 2.5 PARTNER SUBMISSIONS SECTION -->
+    <div id="tab-submissions" class="admin-section">
+        <div style="margin-bottom:1rem; display:flex; gap:0.5rem;">
+            <button class="filter-btn active" onclick="filterSubmissions('all', this)">Alle</button>
+            <button class="filter-btn" onclick="filterSubmissions('job', this)">💼 Jobs</button>
+            <button class="filter-btn" onclick="filterSubmissions('coupon', this)">🎟️ Coupons</button>
+        </div>
+        <div id="submissionsList" class="data-list">
+            <div class="loading-state">Lade Einreichungen...</div>
         </div>
     </div>
 
@@ -266,23 +339,87 @@
         </div>
     </div>
 
-    <!-- 4. LISTINGS SECTION -->
+    <!-- 4. LISTINGS SECTION (Wohnungen) -->
     <div id="tab-listings" class="admin-section">
+        <!-- Anleitung Reinigungsservice -->
+        <div style="background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%); color: white; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <span style="font-size: 1.5rem;">🧹</span>
+                <strong style="font-size: 1rem;">Reinigungsservice - So geht's</strong>
+            </div>
+            <ol style="margin: 0; padding-left: 1.25rem; font-size: 0.85rem; line-height: 1.6;">
+                <li>Student ruft an/schreibt mit <strong>Referenz-Nr</strong> (z.B. R8-4F2A3B)</li>
+                <li>Du gibst die Nr hier in die Suche ein → findest Wohnung mit Adresse</li>
+                <li>Student zeigt <strong>Studentenausweis</strong> beim Termin = <strong>15% Rabatt</strong></li>
+            </ol>
+        </div>
+        <div style="margin-bottom:1rem;">
+            <input type="text" id="listingSearch" placeholder="🔍 Suche nach Referenz-Nr (z.B. R8-4F2A3B), Titel oder Stadt..." style="padding:0.75rem; width:100%; border-radius:8px; border:1px solid #e5e7eb;">
+        </div>
         <div id="listingsList" class="data-list">
-            <div class="loading-state">Lade Inserate...</div>
+            <div class="loading-state">Lade Wohnungen...</div>
+        </div>
+    </div>
+
+    <!-- 5. MARKTPLATZ SECTION -->
+    <div id="tab-marktplatz" class="admin-section">
+        <div style="margin-bottom:1rem;">
+            <input type="text" id="marktplatzSearch" placeholder="🔍 Suche nach Titel oder Stadt..." style="padding:0.75rem; width:100%; border-radius:8px; border:1px solid #e5e7eb;">
+        </div>
+        <div id="marktplatzList" class="data-list">
+            <div class="loading-state">Lade Marktplatz...</div>
+        </div>
+    </div>
+
+    <!-- 6. JOBS SECTION -->
+    <div id="tab-jobs" class="admin-section">
+        <div style="margin-bottom:1rem;">
+            <a href="job-create.html" class="btn-mini btn-green" style="padding:0.75rem 1.5rem;">+ Neuer Job</a>
+        </div>
+        <div id="jobsList" class="data-list">
+            <div class="loading-state">Lade Jobs...</div>
+        </div>
+    </div>
+
+    <!-- 6. COUPONS SECTION -->
+    <div id="tab-coupons" class="admin-section">
+        <div style="margin-bottom:1rem;">
+            <a href="coupon-create.html" class="btn-mini btn-green" style="padding:0.75rem 1.5rem;">+ Neuer Coupon</a>
+        </div>
+        <div id="couponsList" class="data-list">
+            <div class="loading-state">Lade Coupons...</div>
+        </div>
+    </div>
+
+    <!-- 7. CONTACT MESSAGES SECTION -->
+    <div id="tab-messages" class="admin-section">
+        <div style="margin-bottom:1rem; display:flex; gap:0.5rem; flex-wrap: wrap;">
+            <button class="filter-btn active" onclick="filterMessages('unread', this)">📬 Ungelesen</button>
+            <button class="filter-btn" onclick="filterMessages('read', this)">✅ Gelesen</button>
+            <button class="filter-btn" onclick="filterMessages('all', this)">Alle</button>
+        </div>
+        <div id="messagesList" class="data-list">
+            <div class="loading-state">Lade Nachrichten...</div>
         </div>
     </div>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="room8-ui.js"></script>
+<script src="room8-utils.js"></script>
 <script>
-    // 1. Config Fallback
-    if (typeof SUPABASE_URL === 'undefined') { var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co'; var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw'; }
-    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const ADMIN_EMAIL = 'albayrak_yusuf@icloud.com';
+
+    // Helper: XSS Protection
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
 
     // Helper: Navigation
     function navigateTo(url) {
@@ -291,11 +428,11 @@
 
     // 2. Auth Check
     async function checkAdmin() {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await sb.auth.getUser();
         
         if (!user || user.email !== ADMIN_EMAIL) {
-            alert("Zugriff verweigert!");
-            navigateTo('dashboard.html');
+            Room8UI.error("Zugriff verweigert!");
+            setTimeout(function() { navigateTo('dashboard.html'); }, 1500);
             return;
         }
         document.getElementById('adminEmail').textContent = user.email;
@@ -307,21 +444,29 @@
         loadStats();
         loadReports();
         loadVerifications();
-        loadUsers(); // Lädt erstmal die neuesten 20
-        loadListings(); // Lädt erstmal die neuesten 20
+        loadSubmissions();
+        loadUsers();
+        loadListings();
+        loadMarktplatz();
+        loadAdminJobs();
+        loadAdminCoupons();
+        loadContactMessages();
     }
 
     async function loadStats() {
         // Simple counts via Separate Queries
-        const pending = await supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending');
-        const reports = await supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'open');
-        const users = await supabase.from('profiles').select('id', { count: 'exact', head: true });
-        const listings = await supabase.from('listings').select('id', { count: 'exact', head: true }).eq('is_active', true);
+        const pending = await sb.from('profiles').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending');
+        const reports = await sb.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'open');
+        const users = await sb.from('profiles').select('id', { count: 'exact', head: true });
+        const listings = await sb.from('listings').select('id', { count: 'exact', head: true }).eq('is_active', true);
+        const submissions = await sb.from('partner_submissions').select('id', { count: 'exact', head: true }).eq('status', 'pending');
+        const messages = await sb.from('contact_messages').select('id', { count: 'exact', head: true }).eq('is_read', false);
 
         document.getElementById('statPending').textContent = pending.count || 0;
         document.getElementById('statReports').textContent = reports.count || 0;
         document.getElementById('statUsers').textContent = users.count || 0;
         document.getElementById('statListings').textContent = listings.count || 0;
+        document.getElementById('statMessages').textContent = messages.count || 0;
 
         // Badges
         if (pending.count > 0) {
@@ -334,6 +479,16 @@
             b.textContent = reports.count;
             b.style.display = 'inline-block';
         }
+        if (submissions.count > 0) {
+            const b = document.getElementById('badgeSubmissions');
+            b.textContent = submissions.count;
+            b.style.display = 'inline-block';
+        }
+        if (messages.count > 0) {
+            const b = document.getElementById('badgeMessages');
+            b.textContent = messages.count;
+            b.style.display = 'inline-block';
+        }
     }
 
     // --- REPORTS ---
@@ -342,7 +497,7 @@
         // Fetch Reports inkl. Reporter Details
         // Hinweis: Wir versuchen auch reported_user und listing zu joinen, falls Foreign Keys passen.
         // Wenn nicht, laden wir IDs und zeigen Links.
-        const { data: reports, error } = await supabase
+        const { data: reports, error } = await sb
             .from('reports')
             .select(`
                 *,
@@ -363,8 +518,9 @@
 
         container.innerHTML = reports.map(r => {
             const reporterName = r.reporter ? (r.reporter.full_name || r.reporter.email) : 'Unbekannt';
+            const reporterEmail = r.reporter ? r.reporter.email : null;
             const date = new Date(r.created_at).toLocaleDateString('de-DE');
-            
+
             // Dynamische Links basierend auf Typ
             let linksHtml = '';
             if (r.reported_type === 'listing' || r.reported_type === 'wohnung' || r.reported_type === 'gegenstand') {
@@ -373,25 +529,29 @@
                 linksHtml += `<a href="public-profile.html?id=${r.reported_id}" target="_blank" class="btn-mini btn-blue">👤 Profil ansehen</a>`;
             }
 
+            // E-Mail Link zum Melder
+            let emailLink = reporterEmail ? `<a href="mailto:${escapeHtml(reporterEmail)}?subject=Room8%20Meldung%20-%20Rückfrage" class="btn-mini" style="background:#10B981;color:white;">✉️ Melder kontaktieren</a>` : '';
+
             return `
                 <div class="admin-card">
                     <div class="card-header">
-                        <div class="card-title">🚨 Meldung: ${r.reason}</div>
+                        <div class="card-title">🚨 ${escapeHtml(r.reason)}</div>
                         <span class="status-badge status-pending">Offen</span>
                     </div>
                     <div class="info-grid">
-                        <div class="info-item"><label>Melder</label><span>${reporterName}</span></div>
+                        <div class="info-item"><label>Melder</label><span>${escapeHtml(reporterName)}</span></div>
+                        <div class="info-item"><label>Melder E-Mail</label><span>${escapeHtml(reporterEmail) || '-'}</span></div>
                         <div class="info-item"><label>Datum</label><span>${date}</span></div>
-                        <div class="info-item"><label>Typ</label><span>${r.reported_type}</span></div>
-                        <div class="info-item"><label>Betroffene ID</label><span>${r.reported_id}</span></div>
+                        <div class="info-item"><label>Typ</label><span>${escapeHtml(r.reported_type)}</span></div>
                     </div>
-                    <p style="background:#FFFBEB; padding:0.5rem; border-radius:4px; color:#92400E;">
-                        <strong>Beschreibung:</strong> ${r.description || 'Keine Details'}
+                    <p style="background:#FFFBEB; padding:0.5rem; border-radius:4px; color:#92400E; margin: 0.5rem 0;">
+                        <strong>Grund:</strong> ${escapeHtml(r.reason)}
                     </p>
                     <div class="action-bar">
                         ${linksHtml}
+                        ${emailLink}
                         <button class="btn-mini btn-green" onclick="resolveReport('${r.id}')">✅ Erledigt</button>
-                        <button class="btn-mini btn-red" onclick="banTarget('${r.reported_id}', '${r.reported_type}')">🚫 User/Owner Sperren</button>
+                        <button class="btn-mini btn-red" onclick="banTarget('${r.reported_id}', '${r.reported_type}')">🚫 Sperren</button>
                     </div>
                 </div>
             `;
@@ -399,47 +559,322 @@
     }
 
     // --- VERIFICATIONS ---
+    var currentVerificationFilter = 'pending';
+    var allVerificationProfiles = [];
+
     async function loadVerifications() {
         const container = document.getElementById('verificationsList');
-        const { data: profiles, error } = await supabase
+
+        // Lade alle Profile die irgendeine Art von Verifizierung haben
+        const { data: profiles, error } = await sb
             .from('profiles')
             .select('*')
-            .eq('verification_status', 'pending');
+            .order('created_at', { ascending: false });
 
-        if (profiles.length === 0) {
-            container.innerHTML = '<div class="empty-state">Keine offenen Verifizierungen.</div>';
+        if (error) {
+            container.innerHTML = `<p style="color:red">Fehler: ${error.message}</p>`;
             return;
         }
 
-        container.innerHTML = profiles.map(p => {
-            const proof = p.verification_method === 'uni-email' 
-                ? `Uni-Mail: <strong>${p.uni_email}</strong>` 
-                : `<button class="btn-mini btn-blue" onclick="viewDoc('${p.verification_document_url}')">📄 Dokument öffnen</button>`;
+        // Filter nur Profile die Verifizierungsdaten haben
+        allVerificationProfiles = (profiles || []).filter(p =>
+            p.verification_status ||
+            p.enrollment_certificate_url ||
+            p.verification_document_url ||
+            p.uni_email ||
+            p.edu_email ||
+            p.student_id_image_url
+        );
+
+        renderVerifications();
+    }
+
+    function renderVerifications() {
+        const container = document.getElementById('verificationsList');
+        let filtered = allVerificationProfiles;
+
+        if (currentVerificationFilter !== 'all') {
+            filtered = allVerificationProfiles.filter(p => (p.verification_status || 'none') === currentVerificationFilter);
+        }
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="empty-state">Keine Verifizierungen mit diesem Status.</div>';
+            return;
+        }
+
+        container.innerHTML = filtered.map(p => {
+            // Prüfen welche Art von Beweis vorhanden ist
+            let proofHtml = 'Kein Beweis angegeben';
+
+            if (p.verification_method === 'uni-email' && p.uni_email) {
+                proofHtml = `<span style="color:#059669;">✅ Uni-Mail: <strong>${escapeHtml(p.uni_email)}</strong></span>`;
+            } else if (p.enrollment_certificate_url) {
+                proofHtml = `<button class="btn-mini btn-blue" onclick="viewDoc('${p.enrollment_certificate_url}')">📄 Immatrikulationsbescheinigung öffnen</button>`;
+            } else if (p.verification_document_url) {
+                proofHtml = `<button class="btn-mini btn-blue" onclick="viewDoc('${p.verification_document_url}')">📄 Hochgeladenes Dokument öffnen</button>`;
+            } else if (p.edu_email) {
+                proofHtml = `<span style="color:#059669;">✅ Edu-Mail: <strong>${escapeHtml(p.edu_email)}</strong></span>`;
+            } else if (p.student_id_image_url) {
+                proofHtml = `<button class="btn-mini btn-blue" onclick="viewDoc('${p.student_id_image_url}')">🎓 Studentenausweis öffnen</button>`;
+            } else if (p.avatar_url) {
+                // Fallback: Vielleicht wurde das Dokument als Avatar hochgeladen?
+                proofHtml = `<button class="btn-mini btn-gray" onclick="viewDoc('${p.avatar_url}')">📷 Profilbild ansehen</button>`;
+            }
+
+            // Status Badge
+            const status = p.verification_status || 'none';
+            let statusBadge = '';
+            if (status === 'pending') statusBadge = '<span class="status-badge status-pending">⏳ Offen</span>';
+            else if (status === 'approved') statusBadge = '<span class="status-badge status-approved">✅ Genehmigt</span>';
+            else if (status === 'rejected') statusBadge = '<span class="status-badge status-rejected">❌ Abgelehnt</span>';
+            else statusBadge = '<span class="status-badge" style="background:#F3F4F6;color:#6B7280;">Kein Status</span>';
+
+            // Action Buttons je nach Status
+            let actionButtons = `<a href="mailto:${escapeHtml(p.email)}?subject=Room8%20Verifizierung" class="btn-mini" style="background:#10B981;color:white;">✉️ E-Mail</a>`;
+
+            if (status !== 'approved') {
+                actionButtons += `<button class="btn-mini btn-green" onclick="verifyUser('${p.id}', true)" style="padding: 0.75rem 1.5rem;">✅ GENEHMIGEN</button>`;
+            }
+            if (status !== 'rejected') {
+                actionButtons += `<button class="btn-mini btn-red" onclick="verifyUser('${p.id}', false)" style="padding: 0.75rem 1.5rem;">❌ ABLEHNEN</button>`;
+            }
+            if (status === 'approved' || status === 'rejected') {
+                actionButtons += `<button class="btn-mini btn-yellow" onclick="resetVerification('${p.id}')">↩️ Zurücksetzen</button>`;
+            }
 
             return `
                 <div class="admin-card">
                     <div class="card-header">
-                        <div class="card-title">🎓 ${p.full_name || p.username || p.email}</div>
+                        <div class="card-title">🎓 ${escapeHtml(p.full_name || p.username || 'Unbekannt')}</div>
+                        ${statusBadge}
                     </div>
                     <div class="info-grid">
-                        <div class="info-item"><label>Email</label><span>${p.email}</span></div>
-                        <div class="info-item"><label>Beweis</label><span>${proof}</span></div>
+                        <div class="info-item"><label>E-Mail</label><span>${escapeHtml(p.email)}</span></div>
+                        <div class="info-item"><label>Universität</label><span>${escapeHtml(p.university) || '-'}</span></div>
+                        <div class="info-item"><label>Methode</label><span>${escapeHtml(p.verification_method) || 'Dokument'}</span></div>
+                        <div class="info-item"><label>ID</label><span style="font-size:0.7rem">${p.id.substring(0,8)}...</span></div>
+                    </div>
+                    <div style="margin: 1rem 0; padding: 0.75rem; background: #F3F4F6; border-radius: 8px;">
+                        <label style="font-size: 0.75rem; color: #6b7280; display: block; margin-bottom: 0.5rem;">BEWEIS / DOKUMENT</label>
+                        ${proofHtml}
                     </div>
                     <div class="action-bar">
-                        <button class="btn-mini btn-green" onclick="verifyUser('${p.id}', true)">Genehmigen</button>
-                        <button class="btn-mini btn-red" onclick="verifyUser('${p.id}', false)">Ablehnen</button>
+                        ${actionButtons}
                     </div>
                 </div>
             `;
         }).join('');
     }
 
+    window.filterVerifications = (status, btn) => {
+        currentVerificationFilter = status;
+        document.querySelectorAll('#tab-verifications .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderVerifications();
+    };
+
+    window.resetVerification = async (id) => {
+        if (!confirm("Verifizierungsstatus zurücksetzen auf 'pending'?")) return;
+        await sb.from('profiles').update({
+            verification_status: 'pending',
+            is_verified: false,
+            is_student_verified: false
+        }).eq('id', id);
+        Room8UI.success("Status zurückgesetzt.");
+        loadVerifications();
+        loadStats();
+    };
+
+    // --- PARTNER SUBMISSIONS ---
+    var currentSubmissionFilter = 'all';
+    var allSubmissions = [];
+
+    async function loadSubmissions() {
+        const container = document.getElementById('submissionsList');
+        const { data: submissions, error } = await sb
+            .from('partner_submissions')
+            .select('*')
+            .eq('status', 'pending')
+            .order('submitted_at', { ascending: false });
+
+        if (error) {
+            container.innerHTML = `<p style="color:red">Fehler: ${error.message}</p>`;
+            return;
+        }
+
+        allSubmissions = submissions || [];
+        renderSubmissions();
+    }
+
+    function renderSubmissions() {
+        const container = document.getElementById('submissionsList');
+        let filtered = allSubmissions;
+
+        if (currentSubmissionFilter !== 'all') {
+            filtered = allSubmissions.filter(s => s.submission_type === currentSubmissionFilter);
+        }
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="empty-state">Keine offenen Einreichungen.</div>';
+            return;
+        }
+
+        container.innerHTML = filtered.map(s => {
+            const isJob = s.submission_type === 'job';
+            const icon = isJob ? '💼' : '🎟️';
+            const date = new Date(s.submitted_at).toLocaleDateString('de-DE');
+
+            // Details basierend auf Typ
+            let detailsHtml = '';
+            if (isJob) {
+                detailsHtml = `
+                    <div class="info-item"><label>Firma</label><span>${escapeHtml(s.company_name)}</span></div>
+                    <div class="info-item"><label>Typ</label><span>${escapeHtml(s.job_type)}</span></div>
+                    <div class="info-item"><label>Standort</label><span>${escapeHtml(s.location || s.city)}</span></div>
+                    <div class="info-item"><label>Gehalt</label><span>${escapeHtml(s.salary) || '-'}</span></div>
+                `;
+            } else {
+                detailsHtml = `
+                    <div class="info-item"><label>Geschäft</label><span>${escapeHtml(s.business_name)}</span></div>
+                    <div class="info-item"><label>Kategorie</label><span>${escapeHtml(s.category)}</span></div>
+                    <div class="info-item"><label>Stadt</label><span>${escapeHtml(s.city)}</span></div>
+                    <div class="info-item"><label>Rabatt</label><span>${escapeHtml(s.discount_value)}</span></div>
+                `;
+            }
+
+            return `
+                <div class="admin-card">
+                    <div class="card-header">
+                        <div class="card-title">${icon} ${escapeHtml(s.title)}</div>
+                        <span class="status-badge status-pending">${isJob ? 'Job' : 'Coupon'}</span>
+                    </div>
+                    <div class="info-grid">
+                        ${detailsHtml}
+                        <div class="info-item"><label>Kontakt</label><span>${escapeHtml(s.contact_email)}</span></div>
+                        <div class="info-item"><label>Eingereicht</label><span>${date}</span></div>
+                    </div>
+                    <div style="background:#F9FAFB; padding:1rem; border-radius:8px; margin:0.5rem 0;">
+                        <label style="font-size:0.75rem; color:#6b7280; display:block; margin-bottom:0.5rem;">BESCHREIBUNG</label>
+                        <p style="margin:0; color:#374151; font-size:0.9rem;">${escapeHtml(s.description) || 'Keine Beschreibung'}</p>
+                    </div>
+                    <div class="action-bar">
+                        <a href="mailto:${escapeHtml(s.contact_email)}?subject=Room8%20Partner%20-%20Ihre%20Einreichung" class="btn-mini" style="background:#10B981;color:white;">✉️ Kontaktieren</a>
+                        <button class="btn-mini btn-green" onclick="approveSubmission('${s.id}', '${s.submission_type}')" style="padding: 0.75rem 1.5rem;">✅ ÜBERNEHMEN</button>
+                        <button class="btn-mini btn-red" onclick="rejectSubmission('${s.id}')" style="padding: 0.75rem 1.5rem;">❌ ABLEHNEN</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    window.filterSubmissions = (type, btn) => {
+        currentSubmissionFilter = type;
+        document.querySelectorAll('#tab-submissions .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderSubmissions();
+    };
+
+    window.approveSubmission = async (id, type) => {
+        if (!confirm("Einreichung übernehmen und veröffentlichen?")) return;
+
+        const submission = allSubmissions.find(s => s.id === id);
+        if (!submission) return;
+
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+
+            if (type === 'job') {
+                // Job in listings erstellen
+                const jobData = {
+                    owner_id: user.id,
+                    type: 'job',
+                    title: submission.title || 'Unbenannter Job',
+                    description: submission.description || '',
+                    city: submission.city || submission.location || 'Remote',
+                    location: submission.location || submission.city || 'Remote',
+                    company_name: submission.company_name || 'Unbekannt',
+                    company_website: submission.company_website || null,
+                    company_size: submission.company_size || null,
+                    job_type: submission.job_type || 'werkstudent',
+                    contract_duration: submission.contract_duration || null,
+                    salary_amount: submission.salary ? parseFloat(submission.salary) : null,
+                    min_hours_per_week: submission.hours ? parseInt(submission.hours) : null,
+                    requirements: submission.requirements ? submission.requirements.split('\n').filter(r => r.trim()) : [],
+                    benefits: submission.benefits ? submission.benefits.split('\n').filter(b => b.trim()) : [],
+                    application_email: submission.application_email || submission.contact_email,
+                    application_url: submission.application_url || null,
+                    is_active: true
+                };
+
+                const { error: jobError } = await sb.from('listings').insert(jobData);
+                if (jobError) throw jobError;
+
+            } else if (type === 'coupon') {
+                // Coupon erstellen
+                const couponData = {
+                    user_id: user.id,
+                    business_name: submission.business_name,
+                    title: submission.title,
+                    category: submission.category,
+                    discount_value: submission.discount_value,
+                    discount_code: (submission.business_name || 'ROOM8').substring(0, 6).toUpperCase() + Math.floor(Math.random() * 100),
+                    valid_until: submission.valid_until,
+                    description: submission.description,
+                    city: submission.city,
+                    partner_data: {
+                        address: submission.address,
+                        zip_code: submission.zip,
+                        website: submission.website,
+                        phone: submission.phone,
+                        opening_hours: submission.opening_hours
+                    },
+                    status: 'active'
+                };
+
+                const { error: couponError } = await sb.from('coupons').insert(couponData);
+                if (couponError) throw couponError;
+            }
+
+            // Submission als approved markieren
+            await sb.from('partner_submissions').update({
+                status: 'approved',
+                reviewed_at: new Date().toISOString(),
+                reviewed_by: user.id
+            }).eq('id', id);
+
+            Room8UI.success("Erfolgreich übernommen!");
+            loadSubmissions();
+            loadStats();
+
+        } catch (err) {
+            Room8UI.error("Fehler: " + err.message);
+        }
+    };
+
+    window.rejectSubmission = async (id) => {
+        const reason = prompt("Grund für die Ablehnung (optional):");
+        if (reason === null) return; // Cancelled
+
+        const { data: { user } } = await sb.auth.getUser();
+
+        await sb.from('partner_submissions').update({
+            status: 'rejected',
+            reviewed_at: new Date().toISOString(),
+            reviewed_by: user.id,
+            admin_notes: reason || null
+        }).eq('id', id);
+
+        Room8UI.success("Einreichung abgelehnt.");
+        loadSubmissions();
+        loadStats();
+    };
+
     // --- USERS ---
     async function loadUsers() {
         const container = document.getElementById('usersList');
         const search = document.getElementById('userSearch').value.toLowerCase();
         
-        let query = supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(20);
+        let query = sb.from('profiles').select('*').order('created_at', { ascending: false }).limit(20);
         
         const { data: users } = await query;
         
@@ -451,20 +886,24 @@
 
         container.innerHTML = filtered.map(u => {
             const status = u.is_banned ? '🚫 Gesperrt' : (u.is_verified ? '✅ Verifiziert' : 'Standard');
+            const created = new Date(u.created_at).toLocaleDateString('de-DE');
             return `
                 <div class="admin-card">
                     <div class="card-header">
-                        <div class="card-title">👤 ${u.email}</div>
+                        <div class="card-title">👤 ${escapeHtml(u.full_name || u.username || 'Kein Name')}</div>
                         <span>${status}</span>
                     </div>
                     <div class="info-grid">
-                        <div class="info-item"><label>Name</label><span>${u.full_name || '-'}</span></div>
-                        <div class="info-item"><label>ID</label><span>${u.id}</span></div>
+                        <div class="info-item"><label>E-Mail</label><span>${escapeHtml(u.email)}</span></div>
+                        <div class="info-item"><label>Stadt</label><span>${escapeHtml(u.city) || '-'}</span></div>
+                        <div class="info-item"><label>Registriert</label><span>${created}</span></div>
+                        <div class="info-item"><label>ID</label><span style="font-size:0.7rem">${u.id.substring(0,8)}...</span></div>
                     </div>
                     <div class="action-bar">
-                        <a href="public-profile.html?id=${u.id}" target="_blank" class="btn-mini btn-blue">Profil</a>
-                        ${u.is_banned 
-                            ? `<button class="btn-mini btn-green" onclick="unbanUser('${u.id}')">Entsperren</button>` 
+                        <a href="mailto:${escapeHtml(u.email)}?subject=Room8%20-%20Nachricht%20vom%20Admin" class="btn-mini" style="background:#10B981;color:white;">✉️ E-Mail</a>
+                        <a href="public-profile.html?id=${u.id}" target="_blank" class="btn-mini btn-blue">👤 Profil</a>
+                        ${u.is_banned
+                            ? `<button class="btn-mini btn-green" onclick="unbanUser('${u.id}')">Entsperren</button>`
                             : `<button class="btn-mini btn-red" onclick="banUser('${u.id}')">Sperren</button>`
                         }
                     </div>
@@ -475,47 +914,220 @@
 
     document.getElementById('userSearch').addEventListener('input', loadUsers);
 
-    // --- LISTINGS ---
+    // --- LISTINGS (nur Wohnungen & Gegenstände, keine Jobs) ---
+    var allListingsCache = [];
+
     async function loadListings() {
         const container = document.getElementById('listingsList');
-        const { data: listings } = await supabase.from('listings').select('*').order('created_at', { ascending: false }).limit(20);
+        const searchInput = document.getElementById('listingSearch');
+        const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
 
-        container.innerHTML = listings.map(l => `
-            <div class="admin-card">
-                <div class="card-header">
-                    <div class="card-title">${l.title}</div>
-                    <span>${l.is_active ? '✅ Aktiv' : '⏸️ Inaktiv'}</span>
+        // Nur einmal laden, dann cachen
+        if (allListingsCache.length === 0 || !searchTerm) {
+            const { data: listings, error } = await sb
+                .from('listings')
+                .select('*')
+                .eq('type', 'wohnung')
+                .order('created_at', { ascending: false })
+                .limit(100);
+
+            if (error || !listings || listings.length === 0) {
+                container.innerHTML = '<div class="empty-state">Keine Wohnungen/Gegenstände vorhanden.</div>';
+                return;
+            }
+            allListingsCache = listings;
+        }
+
+        // Filtern nach Suchbegriff
+        let filtered = allListingsCache;
+        if (searchTerm) {
+            filtered = allListingsCache.filter(l => {
+                const refCode = 'r8-' + l.id.substring(0, 6).toLowerCase();
+                const title = (l.title || '').toLowerCase();
+                const city = (l.city || '').toLowerCase();
+                const address = (l.address_line || '').toLowerCase();
+
+                // Suche nach Ref-Code (mit oder ohne R8- Präfix)
+                const searchClean = searchTerm.replace('r8-', '');
+
+                return refCode.includes(searchTerm) ||
+                       l.id.toLowerCase().includes(searchClean) ||
+                       title.includes(searchTerm) ||
+                       city.includes(searchTerm) ||
+                       address.includes(searchTerm);
+            });
+        }
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="empty-state">Keine Ergebnisse für "' + escapeHtml(searchTerm) + '"</div>';
+            return;
+        }
+
+        container.innerHTML = filtered.map(l => {
+            const typeLabel = '🏠 Wohnung';
+            const refCode = 'R8-' + l.id.substring(0, 6).toUpperCase();
+            return `
+                <div class="admin-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">${typeLabel} ${escapeHtml(l.title)}</div>
+                            <div class="card-meta" style="font-family: monospace; color: #0EA5E9;">📋 ${refCode}</div>
+                        </div>
+                        <span class="${l.is_active ? 'status-badge status-approved' : 'status-badge status-rejected'}">${l.is_active ? 'Aktiv' : 'Inaktiv'}</span>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item"><label>Preis</label><span>${l.price || l.monthly_rent || '-'}€</span></div>
+                        <div class="info-item"><label>Stadt</label><span>${escapeHtml(l.city) || '-'}</span></div>
+                        <div class="info-item"><label>Adresse</label><span>${escapeHtml(l.address_line) || '-'}</span></div>
+                        <div class="info-item"><label>Modus</label><span>${l.listing_mode || 'offer'}</span></div>
+                    </div>
+                    <div class="action-bar">
+                        <a href="detail.html?id=${l.id}" target="_blank" class="btn-mini btn-blue">👁️ Ansehen</a>
+                        <button class="btn-mini btn-gray" onclick="navigator.clipboard.writeText('${refCode}'); Room8UI.success('Referenz kopiert!')">📋 Ref kopieren</button>
+                        <button class="btn-mini ${l.is_active ? 'btn-yellow' : 'btn-green'}" onclick="toggleListingActive('${l.id}', ${!l.is_active})">${l.is_active ? '⏸️ Deaktivieren' : '▶️ Aktivieren'}</button>
+                        <button class="btn-mini btn-red" onclick="deleteListing('${l.id}')">🗑️ Löschen</button>
+                    </div>
                 </div>
-                <div class="info-grid">
-                    <div class="info-item"><label>Preis</label><span>${l.price || l.monthly_rent || '-'}</span></div>
-                    <div class="info-item"><label>Typ</label><span>${l.type}</span></div>
-                </div>
-                <div class="action-bar">
-                    <a href="listing-details.html?id=${l.id}" target="_blank" class="btn-mini btn-blue">Ansehen</a>
-                    <button class="btn-mini btn-red" onclick="deleteListing('${l.id}')">Löschen</button>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
+
+    // Listing-Suche Event Listener
+    document.getElementById('listingSearch').addEventListener('input', function() {
+        loadListings();
+    });
+
+    // --- MARKTPLATZ (Gegenstände) ---
+    var allMarktplatzCache = [];
+
+    async function loadMarktplatz() {
+        const container = document.getElementById('marktplatzList');
+        const searchInput = document.getElementById('marktplatzSearch');
+        const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+        if (allMarktplatzCache.length === 0 || !searchTerm) {
+            const { data: items, error } = await sb
+                .from('listings')
+                .select('*')
+                .eq('type', 'gegenstand')
+                .order('created_at', { ascending: false })
+                .limit(100);
+
+            if (error || !items || items.length === 0) {
+                container.innerHTML = '<div class="empty-state">Keine Marktplatz-Inserate vorhanden.</div>';
+                return;
+            }
+            allMarktplatzCache = items;
+        }
+
+        let filtered = allMarktplatzCache;
+        if (searchTerm) {
+            filtered = allMarktplatzCache.filter(l => {
+                const title = (l.title || '').toLowerCase();
+                const city = (l.city || '').toLowerCase();
+                return title.includes(searchTerm) || city.includes(searchTerm);
+            });
+        }
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="empty-state">Keine Ergebnisse für "' + escapeHtml(searchTerm) + '"</div>';
+            return;
+        }
+
+        container.innerHTML = filtered.map(l => {
+            const refCode = 'R8-' + l.id.substring(0, 6).toUpperCase();
+            return `
+                <div class="admin-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">📦 ${escapeHtml(l.title)}</div>
+                            <div class="card-meta" style="font-family: monospace; color: #0EA5E9;">📋 ${refCode}</div>
+                        </div>
+                        <span class="${l.is_active ? 'status-badge status-approved' : 'status-badge status-rejected'}">${l.is_active ? 'Aktiv' : 'Inaktiv'}</span>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item"><label>Preis</label><span>${l.price || '-'}€</span></div>
+                        <div class="info-item"><label>Stadt</label><span>${escapeHtml(l.city) || '-'}</span></div>
+                        <div class="info-item"><label>Modus</label><span>${l.listing_mode || 'offer'}</span></div>
+                    </div>
+                    <div class="action-bar">
+                        <a href="detail.html?id=${l.id}" target="_blank" class="btn-mini btn-blue">👁️ Ansehen</a>
+                        <button class="btn-mini ${l.is_active ? 'btn-yellow' : 'btn-green'}" onclick="toggleMarktplatzActive('${l.id}', ${!l.is_active})">${l.is_active ? '⏸️ Deaktivieren' : '▶️ Aktivieren'}</button>
+                        <button class="btn-mini btn-red" onclick="deleteMarktplatz('${l.id}')">🗑️ Löschen</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    document.getElementById('marktplatzSearch').addEventListener('input', function() {
+        loadMarktplatz();
+    });
+
+    window.toggleMarktplatzActive = async (id, active) => {
+        const { error } = await sb.from('listings').update({ is_active: active }).eq('id', id);
+        if (error) {
+            Room8UI.error("Fehler: " + error.message);
+            return;
+        }
+        Room8UI.success(active ? "Inserat aktiviert" : "Inserat deaktiviert");
+        allMarktplatzCache = [];
+        loadMarktplatz();
+    };
+
+    window.deleteMarktplatz = async (id) => {
+        if(!confirm("Inserat endgültig löschen?")) return;
+
+        // Erst zugehörige Fotos löschen
+        await sb.from('listing_photos').delete().eq('listing_id', id);
+
+        // Dann das Listing
+        const { error, data } = await sb.from('listings').delete().eq('id', id).select();
+
+        if (error) {
+            Room8UI.error("Fehler beim Löschen: " + error.message);
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            Room8UI.warning("Keine Berechtigung oder Inserat nicht gefunden");
+            return;
+        }
+
+        Room8UI.success("Inserat gelöscht!");
+        allMarktplatzCache = [];
+        loadMarktplatz();
+    };
+
+    window.toggleListingActive = async (id, active) => {
+        const { error } = await sb.from('listings').update({ is_active: active }).eq('id', id);
+        if (error) {
+            Room8UI.error("Fehler: " + error.message);
+            return;
+        }
+        Room8UI.success(active ? "Inserat aktiviert" : "Inserat deaktiviert");
+        allListingsCache = [];
+        loadListings();
+    };
 
     // --- ACTIONS ---
 
     window.resolveReport = async (id) => {
         if(!confirm("Meldung schließen?")) return;
-        await supabase.from('reports').update({ status: 'resolved' }).eq('id', id);
+        await sb.from('reports').update({ status: 'resolved' }).eq('id', id);
         loadReports();
     };
 
     window.banUser = async (id) => {
         if(!confirm("Nutzer wirklich sperren?")) return;
-        await supabase.from('profiles').update({ is_banned: true }).eq('id', id);
-        alert("Gesperrt.");
+        await sb.from('profiles').update({ is_banned: true }).eq('id', id);
+        Room8UI.success("Gesperrt.");
         loadUsers();
     };
 
     window.unbanUser = async (id) => {
-        await supabase.from('profiles').update({ is_banned: false }).eq('id', id);
-        alert("Entsperrt.");
+        await sb.from('profiles').update({ is_banned: false }).eq('id', id);
+        Room8UI.success("Entsperrt.");
         loadUsers();
     };
 
@@ -523,31 +1135,342 @@
         if (type === 'user') return window.banUser(id);
         // Wenn Inserat gemeldet wurde, sperren wir den Besitzer
         if (type === 'listing' || type === 'wohnung' || type === 'gegenstand') {
-            const { data } = await supabase.from('listings').select('owner_id').eq('id', id).single();
+            const { data } = await sb.from('listings').select('owner_id').eq('id', id).single();
             if(data) window.banUser(data.owner_id);
         }
     };
 
     window.verifyUser = async (id, approve) => {
-        const updates = {
-            verification_status: approve ? 'approved' : 'rejected',
-            is_verified: approve,
-            is_student_verified: approve
-        };
-        await supabase.from('profiles').update(updates).eq('id', id);
-        loadVerifications();
+        const action = approve ? 'genehmigen' : 'ablehnen';
+        if (!confirm(`Nutzer wirklich ${action}?`)) return;
+
+        try {
+            const updates = {
+                verification_status: approve ? 'approved' : 'rejected',
+                is_verified: approve,
+                is_student_verified: approve
+            };
+
+            const { error } = await sb.from('profiles').update(updates).eq('id', id);
+
+            if (error) {
+                console.error("Fehler:", error);
+                Room8UI.error("Fehler: " + error.message);
+                return;
+            }
+
+            Room8UI.success(approve ? "Nutzer verifiziert!" : "Nutzer abgelehnt.");
+            loadVerifications();
+            loadStats();
+        } catch (err) {
+            console.error("Exception:", err);
+            Room8UI.error("Fehler: " + err.message);
+        }
     };
 
-    window.viewDoc = async (path) => {
-        const { data } = await supabase.storage.from('verification-documents').createSignedUrl(path, 60);
-        if (data) window.open(data.signedUrl, '_blank');
-        else alert("Fehler beim Öffnen.");
+    window.viewDoc = async (urlOrPath) => {
+        if (!urlOrPath) {
+            Room8UI.warning("Kein Dokument-Pfad vorhanden.");
+            return;
+        }
+
+        console.log("viewDoc aufgerufen mit:", urlOrPath);
+
+        // Falls es bereits eine vollständige URL ist, direkt öffnen
+        if (urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://')) {
+            window.open(urlOrPath, '_blank');
+            return;
+        }
+
+        // Ansonsten versuchen wir eine Public URL oder Signed URL zu erstellen
+        var buckets = ['enrollment-certificates', 'verification-documents', 'avatars', 'listing-images', 'documents', 'chat-images'];
+
+        // Erst versuchen wir Public URLs
+        for (var i = 0; i < buckets.length; i++) {
+            try {
+                var publicResult = sb.storage.from(buckets[i]).getPublicUrl(urlOrPath);
+                if (publicResult.data && publicResult.data.publicUrl) {
+                    console.log("Public URL gefunden in", buckets[i], ":", publicResult.data.publicUrl);
+                    window.open(publicResult.data.publicUrl, '_blank');
+                    return;
+                }
+            } catch (e) {
+                console.log('Public URL fehlgeschlagen für ' + buckets[i], e);
+            }
+        }
+
+        // Dann versuchen wir Signed URLs (für private Buckets)
+        for (var i = 0; i < buckets.length; i++) {
+            try {
+                var signedResult = await sb.storage.from(buckets[i]).createSignedUrl(urlOrPath, 300);
+                if (signedResult.data && signedResult.data.signedUrl) {
+                    console.log("Signed URL gefunden in", buckets[i], ":", signedResult.data.signedUrl);
+                    window.open(signedResult.data.signedUrl, '_blank');
+                    return;
+                }
+            } catch (e) {
+                console.log('Signed URL fehlgeschlagen für ' + buckets[i], e);
+            }
+        }
+
+        // Falls nichts gefunden wurde, zeige den Pfad an
+        Room8UI.warning("Dokument konnte nicht geöffnet werden.");
+        alert("Dokument-Pfad: " + urlOrPath + "\n\nBitte prüfe in Supabase Storage ob die Datei existiert.");
     };
 
     window.deleteListing = async (id) => {
-        if(!confirm("Endgültig löschen?")) return;
-        await supabase.from('listings').delete().eq('id', id);
+        if(!confirm("Inserat endgültig löschen? Dies kann nicht rückgängig gemacht werden!")) return;
+
+        console.log("Deleting listing:", id);
+
+        // Erst zugehörige Fotos löschen
+        await sb.from('listing_photos').delete().eq('listing_id', id);
+
+        // Dann das Listing selbst
+        const { error, data } = await sb.from('listings').delete().eq('id', id).select();
+
+        console.log("Delete result:", { error, data });
+
+        if (error) {
+            Room8UI.error("Fehler beim Löschen: " + error.message);
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            Room8UI.warning("Keine Berechtigung oder Inserat nicht gefunden");
+            return;
+        }
+
+        Room8UI.success("Inserat gelöscht!");
+        allListingsCache = [];
         loadListings();
+    };
+
+    // --- ADMIN JOBS ---
+    async function loadAdminJobs() {
+        const container = document.getElementById('jobsList');
+        const { data: jobs, error } = await sb
+            .from('listings')
+            .select('*')
+            .eq('type', 'job')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            container.innerHTML = `<p style="color:red">Fehler: ${error.message}</p>`;
+            return;
+        }
+
+        if (!jobs || jobs.length === 0) {
+            container.innerHTML = '<div class="empty-state">Keine Jobs vorhanden. <a href="job-create.html">Ersten Job erstellen</a></div>';
+            return;
+        }
+
+        container.innerHTML = jobs.map(j => `
+            <div class="admin-card">
+                <div class="card-header">
+                    <div class="card-title">💼 ${escapeHtml(j.title)}</div>
+                    <span class="${j.is_active ? 'status-badge status-approved' : 'status-badge status-rejected'}">${j.is_active ? 'Aktiv' : 'Inaktiv'}</span>
+                </div>
+                <div class="info-grid">
+                    <div class="info-item"><label>Firma</label><span>${escapeHtml(j.company_name) || '-'}</span></div>
+                    <div class="info-item"><label>Typ</label><span>${escapeHtml(j.job_type) || '-'}</span></div>
+                    <div class="info-item"><label>Stadt</label><span>${escapeHtml(j.city) || '-'}</span></div>
+                    <div class="info-item"><label>Gehalt</label><span>${j.salary_amount ? j.salary_amount + '€' : '-'}</span></div>
+                </div>
+                <div class="action-bar">
+                    <button class="btn-mini btn-blue" onclick="window.open('job-detail.html?id=${j.id}', '_blank')">👁️ Ansehen</button>
+                    <button class="btn-mini ${j.is_active ? 'btn-yellow' : 'btn-green'}" onclick="toggleJobActive('${j.id}', ${!j.is_active})">${j.is_active ? '⏸️ Deaktivieren' : '▶️ Aktivieren'}</button>
+                    <button class="btn-mini btn-red" onclick="deleteJob('${j.id}')">🗑️ Löschen</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.toggleJobActive = async (id, active) => {
+        const { error } = await sb.from('listings').update({ is_active: active }).eq('id', id);
+        if (error) {
+            Room8UI.error("Fehler: " + error.message);
+            return;
+        }
+        Room8UI.success(active ? "Job aktiviert" : "Job deaktiviert");
+        loadAdminJobs();
+    };
+
+    window.deleteJob = async (id) => {
+        if (!confirm("Job wirklich löschen?")) return;
+        const { error } = await sb.from('listings').delete().eq('id', id);
+        if (error) {
+            Room8UI.error("Fehler: " + error.message);
+            return;
+        }
+        Room8UI.success("Job gelöscht");
+        loadAdminJobs();
+    };
+
+    // --- ADMIN COUPONS ---
+    async function loadAdminCoupons() {
+        const container = document.getElementById('couponsList');
+        const { data: coupons, error } = await sb
+            .from('coupons')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            container.innerHTML = `<p style="color:red">Fehler: ${error.message}</p>`;
+            return;
+        }
+
+        if (!coupons || coupons.length === 0) {
+            container.innerHTML = '<div class="empty-state">Keine Coupons vorhanden. <a href="coupon-create.html">Ersten Coupon erstellen</a></div>';
+            return;
+        }
+
+        container.innerHTML = coupons.map(c => {
+            const isActive = c.status === 'active';
+            return `
+                <div class="admin-card">
+                    <div class="card-header">
+                        <div class="card-title">🎟️ ${escapeHtml(c.title)}</div>
+                        <span class="${isActive ? 'status-badge status-approved' : 'status-badge status-rejected'}">${isActive ? 'Aktiv' : 'Inaktiv'}</span>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item"><label>Partner</label><span>${escapeHtml(c.business_name)}</span></div>
+                        <div class="info-item"><label>Rabatt</label><span>${escapeHtml(c.discount_value)}</span></div>
+                        <div class="info-item"><label>Code</label><span style="font-family:monospace;font-weight:bold;">${escapeHtml(c.discount_code)}</span></div>
+                        <div class="info-item"><label>Stadt</label><span>${escapeHtml(c.city) || '-'}</span></div>
+                    </div>
+                    <div class="action-bar">
+                        <button class="btn-mini ${isActive ? 'btn-yellow' : 'btn-green'}" onclick="toggleCouponActive('${c.id}', ${!isActive})">${isActive ? '⏸️ Deaktivieren' : '▶️ Aktivieren'}</button>
+                        <button class="btn-mini btn-red" onclick="deleteCoupon('${c.id}')">🗑️ Löschen</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    window.toggleCouponActive = async (id, active) => {
+        const { error } = await sb.from('coupons').update({ status: active ? 'active' : 'inactive' }).eq('id', id);
+        if (error) {
+            Room8UI.error("Fehler: " + error.message);
+            return;
+        }
+        Room8UI.success(active ? "Coupon aktiviert" : "Coupon deaktiviert");
+        loadAdminCoupons();
+    };
+
+    window.deleteCoupon = async (id) => {
+        if (!confirm("Coupon wirklich löschen?")) return;
+        const { error } = await sb.from('coupons').delete().eq('id', id);
+        if (error) {
+            Room8UI.error("Fehler: " + error.message);
+            return;
+        }
+        Room8UI.success("Coupon gelöscht");
+        loadAdminCoupons();
+    };
+
+    // --- CONTACT MESSAGES ---
+    var currentMessageFilter = 'unread';
+    var allMessages = [];
+
+    async function loadContactMessages() {
+        const container = document.getElementById('messagesList');
+
+        const { data: messages, error } = await sb
+            .from('contact_messages')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            container.innerHTML = `<p style="color:red">Fehler: ${error.message}</p>`;
+            return;
+        }
+
+        allMessages = messages || [];
+
+        // Badge aktualisieren
+        const unreadCount = allMessages.filter(m => !m.is_read).length;
+        if (unreadCount > 0) {
+            const badge = document.getElementById('badgeMessages');
+            badge.textContent = unreadCount;
+            badge.style.display = 'inline-block';
+        }
+
+        renderMessages();
+    }
+
+    function renderMessages() {
+        const container = document.getElementById('messagesList');
+        let filtered = allMessages;
+
+        if (currentMessageFilter === 'unread') {
+            filtered = allMessages.filter(m => !m.is_read);
+        } else if (currentMessageFilter === 'read') {
+            filtered = allMessages.filter(m => m.is_read);
+        }
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="empty-state">Keine Nachrichten.</div>';
+            return;
+        }
+
+        container.innerHTML = filtered.map(m => {
+            const date = new Date(m.created_at).toLocaleString('de-DE');
+            const categoryLabel = {
+                'frage': 'Allgemeine Frage',
+                'tech': 'Technisches Problem',
+                'report': 'Meldung / Sicherheit',
+                'business': 'Partner / Business'
+            }[m.category] || m.category || 'Sonstiges';
+
+            return `
+                <div class="admin-card" style="${m.is_read ? 'opacity: 0.7;' : 'border-left: 4px solid #3b82f6;'}">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">${m.is_read ? '' : '🔵 '}${escapeHtml(m.name)}</div>
+                            <div class="card-meta">${escapeHtml(m.email)} • ${date}</div>
+                        </div>
+                        <span class="status-badge" style="background: #E0E7FF; color: #3730A3;">${escapeHtml(categoryLabel)}</span>
+                    </div>
+                    <div style="background:#F9FAFB; padding:1rem; border-radius:8px; margin:0.5rem 0;">
+                        <p style="margin:0; color:#374151; font-size:0.95rem; white-space: pre-wrap;">${escapeHtml(m.message)}</p>
+                    </div>
+                    <div class="action-bar">
+                        <a href="mailto:${escapeHtml(m.email)}?subject=Re:%20Room8%20Support%20-%20${encodeURIComponent(categoryLabel)}" class="btn-mini" style="background:#10B981;color:white;">✉️ Antworten</a>
+                        ${!m.is_read ? `<button class="btn-mini btn-blue" onclick="markMessageRead('${m.id}')">✅ Als gelesen markieren</button>` : ''}
+                        <button class="btn-mini btn-red" onclick="deleteMessage('${m.id}')">🗑️ Löschen</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    window.filterMessages = (filter, btn) => {
+        currentMessageFilter = filter;
+        document.querySelectorAll('#tab-messages .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderMessages();
+    };
+
+    window.markMessageRead = async (id) => {
+        const { error } = await sb.from('contact_messages').update({ is_read: true }).eq('id', id);
+        if (error) {
+            Room8UI.error("Fehler: " + error.message);
+            return;
+        }
+        Room8UI.success("Als gelesen markiert");
+        loadContactMessages();
+    };
+
+    window.deleteMessage = async (id) => {
+        if (!confirm("Nachricht wirklich löschen?")) return;
+        const { error } = await sb.from('contact_messages').delete().eq('id', id);
+        if (error) {
+            Room8UI.error("Fehler: " + error.message);
+            return;
+        }
+        Room8UI.success("Nachricht gelöscht");
+        loadContactMessages();
     };
 
     window.switchTab = (tab) => {
@@ -561,5 +1484,6 @@
 
     checkAdmin();
 </script>
+<script src="notificationBell.js"></script>
 </body>
 </html>

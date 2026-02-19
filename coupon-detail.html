@@ -2,8 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Coupon - Room8</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Coupon - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .coupon-hero { height: 250px; background-color: #FED7AA; position: relative; }
@@ -20,7 +19,7 @@
     </header>
 
     <div class="coupon-hero">
-        <img id="heroImg" src="https://via.placeholder.com/400x250" alt="Deal">
+        <img id="heroImg" src="no-image.svg" alt="Deal">
     </div>
 
     <div class="coupon-content">
@@ -38,17 +37,18 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="room8-ui.js"></script>
 <script>
-    if (typeof SUPABASE_URL === 'undefined') { var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co'; var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw'; }
-    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const id = new URLSearchParams(window.location.search).get('id');
 
     async function load() {
         if(!id) return;
-        const { data: coupon } = await supabase.from('coupons').select('*, coupon_photos(storage_path)').eq('id', id).single();
+        const { data: coupon } = await sb.from('coupons').select('*, coupon_photos(storage_path)').eq('id', id).single();
         
         if(coupon) {
             document.getElementById('companyName').textContent = coupon.business_name;
@@ -59,7 +59,7 @@
             if(coupon.valid_until) document.getElementById('validDate').textContent = new Date(coupon.valid_until).toLocaleDateString('de-DE');
 
             if (coupon.coupon_photos && coupon.coupon_photos.length > 0) {
-                const { data } = supabase.storage.from('listing-images').getPublicUrl(coupon.coupon_photos[0].storage_path);
+                const { data } = sb.storage.from('listing-images').getPublicUrl(coupon.coupon_photos[0].storage_path);
                 document.getElementById('heroImg').src = data.publicUrl;
             }
         }
@@ -68,9 +68,10 @@
     function copyCode() {
         const code = document.getElementById('couponCode').textContent;
         navigator.clipboard.writeText(code);
-        alert("Code kopiert: " + code);
+        Room8UI.success("Code kopiert: " + code);
     }
     load();
 </script>
+<script src="notificationBell.js"></script>
 </body>
 </html>

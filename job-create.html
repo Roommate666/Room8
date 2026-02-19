@@ -2,8 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Job erstellen - Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Job erstellen - Admin</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .app-header { background: #111827; color: white; }
@@ -125,11 +124,12 @@
     </main>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="room8-ui.js"></script>
 <script>
-    if (typeof SUPABASE_URL === 'undefined') { var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co'; var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw'; }
-    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const ADMIN_EMAIL = 'albayrak_yusuf@icloud.com';
 
     function navigateTo(url) {
@@ -137,15 +137,25 @@
     }
 
     async function checkAdmin() {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await sb.auth.getUser();
         if (!user || user.email !== ADMIN_EMAIL) { navigateTo('dashboard.html'); }
         return user;
     }
 
-    // Preview
+    // Preview mit Bildvorschau
     const fileInput = document.getElementById('logoInput');
     fileInput.addEventListener('change', (e) => {
-        if(e.target.files[0]) document.getElementById('previewContainer').innerHTML = `✅ ${e.target.files[0].name}`;
+        if(e.target.files[0]) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('previewContainer').innerHTML = `
+                    <img src="${event.target.result}" style="max-width:100px; max-height:100px; border-radius:12px; margin-bottom:0.5rem;">
+                    <div style="color:#10B981; font-weight:600;">✅ ${file.name}</div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
     });
 
     function textToArray(text) { return text.split('\n').filter(line => line.trim() !== ''); }
@@ -181,25 +191,26 @@
                 is_active: true
             };
 
-            const { data: job, error } = await supabase.from('listings').insert(jobData).select().single();
+            const { data: job, error } = await sb.from('listings').insert(jobData).select().single();
             if (error) throw error;
 
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
                 const path = `jobs/${job.id}_logo.${file.name.split('.').pop()}`;
-                await supabase.storage.from('listing-images').upload(path, file);
-                await supabase.from('listing_photos').insert({ listing_id: job.id, storage_path: path });
+                await sb.storage.from('listing-images').upload(path, file);
+                await sb.from('listing_photos').insert({ listing_id: job.id, storage_path: path });
             }
 
-            alert("Job erstellt!");
-            navigateTo("admin-panel.html");
+            Room8UI.success("Job erstellt!");
+            setTimeout(function() { navigateTo("admin-panel.html"); }, 1500);
         } catch (err) {
-            alert("Fehler: " + err.message);
+            Room8UI.error("Job konnte nicht erstellt werden. Bitte versuche es erneut.");
             btn.disabled = false;
         }
     });
 
     checkAdmin();
 </script>
+<script src="notificationBell.js"></script>
 </body>
 </html>

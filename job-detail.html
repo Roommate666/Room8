@@ -2,11 +2,10 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Job - Room8</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Job - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .app-container { background: white; padding-bottom: 80px; }
+        .app-container { background: white; padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px); }
         
         .job-hero { text-align: center; padding: 2rem 1.5rem; background: #F9FAFB; }
         .job-logo { width: 80px; height: 80px; border-radius: 16px; object-fit: cover; margin-bottom: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
@@ -44,7 +43,7 @@
 
     <div id="content" style="display:none;">
         <div class="job-hero">
-            <img src="placeholder.png" id="logo" class="job-logo" onerror="this.src='https://via.placeholder.com/80'">
+            <img src="placeholder.png" id="logo" class="job-logo" onerror="this.src='no-image.svg'">
             <h1 id="title" class="job-title"></h1>
             <div id="company" class="job-company"></div>
         </div>
@@ -79,17 +78,18 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="room8-ui.js"></script>
 <script>
-    if (typeof SUPABASE_URL === 'undefined') { var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co'; var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw'; }
-    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const id = new URLSearchParams(window.location.search).get('id');
 
     async function load() {
         if (!id) return;
-        const { data: job } = await supabase.from('listings').select('*, listing_photos(storage_path)').eq('id', id).single();
+        const { data: job } = await sb.from('listings').select('*, listing_photos(storage_path)').eq('id', id).single();
         
         if (job) {
             document.getElementById('loading').style.display = 'none';
@@ -109,7 +109,7 @@
 
             // Logo
             if (job.listing_photos && job.listing_photos.length > 0) {
-                const { data } = supabase.storage.from('listing-images').getPublicUrl(job.listing_photos[0].storage_path);
+                const { data } = sb.storage.from('listing-images').getPublicUrl(job.listing_photos[0].storage_path);
                 document.getElementById('logo').src = data.publicUrl;
             }
 
@@ -127,11 +127,12 @@
             document.getElementById('applyBtn').onclick = () => {
                 if (job.application_url) window.open(job.application_url, '_blank');
                 else if (job.application_email) window.location.href = `mailto:${job.application_email}`;
-                else alert("Bitte direkt beim Anbieter melden.");
+                else Room8UI.info("Bitte direkt beim Anbieter melden.");
             };
         }
     }
     load();
 </script>
+<script src="notificationBell.js"></script>
 </body>
 </html>

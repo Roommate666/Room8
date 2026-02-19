@@ -2,13 +2,13 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Benachrichtigungen - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
         /* Spezifische Styles für Benachrichtigungen */
         .notifications-list {
-            padding-bottom: 80px;
+            padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px);
         }
 
         .filter-tabs {
@@ -87,10 +87,11 @@
         .type-chat { background: #EEF2FF; color: #3B82F6; }
         .type-review { background: #FFFBEB; color: #F59E0B; }
         .type-favorite { background: #FEF2F2; color: #EF4444; }
+        .type-search { background: #F0FDF4; color: #16A34A; }
         .type-info { background: #F3F4F6; color: #6B7280; }
 
         .notif-content { flex: 1; min-width: 0; }
-        
+
         .notif-title {
             font-weight: 600;
             font-size: 0.95rem;
@@ -142,7 +143,7 @@
 
 <div class="app-container">
     <header class="app-header">
-        <a href="index.html" class="back-arrow">
+        <a href="javascript:history.back()" class="back-arrow">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
         <h1>Aktivitäten</h1>
@@ -152,6 +153,7 @@
     <div class="filter-tabs" id="filterTabs">
         <div class="filter-tab active" data-filter="all">Alle</div>
         <div class="filter-tab" data-filter="unread">Ungelesen</div>
+        <div class="filter-tab" data-filter="search_match">Suchalarme</div>
         <div class="filter-tab" data-filter="chat_message">Chats</div>
         <div class="filter-tab" data-filter="review">Bewertungen</div>
         <div class="filter-tab" data-filter="favorite">Favoriten</div>
@@ -166,20 +168,12 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
 <script src="navigation.js"></script>
+<!-- No notificationBell.js on this page - we're already on notifications -->
 <script>
-    // 1. Config Fallback
-    if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_ANON_KEY === 'undefined') {
-        var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co';
-        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw';
-    }
-
-    var supabase;
-    if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Helper: Navigation (Vorschau-Fix)
     function navigateTo(url) {
@@ -196,13 +190,13 @@
         const markAllBtn = document.getElementById('markAllBtn');
 
         try {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await sb.auth.getUser();
             if (!user) {
                 container.innerHTML = '<div class="empty-state"><p>Bitte einloggen.</p></div>';
                 return;
             }
 
-            const { data: notifications, error } = await supabase
+            const { data: notifications, error } = await sb
                 .from('notifications')
                 .select('*')
                 .eq('user_id', user.id)
@@ -265,6 +259,7 @@
         if (n.type === 'chat_message') { icon = '💬'; typeClass = 'type-chat'; }
         else if (n.type === 'review') { icon = '⭐'; typeClass = 'type-review'; }
         else if (n.type === 'favorite') { icon = '❤️'; typeClass = 'type-favorite'; }
+        else if (n.type === 'search_match') { icon = '🔔'; typeClass = 'type-search'; }
 
         // Zeit formatieren (z.B. "vor 5 Min")
         const timeStr = timeAgo(n.created_at);
@@ -283,7 +278,7 @@
             // 1. Mark as read in DB
             if (!n.is_read) {
                 item.classList.remove('unread');
-                await supabase.from('notifications').update({ is_read: true }).eq('id', n.id);
+                await sb.from('notifications').update({ is_read: true }).eq('id', n.id);
                 // Lokal updaten damit Badge verschwindet beim Neurendern
                 n.is_read = true; 
             }
@@ -298,10 +293,10 @@
     }
 
     async function markAllRead() {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await sb.auth.getUser();
         if(!user) return;
 
-        const { error } = await supabase
+        const { error } = await sb
             .from('notifications')
             .update({ is_read: true })
             .eq('user_id', user.id)

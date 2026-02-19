@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Details - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
@@ -56,7 +56,7 @@
         /* BACK BUTTON OVERLAY */
         .back-btn-overlay {
             position: absolute;
-            top: 15px;
+            top: calc(15px + env(safe-area-inset-top));            
             left: 15px;
             width: 40px;
             height: 40px;
@@ -74,7 +74,7 @@
         /* NOTIFICATION BELL OVERLAY (NEU) */
         .notification-btn-overlay {
             position: absolute;
-            top: 15px;
+            top: calc(15px + env(safe-area-inset-top));
             right: 15px;
             width: 40px;
             height: 40px;
@@ -92,7 +92,7 @@
         /* === CONTENT === */
         .detail-content {
             padding: 1.5rem;
-            padding-bottom: 100px; /* Platz für Sticky Footer */
+            padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px); /* Platz für Sticky Footer */
             background: white;
             border-radius: 20px 20px 0 0;
             margin-top: -20px;
@@ -380,52 +380,62 @@
             border-top: 1px solid #F3F4F6;
             padding-top: 1rem;
         }
-        
+
         .btn-report {
-            background: none;
-            border: none;
-            color: #EF4444;
+            background: #FEF3C7;
+            border: 1px solid #FCD34D;
+            color: #D97706;
             font-size: 0.85rem;
-            font-weight: 500;
+            font-weight: 600;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
             cursor: pointer;
-            padding: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            transition: all 0.2s;
         }
-        
+
         .btn-report:hover {
-            text-decoration: underline;
+            background: #FDE68A;
+            transform: scale(1.02);
         }
 
         /* STICKY FOOTER ACTION BAR */
         .action-bar {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
+            bottom: 90px;
+            left: 16px;
+            right: 16px;
+            width: auto;
             background: white;
-            padding: 1rem 1.5rem;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+            padding: 0.75rem 1rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             display: flex;
-            gap: 1rem;
-            z-index: 100;
-            padding-bottom: max(1rem, env(safe-area-inset-bottom));
+            gap: 0.75rem;
+            z-index: 10000;
+            box-sizing: border-box;
+            border-radius: 16px;
+        }
+
+        /* Content Padding damit Action-Bar nichts verdeckt */
+        .detail-content {
+            padding-bottom: 180px !important;
         }
 
         .btn-fav {
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 48px;
             border-radius: 12px;
             border: 1px solid var(--border-color);
             background: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
             cursor: pointer;
-            color: #d1d5db; /* Default grau */
+            color: #d1d5db;
             transition: all 0.2s;
+            flex-shrink: 0;
         }
         .btn-fav.active {
             color: #EF4444;
@@ -435,14 +445,59 @@
 
         .btn-contact {
             flex: 1;
-            background: var(--primary-gradient);
+            height: 48px;
+            background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
             color: white;
             border: none;
             border-radius: 12px;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
-            box-shadow: var(--shadow-glow);
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-contact:active {
+            transform: scale(0.98);
+        }
+
+        .btn-report-small {
+            width: 48px;
+            height: 48px;
+            background: #FEF3C7;
+            color: #D97706;
+            border: 1px solid #FCD34D;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .btn-report-small:active {
+            transform: scale(0.95);
+            background: #FDE68A;
+        }
+
+        .btn-report-small {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            border: 1px solid #FCD34D;
+            background: #FEF3C7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #D97706;
+            transition: all 0.2s;
+        }
+        .btn-report-small:hover {
+            background: #FDE68A;
         }
     </style>
 </head>
@@ -461,7 +516,7 @@
         
         <div class="slider-wrapper" id="sliderWrapper">
             <!-- Bilder werden per JS geladen -->
-            <div class="slide"><img src="assets/placeholder.jpg" id="placeholderImg" onerror="this.src='https://via.placeholder.com/400x300?text=Lade+Bilder...'"></div>
+            <div class="slide"><img src="assets/placeholder.jpg" id="placeholderImg" onerror="this.src='no-image.svg'"></div>
         </div>
         
         <div class="slider-dots" id="sliderDots"></div>
@@ -577,36 +632,31 @@
             </div>
         </div>
 
-        <!-- Melden Button -->
-        <div class="report-section">
-            <button class="btn-report" onclick="reportListing()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-                Inserat melden
-            </button>
-        </div>
     </div>
 
     <!-- Footer Action Bar -->
     <div class="action-bar">
         <button class="btn-fav" id="favBtn" onclick="toggleFavorite()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
         </button>
         <button class="btn-contact" id="contactBtn">Nachricht senden</button>
+        <button class="btn-report-small" id="reportBtnBar" onclick="reportListing()">⚠️</button>
     </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
+<script src="notificationBell.js"></script>
+<script src="notificationHelpers.js"></script>
 <script>
-    // 1. Config Fallback
-    if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_ANON_KEY === 'undefined') {
-        var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co';
-        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw';
-    }
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    var supabase;
-    if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // XSS Protection
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     // URL Params
@@ -623,15 +673,15 @@
     }
 
     async function loadDetails() {
-        if (!listingId || !supabase) return;
+        if (!listingId || !sb) return;
 
         try {
             // 1. User check (für Favorite Button)
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await sb.auth.getUser();
             currentUserId = user ? user.id : null;
 
             // 2. Listing laden (inkl. Owner Profile)
-            const { data: listing, error } = await supabase
+            const { data: listing, error } = await sb
                 .from('listings')
                 .select(`
                     *,
@@ -649,6 +699,22 @@
             if (error) throw error;
             currentListing = listing;
 
+            // Navigation Highlight basierend auf Typ
+            window.currentListingType = listing.type;
+            setTimeout(function() {
+                var navItems = document.querySelectorAll('.bottom-nav-item');
+                navItems.forEach(function(item) {
+                    item.classList.remove('active', 'active-housing', 'active-marketplace');
+                });
+                if (listing.type === 'wohnung') {
+                    var wohnenNav = document.querySelector('.bottom-nav-item[data-href="wohnungen.html"]');
+                    if (wohnenNav) wohnenNav.classList.add('active-housing');
+                } else if (listing.type === 'gegenstand') {
+                    var marktNav = document.querySelector('.bottom-nav-item[data-href="gegenstaende.html"]');
+                    if (marktNav) marktNav.classList.add('active-marketplace');
+                }
+            }, 200);
+
             // 3. UI befüllen
             fillUI(listing);
 
@@ -658,10 +724,27 @@
             // 5. Favorite Status checken
             if (currentUserId) checkFavoriteStatus();
 
+            // 6. Eigenes Inserat: Favoriten/Melden-Buttons verstecken, Kontakt zu Bearbeiten
+            if (currentUserId && listing.owner_id === currentUserId) {
+                document.getElementById('favBtn').style.display = 'none';
+                document.getElementById('reportBtnBar').style.display = 'none';
+                document.getElementById('contactBtn').textContent = 'Inserat bearbeiten';
+                document.getElementById('contactBtn').onclick = function() {
+                    var editPage = listing.type === 'wohnung' ? 'wohnung.html' : 'gegenstand.html';
+                    navigateTo(editPage + '?id=' + listingId);
+                };
+            } else {
+                // 7. View Counter inkrementieren (nur für fremde Inserate)
+                sb.from('listings')
+                    .update({ view_count: (listing.view_count || 0) + 1 })
+                    .eq('id', listingId)
+                    .then(() => console.log('View count incremented'));
+            }
+
         } catch (err) {
             console.error(err);
             document.getElementById('title').textContent = "Fehler beim Laden";
-            document.getElementById('description').textContent = err.message;
+            document.getElementById('description').textContent = 'Inserat konnte nicht geladen werden. Bitte versuche es erneut.';
         }
     }
 
@@ -672,7 +755,7 @@
         document.getElementById('location').textContent = (l.district ? l.district + ', ' : '') + l.city;
         
         // Badge
-        const typeMap = { 'offer': 'Angebot', 'search': 'Gesuch', 'swap': 'Tausch' };
+        const typeMap = { 'offer': 'Angebot', 'search': 'Gesucht', 'swap': 'Tausch' };
         document.getElementById('typeBadge').textContent = typeMap[l.listing_mode] || 'Inserat';
 
         // Preis
@@ -712,9 +795,12 @@
                 if(confirm("Bitte einloggen um Kontakt aufzunehmen.")) navigateTo('login.html');
                 return;
             }
-            // Hier später Chat öffnen
-            // navigateTo(`chat.html?listing=${l.id}&user=${l.owner_id}`);
-            alert("Chat-Funktion kommt als nächstes! Hier würde der Chat starten.");
+            if (!currentListing || !currentListing.owner_id) {
+                Room8UI.error("Fehler: Inserat nicht gefunden.");
+                return;
+            }
+            // Chat öffnen
+            navigateTo('chat.html?listingId=' + listingId + '&sellerId=' + currentListing.owner_id);
         };
 
         // --- GRID ATTRIBUTES ---
@@ -830,9 +916,27 @@
             }
 
         } else {
-            // Gegenstand
-            addAttr('Kategorie', l.category);
-            addAttr('Zustand', l.condition);
+            // Gegenstand - mit deutschen Übersetzungen
+            var categoryLabels = {
+                'Furniture & Home': 'Möbel & Wohnen',
+                'Electronics & Tech': 'Elektronik & Technik',
+                'Books & Study': 'Bücher & Studium',
+                'Clothing & Fashion': 'Kleidung & Mode',
+                'Kitchen & Appliances': 'Küche & Geräte',
+                'Sports & Outdoor': 'Sport & Outdoor',
+                'Bikes & Transport': 'Fahrräder & Transport',
+                'Music & Instruments': 'Musik & Instrumente',
+                'Others': 'Sonstiges'
+            };
+            var conditionLabels = {
+                'New': 'Neu',
+                'Like New': 'Wie neu',
+                'Good': 'Gut',
+                'Fair': 'Akzeptabel',
+                'Poor': 'Gebraucht'
+            };
+            addAttr('Kategorie', categoryLabels[l.category] || l.category);
+            addAttr('Zustand', conditionLabels[l.condition] || l.condition);
         }
     }
 
@@ -964,7 +1068,7 @@
         }
 
         if (locInfo.uni_name) {
-            list.innerHTML += `<span class="feature-tag">🏫 ${locInfo.uni_name}</span>`;
+            list.innerHTML += `<span class="feature-tag">🏫 ${escapeHtml(locInfo.uni_name)}</span>`;
             hasItems = true;
         }
 
@@ -1173,7 +1277,7 @@
     }
 
     async function loadImages(id) {
-        const { data: photos } = await supabase
+        const { data: photos } = await sb
             .from('listing_photos')
             .select('storage_path')
             .eq('listing_id', id)
@@ -1186,7 +1290,7 @@
             wrapper.innerHTML = ''; // Remove placeholder
             
             photos.forEach((p, index) => {
-                const { data } = supabase.storage.from('listing-images').getPublicUrl(p.storage_path);
+                const { data } = sb.storage.from('listing-images').getPublicUrl(p.storage_path);
                 if (data) {
                     // Slide add
                     const slide = document.createElement('div');
@@ -1216,7 +1320,7 @@
 
     // Favorites Logic
     async function checkFavoriteStatus() {
-        const { data } = await supabase.from('favorites').select('id').eq('listing_id', listingId).eq('user_id', currentUserId);
+        const { data } = await sb.from('favorites').select('id').eq('listing_id', listingId).eq('user_id', currentUserId);
         if (data && data.length > 0) {
             isFavorited = true;
             updateFavBtn();
@@ -1229,15 +1333,32 @@
             return;
         }
 
+        // Eigenes Inserat kann nicht favorisiert werden
+        if (currentListing && currentListing.owner_id === currentUserId) {
+            Room8UI.warning("Du kannst dein eigenes Inserat nicht favorisieren.");
+            return;
+        }
+
         const btn = document.getElementById('favBtn');
+        const wasNotFavorited = !isFavorited;
+
         // Optimistic Update
         isFavorited = !isFavorited;
         updateFavBtn();
 
         if (isFavorited) {
-            await supabase.from('favorites').insert({ user_id: currentUserId, listing_id: listingId });
+            await sb.from('favorites').insert({ user_id: currentUserId, listing_id: listingId });
+
+            // Send notification to listing owner (only when adding to favorites)
+            if (wasNotFavorited && currentListing && currentListing.owner_id && currentListing.owner_id !== currentUserId && window.NotificationHelpers) {
+                try {
+                    var profileRes = await sb.from('profiles').select('username, full_name').eq('id', currentUserId).single();
+                    var faverName = profileRes.data ? (profileRes.data.full_name || profileRes.data.username || 'Jemand') : 'Jemand';
+                    NotificationHelpers.notifyFavorite(currentListing.owner_id, faverName, currentListing.title, listingId);
+                } catch(e) { console.log('Notification error:', e); }
+            }
         } else {
-            await supabase.from('favorites').delete().eq('user_id', currentUserId).eq('listing_id', listingId);
+            await sb.from('favorites').delete().eq('user_id', currentUserId).eq('listing_id', listingId);
         }
     }
 
@@ -1255,21 +1376,39 @@
     // Reporting Function
     function reportListing() {
         if (!currentUserId) {
-            alert("Bitte logge dich ein, um ein Inserat zu melden.");
+            Room8UI.warning("Bitte logge dich ein, um ein Inserat zu melden.");
             return;
         }
-        
-        const reason = prompt("Warum möchtest du dieses Inserat melden? (z.B. Betrug, Spam)");
-        if (reason) {
-            supabase.from('reports').insert({
+
+        // Prüfen ob User eigenes Inserat melden will
+        if (currentListing && currentListing.owner_id === currentUserId) {
+            Room8UI.warning("Du kannst dein eigenes Inserat nicht melden.");
+            return;
+        }
+
+        // Vordefinierte Melde-Gründe
+        const reasons = [
+            "Betrug / Fake-Inserat",
+            "Falsche Informationen",
+            "Bereits vermietet/verkauft",
+            "Spam / Werbung",
+            "Unangemessene Bilder",
+            "Sonstiges"
+        ];
+        const reasonList = reasons.map((r, i) => `${i + 1}. ${r}`).join('\n');
+        const choice = prompt(`Warum möchtest du dieses Inserat melden?\n\n${reasonList}\n\nGib die Nummer ein (1-6):`);
+        if (choice) {
+            const idx = parseInt(choice) - 1;
+            const reason = (idx >= 0 && idx < reasons.length) ? reasons[idx] : choice;
+            sb.from('reports').insert({
                 reporter_id: currentUserId,
                 reported_type: 'listing',
                 reported_id: listingId,
                 reason: reason,
                 status: 'open'
             }).then(({ error }) => {
-                if (error) alert("Fehler beim Melden: " + error.message);
-                else alert("Vielen Dank! Wir werden das Inserat prüfen.");
+                if (error) Room8UI.error("Meldung konnte nicht gesendet werden. Bitte versuche es erneut.");
+                else Room8UI.success("Vielen Dank! Wir werden das Inserat prüfen.");
             });
         }
     }

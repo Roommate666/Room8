@@ -2,12 +2,39 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Inserat erstellen - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        /* Header - Grün mit weißer Schrift */
+        .app-header {
+            display: grid;
+            grid-template-columns: 40px 1fr 40px;
+            align-items: center;
+            padding: calc(1.5rem + env(safe-area-inset-top)) 1.5rem 1.5rem 1.5rem;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
+            margin-bottom: 1.25rem;
+        }
+        .app-header h1 {
+            color: white !important;
+            -webkit-text-fill-color: white !important;
+            background: none !important;
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 800;
+            text-align: center;
+        }
+        .back-arrow {
+            color: white !important;
+            background: rgba(255,255,255,0.2) !important;
+            border: none !important;
+        }
+
         /* === Spezifische Styles für Upload & Formular === */
-        
+
         /* Upload Bereich */
         .upload-area {
             background-color: #F9FAFB;
@@ -111,13 +138,24 @@
             margin-bottom: 0.5rem;
             display: block;
         }
+
+        .helper-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <header class="app-header">
-        <a href="choose-listing.html" class="back-arrow">
+        <a href="javascript:history.back()" class="back-arrow">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
         <h1 id="pageTitle">Verkaufen</h1>
@@ -168,7 +206,7 @@
 
             <!-- Kategorie -->
             <div class="form-group">
-                <label for="category">Kategorie</label>
+                <label for="category" id="label-category">Kategorie</label>
                 <select id="category" required>
                     <option value="" disabled selected>Bitte wählen</option>
                     <option value="Furniture & Home">Möbel & Wohnen</option>
@@ -184,8 +222,8 @@
             </div>
 
             <!-- Zustand -->
-            <div class="form-group">
-                <label for="condition">Zustand</label>
+            <div class="form-group" id="condition-group">
+                <label for="condition" id="label-condition">Zustand</label>
                 <select id="condition" required>
                     <option value="" disabled selected>Bitte wählen</option>
                     <option value="New">Neu</option>
@@ -194,6 +232,7 @@
                     <option value="Fair">Ok</option>
                     <option value="Poor">Gebraucht</option>
                 </select>
+                <span class="helper-text hidden" id="condition-helper">Welcher Zustand ist für dich noch akzeptabel?</span>
             </div>
 
             <!-- Stadt -->
@@ -216,25 +255,15 @@
 </div>
 
 <!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
-<script src="cities.js"></script> 
+<script src="room8-ui.js"></script>
+<script src="cities.js"></script>
+<script src="notificationHelpers.js"></script>
 
 <script>
-    // 1. Config Fallback (Rettungsschirm)
-    if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_ANON_KEY === 'undefined') {
-        console.warn("Config missing, using fallback.");
-        var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co';
-        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw';
-    }
-
-    // 2. Init Supabase
-    var supabase;
-    if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } else if (typeof window.supabaseClient !== 'undefined') {
-        supabase = window.supabaseClient;
-    }
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // 3. Stadt-Vorschläge laden
     if (typeof populateCityDatalist === 'function') {
@@ -244,23 +273,91 @@
     // Variablen
     var selectedFiles = [];
     var currentMode = 'offer';
-    
-    // URL Parameter checken (z.B. ?mode=search)
+    var editListingId = null;
+    var existingPhotos = [];
+
+    // URL Parameter checken (z.B. ?mode=search oder ?id=123)
     var urlParams = new URLSearchParams(window.location.search);
     var modeParam = urlParams.get('mode');
-    if (modeParam) setMode(modeParam);
+    var idParam = urlParams.get('id');
+
+    if (idParam) {
+        editListingId = idParam;
+        loadListingForEdit(idParam);
+    } else if (modeParam) {
+        setMode(modeParam);
+    }
+
+    // Listing laden für Bearbeitung
+    async function loadListingForEdit(listingId) {
+        try {
+            var result = await sb.from('listings').select('*').eq('id', listingId).single();
+            if (result.error) throw result.error;
+
+            var listing = result.data;
+
+            // Titel anpassen
+            document.getElementById('pageTitle').textContent = 'Inserat bearbeiten';
+            document.getElementById('submitBtn').textContent = 'Änderungen speichern';
+
+            // Modus setzen
+            if (listing.listing_mode) {
+                setMode(listing.listing_mode);
+            }
+
+            // Felder füllen
+            document.getElementById('title').value = listing.title || '';
+            document.getElementById('price').value = listing.price || '';
+            document.getElementById('price_min').value = listing.price_range_min || '';
+            document.getElementById('price_max').value = listing.price_range_max || '';
+            document.getElementById('category').value = listing.category || '';
+            document.getElementById('condition').value = listing.condition || '';
+            document.getElementById('city').value = listing.city || '';
+            document.getElementById('description').value = listing.description || '';
+
+            // Existierende Bilder laden
+            var photosResult = await sb.from('listing_photos').select('*').eq('listing_id', listingId).order('display_order');
+            if (photosResult.data && photosResult.data.length > 0) {
+                existingPhotos = photosResult.data;
+                var grid = document.getElementById('previewGrid');
+
+                for (var i = 0; i < photosResult.data.length; i++) {
+                    var photo = photosResult.data[i];
+                    var publicUrl = sb.storage.from('listing-images').getPublicUrl(photo.storage_path).data.publicUrl;
+
+                    var div = document.createElement('div');
+                    div.className = 'preview-item';
+                    div.innerHTML = '<img src="' + publicUrl + '">';
+                    grid.appendChild(div);
+                }
+                updateCounter();
+            }
+
+        } catch (err) {
+            console.error('Fehler beim Laden:', err);
+            Room8UI.error('Inserat konnte nicht geladen werden. Bitte versuche es erneut.');
+        }
+    }
 
     function setMode(mode) {
         currentMode = mode;
         // UI Umschalten
         document.getElementById('mode-offer').className = mode === 'offer' ? 'mode-option active' : 'mode-option';
         document.getElementById('mode-search').className = mode === 'search' ? 'mode-option active' : 'mode-option';
-        
+
         var pageTitle = document.getElementById('pageTitle');
         var submitBtn = document.getElementById('submitBtn');
         var priceGroup = document.getElementById('price-group');
         var priceRangeGroup = document.getElementById('price-range-group');
         var priceInput = document.getElementById('price');
+        var imageSection = document.getElementById('imageSection');
+        var conditionSelect = document.getElementById('condition');
+        var conditionLabel = document.getElementById('label-condition');
+        var conditionHelper = document.getElementById('condition-helper');
+        var categoryLabel = document.getElementById('label-category');
+        var titleInput = document.getElementById('title');
+        var cityInput = document.getElementById('city');
+        var descInput = document.getElementById('description');
 
         if (mode === 'search') {
             pageTitle.textContent = 'Gesuch aufgeben';
@@ -268,12 +365,36 @@
             priceGroup.classList.add('hidden');
             priceRangeGroup.classList.remove('hidden');
             priceInput.required = false;
+            imageSection.classList.add('hidden');
+            conditionSelect.required = false;
+
+            // Labels für Gesuch anpassen
+            conditionLabel.textContent = 'Mindest-Zustand';
+            conditionHelper.classList.remove('hidden');
+            categoryLabel.textContent = 'In welcher Kategorie?';
+
+            // Placeholders für Gesuch anpassen
+            titleInput.placeholder = 'Was suchst du?';
+            cityInput.placeholder = 'Wo suchst du?';
+            descInput.placeholder = 'Beschreibe genauer was du suchst...';
         } else {
             pageTitle.textContent = 'Verkaufen';
             submitBtn.textContent = 'Veröffentlichen';
             priceGroup.classList.remove('hidden');
             priceRangeGroup.classList.add('hidden');
             priceInput.required = true;
+            imageSection.classList.remove('hidden');
+            conditionSelect.required = true;
+
+            // Labels für Angebot
+            conditionLabel.textContent = 'Zustand';
+            conditionHelper.classList.add('hidden');
+            categoryLabel.textContent = 'Kategorie';
+
+            // Placeholders für Angebot
+            titleInput.placeholder = 'Was möchtest du anbieten?';
+            cityInput.placeholder = 'Wo befindet sich der Artikel?';
+            descInput.placeholder = 'Beschreibe den Artikel genauer...';
         }
     }
 
@@ -319,9 +440,9 @@
     }
 
     function updateCounter() {
-        var activeCount = selectedFiles.filter(f => f !== null).length;
+        var activeCount = selectedFiles.filter(f => f !== null).length + existingPhotos.length;
         document.getElementById('photoCounter').textContent = activeCount + ' / 5 Fotos';
-        
+
         // Upload Button ausblenden wenn voll
         var uploadArea = document.querySelector('.upload-area');
         if (activeCount >= 5) {
@@ -342,10 +463,10 @@
 
         try {
             // 1. Auth Check
-            var { data: { user } } = await supabase.auth.getUser();
+            var { data: { user } } = await sb.auth.getUser();
             if (!user) {
-                alert("Bitte erst einloggen.");
-                window.location.href = 'login.html';
+                Room8UI.warning("Bitte erst einloggen.");
+                setTimeout(function() { window.location.href = 'login.html'; }, 1500);
                 return;
             }
 
@@ -367,72 +488,115 @@
                 priceMax = document.getElementById('price_max').value || null;
             }
 
-            // 3. Listing in DB erstellen
-            var insertData = {
-                owner_id: user.id,
+            // 3. Listing in DB erstellen oder aktualisieren
+            var listingData = {
                 type: 'gegenstand',
                 title: title,
                 price: price,
                 price_range_min: priceMin,
                 price_range_max: priceMax,
                 category: category,
-                condition: condition, 
+                condition: condition,
                 city: city,
                 description: description,
                 listing_mode: currentMode,
                 is_active: true
             };
 
-            var { data: listing, error: insertError } = await supabase
-                .from('listings')
-                .insert(insertData)
-                .select()
-                .single();
+            var listing;
+            if (editListingId) {
+                // UPDATE
+                var updateResult = await sb.from('listings').update(listingData).eq('id', editListingId).select().single();
+                if (updateResult.error) throw updateResult.error;
+                listing = updateResult.data;
+            } else {
+                // INSERT
+                listingData.owner_id = user.id;
+                var insertResult = await sb.from('listings').insert(listingData).select().single();
+                if (insertResult.error) throw insertResult.error;
+                listing = insertResult.data;
+            }
 
-            if (insertError) throw insertError;
-
-            // 4. Bilder hochladen
+            // 4. Bilder hochladen (nur neue)
             var activeFiles = selectedFiles.filter(f => f !== null);
-            
+
             if (activeFiles.length > 0) {
                 btn.textContent = "Lade Bilder hoch...";
-                
+                var startIndex = existingPhotos.length;
+
                 for (var i = 0; i < activeFiles.length; i++) {
                     var file = activeFiles[i];
                     var fileExt = file.name.split('.').pop();
-                    // Eindeutiger Dateiname: listingID_index.ext
-                    var fileName = `${listing.id}_${i}.${fileExt}`;
-                    
-                    // Upload zu Storage
-                    var { error: uploadError } = await supabase.storage
-                        .from('listing-images')
-                        .upload(fileName, file);
+                    var fileName = `${listing.id}_${startIndex + i}.${fileExt}`;
 
-                    if (uploadError) {
-                        console.error("Bild Upload Fehler:", uploadError);
-                        // Wir machen trotzdem weiter, damit das Listing nicht verloren geht
+                    var uploadResult = await sb.storage.from('listing-images').upload(fileName, file);
+
+                    if (uploadResult.error) {
+                        console.error("Bild Upload Fehler:", uploadResult.error);
                     } else {
-                        // Verknüpfung in DB speichern
-                        await supabase.from('listing_photos').insert({
+                        await sb.from('listing_photos').insert({
                             listing_id: listing.id,
                             storage_path: fileName,
-                            display_order: i
+                            display_order: startIndex + i
                         });
                     }
                 }
             }
 
             // Erfolg!
-            alert("Erfolgreich erstellt!");
-            window.location.href = "gegenstaende.html"; // Zur Übersicht
+            Room8UI.success(editListingId ? "Änderungen gespeichert!" : "Erfolgreich erstellt!");
+
+            // NEU: Benachrichtige User in der Stadt (nur bei neuen Inseraten)
+            if (!editListingId && listing.city && window.NotificationHelpers) {
+                try {
+                    // Hole alle User in dieser Stadt mit aktivierter Benachrichtigung
+                    var cityUsersRes = await sb
+                        .from('profiles')
+                        .select('id')
+                        .ilike('city', listing.city);
+
+                    if (cityUsersRes.data && cityUsersRes.data.length > 0) {
+                        for (var u of cityUsersRes.data) {
+                            // Nicht den Ersteller selbst benachrichtigen
+                            if (u.id === user.id) continue;
+
+                            // Prüfe Benachrichtigungseinstellungen
+                            var settingsRes = await sb
+                                .from('notification_settings')
+                                .select('new_listing_city')
+                                .eq('user_id', u.id)
+                                .single();
+
+                            // Standard: aktiviert wenn keine Einstellung
+                            var notify = !settingsRes.data || settingsRes.data.new_listing_city !== false;
+
+                            if (notify) {
+                                await NotificationHelpers.createNotification(
+                                    u.id,
+                                    'new_listing_city',
+                                    '📦 Neuer Artikel in ' + listing.city,
+                                    listing.title,
+                                    'listing-details.html?id=' + listing.id,
+                                    listing.id
+                                );
+                            }
+                        }
+                    }
+                } catch (notifyErr) {
+                    console.log('City notification error:', notifyErr);
+                }
+            }
+
+            setTimeout(function() { window.location.href = "gegenstaende.html"; }, 1500);
 
         } catch (err) {
             console.error(err);
-            alert("Fehler: " + err.message);
+            Room8UI.error("Inserat konnte nicht gespeichert werden. Bitte versuche es erneut.");
             btn.disabled = false;
             btn.textContent = originalText;
         }
     });
 </script>
+<script src="notificationBell.js"></script>
 </body>
 </html>

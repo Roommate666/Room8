@@ -2,8 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gespeicherte Suchen - Room8</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Gespeicherte Suchen - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
         /* Card Styles */
@@ -99,17 +98,19 @@
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); z-index: 2000;
-            display: none; align-items: flex-end; 
+            display: none; align-items: flex-end;
             justify-content: center;
+            overflow: hidden;
         }
-        
+
         .modal-content {
             background: white; width: 100%; max-width: 600px;
             border-radius: 20px 20px 0 0;
             padding: 1.5rem;
-            padding-bottom: 2rem;
-            max-height: 90vh;
+            padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+            max-height: 85vh;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             animation: slideUp 0.3s ease-out;
         }
         
@@ -173,7 +174,7 @@
 
 <div class="app-container">
     <header class="app-header">
-        <a href="settings.html" class="back-arrow" onclick="event.preventDefault(); navigateTo('settings.html');">
+        <a href="javascript:history.back()" class="back-arrow">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
         <h1>Suchaufträge</h1>
@@ -274,13 +275,15 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="room8-ui.js"></script>
 <script src="cities.js"></script>
 <script src="navigation.js"></script>
+<script src="notificationBell.js"></script>
 <script>
-    if (typeof SUPABASE_URL === 'undefined') { var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co'; var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw'; }
-    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Sicherer Navigation Helper
     function navigateTo(url) {
@@ -306,15 +309,15 @@
 
     async function loadSearches() {
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            
-            if (!user) { 
+            const { data: { user } } = await sb.auth.getUser();
+
+            if (!user) {
                 navigateTo('login.html');
-                return; 
+                return;
             }
             currentUser = user;
 
-            const { data: searches, error } = await supabase
+            const { data: searches, error } = await sb
                 .from('saved_searches')
                 .select('*')
                 .eq('user_id', user.id)
@@ -344,7 +347,8 @@
         const div = document.createElement('div');
         div.className = 'search-card';
         
-        const isHousing = s.type === 'wohnung';
+        // Spalte heißt 'search_type'
+        const isHousing = s.search_type === 'wohnung';
         const icon = isHousing ? '🏠' : '📦';
         let title = s.search_query;
         if (!title) {
@@ -410,12 +414,12 @@
 
     // Actions
     window.toggleActive = async (id, state) => {
-        await supabase.from('saved_searches').update({ is_active: state }).eq('id', id);
+        await sb.from('saved_searches').update({ is_active: state }).eq('id', id);
     };
 
     window.deleteSearch = async (id) => {
         if(!confirm("Löschen?")) return;
-        await supabase.from('saved_searches').delete().eq('id', id);
+        await sb.from('saved_searches').delete().eq('id', id);
         loadSearches();
     };
 
@@ -425,44 +429,59 @@
         const btn = document.getElementById('saveBtn');
         btn.disabled = true; btn.textContent = 'Speichere...';
 
-        const type = document.getElementById('searchType').value;
-        
-        const data = {
-            user_id: currentUser.id,
-            type: type,
-            city: document.getElementById('city').value,
-            min_price: document.getElementById('minPrice').value || null,
-            max_price: document.getElementById('maxPrice').value || null,
-            is_active: true
-        };
+        try {
+            const type = document.getElementById('searchType').value;
+            const cityVal = document.getElementById('city').value.trim();
 
-        if (type === 'wohnung') {
-            const rt = document.getElementById('roomType').value;
-            data.room_type = rt === 'all' ? null : rt;
-            
-            const dateVal = document.getElementById('availableFrom').value;
-            data.available_from = dateVal || null;
-            
-            data.category = null;
-            data.search_query = null;
-        } else {
-            const cat = document.getElementById('category').value;
-            data.category = cat === 'all' ? null : cat;
-            data.search_query = document.getElementById('query').value || null;
-            
-            data.room_type = null;
-            data.available_from = null;
-        }
+            if (!cityVal) {
+                throw new Error('Bitte Stadt eingeben');
+            }
 
-        const { error } = await supabase.from('saved_searches').insert(data);
-        
-        btn.disabled = false; btn.textContent = 'Alarm speichern';
-        
-        if (error) {
-            alert("Fehler: " + error.message);
-        } else {
+            const minPriceVal = document.getElementById('minPrice').value;
+            const maxPriceVal = document.getElementById('maxPrice').value;
+
+            // search_type und search_query sind NOT NULL
+            const data = {
+                user_id: currentUser.id,
+                search_type: type,
+                search_query: '',
+                city: cityVal,
+                min_price: minPriceVal ? parseFloat(minPriceVal) : null,
+                max_price: maxPriceVal ? parseFloat(maxPriceVal) : null,
+                is_active: true
+            };
+
+            if (type === 'wohnung') {
+                const rt = document.getElementById('roomType').value;
+                if (rt && rt !== 'all') data.room_type = rt;
+
+                const dateVal = document.getElementById('availableFrom').value;
+                if (dateVal) data.available_from = dateVal;
+            } else {
+                const cat = document.getElementById('category').value;
+                if (cat && cat !== 'all') data.category = cat;
+                data.search_query = document.getElementById('query').value || '';
+            }
+
+            console.log('Speichere Suche:', data);
+            const { error } = await sb.from('saved_searches').insert(data);
+
+            if (error) {
+                console.error('Insert error:', error);
+                throw error;
+            }
+
+            Room8UI.success('Suchauftrag gespeichert!');
+            document.getElementById('searchForm').reset();
             closeModal();
             loadSearches();
+
+        } catch (err) {
+            console.error('Fehler beim Speichern:', err);
+            Room8UI.error("Suchauftrag konnte nicht gespeichert werden. Bitte versuche es erneut.");
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Alarm speichern';
         }
     });
 

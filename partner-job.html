@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Job einreichen - Room8 Partner</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .partner-container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 1rem;
+            padding-bottom: 3rem;
+        }
+        .partner-header {
+            text-align: center;
+            color: white;
+            padding: 2rem 1rem;
+        }
+        .partner-header h1 {
+            font-size: 1.8rem;
+            margin: 0 0 0.5rem 0;
+        }
+        .partner-header p {
+            opacity: 0.9;
+            margin: 0;
+        }
+        .partner-logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #374151;
+            margin: 1.5rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #E5E7EB;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .section-title:first-child { margin-top: 0; }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #374151;
+            margin-bottom: 0.4rem;
+        }
+        .form-group label .required {
+            color: #EF4444;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .form-group small {
+            display: block;
+            color: #6B7280;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+        }
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        @media (max-width: 500px) {
+            .row { grid-template-columns: 1fr; }
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        .success-message h2 {
+            color: #059669;
+            margin: 0 0 1rem 0;
+        }
+        .success-message p {
+            color: #6B7280;
+        }
+        .info-box {
+            background: #F0F9FF;
+            border: 1px solid #BAE6FD;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: #0369A1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="partner-container">
+    <div class="partner-header">
+        <div class="partner-logo">💼</div>
+        <h1>Job bei Room8 einreichen</h1>
+        <p>Erreiche tausende Studenten mit deiner Stellenanzeige</p>
+    </div>
+
+    <div class="form-card">
+        <div class="info-box">
+            ℹ️ Bitte fülle alle Pflichtfelder aus. Nach der Prüfung wird dein Job in der App veröffentlicht.
+        </div>
+
+        <form id="jobForm">
+            <!-- Unternehmen -->
+            <div class="section-title">🏢 Unternehmen</div>
+
+            <div class="form-group">
+                <label>Firmenname <span class="required">*</span></label>
+                <input type="text" id="company" required placeholder="z.B. Musterfirma GmbH">
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>Website</label>
+                    <input type="url" id="website" placeholder="https://www.beispiel.de">
+                </div>
+                <div class="form-group">
+                    <label>Unternehmensgröße</label>
+                    <select id="companySize">
+                        <option value="">Bitte wählen</option>
+                        <option value="1-10">1-10 Mitarbeiter</option>
+                        <option value="11-50">11-50 Mitarbeiter</option>
+                        <option value="51-200">51-200 Mitarbeiter</option>
+                        <option value="201-500">201-500 Mitarbeiter</option>
+                        <option value="500+">500+ Mitarbeiter</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Kontakt E-Mail <span class="required">*</span></label>
+                <input type="email" id="contactEmail" required placeholder="jobs@beispiel.de">
+                <small>Für Rückfragen und die Bestätigung</small>
+            </div>
+
+            <!-- Job Details -->
+            <div class="section-title">📋 Job Details</div>
+
+            <div class="form-group">
+                <label>Jobtitel <span class="required">*</span></label>
+                <input type="text" id="title" required placeholder="z.B. Werkstudent Marketing (m/w/d)">
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>Job-Art <span class="required">*</span></label>
+                    <select id="jobType" required>
+                        <option value="">Bitte wählen</option>
+                        <option value="werkstudent">Werkstudent</option>
+                        <option value="minijob">Minijob</option>
+                        <option value="praktikum">Praktikum</option>
+                        <option value="vollzeit">Vollzeit</option>
+                        <option value="teilzeit">Teilzeit</option>
+                        <option value="freelance">Freelance</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Befristung</label>
+                    <select id="contractDuration">
+                        <option value="">Bitte wählen</option>
+                        <option value="unbefristet">Unbefristet</option>
+                        <option value="6-monate">6 Monate</option>
+                        <option value="12-monate">12 Monate</option>
+                        <option value="nach-absprache">Nach Absprache</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Standort <span class="required">*</span></label>
+                <input type="text" id="location" required placeholder="z.B. Berlin / Remote">
+            </div>
+
+            <!-- Gehalt & Arbeitszeit -->
+            <div class="section-title">💰 Gehalt & Arbeitszeit</div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>Gehalt/Stundenlohn</label>
+                    <input type="text" id="salary" placeholder="z.B. 15€/Stunde oder 2.500€/Monat">
+                </div>
+                <div class="form-group">
+                    <label>Stunden pro Woche</label>
+                    <input type="text" id="hours" placeholder="z.B. 15-20">
+                </div>
+            </div>
+
+            <!-- Beschreibung -->
+            <div class="section-title">📝 Beschreibung</div>
+
+            <div class="form-group">
+                <label>Jobbeschreibung <span class="required">*</span></label>
+                <textarea id="description" required placeholder="Beschreibe die Aufgaben und was den Job besonders macht..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Anforderungen</label>
+                <textarea id="requirements" placeholder="Was sollten Bewerber mitbringen? (Eine Anforderung pro Zeile)"></textarea>
+                <small>Eine Anforderung pro Zeile</small>
+            </div>
+
+            <div class="form-group">
+                <label>Benefits / Was wir bieten</label>
+                <textarea id="benefits" placeholder="z.B. Flexible Arbeitszeiten, Homeoffice, etc. (Ein Benefit pro Zeile)"></textarea>
+                <small>Ein Benefit pro Zeile</small>
+            </div>
+
+            <!-- Bewerbung -->
+            <div class="section-title">📨 Bewerbung</div>
+
+            <div class="form-group">
+                <label>Bewerbungs-E-Mail</label>
+                <input type="email" id="appEmail" placeholder="bewerbung@beispiel.de">
+            </div>
+
+            <div class="form-group">
+                <label>Oder: Link zum Bewerbungsportal</label>
+                <input type="url" id="appUrl" placeholder="https://karriere.beispiel.de/job123">
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">📤 Job einreichen</button>
+        </form>
+
+        <div class="success-message" id="successMessage">
+            <div class="success-icon">✅</div>
+            <h2>Vielen Dank!</h2>
+            <p>Dein Job wurde erfolgreich eingereicht und wird in Kürze geprüft. Du erhältst eine Bestätigung per E-Mail.</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="config.js"></script>
+<script>
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    document.getElementById('jobForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Wird gesendet...';
+
+        try {
+            const data = {
+                submission_type: 'job',
+                status: 'pending',
+                company_name: document.getElementById('company').value,
+                company_website: document.getElementById('website').value || null,
+                company_size: document.getElementById('companySize').value || null,
+                contact_email: document.getElementById('contactEmail').value,
+                title: document.getElementById('title').value,
+                job_type: document.getElementById('jobType').value,
+                contract_duration: document.getElementById('contractDuration').value || null,
+                location: document.getElementById('location').value,
+                salary: document.getElementById('salary').value || null,
+                hours: document.getElementById('hours').value || null,
+                description: document.getElementById('description').value,
+                requirements: document.getElementById('requirements').value || null,
+                benefits: document.getElementById('benefits').value || null,
+                application_email: document.getElementById('appEmail').value || null,
+                application_url: document.getElementById('appUrl').value || null,
+                submitted_at: new Date().toISOString()
+            };
+
+            const { error } = await sb.from('partner_submissions').insert(data);
+            if (error) throw error;
+
+            document.getElementById('jobForm').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
+
+        } catch (err) {
+            console.error(err);
+            Room8UI.error('Einreichung fehlgeschlagen. Bitte versuche es erneut.');
+            btn.disabled = false;
+            btn.textContent = '📤 Job einreichen';
+        }
+    });
+</script>
+</body>
+</html>

@@ -5,3 +5,7 @@ build-log.txt
 android/app/build/
 android/.gradle/
 .temp/
+.claude/
+nul
+*.firebase-adminsdk*.json
+unnamed.jpg

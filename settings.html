@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Einstellungen - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
@@ -96,7 +96,10 @@
         .icon-search { background: #ECFDF5; color: #10B981; }
         .icon-legal { background: #F3F4F6; color: #6B7280; }
         .icon-logout { background: #FEE2E2; color: #EF4444; }
+        .icon-delete { background: #FEE2E2; color: #DC2626; }
+.delete-btn { color: #DC2626; font-weight: 600; }
         .icon-admin { background: #111827; color: #FBBF24; }
+        .icon-blocked { background: #FEE2E2; color: #991B1B; }
 
         .item-text {
             flex: 1;
@@ -157,7 +160,7 @@
 
 <div class="app-container">
     <header class="app-header">
-        <a href="profile.html" class="back-arrow">
+        <a href="javascript:history.back()" class="back-arrow">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
         <h1>Einstellungen</h1>
@@ -227,6 +230,11 @@
                 <span class="item-text">Verifizierung</span>
                 <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
             </a>
+            <a href="blocked-users.html" class="settings-item">
+                <div class="item-icon icon-blocked">🚫</div>
+                <span class="item-text">Blockierte Nutzer</span>
+                <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
         </div>
 
         <!-- Legal & Support -->
@@ -253,6 +261,15 @@
                 <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
             </a>
         </div>
+            <!-- Konto löschen -->
+<h3 class="section-label">Gefahrenzone</h3>
+<div class="settings-group">
+    <div class="settings-item" id="deleteAccountBtn" style="cursor: pointer;">
+        <div class="item-icon icon-delete">🗑️</div>
+        <span class="item-text delete-btn">Konto löschen</span>
+        <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    </div>
+</div>
 
         <!-- Logout -->
         <div class="settings-group">
@@ -263,7 +280,7 @@
         </div>
 
         <div class="version-info">
-            Room8 Version 1.0.2<br>
+            Room8 Version 2.0<br>
             Made with ❤️ for Students
         </div>
 
@@ -272,26 +289,17 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
+<script src="notificationBell.js"></script>
 <script>
-    // Config Fallback
-    if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_ANON_KEY === 'undefined') {
-        var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co';
-        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw';
-    }
-
     // DEINE ADMIN E-MAIL
     var ADMIN_EMAIL = 'albayrak_yusuf@icloud.com';
 
     // Init
-    var supabase;
-    if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } else if (typeof window.supabaseClient !== 'undefined') {
-        supabase = window.supabaseClient;
-    }
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     function navigateTo(url) {
         try {
@@ -304,7 +312,7 @@
     async function loadUser() {
         if (!supabase) return;
 
-        var result = await supabase.auth.getUser();
+        var result = await sb.auth.getUser();
         var user = result.data ? result.data.user : null;
         
         if (!user) {
@@ -320,7 +328,7 @@
         }
 
         // Profil laden
-        var profileResult = await supabase
+        var profileResult = await sb
             .from('profiles')
             .select('username, email, full_name, avatar_url')
             .eq('id', user.id)
@@ -345,10 +353,85 @@
 
     document.getElementById('logoutBtn').addEventListener('click', async function() {
         if (confirm('Möchtest du dich wirklich abmelden?')) {
-            await supabase.auth.signOut();
+            await sb.auth.signOut();
             navigateTo('login.html');
         }
     });
+     // Konto löschen
+document.getElementById('deleteAccountBtn').addEventListener('click', async function() {
+    var confirmText = prompt('Um dein Konto zu löschen, gib "LÖSCHEN" ein:');
+    if (confirmText !== 'LÖSCHEN') {
+        Room8UI.info('Konto wurde NICHT gelöscht.');
+        return;
+    }
+
+    if (!confirm('Bist du WIRKLICH sicher? Alle deine Daten, Inserate und Nachrichten werden unwiderruflich gelöscht!')) {
+        return;
+    }
+
+    try {
+        var result = await sb.auth.getUser();
+        var user = result.data ? result.data.user : null;
+        if (!user) return;
+
+        Room8UI.info('Lösche deine Daten...');
+
+        // 1. Listing-Fotos aus Storage löschen
+        try {
+            const { data: photos } = await sb.from('listing_photos').select('storage_path').eq('user_id', user.id);
+            if (photos && photos.length > 0) {
+                const paths = photos.map(p => p.storage_path);
+                await sb.storage.from('listing-images').remove(paths);
+            }
+        } catch (e) { console.log('Storage cleanup error:', e); }
+
+        // 2. Chat-Bilder aus Storage löschen
+        try {
+            const { data: chatFiles } = await sb.storage.from('chat-images').list(user.id);
+            if (chatFiles && chatFiles.length > 0) {
+                const chatPaths = chatFiles.map(f => user.id + '/' + f.name);
+                await sb.storage.from('chat-images').remove(chatPaths);
+            }
+        } catch (e) { console.log('Chat images cleanup error:', e); }
+
+        // 3. Avatar aus Storage löschen
+        try {
+            const { data: avatarFiles } = await sb.storage.from('avatars').list(user.id);
+            if (avatarFiles && avatarFiles.length > 0) {
+                const avatarPaths = avatarFiles.map(f => user.id + '/' + f.name);
+                await sb.storage.from('avatars').remove(avatarPaths);
+            }
+        } catch (e) { console.log('Avatar cleanup error:', e); }
+
+        // 4. Alle Datenbank-Einträge löschen
+        await sb.from('listing_photos').delete().eq('user_id', user.id);
+        await sb.from('listings').delete().eq('owner_id', user.id);
+        await sb.from('messages').delete().eq('sender_id', user.id);
+        await sb.from('messages').delete().eq('receiver_id', user.id);
+        await sb.from('favorites').delete().eq('user_id', user.id);
+        await sb.from('notifications').delete().eq('user_id', user.id);
+        await sb.from('reviews').delete().eq('reviewer_id', user.id);
+        await sb.from('reviews').delete().eq('reviewee_id', user.id);
+        await sb.from('reports').delete().eq('reporter_id', user.id);
+        await sb.from('saved_searches').delete().eq('user_id', user.id);
+        await sb.from('profiles').delete().eq('id', user.id);
+
+        // 5. Auth-User löschen (via Edge Function)
+        try {
+            await sb.functions.invoke('delete-user', { body: { userId: user.id } });
+        } catch (e) {
+            console.log('Auth deletion needs Edge Function:', e);
+        }
+
+        await sb.auth.signOut();
+
+        Room8UI.success('Dein Konto wurde gelöscht. Auf Wiedersehen!');
+        setTimeout(function() { navigateTo('login.html'); }, 1500);
+    } catch (err) {
+        console.error('Fehler beim Löschen:', err);
+        Room8UI.error('Konto konnte nicht gelöscht werden. Bitte versuche es erneut.');
+    }
+});
 
     loadUser();
 </script>

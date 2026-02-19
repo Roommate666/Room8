@@ -2,8 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Verifizierung - Room8</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Verifizierung - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .verify-container {
@@ -135,7 +134,7 @@
 
 <div class="app-container">
     <header class="app-header">
-        <a href="profile.html" class="back-arrow">
+        <a href="javascript:history.back()" class="back-arrow">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
         <h1>Studenten-Status</h1>
@@ -213,23 +212,13 @@
     </main>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script>
-    // 1. Config Fallback
-    if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_ANON_KEY === 'undefined') {
-        var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co';
-        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw';
-    }
-
-    // 2. Init
-    var supabase;
-    if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } else if (typeof window.supabaseClient !== 'undefined') {
-        supabase = window.supabaseClient;
-    }
+    // Init
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Helper: Navigation
     function navigateTo(url) {
@@ -241,7 +230,7 @@
     // Init
     async function init() {
         if (!supabase) return;
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await sb.auth.getUser();
         if (!user) {
             navigateTo('login.html');
             return;
@@ -249,7 +238,7 @@
         currentUser = user;
 
         // Check if already pending
-        const { data: profile } = await supabase.from('profiles').select('verification_status').eq('id', user.id).single();
+        const { data: profile } = await sb.from('profiles').select('verification_status').eq('id', user.id).single();
         if (profile && (profile.verification_status === 'pending' || profile.verification_status === 'approved')) {
             showSuccess();
             document.querySelector('#success-view h2').textContent = "Status: " + (profile.verification_status === 'approved' ? "Verifiziert" : "In Prüfung");
@@ -286,32 +275,112 @@
     // --- LOGIC: EMAIL SUBMIT ---
     document.getElementById('emailForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = document.getElementById('uniEmail').value;
+        const email = document.getElementById('uniEmail').value.trim().toLowerCase();
         const btn = document.getElementById('btnEmail');
-        
+
+        // BLOCKED: All known personal/commercial email providers
+        const BLOCKED_DOMAINS = [
+            // Google
+            'gmail.com','googlemail.com','google.com',
+            // Microsoft
+            'outlook.com','outlook.de','outlook.at','outlook.ch','hotmail.com','hotmail.de','hotmail.co.uk','hotmail.fr','hotmail.it','hotmail.es','live.com','live.de','live.at','live.co.uk','live.fr','live.nl','msn.com','windowslive.com','passport.com',
+            // Yahoo
+            'yahoo.com','yahoo.de','yahoo.co.uk','yahoo.fr','yahoo.it','yahoo.es','yahoo.co.jp','yahoo.ca','yahoo.com.au','yahoo.co.in','ymail.com','rocketmail.com',
+            // Apple
+            'icloud.com','me.com','mac.com',
+            // German providers
+            'web.de','gmx.de','gmx.net','gmx.at','gmx.ch','gmx.com','gmx.info','gmx.org','gmx.eu','gmx.biz',
+            't-online.de','magenta.de','freenet.de','arcor.de','vodafone.de','o2online.de','1und1.de','1und1.com',
+            'kabelmail.de','kabelbw.de','online.de','go4more.de','cityweb.de','nexgo.de','mnet-mail.de',
+            'unitybox.de','unity-mail.de','versanet.de','osnanet.de','netcologne.de',
+            // Privacy / encrypted
+            'protonmail.com','protonmail.ch','proton.me','pm.me','tutanota.com','tutanota.de','tuta.io','tuta.com','posteo.de','posteo.net','posteo.eu','mailbox.org',
+            // AOL
+            'aol.com','aol.de','aol.co.uk','aim.com',
+            // Mail.com / GMX international
+            'mail.com','email.com','email.de','usa.com','myself.com','consultant.com','europe.com','asia.com','writeme.com','dr.com','engineer.com',
+            // Zoho
+            'zoho.com','zoho.eu','zohomail.com','zohomail.eu',
+            // Russian
+            'mail.ru','yandex.com','yandex.ru','rambler.ru','bk.ru','list.ru','inbox.ru',
+            // French
+            'orange.fr','wanadoo.fr','laposte.net','sfr.fr','free.fr','numericable.fr','bbox.fr',
+            // Italian
+            'libero.it','virgilio.it','alice.it','tin.it','fastwebnet.it','tiscali.it','pec.it',
+            // Spanish
+            'telefonica.net','terra.es','ono.com','jazztel.es',
+            // Dutch/Belgian
+            'ziggo.nl','hetnet.nl','home.nl','planet.nl','xs4all.nl','kpnmail.nl','upcmail.nl','chello.nl','telenet.be','skynet.be','proximus.be',
+            // Nordic
+            'telia.com','bredband.net','spray.se','comhem.se','elisa.fi','kolumbus.fi',
+            // Austrian
+            'a1.net','aon.at','chello.at','drei.at','inode.at','liwest.at','speed.at','utanet.at','kabsi.at','tele2.at',
+            // Swiss
+            'bluewin.ch','sunrise.ch','hispeed.ch','vtxnet.ch','green.ch','swissonline.ch',
+            // UK
+            'btinternet.com','btopenworld.com','talktalk.net','sky.com','virgin.net','virginmedia.com','ntlworld.com','blueyonder.co.uk','plusnet.com','tiscali.co.uk',
+            // US ISPs
+            'comcast.net','verizon.net','att.net','sbcglobal.net','bellsouth.net','charter.net','cox.net','earthlink.net','juno.com','netzero.net','optonline.net','frontier.com','windstream.net','centurylink.net',
+            // Temp / disposable
+            'guerrillamail.com','guerrillamail.de','sharklasers.com','grr.la','guerrillamailblock.com','tempmail.com','temp-mail.org','throwaway.email','mailinator.com','yopmail.com','yopmail.fr','trashmail.com','trashmail.de','trashmail.net','dispostable.com','maildrop.cc','fakeinbox.com','mailnesia.com','tempail.com','tempr.email','discard.email','discardmail.com','10minutemail.com','minutemail.com','mohmal.com','burnermail.io','inboxbear.com',
+            // Chinese
+            'qq.com','163.com','126.com','sina.com','sohu.com','aliyun.com',
+            // Indian
+            'rediffmail.com','sify.com',
+            // Brazilian
+            'uol.com.br','bol.com.br','terra.com.br','ig.com.br',
+            // Korean / Japanese
+            'naver.com','daum.net','hanmail.net','nate.com','docomo.ne.jp','ezweb.ne.jp','softbank.ne.jp',
+            // Other common
+            'inbox.com','hushmail.com','fastmail.com','fastmail.fm','runbox.com','mailfence.com','startmail.com','kolabnow.com','disroot.org','riseup.net','autistici.org','aktivix.org','cock.li','airmail.cc','dnmx.org','420blaze.it','waifu.club','firemail.cc','getaddressee.com','lavabit.com','countermail.com','safe-mail.net','scryptmail.com','xmail.net','emailn.de','lycos.com','lycos.de',
+        ];
+
+        const domain = email.split('@')[1];
+        if (!domain) {
+            Room8UI.error('Bitte gib eine gültige E-Mail-Adresse ein.');
+            return;
+        }
+        if (BLOCKED_DOMAINS.includes(domain)) {
+            Room8UI.error('Bitte verwende deine Uni-E-Mail-Adresse (z.B. vorname@uni-koeln.de). Private E-Mail-Anbieter sind nicht erlaubt.');
+            return;
+        }
+
         btn.disabled = true;
         btn.textContent = "Sende...";
 
         try {
-            // Update Profile
-            const { error } = await supabase
+            // Generate a unique verification token
+            const token = crypto.randomUUID();
+            const verificationLink = 'https://room8.club/verify-uni-email.html?token=' + token;
+
+            // Update Profile with email, method, status and token
+            const { error } = await sb
                 .from('profiles')
-                .update({ 
+                .update({
                     uni_email: email,
-                    verification_method: 'uni_email',
-                    verification_status: 'pending' 
+                    verification_method: 'uni-email',
+                    verification_status: 'pending',
+                    uni_email_verification_token: token
                 })
                 .eq('id', currentUser.id);
 
             if (error) throw error;
 
-            // Optional: Trigger Edge Function here if configured
-            // await supabase.functions.invoke('send-verification', { body: { email } });
-            
+            // Send verification email via Edge Function
+            const { error: fnError } = await sb.functions.invoke('send-notification', {
+                body: {
+                    to: email,
+                    type: 'uni_email_verification',
+                    data: { verificationLink: verificationLink }
+                }
+            });
+
+            if (fnError) console.error('E-Mail senden fehlgeschlagen:', fnError);
+
             showSuccess();
 
         } catch (err) {
-            alert("Fehler: " + err.message);
+            Room8UI.error("Code konnte nicht gesendet werden. Bitte versuche es erneut.");
             btn.disabled = false;
             btn.textContent = "Code anfordern";
         }
@@ -325,7 +394,7 @@
         const btn = document.getElementById('btnUpload');
 
         if (!file) {
-            alert("Bitte wähle ein Dokument aus.");
+            Room8UI.warning("Bitte wähle ein Dokument aus.");
             return;
         }
 
@@ -336,23 +405,22 @@
             const fileExt = file.name.split('.').pop();
             const filePath = `${currentUser.id}_verification.${fileExt}`;
 
-            // 1. Upload
-            const { error: uploadError } = await supabase.storage
-                .from('verification-documents')
+            // 1. Upload - MUSS erfolgreich sein!
+            const { error: uploadError } = await sb.storage
+                .from('enrollment-certificates')
                 .upload(filePath, file, { upsert: true });
 
             if (uploadError) {
-                console.warn("Storage warning:", uploadError);
-                // Continue anyway to update status for demo purposes
+                throw new Error("Upload fehlgeschlagen: " + uploadError.message);
             }
 
-            // 2. Update Profile
-            const { error: dbError } = await supabase
+            // 2. Update Profile NUR wenn Upload erfolgreich
+            const { error: dbError } = await sb
                 .from('profiles')
-                .update({ 
-                    verification_document_url: filePath,
+                .update({
+                    enrollment_certificate_url: filePath,
                     verification_method: 'document',
-                    verification_status: 'pending' 
+                    verification_status: 'pending'
                 })
                 .eq('id', currentUser.id);
 
@@ -361,7 +429,7 @@
             showSuccess();
 
         } catch (err) {
-            alert("Fehler: " + err.message);
+            Room8UI.error("Dokument konnte nicht eingereicht werden. Bitte versuche es erneut.");
             btn.disabled = false;
             btn.textContent = "Dokument einreichen";
         }
@@ -369,5 +437,6 @@
 
     init();
 </script>
+<script src="notificationBell.js"></script>
 </body>
 </html>

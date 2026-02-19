@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "652614538564",
+    "project_id": "room8-d1867",
+    "storage_bucket": "room8-d1867.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:652614538564:android:9cc8ae4d82f14c7e1b7311",
+        "android_client_info": {
+          "package_name": "club.room8.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaSuyjrNZCYKk_TUPdFo0L5r6nOR6zb6g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

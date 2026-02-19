@@ -56,7 +56,7 @@ const translations = {
 
  filter_offers: 'Angebote',
 
- filter_searches: 'Gesuche',
+ filter_searches: 'Gesucht',
 
  filter_swaps: 'Tausch',
 
@@ -132,7 +132,7 @@ const translations = {
 
  listings_filter_offers: 'Angebote',
 
- listings_filter_searches: 'Gesuche',
+ listings_filter_searches: 'Gesucht',
 
  listings_filter_swaps: 'Tausch',
 
@@ -375,6 +375,14 @@ const translations = {
  register_password_confirm_placeholder: 'Passwort wiederholen',
 
  register_btn_create: 'Konto erstellen',
+
+ register_terms_agree: 'Ich akzeptiere die',
+
+ register_terms_link: 'Nutzungsbedingungen (AGB)',
+
+ register_terms_and: 'und die',
+
+ register_privacy_link: 'Datenschutzerklärung',
 
  
 
@@ -781,6 +789,20 @@ const translations = {
  public_profile_review: 'Bewertung',
 
  public_profile_reviews_count: 'Bewertungen',
+
+ public_profile_block_user: 'Nutzer blockieren',
+
+ public_profile_unblock_user: 'Blockierung aufheben',
+
+ public_profile_block_confirm: 'Möchtest du diesen Nutzer wirklich blockieren? Du wirst keine Nachrichten mehr von dieser Person erhalten und ihre Inserate nicht mehr sehen.',
+
+ public_profile_unblock_confirm: 'Möchtest du die Blockierung aufheben?',
+
+ public_profile_blocked: 'Nutzer wurde blockiert.',
+
+ public_profile_unblocked: 'Blockierung wurde aufgehoben.',
+
+ public_profile_block_error: 'Fehler beim Blockieren/Entblocken.',
 
  
 
@@ -1516,7 +1538,15 @@ const translations = {
 
  register_btn_create: 'Create Account',
 
- 
+ register_terms_agree: 'I accept the',
+
+ register_terms_link: 'Terms of Use',
+
+ register_terms_and: 'and the',
+
+ register_privacy_link: 'Privacy Policy',
+
+
 
  // Forms
 
@@ -1922,7 +1952,21 @@ const translations = {
 
  public_profile_reviews_count: 'reviews',
 
- 
+ public_profile_block_user: 'Block user',
+
+ public_profile_unblock_user: 'Unblock user',
+
+ public_profile_block_confirm: 'Do you really want to block this user? You will no longer receive messages from this person and won\'t see their listings.',
+
+ public_profile_unblock_confirm: 'Do you want to unblock this user?',
+
+ public_profile_blocked: 'User has been blocked.',
+
+ public_profile_unblocked: 'User has been unblocked.',
+
+ public_profile_block_error: 'Error while blocking/unblocking.',
+
+
 
  // Choose Listing
 

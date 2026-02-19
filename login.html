@@ -2,27 +2,51 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Anmelden - Room8</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* Spezifisches Styling für Login */
+    .app-container {
+      padding-bottom: 0;
+    }
+
     .login-header {
       text-align: center;
       margin-bottom: 2rem;
       margin-top: 1rem;
     }
-    
+
+    .login-logo {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 1rem;
+      background: var(--gradient-primary);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35);
+    }
+
+    .login-logo svg {
+      width: 30px;
+      height: 30px;
+      color: white;
+    }
+
     .login-header h1 {
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       font-weight: 700;
       margin-bottom: 0.5rem;
-      color: var(--primary-color);
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    
+
     .login-header p {
       color: var(--text-light);
-      font-size: 1rem;
+      font-size: 0.95rem;
     }
 
     .forgot-password-link {
@@ -33,20 +57,35 @@
       color: var(--primary-color);
       text-decoration: none;
       font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .forgot-password-link:hover {
+      opacity: 0.8;
     }
 
     .register-hint {
       text-align: center;
       margin-top: 2rem;
+      padding: 1.5rem;
       font-size: 0.9rem;
       color: var(--text-light);
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--glass-border);
     }
 
     .register-hint a {
       color: var(--primary-color);
-      font-weight: 600;
+      font-weight: 700;
       text-decoration: none;
     }
+
+    .register-hint a:hover {
+      text-decoration: underline;
+    }
+
   </style>
 </head>
 <body>
@@ -61,8 +100,14 @@
     </header>
 
     <main class="app-content">
-      
+
       <div class="login-header">
+        <div class="login-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
         <h1 data-i18n="auth_login_title">Willkommen zurück!</h1>
         <p>Logge dich ein, um fortzufahren.</p>
       </div>
@@ -70,7 +115,7 @@
       <form id="loginForm">
         <div class="form-group">
           <label for="loginEmail" data-i18n="auth_email">E-Mail Adresse</label>
-          <input type="email" id="loginEmail" required data-i18n-placeholder="auth_email_placeholder" placeholder="deine.email@uni.de" autocomplete="email">
+          <input type="email" id="loginEmail" required data-i18n-placeholder="auth_email_placeholder" placeholder="deine@email.de" autocomplete="email">
         </div>
 
         <div class="form-group">
@@ -90,27 +135,20 @@
     <footer class="app-footer-nav" id="app-footer-nav"></footer>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
   <script src="config.js"></script>
+  <script src="room8-ui.js"></script>
   <script>
-    // 1. Config Fallback
-    if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_ANON_KEY === 'undefined') {
-        var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co';
-        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw';
-    }
-
-    var supabase;
-    if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     var loginBtn = document.getElementById('loginBtn');
     
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
       
-      if(!supabase) {
-          alert("Verbindungsfehler: Supabase konnte nicht geladen werden.");
+      if(!sb) {
+          Room8UI.error("Verbindungsfehler: Supabase konnte nicht geladen werden.");
           return;
       }
 
@@ -121,7 +159,7 @@
       var originalText = loginBtn.textContent;
       loginBtn.textContent = "Wird eingeloggt...";
       
-      supabase.auth.signInWithPassword({ email: email, password: password })
+      sb.auth.signInWithPassword({ email: email, password: password })
         .then(function(response) {
           if (response.error) { 
             throw response.error;
@@ -132,9 +170,10 @@
         })
         .catch(function(err) {
           console.error("Login Error:", err);
-          var msg = err.message;
-          if (msg === 'Invalid login credentials') msg = 'Falsches Passwort oder E-Mail.';
-          alert('Login fehlgeschlagen: ' + msg);
+          var msg = 'Login fehlgeschlagen. Bitte versuche es erneut.';
+          if (err.message === 'Invalid login credentials') msg = 'Falsches Passwort oder E-Mail.';
+          else if (err.message === 'Email not confirmed') msg = 'Bitte bestätige zuerst deine E-Mail-Adresse.';
+          Room8UI.error(msg);
           
           loginBtn.disabled = false;
           loginBtn.textContent = originalText;
@@ -142,7 +181,24 @@
     });
   </script>
   
-  <script src="navigation.js"></script>
   <script src="translations.js"></script>
+  <script>
+    // Fix back-arrow for Capacitor iOS
+    document.querySelectorAll('.back-arrow, a[href="index.html"]').forEach(function(arrow) {
+      arrow.addEventListener('click', function(e) {
+        e.preventDefault();
+        var href = arrow.getAttribute('href');
+        if (href && href !== '#') {
+          try {
+            window.location.href = href;
+          } catch(err) {
+            window.location.replace(href);
+          }
+        } else {
+          window.history.back();
+        }
+      });
+    });
+  </script>
 </body>
 </html>
