@@ -7,14 +7,19 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 public class Room8MessagingService extends FirebaseMessagingService {
 
+    private static final String TAG = "Room8FCM";
+
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
+        Log.d(TAG, "onMessageReceived called! Data size: " + remoteMessage.getData().size());
+
         String title = null;
         String body = null;
         String url = null;
@@ -24,16 +29,21 @@ public class Room8MessagingService extends FirebaseMessagingService {
             title = remoteMessage.getData().get("title");
             body = remoteMessage.getData().get("body");
             url = remoteMessage.getData().get("url");
+            Log.d(TAG, "Data message - title: " + title + ", body: " + body + ", url: " + url);
         }
 
         // Fallback: Notification payload
         if (title == null && remoteMessage.getNotification() != null) {
             title = remoteMessage.getNotification().getTitle();
             body = remoteMessage.getNotification().getBody();
+            Log.d(TAG, "Notification payload - title: " + title);
         }
 
         if (title != null) {
+            Log.d(TAG, "Showing notification with Room8 logo");
             showNotification(title, body, url);
+        } else {
+            Log.w(TAG, "No title found, skipping notification");
         }
     }
 
