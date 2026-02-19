@@ -607,7 +607,7 @@
                         .eq('blocked_id', userId);
 
                     if (error) {
-                        Room8UI.error('Fehler beim Entsperren: ' + error.message);
+                        Room8UI.error('Entsperren fehlgeschlagen. Bitte versuche es erneut.');
                         return;
                     }
 
@@ -631,7 +631,7 @@
                         if (error.code === '23505') {
                             Room8UI.warning('Nutzer ist bereits blockiert.');
                         } else {
-                            Room8UI.error('Fehler beim Blockieren: ' + error.message);
+                            Room8UI.error('Blockieren fehlgeschlagen. Bitte versuche es erneut.');
                         }
                         return;
                     }
@@ -675,7 +675,7 @@
 
         container.innerHTML = '';
         listings.forEach(l => {
-            let imgUrl = 'https://via.placeholder.com/150?text=Room8';
+            let imgUrl = 'no-image.svg';
             if (l.listing_photos && l.listing_photos.length > 0) {
                 const { data } = sb.storage.from('listing-images').getPublicUrl(l.listing_photos[0].storage_path);
                 if (data) imgUrl = data.publicUrl;

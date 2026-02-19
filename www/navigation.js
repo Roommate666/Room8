@@ -239,6 +239,7 @@
             }
 
             .bottom-nav-item {
+                position: relative;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -328,6 +329,24 @@
                 font-weight: 600;
                 letter-spacing: 0.01em;
             }
+
+            .bottom-nav-badge {
+                position: absolute;
+                top: 0;
+                right: 2px;
+                background: #EF4444;
+                color: white;
+                font-size: 0.6rem;
+                font-weight: 700;
+                min-width: 16px;
+                height: 16px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0 4px;
+                box-shadow: 0 2px 4px rgba(239,68,68,0.4);
+            }
         `;
 
         var style = document.createElement('style');
@@ -336,16 +355,119 @@
         document.head.appendChild(style);
     }
 
+    // Update unread message badge on Chat nav item
+    var _navClient = null;
+    var _navUserId = null;
+    var _realtimeSubscribed = false;
+
+    function getNavClient() {
+        if (_navClient) return _navClient;
+        if (window.supabase && window.supabase.createClient && typeof SUPABASE_URL !== 'undefined') {
+            _navClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+        return _navClient;
+    }
+
+    function setBadgeCount(count) {
+        var chatLink = document.querySelector('.bottom-nav-item[data-href="nachrichten.html"]');
+        if (!chatLink) return;
+        var old = chatLink.querySelector('.bottom-nav-badge');
+        if (old) old.remove();
+        if (count && count > 0) {
+            var badge = document.createElement('span');
+            badge.className = 'bottom-nav-badge';
+            badge.textContent = count > 99 ? '99+' : count;
+            chatLink.appendChild(badge);
+        }
+    }
+
+    function updateChatBadge() {
+        var client = getNavClient();
+        if (!client) return;
+        try {
+            client.auth.getSession().then(function(result) {
+                if (!result.data || !result.data.session) return;
+                _navUserId = result.data.session.user.id;
+                client.from('messages')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('receiver_id', _navUserId)
+                    .eq('is_read', false)
+                    .then(function(res) {
+                        setBadgeCount(res.count);
+                    });
+                // Subscribe to realtime updates (once)
+                subscribeToMessageUpdates();
+            });
+        } catch(e) { console.warn('Badge update failed:', e); }
+    }
+
+    // Real-time subscription for chat badge
+    function subscribeToMessageUpdates() {
+        if (_realtimeSubscribed || !_navUserId) return;
+        var client = getNavClient();
+        if (!client) return;
+        _realtimeSubscribed = true;
+        try {
+            client.channel('nav-badge-messages')
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'messages',
+                    filter: 'receiver_id=eq.' + _navUserId
+                }, function() {
+                    // New message received - refresh badge count
+                    client.from('messages')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('receiver_id', _navUserId)
+                        .eq('is_read', false)
+                        .then(function(res) {
+                            setBadgeCount(res.count);
+                        });
+                })
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'messages',
+                    filter: 'receiver_id=eq.' + _navUserId
+                }, function() {
+                    // Message marked as read - refresh badge count
+                    client.from('messages')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('receiver_id', _navUserId)
+                        .eq('is_read', false)
+                        .then(function(res) {
+                            setBadgeCount(res.count);
+                        });
+                })
+                .subscribe();
+        } catch(e) { console.warn('Realtime badge subscription failed:', e); }
+    }
+
+    // Dynamically load push-logic.js on every page (if not already loaded)
+    function loadPushLogic() {
+        if (window.PushService) return; // already loaded
+        if (!document.querySelector('script[src="push-logic.js"]')) {
+            var s = document.createElement('script');
+            s.src = 'push-logic.js';
+            s.async = true;
+            document.body.appendChild(s);
+        }
+    }
+
     // Render on DOM ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
             injectBottomNavStyles();
             renderBottomNav();
             fixBackArrowLinks();
+            setTimeout(updateChatBadge, 500);
+            setTimeout(loadPushLogic, 800);
         });
     } else {
         injectBottomNavStyles();
         renderBottomNav();
         fixBackArrowLinks();
+        setTimeout(updateChatBadge, 500);
+        setTimeout(loadPushLogic, 800);
     }
 })();

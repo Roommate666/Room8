@@ -57,6 +57,11 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+        @media (min-width: 1100px) {
+            .favorites-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
 
         /* Karte Styling */
         .fav-card {
@@ -319,7 +324,7 @@
     }
 
     function renderFavoriteCard(favId, listing, photoPath) {
-        let imageUrl = 'https://via.placeholder.com/300x200?text=Kein+Bild';
+        let imageUrl = 'no-image.svg';
         
         if (photoPath) {
             const { data } = sb.storage.from('listing-images').getPublicUrl(photoPath);
@@ -338,7 +343,7 @@
         return `
             <div class="fav-card" onclick="navigateTo('listing-details.html?id=${listing.id}')">
                 <div class="fav-image-container">
-                    <img src="${imageUrl}" class="fav-image" alt="${listing.title}" onerror="this.src='https://via.placeholder.com/300x200?text=Error'">
+                    <img src="${imageUrl}" class="fav-image" alt="${listing.title}" onerror="this.src='no-image.svg'">
                     <button class="delete-fav-btn" data-id="${favId}">
                         🗑️
                     </button>
@@ -382,7 +387,7 @@
             // Neu laden
             loadFavorites();
         } catch (err) {
-            Room8UI.error('Fehler: ' + err.message);
+            Room8UI.error('Favorit konnte nicht entfernt werden. Bitte versuche es erneut.');
             loadFavorites(); // Zurücksetzen bei Fehler
         }
     }

@@ -204,7 +204,7 @@
             Room8UI.success("Job erstellt!");
             setTimeout(function() { navigateTo("admin-panel.html"); }, 1500);
         } catch (err) {
-            Room8UI.error("Fehler: " + err.message);
+            Room8UI.error("Job konnte nicht erstellt werden. Bitte versuche es erneut.");
             btn.disabled = false;
         }
     });

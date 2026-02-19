@@ -278,30 +278,70 @@
         const email = document.getElementById('uniEmail').value.trim().toLowerCase();
         const btn = document.getElementById('btnEmail');
 
-        // Block non-university email domains
-        const blockedDomains = [
-            'gmail.com', 'googlemail.com', 'yahoo.com', 'yahoo.de',
-            'hotmail.com', 'hotmail.de', 'outlook.com', 'outlook.de',
-            'live.com', 'live.de', 'aol.com', 'aol.de',
-            'icloud.com', 'me.com', 'mac.com',
-            'mail.com', 'email.de', 'gmx.de', 'gmx.net', 'gmx.at',
-            'web.de', 't-online.de', 'freenet.de', 'posteo.de',
-            'protonmail.com', 'proton.me', 'tutanota.com', 'tuta.io',
-            'zoho.com', 'yandex.com', 'mail.ru',
-            'msn.com', 'windowslive.com'
+        // BLOCKED: All known personal/commercial email providers
+        const BLOCKED_DOMAINS = [
+            // Google
+            'gmail.com','googlemail.com','google.com',
+            // Microsoft
+            'outlook.com','outlook.de','outlook.at','outlook.ch','hotmail.com','hotmail.de','hotmail.co.uk','hotmail.fr','hotmail.it','hotmail.es','live.com','live.de','live.at','live.co.uk','live.fr','live.nl','msn.com','windowslive.com','passport.com',
+            // Yahoo
+            'yahoo.com','yahoo.de','yahoo.co.uk','yahoo.fr','yahoo.it','yahoo.es','yahoo.co.jp','yahoo.ca','yahoo.com.au','yahoo.co.in','ymail.com','rocketmail.com',
+            // Apple
+            'icloud.com','me.com','mac.com',
+            // German providers
+            'web.de','gmx.de','gmx.net','gmx.at','gmx.ch','gmx.com','gmx.info','gmx.org','gmx.eu','gmx.biz',
+            't-online.de','magenta.de','freenet.de','arcor.de','vodafone.de','o2online.de','1und1.de','1und1.com',
+            'kabelmail.de','kabelbw.de','online.de','go4more.de','cityweb.de','nexgo.de','mnet-mail.de',
+            'unitybox.de','unity-mail.de','versanet.de','osnanet.de','netcologne.de',
+            // Privacy / encrypted
+            'protonmail.com','protonmail.ch','proton.me','pm.me','tutanota.com','tutanota.de','tuta.io','tuta.com','posteo.de','posteo.net','posteo.eu','mailbox.org',
+            // AOL
+            'aol.com','aol.de','aol.co.uk','aim.com',
+            // Mail.com / GMX international
+            'mail.com','email.com','email.de','usa.com','myself.com','consultant.com','europe.com','asia.com','writeme.com','dr.com','engineer.com',
+            // Zoho
+            'zoho.com','zoho.eu','zohomail.com','zohomail.eu',
+            // Russian
+            'mail.ru','yandex.com','yandex.ru','rambler.ru','bk.ru','list.ru','inbox.ru',
+            // French
+            'orange.fr','wanadoo.fr','laposte.net','sfr.fr','free.fr','numericable.fr','bbox.fr',
+            // Italian
+            'libero.it','virgilio.it','alice.it','tin.it','fastwebnet.it','tiscali.it','pec.it',
+            // Spanish
+            'telefonica.net','terra.es','ono.com','jazztel.es',
+            // Dutch/Belgian
+            'ziggo.nl','hetnet.nl','home.nl','planet.nl','xs4all.nl','kpnmail.nl','upcmail.nl','chello.nl','telenet.be','skynet.be','proximus.be',
+            // Nordic
+            'telia.com','bredband.net','spray.se','comhem.se','elisa.fi','kolumbus.fi',
+            // Austrian
+            'a1.net','aon.at','chello.at','drei.at','inode.at','liwest.at','speed.at','utanet.at','kabsi.at','tele2.at',
+            // Swiss
+            'bluewin.ch','sunrise.ch','hispeed.ch','vtxnet.ch','green.ch','swissonline.ch',
+            // UK
+            'btinternet.com','btopenworld.com','talktalk.net','sky.com','virgin.net','virginmedia.com','ntlworld.com','blueyonder.co.uk','plusnet.com','tiscali.co.uk',
+            // US ISPs
+            'comcast.net','verizon.net','att.net','sbcglobal.net','bellsouth.net','charter.net','cox.net','earthlink.net','juno.com','netzero.net','optonline.net','frontier.com','windstream.net','centurylink.net',
+            // Temp / disposable
+            'guerrillamail.com','guerrillamail.de','sharklasers.com','grr.la','guerrillamailblock.com','tempmail.com','temp-mail.org','throwaway.email','mailinator.com','yopmail.com','yopmail.fr','trashmail.com','trashmail.de','trashmail.net','dispostable.com','maildrop.cc','fakeinbox.com','mailnesia.com','tempail.com','tempr.email','discard.email','discardmail.com','10minutemail.com','minutemail.com','mohmal.com','burnermail.io','inboxbear.com',
+            // Chinese
+            'qq.com','163.com','126.com','sina.com','sohu.com','aliyun.com',
+            // Indian
+            'rediffmail.com','sify.com',
+            // Brazilian
+            'uol.com.br','bol.com.br','terra.com.br','ig.com.br',
+            // Korean / Japanese
+            'naver.com','daum.net','hanmail.net','nate.com','docomo.ne.jp','ezweb.ne.jp','softbank.ne.jp',
+            // Other common
+            'inbox.com','hushmail.com','fastmail.com','fastmail.fm','runbox.com','mailfence.com','startmail.com','kolabnow.com','disroot.org','riseup.net','autistici.org','aktivix.org','cock.li','airmail.cc','dnmx.org','420blaze.it','waifu.club','firemail.cc','getaddressee.com','lavabit.com','countermail.com','safe-mail.net','scryptmail.com','xmail.net','emailn.de','lycos.com','lycos.de',
         ];
 
         const domain = email.split('@')[1];
-        if (blockedDomains.includes(domain)) {
-            Room8UI.error('Bitte verwende deine Uni-E-Mail-Adresse (z.B. @uni-koeln.de), keine private E-Mail.');
+        if (!domain) {
+            Room8UI.error('Bitte gib eine gültige E-Mail-Adresse ein.');
             return;
         }
-
-        // Also check: must contain typical uni patterns like .edu, uni-, .ac., stud., hs-
-        const uniPatterns = ['.edu', 'uni-', 'uni.', '.ac.', 'stud.', 'hs-', 'haw-', 'fh-', 'th-', 'tu-', 'fu-', 'hu-', 'rwth', 'kit.edu', 'lmu.de', 'tum.de', 'fau.de'];
-        const isUniDomain = uniPatterns.some(p => domain.includes(p));
-        if (!isUniDomain) {
-            Room8UI.error('Diese E-Mail sieht nicht nach einer Uni-Adresse aus. Nutze deine offizielle Hochschul-E-Mail.');
+        if (BLOCKED_DOMAINS.includes(domain)) {
+            Room8UI.error('Bitte verwende deine Uni-E-Mail-Adresse (z.B. vorname@uni-koeln.de). Private E-Mail-Anbieter sind nicht erlaubt.');
             return;
         }
 
@@ -340,7 +380,7 @@
             showSuccess();
 
         } catch (err) {
-            Room8UI.error("Fehler: " + err.message);
+            Room8UI.error("Code konnte nicht gesendet werden. Bitte versuche es erneut.");
             btn.disabled = false;
             btn.textContent = "Code anfordern";
         }
@@ -389,7 +429,7 @@
             showSuccess();
 
         } catch (err) {
-            Room8UI.error("Fehler: " + err.message);
+            Room8UI.error("Dokument konnte nicht eingereicht werden. Bitte versuche es erneut.");
             btn.disabled = false;
             btn.textContent = "Dokument einreichen";
         }

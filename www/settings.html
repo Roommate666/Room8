@@ -429,7 +429,7 @@ document.getElementById('deleteAccountBtn').addEventListener('click', async func
         setTimeout(function() { navigateTo('login.html'); }, 1500);
     } catch (err) {
         console.error('Fehler beim Löschen:', err);
-        Room8UI.error('Fehler beim Löschen des Kontos: ' + err.message);
+        Room8UI.error('Konto konnte nicht gelöscht werden. Bitte versuche es erneut.');
     }
 });
 

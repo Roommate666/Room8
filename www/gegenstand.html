@@ -335,7 +335,7 @@
 
         } catch (err) {
             console.error('Fehler beim Laden:', err);
-            Room8UI.error('Fehler beim Laden des Inserats: ' + err.message);
+            Room8UI.error('Inserat konnte nicht geladen werden. Bitte versuche es erneut.');
         }
     }
 
@@ -591,7 +591,7 @@
 
         } catch (err) {
             console.error(err);
-            Room8UI.error("Fehler: " + err.message);
+            Room8UI.error("Inserat konnte nicht gespeichert werden. Bitte versuche es erneut.");
             btn.disabled = false;
             btn.textContent = originalText;
         }

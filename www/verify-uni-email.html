@@ -176,9 +176,9 @@
         var errorBox = document.createElement('div');
         errorBox.className = 'error-box';
         errorBox.innerHTML = `
-          <strong>Ã¢ÂÅ’ Error:</strong><br>
-          ${error.message}<br><br>
-          Der Verifizierungslink ist ungültig oder abgelaufen.
+          <strong>Verifizierung fehlgeschlagen</strong><br>
+          
+          Der Verifizierungslink ist ungültig oder abgelaufen. Bitte fordere einen neuen Link an.
         `;
         
         message.replaceWith(errorBox);

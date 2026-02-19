@@ -205,7 +205,7 @@
           }, 1500);
         })
         .catch(function(err) {
-          setFormMessage('Fehler: ' + err.message, false);
+          setFormMessage('Bewertung konnte nicht gesendet werden. Bitte versuche es erneut.', false);
           submitBtn.disabled = false;
           submitBtn.textContent = 'Bewertung absenden';
         });

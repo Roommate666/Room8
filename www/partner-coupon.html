@@ -341,7 +341,7 @@
 
         } catch (err) {
             console.error(err);
-            alert('Fehler beim Einreichen: ' + err.message);
+            Room8UI.error('Einreichung fehlgeschlagen. Bitte versuche es erneut.');
             btn.disabled = false;
             btn.textContent = '🎟️ Coupon einreichen';
         }

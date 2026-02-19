@@ -205,7 +205,7 @@
     <div class="profile-greeting">
         <a href="#" id="public-profile-link-avatar">
             <div id="avatar-container" class="avatar-display">
-                <img src="placeholder.png" alt="Avatar" id="avatar-img" onerror="this.src='https://via.placeholder.com/100?text=User'">
+                <img src="placeholder.png" alt="Avatar" id="avatar-img" onerror="this.src='no-image.svg'">
             </div>
         </a>
         <div class="greeting-text">
@@ -360,7 +360,7 @@
 
         if (error) {
             console.error("Error loading listings:", error);
-            listingsContainer.innerHTML = '<p style="padding:1.5rem; color:red;">Fehler beim Laden: ' + error.message + '</p>';
+            listingsContainer.innerHTML = '<p style="padding:1.5rem; color:red;">Inserate konnten nicht geladen werden. Bitte versuche es erneut.</p>';
             return;
         }
 
@@ -396,7 +396,7 @@
         card.className = 'listing-card';
         card.dataset.listingId = String(listing.id); // ID als String speichern
         
-        var imageUrl = 'https://via.placeholder.com/300x200?text=Room8';
+        var imageUrl = 'no-image.svg';
         if (listing.listing_photos && listing.listing_photos.length > 0) {
             var urlData = sb.storage.from('listing-images').getPublicUrl(listing.listing_photos[0].storage_path);
             if (urlData.data) imageUrl = urlData.data.publicUrl;
@@ -468,7 +468,7 @@
 
         if (error) {
             console.error("Delete error:", error);
-            Room8UI.error("Fehler: " + error.message);
+            Room8UI.error("Inserat konnte nicht gelöscht werden. Bitte versuche es erneut.");
             cardToRemove.style.opacity = '1';
         } else {
             cardToRemove.remove();

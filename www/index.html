@@ -124,8 +124,8 @@
     if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
         // Supabase Client - Direkte Initialisierung
         var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        sb.auth.getUser().then(({ data }) => {
-            if (data && data.user) {
+        sb.auth.getSession().then(({ data }) => {
+            if (data && data.session) {
                 // User ist eingeloggt -> Weiterleitung zum Dashboard
                 window.location.replace('dashboard.html');
             }

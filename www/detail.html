@@ -840,7 +840,7 @@
             })
             .catch(function(error) {
                 console.error('Fehler beim Laden:', error);
-                detailContainer.innerHTML = '<p style="text-align:center; padding: 2rem; color:red;"><b>Fehler:</b> ' + error.message + '</p>';
+                detailContainer.innerHTML = '<p style="text-align:center; padding: 2rem; color:red;">Inserat konnte nicht geladen werden. Bitte versuche es erneut.</p>';
             });
     }
     
@@ -1012,7 +1012,7 @@
             } else if (err.code === '42501') {
                 Room8UI.warning('Keine Berechtigung. Bist du eingeloggt?');
             } else {
-                Room8UI.error('Fehler beim Senden der Meldung: ' + (err.message || 'Unbekannter Fehler'));
+                Room8UI.error('Meldung konnte nicht gesendet werden. Bitte versuche es erneut.');
             }
         }).finally(function() {
             reportSubmitBtn.disabled = false;

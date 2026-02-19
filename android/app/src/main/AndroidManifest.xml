@@ -9,6 +9,18 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="room8_default" />
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notification_color" />
+
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation"
             android:name=".MainActivity"
@@ -23,6 +35,15 @@
             </intent-filter>
 
         </activity>
+
+        <!-- Custom FCM Service mit Room8 Logo -->
+        <service
+            android:name=".Room8MessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
 
         <provider
             android:name="androidx.core.content.FileProvider"

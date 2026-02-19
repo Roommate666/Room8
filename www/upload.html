@@ -130,7 +130,7 @@
           }, 3000);
         })
         .catch(function(error) {
-          setFormMessage(getTranslation('error', 'Fehler') + ': ' + error.message, false);
+          setFormMessage(getTranslation('error', 'Fehler') + ': Hochladen fehlgeschlagen. Bitte versuche es erneut.', false);
           submitBtn.disabled = false;
           submitBtn.textContent = getTranslation('button_text', 'Hochladen & auf Prüfung warten');
         });

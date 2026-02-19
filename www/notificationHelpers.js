@@ -113,7 +113,7 @@
                 'review',
                 '⭐ Neue Bewertung von ' + reviewerName,
                 reviewerName + ' hat dir ' + rating + ' Sterne gegeben ' + stars,
-                listingId ? 'detail.html?id=' + listingId : 'profile.html',
+                'public-profile.html?id=' + userId,
                 listingId
             );
         },
@@ -133,7 +133,7 @@
             );
         },
 
-        addFavorite: async function(favoritableType, favoritableId) {
+        addFavorite: async function(favoritableType, listingId) {
             var sb = getSupabase();
             if (!sb) return { success: false, error: 'Supabase not loaded' };
 
@@ -147,8 +147,7 @@
                     .from('favorites')
                     .select('id')
                     .eq('user_id', user.id)
-                    .eq('favoritable_type', favoritableType)
-                    .eq('favoritable_id', favoritableId)
+                    .eq('listing_id', listingId)
                     .single();
 
                 if (check.data) {
@@ -159,8 +158,7 @@
                     .from('favorites')
                     .insert({
                         user_id: user.id,
-                        favoritable_type: favoritableType,
-                        favoritable_id: favoritableId
+                        listing_id: listingId
                     })
                     .select()
                     .single();
@@ -174,7 +172,7 @@
             }
         },
 
-        removeFavorite: async function(favoritableType, favoritableId) {
+        removeFavorite: async function(favoritableType, listingId) {
             var sb = getSupabase();
             if (!sb) return { success: false };
 
@@ -187,8 +185,7 @@
                     .from('favorites')
                     .delete()
                     .eq('user_id', user.id)
-                    .eq('favoritable_type', favoritableType)
-                    .eq('favoritable_id', favoritableId);
+                    .eq('listing_id', listingId);
 
                 if (res.error) throw res.error;
                 return { success: true };
@@ -199,7 +196,7 @@
             }
         },
 
-        isFavorited: async function(favoritableType, favoritableId) {
+        isFavorited: async function(favoritableType, listingId) {
             var sb = getSupabase();
             if (!sb) return false;
 
@@ -212,8 +209,7 @@
                     .from('favorites')
                     .select('id')
                     .eq('user_id', user.id)
-                    .eq('favoritable_type', favoritableType)
-                    .eq('favoritable_id', favoritableId)
+                    .eq('listing_id', listingId)
                     .single();
 
                 // PGRST116 bedeutet "kein Ergebnis", das ist kein echter Fehler hier
@@ -222,7 +218,6 @@
                 return !!res.data;
 
             } catch (error) {
-                // console.error('Error checking favorite:', error); // Optional loggen
                 return false;
             }
         },
@@ -242,9 +237,7 @@
                     .eq('user_id', user.id)
                     .order('created_at', { ascending: false });
 
-                if (favoritableType) {
-                    query = query.eq('favoritable_type', favoritableType);
-                }
+                // favorites table only has listing_id, no type filter needed
 
                 var res = await query;
                 if (res.error) throw res.error;

@@ -312,7 +312,7 @@
             Room8UI.success("Coupon erfolgreich erstellt!");
             setTimeout(function() { navigateTo("admin.html"); }, 1500);
         } catch (err) {
-            Room8UI.error("Fehler: " + err.message);
+            Room8UI.error("Coupon konnte nicht erstellt werden. Bitte versuche es erneut.");
             btn.disabled = false;
             btn.textContent = 'Coupon Veröffentlichen';
         }

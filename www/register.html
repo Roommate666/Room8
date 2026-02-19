@@ -375,7 +375,7 @@
         } else if (error.message.indexOf('Invalid email') !== -1) {
           setMsg(m.invalid, false);
         } else {
-          setMsg(m.failed + error.message, false);
+          setMsg(m.failed + 'Bitte versuche es erneut.', false);
         }
         
         registerBtn.disabled = false;

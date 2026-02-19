@@ -325,9 +325,10 @@
         checkPushStatus();
 
         if (!sb) return;
-        const { data: { user } } = await sb.auth.getUser();
-        
-        if (!user) { navigateTo('index.html'); return; }
+        const { data: { session } } = await sb.auth.getSession();
+
+        if (!session) { navigateTo('index.html'); return; }
+        const user = session.user;
 
         const { data: profile } = await sb.from('profiles').select('full_name, username, avatar_url').eq('id', user.id).single();
 

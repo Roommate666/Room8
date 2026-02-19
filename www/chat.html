@@ -516,7 +516,7 @@
                 const { data } = sb.storage.from('listing-images').getPublicUrl(listing.listing_photos[0].storage_path);
                 if (data) imgEl.src = data.publicUrl;
             } else {
-                imgEl.src = 'https://via.placeholder.com/100?text=No+Img';
+                imgEl.src = 'no-image.svg';
             }
 
             // Klickbar machen: Zum Inserat
@@ -553,6 +553,21 @@
             container.innerHTML = '<div style="text-align:center;margin-top:3rem;color:#9ca3af;">Schreib "Hallo"!</div>';
         }
         scrollToBottom();
+        markMessagesAsRead();
+    }
+
+    async function markMessagesAsRead() {
+        if (!currentUser || !targetUserId) return;
+        try {
+            await sb.from('messages')
+                .update({ is_read: true })
+                .eq('sender_id', targetUserId)
+                .eq('receiver_id', currentUser.id)
+                .eq('is_read', false);
+            // Update chat badge in navigation
+            var badge = document.querySelector('.bottom-nav-badge');
+            if (badge) badge.remove();
+        } catch(e) { console.warn('Mark read failed:', e); }
     }
 
     function appendMessage(msg) {
@@ -874,6 +889,14 @@
             console.log('Could not load notification count');
         }
     }
+
+    // Fix: Reset container when returning from another page (e.g. listing-details)
+    window.addEventListener('pageshow', function(event) {
+        appContainer.style.height = '100%';
+        appContainer.style.top = '0';
+        appContainer.style.bottom = '0';
+        setTimeout(scrollToBottom, 100);
+    });
 
     initChat();
     loadNotificationCount();

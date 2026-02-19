@@ -42,8 +42,11 @@ const PushService = {
 
         // Registration erfolg
         PushNotifications.addListener('registration', async (token) => {
-            console.log('Push: APNs Token erhalten:', token.value);
-            // Auf iOS speichern wir den FCM Token stattdessen (kommt via fcmToken Event)
+            console.log('Push: Token erhalten:', token.value);
+            // Auf Android ist das direkt der FCM Token → speichern
+            if (token.value) {
+                await PushService.saveTokenToSupabase(token.value);
+            }
         });
 
         // Fehler
@@ -123,13 +126,13 @@ const PushService = {
     saveTokenToSupabase: async (token) => {
         console.log('💾 Speichere FCM Token in Supabase...');
 
-        // Supabase Client finden
-        var sb = window.supabase || window.sb;
-        if (!sb && typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined') {
-            sb = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Supabase Client finden oder erstellen
+        var sb = window.sb;
+        if (!sb && typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+            sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
 
-        if (!sb) {
+        if (!sb || !sb.auth) {
             console.error('Push: Supabase Client nicht gefunden');
             return;
         }
@@ -165,3 +168,22 @@ window.addEventListener('fcmToken', async (e) => {
         await window.PushService.saveTokenToSupabase(token);
     }
 });
+
+// AUTO-INIT: Push automatisch starten wenn in nativer App
+(function() {
+    function autoInitPush() {
+        if (!PushService.isNativeApp()) return;
+        // Warte kurz bis Supabase/Config geladen ist
+        setTimeout(function() {
+            console.log('Push: Auto-Init auf', window.location.pathname);
+            PushService.tryAutoAsk().catch(function(e) {
+                console.warn('Push auto-init Fehler:', e);
+            });
+        }, 1500);
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', autoInitPush);
+    } else {
+        autoInitPush();
+    }
+})();

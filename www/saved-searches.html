@@ -478,7 +478,7 @@
 
         } catch (err) {
             console.error('Fehler beim Speichern:', err);
-            Room8UI.error("Fehler: " + (err.message || 'Unbekannter Fehler'));
+            Room8UI.error("Suchauftrag konnte nicht gespeichert werden. Bitte versuche es erneut.");
         } finally {
             btn.disabled = false;
             btn.textContent = 'Alarm speichern';

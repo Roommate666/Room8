@@ -516,7 +516,7 @@
         
         <div class="slider-wrapper" id="sliderWrapper">
             <!-- Bilder werden per JS geladen -->
-            <div class="slide"><img src="assets/placeholder.jpg" id="placeholderImg" onerror="this.src='https://via.placeholder.com/400x300?text=Lade+Bilder...'"></div>
+            <div class="slide"><img src="assets/placeholder.jpg" id="placeholderImg" onerror="this.src='no-image.svg'"></div>
         </div>
         
         <div class="slider-dots" id="sliderDots"></div>
@@ -744,7 +744,7 @@
         } catch (err) {
             console.error(err);
             document.getElementById('title').textContent = "Fehler beim Laden";
-            document.getElementById('description').textContent = err.message;
+            document.getElementById('description').textContent = 'Inserat konnte nicht geladen werden. Bitte versuche es erneut.';
         }
     }
 
@@ -1407,7 +1407,7 @@
                 reason: reason,
                 status: 'open'
             }).then(({ error }) => {
-                if (error) Room8UI.error("Fehler beim Melden: " + error.message);
+                if (error) Room8UI.error("Meldung konnte nicht gesendet werden. Bitte versuche es erneut.");
                 else Room8UI.success("Vielen Dank! Wir werden das Inserat prüfen.");
             });
         }

@@ -36,7 +36,7 @@
             <!-- Avatar Upload -->
             <div class="avatar-upload-container">
                 <label for="avatarFile">
-                    <img src="placeholder.png" alt="Dein Avatar" id="avatar-preview" class="avatar-preview" onerror="this.src='https://via.placeholder.com/150'">
+                    <img src="placeholder.png" alt="Dein Avatar" id="avatar-preview" class="avatar-preview" onerror="this.src='no-image.svg'">
                     <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-light);" data-i18n="edit_profile_change_photo">Klicke, um Bild zu ändern</p>
                 </label>
                 <input type="file" id="avatarFile" accept="image/*">
@@ -324,7 +324,7 @@
         } catch (error) {
             console.error(error);
             msgContainer.style.color = 'red';
-            msgContainer.textContent = 'Fehler: ' + error.message;
+            msgContainer.textContent = 'Profil konnte nicht gespeichert werden. Bitte versuche es erneut.';
             submitBtn.disabled = false;
             submitBtn.textContent = 'Änderungen speichern';
         }

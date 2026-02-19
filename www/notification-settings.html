@@ -250,12 +250,13 @@
     async function loadSettings() {
         if (!supabase) return;
 
-        const { data: { user } } = await sb.auth.getUser();
-        if (!user) {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) {
             // FIX: Verwende sichere Navigation
             navigateTo('login.html');
             return;
         }
+        const user = session.user;
         currentUser = user;
 
         // Versuche Einstellungen zu laden
@@ -330,7 +331,7 @@
             .upsert(newSettings, { onConflict: 'user_id' });
 
         if (error) {
-            Room8UI.error("Fehler beim Speichern: " + error.message);
+            Room8UI.error("Einstellungen konnten nicht gespeichert werden. Bitte versuche es erneut.");
         } else {
             // Button Feedback
             btn.textContent = "Gespeichert! ✓";

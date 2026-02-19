@@ -170,9 +170,10 @@
         })
         .catch(function(err) {
           console.error("Login Error:", err);
-          var msg = err.message;
-          if (msg === 'Invalid login credentials') msg = 'Falsches Passwort oder E-Mail.';
-          Room8UI.error('Login fehlgeschlagen: ' + msg);
+          var msg = 'Login fehlgeschlagen. Bitte versuche es erneut.';
+          if (err.message === 'Invalid login credentials') msg = 'Falsches Passwort oder E-Mail.';
+          else if (err.message === 'Email not confirmed') msg = 'Bitte bestätige zuerst deine E-Mail-Adresse.';
+          Room8UI.error(msg);
           
           loginBtn.disabled = false;
           loginBtn.textContent = originalText;
