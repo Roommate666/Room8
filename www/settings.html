@@ -289,8 +289,28 @@
     <div id="app-footer-nav"></div>
 </div>
 
+<!-- Custom Delete Account Modal -->
+<div id="deleteModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:99999;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:white;border-radius:20px;max-width:400px;width:100%;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.2);">
+        <div style="background:linear-gradient(135deg,#ef4444,#dc2626);padding:2rem;text-align:center;">
+            <div style="font-size:3rem;margin-bottom:0.5rem;">&#9888;&#65039;</div>
+            <h3 style="color:white;margin:0;font-size:1.3rem;">Konto l&#246;schen?</h3>
+        </div>
+        <div style="padding:1.5rem;">
+            <p style="color:#374151;line-height:1.6;margin:0 0 1rem 0;font-size:0.95rem;">Alle deine Daten, Inserate und Nachrichten werden <strong>unwiderruflich gel&#246;scht</strong>.</p>
+            <p style="color:#6b7280;font-size:0.85rem;margin:0 0 1rem 0;">Gib <strong>L&#214;SCHEN</strong> ein, um zu best&#228;tigen:</p>
+            <input type="text" id="deleteConfirmInput" placeholder="L&#214;SCHEN" style="width:100%;padding:0.75rem 1rem;border:2px solid #e5e7eb;border-radius:12px;font-size:1rem;text-align:center;font-weight:600;letter-spacing:2px;box-sizing:border-box;outline:none;transition:border-color 0.2s;">
+            <div style="display:flex;gap:0.75rem;margin-top:1.5rem;">
+                <button id="cancelDeleteBtn" style="flex:1;padding:0.85rem;border-radius:12px;border:1px solid #e5e7eb;background:#f9fafb;color:#374151;font-weight:600;font-size:0.95rem;cursor:pointer;">Abbrechen</button>
+                <button id="confirmDeleteBtn" style="flex:1;padding:0.85rem;border-radius:12px;border:none;background:#ef4444;color:white;font-weight:600;font-size:0.95rem;cursor:pointer;opacity:0.4;pointer-events:none;">Endg&#252;ltig l&#246;schen</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
 <script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
@@ -357,17 +377,37 @@
             navigateTo('login.html');
         }
     });
-     // Konto löschen
-document.getElementById('deleteAccountBtn').addEventListener('click', async function() {
-    var confirmText = prompt('Um dein Konto zu löschen, gib "LÖSCHEN" ein:');
-    if (confirmText !== 'LÖSCHEN') {
-        Room8UI.info('Konto wurde NICHT gelöscht.');
-        return;
-    }
+     // Konto loeschen - Custom Modal
+    var deleteModal = document.getElementById('deleteModal');
+    var deleteInput = document.getElementById('deleteConfirmInput');
+    var confirmBtn = document.getElementById('confirmDeleteBtn');
+    var cancelBtn = document.getElementById('cancelDeleteBtn');
 
-    if (!confirm('Bist du WIRKLICH sicher? Alle deine Daten, Inserate und Nachrichten werden unwiderruflich gelöscht!')) {
-        return;
-    }
+    document.getElementById('deleteAccountBtn').addEventListener('click', function() {
+        deleteModal.style.display = 'flex';
+        deleteInput.value = '';
+        confirmBtn.style.opacity = '0.4';
+        confirmBtn.style.pointerEvents = 'none';
+        setTimeout(function() { deleteInput.focus(); }, 100);
+    });
+
+    cancelBtn.addEventListener('click', function() {
+        deleteModal.style.display = 'none';
+    });
+
+    deleteInput.addEventListener('input', function() {
+        var val = deleteInput.value.trim().toUpperCase();
+        if (val === 'L\u00D6SCHEN' || val === 'LOESCHEN') {
+            confirmBtn.style.opacity = '1';
+            confirmBtn.style.pointerEvents = 'auto';
+        } else {
+            confirmBtn.style.opacity = '0.4';
+            confirmBtn.style.pointerEvents = 'none';
+        }
+    });
+
+    confirmBtn.addEventListener('click', async function() {
+        deleteModal.style.display = 'none';
 
     try {
         var result = await sb.auth.getUser();

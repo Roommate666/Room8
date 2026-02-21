@@ -92,15 +92,15 @@
         // 1. CHAT & KOMMUNIKATION
         // ==========================================
 
-        notifyChatMessage: async function(recipientId, senderName, messagePreview) {
-            var preview = messagePreview.length > 100 ? messagePreview.substring(0, 100) + '...' : messagePreview;
+        // Chat-Notification erstellen wenn jemand eine Nachricht sendet
+        notifyChatMessage: async function(receiverId, senderId, senderName, messagePreview, listingId) {
             return await this.createNotification(
-                recipientId,
+                receiverId,
                 'chat_message',
-                '💬 Neue Nachricht von ' + senderName,
-                preview,
-                'nachrichten.html',
-                null
+                'Neue Nachricht von ' + senderName,
+                messagePreview || 'Du hast eine neue Nachricht erhalten',
+                'chat.html?user=' + senderId + (listingId ? '&listing=' + listingId : ''),
+                listingId
             );
         },
 

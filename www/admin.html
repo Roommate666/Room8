@@ -413,6 +413,8 @@
     // Supabase Client - Direkte Initialisierung
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // Signed URLs werden jetzt ueber Edge Function geholt (kein Service Key im Frontend)
+
     const ADMIN_EMAIL = 'albayrak_yusuf@icloud.com';
 
     // Helper: XSS Protection
@@ -633,10 +635,10 @@
             let actionButtons = `<a href="mailto:${escapeHtml(p.email)}?subject=Room8%20Verifizierung" class="btn-mini" style="background:#10B981;color:white;">✉️ E-Mail</a>`;
 
             if (status !== 'approved') {
-                actionButtons += `<button class="btn-mini btn-green" onclick="verifyUser('${p.id}', true)" style="padding: 0.75rem 1.5rem;">✅ GENEHMIGEN</button>`;
+                actionButtons += `<button class="btn-mini btn-green" onclick="verifyUser('${p.id}', true, '${escapeHtml(p.email)}')" style="padding: 0.75rem 1.5rem;">✅ GENEHMIGEN</button>`;
             }
             if (status !== 'rejected') {
-                actionButtons += `<button class="btn-mini btn-red" onclick="verifyUser('${p.id}', false)" style="padding: 0.75rem 1.5rem;">❌ ABLEHNEN</button>`;
+                actionButtons += `<button class="btn-mini btn-red" onclick="verifyUser('${p.id}', false, '${escapeHtml(p.email)}')" style="padding: 0.75rem 1.5rem;">❌ ABLEHNEN</button>`;
             }
             if (status === 'approved' || status === 'rejected') {
                 actionButtons += `<button class="btn-mini btn-yellow" onclick="resetVerification('${p.id}')">↩️ Zurücksetzen</button>`;
@@ -1140,7 +1142,7 @@
         }
     };
 
-    window.verifyUser = async (id, approve) => {
+    window.verifyUser = async (id, approve, userEmail) => {
         const action = approve ? 'genehmigen' : 'ablehnen';
         if (!confirm(`Nutzer wirklich ${action}?`)) return;
 
@@ -1157,6 +1159,54 @@
                 console.error("Fehler:", error);
                 Room8UI.error("Fehler: " + error.message);
                 return;
+            }
+
+            // Email an User senden (Genehmigung oder Ablehnung)
+            // Falls kein Email aus Profil, versuche auth.users
+            var emailToSend = userEmail;
+            if (!emailToSend || emailToSend === 'undefined' || emailToSend === 'null' || emailToSend.trim() === '') {
+                // Fallback: Email aus auth.users ueber admin API
+                console.warn("Keine Email im Profil, versuche Supabase Auth...");
+                try {
+                    var { data: authData } = await sb.auth.admin.getUserById(id);
+                    if (authData && authData.user && authData.user.email) {
+                        emailToSend = authData.user.email;
+                    }
+                } catch(e) {
+                    console.warn("Auth admin API nicht verfuegbar:", e.message);
+                }
+            }
+
+            if (emailToSend && emailToSend.trim() !== '') {
+                try {
+                    const emailType = approve ? 'verification_approved' : 'verification_rejected';
+                    console.log("Sende Email an:", emailToSend, "Typ:", emailType);
+                    const resp = await fetch('https://tvnvmogaqmduzcycmvby.supabase.co/functions/v1/send-notification', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+                        },
+                        body: JSON.stringify({
+                            to: emailToSend,
+                            type: emailType,
+                            data: {}
+                        })
+                    });
+                    const result = await resp.json();
+                    if (result.success) {
+                        console.log("Email erfolgreich gesendet an:", emailToSend);
+                    } else {
+                        console.error("Email-Fehler:", result);
+                        Room8UI.warning("Email konnte nicht gesendet werden: " + (result.error || 'Unbekannter Fehler'));
+                    }
+                } catch (emailErr) {
+                    console.error("Email-Fehler:", emailErr.message);
+                    Room8UI.warning("Email-Versand fehlgeschlagen: " + emailErr.message);
+                }
+            } else {
+                console.warn("Keine Email-Adresse fuer User:", id);
+                Room8UI.warning("Keine Email-Adresse fuer diesen Nutzer gefunden. Email wurde nicht gesendet.");
             }
 
             Room8UI.success(approve ? "Nutzer verifiziert!" : "Nutzer abgelehnt.");
@@ -1176,46 +1226,46 @@
 
         console.log("viewDoc aufgerufen mit:", urlOrPath);
 
-        // Falls es bereits eine vollständige URL ist, direkt öffnen
+        // Falls es bereits eine vollstaendige URL ist, direkt oeffnen
         if (urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://')) {
             window.open(urlOrPath, '_blank');
             return;
         }
 
-        // Ansonsten versuchen wir eine Public URL oder Signed URL zu erstellen
+        // Signed URLs ueber Edge Function holen (kein Service Key im Frontend)
         var buckets = ['enrollment-certificates', 'verification-documents', 'avatars', 'listing-images', 'documents', 'chat-images'];
+        var session = await sb.auth.getSession();
+        var token = session.data.session ? session.data.session.access_token : null;
+        if (!token) {
+            Room8UI.error("Nicht eingeloggt.");
+            return;
+        }
 
-        // Erst versuchen wir Public URLs
         for (var i = 0; i < buckets.length; i++) {
             try {
-                var publicResult = sb.storage.from(buckets[i]).getPublicUrl(urlOrPath);
-                if (publicResult.data && publicResult.data.publicUrl) {
-                    console.log("Public URL gefunden in", buckets[i], ":", publicResult.data.publicUrl);
-                    window.open(publicResult.data.publicUrl, '_blank');
-                    return;
+                var resp = await fetch(SUPABASE_URL + '/functions/v1/get-signed-url', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ bucket: buckets[i], path: urlOrPath })
+                });
+                if (resp.ok) {
+                    var result = await resp.json();
+                    if (result.signedUrl) {
+                        console.log("Signed URL gefunden in", buckets[i]);
+                        window.open(result.signedUrl, '_blank');
+                        return;
+                    }
                 }
             } catch (e) {
-                console.log('Public URL fehlgeschlagen für ' + buckets[i], e);
+                console.log('Signed URL fehlgeschlagen fuer ' + buckets[i], e);
             }
         }
 
-        // Dann versuchen wir Signed URLs (für private Buckets)
-        for (var i = 0; i < buckets.length; i++) {
-            try {
-                var signedResult = await sb.storage.from(buckets[i]).createSignedUrl(urlOrPath, 300);
-                if (signedResult.data && signedResult.data.signedUrl) {
-                    console.log("Signed URL gefunden in", buckets[i], ":", signedResult.data.signedUrl);
-                    window.open(signedResult.data.signedUrl, '_blank');
-                    return;
-                }
-            } catch (e) {
-                console.log('Signed URL fehlgeschlagen für ' + buckets[i], e);
-            }
-        }
-
-        // Falls nichts gefunden wurde, zeige den Pfad an
-        Room8UI.warning("Dokument konnte nicht geöffnet werden.");
-        alert("Dokument-Pfad: " + urlOrPath + "\n\nBitte prüfe in Supabase Storage ob die Datei existiert.");
+        Room8UI.warning("Dokument konnte nicht geoeffnet werden.");
+        alert("Dokument-Pfad: " + urlOrPath + "\n\nBitte pruefe in Supabase Storage ob die Datei existiert.");
     };
 
     window.deleteListing = async (id) => {

@@ -173,7 +173,7 @@
     function needsOverlayStyle() {
         var path = window.location.pathname;
         var filename = path.substring(path.lastIndexOf('/') + 1);
-        var overlayPages = ['listing-details.html', 'detail.html', 'job-detail.html', 'coupon-detail.html'];
+        var overlayPages = ['listing-details.html', 'job-detail.html', 'coupon-detail.html'];
         return overlayPages.indexOf(filename) !== -1;
     }
 
@@ -221,6 +221,21 @@
         return true;
     }
 
+    // Native App Badge aktualisieren (Capacitor BadgePlugin)
+    function updateNativeBadge(count) {
+        try {
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Badge) {
+                if (count > 0) {
+                    window.Capacitor.Plugins.Badge.setBadge({ count: count });
+                } else {
+                    window.Capacitor.Plugins.Badge.clearBadge();
+                }
+            }
+        } catch (e) {
+            // Kein nativer Badge-Support (z.B. im Browser)
+        }
+    }
+
     // Lade ungelesene Anzahl
     function loadUnreadCount(callback) {
         var sb = createSupabaseClient();
@@ -246,6 +261,8 @@
                         if (!result.error && result.count !== undefined) {
                             count = result.count;
                         }
+                        // Native App Badge aktualisieren (MIUI/Xiaomi)
+                        updateNativeBadge(count);
                         callback(count);
                     })
                     .catch(function() {
@@ -311,6 +328,122 @@
     setTimeout(initBell, 500);
     setTimeout(initBell, 1500);
 
+    // In-App Toast bei neuer Benachrichtigung
+    function showInAppToast(title, message) {
+        // Toast CSS injizieren
+        if (!document.getElementById('toast-notification-style')) {
+            var toastCSS = document.createElement('style');
+            toastCSS.id = 'toast-notification-style';
+            toastCSS.textContent = [
+                '.room8-toast {',
+                '    position: fixed;',
+                '    top: calc(60px + env(safe-area-inset-top, 0px));',
+                '    left: 16px;',
+                '    right: 16px;',
+                '    background: white;',
+                '    border-radius: 12px;',
+                '    box-shadow: 0 8px 32px rgba(0,0,0,0.18);',
+                '    padding: 12px 16px;',
+                '    display: flex;',
+                '    align-items: center;',
+                '    gap: 12px;',
+                '    z-index: 99999;',
+                '    transform: translateY(-120%);',
+                '    transition: transform 0.3s ease;',
+                '    border-left: 4px solid #6366F1;',
+                '    cursor: pointer;',
+                '}',
+                '.room8-toast.show { transform: translateY(0); }',
+                '.room8-toast-icon { font-size: 1.5rem; flex-shrink: 0; }',
+                '.room8-toast-content { flex: 1; min-width: 0; }',
+                '.room8-toast-title { font-weight: 700; font-size: 0.85rem; margin: 0; color: #1F2937; }',
+                '.room8-toast-msg { font-size: 0.8rem; color: #6B7280; margin: 2px 0 0; ',
+                '    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }',
+                '.room8-toast-close { background: none; border: none; font-size: 1.2rem; color: #9CA3AF; cursor: pointer; padding: 4px; }'
+            ].join('\n');
+            document.head.appendChild(toastCSS);
+        }
+
+        // Alten Toast entfernen
+        var old = document.querySelector('.room8-toast');
+        if (old) old.remove();
+
+        var toast = document.createElement('div');
+        toast.className = 'room8-toast';
+        toast.innerHTML =
+            '<span class="room8-toast-icon">🔔</span>' +
+            '<div class="room8-toast-content">' +
+                '<p class="room8-toast-title">' + (title || 'Room8') + '</p>' +
+                '<p class="room8-toast-msg">' + (message && message.indexOf('[IMG]') !== -1 ? (message.replace(/\[IMG\].*?\[\/IMG\]\n?/, '').trim() || 'Bild') : (message || '')) + '</p>' +
+            '</div>' +
+            '<button class="room8-toast-close">&times;</button>';
+
+        toast.addEventListener('click', function() {
+            window.location.href = 'notifications.html';
+        });
+        toast.querySelector('.room8-toast-close').addEventListener('click', function(e) {
+            e.stopPropagation();
+            toast.classList.remove('show');
+            setTimeout(function() { toast.remove(); }, 300);
+        });
+
+        document.body.appendChild(toast);
+        setTimeout(function() { toast.classList.add('show'); }, 50);
+        setTimeout(function() {
+            if (toast.parentNode) {
+                toast.classList.remove('show');
+                setTimeout(function() { toast.remove(); }, 300);
+            }
+        }, 5000);
+    }
+
+    // Realtime Subscription fuer Live-Updates
+    var realtimeSubscribed = false;
+    function subscribeToNotifications() {
+        if (realtimeSubscribed) return;
+        var sb = createSupabaseClient();
+        if (!sb) return;
+
+        sb.auth.getUser().then(function(response) {
+            var user = response.data ? response.data.user : null;
+            if (!user) return;
+
+            realtimeSubscribed = true;
+            sb.channel('bell-notifications')
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'notifications',
+                    filter: 'user_id=eq.' + user.id
+                }, function(payload) {
+                    // Neue Benachrichtigung - Badge aktualisieren
+                    loadUnreadCount(function(count) {
+                        renderBell(count);
+                    });
+                    // Nav-Badge auch aktualisieren
+                    if (window.updateNavChatBadge) window.updateNavChatBadge();
+                    // In-App Toast anzeigen
+                    if (payload.new) {
+                        showInAppToast(payload.new.title, payload.new.message);
+                    }
+                })
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'notifications',
+                    filter: 'user_id=eq.' + user.id
+                }, function() {
+                    // Notification gelesen - Badge aktualisieren
+                    loadUnreadCount(function(count) {
+                        renderBell(count);
+                    });
+                    // Nav-Badge auch aktualisieren
+                    if (window.updateNavChatBadge) window.updateNavChatBadge();
+                })
+                .subscribe();
+        });
+    }
+
     // Expose refresh Funktion
     window.NotificationBell = {
         refresh: function() {
@@ -318,7 +451,26 @@
                 renderBell(count);
             });
         },
-        init: initBell
+        init: initBell,
+        showToast: showInAppToast
     };
+
+    // Starte Realtime nach Init
+    setTimeout(function() {
+        if (shouldShowBell()) {
+            ensureSupabaseLoaded(function() {
+                subscribeToNotifications();
+            });
+        }
+    }, 2000);
+
+    // Polling-Fallback alle 30 Sekunden (falls Realtime nicht funktioniert)
+    setInterval(function() {
+        if (shouldShowBell() && bellInitialized) {
+            loadUnreadCount(function(count) {
+                renderBell(count);
+            });
+        }
+    }, 30000);
 
 })();

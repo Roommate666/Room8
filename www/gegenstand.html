@@ -257,13 +257,17 @@
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
 <script src="room8-ui.js"></script>
 <script src="cities.js"></script>
 <script src="notificationHelpers.js"></script>
+<script src="verifyGate.js"></script>
 
 <script>
     // Supabase Client - Direkte Initialisierung
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    var _t = (typeof Room8i18n !== 'undefined') ? Room8i18n.t : function(k) { return k; };
+    verifyGate({ blur: ['.app-content'], message: _t('verify_create_message') });
 
     // 3. Stadt-Vorschläge laden
     if (typeof populateCityDatalist === 'function') {

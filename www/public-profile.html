@@ -110,8 +110,8 @@
         }
 
         .btn-message {
-            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
-            color: white !important;
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
             border: none;
             padding: 0.85rem 2.5rem;
             border-radius: 99px;
@@ -119,7 +119,7 @@
             font-size: 1rem;
             cursor: pointer;
             text-decoration: none;
-            display: inline-flex !important;
+            display: inline-flex;
             align-items: center;
             gap: 0.5rem;
             box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
@@ -397,9 +397,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
 <script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script src="room8-utils.js"></script>
+<script src="verifyGate.js"></script>
 <script>
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -435,13 +437,20 @@
 
     async function initProfile() {
         if (!userId || !sb) {
-            document.getElementById('loading').innerHTML = "Nutzer nicht gefunden.";
+            document.getElementById('loading').textContent = "Nutzer nicht gefunden.";
             return;
         }
 
         // Auth Check
         const { data: { user } } = await sb.auth.getUser();
         currentUser = user;
+
+        // Verifizierungs-Status merken fuer Blur
+        var isVerifiedUser = false;
+        if (currentUser) {
+            const { data: myProfile } = await sb.from('profiles').select('is_verified, is_student_verified').eq('id', currentUser.id).single();
+            isVerifiedUser = myProfile && (myProfile.is_verified || myProfile.is_student_verified);
+        }
 
         // Eigene Profilseite?
         if (currentUser && currentUser.id === userId) {
@@ -451,10 +460,16 @@
             document.getElementById('reviewBtn').style.display = 'none';
         }
 
-        loadUserProfile();
+        await loadUserProfile();
         loadUserListings();
         loadUserReviews();
         checkBlockStatus();
+
+        // Blur-Overlay fuer nicht-verifizierte User (nicht fuer eigenes Profil)
+        var isOwnProfile = currentUser && currentUser.id === userId;
+        if (!isVerifiedUser && !isOwnProfile) {
+            showVerifyOverlay(['#profileContent'], 'Verifiziere dich, um Profile ansehen zu k\u00f6nnen.');
+        }
     }
 
     async function checkBlockStatus() {

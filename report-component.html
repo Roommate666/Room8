@@ -265,10 +265,12 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="room8-ui.js"></script>
 <script>
-    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     // REPORT FUNCTIONALITY
     // Verwendung: window.openReportModal(type, id)
     // Beispiel: window.openReportModal('user', 'user-uuid')
@@ -300,7 +302,7 @@
     }
     
     reportModalClose.addEventListener('click', closeReportModal);
-    reportModal.addEventListenerfunction('click', (e) {
+    reportModal.addEventListener('click', function(e) {
         if (e.target === reportModal) closeReportModal();
     });
     
@@ -314,11 +316,11 @@
     });
     
     // Form submit
-    reportForm.addEventListenerfunction('submit', async (e) {
+    reportForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         if (!currentReportType || !currentReportId) {
-            alert('Fehler: Keine Meldung ausgewählt');
+            Room8UI.error('Fehler: Keine Meldung ausgewählt');
             return;
         }
         
@@ -331,7 +333,7 @@
             reportSubmitBtn.disabled = true;
             reportSubmitBtn.textContent = 'Wird gesendet...';
             
-            var { error } = await supabase
+            var { error } = await sb
                 .from('reports')
                 .insert({
                     reporter_id: user.id,
@@ -339,21 +341,21 @@
                     reported_id: currentReportId,
                     reason: reason,
                     description: description || null,
-                    status: 'pending'
+                    status: 'open'
                 });
             
             if (error) throw error;
-            
-            alert('âœ… Vielen Dank für deine Meldung! Wir werden sie prüfen.');
+
+            Room8UI.success('Vielen Dank für deine Meldung! Wir werden sie prüfen.');
             closeReportModal();
-            
+
         } catch (err) {
             console.error('Error submitting report:', err);
-            
+
             if (err.message && err.message.includes('duplicate')) {
-                alert('Du hast dies bereits gemeldet.');
+                Room8UI.warning('Du hast dies bereits gemeldet.');
             } else {
-                alert('Fehler beim Senden der Meldung. Bitte versuche es erneut.');
+                Room8UI.error('Fehler beim Senden der Meldung. Bitte versuche es erneut.');
             }
             
             reportSubmitBtn.disabled = false;

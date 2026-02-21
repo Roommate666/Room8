@@ -9,3 +9,4 @@ android/.gradle/
 nul
 *.firebase-adminsdk*.json
 unnamed.jpg
+supabase/config.toml

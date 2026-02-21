@@ -163,8 +163,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
+<script src="verifyGate.js"></script>
 <script>
     // Supabase Client - Direkte Initialisierung
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -190,7 +192,11 @@
             }
             currentUser = user;
 
-            // Nachrichten laden (Sender ODER Empfänger bin ich)
+            // Verifizierungs-Status merken
+            const { data: myProfile } = await sb.from('profiles').select('is_verified, is_student_verified').eq('id', user.id).single();
+            var isVerifiedUser = myProfile && (myProfile.is_verified || myProfile.is_student_verified);
+
+            // Nachrichten laden (Sender ODER Empfaenger bin ich)
             const { data: messages, error } = await sb
                 .from('messages')
                 .select('id, sender_id, receiver_id, listing_id, content, created_at, is_read')
@@ -217,7 +223,7 @@
                     conversations[key] = {
                         partnerId: partnerId,
                         listingId: msg.listing_id,
-                        lastMessage: msg.content,
+                        lastMessage: msg.content && msg.content.match(/\[IMG\]/) ? (msg.content.replace(/\[IMG\].*?\[\/IMG\]\n?/, '').trim() || '📷 Bild') : msg.content,
                         lastDate: new Date(msg.created_at),
                         isUnread: (!msg.is_read && msg.receiver_id === user.id)
                     };
@@ -252,6 +258,11 @@
 
             allConversations = await Promise.all(promises);
             renderList(allConversations);
+
+            // Blur-Overlay fuer nicht-verifizierte User
+            if (!isVerifiedUser) {
+                showVerifyOverlay(['#inboxContainer'], 'Verifiziere dich, um Nachrichten sehen zu k\u00f6nnen.');
+            }
 
         } catch (err) {
             console.error("Inbox Error:", err);

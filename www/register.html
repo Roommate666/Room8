@@ -305,7 +305,8 @@
           failed: 'Registrierung fehlgeschlagen: ',
           checkEmail: 'Überprüfe deine E-Mail!',
           sentTo: 'Wir haben einen Bestätigungslink an',
-          clickLink: 'gesendet. Klicke auf den Link um dein Konto zu aktivieren.'
+          clickLink: 'gesendet. Klicke auf den Link um dein Konto zu aktivieren.',
+          spamHint: 'Tipp: Schau auch in deinem Spam-Ordner nach, falls die E-Mail nicht ankommt!'
         },
         en: {
           mismatch: 'Passwords do not match!',
@@ -318,7 +319,8 @@
           failed: 'Registration failed: ',
           checkEmail: 'Check your email!',
           sentTo: 'We sent a confirmation link to',
-          clickLink: 'Click the link to activate your account.'
+          clickLink: 'Click the link to activate your account.',
+          spamHint: 'Tip: Also check your spam folder if the email doesn\'t arrive!'
         }
       };
       var m = messages[lang] || messages.en;
@@ -364,7 +366,8 @@
         infoBox.className = 'info-box';
         infoBox.innerHTML = '<strong>' + m.checkEmail + '</strong><br>' +
           m.sentTo + ' <strong>' + email + '</strong><br>' +
-          m.clickLink;
+          m.clickLink + '<br><br>' +
+          '<span style="color: #F59E0B; font-size: 0.9rem;">&#9888; ' + m.spamHint + '</span>';
         msg.after(infoBox);
       })
       .catch(function(error) {

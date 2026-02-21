@@ -445,8 +445,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
 <script src="notificationHelpers.js"></script>
 <script src="notificationBell.js"></script>
+<script src="navigation.js"></script>
+<script src="verifyGate.js"></script>
 <script>
     // Supabase Client - Direkte Initialisierung
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -457,6 +460,7 @@
     const listingId = urlParams.get('listing') || urlParams.get('listingId');
 
     var currentUser = null;
+    var currentUserName = 'Jemand';
 
     function navigateTo(url) {
         try { window.location.href = url; } catch(e) { console.warn(e); }
@@ -467,11 +471,21 @@
         if (!user) { navigateTo('login.html'); return; }
         currentUser = user;
 
+        // Verifizierungs-Check + Name cachen
+        const { data: myProfile } = await sb.from('profiles').select('is_verified, is_student_verified, full_name, username').eq('id', user.id).single();
+        var isVerifiedUser = myProfile && (myProfile.is_verified || myProfile.is_student_verified);
+        if (myProfile) currentUserName = myProfile.full_name || myProfile.username || 'Jemand';
+
         if (targetUserId) loadPartnerProfile(targetUserId);
         if (listingId) loadListingContext(listingId);
         if (targetUserId) {
             loadMessages();
             subscribeToMessages();
+        }
+
+        // Blur-Overlay fuer nicht-verifizierte User
+        if (!isVerifiedUser) {
+            showVerifyOverlay(['#messagesList', '.chat-input-area'], 'Verifiziere dich, um Nachrichten senden zu k\u00f6nnen.');
         }
     }
 
@@ -559,14 +573,29 @@
     async function markMessagesAsRead() {
         if (!currentUser || !targetUserId) return;
         try {
+            // 1. Nachrichten als gelesen markieren
             await sb.from('messages')
                 .update({ is_read: true })
                 .eq('sender_id', targetUserId)
                 .eq('receiver_id', currentUser.id)
                 .eq('is_read', false);
-            // Update chat badge in navigation
-            var badge = document.querySelector('.bottom-nav-badge');
-            if (badge) badge.remove();
+
+            // 2. Chat-Benachrichtigungen als gelesen markieren (Glocke)
+            await sb.from('notifications')
+                .update({ is_read: true })
+                .eq('user_id', currentUser.id)
+                .eq('type', 'chat_message')
+                .eq('is_read', false);
+
+            // 3. Chat Badge in Navigation aktualisieren
+            var chatLink = document.querySelector('.bottom-nav-item[data-href="nachrichten.html"]');
+            if (chatLink) {
+                var badge = chatLink.querySelector('.bottom-nav-badge');
+                if (badge) badge.remove();
+            }
+
+            // 4. Glocke aktualisieren
+            if (window.NotificationBell) window.NotificationBell.refresh();
         } catch(e) { console.warn('Mark read failed:', e); }
     }
 
@@ -622,6 +651,8 @@
                 if (payload.new.sender_id === targetUserId) {
                     appendMessage(payload.new);
                     scrollToBottom();
+                    // Kurz warten damit die Notification in der DB ist
+                    setTimeout(function() { markMessagesAsRead(); }, 1000);
                 }
             }).subscribe();
     }
@@ -787,14 +818,14 @@
             console.error('Message insert error:', insertError);
         } else {
             console.log('Message sent successfully:', messageContent);
-        }
-
-        // Notify
-        if (window.NotificationHelpers) {
-             const { data: myProfile } = await sb.from('profiles').select('full_name, username').eq('id', currentUser.id).single();
-             const myName = myProfile ? (myProfile.full_name || myProfile.username) : 'Jemand';
-             const notifyText = imageUrl ? '📷 Bild' : content.substring(0, 50);
-             NotificationHelpers.notifyChatMessage(targetUserId, myName, notifyText);
+            // Notification an Empfaenger senden
+            if (window.NotificationHelpers && window.NotificationHelpers.notifyChatMessage) {
+                var preview = content || 'Bild gesendet';
+                if (preview.length > 60) preview = preview.substring(0, 60) + '...';
+                window.NotificationHelpers.notifyChatMessage(targetUserId, currentUser.id, currentUserName, preview, listingId).catch(function(e) {
+                    console.warn('Chat notification failed:', e);
+                });
+            }
         }
     }
 

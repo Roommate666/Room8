@@ -263,6 +263,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
 <script src="notificationHelpers.js"></script>
@@ -354,6 +355,8 @@
         }
     }
     
+    function escHtml(t) { return t ? String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
+
     function renderItemCard(item) {
         var imageUrl = null;
         var isSearchListing = item.listing_mode === 'search';
@@ -395,7 +398,7 @@
         } else {
             imageHtml = `
                 <div class="card-image-container">
-                    <img src="${imageUrl || 'no-image.svg'}" alt="${item.title}" onerror="this.src='no-image.svg';">
+                    <img src="${imageUrl || 'no-image.svg'}" alt="${escHtml(item.title)}" onerror="this.src='no-image.svg';">
                     <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
                 </div>`;
         }
@@ -405,15 +408,15 @@
                 ${imageHtml}
                 <div class="card-content">
                     <div class="card-header">
-                        <h3 class="card-title">${item.title}</h3>
+                        <h3 class="card-title">${escHtml(item.title)}</h3>
                         <span class="card-price">${priceStr}</span>
                     </div>
                     <div class="card-location">
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                        ${item.city || 'Unbekannt'}
+                        ${escHtml(item.city) || 'Unbekannt'}
                     </div>
                     <div class="card-footer">
-                        <span>${item.category ? item.category.split(' ')[0] : ''}</span>
+                        <span>${escHtml(item.category ? item.category.split(' ')[0] : '')}</span>
                         <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" data-id="${item.id}" onclick="event.stopPropagation(); toggleFavorite('${item.id}', this);">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${isFavorited ? '#ef4444' : 'none'}" stroke="${isFavorited ? '#ef4444' : '#9ca3af'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                         </button>

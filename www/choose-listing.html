@@ -76,18 +76,6 @@
             height: 24px;
         }
 
-        .banner-verification {
-            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
-            color: white;
-            padding: 1rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-            display: none; /* Initial versteckt */
-            align-items: center;
-            gap: 1rem;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-        }
-        
         .disabled-link {
             opacity: 0.6;
             pointer-events: none;
@@ -106,17 +94,7 @@
         <div style="width: 40px;"></div> <!-- Platzhalter für Balance -->
     </header>
 
-    <main class="app-content">
-        
-        <!-- Verification Warning Banner -->
-        <div id="verificationBanner" class="banner-verification">
-            <div style="font-size: 1.5rem;">🔒</div>
-            <div style="flex: 1;">
-                <h4 style="margin: 0; font-size: 0.95rem;">Verifizierung nötig</h4>
-                <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; opacity: 0.9;">Bestätige deinen Status, um Inserate zu erstellen.</p>
-            </div>
-            <a href="verify-options.html" style="background: white; color: #D97706; padding: 0.5rem 1rem; border-radius: 20px; text-decoration: none; font-size: 0.8rem; font-weight: 700; white-space: nowrap;">Starten</a>
-        </div>
+    <main class="app-content" id="mainContent">
 
         <!-- Section: Wohnen -->
         <div class="category-header">
@@ -183,59 +161,14 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <!-- Erst config.js laden, da hier die URL und KEY definiert sind -->
 <script src="config.js"></script>
+<script src="translations.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
-
+<script src="verifyGate.js"></script>
 <script>
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    async function checkVerification() {
-        if (!sb) return;
-
-        try {
-            // Prüfen, ob ein User eingeloggt ist
-            const { data: { user } } = await sb.auth.getUser();
-            if (!user) return;
-
-            // Profilstatus abrufen
-            const { data: profile, error } = await sb
-                .from('profiles')
-                .select('is_verified, is_student_verified')
-                .eq('id', user.id)
-                .single();
-            
-            if (error) {
-                console.warn("Profile fetch error:", error);
-                return;
-            }
-
-            // Prüfen ob verifiziert
-            const isVerified = profile && (profile.is_verified || profile.is_student_verified);
-
-            if (!isVerified) {
-                // Banner anzeigen
-                const banner = document.getElementById('verificationBanner');
-                if(banner) banner.style.display = 'flex';
-                
-                // Alle Links deaktivieren
-                const links = document.querySelectorAll('.link-item');
-                links.forEach(link => {
-                    link.classList.add('disabled-link');
-                    link.href = '#'; // Link-Ziel entfernen
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                    });
-                });
-            }
-        } catch (err) {
-            console.error("Verification check failed:", err);
-        }
-    }
-
-    // Nur ausführen, wenn Supabase bereit ist
-    if (supabase) {
-        checkVerification();
-    }
+    var _t = (typeof Room8i18n !== 'undefined') ? Room8i18n.t : function(k) { return k; };
+    verifyGate({ blur: ['#mainContent'], message: _t('verify_create_message') });
 </script>
 </body>
 </html>

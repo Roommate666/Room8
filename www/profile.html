@@ -123,21 +123,10 @@
             border: 1px solid rgba(255,255,255,0.3);
         }
 
-        .close-banner {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
+        /* Erledigte Checklist-Items */
+        .feature-list li[style*="line-through"]::before {
+            content: '✓';
+            color: rgba(255,255,255,0.5);
         }
 
         /* CUSTOM MODAL (Ersatz für confirm/alert) */
@@ -224,22 +213,21 @@
         </div>
     </div>
 
-    <!-- NEUE FEATURES BANNER -->
+    <!-- SETUP BANNER - verschwindet erst wenn alles erledigt -->
     <div class="feature-banner" id="featureBanner" style="display: none;">
-        <button class="close-banner" onclick="closeBanner()">&#215;</button>
         <div class="feature-banner-header">
-            <div class="feature-icon">&#127881;</div>
-            <h3 data-i18n="profile_new_features">Neu bei Room8!</h3>
+            <div class="feature-icon">&#128640;</div>
+            <h3>Richte Room8 ein!</h3>
         </div>
-        <p data-i18n="profile_new_features_desc">Entdecke die neuen Möglichkeiten:</p>
-        <ul class="feature-list">
-            <li data-i18n="profile_feature_1">Personalisierte Benachrichtigungen</li>
-            <li data-i18n="profile_feature_2">Gespeicherte Suchen</li>
-            <li data-i18n="profile_feature_3">Verifizierung für mehr Vertrauen</li>
+        <p>Erledige diese Schritte fuer das volle Erlebnis:</p>
+        <ul class="feature-list" id="setupChecklist">
+            <li id="checkVerify">Verifizierung abschliessen</li>
+            <li id="checkPush">Benachrichtigungen aktivieren</li>
+            <li id="checkSearch">Gespeicherte Suche anlegen</li>
         </ul>
-        <div class="feature-buttons">
-            <a href="verify-options.html" class="feature-btn feature-btn-primary" data-i18n="profile_setup_now">Verifizieren</a>
-            <a href="saved-searches.html" class="feature-btn feature-btn-secondary" data-i18n="profile_save_search">Suchen</a>
+        <div class="feature-buttons" id="setupButtons">
+            <a href="verify-options.html" class="feature-btn feature-btn-primary" id="btnVerify">Verifizieren</a>
+            <a href="saved-searches.html" class="feature-btn feature-btn-secondary" id="btnSearch">Suche anlegen</a>
         </div>
     </div>
 
@@ -479,20 +467,46 @@
         }
     };
 
-    // Feature Banner
-    function checkFeatureBanner(userId) {
-        var bannerSeen = localStorage.getItem('feature_banner_seen_' + userId);
-        if (!bannerSeen) {
-            setTimeout(() => { document.getElementById('featureBanner').style.display = 'block'; }, 500);
-        }
-    }
+    // Setup-Banner: Verschwindet nur wenn ALLE Aufgaben erledigt sind
+    async function checkFeatureBanner(userId) {
+        var isVerified = false;
+        var pushEnabled = localStorage.getItem('push_enabled') === 'true';
+        var hasSavedSearch = false;
 
-    window.closeBanner = function() {
-        sb.auth.getUser().then(({data}) => {
-            if(data.user) localStorage.setItem('feature_banner_seen_' + data.user.id, 'true');
-        });
-        document.getElementById('featureBanner').style.display = 'none';
-    };
+        // 1. Verifizierung pruefen
+        var { data: prof } = await sb.from('profiles').select('is_verified, is_student_verified').eq('id', userId).single();
+        if (prof && (prof.is_verified || prof.is_student_verified)) isVerified = true;
+
+        // 2. Gespeicherte Suchen pruefen
+        var { count } = await sb.from('saved_searches').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('is_active', true);
+        if (count && count > 0) hasSavedSearch = true;
+
+        // Wenn ALLES erledigt: Banner nicht zeigen
+        if (isVerified && pushEnabled && hasSavedSearch) return;
+
+        // Checkliste aktualisieren - erledigte Items markieren
+        var checkVerify = document.getElementById('checkVerify');
+        var checkPush = document.getElementById('checkPush');
+        var checkSearch = document.getElementById('checkSearch');
+
+        if (isVerified) {
+            checkVerify.style.opacity = '0.5';
+            checkVerify.style.textDecoration = 'line-through';
+            document.getElementById('btnVerify').style.display = 'none';
+        }
+        if (pushEnabled) {
+            checkPush.style.opacity = '0.5';
+            checkPush.style.textDecoration = 'line-through';
+        }
+        if (hasSavedSearch) {
+            checkSearch.style.opacity = '0.5';
+            checkSearch.style.textDecoration = 'line-through';
+            document.getElementById('btnSearch').style.display = 'none';
+        }
+
+        // Banner anzeigen
+        setTimeout(function() { document.getElementById('featureBanner').style.display = 'block'; }, 300);
+    }
 
     // Badge update
     async function updateNotificationBadge(userId) {

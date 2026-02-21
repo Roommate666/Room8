@@ -102,6 +102,15 @@ serve(async (req) => {
       )
     }
 
+    // Ungelesene Notifications zaehlen fuer App Badge
+    const { count: unreadCount } = await supabase
+      .from('notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('is_read', false)
+
+    const badgeCount = String(unreadCount || 0)
+
     // Get FCM access token
     const accessToken = await getFCMAccessToken()
     const projectId = JSON.parse(Deno.env.get('FIREBASE_SERVICE_ACCOUNT')!).project_id
@@ -118,14 +127,26 @@ serve(async (req) => {
         body: JSON.stringify({
           message: {
             token: profile.fcm_token,
+            // Data payload fuer unseren Room8MessagingService (Vordergrund)
             data: {
               title: title,
               body: body || '',
               url: data?.url || 'notifications.html',
+              badgeCount: badgeCount,
               ...(data || {})
             },
+            // Notification payload fuer System-Anzeige (Hintergrund) + MIUI Badge
+            notification: {
+              title: title,
+              body: body || ''
+            },
             android: {
-              priority: 'high'
+              priority: 'high',
+              notification: {
+                channel_id: 'room8_default',
+                notification_count: parseInt(badgeCount) || 0,
+                click_action: 'OPEN_APP'
+              }
             }
           }
         })

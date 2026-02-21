@@ -24,7 +24,7 @@
     window.NotificationHelpers = {
 
         /**
-         * BASIS-FUNKTION: Erstelle eine Benachrichtigung
+         * BASIS-FUNKTION: Erstelle eine Benachrichtigung + sende Push
          */
         createNotification: async function(userId, type, title, message, link, referenceId) {
             var sb = getSupabase();
@@ -46,10 +46,45 @@
                     .single();
 
                 if (result.error) throw result.error;
+
+                // Push-Benachrichtigung senden (im Hintergrund, ohne auf Antwort zu warten)
+                this.sendPushNotification(userId, title, message, link).catch(function(e) {
+                    console.log('Push send failed (optional):', e);
+                });
+
                 return result.data;
             } catch (error) {
                 console.error('Error creating notification:', error);
                 return null;
+            }
+        },
+
+        /**
+         * Push-Benachrichtigung via Edge Function senden
+         */
+        sendPushNotification: async function(userId, title, body, url) {
+            var sb = getSupabase();
+            if (!sb) return { success: false };
+
+            try {
+                var result = await sb.functions.invoke('send-push', {
+                    body: {
+                        userId: userId,
+                        title: title,
+                        body: body,
+                        data: { url: url || 'notifications.html' }
+                    }
+                });
+
+                if (result.error) {
+                    console.log('Push invoke error:', result.error);
+                    return { success: false };
+                }
+
+                return result.data || { success: true };
+            } catch (error) {
+                console.log('Push error:', error);
+                return { success: false };
             }
         },
 
@@ -78,7 +113,7 @@
                 'review',
                 '⭐ Neue Bewertung von ' + reviewerName,
                 reviewerName + ' hat dir ' + rating + ' Sterne gegeben ' + stars,
-                listingId ? 'detail.html?id=' + listingId : 'profile.html',
+                'public-profile.html?id=' + userId,
                 listingId
             );
         },
@@ -87,7 +122,18 @@
         // 2. FAVORITEN
         // ==========================================
 
-        addFavorite: async function(favoritableType, favoritableId) {
+        notifyFavorite: async function(listingOwnerId, faverName, listingTitle, listingId) {
+            return await this.createNotification(
+                listingOwnerId,
+                'favorite',
+                '❤️ ' + faverName + ' hat dein Inserat favorisiert',
+                '"' + listingTitle + '" wurde zu den Favoriten hinzugefügt',
+                listingId ? 'listing-details.html?id=' + listingId : null,
+                listingId
+            );
+        },
+
+        addFavorite: async function(favoritableType, listingId) {
             var sb = getSupabase();
             if (!sb) return { success: false, error: 'Supabase not loaded' };
 
@@ -101,8 +147,7 @@
                     .from('favorites')
                     .select('id')
                     .eq('user_id', user.id)
-                    .eq('favoritable_type', favoritableType)
-                    .eq('favoritable_id', favoritableId)
+                    .eq('listing_id', listingId)
                     .single();
 
                 if (check.data) {
@@ -113,8 +158,7 @@
                     .from('favorites')
                     .insert({
                         user_id: user.id,
-                        favoritable_type: favoritableType,
-                        favoritable_id: favoritableId
+                        listing_id: listingId
                     })
                     .select()
                     .single();
@@ -128,7 +172,7 @@
             }
         },
 
-        removeFavorite: async function(favoritableType, favoritableId) {
+        removeFavorite: async function(favoritableType, listingId) {
             var sb = getSupabase();
             if (!sb) return { success: false };
 
@@ -141,8 +185,7 @@
                     .from('favorites')
                     .delete()
                     .eq('user_id', user.id)
-                    .eq('favoritable_type', favoritableType)
-                    .eq('favoritable_id', favoritableId);
+                    .eq('listing_id', listingId);
 
                 if (res.error) throw res.error;
                 return { success: true };
@@ -153,7 +196,7 @@
             }
         },
 
-        isFavorited: async function(favoritableType, favoritableId) {
+        isFavorited: async function(favoritableType, listingId) {
             var sb = getSupabase();
             if (!sb) return false;
 
@@ -166,8 +209,7 @@
                     .from('favorites')
                     .select('id')
                     .eq('user_id', user.id)
-                    .eq('favoritable_type', favoritableType)
-                    .eq('favoritable_id', favoritableId)
+                    .eq('listing_id', listingId)
                     .single();
 
                 // PGRST116 bedeutet "kein Ergebnis", das ist kein echter Fehler hier
@@ -176,7 +218,6 @@
                 return !!res.data;
 
             } catch (error) {
-                // console.error('Error checking favorite:', error); // Optional loggen
                 return false;
             }
         },
@@ -196,9 +237,7 @@
                     .eq('user_id', user.id)
                     .order('created_at', { ascending: false });
 
-                if (favoritableType) {
-                    query = query.eq('favoritable_type', favoritableType);
-                }
+                // favorites table only has listing_id, no type filter needed
 
                 var res = await query;
                 if (res.error) throw res.error;
@@ -277,11 +316,12 @@
                 var user = auth.data.user;
                 if (!user) throw new Error('Nicht eingeloggt');
 
+                // search_type und search_query sind NOT NULL
                 var insertData = {
                     user_id: user.id,
-                    search_type: searchType,
-                    search_query: searchQuery,
-                    city: city || null,
+                    search_type: searchType || 'wohnung',
+                    search_query: searchQuery || '',
+                    city: city || '',
                     min_price: minPrice || null,
                     max_price: maxPrice || null,
                     is_active: true

@@ -170,6 +170,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
 <script src="navigation.js"></script>
 <!-- No notificationBell.js on this page - we're already on notifications -->
 <script>
@@ -182,6 +183,7 @@
 
     var allNotifications = [];
     var currentFilter = 'all';
+    var currentUserId = null;
 
     async function loadNotifications() {
         if (!supabase) return;
@@ -195,6 +197,7 @@
                 container.innerHTML = '<div class="empty-state"><p>Bitte einloggen.</p></div>';
                 return;
             }
+            currentUserId = user.id;
 
             const { data: notifications, error } = await sb
                 .from('notifications')
@@ -268,7 +271,7 @@
             <div class="notif-icon ${typeClass}">${icon}</div>
             <div class="notif-content">
                 <div class="notif-title">${escapeHtml(n.title)}</div>
-                <p class="notif-message">${escapeHtml(n.message)}</p>
+                <p class="notif-message">${escapeHtml(n.message && n.message.match(/\[IMG\]/) ? (n.message.replace(/\[IMG\].*?\[\/IMG\]\n?/, '').trim() || 'Bild') : n.message)}</p>
                 <div class="notif-time">${timeStr}</div>
             </div>
         `;
@@ -283,9 +286,14 @@
                 n.is_read = true; 
             }
             
-            // 2. Navigate
-            if (n.link) {
-                navigateTo(n.link);
+            // 2. Navigate - mit Typ-spezifischen Fixes
+            var targetLink = n.link;
+            if (n.type === 'review' && currentUserId) {
+                // Review-Notifications immer zum öffentlichen Profil
+                targetLink = 'public-profile.html?id=' + currentUserId;
+            }
+            if (targetLink) {
+                navigateTo(targetLink);
             }
         };
 

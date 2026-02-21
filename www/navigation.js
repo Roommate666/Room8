@@ -43,7 +43,10 @@
         }
         if (filename === 'job-detail.html') return 'jobs';
         if (filename === 'coupon-detail.html') return 'coupons';
-        if (filename === 'detail.html') return 'marketplace';
+        if (filename === 'detail.html') {
+            if (window.currentListingType === 'wohnung') return 'housing';
+            return 'marketplace'; // default fuer gegenstand
+        }
 
         var pageMap = {
             'dashboard.html': 'home',
@@ -51,7 +54,6 @@
             'wohnung.html': 'housing',
             'gegenstaende.html': 'marketplace',
             'gegenstand.html': 'marketplace',
-            'detail.html': 'marketplace',
             'jobs.html': 'jobs',
             'job-create.html': 'jobs',
             'coupons.html': 'coupons',
@@ -96,20 +98,21 @@
             }
         }
 
-        // Nicht auf Login/Register/Index anzeigen
-        if (filename === 'index.html' || filename === 'login.html' || filename === 'register.html' || filename === '' || !filename) {
+        // Nicht auf Login/Register/Index/Chat anzeigen
+        if (filename === 'index.html' || filename === 'login.html' || filename === 'register.html' || filename === 'chat.html' || filename === '' || !filename) {
             return;
         }
 
         var currentPage = getCurrentPage();
 
+        var _t = (typeof Room8i18n !== 'undefined') ? Room8i18n.t : function(k) { return k; };
         var navItems = [
-            { id: 'home', href: 'dashboard.html', icon: 'grid', label: 'Home' },
-            { id: 'housing', href: 'wohnungen.html', icon: 'home', label: 'Wohnen' },
-            { id: 'marketplace', href: 'gegenstaende.html', icon: 'shopping', label: 'Markt' },
-            { id: 'jobs', href: 'jobs.html', icon: 'briefcase', label: 'Jobs' },
-            { id: 'coupons', href: 'coupons.html', icon: 'tag', label: 'Coupons' },
-            { id: 'messages', href: 'nachrichten.html', icon: 'message', label: 'Chat' }
+            { id: 'home', href: 'dashboard.html', icon: 'grid', label: _t('nav_tab_home') },
+            { id: 'housing', href: 'wohnungen.html', icon: 'home', label: _t('nav_tab_housing') },
+            { id: 'marketplace', href: 'gegenstaende.html', icon: 'shopping', label: _t('nav_tab_market') },
+            { id: 'jobs', href: 'jobs.html', icon: 'briefcase', label: _t('nav_tab_jobs') },
+            { id: 'coupons', href: 'coupons.html', icon: 'tag', label: _t('nav_tab_coupons') },
+            { id: 'messages', href: 'nachrichten.html', icon: 'message', label: _t('nav_tab_chat') }
         ];
 
         // Build nav items
@@ -401,6 +404,9 @@
         } catch(e) { console.warn('Badge update failed:', e); }
     }
 
+    // Global machen fuer Cross-Refresh
+    window.updateNavChatBadge = updateChatBadge;
+
     // Real-time subscription for chat badge
     function subscribeToMessageUpdates() {
         if (_realtimeSubscribed || !_navUserId) return;
@@ -423,6 +429,8 @@
                         .then(function(res) {
                             setBadgeCount(res.count);
                         });
+                    // Bell auch aktualisieren
+                    if (window.NotificationBell) window.NotificationBell.refresh();
                 })
                 .on('postgres_changes', {
                     event: 'UPDATE',
@@ -438,6 +446,8 @@
                         .then(function(res) {
                             setBadgeCount(res.count);
                         });
+                    // Bell auch aktualisieren
+                    if (window.NotificationBell) window.NotificationBell.refresh();
                 })
                 .subscribe();
         } catch(e) { console.warn('Realtime badge subscription failed:', e); }

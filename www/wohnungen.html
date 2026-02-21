@@ -306,6 +306,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
 <script src="notificationHelpers.js"></script>
@@ -488,6 +489,8 @@
         }
     }
 
+    function escHtml(t) { return t ? String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
+
     function renderHousingCard(listing) {
         var imageUrl = null;
         var isSearchListing = listing.listing_mode === 'search';
@@ -540,7 +543,7 @@
         } else {
             imageHtml = `
                 <div class="card-image-container">
-                    <img src="${imageUrl || 'no-image.svg'}" alt="${listing.title}" onerror="this.src='no-image.svg';">
+                    <img src="${imageUrl || 'no-image.svg'}" alt="${escHtml(listing.title)}" onerror="this.src='no-image.svg';">
                     <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
                 </div>`;
         }
@@ -550,12 +553,12 @@
                 ${imageHtml}
                 <div class="card-content">
                     <div class="card-header">
-                        <h3 class="card-title">${listing.title}</h3>
+                        <h3 class="card-title">${escHtml(listing.title)}</h3>
                         <span class="card-price">${priceStr}</span>
                     </div>
                     <div class="card-location">
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                        ${listing.city || 'Unbekannt'}
+                        ${escHtml(listing.city) || 'Unbekannt'}
                     </div>
                     <div class="card-footer">
                         ${matchBadgeHtml}

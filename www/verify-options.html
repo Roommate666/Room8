@@ -142,7 +142,15 @@
     </header>
 
     <main class="app-content">
-        
+
+        <!-- Rejected Banner (wird ueber selection-view angezeigt bei Status rejected) -->
+        <div id="rejected-view" style="display:none; max-width: 600px; margin: 0 auto; padding: 1rem 0 0 0;">
+            <div style="background: #FEE2E2; border: 1px solid #FCA5A5; border-radius: 12px; padding: 1.25rem; margin-bottom: 0; text-align: center;">
+                <h3 style="color: #991B1B; margin: 0 0 0.5rem 0;">Verifizierung abgelehnt</h3>
+                <p style="color: #B91C1C; margin: 0; font-size: 0.9rem;">Deine letzte Verifizierung wurde abgelehnt. Bitte versuche es erneut.</p>
+            </div>
+        </div>
+
         <!-- Auswahl Screen -->
         <div id="selection-view" class="verify-container">
             <div class="verify-header">
@@ -197,7 +205,7 @@
             </div>
         </div>
 
-        <!-- Success Screen -->
+        <!-- Success Screen (pending) -->
         <div id="success-view">
             <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
             <h2>Einreichung erfolgreich!</h2>
@@ -206,14 +214,17 @@
                 Dies dauert in der Regel weniger als 24 Stunden.<br>
                 Du erhältst eine Benachrichtigung.
             </p>
+            <button id="btn-new-verification" onclick="startNewVerification()" class="submit-btn" style="display:none; background: #f59e0b; margin-bottom: 1rem;">Neue Verifizierung starten</button>
             <button onclick="navigateTo('profile.html')" class="submit-btn">Zurück zum Profil</button>
         </div>
+
 
     </main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
 <script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script>
@@ -237,12 +248,21 @@
         }
         currentUser = user;
 
-        // Check if already pending
         const { data: profile } = await sb.from('profiles').select('verification_status').eq('id', user.id).single();
-        if (profile && (profile.verification_status === 'pending' || profile.verification_status === 'approved')) {
+        if (!profile) return;
+
+        if (profile.verification_status === 'approved') {
             showSuccess();
-            document.querySelector('#success-view h2').textContent = "Status: " + (profile.verification_status === 'approved' ? "Verifiziert" : "In Prüfung");
-            document.querySelector('#success-view p').innerHTML = "Du hast deine Unterlagen bereits eingereicht.";
+            document.querySelector('#success-view h2').textContent = "Verifiziert";
+            document.querySelector('#success-view p').textContent = "Dein Studenten-Status wurde bestätigt.";
+        } else if (profile.verification_status === 'pending') {
+            showSuccess();
+            document.querySelector('#success-view h2').textContent = "In Prüfung";
+            document.querySelector('#success-view p').textContent = "Wir prüfen deine Daten. Dies dauert in der Regel weniger als 24 Stunden.";
+            document.getElementById('btn-new-verification').style.display = 'inline-block';
+        } else if (profile.verification_status === 'rejected') {
+            // Abgelehnt: Hinweis-Banner anzeigen + Auswahl bleibt sichtbar
+            document.getElementById('rejected-view').style.display = 'block';
         }
     }
 
@@ -269,7 +289,26 @@
 
     function showSuccess() {
         document.getElementById('selection-view').style.display = 'none';
+        document.getElementById('rejected-view').style.display = 'none';
         document.getElementById('success-view').style.display = 'block';
+    }
+
+    async function startNewVerification() {
+        try {
+            const { error } = await sb.from('profiles').update({
+                verification_status: null,
+                verification_method: null
+            }).eq('id', currentUser.id);
+
+            if (error) throw error;
+
+            // UI zuruecksetzen: Auswahl anzeigen
+            document.getElementById('success-view').style.display = 'none';
+            document.getElementById('rejected-view').style.display = 'none';
+            document.getElementById('selection-view').style.display = 'block';
+        } catch (err) {
+            Room8UI.error("Fehler beim Zurücksetzen. Bitte versuche es erneut.");
+        }
     }
 
     // --- LOGIC: EMAIL SUBMIT ---
