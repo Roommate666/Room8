@@ -84,14 +84,14 @@
         }
 
         /* Icon Farben */
-        .type-chat { background: #EEF2FF; color: #3B82F6; }
+        .type-chat { background: #F2F2F0; color: #3B82F6; }
         .type-review { background: #FFFBEB; color: #F59E0B; }
         .type-favorite { background: #FEF2F2; color: #EF4444; }
         .type-search { background: #F0FDF4; color: #16A34A; }
         .type-info { background: #F3F4F6; color: #6B7280; }
 
         .notif-content { flex: 1; min-width: 0; }
-
+        
         .notif-title {
             font-weight: 600;
             font-size: 0.95rem;
@@ -168,8 +168,10 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="navigation.js"></script>
 <!-- No notificationBell.js on this page - we're already on notifications -->
 <script>
@@ -279,13 +281,17 @@
             if (!n.is_read) {
                 item.classList.remove('unread');
                 await sb.from('notifications').update({ is_read: true }).eq('id', n.id);
-                // Lokal updaten damit Badge verschwindet beim Neurendern
-                n.is_read = true; 
+                n.is_read = true;
             }
-            
-            // 2. Navigate
-            if (n.link) {
-                navigateTo(n.link);
+
+            // 2. Navigate - mit Fallback für Review-Notifications
+            var targetUrl = n.link;
+            if (n.type === 'review') {
+                // Review-Notifications immer zum eigenen öffentlichen Profil
+                targetUrl = 'public-profile.html?id=' + n.user_id;
+            }
+            if (targetUrl) {
+                navigateTo(targetUrl);
             }
         };
 

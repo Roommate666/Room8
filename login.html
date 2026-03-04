@@ -20,12 +20,12 @@
       width: 60px;
       height: 60px;
       margin: 0 auto 1rem;
-      background: var(--gradient-primary);
+      background: linear-gradient(135deg, #3B82F6, #2563EB);
       border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.35);
     }
 
     .login-logo svg {
@@ -38,7 +38,7 @@
       font-size: 1.6rem;
       font-weight: 700;
       margin-bottom: 0.5rem;
-      background: var(--gradient-primary);
+      background: linear-gradient(135deg, #3B82F6, #2563EB);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -54,7 +54,7 @@
       text-align: right;
       margin-top: 0.5rem;
       font-size: 0.85rem;
-      color: var(--primary-color);
+      color: #3B82F6;
       text-decoration: none;
       font-weight: 600;
       transition: opacity 0.2s;
@@ -77,7 +77,7 @@
     }
 
     .register-hint a {
-      color: var(--primary-color);
+      color: #3B82F6;
       font-weight: 700;
       text-decoration: none;
     }
@@ -85,7 +85,6 @@
     .register-hint a:hover {
       text-decoration: underline;
     }
-
   </style>
 </head>
 <body>
@@ -135,8 +134,9 @@
     <footer class="app-footer-nav" id="app-footer-nav"></footer>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+  <script src="lib/supabase.min.js"></script>
   <script src="config.js"></script>
+<script src="session-cache.js"></script>
   <script src="room8-ui.js"></script>
   <script>
     // Supabase Client - Direkte Initialisierung
@@ -170,10 +170,9 @@
         })
         .catch(function(err) {
           console.error("Login Error:", err);
-          var msg = 'Login fehlgeschlagen. Bitte versuche es erneut.';
-          if (err.message === 'Invalid login credentials') msg = 'Falsches Passwort oder E-Mail.';
-          else if (err.message === 'Email not confirmed') msg = 'Bitte bestätige zuerst deine E-Mail-Adresse.';
-          Room8UI.error(msg);
+          var msg = err.message;
+          if (msg === 'Invalid login credentials') msg = 'Falsches Passwort oder E-Mail.';
+          Room8UI.error('Login fehlgeschlagen: ' + msg);
           
           loginBtn.disabled = false;
           loginBtn.textContent = originalText;

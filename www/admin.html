@@ -405,15 +405,15 @@
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script src="room8-utils.js"></script>
 <script>
     // Supabase Client - Direkte Initialisierung
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // Signed URLs werden jetzt ueber Edge Function geholt (kein Service Key im Frontend)
 
     const ADMIN_EMAIL = 'albayrak_yusuf@icloud.com';
 
@@ -496,9 +496,6 @@
     // --- REPORTS ---
     async function loadReports() {
         const container = document.getElementById('reportsList');
-        // Fetch Reports inkl. Reporter Details
-        // Hinweis: Wir versuchen auch reported_user und listing zu joinen, falls Foreign Keys passen.
-        // Wenn nicht, laden wir IDs und zeigen Links.
         const { data: reports, error } = await sb
             .from('reports')
             .select(`
@@ -518,40 +515,105 @@
             return;
         }
 
+        // Fetch listing details + owner info for listing-type reports
+        var listingIds = reports
+            .filter(r => r.reported_type === 'listing' || r.reported_type === 'wohnung' || r.reported_type === 'gegenstand')
+            .map(r => r.reported_id);
+
+        var listingMap = {};
+        if (listingIds.length > 0) {
+            const { data: listings } = await sb
+                .from('listings')
+                .select('id, title, type, city, owner_id')
+                .in('id', listingIds);
+            if (listings) {
+                var ownerIds = [...new Set(listings.map(l => l.owner_id).filter(Boolean))];
+                var ownerMap = {};
+                if (ownerIds.length > 0) {
+                    const { data: owners } = await sb
+                        .from('profiles')
+                        .select('id, email, full_name, username')
+                        .in('id', ownerIds);
+                    if (owners) owners.forEach(o => ownerMap[o.id] = o);
+                }
+                listings.forEach(l => {
+                    listingMap[l.id] = l;
+                    listingMap[l.id].owner = ownerMap[l.owner_id] || null;
+                });
+            }
+        }
+
         container.innerHTML = reports.map(r => {
             const reporterName = r.reporter ? (r.reporter.full_name || r.reporter.email) : 'Unbekannt';
             const reporterEmail = r.reporter ? r.reporter.email : null;
             const date = new Date(r.created_at).toLocaleDateString('de-DE');
+            const listing = listingMap[r.reported_id];
+            const isListing = r.reported_type === 'listing' || r.reported_type === 'wohnung' || r.reported_type === 'gegenstand';
 
-            // Dynamische Links basierend auf Typ
+            // Link zum Inserat / Profil
             let linksHtml = '';
-            if (r.reported_type === 'listing' || r.reported_type === 'wohnung' || r.reported_type === 'gegenstand') {
-                linksHtml += `<a href="listing-details.html?id=${r.reported_id}" target="_blank" class="btn-mini btn-blue">🏠 Inserat ansehen</a>`;
+            if (isListing) {
+                linksHtml += `<button class="btn-mini btn-blue" onclick="window.location.href='listing-details.html?id=${r.reported_id}'">🏠 Inserat ansehen</button>`;
             } else if (r.reported_type === 'user') {
-                linksHtml += `<a href="public-profile.html?id=${r.reported_id}" target="_blank" class="btn-mini btn-blue">👤 Profil ansehen</a>`;
+                linksHtml += `<button class="btn-mini btn-blue" onclick="window.location.href='public-profile.html?id=${r.reported_id}'">👤 Profil ansehen</button>`;
             }
 
-            // E-Mail Link zum Melder
+            // Owner info
+            let ownerHtml = '';
+            if (isListing && listing && listing.owner) {
+                const ownerName = listing.owner.full_name || listing.owner.username || listing.owner.email;
+                ownerHtml = `
+                    <div class="info-item"><label>Inserent</label><span>${escapeHtml(ownerName)}</span></div>
+                    <div class="info-item"><label>Inserent E-Mail</label><span>${escapeHtml(listing.owner.email)}</span></div>
+                `;
+            }
+
+            // Listing info
+            let listingInfoHtml = '';
+            if (isListing && listing) {
+                listingInfoHtml = `
+                    <div class="info-item"><label>Inserat</label><span>${escapeHtml(listing.title || '-')}</span></div>
+                    <div class="info-item"><label>Stadt</label><span>${escapeHtml(listing.city || '-')}</span></div>
+                `;
+            } else if (isListing && !listing) {
+                listingInfoHtml = `<div class="info-item"><label>Inserat</label><span style="color:#EF4444;">Gelöscht / Nicht gefunden</span></div>`;
+            }
+
+            // E-Mail Links
             let emailLink = reporterEmail ? `<a href="mailto:${escapeHtml(reporterEmail)}?subject=Room8%20Meldung%20-%20Rückfrage" class="btn-mini" style="background:#10B981;color:white;">✉️ Melder kontaktieren</a>` : '';
+
+            // Owner Profil + Mail
+            let ownerLinks = '';
+            if (isListing && listing && listing.owner) {
+                ownerLinks = `<button class="btn-mini" style="background:#E8604C;color:white;" onclick="window.location.href='public-profile.html?id=${listing.owner_id}'">👤 Inserent Profil</button>`;
+                ownerLinks += `<a href="mailto:${escapeHtml(listing.owner.email)}?subject=Room8%20-%20Ihr%20Inserat%20wurde%20gemeldet" class="btn-mini" style="background:#F59E0B;color:white;">✉️ Inserent kontaktieren</a>`;
+            }
+
+            // Delete button
+            let deleteBtn = isListing && listing ? `<button class="btn-mini btn-red" onclick="deleteReportedListing('${r.reported_id}', '${r.id}')">🗑️ Inserat löschen</button>` : '';
 
             return `
                 <div class="admin-card">
                     <div class="card-header">
-                        <div class="card-title">🚨 ${escapeHtml(r.reason)}</div>
+                        <div class="card-title">🚨 Meldung</div>
                         <span class="status-badge status-pending">Offen</span>
                     </div>
                     <div class="info-grid">
                         <div class="info-item"><label>Melder</label><span>${escapeHtml(reporterName)}</span></div>
                         <div class="info-item"><label>Melder E-Mail</label><span>${escapeHtml(reporterEmail) || '-'}</span></div>
+                        ${ownerHtml}
+                        ${listingInfoHtml}
                         <div class="info-item"><label>Datum</label><span>${date}</span></div>
                         <div class="info-item"><label>Typ</label><span>${escapeHtml(r.reported_type)}</span></div>
                     </div>
                     <p style="background:#FFFBEB; padding:0.5rem; border-radius:4px; color:#92400E; margin: 0.5rem 0;">
                         <strong>Grund:</strong> ${escapeHtml(r.reason)}
                     </p>
-                    <div class="action-bar">
+                    <div class="action-bar" style="flex-wrap:wrap; gap:0.4rem;">
                         ${linksHtml}
+                        ${ownerLinks}
                         ${emailLink}
+                        ${deleteBtn}
                         <button class="btn-mini btn-green" onclick="resolveReport('${r.id}')">✅ Erledigt</button>
                         <button class="btn-mini btn-red" onclick="banTarget('${r.reported_id}', '${r.reported_type}')">🚫 Sperren</button>
                     </div>
@@ -611,16 +673,15 @@
             if (p.verification_method === 'uni-email' && p.uni_email) {
                 proofHtml = `<span style="color:#059669;">✅ Uni-Mail: <strong>${escapeHtml(p.uni_email)}</strong></span>`;
             } else if (p.enrollment_certificate_url) {
-                proofHtml = `<button class="btn-mini btn-blue" onclick="viewDoc('${p.enrollment_certificate_url}')">📄 Immatrikulationsbescheinigung öffnen</button>`;
+                proofHtml = `<button class="btn-mini btn-blue" onclick="viewDoc('${p.enrollment_certificate_url}', 'enrollment-certificates')">📄 Immatrikulationsbescheinigung öffnen</button>`;
             } else if (p.verification_document_url) {
-                proofHtml = `<button class="btn-mini btn-blue" onclick="viewDoc('${p.verification_document_url}')">📄 Hochgeladenes Dokument öffnen</button>`;
+                proofHtml = `<button class="btn-mini btn-blue" onclick="viewDoc('${p.verification_document_url}', 'verification-documents')">📄 Hochgeladenes Dokument öffnen</button>`;
             } else if (p.edu_email) {
                 proofHtml = `<span style="color:#059669;">✅ Edu-Mail: <strong>${escapeHtml(p.edu_email)}</strong></span>`;
             } else if (p.student_id_image_url) {
-                proofHtml = `<button class="btn-mini btn-blue" onclick="viewDoc('${p.student_id_image_url}')">🎓 Studentenausweis öffnen</button>`;
+                proofHtml = `<button class="btn-mini btn-blue" onclick="viewDoc('${p.student_id_image_url}', 'enrollment-certificates')">🎓 Studentenausweis öffnen</button>`;
             } else if (p.avatar_url) {
-                // Fallback: Vielleicht wurde das Dokument als Avatar hochgeladen?
-                proofHtml = `<button class="btn-mini btn-gray" onclick="viewDoc('${p.avatar_url}')">📷 Profilbild ansehen</button>`;
+                proofHtml = `<button class="btn-mini btn-gray" onclick="viewDoc('${p.avatar_url}', 'avatars')">📷 Profilbild ansehen</button>`;
             }
 
             // Status Badge
@@ -635,10 +696,10 @@
             let actionButtons = `<a href="mailto:${escapeHtml(p.email)}?subject=Room8%20Verifizierung" class="btn-mini" style="background:#10B981;color:white;">✉️ E-Mail</a>`;
 
             if (status !== 'approved') {
-                actionButtons += `<button class="btn-mini btn-green" onclick="verifyUser('${p.id}', true, '${escapeHtml(p.email)}')" style="padding: 0.75rem 1.5rem;">✅ GENEHMIGEN</button>`;
+                actionButtons += `<button class="btn-mini btn-green" onclick="verifyUser('${p.id}', true)" style="padding: 0.75rem 1.5rem;">✅ GENEHMIGEN</button>`;
             }
             if (status !== 'rejected') {
-                actionButtons += `<button class="btn-mini btn-red" onclick="verifyUser('${p.id}', false, '${escapeHtml(p.email)}')" style="padding: 0.75rem 1.5rem;">❌ ABLEHNEN</button>`;
+                actionButtons += `<button class="btn-mini btn-red" onclick="verifyUser('${p.id}', false)" style="padding: 0.75rem 1.5rem;">❌ ABLEHNEN</button>`;
             }
             if (status === 'approved' || status === 'rejected') {
                 actionButtons += `<button class="btn-mini btn-yellow" onclick="resetVerification('${p.id}')">↩️ Zurücksetzen</button>`;
@@ -1142,7 +1203,24 @@
         }
     };
 
-    window.verifyUser = async (id, approve, userEmail) => {
+    window.deleteReportedListing = async (listingId, reportId) => {
+        if (!confirm("Inserat endgültig löschen und Meldung schließen?")) return;
+        // Fotos löschen
+        await sb.from('listing_photos').delete().eq('listing_id', listingId);
+        // Listing löschen
+        const { error } = await sb.from('listings').delete().eq('id', listingId);
+        if (error) {
+            Room8UI.error("Fehler beim Löschen: " + error.message);
+            return;
+        }
+        // Report als resolved markieren
+        await sb.from('reports').update({ status: 'resolved' }).eq('id', reportId);
+        Room8UI.success("Inserat gelöscht und Meldung geschlossen!");
+        loadReports();
+        loadStats();
+    };
+
+    window.verifyUser = async (id, approve) => {
         const action = approve ? 'genehmigen' : 'ablehnen';
         if (!confirm(`Nutzer wirklich ${action}?`)) return;
 
@@ -1161,52 +1239,29 @@
                 return;
             }
 
-            // Email an User senden (Genehmigung oder Ablehnung)
-            // Falls kein Email aus Profil, versuche auth.users
-            var emailToSend = userEmail;
-            if (!emailToSend || emailToSend === 'undefined' || emailToSend === 'null' || emailToSend.trim() === '') {
-                // Fallback: Email aus auth.users ueber admin API
-                console.warn("Keine Email im Profil, versuche Supabase Auth...");
-                try {
-                    var { data: authData } = await sb.auth.admin.getUserById(id);
-                    if (authData && authData.user && authData.user.email) {
-                        emailToSend = authData.user.email;
-                    }
-                } catch(e) {
-                    console.warn("Auth admin API nicht verfuegbar:", e.message);
-                }
-            }
+            // E-Mail an den Nutzer senden
+            try {
+                var profile = allVerificationProfiles.find(p => p.id === id);
+                var userName = profile ? (profile.full_name || profile.display_name || 'Nutzer') : 'Nutzer';
 
-            if (emailToSend && emailToSend.trim() !== '') {
-                try {
-                    const emailType = approve ? 'verification_approved' : 'verification_rejected';
-                    console.log("Sende Email an:", emailToSend, "Typ:", emailType);
-                    const resp = await fetch('https://tvnvmogaqmduzcycmvby.supabase.co/functions/v1/send-notification', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
-                        },
-                        body: JSON.stringify({
-                            to: emailToSend,
-                            type: emailType,
-                            data: {}
-                        })
-                    });
-                    const result = await resp.json();
-                    if (result.success) {
-                        console.log("Email erfolgreich gesendet an:", emailToSend);
-                    } else {
-                        console.error("Email-Fehler:", result);
-                        Room8UI.warning("Email konnte nicht gesendet werden: " + (result.error || 'Unbekannter Fehler'));
-                    }
-                } catch (emailErr) {
-                    console.error("Email-Fehler:", emailErr.message);
-                    Room8UI.warning("Email-Versand fehlgeschlagen: " + emailErr.message);
+                var emailPayload = approve
+                    ? { userId: id, type: 'account_verified', data: { userName: userName } }
+                    : { userId: id, type: 'verification_rejected', data: { verificationLink: 'https://room8.club/verify-options.html' } };
+
+                var emailRes = await fetch(SUPABASE_URL + '/functions/v1/send-notification', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+                    body: JSON.stringify(emailPayload)
+                });
+                var emailResult = await emailRes.json();
+
+                if (emailResult.success) {
+                    Room8UI.success("E-Mail wurde gesendet!");
+                } else {
+                    Room8UI.warning("E-Mail Fehler: " + (emailResult.error || 'Unbekannt'));
                 }
-            } else {
-                console.warn("Keine Email-Adresse fuer User:", id);
-                Room8UI.warning("Keine Email-Adresse fuer diesen Nutzer gefunden. Email wurde nicht gesendet.");
+            } catch (emailErr) {
+                Room8UI.warning("E-Mail konnte nicht gesendet werden: " + emailErr.message);
             }
 
             Room8UI.success(approve ? "Nutzer verifiziert!" : "Nutzer abgelehnt.");
@@ -1218,54 +1273,76 @@
         }
     };
 
-    window.viewDoc = async (urlOrPath) => {
+    function showDocOverlay(url) {
+        var overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:99999;display:flex;flex-direction:column;';
+
+        var topBar = document.createElement('div');
+        topBar.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:12px 16px;padding-top:calc(env(safe-area-inset-top,20px) + 12px);background:#1f2937;';
+
+        var closeBtn = document.createElement('button');
+        closeBtn.textContent = 'Schließen';
+        closeBtn.style.cssText = 'background:#ef4444;color:white;border:none;padding:8px 20px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;';
+        closeBtn.onclick = function() { overlay.remove(); };
+
+        var openBtn = document.createElement('button');
+        openBtn.textContent = 'In Browser öffnen';
+        openBtn.style.cssText = 'background:#3b82f6;color:white;border:none;padding:8px 20px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;';
+        openBtn.onclick = function() { window.open(url, '_system'); };
+
+        topBar.appendChild(closeBtn);
+        topBar.appendChild(openBtn);
+        overlay.appendChild(topBar);
+
+        var iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.style.cssText = 'flex:1;border:none;background:white;';
+        overlay.appendChild(iframe);
+
+        document.body.appendChild(overlay);
+    }
+
+    window.viewDoc = async (urlOrPath, bucket) => {
         if (!urlOrPath) {
             Room8UI.warning("Kein Dokument-Pfad vorhanden.");
             return;
         }
 
-        console.log("viewDoc aufgerufen mit:", urlOrPath);
-
-        // Falls es bereits eine vollstaendige URL ist, direkt oeffnen
+        // Falls es bereits eine vollständige URL ist
         if (urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://')) {
-            window.open(urlOrPath, '_blank');
+            showDocOverlay(urlOrPath);
             return;
         }
 
-        // Signed URLs ueber Edge Function holen (kein Service Key im Frontend)
-        var buckets = ['enrollment-certificates', 'verification-documents', 'avatars', 'listing-images', 'documents', 'chat-images'];
-        var session = await sb.auth.getSession();
-        var token = session.data.session ? session.data.session.access_token : null;
-        if (!token) {
-            Room8UI.error("Nicht eingeloggt.");
-            return;
-        }
-
-        for (var i = 0; i < buckets.length; i++) {
+        // Wenn Bucket bekannt ist, direkt Signed URL erstellen
+        if (bucket) {
             try {
-                var resp = await fetch(SUPABASE_URL + '/functions/v1/get-signed-url', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ bucket: buckets[i], path: urlOrPath })
-                });
-                if (resp.ok) {
-                    var result = await resp.json();
-                    if (result.signedUrl) {
-                        console.log("Signed URL gefunden in", buckets[i]);
-                        window.open(result.signedUrl, '_blank');
-                        return;
-                    }
+                var signedResult = await sb.storage.from(bucket).createSignedUrl(urlOrPath, 600);
+                if (signedResult.data && signedResult.data.signedUrl) {
+                    showDocOverlay(signedResult.data.signedUrl);
+                    return;
+                }
+                if (signedResult.error) {
+                    console.error("Signed URL Fehler:", signedResult.error);
                 }
             } catch (e) {
-                console.log('Signed URL fehlgeschlagen fuer ' + buckets[i], e);
+                console.error('Signed URL fehlgeschlagen für ' + bucket, e);
             }
         }
 
-        Room8UI.warning("Dokument konnte nicht geoeffnet werden.");
-        alert("Dokument-Pfad: " + urlOrPath + "\n\nBitte pruefe in Supabase Storage ob die Datei existiert.");
+        // Fallback: Alle Buckets durchprobieren
+        var buckets = ['enrollment-certificates', 'verification-documents', 'avatars', 'listing-images', 'documents', 'chat-images'];
+        for (var i = 0; i < buckets.length; i++) {
+            try {
+                var signedResult = await sb.storage.from(buckets[i]).createSignedUrl(urlOrPath, 600);
+                if (signedResult.data && signedResult.data.signedUrl) {
+                    showDocOverlay(signedResult.data.signedUrl);
+                    return;
+                }
+            } catch (e) {}
+        }
+
+        Room8UI.warning("Dokument konnte nicht geöffnet werden. Prüfe ob die Datei in Supabase Storage existiert.");
     };
 
     window.deleteListing = async (id) => {
@@ -1480,7 +1557,7 @@
                             <div class="card-title">${m.is_read ? '' : '🔵 '}${escapeHtml(m.name)}</div>
                             <div class="card-meta">${escapeHtml(m.email)} • ${date}</div>
                         </div>
-                        <span class="status-badge" style="background: #E0E7FF; color: #3730A3;">${escapeHtml(categoryLabel)}</span>
+                        <span class="status-badge" style="background: #EBEBEB; color: #1A1A2E;">${escapeHtml(categoryLabel)}</span>
                     </div>
                     <div style="background:#F9FAFB; padding:1rem; border-radius:8px; margin:0.5rem 0;">
                         <p style="margin:0; color:#374151; font-size:0.95rem; white-space: pre-wrap;">${escapeHtml(m.message)}</p>

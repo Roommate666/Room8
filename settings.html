@@ -26,7 +26,7 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: #EEF2FF;
+            background: #F2F2F0;
             color: var(--primary-color);
             display: flex;
             align-items: center;
@@ -91,7 +91,7 @@
         }
 
         /* Icon Colors */
-        .icon-profile { background: #EEF2FF; color: #4F46E5; }
+        .icon-profile { background: #F2F2F0; color: #E8604C; }
         .icon-notify { background: #FFFBEB; color: #F59E0B; }
         .icon-search { background: #ECFDF5; color: #10B981; }
         .icon-legal { background: #F3F4F6; color: #6B7280; }
@@ -289,8 +289,10 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
@@ -353,6 +355,28 @@
 
     document.getElementById('logoutBtn').addEventListener('click', async function() {
         if (confirm('Möchtest du dich wirklich abmelden?')) {
+            // FCM Token löschen damit keine Push an dieses Gerät gehen
+            try {
+                var auth = await sb.auth.getUser();
+                if (auth.data.user) {
+                    await sb.from('profiles').update({ fcm_token: null }).eq('id', auth.data.user.id);
+                }
+            } catch (e) {
+                console.warn('Token cleanup failed:', e);
+            }
+            // Alle Push-Daten aufräumen
+            localStorage.removeItem('push_token');
+            localStorage.removeItem('push_enabled');
+            // Alte Notifications aus dem Notification Center löschen
+            try {
+                if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications) {
+                    window.Capacitor.Plugins.PushNotifications.removeAllDeliveredNotifications();
+                }
+            } catch (e) { /* Web-Fallback, kein Capacitor */ }
+            // PushService Reset damit neuer User frisch initialisiert
+            if (window.PushService) {
+                window.PushService._initialized = false;
+            }
             await sb.auth.signOut();
             navigateTo('login.html');
         }
@@ -429,7 +453,7 @@ document.getElementById('deleteAccountBtn').addEventListener('click', async func
         setTimeout(function() { navigateTo('login.html'); }, 1500);
     } catch (err) {
         console.error('Fehler beim Löschen:', err);
-        Room8UI.error('Konto konnte nicht gelöscht werden. Bitte versuche es erneut.');
+        Room8UI.error('Fehler beim Löschen des Kontos: ' + err.message);
     }
 });
 

@@ -194,14 +194,66 @@ function populateCityDatalist(datalistId) {
         console.error('Datalist with id "' + datalistId + '" not found');
         return;
     }
-    
+
+    // Datalist befüllen (für Desktop-Browser)
     datalist.innerHTML = '';
-    
     for (var i = 0; i < germanCities.length; i++) {
         var option = document.createElement('option');
         option.value = germanCities[i];
         datalist.appendChild(option);
     }
+
+    // Custom Autocomplete für iOS/mobile (datalist wird dort nicht unterstützt)
+    var input = document.querySelector('input[list="' + datalistId + '"]');
+    if (!input) return;
+
+    var dropdown = document.createElement('div');
+    dropdown.className = 'city-autocomplete-dropdown';
+    dropdown.style.cssText = 'display:none;position:absolute;left:0;right:0;top:100%;background:white;border:1px solid #d1d5db;border-radius:10px;max-height:180px;overflow-y:auto;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.12);';
+
+    var wrapper = input.parentElement;
+    if (wrapper) wrapper.style.position = 'relative';
+    input.parentElement.appendChild(dropdown);
+
+    var selecting = false;
+
+    input.addEventListener('input', function() {
+        var val = input.value.trim();
+        if (val.length < 1) { dropdown.style.display = 'none'; return; }
+        var matches = searchCities(val, 8);
+        if (matches.length === 0) { dropdown.style.display = 'none'; return; }
+        dropdown.innerHTML = '';
+        for (var j = 0; j < matches.length; j++) {
+            var item = document.createElement('div');
+            item.textContent = matches[j];
+            item.style.cssText = 'padding:10px 14px;cursor:pointer;font-size:0.9rem;border-bottom:1px solid #f3f4f6;';
+            item.addEventListener('touchstart', function() { selecting = true; });
+            item.addEventListener('mousedown', function() { selecting = true; });
+            (function(city) {
+                item.addEventListener('click', function() {
+                    input.value = city;
+                    dropdown.style.display = 'none';
+                    selecting = false;
+                    input.dispatchEvent(new Event('change'));
+                });
+            })(matches[j]);
+            dropdown.appendChild(item);
+        }
+        dropdown.style.display = 'block';
+    });
+
+    input.addEventListener('focus', function() {
+        if (input.value.trim().length >= 1) {
+            input.dispatchEvent(new Event('input'));
+        }
+    });
+
+    input.addEventListener('blur', function() {
+        if (!selecting) {
+            setTimeout(function() { dropdown.style.display = 'none'; }, 150);
+        }
+        selecting = false;
+    });
 }
 
 /**

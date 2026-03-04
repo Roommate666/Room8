@@ -5,55 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title data-i18n="imprint_page_title">Impressum - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Modern Header */
-        .legal-header-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem 1.5rem 3rem;
-            border-bottom-left-radius: 30px;
-            border-bottom-right-radius: 30px;
-            text-align: center;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(118, 75, 162, 0.2);
-            position: relative;
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
         }
 
-        .back-nav {
-            position: absolute;
-            top: 1.5rem;
-            left: 1.5rem;
-            color: white;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            font-weight: 600;
-            font-size: 0.9rem;
-            opacity: 0.9;
-            transition: opacity 0.2s;
-        }
-        .back-nav:hover { opacity: 1; }
-
-        .legal-header-bg h1 { margin: 0.5rem 0 0.25rem; font-size: 1.8rem; font-weight: 700; }
-        .legal-header-bg p { opacity: 0.9; font-size: 1rem; margin: 0; }
-
-        /* Content Layout */
         .legal-content {
             max-width: 800px;
-            margin: -2.5rem auto 0; /* Overlap Header */
-            padding: 0 1.5rem 4rem;
-            position: relative;
-            z-index: 10;
+            margin: 0 auto;
+            padding: 0 1rem 4rem;
+            animation: blurFadeIn 0.5s ease-out both;
         }
-        
+        /* Glasmorphismus Card */
         .content-card {
-            background: white;
+            background: rgba(255,255,255,0.92);
             border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            border: 1px solid var(--border-color);
-            line-height: 1.6;
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(0,0,0,0.04);
+            line-height: 1.8;
             color: #374151;
             font-size: 0.95rem;
+            margin-top: 1rem;
         }
 
         h2 {
@@ -74,16 +48,19 @@
 
         p { margin-bottom: 1rem; }
 
-        /* Contact Address Box */
+        /* Glasmorphismus Contact Box */
         .contact-box {
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
-            border-radius: 12px;
+            background: rgba(248,250,252,0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(0,0,0,0.04);
+            border-radius: 16px;
             padding: 1.5rem;
             margin: 1.5rem 0;
             text-align: center;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
         }
-        
+
         .contact-box p { margin: 0.25rem 0; }
         .contact-box strong { font-size: 1.1rem; color: var(--text-main); }
 
@@ -93,17 +70,18 @@
             gap: 1rem;
             margin: 1.5rem 0;
         }
-        
+
         .email-item {
-            background: #F0FDF4;
-            border: 1px solid #86EFAC;
+            background: rgba(240,253,244,0.88);
+            border: 1px solid rgba(134,239,172,0.6);
             padding: 1rem;
-            border-radius: 12px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
         }
-        
+
         .email-label { font-weight: 600; color: #166534; display: flex; align-items: center; gap: 0.5rem; }
         .email-link { color: #15803d; text-decoration: none; font-weight: 500; }
         .email-link:hover { text-decoration: underline; }
@@ -113,70 +91,76 @@
             font-size: 0.9rem;
             color: var(--text-muted);
         }
+        /* Barrierefreiheit */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
     </style>
 </head>
 <body>
 
 <div class="app-container" style="background: #F3F4F6;">
-    
-    <!-- Modern Header -->
-    <div class="legal-header-bg">
-        <a href="javascript:history.back()" class="back-nav">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="m15 18-6-6 6-6"/></svg>
-            <span data-i18n="general_back">Zurück</span>
+
+    <!-- Modern Header using app-header from style.css -->
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
         <h1 data-i18n="imprint_title">Impressum</h1>
-        <p>Rechtliche Informationen</p>
-    </div>
+        <div style="width:40px;"></div>
+    </header>
 
     <main class="legal-content">
         <div class="content-card">
-            
-            <h2 data-i18n="imprint_info_title" style="margin-top: 0;">Angaben gemäß § 5 TMG</h2>
-            
+
+            <h2 data-i18n="imprint_info_title" style="margin-top: 0;">Angaben gem&auml;&szlig; &sect; 5 TMG</h2>
+
             <div class="contact-box">
                 <p><strong>Yusuf Albayrak</strong></p>
                 <p>Am Silbermannpark 13</p>
                 <p>86161 Augsburg</p>
                 <p data-i18n="imprint_country">Deutschland</p>
             </div>
-            
+
             <h2 data-i18n="imprint_contact_title">Kontakt</h2>
-            
+
             <div class="email-list">
                 <div class="email-item">
-                    <span class="email-label">📧 <span data-i18n="imprint_email_support">Support</span></span>
+                    <span class="email-label">&#128231; <span data-i18n="imprint_email_support">Support</span></span>
                     <a href="mailto:help@room8.club" class="email-link">help@room8.club</a>
                 </div>
                 <div class="email-item" style="background: #EFF6FF; border-color: #93C5FD;">
-                    <span class="email-label" style="color: #1E40AF;">💼 <span data-i18n="imprint_email_business">Business</span></span>
+                    <span class="email-label" style="color: #1E40AF;">&#128188; <span data-i18n="imprint_email_business">Business</span></span>
                     <a href="mailto:admin@room8.club" class="email-link" style="color: #1D4ED8;">admin@room8.club</a>
                 </div>
             </div>
-            
-            <h2 data-i18n="imprint_responsible_title">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
+
+            <h2>Verantwortlich f&uuml;r den Inhalt nach &sect; 18 Abs. 2 MStV</h2>
             <p>
                 Yusuf Albayrak<br>
                 Am Silbermannpark 13<br>
                 86161 Augsburg
             </p>
-            
-            <h2 data-i18n="imprint_disclaimer_title">Haftungsausschluss</h2>
-            
-            <h3 data-i18n="imprint_liability_content_title">Haftung für Inhalte</h3>
-            <p class="disclaimer-text" data-i18n="imprint_liability_content_text">Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.</p>
 
-            <h3 data-i18n="imprint_liability_links_title">Haftung für Links</h3>
-            <p class="disclaimer-text" data-i18n="imprint_liability_links_text">Unser Angebot enthält Links zu externen Webseiten Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.</p>
+            <h2>Umsatzsteuer</h2>
+            <p class="disclaimer-text">Kleinunternehmer gem&auml;&szlig; &sect; 19 UStG &ndash; es wird keine Umsatzsteuer ausgewiesen.</p>
+
+            <h2>Haftungsausschluss</h2>
+
+            <h3 data-i18n="imprint_liability_content_title">Haftung f&uuml;r Inhalte</h3>
+            <p class="disclaimer-text" data-i18n="imprint_liability_content_text">Die Inhalte unserer Seiten wurden mit gr&ouml;&szlig;ter Sorgfalt erstellt. F&uuml;r die Richtigkeit, Vollst&auml;ndigkeit und Aktualit&auml;t der Inhalte k&ouml;nnen wir jedoch keine Gew&auml;hr &uuml;bernehmen. Als Diensteanbieter sind wir gem&auml;&szlig; &sect; 7 Abs.1 TMG f&uuml;r eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach &sect;&sect; 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, &uuml;bermittelte oder gespeicherte fremde Informationen zu &uuml;berwachen oder nach Umst&auml;nden zu forschen, die auf eine rechtswidrige T&auml;tigkeit hinweisen.</p>
+
+            <h3 data-i18n="imprint_liability_links_title">Haftung f&uuml;r Links</h3>
+            <p class="disclaimer-text" data-i18n="imprint_liability_links_text">Unser Angebot enth&auml;lt Links zu externen Webseiten Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb k&ouml;nnen wir f&uuml;r diese fremden Inhalte auch keine Gew&auml;hr &uuml;bernehmen. F&uuml;r die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.</p>
 
             <h2 data-i18n="imprint_copyright_title">Urheberrecht</h2>
-            <p class="disclaimer-text" data-i18n="imprint_copyright_text">Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.</p>
+            <p class="disclaimer-text" data-i18n="imprint_copyright_text">Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielf&auml;ltigung, Bearbeitung, Verbreitung und jede Art der Verwertung au&szlig;erhalb der Grenzen des Urheberrechtes bed&uuml;rfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.</p>
 
             <h2 data-i18n="imprint_dispute_title">Streitschlichtung</h2>
             <p class="disclaimer-text" data-i18n="imprint_dispute_text">Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
-            
+
             <p style="margin-top: 3rem; text-align: center; color: #9ca3af; font-size: 0.85rem;">
-                <span data-i18n="imprint_last_updated">Stand:</span> Dezember 2024
+                Stand: Februar 2026
             </p>
 
         </div>
@@ -184,6 +168,7 @@
 </div>
 
 <script src="config.js"></script>
+<script src="session-cache.js"></script>
 <script src="translations.js"></script>
 </body>
 </html>

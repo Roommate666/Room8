@@ -6,24 +6,33 @@
     <title>Profil - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* PROFILE HEADER CARD */
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0px); transform: translateY(0); }
+        }
+
+        /* PROFILE HEADER CARD - Glasmorphismus */
         .profile-header-card {
-            background: white;
-            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
             padding: 1.5rem;
             text-align: center;
-            margin-bottom: 1.5rem;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-color);
+            margin-bottom: 1.25rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(0,0,0,0.04);
             position: relative;
+            animation: blurFadeIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
         }
 
         .profile-avatar-large {
-            width: 90px;
-            height: 90px;
+            width: 88px;
+            height: 88px;
             border-radius: 50%;
-            background: #EEF2FF;
-            color: var(--primary-color);
+            background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
+            color: #3B82F6;
             font-size: 2.5rem;
             font-weight: 700;
             display: flex;
@@ -32,34 +41,35 @@
             margin: 0 auto 1rem auto;
             background-size: cover;
             background-position: center;
-            border: 4px solid white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border: 3px solid white;
+            box-shadow: 0 4px 15px rgba(59,130,246,0.15);
         }
 
         .profile-name {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin: 0 0 0.25rem 0;
+            font-size: 1.35rem;
+            font-weight: 800;
+            margin: 0 0 0.2rem 0;
             color: var(--text-main);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
+            letter-spacing: -0.02em;
         }
 
         .profile-meta {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
             margin-bottom: 1rem;
         }
 
-        /* BADGES */
+        /* BADGES - Kibo UI Pill */
         .badge-container {
             display: flex;
             justify-content: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
             flex-wrap: wrap;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
         }
 
         .badge {
@@ -67,40 +77,28 @@
             align-items: center;
             gap: 4px;
             padding: 4px 10px;
-            border-radius: 99px;
-            font-size: 0.75rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
             font-weight: 600;
         }
 
         .badge-verified { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
         .badge-student { background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; }
 
-        /* RATING DISPLAY */
         .rating-display {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
             margin-bottom: 1rem;
-            padding: 0.75rem 1rem;
+            padding: 0.65rem 1rem;
             background: #FFFBEB;
-            border-radius: 12px;
-            border: 1px solid #FDE68A;
+            border-radius: 14px;
+            border: 1px solid rgba(253, 230, 138, 0.6);
         }
-        .rating-stars {
-            color: #F59E0B;
-            font-size: 1.1rem;
-            letter-spacing: 2px;
-        }
-        .rating-score {
-            font-weight: 700;
-            font-size: 1rem;
-            color: #92400E;
-        }
-        .rating-count {
-            font-size: 0.85rem;
-            color: #B45309;
-        }
+        .rating-stars { color: #F59E0B; font-size: 1.05rem; letter-spacing: 2px; }
+        .rating-score { font-weight: 700; font-size: 1rem; color: #92400E; }
+        .rating-count { font-size: 0.82rem; color: #B45309; }
 
         /* ACTION BUTTONS */
         .profile-actions {
@@ -110,92 +108,66 @@
         }
 
         .btn-message {
-            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-            color: white;
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
+            color: white !important;
             border: none;
             padding: 0.85rem 2.5rem;
-            border-radius: 99px;
-            font-weight: 600;
-            font-size: 1rem;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.95rem;
             cursor: pointer;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.35);
             transition: transform 0.1s;
             margin-bottom: 1rem;
         }
         .btn-message:active { transform: scale(0.95); }
 
+        .btn-report, .btn-block, .btn-review {
+            padding: 0.6rem 0.9rem;
+            border-radius: 999px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: transform 0.15s;
+        }
+        .btn-report:active, .btn-block:active, .btn-review:active { transform: scale(0.95); }
+
         .btn-report {
-            background: #FEF3C7;
-            color: #D97706;
-            border: 1px solid #FCD34D;
-            padding: 0.7rem 1rem;
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-            font-weight: 600;
-            font-size: 0.85rem;
-            transition: all 0.2s;
+            background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D;
         }
-        .btn-report:hover { background: #FDE68A; transform: scale(1.02); }
-
         .btn-block {
-            background: #FEE2E2;
-            color: #DC2626;
-            border: 1px solid #FCA5A5;
-            padding: 0.7rem 1rem;
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-            font-weight: 600;
-            font-size: 0.85rem;
-            transition: all 0.2s;
+            background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5;
         }
-        .btn-block:hover { background: #FECACA; transform: scale(1.02); }
-
         .btn-review {
-            background: #DBEAFE;
-            color: #1D4ED8;
-            border: 1px solid #93C5FD;
-            padding: 0.7rem 1rem;
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-            font-weight: 600;
-            font-size: 0.85rem;
-            transition: all 0.2s;
+            background: #DBEAFE; color: #1D4ED8; border: 1px solid #93C5FD;
         }
-        .btn-review:hover { background: #BFDBFE; transform: scale(1.02); }
 
         /* TABS */
         .profile-tabs {
             display: flex;
-            background: #F3F4F6;
+            background: rgba(243, 244, 246, 0.8);
             padding: 4px;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
+            border-radius: 14px;
+            margin-bottom: 1.25rem;
+            animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
         }
 
         .tab-btn {
             flex: 1;
-            padding: 0.7rem;
+            padding: 0.65rem;
             text-align: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
-            border-radius: 10px;
+            border-radius: 11px;
             color: var(--text-muted);
             transition: all 0.2s;
             background: transparent;
@@ -205,40 +177,42 @@
         .tab-btn.active {
             background: white;
             color: var(--text-main);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
         }
 
-        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content { display: none; animation: blurFadeIn 0.3s ease; }
         .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* INFO GRID */
+        /* INFO GRID - Glasmorphismus */
         .info-section {
-            background: white;
-            border-radius: 12px;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 1.15rem 1.25rem;
+            margin-bottom: 0.85rem;
+            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
         }
-        .info-section h3 { margin: 0 0 1rem 0; font-size: 1rem; color: var(--text-main); }
-        
+        .info-section h3 { margin: 0 0 0.85rem 0; font-size: 0.95rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.01em; }
+
         .info-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
+            gap: 0.85rem;
         }
         .info-item { display: flex; flex-direction: column; }
-        .info-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; }
-        .info-value { font-size: 0.95rem; font-weight: 500; color: var(--text-main); }
+        .info-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.04em; }
+        .info-value { font-size: 0.92rem; font-weight: 500; color: var(--text-main); }
 
-        /* TAGS */
-        .tags-container { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        /* TAGS - Kibo UI Pill */
+        .tags-container { display: flex; flex-wrap: wrap; gap: 0.4rem; }
         .tag {
-            padding: 0.4rem 0.8rem;
+            padding: 0.35rem 0.75rem;
             background-color: #F3F4F6;
-            border: 1px solid #E5E7EB;
-            border-radius: 99px;
-            font-size: 0.85rem;
+            border: 1px solid rgba(0,0,0,0.04);
+            border-radius: 999px;
+            font-size: 0.8rem;
             color: var(--text-main);
         }
 
@@ -246,18 +220,21 @@
         .mini-listings-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 1rem;
+            gap: 0.85rem;
         }
 
         .mini-card {
-            background: white;
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.88);
+            border-radius: 14px;
             overflow: hidden;
-            border: 1px solid var(--border-color);
+            border: 1px solid rgba(0,0,0,0.04);
             text-decoration: none;
             color: inherit;
             display: block;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: transform 0.15s;
         }
+        .mini-card:active { transform: scale(0.97); }
 
         .mini-card-img {
             height: 100px;
@@ -266,33 +243,63 @@
             background: #F3F4F6;
         }
 
-        .mini-card-body { padding: 0.75rem; }
+        .mini-card-body { padding: 0.65rem 0.75rem; }
         .mini-card-title {
-            font-size: 0.85rem; font-weight: 600; margin: 0 0 0.25rem 0;
+            font-size: 0.82rem; font-weight: 600; margin: 0 0 0.2rem 0;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .mini-card-price { font-size: 0.85rem; color: var(--primary-color); font-weight: 700; }
+        .mini-card-price { font-size: 0.82rem; color: #3B82F6; font-weight: 700; }
 
         /* REVIEWS */
         .review-item {
-            background: white;
-            padding: 1rem;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 1rem;
+            background: rgba(255, 255, 255, 0.88);
+            padding: 1rem 1.1rem;
+            border-radius: 14px;
+            border: 1px solid rgba(0,0,0,0.04);
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
-        .review-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
-        .review-author { font-weight: 600; font-size: 0.9rem; }
-        .review-date { font-size: 0.8rem; color: var(--text-muted); }
-        .review-stars { color: #F59E0B; font-size: 0.9rem; }
-        .review-text { font-size: 0.9rem; color: #4B5563; line-height: 1.4; margin: 0; }
+        .review-header { display: flex; justify-content: space-between; margin-bottom: 0.4rem; }
+        .review-author { font-weight: 600; font-size: 0.88rem; }
+        .review-date { font-size: 0.75rem; color: var(--text-muted); }
+        .review-stars { color: #F59E0B; font-size: 0.85rem; }
+        .review-text { font-size: 0.88rem; color: #4B5563; line-height: 1.45; margin: 0; }
+        .delete-review-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 999px;
+            margin-top: 0.5rem;
+            display: inline-block;
+            transition: color 0.15s;
+        }
+        .delete-review-btn:active { color: #EF4444; }
 
         .empty-state {
-            text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 2rem;
+            text-align: center; color: var(--text-muted); font-size: 0.88rem; padding: 2rem;
+            animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .profile-header-card, .profile-tabs, .tab-content, .empty-state {
+                animation: none; opacity: 1;
+            }
         }
     </style>
 </head>
 <body>
+
+<!-- Blocked User Overlay -->
+<div id="blockedOverlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:#f9fafb; z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:2rem; text-align:center;">
+    <div style="font-size:3rem; margin-bottom:1rem;">🚫</div>
+    <h2 style="font-size:1.3rem; color:#1f2937; margin-bottom:0.5rem;">Nutzer blockiert</h2>
+    <p style="color:#6b7280; font-size:0.95rem; line-height:1.5; margin-bottom:1.5rem;">Du hast diesen Nutzer blockiert und kannst sein Profil nicht sehen.</p>
+    <button onclick="history.back()" style="display:inline-block; background:linear-gradient(135deg,#3b82f6,#2563eb); color:white; padding:0.85rem 2rem; border-radius:12px; border:none; font-weight:600; font-size:0.95rem; cursor:pointer; margin-bottom:0.75rem; width:200px;">Zurück</button>
+    <button id="unblockFromOverlay" style="display:inline-block; background:white; color:#059669; padding:0.85rem 2rem; border-radius:12px; border:2px solid #6EE7B7; font-weight:600; font-size:0.95rem; cursor:pointer; width:200px;">Entsperren</button>
+</div>
 
 <div class="app-container">
     <header class="app-header">
@@ -305,7 +312,12 @@
 
     <main class="app-content">
         
-        <div id="loading" style="text-align: center; padding: 3rem;">Lade Profil...</div>
+        <div id="loading" style="padding: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+            <div class="skeleton" style="width:90px;height:90px;border-radius:50%;"></div>
+            <div class="skeleton" style="width:140px;height:18px;border-radius:8px;"></div>
+            <div class="skeleton" style="width:100px;height:13px;border-radius:6px;"></div>
+            <div style="width:100%;margin-top:0.5rem;"><div class="skeleton" style="width:100%;height:80px;border-radius:16px;"></div></div>
+        </div>
 
         <div id="profileContent" style="display:none;">
             <!-- Profile Header -->
@@ -395,13 +407,13 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
 <script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script src="room8-utils.js"></script>
-<script src="verifyGate.js"></script>
 <script>
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -437,20 +449,13 @@
 
     async function initProfile() {
         if (!userId || !sb) {
-            document.getElementById('loading').textContent = "Nutzer nicht gefunden.";
+            document.getElementById('loading').innerHTML = "Nutzer nicht gefunden.";
             return;
         }
 
         // Auth Check
         const { data: { user } } = await sb.auth.getUser();
         currentUser = user;
-
-        // Verifizierungs-Status merken fuer Blur
-        var isVerifiedUser = false;
-        if (currentUser) {
-            const { data: myProfile } = await sb.from('profiles').select('is_verified, is_student_verified').eq('id', currentUser.id).single();
-            isVerifiedUser = myProfile && (myProfile.is_verified || myProfile.is_student_verified);
-        }
 
         // Eigene Profilseite?
         if (currentUser && currentUser.id === userId) {
@@ -460,16 +465,26 @@
             document.getElementById('reviewBtn').style.display = 'none';
         }
 
-        await loadUserProfile();
+        // Block-Check: Ist dieser Nutzer blockiert?
+        if (currentUser && currentUser.id !== userId && window.Room8) {
+            var isBlocked = await Room8.isUserBlocked(userId);
+            if (isBlocked) {
+                document.querySelector('.app-container').style.display = 'none';
+                document.getElementById('blockedOverlay').style.display = 'flex';
+                // Entsperren-Button
+                document.getElementById('unblockFromOverlay').addEventListener('click', async function() {
+                    await sb.from('blocked_users').delete().eq('blocker_id', currentUser.id).eq('blocked_id', userId);
+                    if (window.Room8) Room8.clearBlockedUsersCache();
+                    location.reload();
+                });
+                return;
+            }
+        }
+
+        loadUserProfile();
         loadUserListings();
         loadUserReviews();
         checkBlockStatus();
-
-        // Blur-Overlay fuer nicht-verifizierte User (nicht fuer eigenes Profil)
-        var isOwnProfile = currentUser && currentUser.id === userId;
-        if (!isVerifiedUser && !isOwnProfile) {
-            showVerifyOverlay(['#profileContent'], 'Verifiziere dich, um Profile ansehen zu k\u00f6nnen.');
-        }
     }
 
     async function checkBlockStatus() {
@@ -622,7 +637,7 @@
                         .eq('blocked_id', userId);
 
                     if (error) {
-                        Room8UI.error('Entsperren fehlgeschlagen. Bitte versuche es erneut.');
+                        Room8UI.error('Fehler beim Entsperren: ' + error.message);
                         return;
                     }
 
@@ -646,7 +661,7 @@
                         if (error.code === '23505') {
                             Room8UI.warning('Nutzer ist bereits blockiert.');
                         } else {
-                            Room8UI.error('Blockieren fehlgeschlagen. Bitte versuche es erneut.');
+                            Room8UI.error('Fehler beim Blockieren: ' + error.message);
                         }
                         return;
                     }
@@ -690,21 +705,29 @@
 
         container.innerHTML = '';
         listings.forEach(l => {
-            let imgUrl = 'no-image.svg';
+            let imgUrl = null;
             if (l.listing_photos && l.listing_photos.length > 0) {
                 const { data } = sb.storage.from('listing-images').getPublicUrl(l.listing_photos[0].storage_path);
                 if (data) imgUrl = data.publicUrl;
             }
 
             const price = l.type === 'wohnung' ? (l.monthly_rent ? l.monthly_rent + ' €' : 'VB') : (l.price ? l.price + ' €' : 'VB');
+            const placeholderIcon = l.type === 'wohnung' ? '🏠' : '📦';
+            const placeholderLabel = l.type === 'wohnung' ? 'Wohnung' : 'Gegenstand';
 
-            // Verwende onclick statt href für Sicherheit in Vorschau
+            let imageHtml;
+            if (imgUrl) {
+                imageHtml = `<img src="${imgUrl}" class="mini-card-img" onerror="this.outerHTML='<div class=\\'mini-card-img\\' style=\\'display:flex;align-items:center;justify-content:center;background:#EBEBEB;\\'><div style=\\'text-align:center;color:#929292;\\'><div style=\\'font-size:1.5rem;\\'>${placeholderIcon}</div><div style=\\'font-size:0.6rem;font-weight:600;color:#929292;\\'>${placeholderLabel}</div></div></div>'">`;
+            } else {
+                imageHtml = `<div class="mini-card-img" style="display:flex;align-items:center;justify-content:center;background:#EBEBEB;"><div style="text-align:center;color:#929292;"><div style="font-size:1.5rem;">${placeholderIcon}</div><div style="font-size:0.6rem;font-weight:600;color:#929292;">${placeholderLabel}</div></div></div>`;
+            }
+
             const item = document.createElement('div');
             item.className = 'mini-card';
             item.onclick = () => navigateTo(`listing-details.html?id=${l.id}`);
             item.style.cursor = 'pointer';
             item.innerHTML = `
-                <img src="${imgUrl}" class="mini-card-img">
+                ${imageHtml}
                 <div class="mini-card-body">
                     <h4 class="mini-card-title">${l.title}</h4>
                     <div class="mini-card-price">${price}</div>
@@ -717,7 +740,7 @@
     async function loadUserReviews() {
         const { data: reviews } = await sb
             .from('reviews')
-            .select('rating, comment, created_at, reviewer:reviewer_id(username)')
+            .select('id, rating, comment, created_at, reviewer_id, reviewer:reviewer_id(username)')
             .eq('reviewee_id', userId)
             .order('created_at', { ascending: false });
 
@@ -739,6 +762,8 @@
             document.getElementById('ratingScore').textContent = avgRating.toFixed(1);
             document.getElementById('ratingCount').textContent = `(${reviews.length} Bewertung${reviews.length > 1 ? 'en' : ''})`;
             document.getElementById('ratingDisplay').style.display = 'flex';
+        } else {
+            document.getElementById('ratingDisplay').style.display = 'none';
         }
 
         if (!reviews || reviews.length === 0) {
@@ -751,18 +776,36 @@
             const stars = '⭐'.repeat(r.rating);
             const date = new Date(r.created_at).toLocaleDateString();
             const reviewerName = r.reviewer ? r.reviewer.username : 'Anonym';
+            const isOwnReview = currentUser && currentUser.id === r.reviewer_id;
 
             container.innerHTML += `
-                <div class="review-item">
+                <div class="review-item" id="review-${r.id}">
                     <div class="review-header">
                         <span class="review-author">${escapeHtml(reviewerName)}</span>
                         <span class="review-date">${date}</span>
                     </div>
                     <div class="review-stars">${stars}</div>
                     <p class="review-text">${escapeHtml(r.comment || '')}</p>
+                    ${isOwnReview ? `<button class="delete-review-btn" onclick="deleteReview('${r.id}')">Bewertung löschen</button>` : ''}
                 </div>
             `;
         });
+    }
+
+    async function deleteReview(reviewId) {
+        if (!confirm('Bewertung wirklich löschen?')) return;
+
+        var el = document.getElementById('review-' + reviewId);
+        if (el) el.style.opacity = '0.5';
+
+        try {
+            var { error } = await sb.from('reviews').delete().eq('id', reviewId);
+            if (error) throw error;
+            loadUserReviews();
+        } catch (err) {
+            if (window.Room8UI) Room8UI.error('Fehler: ' + err.message);
+            if (el) el.style.opacity = '1';
+        }
     }
 
     // Init

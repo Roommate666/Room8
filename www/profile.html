@@ -6,6 +6,12 @@
     <title>Mein Profil - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
+
         .verified-badge {
             display: inline-flex;
             align-items: center;
@@ -23,17 +29,18 @@
             stroke: white;
             stroke-width: 3;
         }
-        
+
         /* Feature Highlight Banner */
         .feature-banner {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 1.5rem;
             margin: 1rem 1.5rem;
             color: white;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+            animation: blurFadeIn 0.5s 0.3s ease-out both;
         }
 
         .feature-banner::before {
@@ -104,8 +111,8 @@
 
         .feature-btn {
             padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            font-weight: 600;
+            border-radius: 999px;
+            font-weight: 700;
             text-decoration: none;
             font-size: 0.9rem;
             transition: all 0.2s;
@@ -123,58 +130,80 @@
             border: 1px solid rgba(255,255,255,0.3);
         }
 
-        /* Erledigte Checklist-Items */
-        .feature-list li[style*="line-through"]::before {
-            content: '✓';
-            color: rgba(255,255,255,0.5);
+        .close-banner {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
         }
 
-        /* CUSTOM MODAL (Ersatz für confirm/alert) */
+        /* CUSTOM MODAL - Glasmorphismus */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 99999;
             padding: 1rem;
         }
-        
+
         .modal-box {
-            background: white;
+            background: rgba(255,255,255,0.95);
             padding: 1.5rem;
-            border-radius: 16px;
+            border-radius: 20px;
             max-width: 400px;
             width: 100%;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(0,0,0,0.04);
+            animation: blurFadeIn 0.3s ease-out both;
         }
-        
-        .modal-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+
+        .modal-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
         .modal-text { color: var(--text-muted); margin-bottom: 1.5rem; }
-        
+
         .modal-actions { display: flex; gap: 1rem; justify-content: center; }
         .modal-btn {
             padding: 0.75rem 1.5rem;
-            border-radius: 99px;
-            font-weight: 600;
+            border-radius: 999px;
+            font-weight: 700;
             border: none;
             cursor: pointer;
             flex: 1;
+            transition: transform 0.2s;
         }
+        .modal-btn:active { transform: scale(0.97); }
         .btn-cancel { background: #F3F4F6; color: var(--text-main); }
-        .btn-confirm { background: #EF4444; color: white; }
+        .btn-confirm { background: #EF4444; color: white; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
+
+        /* Barrierefreiheit */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <header class="app-header" style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
-        <h1 data-i18n="profile_title" style="margin: 0; flex-shrink: 0; font-size: 1.25rem; color: #667eea;">Mein Profil</h1>
+        <h1 data-i18n="profile_title" style="margin: 0; flex-shrink: 0; font-size: 1.25rem; color: #3B82F6;">Mein Profil</h1>
         <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
             <!-- Notification Bell -->
-            <a href="notifications.html" title="Benachrichtigungen" style="position: relative; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: white; border-radius: 50%; color: #667eea; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+            <a href="notifications.html" title="Benachrichtigungen" style="position: relative; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: white; border-radius: 50%; color: #3B82F6; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
                     <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
@@ -182,11 +211,11 @@
                 <span id="notificationBadge" style="display:none; position:absolute; top:-2px; right:-2px; background:#ef4444; color:white; border-radius:50%; min-width:16px; height:16px; font-size:0.6rem; font-weight:bold; align-items:center; justify-content:center; padding: 0 4px;"></span>
             </a>
             <!-- Settings -->
-            <a href="settings.html" title="Einstellungen" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: white; border-radius: 50%; color: #667eea; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+            <a href="settings.html" title="Einstellungen" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: white; border-radius: 50%; color: #3B82F6; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
             </a>
             <!-- New Listing -->
-            <a href="choose-listing.html" data-i18n="profile_new_listing" style="white-space: nowrap; padding: 0.5rem 0.75rem; background: white; color: #667eea; border-radius: 18px; font-weight: 700; font-size: 0.8rem; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">+ Inserat</a>
+            <a href="choose-listing.html" data-i18n="profile_new_listing" style="white-space: nowrap; padding: 0.5rem 0.75rem; background: white; color: #3B82F6; border-radius: 18px; font-weight: 700; font-size: 0.8rem; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">+ Inserat</a>
         </div>
     </header>
 
@@ -194,7 +223,7 @@
     <div class="profile-greeting">
         <a href="#" id="public-profile-link-avatar">
             <div id="avatar-container" class="avatar-display">
-                <img src="placeholder.png" alt="Avatar" id="avatar-img" onerror="this.src='no-image.svg'">
+                <img src="placeholder.png" alt="Avatar" id="avatar-img" onerror="this.src='https://via.placeholder.com/100?text=User'">
             </div>
         </a>
         <div class="greeting-text">
@@ -213,21 +242,22 @@
         </div>
     </div>
 
-    <!-- SETUP BANNER - verschwindet erst wenn alles erledigt -->
+    <!-- NEUE FEATURES BANNER -->
     <div class="feature-banner" id="featureBanner" style="display: none;">
+        <button class="close-banner" onclick="closeBanner()">&#215;</button>
         <div class="feature-banner-header">
-            <div class="feature-icon">&#128640;</div>
-            <h3>Richte Room8 ein!</h3>
+            <div class="feature-icon">&#127881;</div>
+            <h3 data-i18n="profile_new_features">Neu bei Room8!</h3>
         </div>
-        <p>Erledige diese Schritte fuer das volle Erlebnis:</p>
-        <ul class="feature-list" id="setupChecklist">
-            <li id="checkVerify">Verifizierung abschliessen</li>
-            <li id="checkPush">Benachrichtigungen aktivieren</li>
-            <li id="checkSearch">Gespeicherte Suche anlegen</li>
+        <p data-i18n="profile_new_features_desc">Entdecke die neuen Möglichkeiten:</p>
+        <ul class="feature-list">
+            <li data-i18n="profile_feature_1">Personalisierte Benachrichtigungen</li>
+            <li data-i18n="profile_feature_2">Gespeicherte Suchen</li>
+            <li data-i18n="profile_feature_3">Verifizierung für mehr Vertrauen</li>
         </ul>
-        <div class="feature-buttons" id="setupButtons">
-            <a href="verify-options.html" class="feature-btn feature-btn-primary" id="btnVerify">Verifizieren</a>
-            <a href="saved-searches.html" class="feature-btn feature-btn-secondary" id="btnSearch">Suche anlegen</a>
+        <div class="feature-buttons">
+            <a href="verify-options.html" class="feature-btn feature-btn-primary" data-i18n="profile_setup_now">Verifizieren</a>
+            <a href="saved-searches.html" class="feature-btn feature-btn-secondary" data-i18n="profile_save_search">Suchen</a>
         </div>
     </div>
 
@@ -256,7 +286,8 @@
             <h3><span data-i18n="profile_my_listings">Meine Inserate</span> <span id="listing-count"></span></h3>
         </div>
         <div id="my-listings-container" class="listings-grid">
-            <p style="padding: 1.5rem; color: var(--text-muted);">Lade Inserate...</p>
+            <div class="skeleton-card"><div class="skeleton-image"></div><div style="flex:1;padding:0.75rem;display:flex;flex-direction:column;gap:0.5rem"><div class="skeleton-line" style="width:70%"></div><div class="skeleton-line short" style="width:40%"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton-image"></div><div style="flex:1;padding:0.75rem;display:flex;flex-direction:column;gap:0.5rem"><div class="skeleton-line" style="width:60%"></div><div class="skeleton-line short" style="width:50%"></div></div></div>
         </div>
     </main>
 
@@ -275,8 +306,9 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script src="translations.js"></script>
@@ -342,13 +374,13 @@
         console.log("Loading listings for user:", userId);
         const { data: listings, error } = await sb
             .from('listings')
-            .select('id, title, city, type, view_count, listing_photos(storage_path)')
+            .select('id, title, city, type, listing_mode, view_count, listing_photos(storage_path)')
             .eq('owner_id', userId)
             .eq('is_active', true);
 
         if (error) {
             console.error("Error loading listings:", error);
-            listingsContainer.innerHTML = '<p style="padding:1.5rem; color:red;">Inserate konnten nicht geladen werden. Bitte versuche es erneut.</p>';
+            listingsContainer.innerHTML = '<p style="padding:1.5rem; color:red;">Fehler beim Laden: ' + error.message + '</p>';
             return;
         }
 
@@ -384,18 +416,25 @@
         card.className = 'listing-card';
         card.dataset.listingId = String(listing.id); // ID als String speichern
         
-        var imageUrl = 'no-image.svg';
+        var imageUrl = null;
         if (listing.listing_photos && listing.listing_photos.length > 0) {
             var urlData = sb.storage.from('listing-images').getPublicUrl(listing.listing_photos[0].storage_path);
             if (urlData.data) imageUrl = urlData.data.publicUrl;
         }
-        
+        var placeholderIcon = listing.type === 'wohnung' ? '🏠' : '📦';
+        var placeholderLabel = listing.type === 'wohnung' ? 'Wohnung' : 'Gegenstand';
+        if (listing.listing_mode === 'search') { placeholderIcon = '🔍'; placeholderLabel = 'Suchinserat'; }
+
         var editPage = listing.type === 'wohnung' ? 'wohnung.html' : 'gegenstand.html';
         var editUrl = editPage + '?id=' + listing.id;
-        
+
+        var imageHtml = imageUrl
+            ? `<img src="${imageUrl}" alt="${escapeHtml(listing.title)}" onerror="this.outerHTML='<div style=\\'height:160px;display:flex;align-items:center;justify-content:center;background:#EBEBEB;\\'><div style=\\'text-align:center;color:#929292;\\'><div style=\\'font-size:2rem;\\'>${placeholderIcon}</div><div style=\\'font-size:0.7rem;font-weight:600;color:#929292;\\'>${placeholderLabel}</div></div></div>'">`
+            : `<div style="height:160px;display:flex;align-items:center;justify-content:center;background:#EBEBEB;"><div style="text-align:center;color:#929292;"><div style="font-size:2rem;">${placeholderIcon}</div><div style="font-size:0.7rem;font-weight:600;color:#929292;">${placeholderLabel}</div></div></div>`;
+
         card.innerHTML = `
             <a href="javascript:void(0)" onclick="navigateTo('detail.html?id=${listing.id}')" class="card-image-link">
-                <img src="${imageUrl}" alt="${escapeHtml(listing.title)}">
+                ${imageHtml}
             </a>
             <div class="card-content">
                 <h4>${escapeHtml(listing.title)}</h4>
@@ -456,7 +495,7 @@
 
         if (error) {
             console.error("Delete error:", error);
-            Room8UI.error("Inserat konnte nicht gelöscht werden. Bitte versuche es erneut.");
+            Room8UI.error("Fehler: " + error.message);
             cardToRemove.style.opacity = '1';
         } else {
             cardToRemove.remove();
@@ -467,46 +506,48 @@
         }
     };
 
-    // Setup-Banner: Verschwindet nur wenn ALLE Aufgaben erledigt sind
+    // Feature Banner - dynamisch basierend auf User-Status
     async function checkFeatureBanner(userId) {
-        var isVerified = false;
-        var pushEnabled = localStorage.getItem('push_enabled') === 'true';
-        var hasSavedSearch = false;
+        // Check ob User schon verifiziert ist
+        var { data: profile } = await sb.from('profiles').select('is_verified, is_student_verified').eq('id', userId).single();
+        var isVerified = profile && (profile.is_verified || profile.is_student_verified);
 
-        // 1. Verifizierung pruefen
-        var { data: prof } = await sb.from('profiles').select('is_verified, is_student_verified').eq('id', userId).single();
-        if (prof && (prof.is_verified || prof.is_student_verified)) isVerified = true;
+        // Check ob User schon Suchaufträge hat
+        var { count: searchCount } = await sb.from('saved_searches').select('*', { count: 'exact', head: true }).eq('user_id', userId);
+        var hasSearches = (searchCount || 0) > 0;
 
-        // 2. Gespeicherte Suchen pruefen
-        var { count } = await sb.from('saved_searches').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('is_active', true);
-        if (count && count > 0) hasSavedSearch = true;
+        // Wenn alles erledigt → Banner nicht zeigen
+        if (isVerified && hasSearches) return;
 
-        // Wenn ALLES erledigt: Banner nicht zeigen
-        if (isVerified && pushEnabled && hasSavedSearch) return;
+        // Banner manuell geschlossen?
+        var bannerSeen = localStorage.getItem('feature_banner_seen_' + userId);
+        if (bannerSeen) return;
 
-        // Checkliste aktualisieren - erledigte Items markieren
-        var checkVerify = document.getElementById('checkVerify');
-        var checkPush = document.getElementById('checkPush');
-        var checkSearch = document.getElementById('checkSearch');
-
+        // Einzelne Punkte / Buttons ausblenden wenn erledigt
+        var banner = document.getElementById('featureBanner');
         if (isVerified) {
-            checkVerify.style.opacity = '0.5';
-            checkVerify.style.textDecoration = 'line-through';
-            document.getElementById('btnVerify').style.display = 'none';
+            var verifyBtn = banner.querySelector('a[href="verify-options.html"]');
+            if (verifyBtn) verifyBtn.style.display = 'none';
+            // Verifizierungs-Feature-Punkt ausblenden
+            var items = banner.querySelectorAll('.feature-list li');
+            if (items[2]) items[2].style.display = 'none';
         }
-        if (pushEnabled) {
-            checkPush.style.opacity = '0.5';
-            checkPush.style.textDecoration = 'line-through';
-        }
-        if (hasSavedSearch) {
-            checkSearch.style.opacity = '0.5';
-            checkSearch.style.textDecoration = 'line-through';
-            document.getElementById('btnSearch').style.display = 'none';
+        if (hasSearches) {
+            var searchBtn = banner.querySelector('a[href="saved-searches.html"]');
+            if (searchBtn) searchBtn.style.display = 'none';
+            var items = banner.querySelectorAll('.feature-list li');
+            if (items[1]) items[1].style.display = 'none';
         }
 
-        // Banner anzeigen
-        setTimeout(function() { document.getElementById('featureBanner').style.display = 'block'; }, 300);
+        setTimeout(function() { banner.style.display = 'block'; }, 500);
     }
+
+    window.closeBanner = function() {
+        sb.auth.getUser().then(({data}) => {
+            if(data.user) localStorage.setItem('feature_banner_seen_' + data.user.id, 'true');
+        });
+        document.getElementById('featureBanner').style.display = 'none';
+    };
 
     // Badge update
     async function updateNotificationBadge(userId) {

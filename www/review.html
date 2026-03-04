@@ -5,19 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">  <title>Bewertung abgeben - Room8</title>
   <link rel="stylesheet" href="style.css">
   <style>
+    /* Pattern: Magic UI BlurFade */
+    @keyframes blurFadeIn {
+      from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+      to { opacity: 1; filter: blur(0); transform: translateY(0); }
+    }
     .review-page-container { min-height: 100vh; background-color: var(--background-color); padding-bottom: 2rem; }
     .review-header-bar { display: flex; align-items: center; padding: 1rem 1.5rem; background: white; border-bottom: 1px solid var(--border-color); }
     .review-header-bar .back-arrow { font-size: 1.5rem; text-decoration: none; color: var(--text-color); margin-right: 1rem; }
-    .review-header-bar h1 { font-size: 1.2rem; margin: 0; }
-    .review-form-card { max-width: 500px; margin: 2rem auto; padding: 2rem; background: white; border-radius: var(--border-radius); box-shadow: var(--box-shadow); }
+    .review-header-bar h1 { font-size: 1.2rem; margin: 0; font-weight: 800; letter-spacing: -0.02em; }
+    /* Glasmorphismus Card */
+    .review-form-card { max-width: 500px; margin: 2rem auto; padding: 2rem; background: rgba(255,255,255,0.92); border-radius: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8); border: 1px solid rgba(0,0,0,0.04); animation: blurFadeIn 0.5s ease-out both; }
     .star-rating { display: flex; flex-direction: row-reverse; justify-content: center; gap: 0.5rem; font-size: 2.5rem; margin: 1rem 0; }
     .star-rating input { display: none; }
     .star-rating label { color: #d1d5db; cursor: pointer; transition: color 0.2s; }
     .star-rating input:checked ~ label, .star-rating label:hover, .star-rating label:hover ~ label { color: #fbbf24; }
     #review-context { text-align: center; color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.9rem; }
-    .seller-info-box { display: flex; align-items: center; gap: 1rem; padding: 1rem; background-color: #f9fafb; border-radius: var(--border-radius); margin-bottom: 1.5rem; }
+    .seller-info-box { display: flex; align-items: center; gap: 1rem; padding: 1rem; background-color: rgba(249,250,251,0.88); border-radius: 14px; margin-bottom: 1.5rem; border: 1px solid rgba(0,0,0,0.04); }
     .seller-avatar-review { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background-color: #e5e7eb; }
-    .seller-name-review { font-weight: 600; color: var(--text-color); }
+    .seller-name-review { font-weight: 700; color: var(--text-color); }
+    /* Barrierefreiheit */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
   </style>
 </head>
 <body>
@@ -55,13 +65,14 @@
           <textarea id="comment" placeholder="Erzähl uns mehr über deine Erfahrung..." style="min-height: 120px;"></textarea>
         </div>
         <div id="form-message" style="margin-bottom: 15px; font-weight: bold; text-align: center;"></div>
-        <button type="submit" class="submit-btn" style="width: 100%; background-color: #10b981;">Bewertung absenden</button>
+        <button type="submit" class="submit-btn" style="width: 100%; background-color: #10b981; border-radius: 999px;">Bewertung absenden</button>
       </form>
     </div>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+  <script src="lib/supabase.min.js"></script>
   <script src="config.js"></script>
+<script src="session-cache.js"></script>
   <script src="notificationHelpers.js"></script>
   <script>
     // Supabase Client - Direkte Initialisierung
@@ -205,7 +216,7 @@
           }, 1500);
         })
         .catch(function(err) {
-          setFormMessage('Bewertung konnte nicht gesendet werden. Bitte versuche es erneut.', false);
+          setFormMessage('Fehler: ' + err.message, false);
           submitBtn.disabled = false;
           submitBtn.textContent = 'Bewertung absenden';
         });

@@ -6,11 +6,16 @@
   <title>Willkommen bei Room8</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* Die Seite wird standardmäßig für Mobilgeräte gestylt */
     body, html {
       height: 100%;
       margin: 0;
       padding: 0;
+    }
+
+    /* Pattern: Magic UI BlurFade */
+    @keyframes blurFadeIn {
+      from { opacity: 0; filter: blur(8px); transform: translateY(12px); }
+      to { opacity: 1; filter: blur(0px); transform: translateY(0); }
     }
 
     .welcome-screen-container {
@@ -20,77 +25,104 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 2rem;
+      padding: 2rem 2rem 3rem;
       background: url('https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=2070&auto=format&fit=crop') no-repeat center center;
       background-size: cover;
       position: relative;
       text-align: center;
     }
-    
+
     .welcome-screen-container::before {
         content: '';
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
-        background-color: rgba(255, 255, 255, 0.7); /* Heller Schleier für Lesbarkeit */
+        background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.95) 100%);
     }
 
     .welcome-content {
-        position: relative; /* Stellt sicher, dass der Inhalt über dem Schleier liegt */
+        position: relative;
         z-index: 2;
+        animation: blurFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
     }
 
     .welcome-content h1 {
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      color: var(--text-color);
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, #1E293B, #334155);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
     }
 
     .welcome-content p {
-      font-size: 1.1rem;
-      color: var(--text-light);
-      max-width: 500px;
-      margin: 0 auto 3rem;
+      font-size: 1rem;
+      color: #64748B;
+      max-width: 340px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.5;
     }
 
     .welcome-actions {
       display: flex;
-      flex-direction: column; /* Buttons auf dem Handy untereinander */
-      gap: 1rem;
+      flex-direction: column;
+      gap: 0.75rem;
       width: 100%;
       max-width: 350px;
       margin: 0 auto;
+      animation: blurFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
     }
-    
+
+    /* Pattern: Magic UI ShimmerButton fuer primaeren CTA */
     .welcome-btn {
       display: block;
       padding: 1rem;
       border: 1px solid transparent;
-      border-radius: var(--border-radius);
+      border-radius: 999px;
       font-size: 1rem;
-      font-weight: 600;
+      font-weight: 700;
       text-decoration: none;
-      transition: all 0.2s ease;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
+    .welcome-btn:active { transform: scale(0.98); }
 
     .btn-register {
-      background-color: var(--primary-color);
+      background: linear-gradient(135deg, #3B82F6, #2563EB);
       color: white;
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.35);
+      position: relative;
+      overflow: hidden;
     }
-    .btn-register:hover {
-        background-color: var(--primary-dark);
+    .btn-register::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%; width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      animation: shimmerSlide 3s ease-in-out infinite;
+    }
+    @keyframes shimmerSlide {
+      0%, 100% { left: -100%; }
+      50% { left: 100%; }
+    }
+    .btn-register:active {
+        box-shadow: 0 2px 12px rgba(59, 130, 246, 0.3);
     }
 
     .btn-login {
-      background-color: var(--surface-color);
-      color: var(--primary-color);
-      border-color: var(--border-color);
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #3B82F6;
+      border: 1.5px solid rgba(59, 130, 246, 0.2);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
-    .btn-login:hover {
-        background-color: var(--background-color);
+    .btn-login:active {
+        background: rgba(255,255,255,0.95);
     }
-    
-    /* --- RESPONSIVE REGELN FÜR DESKTOP --- */
+
     @media (min-width: 768px) {
       .welcome-actions {
         flex-direction: row;
@@ -98,34 +130,89 @@
       .welcome-btn {
         flex: 1;
       }
+      .welcome-content h1 {
+        font-size: 3.5rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .welcome-content, .welcome-actions { animation: none; opacity: 1; }
+      .btn-register::after { animation: none; }
     }
   </style>
 </head>
 <body>
 
+  <!-- Animated Splash Overlay -->
+  <div id="splashOverlay" style="
+    position: fixed; inset: 0; z-index: 9999;
+    background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), filter 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  ">
+    <div style="
+      width: 80px; height: 80px; border-radius: 22px;
+      background: rgba(255,255,255,0.15); backdrop-filter: blur(20px);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2);
+      animation: splashIconIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    ">
+      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+    </div>
+    <div style="
+      margin-top: 1.25rem; color: white; font-size: 1.6rem; font-weight: 800;
+      letter-spacing: -0.03em;
+      animation: splashTextIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+    ">Room8</div>
+    <div style="
+      margin-top: 0.4rem; color: rgba(255,255,255,0.6); font-size: 0.85rem; font-weight: 500;
+      animation: splashTextIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.35s both;
+    ">Dein Campus. Dein Deal.</div>
+  </div>
+  <style>
+    @keyframes splashIconIn {
+      from { opacity: 0; transform: scale(0.5); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes splashTextIn {
+      from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+      to { opacity: 1; filter: blur(0); transform: translateY(0); }
+    }
+  </style>
+  <script>
+    setTimeout(function() {
+      var s = document.getElementById('splashOverlay');
+      if (s) { s.style.opacity = '0'; s.style.filter = 'blur(8px)'; setTimeout(function() { s.remove(); }, 500); }
+    }, 1600);
+  </script>
+
   <main class="welcome-screen-container">
     <div class="welcome-content">
-      <h1 data-i18n="hero_title">Your Campus. Your Deal.</h1>
+      <h1 data-i18n="hero_title">Dein Campus. Dein Deal.</h1>
       <p data-i18n="hero_subtitle">
-        The exclusive platform by students, for students. Find your next shared flat or sell used items to your fellow students without the stress.
+        Die exklusive Plattform von Studenten, für Studenten. Finde deine nächste WG oder verkaufe gebrauchte Sachen an deine Kommilitonen - ohne Stress.
       </p>
       <div class="welcome-actions">
-        <a href="register.html" class="welcome-btn btn-register" data-i18n="nav_register">Register</a>
-        <a href="login.html" class="welcome-btn btn-login" data-i18n="nav_login">Log In</a>
+        <a href="register.html" class="welcome-btn btn-register" data-i18n="nav_register">Registrieren</a>
+        <a href="login.html" class="welcome-btn btn-login" data-i18n="nav_login">Anmelden</a>
       </div>
     </div>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+  <script src="lib/supabase.min.js"></script>
   <script src="config.js"></script>
+<script src="session-cache.js"></script>
   <script src="translations.js"></script>
   <script>
     // AUTO-REDIRECT: Wenn schon eingeloggt, direkt zum Dashboard
     if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
         // Supabase Client - Direkte Initialisierung
         var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        sb.auth.getSession().then(({ data }) => {
-            if (data && data.session) {
+        sb.auth.getUser().then(({ data }) => {
+            if (data && data.user) {
                 // User ist eingeloggt -> Weiterleitung zum Dashboard
                 window.location.replace('dashboard.html');
             }

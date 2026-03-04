@@ -99,4 +99,25 @@ if (typeof window !== 'undefined') {
     window.APP_CONFIG = APP_CONFIG;
     window.SUPABASE_URL = SUPABASE_URL;
     window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
+
+    // Globaler Supabase Client (einmalig, wird von allen Scripts geteilt)
+    if (window.supabase && !window.sb) {
+        window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    // Session Cache leeren bei Logout
+    if (window.sb) {
+        window.sb.auth.onAuthStateChange(function(event) {
+            if (event === 'SIGNED_OUT' && window.SessionCache) {
+                window.SessionCache.clear();
+            }
+        });
+    }
+
+    // Service Worker registrieren
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(function(err) {
+            console.log('SW registration failed:', err);
+        });
+    }
 }

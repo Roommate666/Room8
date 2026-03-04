@@ -10,6 +10,31 @@
       padding-bottom: 0;
     }
 
+    /* Pattern: Magic UI BlurFade */
+    @keyframes blurFadeIn {
+      from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+      to { opacity: 1; filter: blur(0px); transform: translateY(0); }
+    }
+    @keyframes shimmerSlide {
+      0%, 100% { left: -100%; }
+      50% { left: 100%; }
+    }
+
+    /* Animated Mesh Gradient Background */
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .app-content::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(-45deg, #EFF6FF, #DBEAFE, #F0F9FF, #E0F2FE, #EFF6FF);
+      background-size: 400% 400%;
+      animation: gradientShift 12s ease infinite;
+      z-index: -1;
+    }
+
     .register-container {
       max-width: 100%;
       margin: 0;
@@ -22,33 +47,50 @@
     .register-header {
       text-align: center;
       margin-bottom: 1.5rem;
+      animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
     }
 
     .register-logo {
-      width: 60px;
-      height: 60px;
+      width: 64px;
+      height: 64px;
       margin: 0 auto 1rem;
-      background: var(--gradient-primary);
-      border-radius: 16px;
+      background: linear-gradient(135deg, #3B82F6, #2563EB);
+      border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Pattern: Magic UI ShineBorder */
+    .register-logo::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(255,255,255,0.3), transparent 50%, rgba(255,255,255,0.1));
+      pointer-events: none;
     }
 
     .register-logo svg {
       width: 30px;
       height: 30px;
       color: white;
+      position: relative;
+      z-index: 1;
     }
 
     .register-header h1 {
       font-size: 1.5rem;
+      font-weight: 800;
       margin-bottom: 0.5rem;
-      background: var(--gradient-primary);
+      background: linear-gradient(135deg, #3B82F6, #2563EB);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      letter-spacing: -0.02em;
     }
 
     .register-header p {
@@ -56,45 +98,83 @@
       font-size: 0.9rem;
     }
 
+    /* Formular verschoenern */
+    #registerForm {
+      animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+    }
+    #registerForm .form-group input[type="text"],
+    #registerForm .form-group input[type="email"],
+    #registerForm .form-group input[type="password"] {
+      border-radius: 14px;
+      padding: 0.9rem 1rem;
+      border: 1.5px solid #E5E7EB;
+      font-size: 0.95rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #FAFAFA;
+    }
+    #registerForm .form-group input:focus {
+      border-color: #3B82F6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
+      background: #fff;
+    }
+    #registerForm .form-group label {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #374151;
+      margin-bottom: 0.4rem;
+    }
+
+    /* Pattern: Magic UI ShimmerButton */
     .register-btn {
       width: 100%;
-      padding: 1rem 1.5rem;
-      background: var(--gradient-primary);
+      padding: 0.95rem 1.5rem;
+      background: linear-gradient(135deg, #3B82F6, #2563EB);
       color: white;
       border: none;
-      border-radius: var(--border-radius-full);
+      border-radius: 999px;
       font-size: 1rem;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.35);
+      position: relative;
+      overflow: hidden;
     }
-
-    .register-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(99, 102, 241, 0.45);
+    .register-btn::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%; width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      animation: shimmerSlide 3s ease-in-out infinite;
     }
-
+    .register-btn:active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 12px rgba(59, 130, 246, 0.3);
+    }
     .register-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
       transform: none;
     }
+    .register-btn:disabled::after { animation: none; }
 
     .login-link {
       text-align: center;
       margin-top: 1.5rem;
       padding: 1.25rem;
       color: var(--text-light);
-      background: var(--glass-bg);
-      backdrop-filter: blur(10px);
-      border-radius: var(--border-radius);
-      border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.6);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
       font-size: 0.9rem;
+      animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
     }
 
     .login-link a {
-      color: var(--primary-color);
+      color: #3B82F6;
       text-decoration: none;
       font-weight: 700;
     }
@@ -108,7 +188,7 @@
       text-align: center;
       font-weight: 600;
       padding: 1rem;
-      border-radius: var(--border-radius);
+      border-radius: 14px;
     }
 
     #msg:empty {
@@ -116,41 +196,45 @@
     }
 
     #msg.success {
-      background: rgba(16, 185, 129, 0.15);
+      background: rgba(16, 185, 129, 0.1);
       color: #059669;
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      border: 1px solid rgba(16, 185, 129, 0.2);
     }
 
     #msg.error {
-      background: rgba(244, 63, 94, 0.15);
+      background: rgba(239, 68, 68, 0.08);
       color: #dc2626;
-      border: 1px solid rgba(244, 63, 94, 0.3);
+      border: 1px solid rgba(239, 68, 68, 0.15);
     }
 
     .info-box {
-      background: rgba(99, 102, 241, 0.1);
-      border: 1px solid rgba(99, 102, 241, 0.3);
+      background: rgba(59, 130, 246, 0.06);
+      border: 1px solid rgba(59, 130, 246, 0.15);
       padding: 1.25rem;
-      border-radius: var(--border-radius);
+      border-radius: 14px;
       margin-top: 1rem;
       font-size: 0.9rem;
-      color: var(--primary-color);
+      color: #1e40af;
       line-height: 1.6;
     }
 
     .checkbox-container {
-      background: var(--glass-bg);
+      background: #FAFAFA;
       padding: 1rem;
-      border-radius: var(--border-radius);
-      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      border: 1.5px solid #E5E7EB;
     }
 
     .checkbox-container input[type="checkbox"] {
       width: 22px !important;
       height: 22px !important;
-      accent-color: var(--primary-color);
+      accent-color: #3B82F6;
     }
 
+    @media (prefers-reduced-motion: reduce) {
+      .register-header, #registerForm, .login-link { animation: none; opacity: 1; }
+      .register-btn::after { animation: none; }
+    }
   </style>
 </head>
 <body>
@@ -158,7 +242,7 @@
   <div class="app-container">
     <header class="app-header">
       <a href="index.html" class="back-arrow">&#8592;</a>
-      <h1 data-i18n="nav_register">Register</h1>
+      <h1 data-i18n="nav_register">Registrieren</h1>
     </header>
     
     <main class="app-content">
@@ -172,13 +256,13 @@
               <line x1="22" y1="11" x2="16" y2="11"></line>
             </svg>
           </div>
-          <h1 data-i18n="register_join">Join Room8</h1>
-          <p data-i18n="register_subtitle">Erstelle dein Konto für den Studenten-Marktplatz</p>
+          <h1 data-i18n="register_join">Tritt Room8 bei</h1>
+          <p data-i18n="register_subtitle">Erstelle dein Konto um auf den Studenten-Marktplatz zuzugreifen</p>
         </div>
 
         <form id="registerForm">
           <div class="form-group">
-            <label for="username" data-i18n="auth_username">Username</label>
+            <label for="username" data-i18n="auth_username">Benutzername</label>
             <input
               type="text"
               id="username"
@@ -187,12 +271,12 @@
               minlength="3"
               autocomplete="username"
               data-i18n-placeholder="register_username_placeholder"
-              placeholder="Choose a username"
+              placeholder="Wähle einen Benutzernamen"
             >
           </div>
 
           <div class="form-group">
-            <label for="email" data-i18n="register_email_label">Email Address</label>
+            <label for="email" data-i18n="register_email_label">E-Mail-Adresse</label>
             <input
               type="email"
               id="email"
@@ -200,15 +284,15 @@
               required
               autocomplete="email"
               data-i18n-placeholder="register_email_placeholder"
-              placeholder="your.email@example.com"
+              placeholder="deine.email@beispiel.de"
             >
             <small style="color: #6b7280; font-size: 0.85rem;" data-i18n="register_email_hint">
-              You can use any email address
+              Du kannst jede E-Mail-Adresse verwenden
             </small>
           </div>
 
           <div class="form-group">
-            <label for="password" data-i18n="register_password_label">Password (min. 6 characters)</label>
+            <label for="password" data-i18n="register_password_label">Passwort (min. 6 Zeichen)</label>
             <input
               type="password"
               id="password"
@@ -217,12 +301,12 @@
               minlength="6"
               autocomplete="new-password"
               data-i18n-placeholder="register_password_placeholder"
-              placeholder="Choose a strong password"
+              placeholder="Wähle ein starkes Passwort"
             >
           </div>
 
           <div class="form-group">
-            <label for="passwordConfirm" data-i18n="auth_confirm_password">Confirm Password</label>
+            <label for="passwordConfirm" data-i18n="auth_confirm_password">Passwort bestätigen</label>
             <input
               type="password"
               id="passwordConfirm"
@@ -231,7 +315,7 @@
               minlength="6"
               autocomplete="new-password"
               data-i18n-placeholder="register_password_confirm_placeholder"
-              placeholder="Repeat your password"
+              placeholder="Passwort wiederholen"
             >
           </div>
 
@@ -254,14 +338,14 @@
           </div>
 
           <button type="submit" class="register-btn" id="registerBtn" data-i18n="register_btn_create">
-            Create Account
+            Konto erstellen
           </button>
 
           <p id="msg"></p>
         </form>
 
         <div class="login-link">
-          <span data-i18n="auth_have_account">Already have an account?</span> <a href="login.html" data-i18n="auth_login_link">Log In</a>
+          <span data-i18n="auth_have_account">Bereits ein Konto?</span> <a href="login.html" data-i18n="auth_login_link">Anmelden</a>
         </div>
       </div>
     </main>
@@ -269,8 +353,9 @@
     <footer class="app-footer-nav" id="app-footer-nav"></footer>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+  <script src="lib/supabase.min.js"></script>
   <script src="config.js"></script>
+<script src="session-cache.js"></script>
   <script>
     // Supabase Client - Direkte Initialisierung
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -300,13 +385,12 @@
           terms: 'Bitte akzeptiere die Nutzungsbedingungen und Datenschutzerklärung.',
           creating: 'Konto wird erstellt...',
           success: 'Konto erstellt! Bitte überprüfe deine E-Mail.',
-          already: 'Diese E-Mail ist bereits registriert. Versuche dich anzumelden!',
+          already: 'Du hast bereits ein Konto mit dieser E-Mail! Bitte einfach einloggen.',
           invalid: 'Bitte gib eine gültige E-Mail-Adresse ein.',
           failed: 'Registrierung fehlgeschlagen: ',
           checkEmail: 'Überprüfe deine E-Mail!',
           sentTo: 'Wir haben einen Bestätigungslink an',
-          clickLink: 'gesendet. Klicke auf den Link um dein Konto zu aktivieren.',
-          spamHint: 'Tipp: Schau auch in deinem Spam-Ordner nach, falls die E-Mail nicht ankommt!'
+          clickLink: 'gesendet. Klicke auf den Link um dein Konto zu aktivieren.'
         },
         en: {
           mismatch: 'Passwords do not match!',
@@ -314,16 +398,15 @@
           terms: 'Please accept the Terms of Use and Privacy Policy.',
           creating: 'Creating account...',
           success: 'Account created! Please check your email to confirm your address.',
-          already: 'This email is already registered. Try logging in!',
+          already: 'You already have an account with this email! Just log in.',
           invalid: 'Please enter a valid email address.',
           failed: 'Registration failed: ',
           checkEmail: 'Check your email!',
           sentTo: 'We sent a confirmation link to',
-          clickLink: 'Click the link to activate your account.',
-          spamHint: 'Tip: Also check your spam folder if the email doesn\'t arrive!'
+          clickLink: 'Click the link to activate your account.'
         }
       };
-      var m = messages[lang] || messages.en;
+      var m = messages[lang] || messages.de;
 
       var acceptTerms = document.getElementById('acceptTerms').checked;
       if (!acceptTerms) {
@@ -358,29 +441,52 @@
           throw response.error;
         }
 
+        // Supabase gibt bei bereits existierender Email ein User-Objekt
+        // mit leerer identities-Liste zurueck statt einem Fehler
+        var user = response.data && response.data.user;
+        if (user && user.identities && user.identities.length === 0) {
+          throw { message: 'already registered', _alreadyExists: true };
+        }
+
         setMsg(m.success, true);
         form.reset();
         registerBtn.disabled = true;
 
         var infoBox = document.createElement('div');
         infoBox.className = 'info-box';
-        infoBox.innerHTML = '<strong>' + m.checkEmail + '</strong><br>' +
-          m.sentTo + ' <strong>' + email + '</strong><br>' +
-          m.clickLink + '<br><br>' +
-          '<span style="color: #F59E0B; font-size: 0.9rem;">&#9888; ' + m.spamHint + '</span>';
+        var strong1 = document.createElement('strong');
+        strong1.textContent = m.checkEmail;
+        var strong2 = document.createElement('strong');
+        strong2.textContent = email;
+        infoBox.appendChild(strong1);
+        infoBox.appendChild(document.createElement('br'));
+        infoBox.appendChild(document.createTextNode(m.sentTo + ' '));
+        infoBox.appendChild(strong2);
+        infoBox.appendChild(document.createElement('br'));
+        infoBox.appendChild(document.createTextNode(m.clickLink));
         msg.after(infoBox);
       })
       .catch(function(error) {
         console.error('Registration error:', error);
-        
-        if (error.message.indexOf('already registered') !== -1) {
-          setMsg(m.already, false);
-        } else if (error.message.indexOf('Invalid email') !== -1) {
+
+        var isAlready = (error._alreadyExists) ||
+          (error.message && error.message.indexOf('already registered') !== -1);
+
+        if (isAlready) {
+          msg.textContent = '';
+          msg.className = 'error';
+          msg.appendChild(document.createTextNode(m.already + ' '));
+          var loginLink = document.createElement('a');
+          loginLink.href = 'login.html';
+          loginLink.textContent = lang === 'de' ? 'Zum Login' : 'Go to Login';
+          loginLink.style.cssText = 'color:#3B82F6;font-weight:700;text-decoration:underline;';
+          msg.appendChild(loginLink);
+        } else if (error.message && error.message.indexOf('Invalid email') !== -1) {
           setMsg(m.invalid, false);
         } else {
-          setMsg(m.failed + 'Bitte versuche es erneut.', false);
+          setMsg(m.failed + (error.message || 'Unknown error'), false);
         }
-        
+
         registerBtn.disabled = false;
       });
     });

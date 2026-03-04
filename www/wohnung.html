@@ -6,7 +6,14 @@
     <title>Wohnung inserieren - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Header - Blau mit weißer Schrift */
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
+        .app-content { animation: blurFadeIn 0.5s ease-out both; }
+
+        /* Header - Blau mit weisser Schrift */
         .app-header {
             display: grid;
             grid-template-columns: 40px 1fr 40px;
@@ -33,12 +40,14 @@
             border: none !important;
         }
 
-        /* Spezifische Styles für dieses Formular */
+        /* Glasmorphismus Mode Switch */
         .mode-switch {
             display: flex;
-            background: #F3F4F6;
+            background: rgba(243,244,246,0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             padding: 4px;
-            border-radius: 12px;
+            border-radius: 14px;
             margin-bottom: 1.5rem;
         }
 
@@ -87,21 +96,21 @@
         }
 
         .checkbox-card {
-            background: #fff;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(0,0,0,0.04);
+            border-radius: 12px;
             padding: 0.75rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             margin-bottom: 0.5rem;
         }
 
         .checkbox-card:hover {
             border-color: var(--primary-color);
-            background: #EEF2FF;
+            background: #F2F2F0;
         }
 
         .checkbox-card input {
@@ -143,7 +152,7 @@
 
         .radio-card:hover {
             border-color: var(--primary-color);
-            background: #EEF2FF;
+            background: #F2F2F0;
         }
 
         .radio-card input[type="radio"] {
@@ -228,13 +237,13 @@
 
         /* Info Box */
         .info-box {
-            background: #EEF2FF;
-            border: 1px solid #C7D2FE;
+            background: #F2F2F0;
+            border: 1px solid #EBEBEB;
             border-radius: 8px;
             padding: 0.75rem;
             margin-bottom: 1rem;
             font-size: 0.85rem;
-            color: #4338CA;
+            color: #6A6A6A;
         }
 
         /* Tags für Hobbys etc. */
@@ -244,14 +253,15 @@
             gap: 0.5rem;
         }
 
+        /* Kibo UI Pill Tags */
         .tag-item {
             background: #F3F4F6;
             border: 1px solid var(--border-color);
-            border-radius: 20px;
+            border-radius: 999px;
             padding: 0.4rem 0.8rem;
             font-size: 0.8rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .tag-item:hover, .tag-item.selected {
@@ -291,6 +301,10 @@
         .date-grid .form-group {
             margin: 0;
             min-width: 0; /* Verhindert Overflow */
+        }
+        /* Barrierefreiheit */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
     </style>
 </head>
@@ -829,18 +843,16 @@
     </main>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
 <script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script src="cities.js"></script>
 <script src="notificationHelpers.js"></script>
-<script src="verifyGate.js"></script>
 <script>
     // Supabase Client - Direkte Initialisierung
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    var _t = (typeof Room8i18n !== 'undefined') ? Room8i18n.t : function(k) { return k; };
-    verifyGate({ blur: ['.app-content'], message: _t('verify_create_message') });
 
     // 2. Städte-Vorschläge aktivieren
     document.addEventListener('DOMContentLoaded', function() {
@@ -1207,7 +1219,7 @@
 
         } catch (err) {
             console.error('Fehler beim Laden:', err);
-            Room8UI.error('Inserat konnte nicht geladen werden. Bitte versuche es erneut.');
+            Room8UI.error('Fehler beim Laden des Inserats: ' + err.message);
         }
     }
 
@@ -1586,52 +1598,16 @@
 
             Room8UI.success(editListingId ? "Änderungen gespeichert!" : "Inserat erfolgreich erstellt!");
 
-            // NEU: Benachrichtige User in der Stadt (nur bei neuen Inseraten)
-            if (!editListingId && listing.city && window.NotificationHelpers) {
-                try {
-                    // Hole alle User in dieser Stadt mit aktivierter Benachrichtigung
-                    var cityUsersRes = await sb
-                        .from('profiles')
-                        .select('id')
-                        .ilike('city', listing.city);
-
-                    if (cityUsersRes.data && cityUsersRes.data.length > 0) {
-                        for (var u of cityUsersRes.data) {
-                            // Nicht den Ersteller selbst benachrichtigen
-                            if (u.id === user.id) continue;
-
-                            // Prüfe Benachrichtigungseinstellungen
-                            var settingsRes = await sb
-                                .from('notification_settings')
-                                .select('new_listing_city')
-                                .eq('user_id', u.id)
-                                .single();
-
-                            // Standard: aktiviert wenn keine Einstellung
-                            var notify = !settingsRes.data || settingsRes.data.new_listing_city !== false;
-
-                            if (notify) {
-                                await NotificationHelpers.createNotification(
-                                    u.id,
-                                    'new_listing_city',
-                                    '🏠 Neue Wohnung in ' + listing.city,
-                                    listing.title,
-                                    'listing-details.html?id=' + listing.id,
-                                    listing.id
-                                );
-                            }
-                        }
-                    }
-                } catch (notifyErr) {
-                    console.log('City notification error:', notifyErr);
-                }
-            }
+            // City-Notifications + Saved-Search-Notifications werden jetzt
+            // komplett server-seitig via DB-Trigger gehandhabt:
+            // - trigger_notify_new_listing_city (notification_settings)
+            // - trigger_match_saved_searches (saved_searches)
 
             setTimeout(function() { window.location.href = "wohnungen.html"; }, 1500);
 
         } catch (err) {
             console.error(err);
-            Room8UI.error("Inserat konnte nicht gespeichert werden. Bitte versuche es erneut.");
+            Room8UI.error("Fehler: " + err.message);
             btn.disabled = false;
             btn.textContent = "Erneut versuchen";
         }

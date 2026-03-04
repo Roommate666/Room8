@@ -57,11 +57,6 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-        @media (min-width: 1100px) {
-            .favorites-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
 
         /* Karte Styling */
         .fav-card {
@@ -208,8 +203,11 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
+<script src="room8-utils.js"></script>
 <script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
@@ -274,7 +272,8 @@
                         price,
                         monthly_rent,
                         city,
-                        type
+                        type,
+                        owner_id
                     )
                 `)
                 .eq('user_id', currentUser.id);
@@ -283,9 +282,19 @@
 
             // Filtern nach Typ (Wohnung vs Gegenstand)
             // Hinweis: Wir filtern im Client, weil der Join-Filter in Supabase JS manchmal tricky ist
-            const filteredFavs = favorites.filter(fav => 
+            var filteredFavs = favorites.filter(fav =>
                 fav.listings && fav.listings.type === currentType
             );
+
+            // Blockierte User filtern
+            if (window.Room8) {
+                var blockedIds = await Room8.loadBlockedUsers();
+                if (blockedIds.length > 0) {
+                    filteredFavs = filteredFavs.filter(function(fav) {
+                        return !fav.listings.owner_id || !blockedIds.includes(fav.listings.owner_id);
+                    });
+                }
+            }
 
             // Bilder holen
             const listingIds = filteredFavs.map(f => f.listing_id);
@@ -324,12 +333,14 @@
     }
 
     function renderFavoriteCard(favId, listing, photoPath) {
-        let imageUrl = 'no-image.svg';
-        
+        let imageUrl = null;
+
         if (photoPath) {
             const { data } = sb.storage.from('listing-images').getPublicUrl(photoPath);
             if (data) imageUrl = data.publicUrl;
         }
+        const _icon = listing.type === 'wohnung' ? '🏠' : '📦';
+        const _label = listing.type === 'wohnung' ? 'Wohnung' : 'Gegenstand';
 
         // Preis Logik
         let priceText = '';
@@ -343,7 +354,10 @@
         return `
             <div class="fav-card" onclick="navigateTo('listing-details.html?id=${listing.id}')">
                 <div class="fav-image-container">
-                    <img src="${imageUrl}" class="fav-image" alt="${listing.title}" onerror="this.src='no-image.svg'">
+                    ${imageUrl
+                        ? `<img src="${imageUrl}" class="fav-image" alt="${listing.title}" onerror="this.outerHTML='<div class=\\'fav-image\\' style=\\'display:flex;align-items:center;justify-content:center;background:#EBEBEB;height:100%;\\'><div style=\\'text-align:center;color:#929292;\\'><div style=\\'font-size:2rem;\\'>${_icon}</div><div style=\\'font-size:0.7rem;font-weight:600;color:#929292;\\'>${_label}</div></div></div>'">`
+                        : `<div class="fav-image" style="display:flex;align-items:center;justify-content:center;background:#EBEBEB;height:180px;"><div style="text-align:center;color:#929292;"><div style="font-size:2rem;">${_icon}</div><div style="font-size:0.7rem;font-weight:600;color:#929292;">${_label}</div></div></div>`
+                    }
                     <button class="delete-fav-btn" data-id="${favId}">
                         🗑️
                     </button>
@@ -387,7 +401,7 @@
             // Neu laden
             loadFavorites();
         } catch (err) {
-            Room8UI.error('Favorit konnte nicht entfernt werden. Bitte versuche es erneut.');
+            Room8UI.error('Fehler: ' + err.message);
             loadFavorites(); // Zurücksetzen bei Fehler
         }
     }

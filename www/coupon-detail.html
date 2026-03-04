@@ -5,11 +5,45 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Coupon - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
         .coupon-hero { height: 250px; background-color: #FED7AA; position: relative; }
         .coupon-hero img { width: 100%; height: 100%; object-fit: cover; }
-        .coupon-content { background: white; border-radius: 20px 20px 0 0; margin-top: -20px; position: relative; padding: 2rem 1.5rem; text-align: center; }
-        .discount-big { font-size: 2.5rem; font-weight: 800; color: #EA580C; margin: 1rem 0; }
-        .code-box { background: #F3F4F6; border: 2px dashed #D1D5DB; padding: 1.5rem; margin: 2rem 0; border-radius: 12px; font-family: monospace; font-size: 1.8rem; font-weight: 700; cursor: pointer; letter-spacing: 2px; }
+        /* Glasmorphismus Content */
+        .coupon-content {
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px 24px 0 0;
+            margin-top: -20px;
+            position: relative;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8);
+            animation: blurFadeIn 0.5s ease-out both;
+        }
+        .discount-big { font-size: 2.5rem; font-weight: 800; color: #EA580C; margin: 1rem 0; letter-spacing: -0.02em; }
+        .code-box {
+            background: rgba(243,244,246,0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 2px dashed #D1D5DB;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 16px;
+            font-family: monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .code-box:active { transform: scale(0.97); }
+        /* Barrierefreiheit */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
     </style>
 </head>
 <body>
@@ -19,7 +53,7 @@
     </header>
 
     <div class="coupon-hero">
-        <img id="heroImg" src="no-image.svg" alt="Deal">
+        <img id="heroImg" src="https://via.placeholder.com/400x250" alt="Deal">
     </div>
 
     <div class="coupon-content">
@@ -37,8 +71,10 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script>
     // Supabase Client - Direkte Initialisierung

@@ -6,11 +6,13 @@
 (function() {
     'use strict';
 
-    // 1. SAFE NAVIGATION
+    // 1. SAFE NAVIGATION (Cache-Buster für WKWebView auf iOS)
     window.navigateTo = function(url) {
         try {
-            console.log('Navigiere zu:', url);
-            window.location.href = url;
+            var separator = url.indexOf('?') !== -1 ? '&' : '?';
+            var freshUrl = url + separator + '_t=' + Date.now();
+            console.log('Navigiere zu:', freshUrl);
+            window.location.href = freshUrl;
         } catch (e) {
             console.warn('Navigation blockiert:', e);
             try {
@@ -103,13 +105,14 @@
 
         var currentPage = getCurrentPage();
 
+        var _t = (typeof Room8i18n !== 'undefined') ? Room8i18n.t : function(k) { return k; };
         var navItems = [
-            { id: 'home', href: 'dashboard.html', icon: 'grid', label: 'Home' },
-            { id: 'housing', href: 'wohnungen.html', icon: 'home', label: 'Wohnen' },
-            { id: 'marketplace', href: 'gegenstaende.html', icon: 'shopping', label: 'Markt' },
-            { id: 'jobs', href: 'jobs.html', icon: 'briefcase', label: 'Jobs' },
-            { id: 'coupons', href: 'coupons.html', icon: 'tag', label: 'Coupons' },
-            { id: 'messages', href: 'nachrichten.html', icon: 'message', label: 'Chat' }
+            { id: 'home', href: 'dashboard.html', icon: 'grid', label: _t('nav_tab_home') },
+            { id: 'housing', href: 'wohnungen.html', icon: 'home', label: _t('nav_tab_housing') },
+            { id: 'marketplace', href: 'gegenstaende.html', icon: 'shopping', label: _t('nav_tab_market') },
+            { id: 'jobs', href: 'jobs.html', icon: 'briefcase', label: _t('nav_tab_jobs') },
+            { id: 'coupons', href: 'coupons.html', icon: 'tag', label: _t('nav_tab_coupons') },
+            { id: 'messages', href: 'nachrichten.html', icon: 'message', label: _t('nav_tab_chat') }
         ];
 
         // Build nav items
@@ -129,6 +132,8 @@
                     activeClass = 'active-jobs';
                 } else if (item.id === 'coupons') {
                     activeClass = 'active-coupons';
+                } else if (item.id === 'messages') {
+                    activeClass = 'active-messages';
                 } else {
                     activeClass = 'active';
                 }
@@ -170,6 +175,9 @@
                 window.navigateTo(targetHref);
             });
         });
+
+        // Load unread chat badge
+        loadChatUnreadBadge();
 
         // Add bottom padding to content to prevent overlap with floating nav
         var appContent = document.querySelector('.app-content');
@@ -239,7 +247,6 @@
             }
 
             .bottom-nav-item {
-                position: relative;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -260,12 +267,12 @@
 
             /* Default Active (Home, Chat, Profile) */
             .bottom-nav-item.active {
-                color: #6366f1;
+                color: #E8604C;
             }
             .bottom-nav-item.active .bottom-nav-icon {
-                background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+                background: linear-gradient(135deg, #E8604C 0%, #D4503E 100%);
                 color: white;
-                box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+                box-shadow: 0 2px 8px rgba(232, 96, 76, 0.3);
             }
 
             /* Wohnen - Blau */
@@ -308,6 +315,16 @@
                 box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
             }
 
+            /* Chat/Nachrichten - Rot */
+            .bottom-nav-item.active-messages {
+                color: #ef4444;
+            }
+            .bottom-nav-item.active-messages .bottom-nav-icon {
+                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+                color: white;
+                box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+            }
+
             .bottom-nav-icon {
                 width: 36px;
                 height: 36px;
@@ -329,24 +346,6 @@
                 font-weight: 600;
                 letter-spacing: 0.01em;
             }
-
-            .bottom-nav-badge {
-                position: absolute;
-                top: 0;
-                right: 2px;
-                background: #EF4444;
-                color: white;
-                font-size: 0.6rem;
-                font-weight: 700;
-                min-width: 16px;
-                height: 16px;
-                border-radius: 8px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 0 4px;
-                box-shadow: 0 2px 4px rgba(239,68,68,0.4);
-            }
         `;
 
         var style = document.createElement('style');
@@ -355,104 +354,63 @@
         document.head.appendChild(style);
     }
 
-    // Update unread message badge on Chat nav item
-    var _navClient = null;
-    var _navUserId = null;
-    var _realtimeSubscribed = false;
+    // Load unread chat message count badge on Chat tab
+    function loadChatUnreadBadge() {
+        var navSb = window.sb;
+        if (!navSb) return;
 
-    function getNavClient() {
-        if (_navClient) return _navClient;
-        if (window.supabase && window.supabase.createClient && typeof SUPABASE_URL !== 'undefined') {
-            _navClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
-        return _navClient;
+        var getCachedUser = window.SessionCache ? window.SessionCache.getUser() : navSb.auth.getUser().then(function(r) { return r.data ? r.data.user : null; });
+        Promise.resolve(getCachedUser).then(function(user) {
+            if (!user) return;
+
+            navSb.from('notifications')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', user.id)
+                .eq('type', 'chat_message')
+                .eq('is_read', false)
+                .then(function(result) {
+                    var count = (result && !result.error && result.count) ? result.count : 0;
+                    updateChatBadgeUI(count);
+                });
+        }).catch(function() {});
     }
 
-    function setBadgeCount(count) {
-        var chatLink = document.querySelector('.bottom-nav-item[data-href="nachrichten.html"]');
-        if (!chatLink) return;
-        var old = chatLink.querySelector('.bottom-nav-badge');
-        if (old) old.remove();
-        if (count && count > 0) {
+    function updateChatBadgeUI(count) {
+        // Find the Chat nav item
+        var chatItem = document.querySelector('.bottom-nav-item[data-href="nachrichten.html"]');
+        if (!chatItem) return;
+
+        // Remove existing badge
+        var existing = chatItem.querySelector('.nav-chat-badge');
+        if (existing) existing.remove();
+
+        if (count > 0) {
             var badge = document.createElement('span');
-            badge.className = 'bottom-nav-badge';
+            badge.className = 'nav-chat-badge';
             badge.textContent = count > 99 ? '99+' : count;
-            chatLink.appendChild(badge);
+            badge.style.cssText = 'position:absolute;top:-2px;right:-2px;background:#ef4444;color:white;font-size:0.6rem;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid white;box-shadow:0 1px 3px rgba(239,68,68,0.4);';
+            chatItem.style.position = 'relative';
+            chatItem.appendChild(badge);
         }
     }
 
-    function updateChatBadge() {
-        var client = getNavClient();
-        if (!client) return;
-        try {
-            client.auth.getSession().then(function(result) {
-                if (!result.data || !result.data.session) return;
-                _navUserId = result.data.session.user.id;
-                client.from('messages')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('receiver_id', _navUserId)
-                    .eq('is_read', false)
-                    .then(function(res) {
-                        setBadgeCount(res.count);
-                    });
-                // Subscribe to realtime updates (once)
-                subscribeToMessageUpdates();
-            });
-        } catch(e) { console.warn('Badge update failed:', e); }
-    }
+    // Global function to refresh chat badge (called from notificationBell realtime)
+    window.updateChatBadge = function() {
+        loadChatUnreadBadge();
+    };
 
-    // Real-time subscription for chat badge
-    function subscribeToMessageUpdates() {
-        if (_realtimeSubscribed || !_navUserId) return;
-        var client = getNavClient();
-        if (!client) return;
-        _realtimeSubscribed = true;
-        try {
-            client.channel('nav-badge-messages')
-                .on('postgres_changes', {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'messages',
-                    filter: 'receiver_id=eq.' + _navUserId
-                }, function() {
-                    // New message received - refresh badge count
-                    client.from('messages')
-                        .select('*', { count: 'exact', head: true })
-                        .eq('receiver_id', _navUserId)
-                        .eq('is_read', false)
-                        .then(function(res) {
-                            setBadgeCount(res.count);
-                        });
-                })
-                .on('postgres_changes', {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'messages',
-                    filter: 'receiver_id=eq.' + _navUserId
-                }, function() {
-                    // Message marked as read - refresh badge count
-                    client.from('messages')
-                        .select('*', { count: 'exact', head: true })
-                        .eq('receiver_id', _navUserId)
-                        .eq('is_read', false)
-                        .then(function(res) {
-                            setBadgeCount(res.count);
-                        });
-                })
-                .subscribe();
-        } catch(e) { console.warn('Realtime badge subscription failed:', e); }
-    }
-
-    // Dynamically load push-logic.js on every page (if not already loaded)
-    function loadPushLogic() {
-        if (window.PushService) return; // already loaded
-        if (!document.querySelector('script[src="push-logic.js"]')) {
-            var s = document.createElement('script');
-            s.src = 'push-logic.js';
-            s.async = true;
-            document.body.appendChild(s);
+    // Refresh chat badge wenn Seite wieder sichtbar wird
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            loadChatUnreadBadge();
         }
-    }
+    });
+
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            loadChatUnreadBadge();
+        }
+    });
 
     // Render on DOM ready
     if (document.readyState === 'loading') {
@@ -460,14 +418,10 @@
             injectBottomNavStyles();
             renderBottomNav();
             fixBackArrowLinks();
-            setTimeout(updateChatBadge, 500);
-            setTimeout(loadPushLogic, 800);
         });
     } else {
         injectBottomNavStyles();
         renderBottomNav();
         fixBackArrowLinks();
-        setTimeout(updateChatBadge, 500);
-        setTimeout(loadPushLogic, 800);
     }
 })();

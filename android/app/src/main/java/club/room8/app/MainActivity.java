@@ -23,17 +23,22 @@ public class MainActivity extends BridgeActivity {
     }
 
     private void handlePushUrl(Intent intent) {
-        if (intent != null && intent.hasExtra("pushUrl")) {
-            String url = intent.getStringExtra("pushUrl");
-            if (url != null && !url.isEmpty()) {
-                // Wait for WebView to be ready, then navigate
-                new android.os.Handler().postDelayed(() -> {
-                    if (getBridge() != null && getBridge().getWebView() != null) {
-                        getBridge().getWebView().evaluateJavascript(
-                            "window.location.href = '" + url.replace("'", "\\'") + "';", null);
-                    }
-                }, 1500);
-            }
+        if (intent == null) return;
+        // Eigener pushUrl-Key (von Room8MessagingService im Vordergrund gesetzt)
+        String url = intent.getStringExtra("pushUrl");
+        // Fallback: Firebase Data-Key "url" (wenn System die Notification im Hintergrund zeigt)
+        if (url == null || url.isEmpty()) {
+            url = intent.getStringExtra("url");
+        }
+        if (url != null && !url.isEmpty()) {
+            final String targetUrl = url;
+            // Wait for WebView to be ready, then navigate
+            new android.os.Handler().postDelayed(() -> {
+                if (getBridge() != null && getBridge().getWebView() != null) {
+                    getBridge().getWebView().evaluateJavascript(
+                        "window.location.href = '" + targetUrl.replace("'", "\\'") + "';", null);
+                }
+            }, 1500);
         }
     }
 

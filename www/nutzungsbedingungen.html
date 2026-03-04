@@ -5,98 +5,71 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title data-i18n="terms_page_title">Nutzungsbedingungen - Room8</title>
 <link rel="stylesheet" href="style.css">
 <style>
-/* Modern Header */
-.legal-header-bg {
-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-color: white;
-padding: 2rem 1.5rem 3rem;
-border-bottom-left-radius: 30px;
-border-bottom-right-radius: 30px;
-text-align: center;
-margin-bottom: 2rem;
-box-shadow: 0 4px 20px rgba(118, 75, 162, 0.2);
-position: relative;
-        }
-.back-nav {
-position: absolute;
-top: 1.5rem;
-left: 1.5rem;
-color: white;
-text-decoration: none;
-display: flex;
-align-items: center;
-font-weight: 600;
-font-size: 0.9rem;
-opacity: 0.9;
-transition: opacity 0.2s;
-        }
-.back-nav:hover { opacity: 1; }
-.legal-header-bg h1 { margin: 0.5rem 0 0.25rem; font-size: 1.8rem; font-weight: 700; }
-.legal-header-bg p { opacity: 0.9; font-size: 1rem; margin: 0; }
-/* Main Content */
+/* Pattern: Magic UI BlurFade */
+@keyframes blurFadeIn {
+  from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+  to { opacity: 1; filter: blur(0); transform: translateY(0); }
+}
+/* Legal Content */
 .legal-content {
 max-width: 800px;
-margin: -2.5rem auto 0; /* Overlap Header */
-padding: 0 1.5rem 4rem;
-position: relative;
-z-index: 10;
-        }
+margin: 0 auto;
+padding: 0 1rem 4rem;
+animation: blurFadeIn 0.5s ease-out both;
+}
+/* Glasmorphismus */
 .content-card {
-background: white;
+background: rgba(255,255,255,0.92);
 border-radius: 20px;
-padding: 2rem;
-box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-border: 1px solid var(--border-color);
+padding: 1.5rem;
+box-shadow: 0 2px 12px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
+border: 1px solid rgba(0,0,0,0.04);
 line-height: 1.8;
 color: #374151;
-        }
+margin-top: 1rem;
+}
 .content-card h2 {
 color: var(--text-main);
 margin-top: 2rem;
 margin-bottom: 1rem;
-font-size: 1.25rem;
+font-size: 1.15rem;
 border-bottom: 2px solid #F3F4F6;
 padding-bottom: 0.5rem;
-        }
+}
 .content-card h3 {
 color: var(--text-main);
 margin-top: 1.5rem;
-font-size: 1.1rem;
-        }
-/* Tabs Styling */
+font-size: 1.05rem;
+}
+/* Tabs */
 .tab-bar {
 display: flex;
-justify-content: center;
-margin-bottom: 1.5rem;
-background: rgba(255,255,255,0.2); /* Transparent auf dem Gradient */
+background: var(--glass-bg);
 padding: 4px;
-border-radius: 16px;
-backdrop-filter: blur(10px);
-border: 1px solid rgba(255,255,255,0.3);
-max-width: 400px;
-margin-left: auto;
-margin-right: auto;
-        }
+border-radius: 14px;
+border: 1px solid var(--glass-border);
+margin: 1rem;
+}
 .tab-link {
 flex: 1;
 text-align: center;
-padding: 0.8rem;
+padding: 0.7rem;
 font-weight: 600;
 cursor: pointer;
-border-radius: 12px;
+border-radius: 10px;
 transition: all 0.2s;
-color: rgba(255,255,255,0.8);
-font-size: 0.95rem;
-        }
+color: var(--text-light);
+font-size: 0.9rem;
+}
 .tab-link.active {
-background: white;
-color: var(--primary-color);
-box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
+background: var(--primary-color);
+color: white;
+box-shadow: 0 2px 8px rgba(59,130,246,0.25);
+}
 /* Info Boxes */
 .info-box, .warning-box, .success-box {
 padding: 1rem 1.25rem;
-border-radius: 8px;
+border-radius: 14px;
 margin: 1.5rem 0;
 font-size: 0.95rem;
         }
@@ -105,26 +78,28 @@ font-size: 0.95rem;
 .success-box { background: #ECFDF5; border-left: 4px solid #10B981; color: #065F46; }
 /* Template Box (Verträge) */
 .template-box {
-background: #F8FAFC;
-border: 1px solid #E2E8F0;
-border-radius: 12px;
+background: rgba(248,250,252,0.92);
+border: 1px solid rgba(0,0,0,0.06);
+border-radius: 16px;
 padding: 1.5rem;
 margin: 1.5rem 0;
-font-family: 'Courier New', Courier, monospace; /* Schreibmaschinen-Look */
+font-family: 'Courier New', Courier, monospace;
 font-size: 0.85rem;
 white-space: pre-wrap;
 word-wrap: break-word;
 overflow-x: auto;
 color: #334155;
-box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+box-shadow: 0 2px 12px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
 position: relative;
+backdrop-filter: blur(8px);
+-webkit-backdrop-filter: blur(8px);
         }
 .template-title {
-background: #334155;
+background: linear-gradient(135deg, #334155 0%, #1E293B 100%);
 color: white;
-padding: 0.5rem 1rem;
+padding: 0.6rem 1.2rem;
 margin: -1.5rem -1.5rem 1rem -1.5rem;
-border-radius: 12px 12px 0 0;
+border-radius: 16px 16px 0 0;
 font-family: sans-serif;
 font-weight: 600;
 font-size: 0.9rem;
@@ -138,17 +113,17 @@ background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
 color: white;
 border: none;
 padding: 0.75rem 1.5rem;
-border-radius: 12px;
+border-radius: 999px;
 cursor: pointer;
 font-size: 0.9rem;
 font-weight: 600;
 margin-top: 0.5rem;
-transition: transform 0.1s, box-shadow 0.2s;
+transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
 box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
 width: 100%;
         }
-.copy-btn:active { transform: scale(0.98); }
-.copy-btn:hover { box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4); }
+.copy-btn:active { transform: scale(0.97); }
+.copy-btn:hover { box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4); transform: translateY(-1px); }
 .email-link {
 background: #EFF6FF;
 padding: 0.2rem 0.6rem;
@@ -160,23 +135,20 @@ font-weight: 500;
 </style>
 </head>
 <body>
-<div class="app-container" style="background: #F3F4F6;">
-<!-- Modern Header -->
-<div class="legal-header-bg">
-<a href="javascript:history.back()" class="back-nav">
-<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="m15 18-6-6 6-6"/></svg>
-<span data-i18n="general_back">Zurück</span>
-</a>
-<h1 data-i18n="terms_title">Rechtliches</h1>
-<p data-i18n="terms_subtitle">AGB & Kostenlose Vorlagen</p>
-<!-- Tabs directly inside header for nice look -->
-<div style="margin-top: 1.5rem;">
-<div class="tab-bar">
-<div class="tab-link active" onclick="switchTab('agb')">📜 AGB</div>
-<div class="tab-link" onclick="switchTab('contracts')">📋 Verträge</div>
-</div>
-</div>
-</div>
+<div class="app-container">
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <h1 data-i18n="terms_title">Rechtliches</h1>
+        <div style="width:40px;"></div>
+    </header>
+
+    <div class="tab-bar">
+        <div class="tab-link active" onclick="switchTab('agb')">AGB</div>
+        <div class="tab-link" onclick="switchTab('contracts')">Musterverträge</div>
+    </div>
+
 <main class="legal-content">
 <!-- AGB TAB -->
 <div id="tab-agb" class="content-card">
@@ -184,31 +156,42 @@ font-weight: 500;
 <strong data-i18n="terms_summary_label">Zusammenfassung:</strong>
 <span data-i18n="terms_summary_text">Room8 ist eine kostenlose Vermittlungsplattform. Wir stellen den Kontakt her, sind aber kein Vertragspartner. Verträge schließt ihr direkt miteinander.</span>
 </div>
-<h2 data-i18n="terms_scope_title">1. Geltungsbereich</h2>
-<p data-i18n="terms_scope_text">
-                Diese Nutzungsbedingungen regeln die Nutzung der App "Room8". Mit der Registrierung akzeptierst du diese Bedingungen.
-</p>
-<h2 data-i18n="terms_target_title">2. Zielgruppe</h2>
-<p data-i18n="terms_target_text">
-                Room8 ist ausschließlich für Studierende gedacht. Mit der Nutzung bestätigst du, dass du an einer Hochschule eingeschrieben bist.
-</p>
-<h2 data-i18n="terms_free_title">3. Kostenlose Nutzung</h2>
-<p data-i18n="terms_free_text">
-                Die Nutzung ist für Studierende 100% kostenlos. Keine Provisionen, keine Gebühren.
-</p>
-<h2 data-i18n="terms_commercial_title">4. Gewerbliche Nutzung</h2>
+<h2>1. Geltungsbereich</h2>
 <p>
-<span data-i18n="terms_commercial_text">Gewerbliche Anbieter benötigen eine Erlaubnis. Kontakt:</span>
+                Diese Nutzungsbedingungen regeln die Nutzung der App „Room8" (nachfolgend „App" oder „Plattform"). Mit der Registrierung akzeptierst du diese Bedingungen. Room8 wird betrieben von Yusuf Albayrak, Am Silbermannpark 13, 86161 Augsburg (nachfolgend „Betreiber").
+</p>
+<h2>2. Zielgruppe und Mindestalter</h2>
+<p>
+                Room8 ist ausschließlich für Studierende gedacht. Mit der Nutzung bestätigst du, dass du an einer Hochschule eingeschrieben bist. Die Nutzung der App ist erst ab einem Alter von <strong>16 Jahren</strong> gestattet. Mit der Registrierung bestätigst du, dass du mindestens 16 Jahre alt bist.
+</p>
+<h2>3. Leistungsbeschreibung</h2>
+<p>
+                Room8 ist eine Vermittlungsplattform mit folgenden Bereichen:
+</p>
+<ul>
+    <li><strong>Wohnungen & WG:</strong> Zimmer, Wohnungen und WGs anbieten, suchen oder tauschen</li>
+    <li><strong>Marktplatz:</strong> Gegenstände verkaufen oder suchen</li>
+    <li><strong>Jobs:</strong> Studentenjobs und Nebentätigkeiten finden</li>
+    <li><strong>Coupons:</strong> Vergünstigungen und Angebote von Partnern</li>
+</ul>
+<p>Die Nutzung ist für Studierende <strong>100% kostenlos</strong>. Keine Provisionen, keine Gebühren.</p>
+
+<h2>4. Gewerbliche Nutzung</h2>
+<p>
+Gewerbliche Anbieter benötigen eine schriftliche Erlaubnis des Betreibers. Kontakt:
 <a href="mailto:admin@room8.club" class="email-link">admin@room8.club</a>
 </p>
-<h2 data-i18n="terms_role_title">5. Unsere Rolle</h2>
+
+<h2>5. Unsere Rolle</h2>
 <div class="warning-box">
-<strong data-i18n="terms_role_important">Wichtig:</strong>
-<span data-i18n="terms_role_warning">Wir sind nur Vermittler. Wir prüfen keine Wohnungen vor Ort.</span>
+<strong>Wichtig:</strong>
+Room8 ist ausschließlich Vermittler. Wir prüfen keine Wohnungen, Gegenstände oder Job-Angebote vor Ort.
 </div>
 <ul>
-<li data-i18n="terms_role_item1">Wir sind nicht an Mietverträgen beteiligt</li>
-<li data-i18n="terms_role_item4">Wir haften nicht für Schäden aus Mietverhältnissen</li>
+<li>Wir sind nicht Vertragspartner bei Miet-, Kauf- oder Arbeitsverträgen</li>
+<li>Alle Vereinbarungen werden ausschließlich zwischen den jeweiligen Nutzern geschlossen</li>
+<li>Wir übernehmen keine Gewähr für die Richtigkeit, Vollständigkeit oder Aktualität der von Nutzern eingestellten Inhalte</li>
+<li>Für Coupons und Job-Angebote von Partnern ist der jeweilige Partner verantwortlich</li>
 </ul>
 <h2 data-i18n="terms_safety_title">6. Sicherheitstipps</h2>
 <div class="success-box">
@@ -234,15 +217,70 @@ font-weight: 500;
 </ul>
 <p><strong>Verstöße gegen diese Regeln führen zur sofortigen Sperrung des Kontos und Löschung aller Inhalte. Gemeldete Inhalte werden innerhalb von 24 Stunden geprüft und entsprechende Maßnahmen ergriffen.</strong></p>
 
+<h2>8. Nutzungsrechte an Inhalten</h2>
+<p>Durch das Hochladen von Inhalten (Texte, Fotos, Beschreibungen) räumst du dem Betreiber ein einfaches, unentgeltliches, zeitlich auf die Dauer deiner Nutzung begrenztes Nutzungsrecht ein, diese Inhalte im Rahmen der Plattform anzuzeigen, zu speichern und technisch zu verarbeiten.</p>
+<ul>
+    <li>Du garantierst, dass du über die erforderlichen Rechte an den hochgeladenen Inhalten verfügst</li>
+    <li>Die Rechte an deinen Inhalten verbleiben bei dir</li>
+    <li>Nach Löschung deines Inserats oder Kontos werden die Inhalte entfernt</li>
+    <li>Der Betreiber ist berechtigt, rechtswidrige Inhalte ohne Vorankündigung zu entfernen</li>
+</ul>
+
+<h2>9. Haftungsbeschränkung</h2>
+<div class="warning-box">
+<strong>Haftung des Betreibers:</strong>
+</div>
+<ul>
+    <li>Der Betreiber haftet <strong>unbeschränkt</strong> für Vorsatz und grobe Fahrlässigkeit</li>
+    <li>Bei leichter Fahrlässigkeit haftet der Betreiber nur bei Verletzung wesentlicher Vertragspflichten (Kardinalpflichten), begrenzt auf den vorhersehbaren, vertragstypischen Schaden</li>
+    <li>Die Haftung für Schäden aus der Verletzung des Lebens, des Körpers oder der Gesundheit bleibt unberührt</li>
+    <li>Der Betreiber haftet nicht für Inhalte, Handlungen oder Unterlassungen der Nutzer</li>
+    <li>Für die Verfügbarkeit der Plattform wird keine Gewähr übernommen. Wartungsarbeiten und technische Störungen sind möglich</li>
+</ul>
+
+<h2>10. Kündigung und Kontolöschung</h2>
+<p>Du kannst dein Konto jederzeit ohne Angabe von Gründen in den Profileinstellungen löschen. Mit der Löschung werden:</p>
+<ul>
+    <li>Alle deine personenbezogenen Daten unwiderruflich entfernt</li>
+    <li>Alle deine Inserate deaktiviert und gelöscht</li>
+    <li>Alle deine Nachrichten gelöscht</li>
+    <li>Dein Nutzungsvertrag beendet</li>
+</ul>
+<p>Der Betreiber kann dein Konto bei Verstößen gegen diese Nutzungsbedingungen jederzeit sperren oder löschen. Du wirst per E-Mail über die Sperrung informiert.</p>
+
+<h2>11. Sperrung durch den Betreiber</h2>
+<p>Der Betreiber behält sich vor, Nutzerkonten vorübergehend oder dauerhaft zu sperren, wenn:</p>
+<ul>
+    <li>Ein Verstoß gegen diese Nutzungsbedingungen vorliegt</li>
+    <li>Falsche Angaben bei der Registrierung gemacht wurden</li>
+    <li>Die Plattform missbräuchlich genutzt wird</li>
+    <li>Berechtigte Meldungen anderer Nutzer vorliegen</li>
+</ul>
+
+<h2>12. Verfügbarkeit</h2>
+<p>Der Betreiber bemüht sich um eine möglichst unterbrechungsfreie Verfügbarkeit der App. Ein Anspruch auf ständige Verfügbarkeit besteht nicht. Wartungsarbeiten, technische Störungen oder höhere Gewalt können zu vorübergehenden Einschränkungen führen.</p>
+
+<h2>13. Änderungen der Nutzungsbedingungen</h2>
+<p>Der Betreiber behält sich vor, diese Nutzungsbedingungen jederzeit zu ändern. Über wesentliche Änderungen wirst du per E-Mail oder In-App-Benachrichtigung informiert. Die fortgesetzte Nutzung der App nach Inkrafttreten der Änderungen gilt als Zustimmung. Bei Widerspruch kannst du dein Konto jederzeit löschen.</p>
+
+<h2>14. Anwendbares Recht und Salvatorische Klausel</h2>
+<p>Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts.</p>
+<p>Sollten einzelne Bestimmungen dieser Nutzungsbedingungen ganz oder teilweise unwirksam sein oder werden, bleibt die Wirksamkeit der übrigen Bestimmungen unberührt. Anstelle der unwirksamen Bestimmung gilt eine wirksame Bestimmung, die dem wirtschaftlichen Zweck der unwirksamen Bestimmung am nächsten kommt.</p>
+
 <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e5e7eb;">
 <p style="text-align: center; color: #9ca3af; font-size: 0.85rem;">
-<span data-i18n="terms_last_updated">Stand:</span> Januar 2026
+Stand: Februar 2026
 </p>
 </div>
 <!-- VERTRÄGE TAB -->
 <div id="tab-contracts" class="content-card" style="display:none;">
-<p data-i18n="terms_templates_intro">
-                Diese Vorlagen sind <strong>kostenlos</strong> und dienen deiner Absicherung. Einfach kopieren, in Word/Google Docs einfügen und ausfüllen.
+
+<div class="warning-box">
+<strong>⚠️ Wichtiger Hinweis:</strong> Diese Mustervertr&auml;ge sind <strong>unverbindliche Beispielvorlagen</strong> und stellen <strong>keine Rechtsberatung</strong> dar. Room8 &uuml;bernimmt <strong>keinerlei Haftung</strong> f&uuml;r die Richtigkeit, Vollst&auml;ndigkeit oder Eignung dieser Vorlagen. Die Nutzung erfolgt auf eigene Verantwortung. F&uuml;r rechtlich bindende Vertr&auml;ge empfehlen wir die Beratung durch einen Rechtsanwalt.
+</div>
+
+<p>
+Diese Vorlagen sind <strong>kostenlos</strong> und dienen als Orientierungshilfe. Einfach kopieren, ausf&uuml;llen und anpassen.
 </p>
 <!-- Template 1: Untermietvertrag -->
 <div class="template-box" id="template1-de">
@@ -251,44 +289,75 @@ font-weight: 500;
 <span>Untermietvertrag</span>
 </div>
 UNTERMIETVERTRAG
+(Unverbindliche Mustervorlage - keine Rechtsberatung)
 
 Zwischen
 
-Untervermieter:
+Untervermieter/in (Hauptmieter/in):
 Name: ________________________________
-Adresse: ________________________________
+Geburtsdatum: ________________________________
+Anschrift: ________________________________
 
 und
 
-Untermieter:
+Untermieter/in:
 Name: ________________________________
-Adresse: ________________________________
+Geburtsdatum: ________________________________
+Bisherige Anschrift: ________________________________
 
-1. Mietobjekt
-Das Zimmer in der Adresse: ________________________________
+§1 Mietobjekt
+Das Zimmer/die Wohnung in:
+Adresse: ________________________________
+Etage/Zimmer: ________________________________
+Größe ca.: ________ m²
 wird ab dem ____________ untervermietet.
 
-2. Mietdauer
-□ Unbefristet mit Kündigungsfrist von ___ Monaten
+Die Zustimmung des Hauptvermieters liegt vor:
+□ Ja (Nachweis anbei)  □ Wird eingeholt
+
+§2 Mietdauer
+□ Unbefristet mit gesetzlicher Kündigungsfrist
+   (3 Monate zum Monatsende, §573c BGB)
 □ Befristet bis zum ____________
+   Grund der Befristung: ________________________________
 
-3. Miete
-Monatliche Warmmiete: ________ €
-Kaution: ________ € (max. 3 Monatsmieten)
-Zahlbar bis zum ___. jedes Monats
+§3 Miete und Zahlung
+Kaltmiete: ________ € / Monat
+Nebenkostenpauschale: ________ € / Monat
+Gesamtmiete (warm): ________ € / Monat
+Zahlbar bis zum ___. jedes Monats auf folgendes Konto:
+IBAN: ________________________________
+Kontoinhaber: ________________________________
 
-4. Nebenkosten
-□ In der Warmmiete enthalten
-□ Zusätzlich: ________ € Pauschale
-□ Nach Verbrauch abgerechnet
+§4 Kaution
+Kaution: ________ € (max. 3 Netto-Kaltmieten, §551 BGB)
+Die Kaution ist auf einem separaten Konto anzulegen
+und wird nach Beendigung des Mietverhältnisses
+abzüglich etwaiger Forderungen zurückerstattet.
 
-5. Unterschriften
+§5 Nebenkosten
+□ In der Warmmiete enthalten (Pauschale)
+□ Jährliche Abrechnung nach Verbrauch
+□ Folgende Kosten sind zusätzlich zu tragen:
+   ________________________________
+
+§6 Zustand der Mietsache
+Der Zustand bei Einzug wird in einem gemeinsamen
+Übergabeprotokoll festgehalten (als Anlage beigefügt).
+
+§7 Sonstige Vereinbarungen
+________________________________
+________________________________
+
+§8 Schlussbestimmungen
+Änderungen und Ergänzungen dieses Vertrages bedürfen
+der Schriftform. Sollte eine Bestimmung unwirksam sein,
+bleibt die Wirksamkeit der übrigen Bestimmungen unberührt.
+
+Ort, Datum: ________________________
 
 ________________________          ________________________
-Ort, Datum                         Ort, Datum
-
-________________________          ________________________
-Untervermieter                     Untermieter
+Untervermieter/in (Unterschrift)   Untermieter/in (Unterschrift)
 </div>
 <button class="copy-btn" onclick="copyTemplate('template1-de')">📋 Vorlage kopieren</button>
 
@@ -299,39 +368,86 @@ Untervermieter                     Untermieter
 <span>WG-Vereinbarung</span>
 </div>
 WG-VEREINBARUNG
+(Unverbindliche Mustervorlage - keine Rechtsberatung)
 
 WG-Adresse: ________________________________
+Gültig ab: ________________________________
 
 WG-Mitglieder:
-1. ________________________________
-2. ________________________________
-3. ________________________________
+1. ________________________________ (Hauptmieter/in: □ Ja □ Nein)
+2. ________________________________ (Hauptmieter/in: □ Ja □ Nein)
+3. ________________________________ (Hauptmieter/in: □ Ja □ Nein)
+4. ________________________________ (Hauptmieter/in: □ Ja □ Nein)
 
-1. Gemeinschaftsräume
-Küche, Bad und Flur werden gemeinsam genutzt und sauber gehalten.
+§1 Gemeinschaftsräume
+Küche, Bad, Flur und ________________________________
+werden gemeinsam genutzt und von allen sauber gehalten.
+Persönliche Räume sind privat und werden nur mit
+Erlaubnis betreten.
 
-2. Putzplan
-□ Wöchentlich rotierend
+§2 Putzplan
+□ Wöchentlich rotierend (Plan hängt in der Küche aus)
 □ Nach Vereinbarung
+□ Sonstiges: ________________________________
 
-3. Ruhezeiten
-Von _____ Uhr bis _____ Uhr
+§3 Ruhezeiten
+Nachtruhe: von _____ Uhr bis _____ Uhr
+Besondere Ruhezeiten (z.B. Prüfungsphase): nach Absprache
 
-4. Gäste
-Übernachtungsgäste sind □ erlaubt □ nach Absprache □ nicht erlaubt
+§4 Gäste und Übernachtungen
+Tagesgäste: □ Jederzeit  □ Nach kurzer Info
+Übernachtungsgäste: □ Erlaubt (max. ___ Nächte/Woche)
+                     □ Nach Absprache
+                     □ Nicht erlaubt
+Längere Besuche (>1 Woche): nur mit Zustimmung aller
 
-5. Kosten
-Gemeinschaftliche Ausgaben werden geteilt:
-Internet: ________ € / Monat
-Putzmittel: ca. ________ € / Monat
+§5 Gemeinschaftliche Kosten
+Internet: ________ € / Monat  (Anbieter: ____________)
+GEZ/Rundfunkbeitrag: ________ € / Monat
+Putzmittel/Haushalt: ca. ________ € / Monat
+Sonstiges: ________________________________
+
+Kostenaufteilung: □ Gleichmäßig  □ Nach Zimmergröße
+□ Sonstige Regelung: ________________________________
+
+Bezahlung: Jedes Mitglied überweist seinen Anteil bis
+zum ___. jedes Monats an:
+Name: ________________________________
+IBAN: ________________________________
+
+§6 Küche und Lebensmittel
+□ Jeder kauft für sich selbst
+□ Gemeinschaftskasse für Grundnahrungsmittel
+□ Kühlschrank: Fächer sind aufgeteilt / beschriftet
+
+§7 Lautstärke und Zusammenleben
+Waschmaschine/Trockner: nicht vor _____ Uhr
+                        und nicht nach _____ Uhr
+Musik/TV: in Zimmerlautstärke nach _____ Uhr
+Rauchen in der Wohnung: □ Erlaubt  □ Nur am Fenster/Balkon  □ Nicht erlaubt
+
+§8 Einzug/Auszug
+Bei Auszug: Nachfolger wird gemeinsam gesucht.
+Kündigungsfrist innerhalb der WG: ___ Monate
+Kautionsregelung bei WG-internem Wechsel:
+________________________________
+
+§9 Sonstige Vereinbarungen
+________________________________
+________________________________
+
+§10 Schlussbestimmungen
+Diese Vereinbarung ist eine freiwillige Absprache zwischen
+den WG-Mitgliedern. Änderungen bedürfen der Zustimmung
+aller Mitglieder. Diese Vereinbarung ersetzt keine
+mietvertraglichen Regelungen mit dem Vermieter.
 
 Unterschriften aller WG-Mitglieder:
 
-________________________
-________________________
-________________________
-
-Datum: ________________
+________________________  Datum: ____________
+________________________  Datum: ____________
+________________________  Datum: ____________
+________________________  Datum: ____________
 </div>
 <button class="copy-btn" onclick="copyTemplate('template2-de')">📋 Vorlage kopieren</button>
 
@@ -344,6 +460,7 @@ Datum: ________________
 </div>
 
 <script src="config.js"></script>
+<script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script src="translations.js"></script>
 <script>
@@ -400,6 +517,7 @@ function fallbackCopy(text) {
     }
     document.body.removeChild(textArea);
 }
+
 </script>
 </body>
 </html>

@@ -6,21 +6,31 @@
     <title>Meine Favoriten - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Spezifische Styles für Favoriten */
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
+
+        /* Glasmorphismus Header */
         .favorites-header {
-            background: white;
+            background: rgba(255,255,255,0.92);
             padding: 1.5rem;
-            border-radius: var(--radius-md);
+            border-radius: 18px;
             margin-bottom: 1.5rem;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(0,0,0,0.04);
             text-align: center;
+            animation: blurFadeIn 0.5s ease-out both;
         }
 
         .favorites-tabs {
             display: flex;
-            background: #F3F4F6;
+            background: rgba(243,244,246,0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             padding: 4px;
-            border-radius: 12px;
+            border-radius: 14px;
             margin-bottom: 1.5rem;
         }
 
@@ -29,20 +39,20 @@
             padding: 0.6rem;
             text-align: center;
             font-size: 0.9rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            border-radius: 8px;
+            border-radius: 10px;
             color: var(--text-muted);
             background: transparent;
             border: none;
-            transition: all 0.2s;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .tab-btn.active {
             background: white;
             color: var(--text-main);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            font-weight: 700;
         }
 
         .favorites-grid {
@@ -57,24 +67,19 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-        @media (min-width: 1100px) {
-            .favorites-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
 
-        /* Karte Styling */
+        /* Glasmorphismus Card */
         .fav-card {
-            background: white;
-            border-radius: var(--radius-md);
+            background: rgba(255,255,255,0.92);
+            border-radius: 18px;
             overflow: hidden;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(0,0,0,0.04);
             position: relative;
             display: flex;
             flex-direction: column;
-            transition: transform 0.2s;
-            text-decoration: none; /* Link Styling entfernen */
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+            text-decoration: none;
             color: inherit;
         }
 
@@ -166,10 +171,17 @@
             padding: 0.75rem 1.5rem;
             background: var(--primary-gradient);
             color: white;
-            border-radius: var(--radius-md);
+            border-radius: 999px;
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 700;
             box-shadow: var(--shadow-glow);
+        }
+
+        .favorites-grid { animation: blurFadeIn 0.5s 0.15s ease-out both; }
+
+        /* Barrierefreiheit */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
     </style>
 </head>
@@ -191,7 +203,10 @@
             <button class="tab-btn" onclick="switchTab('gegenstand')" id="tab-gegenstand">Marktplatz</button>
         </div>
 
-        <div id="loading" style="text-align: center; padding: 2rem;">Lade Favoriten...</div>
+        <div id="loading" style="padding: 1rem;">
+            <div class="skeleton-card"><div class="skeleton-image"></div><div style="flex:1;padding:0.75rem;display:flex;flex-direction:column;gap:0.5rem"><div class="skeleton-line" style="width:65%"></div><div class="skeleton-line short" style="width:40%"></div></div></div>
+            <div class="skeleton-card" style="margin-top:0.75rem;"><div class="skeleton-image"></div><div style="flex:1;padding:0.75rem;display:flex;flex-direction:column;gap:0.5rem"><div class="skeleton-line" style="width:55%"></div><div class="skeleton-line short" style="width:45%"></div></div></div>
+        </div>
         
         <div id="favoritesList" class="favorites-grid">
             <!-- Favoriten werden hier eingefügt -->
@@ -208,9 +223,11 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
 <script src="translations.js"></script>
+<script src="session-cache.js"></script>
+<script src="room8-utils.js"></script>
 <script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
@@ -275,7 +292,8 @@
                         price,
                         monthly_rent,
                         city,
-                        type
+                        type,
+                        owner_id
                     )
                 `)
                 .eq('user_id', currentUser.id);
@@ -284,9 +302,19 @@
 
             // Filtern nach Typ (Wohnung vs Gegenstand)
             // Hinweis: Wir filtern im Client, weil der Join-Filter in Supabase JS manchmal tricky ist
-            const filteredFavs = favorites.filter(fav => 
+            var filteredFavs = favorites.filter(fav =>
                 fav.listings && fav.listings.type === currentType
             );
+
+            // Blockierte User filtern
+            if (window.Room8) {
+                var blockedIds = await Room8.loadBlockedUsers();
+                if (blockedIds.length > 0) {
+                    filteredFavs = filteredFavs.filter(function(fav) {
+                        return !fav.listings.owner_id || !blockedIds.includes(fav.listings.owner_id);
+                    });
+                }
+            }
 
             // Bilder holen
             const listingIds = filteredFavs.map(f => f.listing_id);
@@ -325,12 +353,14 @@
     }
 
     function renderFavoriteCard(favId, listing, photoPath) {
-        let imageUrl = 'no-image.svg';
-        
+        let imageUrl = null;
+
         if (photoPath) {
             const { data } = sb.storage.from('listing-images').getPublicUrl(photoPath);
             if (data) imageUrl = data.publicUrl;
         }
+        const _icon = listing.type === 'wohnung' ? '🏠' : '📦';
+        const _label = listing.type === 'wohnung' ? 'Wohnung' : 'Gegenstand';
 
         // Preis Logik
         let priceText = '';
@@ -344,7 +374,10 @@
         return `
             <div class="fav-card" onclick="navigateTo('listing-details.html?id=${listing.id}')">
                 <div class="fav-image-container">
-                    <img src="${imageUrl}" class="fav-image" alt="${listing.title}" onerror="this.src='no-image.svg'">
+                    ${imageUrl
+                        ? `<img src="${imageUrl}" class="fav-image" alt="${listing.title}" loading="lazy" onerror="this.outerHTML='<div class=\\'fav-image\\' style=\\'display:flex;align-items:center;justify-content:center;background:#EBEBEB;height:100%;\\'><div style=\\'text-align:center;color:#929292;\\'><div style=\\'font-size:2rem;\\'>${_icon}</div><div style=\\'font-size:0.7rem;font-weight:600;color:#929292;\\'>${_label}</div></div></div>'">`
+                        : `<div class="fav-image" style="display:flex;align-items:center;justify-content:center;background:#EBEBEB;height:180px;"><div style="text-align:center;color:#929292;"><div style="font-size:2rem;">${_icon}</div><div style="font-size:0.7rem;font-weight:600;color:#929292;">${_label}</div></div></div>`
+                    }
                     <button class="delete-fav-btn" data-id="${favId}">
                         🗑️
                     </button>
@@ -388,7 +421,7 @@
             // Neu laden
             loadFavorites();
         } catch (err) {
-            Room8UI.error('Favorit konnte nicht entfernt werden. Bitte versuche es erneut.');
+            Room8UI.error('Fehler: ' + err.message);
             loadFavorites(); // Zurücksetzen bei Fehler
         }
     }

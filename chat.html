@@ -53,14 +53,14 @@
             width: 42px;
             height: 42px;
             border-radius: 50%;
-            background: #EEF2FF;
+            background: #F2F2F0;
             background-size: cover;
             background-position: center;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            color: var(--primary-color);
+            color: #3B82F6;
             border: 2px solid white;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             flex-shrink: 0;
@@ -384,13 +384,59 @@
             justify-content: center;
             padding: 0 4px;
         }
+        /* Verification Overlay */
+        .verify-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        .verify-overlay.active { display: flex; }
+        .verify-overlay-box {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            max-width: 360px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        .verify-overlay-box .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .verify-overlay-box h2 { font-size: 1.3rem; margin-bottom: 0.5rem; color: #1f2937; }
+        .verify-overlay-box p { color: #6b7280; font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; }
+        .verify-overlay-box a {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 0.85rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
     </style>
 </head>
 <body>
 
 <div class="app-container">
+    <!-- Verification Overlay -->
+    <div class="verify-overlay" id="verifyOverlay">
+        <div class="verify-overlay-box">
+            <div class="icon">🔒</div>
+            <h2>Verifizierung erforderlich</h2>
+            <p>Um den Chat zu nutzen, musst du zuerst deinen Studentenstatus verifizieren.</p>
+            <a href="verify-options.html">Jetzt verifizieren</a>
+        </div>
+    </div>
+
     <header class="chat-header">
-        <a href="javascript:history.back()" class="back-arrow">
+        <a href="nachrichten.html" onclick="event.preventDefault(); navigateTo('nachrichten.html?_=' + Date.now());" class="back-arrow">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
         
@@ -443,8 +489,11 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
+<script src="room8-utils.js"></script>
 <script src="notificationHelpers.js"></script>
 <script src="notificationBell.js"></script>
 <script>
@@ -454,7 +503,8 @@
     const urlParams = new URLSearchParams(window.location.search);
     // Unterstütze beide Parameter-Formate
     const targetUserId = urlParams.get('user') || urlParams.get('sellerId');
-    const listingId = urlParams.get('listing') || urlParams.get('listingId');
+    // let statt const - kann aus vorhandenen Nachrichten abgeleitet werden (Fix 3)
+    var listingId = urlParams.get('listing') || urlParams.get('listingId') || null;
 
     var currentUser = null;
 
@@ -462,16 +512,41 @@
         try { window.location.href = url; } catch(e) { console.warn(e); }
     }
 
+    async function checkVerification() {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) return;
+        const { data: profile } = await sb.from('profiles').select('is_verified, is_student_verified').eq('id', user.id).single();
+        var isVerified = profile && (profile.is_verified || profile.is_student_verified);
+        if (!isVerified) {
+            document.getElementById('verifyOverlay').classList.add('active');
+        }
+    }
+
     async function initChat() {
         const { data: { user } } = await sb.auth.getUser();
         if (!user) { navigateTo('login.html'); return; }
         currentUser = user;
 
+        checkVerification();
+
+        // Block-Check
+        if (targetUserId && window.Room8) {
+            var isBlocked = await Room8.isUserBlocked(targetUserId);
+            if (isBlocked) {
+                document.getElementById('messagesList').innerHTML = '<div style="padding:3rem;text-align:center;"><div style="font-size:2.5rem;margin-bottom:1rem;">🚫</div><h3 style="color:#1f2937;margin-bottom:0.5rem;">Nutzer blockiert</h3><p style="color:#6b7280;font-size:0.95rem;">Du kannst keine Nachrichten mit diesem Nutzer austauschen.</p><a href="javascript:history.back()" style="display:inline-block;margin-top:1rem;color:#3b82f6;font-weight:600;text-decoration:none;">← Zurück</a></div>';
+                document.querySelector('.chat-input-area').style.display = 'none';
+                return;
+            }
+        }
+
         if (targetUserId) loadPartnerProfile(targetUserId);
         if (listingId) loadListingContext(listingId);
         if (targetUserId) {
-            loadMessages();
+            await loadMessages();
             subscribeToMessages();
+            // Sofort als gelesen markieren (currentUser + targetUserId sind jetzt sicher gesetzt)
+            markMessagesAsRead();
+            markChatNotificationsAsRead();
         }
     }
 
@@ -495,7 +570,7 @@
         // Laden inkl. Bildpfad
         const { data: listing } = await sb
             .from('listings')
-            .select('title, price, monthly_rent, type, listing_photos(storage_path)')
+            .select('title, price, monthly_rent, type, listing_mode, listing_photos(storage_path)')
             .eq('id', id)
             .single();
 
@@ -515,8 +590,20 @@
             if (listing.listing_photos && listing.listing_photos.length > 0) {
                 const { data } = sb.storage.from('listing-images').getPublicUrl(listing.listing_photos[0].storage_path);
                 if (data) imgEl.src = data.publicUrl;
+            } else if (listing.listing_mode === 'search') {
+                // Suchinserat: orangenes Fragezeichen
+                imgEl.style.display = 'none';
+                const placeholder = document.createElement('div');
+                placeholder.style.cssText = 'width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,#FFF7ED,#FFEDD5);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.4rem;';
+                placeholder.textContent = '🔍';
+                imgEl.parentNode.insertBefore(placeholder, imgEl);
             } else {
-                imgEl.src = 'no-image.svg';
+                // Angebot ohne Bild: Haus-Icon
+                imgEl.style.display = 'none';
+                const placeholder = document.createElement('div');
+                placeholder.style.cssText = 'width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,#F2F2F0,#EBEBEB);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.4rem;';
+                placeholder.textContent = listing.type === 'wohnung' ? '🏠' : '📦';
+                imgEl.parentNode.insertBefore(placeholder, imgEl);
             }
 
             // Klickbar machen: Zum Inserat
@@ -525,11 +612,19 @@
     }
 
     async function loadMessages() {
-        const { data: messages } = await sb
+        var query = sb
             .from('messages')
             .select('*')
-            .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${targetUserId}),and(sender_id.eq.${targetUserId},receiver_id.eq.${currentUser.id})`)
-            .order('created_at', { ascending: true });
+            .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${targetUserId}),and(sender_id.eq.${targetUserId},receiver_id.eq.${currentUser.id})`);
+
+        // Pro Inserat filtern: nur Nachrichten fuer dieses Listing anzeigen
+        if (listingId) {
+            query = query.eq('listing_id', listingId);
+        } else {
+            query = query.is('listing_id', null);
+        }
+
+        const { data: messages } = await query.order('created_at', { ascending: true });
 
         const container = document.getElementById('messagesList');
         container.innerHTML = '';
@@ -553,21 +648,6 @@
             container.innerHTML = '<div style="text-align:center;margin-top:3rem;color:#9ca3af;">Schreib "Hallo"!</div>';
         }
         scrollToBottom();
-        markMessagesAsRead();
-    }
-
-    async function markMessagesAsRead() {
-        if (!currentUser || !targetUserId) return;
-        try {
-            await sb.from('messages')
-                .update({ is_read: true })
-                .eq('sender_id', targetUserId)
-                .eq('receiver_id', currentUser.id)
-                .eq('is_read', false);
-            // Update chat badge in navigation
-            var badge = document.querySelector('.bottom-nav-badge');
-            if (badge) badge.remove();
-        } catch(e) { console.warn('Mark read failed:', e); }
     }
 
     function appendMessage(msg) {
@@ -617,13 +697,28 @@
     }
 
     function subscribeToMessages() {
-        sb.channel('public:messages')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${currentUser.id}` }, payload => {
-                if (payload.new.sender_id === targetUserId) {
-                    appendMessage(payload.new);
+        // Ohne Filter subscriben (robuster) - filtern im Callback
+        sb.channel('chat-live-' + currentUser.id + '-' + Date.now())
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'messages'
+            }, function(payload) {
+                // Nur Nachrichten fuer uns von unserem Chat-Partner UND fuer dieses Listing
+                var msg = payload.new;
+                var msgListing = msg.listing_id || null;
+                var currentListing = listingId || null;
+                if (msg.receiver_id === currentUser.id && msg.sender_id === targetUserId && msgListing === currentListing) {
+                    console.log('Realtime: Neue Nachricht von Partner');
+                    appendMessage(msg);
                     scrollToBottom();
+                    // Sofort als gelesen markieren (beide Tabellen!)
+                    markMessagesAsRead();
+                    markChatNotificationsAsRead();
                 }
-            }).subscribe();
+            }).subscribe(function(status) {
+                console.log('Chat realtime subscription:', status);
+            });
     }
 
     // Bild-Anhang Variablen
@@ -789,13 +884,8 @@
             console.log('Message sent successfully:', messageContent);
         }
 
-        // Notify
-        if (window.NotificationHelpers) {
-             const { data: myProfile } = await sb.from('profiles').select('full_name, username').eq('id', currentUser.id).single();
-             const myName = myProfile ? (myProfile.full_name || myProfile.username) : 'Jemand';
-             const notifyText = imageUrl ? '📷 Bild' : content.substring(0, 50);
-             NotificationHelpers.notifyChatMessage(targetUserId, myName, notifyText);
-        }
+        // Notification + Push wird vom DB-Trigger (on_new_message) gehandhabt.
+        // Kein Frontend-Notify nötig (verhindert doppelte Glocken-Einträge).
     }
 
     function escapeHtml(text) {
@@ -821,46 +911,53 @@
         this.style.height = (this.scrollHeight) + 'px';
     }
 
-    // iOS Keyboard Scroll Fix - Robuste Lösung
+    // iOS Keyboard Fix - VisualViewport basiert
     const messagesContainer = document.getElementById('messagesList');
     const appContainer = document.querySelector('.app-container');
     let keyboardOpen = false;
+    let lastViewportHeight = window.innerHeight;
 
     tx.addEventListener('focus', () => {
         keyboardOpen = true;
-        setTimeout(scrollToBottom, 100);
-        setTimeout(scrollToBottom, 300);
-        setTimeout(scrollToBottom, 500);
+        setTimeout(scrollToBottom, 150);
+        setTimeout(scrollToBottom, 400);
     });
 
     tx.addEventListener('blur', () => {
         keyboardOpen = false;
-        // Container zurücksetzen
+        // Restore full layout
         setTimeout(() => {
-            appContainer.style.height = '100%';
+            appContainer.style.height = '';
+            appContainer.style.top = '';
             appContainer.style.bottom = '0';
         }, 100);
     });
 
-    // Visualviewport API für Keyboard-Handling (iOS 13+)
     if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', () => {
-            const viewportHeight = window.visualViewport.height;
-            const offsetTop = window.visualViewport.offsetTop;
+        function onViewportChange() {
+            const vv = window.visualViewport;
+            const viewportHeight = vv.height;
+            const offsetTop = vv.offsetTop;
+            const fullHeight = window.innerHeight;
 
-            // Container an sichtbaren Bereich anpassen
-            appContainer.style.height = viewportHeight + 'px';
-            appContainer.style.top = offsetTop + 'px';
-
-            // Scroll to bottom wenn Keyboard offen
-            if (keyboardOpen) {
-                setTimeout(scrollToBottom, 50);
+            if (viewportHeight < fullHeight - 50) {
+                // Keyboard is open - set bottom to auto so height+top work correctly
+                appContainer.style.bottom = 'auto';
+                appContainer.style.height = viewportHeight + 'px';
+                appContainer.style.top = offsetTop + 'px';
+                keyboardOpen = true;
+                scrollToBottom();
+            } else {
+                // Keyboard closed - restore
+                appContainer.style.bottom = '0';
+                appContainer.style.height = '';
+                appContainer.style.top = '0';
+                keyboardOpen = false;
             }
-        });
+        }
 
-        window.visualViewport.addEventListener('scroll', () => {
-            appContainer.style.top = window.visualViewport.offsetTop + 'px';
-        });
+        window.visualViewport.addEventListener('resize', onViewportChange);
+        window.visualViewport.addEventListener('scroll', onViewportChange);
     }
 
     // Touch-Move für Scroll während Tastatur offen
@@ -868,35 +965,84 @@
         e.stopPropagation();
     }, { passive: true });
 
-    // Load notification count for bell badge
-    async function loadNotificationCount() {
+    // 1) Messages in der messages-Tabelle als gelesen markieren
+    //    → Das entfernt den roten Punkt in nachrichten.html
+    async function markMessagesAsRead() {
+        if (!currentUser || !targetUserId) return;
         try {
-            const { data: { user } } = await sb.auth.getUser();
-            if (!user) return;
-
-            const { count } = await sb
-                .from('notifications')
-                .select('*', { count: 'exact', head: true })
-                .eq('user_id', user.id)
+            var query = sb
+                .from('messages')
+                .update({ is_read: true })
+                .eq('receiver_id', currentUser.id)
+                .eq('sender_id', targetUserId)
                 .eq('is_read', false);
 
-            const badge = document.getElementById('notifBadge');
-            if (badge && count > 0) {
-                badge.textContent = count > 99 ? '99+' : count;
-                badge.style.display = 'flex';
+            // Nur Nachrichten fuer dieses Listing als gelesen markieren
+            if (listingId) {
+                query = query.eq('listing_id', listingId);
+            } else {
+                query = query.is('listing_id', null);
+            }
+
+            await query;
+            console.log('Messages von', targetUserId, 'fuer Listing', listingId, 'als gelesen markiert');
+        } catch (e) {
+            console.log('markMessagesAsRead error:', e);
+        }
+    }
+
+    // 2) Notifications in der notifications-Tabelle als gelesen markieren
+    //    → Das aktualisiert Bell-Badge und Chat-Tab-Badge
+    async function markChatNotificationsAsRead() {
+        if (!currentUser) return;
+        try {
+            await sb
+                .from('notifications')
+                .update({ is_read: true })
+                .eq('user_id', currentUser.id)
+                .eq('type', 'chat_message')
+                .eq('is_read', false);
+
+            console.log('Chat notifications als gelesen markiert');
+
+            // Alle Badges aktualisieren
+            if (window.NotificationBell && window.NotificationBell.refresh) {
+                window.NotificationBell.refresh();
+            }
+            if (window.updateAppBadge) window.updateAppBadge();
+        } catch (e) {
+            console.log('markChatNotificationsAsRead error:', e);
+        }
+    }
+
+    // Bell-Badge im Chat-Header aktualisieren
+    async function loadNotificationCount() {
+        try {
+            if (!currentUser) {
+                var { data: { user } } = await sb.auth.getUser();
+                if (!user) return;
+                currentUser = user;
+            }
+
+            var { count } = await sb
+                .from('notifications')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', currentUser.id)
+                .eq('is_read', false);
+
+            var badge = document.getElementById('notifBadge');
+            if (badge) {
+                if (count > 0) {
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
             }
         } catch (e) {
             console.log('Could not load notification count');
         }
     }
-
-    // Fix: Reset container when returning from another page (e.g. listing-details)
-    window.addEventListener('pageshow', function(event) {
-        appContainer.style.height = '100%';
-        appContainer.style.top = '0';
-        appContainer.style.bottom = '0';
-        setTimeout(scrollToBottom, 100);
-    });
 
     initChat();
     loadNotificationCount();

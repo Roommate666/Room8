@@ -32,8 +32,8 @@
         
         /* Example Banner */
         .example-banner {
-            background: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%);
-            border: 1px solid #8B5CF6;
+            background: #F7F7F5;
+            border: 1px solid #EBEBEB;
             border-radius: 12px;
             padding: 0.75rem 1rem;
             margin: 0 1.5rem 1rem;
@@ -87,7 +87,7 @@
         }
         
         .showcase-hero {
-            background: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%);
+            background: #F7F7F5;
             padding: 1.5rem;
             display: flex;
             gap: 1rem;
@@ -392,8 +392,10 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
@@ -470,7 +472,7 @@
         else if(job.salary_type === 'per_hour') salary += ' / Std';
         
         var jobTypeLabels = { 'werkstudent': 'Werkstudent', 'minijob': 'Minijob', 'praktikum': 'Praktikum', 'teilzeit': 'Teilzeit', 'vollzeit': 'Vollzeit' };
-        var jobType = jobTypeLabels[job.job_type] || job.job_type;
+        var jobType = jobTypeLabels[job.job_type] || (job.job_type ? job.job_type.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }) : 'Job');
         var badge = job.is_demo ? '<span class="example-badge">BEISPIEL</span>' : '';
         var clickAction = job.is_demo ? 'onclick="Room8UI.info(\'Dies ist ein Beispiel-Inserat.\')"' : 'onclick="navigateTo(\'job-detail.html?id=' + job.id + '\')"';
 

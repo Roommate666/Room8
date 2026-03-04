@@ -6,8 +6,14 @@
     <title>Marktplatz - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
+
         .app-container { --primary-color: #10b981; --primary-dark: #059669; background-color: #f3f4f6; padding-bottom: calc(450px + env(safe-area-inset-bottom, 20px)); }
-        
+
         /* HEADER FIX - Luftiger */
         .app-header {
             display: grid;
@@ -18,62 +24,54 @@
             color: white; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;
             box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
             margin-bottom: 1.25rem;
+            animation: blurFadeIn 0.5s ease-out both;
         }
-        
+
         .back-btn {
             color: white; text-decoration: none;
             display: flex; align-items: center; justify-content: center;
             font-size: 1.5rem;
         }
-        
+
         .app-header h1 {
             color: white; margin: 0; font-size: 1.5rem; font-weight: 800;
             text-align: center;
             letter-spacing: -0.02em;
         }
-        
+
         /* Rest wie gehabt */
-        .search-section { padding: 0 1.5rem 1rem; background-color: transparent; }
+        .search-section { padding: 0 1.5rem 1rem; background-color: transparent; animation: blurFadeIn 0.5s 0.1s ease-out both; }
         .search-bar { position: relative; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 999px; }
-        .search-bar input { width: 100%; padding: 0.9rem 1rem 0.9rem 3rem; border-radius: 999px; border: 1px solid white; font-size: 1rem; background: white; transition: all 0.2s; }
-        .search-bar input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
+        .search-bar input { width: 100%; padding: 0.9rem 1rem 0.9rem 3rem; border-radius: 999px; border: 1px solid rgba(0,0,0,0.04); font-size: 1rem; background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: all 0.2s; }
+        .search-bar input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); background: white; }
         .search-icon { position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; }
-        
+
         .filter-container { display: flex; flex-direction: column; gap: 0.8rem; }
         .filter-label { font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; margin-left: 0.5rem; }
         .filter-bar { display: flex; gap: 0.6rem; overflow-x: auto; padding-bottom: 0.5rem; scrollbar-width: none; }
         .filter-bar::-webkit-scrollbar { display: none; }
-        .filter-btn { padding: 0.5rem 1rem; border-radius: 999px; border: 1px solid rgba(0,0,0,0.05); background-color: white; color: #4b5563; font-size: 0.85rem; white-space: nowrap; cursor: pointer; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.03); transition: all 0.2s; }
+        .filter-btn { padding: 0.5rem 1rem; border-radius: 999px; border: 1px solid rgba(0,0,0,0.05); background-color: rgba(255,255,255,0.88); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #4b5563; font-size: 0.85rem; white-space: nowrap; cursor: pointer; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.03); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
         .filter-btn:hover { transform: translateY(-1px); }
-        .filter-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
+        .filter-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); backdrop-filter: none; }
         
         .listings-grid {
             padding: 0 1rem;
-            display: grid;
-            grid-template-columns: 1fr;
+            display: flex;
+            flex-direction: column;
             gap: 0.75rem;
-            max-width: 1200px;
+            max-width: 600px;
             margin: 0 auto;
-        }
-        @media (min-width: 768px) {
-            .listings-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1rem;
-                padding: 0 2rem;
-            }
-        }
-        @media (min-width: 1100px) {
-            .listings-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+            animation: blurFadeIn 0.5s 0.2s ease-out both;
         }
 
+        /* Pattern: Magic UI MagicCard / Glasmorphismus */
         .item-card {
-            background: white;
-            border-radius: 16px;
+            background: rgba(255,255,255,0.92);
+            border-radius: 18px;
             overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            transition: transform 0.2s;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(0,0,0,0.04);
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
             text-decoration: none;
             color: var(--text-color);
             display: flex;
@@ -82,7 +80,7 @@
             cursor: pointer;
             height: 110px;
         }
-        .item-card:hover { transform: translateY(-3px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+        .item-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8); }
 
         .card-image-container {
             position: relative;
@@ -101,20 +99,35 @@
             object-fit: cover;
         }
 
+        /* Pattern: Kibo UI Pill + Status - Pill-Form mit Dot-Indikator */
         .listing-mode-badge {
             position: absolute;
             top: 8px;
             left: 8px;
-            padding: 0.2rem 0.5rem;
-            border-radius: 8px;
+            padding: 0.2rem 0.55rem 0.2rem 0.45rem;
+            border-radius: 999px;
             font-size: 0.6rem;
             font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.03em;
             z-index: 5;
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
-        .listing-mode-badge.offer { background: rgba(255,255,255,0.95); color: #059669; }
-        .listing-mode-badge.search { background: rgba(255,255,255,0.95); color: #d97706; }
+        .listing-mode-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .listing-mode-badge.offer { background: rgba(236,253,245,0.92); color: #065f46; border: 1px solid rgba(5,150,105,0.15); }
+        .listing-mode-badge.offer::before { background: #10b981; box-shadow: 0 0 4px rgba(16,185,129,0.5); }
+        .listing-mode-badge.search { background: rgba(255,251,235,0.92); color: #92400e; border: 1px solid rgba(217,119,6,0.15); }
+        .listing-mode-badge.search::before { background: #f59e0b; box-shadow: 0 0 4px rgba(245,158,11,0.5); }
 
         .favorite-btn {
             background: rgba(255, 255, 255, 0.9);
@@ -168,7 +181,7 @@
             white-space: nowrap;
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             padding: 0.3rem 0.6rem;
-            border-radius: 12px;
+            border-radius: 999px;
             box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
         }
 
@@ -193,11 +206,69 @@
         .empty-state-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 1.5rem; text-align: center; width: 100%; }
         .empty-state-icon { width: 80px; height: 80px; color: #d1d5db; margin-bottom: 1rem; }
         
-        .fab { position: fixed; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); cursor: pointer; text-decoration: none; color: white; z-index: 10000; }
+        .fab { position: fixed; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); cursor: pointer; text-decoration: none; color: white; z-index: 10000; transition: transform 0.2s, box-shadow 0.2s; }
+        .fab:active { transform: scale(0.92); }
+
+        /* Verification Overlay - Glasmorphismus */
+        .verify-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        .verify-overlay.active { display: flex; }
+        .verify-overlay-box {
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            max-width: 360px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(0,0,0,0.04);
+            animation: blurFadeIn 0.4s ease-out both;
+        }
+        .verify-overlay-box .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .verify-overlay-box h2 { font-size: 1.3rem; margin-bottom: 0.5rem; color: #1f2937; font-weight: 800; letter-spacing: -0.02em; }
+        .verify-overlay-box p { color: #6b7280; font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; }
+        .verify-overlay-box a {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 0.85rem 2rem;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .verify-overlay-box a:active { transform: scale(0.97); }
+
+        /* Barrierefreiheit */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
     </style>
 </head>
 <body>
 <div class="app-container">
+    <!-- Verification Overlay -->
+    <div class="verify-overlay" id="verifyOverlay">
+        <div class="verify-overlay-box">
+            <div class="icon">🔒</div>
+            <h2>Verifizierung erforderlich</h2>
+            <p>Um den Marktplatz zu nutzen und Artikel zu kaufen oder verkaufen, musst du zuerst deinen Studentenstatus verifizieren.</p>
+            <a href="verify-options.html">Jetzt verifizieren</a>
+        </div>
+    </div>
+
     <header class="app-header">
         <a href="javascript:history.back()" class="back-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
@@ -248,9 +319,9 @@
     
     <main style="flex:1;">
         <div class="listings-grid" id="listingsContainer">
-            <div style="grid-column:1/-1; text-align:center; padding:3rem; color:#9ca3af;">
-                Lade Artikel...
-            </div>
+            <div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-content"><div class="skeleton-line long"></div><div class="skeleton-line short"></div><div class="skeleton-line price"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-content"><div class="skeleton-line long"></div><div class="skeleton-line short"></div><div class="skeleton-line price"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-content"><div class="skeleton-line long"></div><div class="skeleton-line short"></div><div class="skeleton-line price"></div></div></div>
         </div>
     </main>
     
@@ -261,9 +332,10 @@
     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
 </a>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
 <script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
 <script src="notificationHelpers.js"></script>
@@ -289,6 +361,22 @@
     var currentUserId = null;
     var userFavorites = {};
     var blockedUserIds = [];
+
+    function checkVerification() {
+        if(!sb) return;
+        sb.auth.getUser().then(function(res) {
+            if (!res.data.user) return;
+            sb.from('profiles').select('is_verified, is_student_verified').eq('id', res.data.user.id).single().then(function(pRes) {
+                var profile = pRes.data;
+                var isVerified = profile && (profile.is_verified || profile.is_student_verified);
+                if (!isVerified) {
+                    document.getElementById('verifyOverlay').classList.add('active');
+                    window.scrollTo(0, 0);
+                    document.body.style.overflow = 'hidden';
+                }
+            });
+        });
+    }
 
     function loadCurrentUser() {
         if(!sb) return;
@@ -395,10 +483,19 @@
                     </div>
                     <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
                 </div>`;
+        } else if (!imageUrl) {
+            imageHtml = `
+                <div class="card-image-container" style="background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); display: flex; align-items: center; justify-content: center;">
+                    <div style="text-align: center; color: #059669;">
+                        <div style="font-size: 1.8rem; margin-top: -8px;">🏠</div>
+                        <div style="font-size: 0.6rem; font-weight: 600; margin-top: 2px; color: #6ee7b7;">Kein Bild</div>
+                    </div>
+                    <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
+                </div>`;
         } else {
             imageHtml = `
                 <div class="card-image-container">
-                    <img src="${imageUrl || 'no-image.svg'}" alt="${escHtml(item.title)}" onerror="this.src='no-image.svg';">
+                    <img src="${imageUrl}" alt="${item.title}" loading="lazy" onerror="this.parentElement.innerHTML='<div style=\\'background:linear-gradient(135deg,#ECFDF5,#D1FAE5);width:100%;height:100%;display:flex;align-items:center;justify-content:center;\\'><div style=\\'text-align:center;color:#059669;\\'>🏠<br><span style=\\'font-size:0.6rem;font-weight:600;color:#6ee7b7;\\'>Kein Bild</span></div></div>'">
                     <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
                 </div>`;
         }
@@ -416,7 +513,7 @@
                         ${escHtml(item.city) || 'Unbekannt'}
                     </div>
                     <div class="card-footer">
-                        <span>${escHtml(item.category ? item.category.split(' ')[0] : '')}</span>
+                        <span>${item.category ? item.category.split(' ')[0] : ''}</span>
                         <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" data-id="${item.id}" onclick="event.stopPropagation(); toggleFavorite('${item.id}', this);">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${isFavorited ? '#ef4444' : 'none'}" stroke="${isFavorited ? '#ef4444' : '#9ca3af'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                         </button>
@@ -429,7 +526,9 @@
     function renderListings(items) {
         listingsContainer.innerHTML = '';
         if (items && items.length > 0) {
-            items.forEach(function(l) { listingsContainer.innerHTML += renderItemCard(l); });
+            var html = '';
+            items.forEach(function(l) { html += renderItemCard(l); });
+            listingsContainer.innerHTML = html;
         } else {
             listingsContainer.innerHTML = `
                 <div class="empty-state-container">
@@ -525,6 +624,7 @@
     });
     
     document.addEventListener('DOMContentLoaded', function() {
+        checkVerification();
         loadCurrentUser();
         loadItems();
     });

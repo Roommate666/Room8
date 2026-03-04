@@ -28,14 +28,17 @@
             padding-bottom: 0 !important;
         }
 
+        /* Pattern: Magic UI MagicCard / Glasmorphismus */
         .chat-header {
-            background: white;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 1rem 0.75rem 1rem;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid rgba(0,0,0,0.04);
             display: flex;
             align-items: center;
             gap: 1rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05), inset 0 -1px 0 rgba(255,255,255,0.8);
             z-index: 20;
             flex-shrink: 0;
         }
@@ -53,16 +56,16 @@
             width: 42px;
             height: 42px;
             border-radius: 50%;
-            background: #EEF2FF;
+            background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
             background-size: cover;
             background-position: center;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            color: var(--primary-color);
+            color: #3B82F6;
             border: 2px solid white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(59,130,246,0.12);
             flex-shrink: 0;
         }
 
@@ -78,11 +81,13 @@
         }
         .chat-status { font-size: 0.75rem; color: #10B981; } 
 
-        /* LISTING PREVIEW CARD (Sticky) */
+        /* LISTING PREVIEW CARD (Sticky) - Glasmorphismus */
         .listing-preview {
-            background: white;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             padding: 0.75rem 1rem;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid rgba(0,0,0,0.04);
             display: flex;
             align-items: center;
             gap: 0.75rem;
@@ -120,24 +125,25 @@
             margin: 0;
         }
 
+        /* Pattern: Kibo UI Pill */
         .preview-badge {
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background: #F3F4F6;
-            color: var(--text-muted);
+            font-size: 0.68rem;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: #EFF6FF;
+            color: #3B82F6;
             font-weight: 600;
         }
 
         /* SAFETY BANNER */
         .safety-banner {
             background: #EFF6FF;
-            border: 1px solid #BFDBFE;
+            border: 1px solid rgba(191, 219, 253, 0.6);
             color: #1E40AF;
-            font-size: 0.8rem;
-            padding: 0.75rem 1rem;
+            font-size: 0.78rem;
+            padding: 0.65rem 1rem;
             margin: 0.5rem 1rem 0;
-            border-radius: 8px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             gap: 0.75rem;
@@ -162,50 +168,65 @@
 
         .message-bubble {
             max-width: 75%;
-            padding: 0.6rem 1rem;
+            padding: 0.7rem 1rem;
             border-radius: 18px;
             font-size: 0.95rem;
-            line-height: 1.4;
+            line-height: 1.45;
             position: relative;
             word-wrap: break-word;
             word-break: break-word;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            animation: blurFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Pattern: Magic UI BlurFade - Blur + Fade + Slide */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(6px); transform: translateY(6px); }
+            to { opacity: 1; filter: blur(0px); transform: translateY(0); }
         }
 
         .message-bubble.me {
             align-self: flex-end;
-            background: #3B82F6;
             background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
             color: white;
             border-bottom-right-radius: 4px;
+            box-shadow: 0 2px 8px rgba(59,130,246,0.18);
         }
 
         .message-bubble.them {
             align-self: flex-start;
-            background: white;
+            background: #F3F4F6;
             color: var(--text-main);
             border-bottom-left-radius: 4px;
+            border: 1px solid rgba(0,0,0,0.04);
         }
 
         .message-time {
             font-size: 0.65rem;
             margin-top: 0.3rem;
-            opacity: 0.8;
+            opacity: 0.7;
             text-align: right;
         }
         .message-bubble.them .message-time { color: var(--text-muted); }
 
-        /* INPUT AREA - Fixed Position */
+        @media (prefers-reduced-motion: reduce) {
+            .message-bubble { animation: none; }
+        }
+
+        /* INPUT AREA - Glasmorphismus */
         .chat-input-area {
-            background: #ffffff !important;
+            background: rgba(255,255,255,0.92) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             padding: 0.75rem 1rem;
             padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
-            border-top: 1px solid #E5E7EB;
+            border-top: 1px solid rgba(0,0,0,0.04);
             display: flex !important;
             gap: 0.75rem;
             align-items: center;
             flex-shrink: 0;
             min-height: 60px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
         }
 
         .chat-input {
@@ -384,20 +405,71 @@
             justify-content: center;
             padding: 0 4px;
         }
+        /* Verification Overlay */
+        .verify-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        .verify-overlay.active { display: flex; }
+        .verify-overlay-box {
+            /* Pattern: Magic UI MagicCard / Glasmorphismus */
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            max-width: 360px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+        .verify-overlay-box .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .verify-overlay-box h2 { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem; color: #1f2937; letter-spacing: -0.02em; }
+        .verify-overlay-box p { color: #6b7280; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem; }
+        .verify-overlay-box a {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 0.85rem 2rem;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.35);
+        }
     </style>
 </head>
 <body>
 
 <div class="app-container">
+    <!-- Verification Overlay -->
+    <div class="verify-overlay" id="verifyOverlay">
+        <div class="verify-overlay-box">
+            <div class="icon">🔒</div>
+            <h2>Verifizierung erforderlich</h2>
+            <p>Um den Chat zu nutzen, musst du zuerst deinen Studentenstatus verifizieren.</p>
+            <a href="verify-options.html">Jetzt verifizieren</a>
+        </div>
+    </div>
+
     <header class="chat-header">
-        <a href="javascript:history.back()" class="back-arrow">
+        <a href="nachrichten.html" onclick="event.preventDefault(); navigateTo('nachrichten.html?_=' + Date.now());" class="back-arrow">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
         
         <div class="chat-user-clickable" id="headerProfileLink">
             <div class="chat-partner-avatar" id="headerAvatar">?</div>
             <div class="chat-partner-info">
-                <h3 class="chat-partner-name" id="headerName">Lade...</h3>
+                <h3 class="chat-partner-name" id="headerName"><span class="skeleton" style="display:inline-block;width:80px;height:14px;border-radius:6px;vertical-align:middle;"></span></h3>
                 <span class="chat-status" id="headerStatus">Online</span>
             </div>
         </div>
@@ -412,7 +484,7 @@
     <div id="listingContext" class="listing-preview" style="display:none;">
         <img id="listingImg" class="preview-img" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Bild">
         <div class="preview-info">
-            <p class="preview-title" id="listingTitle">Lade Inserat...</p>
+            <p class="preview-title" id="listingTitle"><span class="skeleton" style="display:inline-block;width:100px;height:12px;border-radius:6px;vertical-align:middle;"></span></p>
             <p class="preview-price" id="listingPrice"></p>
         </div>
         <span class="preview-badge" id="listingBadge">Ansehen ></span>
@@ -426,8 +498,11 @@
     </div>
 
     <div class="messages-container" id="messagesList">
-        <div style="text-align: center; margin-top: 2rem; color: #9ca3af;">
-            Lade Nachrichten...
+        <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+            <div style="display:flex;justify-content:flex-start;"><div class="skeleton" style="width:55%;height:42px;border-radius:16px 16px 16px 4px;"></div></div>
+            <div style="display:flex;justify-content:flex-end;"><div class="skeleton" style="width:45%;height:42px;border-radius:16px 16px 4px 16px;"></div></div>
+            <div style="display:flex;justify-content:flex-start;"><div class="skeleton" style="width:65%;height:56px;border-radius:16px 16px 16px 4px;"></div></div>
+            <div style="display:flex;justify-content:flex-end;"><div class="skeleton" style="width:40%;height:42px;border-radius:16px 16px 4px 16px;"></div></div>
         </div>
     </div>
 
@@ -443,13 +518,14 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
 <script src="translations.js"></script>
+<script src="session-cache.js"></script>
+<script src="room8-ui.js"></script>
+<script src="room8-utils.js"></script>
 <script src="notificationHelpers.js"></script>
 <script src="notificationBell.js"></script>
-<script src="navigation.js"></script>
-<script src="verifyGate.js"></script>
 <script>
     // Supabase Client - Direkte Initialisierung
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -457,13 +533,23 @@
     const urlParams = new URLSearchParams(window.location.search);
     // Unterstütze beide Parameter-Formate
     const targetUserId = urlParams.get('user') || urlParams.get('sellerId');
-    const listingId = urlParams.get('listing') || urlParams.get('listingId');
+    // let statt const - kann aus vorhandenen Nachrichten abgeleitet werden (Fix 3)
+    var listingId = urlParams.get('listing') || urlParams.get('listingId') || null;
 
     var currentUser = null;
-    var currentUserName = 'Jemand';
 
     function navigateTo(url) {
         try { window.location.href = url; } catch(e) { console.warn(e); }
+    }
+
+    async function checkVerification() {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) return;
+        const { data: profile } = await sb.from('profiles').select('is_verified, is_student_verified').eq('id', user.id).single();
+        var isVerified = profile && (profile.is_verified || profile.is_student_verified);
+        if (!isVerified) {
+            document.getElementById('verifyOverlay').classList.add('active');
+        }
     }
 
     async function initChat() {
@@ -471,21 +557,26 @@
         if (!user) { navigateTo('login.html'); return; }
         currentUser = user;
 
-        // Verifizierungs-Check + Name cachen
-        const { data: myProfile } = await sb.from('profiles').select('is_verified, is_student_verified, full_name, username').eq('id', user.id).single();
-        var isVerifiedUser = myProfile && (myProfile.is_verified || myProfile.is_student_verified);
-        if (myProfile) currentUserName = myProfile.full_name || myProfile.username || 'Jemand';
+        checkVerification();
+
+        // Block-Check
+        if (targetUserId && window.Room8) {
+            var isBlocked = await Room8.isUserBlocked(targetUserId);
+            if (isBlocked) {
+                document.getElementById('messagesList').innerHTML = '<div style="padding:3rem;text-align:center;"><div style="font-size:2.5rem;margin-bottom:1rem;">🚫</div><h3 style="color:#1f2937;margin-bottom:0.5rem;">Nutzer blockiert</h3><p style="color:#6b7280;font-size:0.95rem;">Du kannst keine Nachrichten mit diesem Nutzer austauschen.</p><a href="javascript:history.back()" style="display:inline-block;margin-top:1rem;color:#3b82f6;font-weight:600;text-decoration:none;">← Zurück</a></div>';
+                document.querySelector('.chat-input-area').style.display = 'none';
+                return;
+            }
+        }
 
         if (targetUserId) loadPartnerProfile(targetUserId);
         if (listingId) loadListingContext(listingId);
         if (targetUserId) {
-            loadMessages();
+            await loadMessages();
             subscribeToMessages();
-        }
-
-        // Blur-Overlay fuer nicht-verifizierte User
-        if (!isVerifiedUser) {
-            showVerifyOverlay(['#messagesList', '.chat-input-area'], 'Verifiziere dich, um Nachrichten senden zu k\u00f6nnen.');
+            // Sofort als gelesen markieren (currentUser + targetUserId sind jetzt sicher gesetzt)
+            markMessagesAsRead();
+            markChatNotificationsAsRead();
         }
     }
 
@@ -509,7 +600,7 @@
         // Laden inkl. Bildpfad
         const { data: listing } = await sb
             .from('listings')
-            .select('title, price, monthly_rent, type, listing_photos(storage_path)')
+            .select('title, price, monthly_rent, type, listing_mode, listing_photos(storage_path)')
             .eq('id', id)
             .single();
 
@@ -529,8 +620,20 @@
             if (listing.listing_photos && listing.listing_photos.length > 0) {
                 const { data } = sb.storage.from('listing-images').getPublicUrl(listing.listing_photos[0].storage_path);
                 if (data) imgEl.src = data.publicUrl;
+            } else if (listing.listing_mode === 'search') {
+                // Suchinserat: orangenes Fragezeichen
+                imgEl.style.display = 'none';
+                const placeholder = document.createElement('div');
+                placeholder.style.cssText = 'width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,#FFF7ED,#FFEDD5);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.4rem;';
+                placeholder.textContent = '🔍';
+                imgEl.parentNode.insertBefore(placeholder, imgEl);
             } else {
-                imgEl.src = 'no-image.svg';
+                // Angebot ohne Bild: Haus-Icon
+                imgEl.style.display = 'none';
+                const placeholder = document.createElement('div');
+                placeholder.style.cssText = 'width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,#F2F2F0,#EBEBEB);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.4rem;';
+                placeholder.textContent = listing.type === 'wohnung' ? '🏠' : '📦';
+                imgEl.parentNode.insertBefore(placeholder, imgEl);
             }
 
             // Klickbar machen: Zum Inserat
@@ -539,11 +642,19 @@
     }
 
     async function loadMessages() {
-        const { data: messages } = await sb
+        var query = sb
             .from('messages')
             .select('*')
-            .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${targetUserId}),and(sender_id.eq.${targetUserId},receiver_id.eq.${currentUser.id})`)
-            .order('created_at', { ascending: true });
+            .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${targetUserId}),and(sender_id.eq.${targetUserId},receiver_id.eq.${currentUser.id})`);
+
+        // Pro Inserat filtern: nur Nachrichten fuer dieses Listing anzeigen
+        if (listingId) {
+            query = query.eq('listing_id', listingId);
+        } else {
+            query = query.is('listing_id', null);
+        }
+
+        const { data: messages } = await query.order('created_at', { ascending: true });
 
         const container = document.getElementById('messagesList');
         container.innerHTML = '';
@@ -567,36 +678,6 @@
             container.innerHTML = '<div style="text-align:center;margin-top:3rem;color:#9ca3af;">Schreib "Hallo"!</div>';
         }
         scrollToBottom();
-        markMessagesAsRead();
-    }
-
-    async function markMessagesAsRead() {
-        if (!currentUser || !targetUserId) return;
-        try {
-            // 1. Nachrichten als gelesen markieren
-            await sb.from('messages')
-                .update({ is_read: true })
-                .eq('sender_id', targetUserId)
-                .eq('receiver_id', currentUser.id)
-                .eq('is_read', false);
-
-            // 2. Chat-Benachrichtigungen als gelesen markieren (Glocke)
-            await sb.from('notifications')
-                .update({ is_read: true })
-                .eq('user_id', currentUser.id)
-                .eq('type', 'chat_message')
-                .eq('is_read', false);
-
-            // 3. Chat Badge in Navigation aktualisieren
-            var chatLink = document.querySelector('.bottom-nav-item[data-href="nachrichten.html"]');
-            if (chatLink) {
-                var badge = chatLink.querySelector('.bottom-nav-badge');
-                if (badge) badge.remove();
-            }
-
-            // 4. Glocke aktualisieren
-            if (window.NotificationBell) window.NotificationBell.refresh();
-        } catch(e) { console.warn('Mark read failed:', e); }
     }
 
     function appendMessage(msg) {
@@ -615,7 +696,7 @@
             const imageUrl = sanitizeImageUrl(imgMatch[1]);
             const textAfterImage = msg.content.replace(/\[IMG\].*?\[\/IMG\]\n?/, '').trim();
             contentHtml = imageUrl ? `
-                <img src="${imageUrl}" class="message-image" onclick="openImageFullscreen('${imageUrl}')" alt="Bild">
+                <img src="${imageUrl}" class="message-image" loading="lazy" onclick="openImageFullscreen('${imageUrl}')" alt="Bild">
                 ${textAfterImage ? '<div style="margin-top:0.25rem;">' + escapeHtml(textAfterImage) + '</div>' : ''}
             ` : escapeHtml(msg.content);
         } else {
@@ -646,15 +727,28 @@
     }
 
     function subscribeToMessages() {
-        sb.channel('public:messages')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${currentUser.id}` }, payload => {
-                if (payload.new.sender_id === targetUserId) {
-                    appendMessage(payload.new);
+        // Ohne Filter subscriben (robuster) - filtern im Callback
+        sb.channel('chat-live-' + currentUser.id + '-' + Date.now())
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'messages'
+            }, function(payload) {
+                // Nur Nachrichten fuer uns von unserem Chat-Partner UND fuer dieses Listing
+                var msg = payload.new;
+                var msgListing = msg.listing_id || null;
+                var currentListing = listingId || null;
+                if (msg.receiver_id === currentUser.id && msg.sender_id === targetUserId && msgListing === currentListing) {
+                    console.log('Realtime: Neue Nachricht von Partner');
+                    appendMessage(msg);
                     scrollToBottom();
-                    // Kurz warten damit die Notification in der DB ist
-                    setTimeout(function() { markMessagesAsRead(); }, 1000);
+                    // Sofort als gelesen markieren (beide Tabellen!)
+                    markMessagesAsRead();
+                    markChatNotificationsAsRead();
                 }
-            }).subscribe();
+            }).subscribe(function(status) {
+                console.log('Chat realtime subscription:', status);
+            });
     }
 
     // Bild-Anhang Variablen
@@ -673,13 +767,13 @@
 
         // Nur Bilder erlauben
         if (!file.type.startsWith('image/')) {
-            alert('Bitte wähle ein Bild aus.');
+            Room8UI.warning('Bitte waehle ein Bild aus.');
             return;
         }
 
         // Max 10MB
         if (file.size > 10 * 1024 * 1024) {
-            alert('Das Bild ist zu groß (max. 10MB).');
+            Room8UI.warning('Das Bild ist zu gross (max. 10MB).');
             return;
         }
 
@@ -758,7 +852,7 @@
 
                 if (uploadError) {
                     console.error('Upload error:', uploadError);
-                    alert('Fehler beim Hochladen: ' + uploadError.message);
+                    Room8UI.error('Fehler beim Hochladen: ' + uploadError.message);
                     btn.disabled = false;
                     btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>';
                     return;
@@ -769,7 +863,7 @@
                 imageUrl = urlData.publicUrl;
             } catch (err) {
                 console.error('Upload exception:', err);
-                alert('Fehler beim Hochladen.');
+                Room8UI.error('Fehler beim Hochladen.');
                 const btn = document.getElementById('sendBtn');
                 btn.disabled = false;
                 btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>';
@@ -818,15 +912,10 @@
             console.error('Message insert error:', insertError);
         } else {
             console.log('Message sent successfully:', messageContent);
-            // Notification an Empfaenger senden
-            if (window.NotificationHelpers && window.NotificationHelpers.notifyChatMessage) {
-                var preview = content || 'Bild gesendet';
-                if (preview.length > 60) preview = preview.substring(0, 60) + '...';
-                window.NotificationHelpers.notifyChatMessage(targetUserId, currentUser.id, currentUserName, preview, listingId).catch(function(e) {
-                    console.warn('Chat notification failed:', e);
-                });
-            }
         }
+
+        // Notification + Push wird vom DB-Trigger (on_new_message) gehandhabt.
+        // Kein Frontend-Notify nötig (verhindert doppelte Glocken-Einträge).
     }
 
     function escapeHtml(text) {
@@ -852,46 +941,53 @@
         this.style.height = (this.scrollHeight) + 'px';
     }
 
-    // iOS Keyboard Scroll Fix - Robuste Lösung
+    // iOS Keyboard Fix - VisualViewport basiert
     const messagesContainer = document.getElementById('messagesList');
     const appContainer = document.querySelector('.app-container');
     let keyboardOpen = false;
+    let lastViewportHeight = window.innerHeight;
 
     tx.addEventListener('focus', () => {
         keyboardOpen = true;
-        setTimeout(scrollToBottom, 100);
-        setTimeout(scrollToBottom, 300);
-        setTimeout(scrollToBottom, 500);
+        setTimeout(scrollToBottom, 150);
+        setTimeout(scrollToBottom, 400);
     });
 
     tx.addEventListener('blur', () => {
         keyboardOpen = false;
-        // Container zurücksetzen
+        // Restore full layout
         setTimeout(() => {
-            appContainer.style.height = '100%';
+            appContainer.style.height = '';
+            appContainer.style.top = '';
             appContainer.style.bottom = '0';
         }, 100);
     });
 
-    // Visualviewport API für Keyboard-Handling (iOS 13+)
     if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', () => {
-            const viewportHeight = window.visualViewport.height;
-            const offsetTop = window.visualViewport.offsetTop;
+        function onViewportChange() {
+            const vv = window.visualViewport;
+            const viewportHeight = vv.height;
+            const offsetTop = vv.offsetTop;
+            const fullHeight = window.innerHeight;
 
-            // Container an sichtbaren Bereich anpassen
-            appContainer.style.height = viewportHeight + 'px';
-            appContainer.style.top = offsetTop + 'px';
-
-            // Scroll to bottom wenn Keyboard offen
-            if (keyboardOpen) {
-                setTimeout(scrollToBottom, 50);
+            if (viewportHeight < fullHeight - 50) {
+                // Keyboard is open - set bottom to auto so height+top work correctly
+                appContainer.style.bottom = 'auto';
+                appContainer.style.height = viewportHeight + 'px';
+                appContainer.style.top = offsetTop + 'px';
+                keyboardOpen = true;
+                scrollToBottom();
+            } else {
+                // Keyboard closed - restore
+                appContainer.style.bottom = '0';
+                appContainer.style.height = '';
+                appContainer.style.top = '0';
+                keyboardOpen = false;
             }
-        });
+        }
 
-        window.visualViewport.addEventListener('scroll', () => {
-            appContainer.style.top = window.visualViewport.offsetTop + 'px';
-        });
+        window.visualViewport.addEventListener('resize', onViewportChange);
+        window.visualViewport.addEventListener('scroll', onViewportChange);
     }
 
     // Touch-Move für Scroll während Tastatur offen
@@ -899,35 +995,84 @@
         e.stopPropagation();
     }, { passive: true });
 
-    // Load notification count for bell badge
-    async function loadNotificationCount() {
+    // 1) Messages in der messages-Tabelle als gelesen markieren
+    //    → Das entfernt den roten Punkt in nachrichten.html
+    async function markMessagesAsRead() {
+        if (!currentUser || !targetUserId) return;
         try {
-            const { data: { user } } = await sb.auth.getUser();
-            if (!user) return;
-
-            const { count } = await sb
-                .from('notifications')
-                .select('*', { count: 'exact', head: true })
-                .eq('user_id', user.id)
+            var query = sb
+                .from('messages')
+                .update({ is_read: true })
+                .eq('receiver_id', currentUser.id)
+                .eq('sender_id', targetUserId)
                 .eq('is_read', false);
 
-            const badge = document.getElementById('notifBadge');
-            if (badge && count > 0) {
-                badge.textContent = count > 99 ? '99+' : count;
-                badge.style.display = 'flex';
+            // Nur Nachrichten fuer dieses Listing als gelesen markieren
+            if (listingId) {
+                query = query.eq('listing_id', listingId);
+            } else {
+                query = query.is('listing_id', null);
+            }
+
+            await query;
+            console.log('Messages von', targetUserId, 'fuer Listing', listingId, 'als gelesen markiert');
+        } catch (e) {
+            console.log('markMessagesAsRead error:', e);
+        }
+    }
+
+    // 2) Notifications in der notifications-Tabelle als gelesen markieren
+    //    → Das aktualisiert Bell-Badge und Chat-Tab-Badge
+    async function markChatNotificationsAsRead() {
+        if (!currentUser) return;
+        try {
+            await sb
+                .from('notifications')
+                .update({ is_read: true })
+                .eq('user_id', currentUser.id)
+                .eq('type', 'chat_message')
+                .eq('is_read', false);
+
+            console.log('Chat notifications als gelesen markiert');
+
+            // Alle Badges aktualisieren
+            if (window.NotificationBell && window.NotificationBell.refresh) {
+                window.NotificationBell.refresh();
+            }
+            if (window.updateAppBadge) window.updateAppBadge();
+        } catch (e) {
+            console.log('markChatNotificationsAsRead error:', e);
+        }
+    }
+
+    // Bell-Badge im Chat-Header aktualisieren
+    async function loadNotificationCount() {
+        try {
+            if (!currentUser) {
+                var { data: { user } } = await sb.auth.getUser();
+                if (!user) return;
+                currentUser = user;
+            }
+
+            var { count } = await sb
+                .from('notifications')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', currentUser.id)
+                .eq('is_read', false);
+
+            var badge = document.getElementById('notifBadge');
+            if (badge) {
+                if (count > 0) {
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
             }
         } catch (e) {
             console.log('Could not load notification count');
         }
     }
-
-    // Fix: Reset container when returning from another page (e.g. listing-details)
-    window.addEventListener('pageshow', function(event) {
-        appContainer.style.height = '100%';
-        appContainer.style.top = '0';
-        appContainer.style.bottom = '0';
-        setTimeout(scrollToBottom, 100);
-    });
 
     initChat();
     loadNotificationCount();

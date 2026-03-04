@@ -36,6 +36,7 @@
             display: flex;
             align-items: center;
             padding: 1rem;
+            padding-right: 50px;
             background: white;
             border-bottom: 1px solid var(--border-color);
             text-decoration: none;
@@ -52,8 +53,8 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background: #EEF2FF;
-            color: var(--primary-color);
+            background: #F2F2F0;
+            color: #3B82F6;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -90,7 +91,7 @@
 
         .listing-title-hint {
             font-size: 0.75rem;
-            color: var(--primary-color);
+            color: #3B82F6;
             background: #EFF6FF;
             padding: 2px 6px;
             border-radius: 4px;
@@ -117,8 +118,28 @@
             border-radius: 50%;
             position: absolute;
             top: 1rem;
-            right: 1rem;
+            right: 50px;
             display: none; /* Logic via JS */
+        }
+
+        .delete-chat-btn {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.9);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            color: #EF4444;
+            font-size: 1rem;
+            z-index: 10;
         }
 
         /* Empty State */
@@ -132,11 +153,58 @@
             color: var(--text-muted);
         }
         .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+
+        /* Verification Overlay */
+        .verify-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        .verify-overlay.active { display: flex; }
+        .verify-overlay-box {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            max-width: 360px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        .verify-overlay-box .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .verify-overlay-box h2 { font-size: 1.3rem; margin-bottom: 0.5rem; color: #1f2937; }
+        .verify-overlay-box p { color: #6b7280; font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; }
+        .verify-overlay-box a {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 0.85rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
     </style>
 </head>
 <body>
 
 <div class="app-container">
+    <!-- Verification Overlay -->
+    <div class="verify-overlay" id="verifyOverlay">
+        <div class="verify-overlay-box">
+            <div class="icon">🔒</div>
+            <h2>Verifizierung erforderlich</h2>
+            <p>Um Nachrichten zu senden und zu empfangen, musst du zuerst deinen Studentenstatus verifizieren.</p>
+            <a href="verify-options.html">Jetzt verifizieren</a>
+        </div>
+    </div>
+
     <header class="app-header">
         <a href="javascript:history.back()" class="back-arrow">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
@@ -161,13 +229,24 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
+<script src="room8-utils.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
 <script>
-    // Supabase Client - Direkte Initialisierung
-    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Supabase Client - mit Cache-Bypass für WKWebView (iOS)
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        global: {
+            fetch: function(url, options) {
+                options = options || {};
+                options.cache = 'no-store';
+                return fetch(url, options);
+            }
+        }
+    });
 
     var allConversations = [];
     var currentUser = null;
@@ -175,6 +254,14 @@
     // Helper: Navigation sicher machen (Vorschau-Fix)
     function navigateTo(url) {
         try { window.location.href = url; } catch(e) { console.warn(e); }
+    }
+
+    async function checkVerification(userId) {
+        const { data: profile } = await sb.from('profiles').select('is_verified, is_student_verified').eq('id', userId).single();
+        var isVerified = profile && (profile.is_verified || profile.is_student_verified);
+        if (!isVerified) {
+            document.getElementById('verifyOverlay').classList.add('active');
+        }
     }
 
     async function loadInbox() {
@@ -189,6 +276,7 @@
                 return;
             }
             currentUser = user;
+            checkVerification(user.id);
 
             // Nachrichten laden (Sender ODER Empfänger bin ich)
             const { data: messages, error } = await sb
@@ -224,6 +312,42 @@
                 }
             });
 
+            // Blockierte User filtern
+            if (window.Room8) {
+                var blockedIds = await Room8.loadBlockedUsers();
+                if (blockedIds.length > 0) {
+                    Object.keys(conversations).forEach(function(key) {
+                        if (blockedIds.includes(conversations[key].partnerId)) {
+                            delete conversations[key];
+                        }
+                    });
+                }
+            }
+
+            // Ausgeblendete Chats filtern
+            var { data: hiddenChats } = await sb
+                .from('hidden_chats')
+                .select('partner_id, listing_id, hidden_at')
+                .eq('user_id', user.id);
+
+            if (hiddenChats && hiddenChats.length > 0) {
+                Object.keys(conversations).forEach(function(key) {
+                    var convo = conversations[key];
+                    var hidden = hiddenChats.find(function(h) {
+                        return h.partner_id === convo.partnerId &&
+                               (h.listing_id || '') === (convo.listingId || '');
+                    });
+                    if (hidden && new Date(hidden.hidden_at) > convo.lastDate) {
+                        delete conversations[key];
+                    }
+                });
+            }
+
+            if (Object.keys(conversations).length === 0) {
+                renderEmptyState();
+                return;
+            }
+
             // Details laden (Namen & Listing Titel)
             const promises = Object.values(conversations).map(async (convo) => {
                 // Partner Profil
@@ -255,7 +379,7 @@
 
         } catch (err) {
             console.error("Inbox Error:", err);
-            container.innerHTML = '<div style="padding:2rem;text-align:center;color:red;">Nachrichten konnten nicht geladen werden. Bitte versuche es erneut.</div>';
+            container.innerHTML = '<div style="padding:2rem;text-align:center;color:red;">Fehler: ' + (err.message || err) + '</div>';
         }
     }
 
@@ -293,10 +417,28 @@
                         </div>
                     </div>
                     ${convo.isUnread ? '<div class="unread-dot" style="display:block"></div>' : ''}
+                    <button class="delete-chat-btn" data-partner="${convo.partnerId}" data-listing="${convo.listingId || ''}" onclick="event.preventDefault();event.stopPropagation();deleteChat(this);">🗑️</button>
                 </a>
             `;
             container.appendChild(item.firstElementChild); // Append the A tag
         });
+    }
+
+    async function deleteChat(btn) {
+        if (!confirm('Chat ausblenden? Er erscheint wieder, wenn eine neue Nachricht kommt.')) return;
+        var partnerId = btn.dataset.partner;
+        var listingId = btn.dataset.listing || null;
+
+        btn.closest('.conversation-item').style.opacity = '0.3';
+
+        await sb.from('hidden_chats').upsert({
+            user_id: currentUser.id,
+            partner_id: partnerId,
+            listing_id: listingId,
+            hidden_at: new Date().toISOString()
+        }, { onConflict: 'user_id,partner_id,listing_id' });
+
+        loadInbox();
     }
 
     function renderEmptyState() {
@@ -326,7 +468,43 @@
         renderList(filtered);
     });
 
-    document.addEventListener('DOMContentLoaded', loadInbox);
+    // Realtime: Neue Nachrichten live anzeigen
+    function subscribeToNewMessages() {
+        if (!currentUser) return;
+        sb.channel('inbox-rt-' + currentUser.id + '-' + Date.now())
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'messages'
+            }, function(payload) {
+                // Nur Nachrichten die mich betreffen
+                if (payload.new.receiver_id === currentUser.id || payload.new.sender_id === currentUser.id) {
+                    console.log('Inbox: Neue Nachricht, lade neu...');
+                    loadInbox();
+                }
+            }).subscribe(function(status) {
+                console.log('Inbox realtime subscription:', status);
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadInbox().then(function() {
+            subscribeToNewMessages();
+        });
+    });
+
+    // WKWebView iOS Fix: Stale-Page-Erkennung via setInterval
+    // Wenn WKWebView eine gecachte Seite wiederherstellt, läuft der Interval weiter
+    // aber Date.now() springt → wir erkennen den Zeitsprung und laden neu
+    var _lastTick = Date.now();
+    setInterval(function() {
+        var now = Date.now();
+        if (now - _lastTick > 2000 && currentUser) {
+            console.log('Inbox: Stale page detected, reloading...');
+            loadInbox();
+        }
+        _lastTick = now;
+    }, 1000);
 </script>
 </body>
 </html>

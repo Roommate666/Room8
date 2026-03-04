@@ -8,13 +8,13 @@
     <style>
         /* DASHBOARD HEADER */
         .dashboard-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
             color: white;
             padding: 2rem 1.5rem 4rem 1.5rem;
             border-bottom-left-radius: 30px;
             border-bottom-right-radius: 30px;
             position: relative;
-            box-shadow: 0 4px 20px rgba(118, 75, 162, 0.2);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
         }
 
         .header-top {
@@ -53,7 +53,7 @@
         
         .user-avatar-dash {
             width: 60px; height: 60px; border-radius: 50%;
-            background: white; color: #764ba2;
+            background: white; color: #3B82F6;
             display: flex; align-items: center; justify-content: center;
             font-weight: 700; font-size: 1.5rem;
             border: 3px solid rgba(255,255,255,0.3);
@@ -105,7 +105,7 @@
             font-size: 1.5rem; margin-bottom: 0.5rem;
         }
 
-        .icon-housing { background: #EEF2FF; color: #3B82F6; }
+        .icon-housing { background: #F2F2F0; color: #3B82F6; }
         .icon-market { background: #ECFDF5; color: #10B981; }
         .icon-jobs { background: #F3E8FF; color: #8B5CF6; }
         .icon-coupons { background: #FFF7ED; color: #F59E0B; }
@@ -135,7 +135,7 @@
             display: flex; justify-content: space-around;
         }
         .stat-box { text-align: center; cursor: pointer; }
-        .stat-val { font-size: 1.2rem; font-weight: 700; color: var(--primary-color); }
+        .stat-val { font-size: 1.2rem; font-weight: 700; color: #3B82F6; }
         .stat-lbl { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
 
         /* QUICK ACTIONS */
@@ -306,8 +306,10 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
@@ -325,10 +327,9 @@
         checkPushStatus();
 
         if (!sb) return;
-        const { data: { session } } = await sb.auth.getSession();
-
-        if (!session) { navigateTo('index.html'); return; }
-        const user = session.user;
+        const { data: { user } } = await sb.auth.getUser();
+        
+        if (!user) { navigateTo('index.html'); return; }
 
         const { data: profile } = await sb.from('profiles').select('full_name, username, avatar_url').eq('id', user.id).single();
 

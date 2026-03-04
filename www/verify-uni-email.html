@@ -6,100 +6,103 @@
   <title>E-Mail wird verifiziert - Room8</title>
   <link rel="stylesheet" href="style.css">
   <style>
+    /* Pattern: Magic UI BlurFade */
+    @keyframes blurFadeIn {
+      from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+      to { opacity: 1; filter: blur(0); transform: translateY(0); }
+    }
+    body { background: #f3f4f6; }
+    /* Glasmorphismus Card */
     .verify-container {
       max-width: 500px;
       margin: 4rem auto;
-      padding: 3rem;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      padding: 3rem 2rem;
+      background: rgba(255,255,255,0.92);
+      border-radius: 24px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8);
+      border: 1px solid rgba(0,0,0,0.04);
       text-align: center;
+      animation: blurFadeIn 0.5s ease-out both;
     }
-
     .verify-icon {
       font-size: 4rem;
       margin-bottom: 1.5rem;
+    }
+    .verify-icon.loading {
       animation: spin 2s linear infinite;
     }
-
-    .verify-icon.success {
-      animation: none;
-    }
-
-    .verify-icon.error {
-      animation: none;
-    }
-
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-
     .verify-title {
-      font-size: 1.8rem;
-      margin-bottom: 1rem;
+      font-size: 1.6rem;
+      margin-bottom: 0.75rem;
       color: #1f2937;
+      font-weight: 700;
     }
-
     .verify-message {
       color: #6b7280;
       font-size: 1rem;
       line-height: 1.6;
       margin-bottom: 2rem;
     }
-
+    /* Kibo UI Pill */
     .verify-button {
       display: inline-block;
-      padding: 1rem 2rem;
-      background: var(--primary-color);
+      padding: 1rem 2.5rem;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
       color: white;
       text-decoration: none;
-      border-radius: 8px;
-      font-weight: 600;
-      transition: all 0.3s;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
-
-    .verify-button:hover {
-      background: #1e40af;
-      transform: translateY(-2px);
+    .verify-button.success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
-
     .success-box {
-      background: #d1fae5;
+      background: #f0fdf4;
       border: 2px solid #10b981;
       padding: 1.5rem;
-      border-radius: 12px;
+      border-radius: 16px;
       margin-bottom: 2rem;
+      color: #065f46;
+      line-height: 1.6;
     }
-
     .error-box {
-      background: #fee2e2;
+      background: #fef2f2;
       border: 2px solid #ef4444;
       padding: 1.5rem;
-      border-radius: 12px;
+      border-radius: 16px;
       margin-bottom: 2rem;
+      color: #991b1b;
+      line-height: 1.6;
+    }
+    /* Barrierefreiheit */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
     }
   </style>
 </head>
 <body>
 
-  <div class="app-container">
-    <main class="app-content">
-      <div class="verify-container" id="verifyContainer">
-        <div class="verify-icon" id="verifyIcon">&#9203;</div>
-        <h1 class="verify-title" id="verifyTitle">E-Mail wird verifiziert...</h1>
-        <p class="verify-message" id="verifyMessage">Bitte warte, waehrend wir deine Uni-E-Mail verifizieren.</p>
-      </div>
-    </main>
+  <div class="verify-container" id="verifyContainer">
+    <div class="verify-icon loading" id="verifyIcon">&#x23F3;</div>
+    <h1 class="verify-title" id="verifyTitle">E-Mail wird verifiziert...</h1>
+    <p class="verify-message" id="verifyMessage">Bitte warte, wir pr&uuml;fen deinen Verifizierungstoken.</p>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+  <script src="lib/supabase.min.js"></script>
   <script src="config.js"></script>
+<script src="translations.js"></script>
   <script>
-    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     var icon = document.getElementById('verifyIcon');
     var title = document.getElementById('verifyTitle');
-    var message = document.getElementById('verifyMessage');
+    var msg = document.getElementById('verifyMessage');
     var container = document.getElementById('verifyContainer');
 
     async function verifyToken() {
@@ -108,90 +111,59 @@
         var token = urlParams.get('token');
 
         if (!token) {
-          throw new Error('Kein Verifizierungstoken vorhanden');
+          throw new Error('Kein Verifizierungstoken in der URL gefunden.');
         }
 
-        var { data: profile, error: findError } = await sb
-          .from('profiles')
-          .select('id, uni_email, email')
-          .eq('uni_email_verification_token', token)
-          .single();
+        // Edge Function aufrufen (serverseitig, umgeht RLS)
+        var response = await fetch(SUPABASE_URL + '/functions/v1/verify-uni-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({ token: token })
+        });
 
-        if (findError || !profile) {
-          throw new Error('Ungueltiger oder abgelaufener Verifizierungstoken');
+        var result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Verifizierung fehlgeschlagen');
         }
 
-        var { error: updateError } = await sb
-          .from('profiles')
-          .update({
-            is_verified: true,
-            is_student: true,
-            uni_email_verified: true,
-            verification_status: 'approved',
-            verified_at: new Date().toISOString(),
-            uni_email_verification_token: null
-          })
-          .eq('id', profile.id);
-
-        if (updateError) throw updateError;
-
-        // Erfolg
+        // Erfolg!
         icon.textContent = '\uD83C\uDF89';
-        icon.className = 'verify-icon success';
+        icon.className = 'verify-icon';
         title.textContent = 'E-Mail verifiziert!';
 
         var successBox = document.createElement('div');
         successBox.className = 'success-box';
-        var strong = document.createElement('strong');
-        strong.textContent = 'Verifizierung erfolgreich!';
-        var br1 = document.createElement('br');
-        var text1 = document.createTextNode('Deine Uni-E-Mail ');
-        var emailBold = document.createElement('strong');
-        emailBold.textContent = profile.uni_email || '';
-        var text2 = document.createTextNode(' wurde verifiziert.');
-        var br2 = document.createElement('br');
-        var text3 = document.createTextNode('Du hast jetzt vollen Zugang zu Room8!');
-        successBox.appendChild(strong);
-        successBox.appendChild(br1);
-        successBox.appendChild(text1);
-        successBox.appendChild(emailBold);
-        successBox.appendChild(text2);
-        successBox.appendChild(br2);
-        successBox.appendChild(text3);
-
-        message.replaceWith(successBox);
+        successBox.innerHTML = '<strong>\u2705 Erfolgreich!</strong><br>' +
+          'Deine Uni-E-Mail <strong>' + (result.uni_email || '') + '</strong> wurde verifiziert.<br>' +
+          'Du hast jetzt vollen Zugang zu Room8!';
+        msg.replaceWith(successBox);
 
         var button = document.createElement('a');
-        button.href = 'wohnungen.html';
-        button.className = 'verify-button';
-        button.textContent = 'Wohnungen ansehen';
+        button.href = 'https://room8.club/wohnungen.html';
+        button.className = 'verify-button success';
+        button.textContent = '\uD83C\uDFE0 Wohnungen entdecken';
         container.appendChild(button);
-
-        setTimeout(function() {
-          window.location.href = 'wohnungen.html';
-        }, 3000);
 
       } catch (error) {
         console.error('Verification error:', error);
 
-        icon.textContent = '\u26A0\uFE0F';
-        icon.className = 'verify-icon error';
+        icon.textContent = '\u274C';
+        icon.className = 'verify-icon';
         title.textContent = 'Verifizierung fehlgeschlagen';
 
         var errorBox = document.createElement('div');
         errorBox.className = 'error-box';
-        var errStrong = document.createElement('strong');
-        errStrong.textContent = 'Verifizierung fehlgeschlagen';
-        var errBr = document.createElement('br');
-        var errText = document.createTextNode('Der Verifizierungslink ist ungueltig oder abgelaufen. Bitte fordere einen neuen Link an.');
-        errorBox.appendChild(errStrong);
-        errorBox.appendChild(errBr);
-        errorBox.appendChild(errText);
-
-        message.replaceWith(errorBox);
+        errorBox.innerHTML = '<strong>\u274C Fehler:</strong><br>' +
+          error.message + '<br><br>' +
+          'Der Link ist m\u00f6glicherweise ung\u00fcltig oder abgelaufen.';
+        msg.replaceWith(errorBox);
 
         var button = document.createElement('a');
-        button.href = 'verify-options.html';
+        button.href = 'https://room8.club/verify-options.html';
         button.className = 'verify-button';
         button.textContent = 'Erneut versuchen';
         container.appendChild(button);

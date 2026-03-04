@@ -8,13 +8,13 @@
     <style>
         /* DASHBOARD HEADER */
         .dashboard-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
             color: white;
             padding: 2rem 1.5rem 4rem 1.5rem;
             border-bottom-left-radius: 30px;
             border-bottom-right-radius: 30px;
             position: relative;
-            box-shadow: 0 4px 20px rgba(118, 75, 162, 0.2);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
         }
 
         .header-top {
@@ -49,11 +49,14 @@
             display: none;
         }
 
-        .greeting-section { display: flex; align-items: center; gap: 1rem; cursor: pointer; }
+        .greeting-section {
+            display: flex; align-items: center; gap: 1rem; cursor: pointer;
+            animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+        }
         
         .user-avatar-dash {
             width: 60px; height: 60px; border-radius: 50%;
-            background: white; color: #764ba2;
+            background: white; color: #3B82F6;
             display: flex; align-items: center; justify-content: center;
             font-weight: 700; font-size: 1.5rem;
             border: 3px solid rgba(255,255,255,0.3);
@@ -96,7 +99,17 @@
             align-items: center; text-align: center;
             border: 1px solid rgba(0,0,0,0.03);
             height: 100%; justify-content: center;
+            /* Pattern: Magic UI BlurFade */
+            animation: blurFadeIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
         }
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0px); transform: translateY(0); }
+        }
+        .dash-card:nth-child(1) { animation-delay: 0s; }
+        .dash-card:nth-child(2) { animation-delay: 0.08s; }
+        .dash-card:nth-child(3) { animation-delay: 0.16s; }
+        .dash-card:nth-child(4) { animation-delay: 0.24s; }
         .dash-card:active { transform: scale(0.98); }
 
         .dash-icon {
@@ -105,7 +118,7 @@
             font-size: 1.5rem; margin-bottom: 0.5rem;
         }
 
-        .icon-housing { background: #EEF2FF; color: #3B82F6; }
+        .icon-housing { background: #F2F2F0; color: #3B82F6; }
         .icon-market { background: #ECFDF5; color: #10B981; }
         .icon-jobs { background: #F3E8FF; color: #8B5CF6; }
         .icon-coupons { background: #FFF7ED; color: #F59E0B; }
@@ -126,17 +139,40 @@
             display: flex; justify-content: space-between;
             align-items: center; margin-bottom: 1rem;
         }
-        .section-header h3 { margin: 0; font-size: 1.1rem; color: var(--text-main); }
-
-        /* STATS */
-        .stats-banner {
-            background: #F8FAFC; padding: 1rem; border-radius: 16px;
-            border: 1px solid var(--border-color);
-            display: flex; justify-content: space-around;
+        .section-header h3 {
+            margin: 0; font-size: 1.05rem; color: var(--text-main); font-weight: 700;
+            letter-spacing: -0.01em;
         }
-        .stat-box { text-align: center; cursor: pointer; }
-        .stat-val { font-size: 1.2rem; font-weight: 700; color: var(--primary-color); }
-        .stat-lbl { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+
+        /* STATS - Pattern: Magic UI MagicCard (Glasmorphismus) */
+        .stats-banner {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem;
+        }
+        .stat-box {
+            text-align: center; cursor: pointer;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.6);
+            border-radius: 16px;
+            padding: 1rem 0.5rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: blurFadeIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+        .stat-box:nth-child(1) { animation-delay: 0.1s; }
+        .stat-box:nth-child(2) { animation-delay: 0.18s; }
+        .stat-box:nth-child(3) { animation-delay: 0.26s; }
+        .stat-box:active { transform: scale(0.97); }
+        .stat-val {
+            font-size: 1.5rem; font-weight: 800;
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+        .stat-lbl { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; margin-top: 0.2rem; }
 
         /* QUICK ACTIONS */
         .quick-actions {
@@ -145,14 +181,29 @@
         }
         .quick-actions::-webkit-scrollbar { display: none; }
 
+        /* Pattern: Kibo UI Pill + Magic UI InteractiveHoverButton */
         .quick-btn {
-            background: white; border: 1px solid var(--border-color);
-            border-radius: 12px; padding: 0.75rem 1rem;
+            background: white; border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 999px; padding: 0.65rem 1.1rem;
             display: flex; align-items: center; gap: 0.5rem;
             white-space: nowrap; text-decoration: none;
-            color: var(--text-main); font-size: 0.9rem; font-weight: 500;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            color: var(--text-main); font-size: 0.85rem; font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: blurFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
         }
+        .quick-btn:nth-child(1) { animation-delay: 0.15s; }
+        .quick-btn:nth-child(2) { animation-delay: 0.22s; }
+        .quick-btn:nth-child(3) { animation-delay: 0.29s; }
+        .quick-btn:active { transform: scale(0.96); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+        .quick-btn span {
+            display: flex; align-items: center; justify-content: center;
+            width: 26px; height: 26px; border-radius: 50%;
+            font-size: 0.85rem;
+        }
+        .quick-btn:nth-child(1) span { background: rgba(59,130,246,0.1); }
+        .quick-btn:nth-child(2) span { background: rgba(245,158,11,0.1); }
+        .quick-btn:nth-child(3) span { background: rgba(107,114,128,0.1); }
     </style>
 </head>
 <body>
@@ -242,7 +293,7 @@
 
     <!-- REINIGUNGSSERVICE BANNER (Aufklappbar) -->
     <div class="content-section" style="padding-top: 0;">
-        <div id="cleaningBanner" style="background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%); border-radius: 16px; padding: 1rem 1.25rem; color: white; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3); cursor: pointer;" onclick="toggleCleaningDetails()">
+        <div id="cleaningBanner" style="background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%); border-radius: 16px; padding: 1rem 1.25rem; color: white; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3); cursor: pointer; position: relative; overflow: hidden; animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;" onclick="toggleCleaningDetails()">
 
             <!-- Header (immer sichtbar) -->
             <div style="display: flex; align-items: center; gap: 1rem;">
@@ -306,9 +357,10 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
 <script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
@@ -326,10 +378,9 @@
         checkPushStatus();
 
         if (!sb) return;
-        const { data: { session } } = await sb.auth.getSession();
-
-        if (!session) { navigateTo('index.html'); return; }
-        const user = session.user;
+        const { data: { user } } = await sb.auth.getUser();
+        
+        if (!user) { navigateTo('index.html'); return; }
 
         const { data: profile } = await sb.from('profiles').select('full_name, username, avatar_url').eq('id', user.id).single();
 

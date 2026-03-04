@@ -183,7 +183,7 @@
             }
             .empty-state-modern .empty-action {
                 padding: 0.75rem 1.5rem;
-                background: linear-gradient(135deg, #6366f1, #4f46e5);
+                background: linear-gradient(135deg, #E8604C, #D4503E);
                 color: white;
                 border: none;
                 border-radius: 12px;

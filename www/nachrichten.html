@@ -6,26 +6,36 @@
     <title>Nachrichten - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0px); transform: translateY(0); }
+        }
+
         .search-bar-container {
-            padding: 1rem;
+            padding: 0.75rem 1rem;
             background: white;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid rgba(0,0,0,0.04);
         }
 
         .search-input {
             width: 100%;
-            padding: 0.75rem 1rem;
-            border-radius: 99px;
-            border: 1px solid var(--border-color);
-            background: #F9FAFB;
-            font-size: 0.95rem;
+            padding: 0.7rem 1rem 0.7rem 2.5rem;
+            border-radius: 999px;
+            border: 1.5px solid #E5E7EB;
+            background: #FAFAFA;
+            font-size: 0.9rem;
             outline: none;
-            transition: all 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cpath d='m21 21-4.35-4.35'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: 0.85rem center;
+            background-size: 16px;
         }
         .search-input:focus {
-            background: white;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background-color: white;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.06);
         }
 
         .conversations-list {
@@ -35,91 +45,124 @@
         .conversation-item {
             display: flex;
             align-items: center;
-            padding: 1rem;
+            padding: 0.85rem 1rem;
+            padding-right: 48px;
             background: white;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid rgba(0,0,0,0.04);
             text-decoration: none;
             color: inherit;
-            transition: background 0.2s;
+            transition: background 0.15s;
             position: relative;
         }
 
         .conversation-item:active {
-            background-color: #F3F4F6;
+            background-color: #F8F9FA;
         }
 
         .avatar-placeholder {
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
-            background: #EEF2FF;
-            color: var(--primary-color);
+            background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+            color: #3B82F6;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 1.2rem;
-            margin-right: 1rem;
+            font-size: 1.1rem;
+            margin-right: 0.85rem;
             flex-shrink: 0;
             background-size: cover;
             background-position: center;
-            border: 1px solid var(--border-color);
+            border: 2px solid rgba(59,130,246,0.08);
         }
 
         .convo-details {
             flex: 1;
-            min-width: 0; /* Wichtig für Text-Truncate */
+            min-width: 0;
         }
 
         .convo-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 0.25rem;
+            align-items: baseline;
+            margin-bottom: 0.15rem;
         }
 
         .partner-name {
-            font-weight: 600;
-            font-size: 1rem;
+            font-weight: 700;
+            font-size: 0.95rem;
             color: var(--text-main);
+            letter-spacing: -0.01em;
         }
 
         .timestamp {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-muted);
         }
 
+        /* Pattern: Kibo UI Pill fuer Listing-Hint */
         .listing-title-hint {
-            font-size: 0.75rem;
-            color: var(--primary-color);
-            background: #EFF6FF;
-            padding: 2px 6px;
-            border-radius: 4px;
+            font-size: 0.7rem;
+            color: #2563EB;
+            background: rgba(59,130,246,0.06);
+            padding: 2px 8px;
+            border-radius: 999px;
             display: inline-block;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.2rem;
             max-width: 100%;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            font-weight: 600;
+            border: 1px solid rgba(59,130,246,0.08);
         }
 
         .last-message {
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             color: var(--text-muted);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            line-height: 1.3;
         }
 
+        /* Unread-Dot mit Glow (blau statt rot fuer Konsistenz) */
         .unread-dot {
-            width: 10px;
-            height: 10px;
-            background-color: #EF4444;
+            width: 9px;
+            height: 9px;
+            background-color: #3B82F6;
             border-radius: 50%;
             position: absolute;
             top: 1rem;
-            right: 1rem;
-            display: none; /* Logic via JS */
+            right: 48px;
+            display: none;
+            box-shadow: 0 0 6px rgba(59,130,246,0.5);
         }
+
+        .delete-chat-btn {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            cursor: pointer;
+            color: #9CA3AF;
+            font-size: 0.85rem;
+            z-index: 10;
+            transition: color 0.2s;
+        }
+        .delete-chat-btn:active { color: #EF4444; }
 
         /* Empty State */
         .empty-state {
@@ -130,13 +173,71 @@
             padding: 4rem 1.5rem;
             text-align: center;
             color: var(--text-muted);
+            animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
         }
-        .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+        .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+        .empty-state h3 { color: var(--text-main); font-weight: 700; margin-bottom: 0.3rem; }
+        .empty-state p { font-size: 0.9rem; line-height: 1.4; }
+
+        /* Verification Overlay - Pattern: Glasmorphismus */
+        .verify-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        .verify-overlay.active { display: flex; }
+        .verify-overlay-box {
+            background: white;
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            max-width: 340px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            animation: blurFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+        .verify-overlay-box .icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .verify-overlay-box h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem; color: #1f2937; letter-spacing: -0.02em; }
+        .verify-overlay-box p { color: #6b7280; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem; }
+        .verify-overlay-box a {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 0.85rem 2rem;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(59,130,246,0.3);
+            transition: transform 0.2s;
+        }
+        .verify-overlay-box a:active { transform: scale(0.97); }
+
+        @media (prefers-reduced-motion: reduce) {
+            .empty-state, .verify-overlay-box { animation: none; opacity: 1; }
+        }
     </style>
 </head>
 <body>
 
 <div class="app-container">
+    <!-- Verification Overlay -->
+    <div class="verify-overlay" id="verifyOverlay">
+        <div class="verify-overlay-box">
+            <div class="icon">🔒</div>
+            <h2>Verifizierung erforderlich</h2>
+            <p>Um Nachrichten zu senden und zu empfangen, musst du zuerst deinen Studentenstatus verifizieren.</p>
+            <a href="verify-options.html">Jetzt verifizieren</a>
+        </div>
+    </div>
+
     <header class="app-header">
         <a href="javascript:history.back()" class="back-arrow">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
@@ -154,22 +255,36 @@
 
     <main class="app-content" style="padding: 0;">
         <div class="conversations-list" id="inboxContainer">
-            <div style="padding: 2rem; text-align: center; color: var(--text-muted);">Lade Nachrichten...</div>
+            <div style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0;">
+                <div style="display:flex;gap:0.85rem;align-items:center;padding:0.85rem 0;border-bottom:1px solid rgba(0,0,0,0.04);"><div class="skeleton" style="width:52px;height:52px;border-radius:50%;flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="width:45%;height:14px;margin-bottom:8px;border-radius:6px;"></div><div class="skeleton" style="width:70%;height:12px;border-radius:6px;"></div></div></div>
+                <div style="display:flex;gap:0.85rem;align-items:center;padding:0.85rem 0;border-bottom:1px solid rgba(0,0,0,0.04);"><div class="skeleton" style="width:52px;height:52px;border-radius:50%;flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="width:55%;height:14px;margin-bottom:8px;border-radius:6px;"></div><div class="skeleton" style="width:60%;height:12px;border-radius:6px;"></div></div></div>
+                <div style="display:flex;gap:0.85rem;align-items:center;padding:0.85rem 0;"><div class="skeleton" style="width:52px;height:52px;border-radius:50%;flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="width:40%;height:14px;margin-bottom:8px;border-radius:6px;"></div><div class="skeleton" style="width:75%;height:12px;border-radius:6px;"></div></div></div>
+            </div>
         </div>
     </main>
 
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
 <script src="translations.js"></script>
+<script src="session-cache.js"></script>
+<script src="room8-ui.js"></script>
+<script src="room8-utils.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
-<script src="verifyGate.js"></script>
 <script>
-    // Supabase Client - Direkte Initialisierung
-    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Supabase Client - mit Cache-Bypass für WKWebView (iOS)
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        global: {
+            fetch: function(url, options) {
+                options = options || {};
+                options.cache = 'no-store';
+                return fetch(url, options);
+            }
+        }
+    });
 
     var allConversations = [];
     var currentUser = null;
@@ -177,6 +292,14 @@
     // Helper: Navigation sicher machen (Vorschau-Fix)
     function navigateTo(url) {
         try { window.location.href = url; } catch(e) { console.warn(e); }
+    }
+
+    async function checkVerification(userId) {
+        const { data: profile } = await sb.from('profiles').select('is_verified, is_student_verified').eq('id', userId).single();
+        var isVerified = profile && (profile.is_verified || profile.is_student_verified);
+        if (!isVerified) {
+            document.getElementById('verifyOverlay').classList.add('active');
+        }
     }
 
     async function loadInbox() {
@@ -191,12 +314,9 @@
                 return;
             }
             currentUser = user;
+            checkVerification(user.id);
 
-            // Verifizierungs-Status merken
-            const { data: myProfile } = await sb.from('profiles').select('is_verified, is_student_verified').eq('id', user.id).single();
-            var isVerifiedUser = myProfile && (myProfile.is_verified || myProfile.is_student_verified);
-
-            // Nachrichten laden (Sender ODER Empfaenger bin ich)
+            // Nachrichten laden (Sender ODER Empfänger bin ich)
             const { data: messages, error } = await sb
                 .from('messages')
                 .select('id, sender_id, receiver_id, listing_id, content, created_at, is_read')
@@ -223,12 +343,48 @@
                     conversations[key] = {
                         partnerId: partnerId,
                         listingId: msg.listing_id,
-                        lastMessage: msg.content && msg.content.match(/\[IMG\]/) ? (msg.content.replace(/\[IMG\].*?\[\/IMG\]\n?/, '').trim() || '📷 Bild') : msg.content,
+                        lastMessage: msg.content,
                         lastDate: new Date(msg.created_at),
                         isUnread: (!msg.is_read && msg.receiver_id === user.id)
                     };
                 }
             });
+
+            // Blockierte User filtern
+            if (window.Room8) {
+                var blockedIds = await Room8.loadBlockedUsers();
+                if (blockedIds.length > 0) {
+                    Object.keys(conversations).forEach(function(key) {
+                        if (blockedIds.includes(conversations[key].partnerId)) {
+                            delete conversations[key];
+                        }
+                    });
+                }
+            }
+
+            // Ausgeblendete Chats filtern
+            var { data: hiddenChats } = await sb
+                .from('hidden_chats')
+                .select('partner_id, listing_id, hidden_at')
+                .eq('user_id', user.id);
+
+            if (hiddenChats && hiddenChats.length > 0) {
+                Object.keys(conversations).forEach(function(key) {
+                    var convo = conversations[key];
+                    var hidden = hiddenChats.find(function(h) {
+                        return h.partner_id === convo.partnerId &&
+                               (h.listing_id || '') === (convo.listingId || '');
+                    });
+                    if (hidden && new Date(hidden.hidden_at) > convo.lastDate) {
+                        delete conversations[key];
+                    }
+                });
+            }
+
+            if (Object.keys(conversations).length === 0) {
+                renderEmptyState();
+                return;
+            }
 
             // Details laden (Namen & Listing Titel)
             const promises = Object.values(conversations).map(async (convo) => {
@@ -259,14 +415,9 @@
             allConversations = await Promise.all(promises);
             renderList(allConversations);
 
-            // Blur-Overlay fuer nicht-verifizierte User
-            if (!isVerifiedUser) {
-                showVerifyOverlay(['#inboxContainer'], 'Verifiziere dich, um Nachrichten sehen zu k\u00f6nnen.');
-            }
-
         } catch (err) {
             console.error("Inbox Error:", err);
-            container.innerHTML = '<div style="padding:2rem;text-align:center;color:red;">Nachrichten konnten nicht geladen werden. Bitte versuche es erneut.</div>';
+            container.innerHTML = '<div style="padding:2rem;text-align:center;color:red;">Fehler: ' + (err.message || err) + '</div>';
         }
     }
 
@@ -304,10 +455,28 @@
                         </div>
                     </div>
                     ${convo.isUnread ? '<div class="unread-dot" style="display:block"></div>' : ''}
+                    <button class="delete-chat-btn" data-partner="${convo.partnerId}" data-listing="${convo.listingId || ''}" onclick="event.preventDefault();event.stopPropagation();deleteChat(this);">🗑️</button>
                 </a>
             `;
             container.appendChild(item.firstElementChild); // Append the A tag
         });
+    }
+
+    async function deleteChat(btn) {
+        if (!confirm('Chat ausblenden? Er erscheint wieder, wenn eine neue Nachricht kommt.')) return;
+        var partnerId = btn.dataset.partner;
+        var listingId = btn.dataset.listing || null;
+
+        btn.closest('.conversation-item').style.opacity = '0.3';
+
+        await sb.from('hidden_chats').upsert({
+            user_id: currentUser.id,
+            partner_id: partnerId,
+            listing_id: listingId,
+            hidden_at: new Date().toISOString()
+        }, { onConflict: 'user_id,partner_id,listing_id' });
+
+        loadInbox();
     }
 
     function renderEmptyState() {
@@ -337,7 +506,43 @@
         renderList(filtered);
     });
 
-    document.addEventListener('DOMContentLoaded', loadInbox);
+    // Realtime: Neue Nachrichten live anzeigen
+    function subscribeToNewMessages() {
+        if (!currentUser) return;
+        sb.channel('inbox-rt-' + currentUser.id + '-' + Date.now())
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'messages'
+            }, function(payload) {
+                // Nur Nachrichten die mich betreffen
+                if (payload.new.receiver_id === currentUser.id || payload.new.sender_id === currentUser.id) {
+                    console.log('Inbox: Neue Nachricht, lade neu...');
+                    loadInbox();
+                }
+            }).subscribe(function(status) {
+                console.log('Inbox realtime subscription:', status);
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadInbox().then(function() {
+            subscribeToNewMessages();
+        });
+    });
+
+    // WKWebView iOS Fix: Stale-Page-Erkennung via setInterval
+    // Wenn WKWebView eine gecachte Seite wiederherstellt, läuft der Interval weiter
+    // aber Date.now() springt → wir erkennen den Zeitsprung und laden neu
+    var _lastTick = Date.now();
+    setInterval(function() {
+        var now = Date.now();
+        if (now - _lastTick > 2000 && currentUser) {
+            console.log('Inbox: Stale page detected, reloading...');
+            loadInbox();
+        }
+        _lastTick = now;
+    }, 1000);
 </script>
 </body>
 </html>

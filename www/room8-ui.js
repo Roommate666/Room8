@@ -66,15 +66,15 @@
             padding: 14px 18px;
             background: ${color.bg};
             border: 1px solid ${color.border};
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border-radius: 999px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8);
             color: ${color.text};
             font-size: 0.9rem;
             font-weight: 500;
             pointer-events: auto;
-            animation: toastSlideIn 0.3s ease;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            animation: toastBlurIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         `;
 
         toast.innerHTML = '<span style="color: ' + color.icon + '; flex-shrink: 0;">' + (icons[type] || icons.info) + '</span><span style="flex: 1;">' + escapeHtml(message) + '</span>';
@@ -83,7 +83,7 @@
 
         // Auto-remove
         setTimeout(function() {
-            toast.style.animation = 'toastSlideOut 0.3s ease forwards';
+            toast.style.animation = 'toastBlurOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards';
             setTimeout(function() {
                 if (toast.parentNode) toast.parentNode.removeChild(toast);
             }, 300);
@@ -106,13 +106,13 @@
         var style = document.createElement('style');
         style.id = 'room8-toast-styles';
         style.textContent = `
-            @keyframes toastSlideIn {
-                from { opacity: 0; transform: translateY(-20px); }
-                to { opacity: 1; transform: translateY(0); }
+            @keyframes toastBlurIn {
+                from { opacity: 0; filter: blur(8px); transform: translateY(-16px) scale(0.96); }
+                to { opacity: 1; filter: blur(0); transform: translateY(0) scale(1); }
             }
-            @keyframes toastSlideOut {
-                from { opacity: 1; transform: translateY(0); }
-                to { opacity: 0; transform: translateY(-20px); }
+            @keyframes toastBlurOut {
+                from { opacity: 1; filter: blur(0); transform: translateY(0) scale(1); }
+                to { opacity: 0; filter: blur(8px); transform: translateY(-12px) scale(0.96); }
             }
 
             /* Skeleton Loading */
@@ -183,7 +183,7 @@
             }
             .empty-state-modern .empty-action {
                 padding: 0.75rem 1.5rem;
-                background: linear-gradient(135deg, #6366f1, #4f46e5);
+                background: linear-gradient(135deg, #3B82F6, #2563EB);
                 color: white;
                 border: none;
                 border-radius: 12px;

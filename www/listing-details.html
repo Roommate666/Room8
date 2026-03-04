@@ -6,9 +6,10 @@
     <title>Details - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Notification Badge auf Detail-Seiten ausblenden */
-        .notification-bell-badge {
-            display: none !important;
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
         }
 
         /* === HERO IMAGE SLIDER === */
@@ -58,10 +59,76 @@
         }
         .dot.active { background: white; transform: scale(1.2); }
 
+        /* === FULLSCREEN IMAGE OVERLAY === */
+        .fullscreen-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .fullscreen-wrapper {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+        }
+        .fullscreen-wrapper::-webkit-scrollbar { display: none; }
+        .fullscreen-slide {
+            min-width: 100%;
+            height: 100%;
+            scroll-snap-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fullscreen-slide img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .fullscreen-close {
+            position: absolute;
+            top: calc(15px + env(safe-area-inset-top));
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100000;
+            cursor: pointer;
+        }
+        .fullscreen-dots {
+            position: absolute;
+            bottom: calc(20px + env(safe-area-inset-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+        .fullscreen-dots .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+        }
+        .fullscreen-dots .dot.active { background: white; transform: scale(1.2); }
+
         /* BACK BUTTON OVERLAY */
         .back-btn-overlay {
             position: absolute;
-            top: calc(15px + env(safe-area-inset-top));
+            top: calc(15px + env(safe-area-inset-top));            
             left: 15px;
             width: 40px;
             height: 40px;
@@ -73,30 +140,33 @@
             justify-content: center;
             color: white;
             text-decoration: none;
-            z-index: 60;
+            z-index: 10;
         }
 
-        /* Glocke wird dynamisch von notificationBell.js eingefuegt */
+        /* Alte Glocke verstecken (wird von notificationBell.js ersetzt) */
+        .notification-btn-overlay { display: none !important; }
 
         /* === CONTENT === */
         .detail-content {
             padding: 1.5rem;
-            padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px); /* Platz für Sticky Footer */
+            padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px);
             background: white;
-            border-radius: 20px 20px 0 0;
+            border-radius: 24px 24px 0 0;
             margin-top: -20px;
             position: relative;
             z-index: 5;
+            animation: blurFadeIn 0.5s 0.1s ease-out both;
         }
 
         .header-section { margin-bottom: 1.5rem; }
         
         .listing-title {
             font-size: 1.5rem;
-            font-weight: 700;
+            font-weight: 800;
             color: var(--text-main);
             margin: 0 0 0.5rem 0;
             line-height: 1.2;
+            letter-spacing: -0.02em;
         }
 
         .listing-price {
@@ -108,13 +178,14 @@
             gap: 0.5rem;
         }
 
+        /* Kibo UI Pill */
         .price-badge {
             background: #ECFDF5;
             color: #065F46;
             font-size: 0.8rem;
             padding: 0.2rem 0.6rem;
-            border-radius: 6px;
-            font-weight: 600;
+            border-radius: 999px;
+            font-weight: 700;
         }
 
         .location-row {
@@ -126,15 +197,19 @@
             margin-top: 0.5rem;
         }
 
-        /* ATTRIBUTES GRID */
+        /* ATTRIBUTES GRID - Glasmorphismus */
         .attributes-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
             margin: 1.5rem 0;
             padding: 1rem;
-            background: #F9FAFB;
-            border-radius: 12px;
+            background: rgba(249,250,251,0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 16px;
+            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
         }
 
         .attr-item {
@@ -173,11 +248,12 @@
             gap: 0.5rem;
         }
 
+        /* Kibo UI Pill */
         .feature-tag {
             background: white;
             border: 1px solid var(--border-color);
             padding: 0.4rem 0.8rem;
-            border-radius: 8px;
+            border-radius: 999px;
             font-size: 0.85rem;
             color: var(--text-main);
             display: flex;
@@ -192,9 +268,9 @@
         }
 
         .feature-tag.info {
-            background: #EEF2FF;
-            border-color: #6366F1;
-            color: #4338CA;
+            background: #EFF6FF;
+            border-color: #3B82F6;
+            color: #2563EB;
         }
 
         /* ROOMS INFO BOX */
@@ -236,8 +312,8 @@
 
         /* SEEKER PROFILE BOX */
         .seeker-profile-box {
-            background: linear-gradient(135deg, #EEF2FF 0%, #F5F3FF 100%);
-            border: 1px solid #C7D2FE;
+            background: #F7F7F5;
+            border: 1px solid #EBEBEB;
             border-radius: 12px;
             padding: 1rem;
             margin-top: 0.75rem;
@@ -254,7 +330,7 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background: #C7D2FE;
+            background: #EBEBEB;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -332,20 +408,23 @@
             color: #78350F;
         }
 
-        /* OWNER PROFILE */
+        /* OWNER PROFILE - Glasmorphismus */
         .owner-card {
             display: flex;
             align-items: center;
             margin-top: 2rem;
             padding: 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            cursor: pointer; /* Zeigt Klickbarkeit an */
-            transition: background-color 0.2s;
+            border: 1px solid rgba(0,0,0,0.04);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(249,250,251,0.88);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.6);
         }
-        
+
         .owner-card:active {
             background-color: #F3F4F6;
+            transform: scale(0.98);
         }
 
         .owner-avatar {
@@ -390,40 +469,43 @@
             transform: scale(1.02);
         }
 
-        /* STICKY FOOTER ACTION BAR */
+        /* STICKY FOOTER ACTION BAR - Glasmorphismus */
         .action-bar {
             position: fixed;
-            bottom: 90px;
+            bottom: calc(100px + env(safe-area-inset-bottom, 0px));
             left: 16px;
             right: 16px;
             width: auto;
-            background: white;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             padding: 0.75rem 1rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(0,0,0,0.04);
             display: flex;
             gap: 0.75rem;
             z-index: 10000;
             box-sizing: border-box;
-            border-radius: 16px;
+            border-radius: 18px;
         }
 
         /* Content Padding damit Action-Bar nichts verdeckt */
         .detail-content {
-            padding-bottom: 180px !important;
+            padding-bottom: 220px !important;
         }
 
         .btn-fav {
             width: 48px;
             height: 48px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            border: 1px solid rgba(0,0,0,0.06);
             background: white;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             color: #d1d5db;
-            transition: all 0.2s;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             flex-shrink: 0;
         }
         .btn-fav.active {
@@ -435,17 +517,18 @@
         .btn-contact {
             flex: 1;
             height: 48px;
-            background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-weight: 600;
+            border-radius: 999px;
+            font-weight: 700;
             font-size: 0.95rem;
             cursor: pointer;
-            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .btn-contact:active {
@@ -488,6 +571,11 @@
         .btn-report-small:hover {
             background: #FDE68A;
         }
+
+        /* Barrierefreiheit */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
     </style>
 </head>
 <body>
@@ -498,27 +586,33 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
         
-        <!-- Glocke wird dynamisch von notificationBell.js eingefuegt -->
+        <!-- Glocke wird automatisch von notificationBell.js eingefügt -->
         
         <div class="slider-wrapper" id="sliderWrapper">
             <!-- Bilder werden per JS geladen -->
-            <div class="slide"><img src="assets/placeholder.jpg" id="placeholderImg" onerror="this.src='no-image.svg'"></div>
+            <div class="slide"><img src="assets/placeholder.jpg" id="placeholderImg" onerror="this.src='https://via.placeholder.com/400x300?text=Loading...'"></div>
         </div>
         
         <div class="slider-dots" id="sliderDots"></div>
     </div>
 
+    <!-- Fullscreen Image Overlay -->
+    <div class="fullscreen-overlay" id="fullscreenOverlay" style="display:none;">
+        <button class="fullscreen-close" onclick="closeFullscreen()">&times;</button>
+        <div class="fullscreen-wrapper" id="fullscreenWrapper"></div>
+        <div class="fullscreen-dots" id="fullscreenDots"></div>
+    </div>
+
     <!-- Main Content -->
     <div class="detail-content">
         <div class="header-section">
-            <div class="price-badge" id="typeBadge" style="display:inline-block; margin-bottom:0.5rem;">Angebot</div>
-            <h1 class="listing-title" id="title">Lädt Details...</h1>
+            <div class="price-badge" id="typeBadge" style="display:inline-block; margin-bottom:0.5rem;"></div>
+            <h1 class="listing-title" id="title"></h1>
             <div class="listing-price" id="price">-- €</div>
             <div class="location-row">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span id="location">Stadt, Viertel</span>
+                <span id="location"></span>
             </div>
-            <div id="refCodeRow" style="display:none; font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem;">Referenz-Nr: <span id="refCode"></span></div>
         </div>
 
         <div class="attributes-grid" id="attributesGrid">
@@ -534,7 +628,7 @@
             <div class="seeker-profile-box" id="seekerProfileBox"></div>
         </div>
 
-        <!-- WG Praeferenzen (Nur bei Gesuch) -->
+        <!-- WG Präferenzen (Nur bei Gesuch) -->
         <div id="wgPreferencesSection" style="display:none;">
             <div class="section-title" id="wgPrefTitle"></div>
             <div class="features-wrap" id="wgPreferencesList"></div>
@@ -546,7 +640,7 @@
             <div class="swap-info-box" id="swapInfoBox"></div>
         </div>
 
-        <!-- Raeume (Eigen/Geteilt) -->
+        <!-- Räume (Eigen/Geteilt) -->
         <div id="roomsSection" style="display:none;">
             <div class="section-title" id="roomsTitle"></div>
             <div class="rooms-grid" id="roomsGrid"></div>
@@ -558,7 +652,7 @@
             <div class="features-wrap" id="bathroomList"></div>
         </div>
 
-        <!-- Kuechen Details -->
+        <!-- Küchen Details -->
         <div id="kitchenSection" style="display:none;">
             <div class="section-title" id="kitchenTitle"></div>
             <div class="features-wrap" id="kitchenList"></div>
@@ -576,7 +670,7 @@
             <div class="features-wrap" id="featuresList"></div>
         </div>
 
-        <!-- Moebel (Nur Wohnungen) -->
+        <!-- Möbel (Nur Wohnungen) -->
         <div id="furnitureSection" style="display:none;">
             <div class="section-title" id="furnitureTitle"></div>
             <div class="features-wrap" id="furnitureList"></div>
@@ -627,14 +721,37 @@
         <button class="btn-report-small" id="reportBtnBar" onclick="reportListing()">⚠️</button>
     </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+    <!-- Report Modal -->
+    <div id="reportModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+        <div style="background:white; border-radius:20px; width:90%; max-width:400px; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <div style="background:linear-gradient(135deg,#FEE2E2,#FECACA); padding:1.25rem 1.5rem; border-radius:20px 20px 0 0; display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:0.6rem;">
+                    <span style="font-size:1.4rem;">🚩</span>
+                    <h3 id="reportModalTitle" style="margin:0; font-size:1.1rem; color:#991B1B;"></h3>
+                </div>
+                <button id="reportModalClose" style="background:rgba(0,0,0,0.08); border:none; width:32px; height:32px; border-radius:50%; font-size:1.2rem; cursor:pointer; color:#6b7280; display:flex; align-items:center; justify-content:center;">&times;</button>
+            </div>
+            <div style="padding:1.25rem;">
+                <p id="reportModalPrompt" style="margin:0 0 1rem; font-size:0.85rem; color:#6b7280;"></p>
+                <div id="reportReasons" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
+                <div style="margin-top:1rem;">
+                    <label id="reportExtraLabel" style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.85rem; color:#374151;"></label>
+                    <textarea id="reportDescription" style="width:100%; min-height:80px; padding:0.7rem; border:1.5px solid #e5e7eb; border-radius:10px; font-family:inherit; font-size:0.85rem; resize:vertical; box-sizing:border-box;"></textarea>
+                </div>
+                <button id="reportSubmitBtn" disabled style="width:100%; margin-top:1rem; padding:0.85rem; background:#EF4444; color:white; border:none; border-radius:12px; font-weight:700; font-size:0.95rem; cursor:pointer; opacity:0.5; transition:all 0.2s;"></button>
+            </div>
+        </div>
+    </div>
+
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
 <script src="translations.js"></script>
+<script src="session-cache.js"></script>
+<script src="room8-utils.js"></script>
 <script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
 <script src="notificationHelpers.js"></script>
-<script src="verifyGate.js"></script>
 <script>
     // Supabase Client - Direkte Initialisierung
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -665,16 +782,9 @@
         if (!listingId || !sb) return;
 
         try {
-            // 1. User check (fuer Favorite Button)
+            // 1. User check (für Favorite Button)
             const { data: { user } } = await sb.auth.getUser();
             currentUserId = user ? user.id : null;
-
-            // Verifizierungs-Status merken fuer Blur
-            var isVerifiedUser = false;
-            if (user) {
-                const { data: myProfile } = await sb.from('profiles').select('is_verified, is_student_verified').eq('id', user.id).single();
-                isVerifiedUser = myProfile && (myProfile.is_verified || myProfile.is_student_verified);
-            }
 
             // 2. Listing laden (inkl. Owner Profile)
             const { data: listing, error } = await sb
@@ -694,6 +804,15 @@
 
             if (error) throw error;
             currentListing = listing;
+
+            // Block-Check: Ist der Inserat-Ersteller blockiert?
+            if (currentUserId && listing.owner_id && listing.owner_id !== currentUserId && window.Room8) {
+                var isBlocked = await Room8.isUserBlocked(listing.owner_id);
+                if (isBlocked) {
+                    document.querySelector('.app-container').innerHTML = '<div style="padding:3rem;text-align:center;margin-top:calc(2rem + env(safe-area-inset-top));"><div style="font-size:3rem;margin-bottom:1rem;">\uD83D\uDEAB</div><h2 style="font-size:1.3rem;color:#1f2937;margin-bottom:0.5rem;">User blocked</h2><p style="color:#6b7280;font-size:0.95rem;line-height:1.5;margin-bottom:1.5rem;">You have blocked the creator of this listing.</p><button onclick="history.back()" style="display:inline-block;background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;padding:0.85rem 2rem;border-radius:12px;border:none;font-weight:600;font-size:0.95rem;cursor:pointer;">Back</button></div>';
+                    return;
+                }
+            }
 
             // Navigation Highlight basierend auf Typ
             window.currentListingType = listing.type;
@@ -730,25 +849,17 @@
                     navigateTo(editPage + '?id=' + listingId);
                 };
             } else {
-                // 7. View Counter inkrementieren (nur fuer fremde Inserate)
+                // 7. View Counter inkrementieren (nur für fremde Inserate)
                 sb.from('listings')
                     .update({ view_count: (listing.view_count || 0) + 1 })
                     .eq('id', listingId)
                     .then(() => console.log('View count incremented'));
             }
 
-            // Blur-Overlay fuer nicht-verifizierte User
-            var isOwner = currentUserId && listing.owner_id === currentUserId;
-            if (!isVerifiedUser && !isOwner) {
-                showVerifyOverlay(['.detail-content', '#sliderWrapper'], tr('verify_default_message'));
-                var actionBar = document.querySelector('.action-bar');
-                if (actionBar) actionBar.style.display = 'none';
-            }
-
         } catch (err) {
             console.error(err);
             document.getElementById('title').textContent = tr('detail_error_loading');
-            document.getElementById('description').textContent = tr('detail_error_loading');
+            document.getElementById('description').textContent = err.message;
         }
     }
 
@@ -771,6 +882,12 @@
         document.getElementById('viewProfileText').textContent = tr('detail_view_profile');
         document.getElementById('contactBtn').textContent = tr('detail_send_message');
         document.getElementById('ownerName').textContent = tr('detail_host');
+        // Report Modal Texte
+        document.getElementById('reportModalTitle').textContent = tr('detail_report_title');
+        document.getElementById('reportModalPrompt').textContent = tr('detail_report_prompt');
+        document.getElementById('reportExtraLabel').textContent = tr('detail_report_description');
+        document.getElementById('reportDescription').placeholder = tr('detail_report_description_placeholder');
+        document.getElementById('reportSubmitBtn').textContent = tr('detail_report_submit');
 
         // Basic Info
         document.getElementById('title').textContent = l.title;
@@ -792,18 +909,13 @@
         }
         document.getElementById('price').textContent = priceText;
 
-        // Referenz-Nummer
-        var refCode = 'R8-' + l.id.substring(0, 6).toUpperCase();
-        document.getElementById('refCode').textContent = refCode;
-        document.getElementById('refCodeRow').style.display = 'block';
-
         // Reinigungsservice Banner (nur Wohnungen) - collapsible
         if (l.type === 'wohnung') {
+            var refCode = 'R8-' + l.id.substring(0, 6).toUpperCase();
             var banner = document.getElementById('cleaningBanner');
             var wrapper = document.createElement('div');
             wrapper.style.cssText = 'background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%); border-radius: 16px; color: white; margin: 1.5rem 0; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25); overflow: hidden;';
 
-            // Kompakte Kopfzeile - immer sichtbar
             var headerRow = document.createElement('div');
             headerRow.style.cssText = 'display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; cursor: pointer;';
             var iconSpan = document.createElement('span');
@@ -826,7 +938,6 @@
             headerRow.appendChild(headerText);
             headerRow.appendChild(chevron);
 
-            // Aufklappbarer Inhalt - standardmaessig hidden
             var detailsDiv = document.createElement('div');
             detailsDiv.style.cssText = 'display: none; padding: 0 1.25rem 1.25rem;';
 
@@ -865,7 +976,7 @@
             copyBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 navigator.clipboard.writeText(refCode);
-                Room8UI.success(tr('detail_reference_copied'));
+                if (window.Room8UI) Room8UI.success(tr('detail_reference_copied'));
             });
             btnRow.appendChild(linkBtn);
             btnRow.appendChild(copyBtn);
@@ -960,7 +1071,7 @@
                 'window': '\uD83E\uDE9F Window'
             });
 
-            // === KUECHEN DETAILS ===
+            // === KÜCHEN DETAILS ===
             renderTags('kitchenSection', 'kitchenList', l.kitchen_details, {
                 'stove': '\uD83D\uDD25 ' + tr('detail_stove'),
                 'oven': '\u2668\uFE0F ' + tr('detail_oven'),
@@ -993,8 +1104,8 @@
                 'floor_heating': '\uD83D\uDD25 Floor heating',
                 'shutters': '\uD83E\uDE9F Shutters'
             });
-
-            // === MOEBLIERUNG (erweitert) ===
+            
+            // === MÖBLIERUNG (erweitert) ===
             renderTags('furnitureSection', 'furnitureList', l.furniture_data, {
                 'bed': '\uD83D\uDECF\uFE0F Bed',
                 'desk': '\uD83D\uDDA5\uFE0F Desk',
@@ -1025,11 +1136,27 @@
             }
 
         } else {
-            // Gegenstand - Uebersetzungen aus translations.js
-            var catKey = 'cat_' + (l.category || '').toLowerCase().replace(/[^a-z]/g, '_');
-            addAttr(tr('detail_category'), tr(catKey) || l.category);
-            var condKey = 'condition_' + (l.condition || '').toLowerCase().replace(/\s+/g, '_');
-            addAttr(tr('detail_condition'), tr(condKey) || l.condition);
+            // Gegenstand - mit uebersetzten Labels
+            var categoryLabels = {
+                'Furniture & Home': tr('marketplace_cat_furniture'),
+                'Electronics & Tech': tr('marketplace_cat_electronics'),
+                'Books & Study': tr('marketplace_cat_books'),
+                'Clothing & Fashion': tr('marketplace_cat_clothing'),
+                'Kitchen & Appliances': tr('marketplace_cat_kitchen'),
+                'Sports & Outdoor': tr('marketplace_cat_sports'),
+                'Bikes & Transport': tr('marketplace_cat_bikes'),
+                'Music & Instruments': tr('marketplace_cat_music'),
+                'Others': tr('marketplace_cat_others')
+            };
+            var conditionLabels = {
+                'New': 'New',
+                'Like New': 'Like New',
+                'Good': 'Good',
+                'Fair': 'Fair',
+                'Poor': 'Poor'
+            };
+            addAttr(tr('detail_category'), categoryLabels[l.category] || humanize(l.category));
+            addAttr(tr('detail_condition'), conditionLabels[l.condition] || humanize(l.condition));
         }
     }
 
@@ -1054,11 +1181,11 @@
         const grid = document.getElementById('roomsGrid');
         let hasItems = false;
 
-        var roomTypeLabels = {
-            'private': tr('detail_toilet_private'),
-            'shared': tr('detail_toilet_shared'),
-            'none': '-',
-            'in_bath': tr('detail_bathroom'),
+        const roomTypeLabels = {
+            'private': tr('detail_room_private'),
+            'shared': tr('detail_room_shared'),
+            'none': 'None',
+            'in_bath': 'In Bath',
             'separate': tr('detail_separate')
         };
 
@@ -1069,7 +1196,7 @@
                     <span class="room-icon">${icon}</span>
                     <div class="room-info">
                         <span class="room-label">${label}</span>
-                        <span class="room-value">${roomTypeLabels[value] || value}</span>
+                        <span class="room-value">${roomTypeLabels[value] || humanize(value)}</span>
                     </div>
                 </div>`;
             hasItems = true;
@@ -1099,40 +1226,40 @@
         const list = document.getElementById('wgDetailsList');
         let hasItems = false;
 
-        var genderLabels = {
+        const genderLabels = {
             'female_only': '\uD83D\uDC69 ' + tr('detail_female_only'),
             'male_only': '\uD83D\uDC68 ' + tr('detail_male_only'),
             'mixed': '\uD83D\uDC65 ' + tr('detail_mixed')
         };
 
-        var typeLabels = {
+        const typeLabels = {
             'students': '\uD83C\uDF93 ' + tr('detail_students_wg'),
             'working': '\uD83D\uDCBC ' + tr('detail_workers_wg'),
             'mixed': '\uD83D\uDD00 ' + tr('detail_mixed'),
-            'purpose': '\uD83C\uDFAF Purpose',
-            'community': '\u2764\uFE0F Community'
+            'purpose': '\uD83C\uDFAF Zweck-WG',
+            'community': '\u2764\uFE0F Gemeinschafts-WG'
         };
 
         if (wgData.size) {
-            list.innerHTML += '<span class="feature-tag info">\uD83D\uDC65 ' + wgData.size + ' Roommates</span>';
+            list.innerHTML += `<span class="feature-tag info">\uD83D\uDC65 ${wgData.size} Roommates</span>`;
             hasItems = true;
         }
 
         if (wgData.gender && genderLabels[wgData.gender]) {
-            list.innerHTML += '<span class="feature-tag">' + genderLabels[wgData.gender] + '</span>';
+            list.innerHTML += `<span class="feature-tag">${genderLabels[wgData.gender]}</span>`;
             hasItems = true;
         }
 
         if (wgData.type && typeLabels[wgData.type]) {
-            list.innerHTML += '<span class="feature-tag">' + typeLabels[wgData.type] + '</span>';
+            list.innerHTML += `<span class="feature-tag">${typeLabels[wgData.type]}</span>`;
             hasItems = true;
         }
 
         if (wgData.smoking) {
-            list.innerHTML += '<span class="feature-tag">\uD83D\uDEAC ' + tr('detail_smoking_yes') + '</span>';
+            list.innerHTML += `<span class="feature-tag">\uD83D\uDEAC ${tr('detail_smoking_yes')}</span>`;
             hasItems = true;
         } else if (wgData.smoking_outside) {
-            list.innerHTML += '<span class="feature-tag">\uD83D\uDEAD ' + tr('detail_smoking_outside') + '</span>';
+            list.innerHTML += `<span class="feature-tag">\uD83D\uDEAD ${tr('detail_smoking_outside')}</span>`;
             hasItems = true;
         }
 
@@ -1143,7 +1270,7 @@
         const list = document.getElementById('locationInfoList');
         let hasItems = false;
 
-        var transportLabels = {
+        const transportLabels = {
             'excellent': '\u2B50 ' + tr('detail_transport_excellent'),
             'good': '\uD83D\uDC4D ' + tr('detail_transport_good'),
             'medium': '\uD83D\uDC4C ' + tr('detail_transport_moderate'),
@@ -1151,12 +1278,12 @@
         };
 
         if (locInfo.uni_distance) {
-            list.innerHTML += '<span class="feature-tag info">\uD83C\uDF93 ' + locInfo.uni_distance + ' ' + tr('detail_minutes_to_uni') + '</span>';
+            list.innerHTML += `<span class="feature-tag info">\uD83C\uDF93 ${locInfo.uni_distance} ${tr('detail_minutes_to_uni')}</span>`;
             hasItems = true;
         }
 
         if (locInfo.public_transport && transportLabels[locInfo.public_transport]) {
-            list.innerHTML += '<span class="feature-tag">\uD83D\uDE87 ' + tr('detail_public_transport') + ': ' + transportLabels[locInfo.public_transport] + '</span>';
+            list.innerHTML += `<span class="feature-tag">\uD83D\uDE87 ${tr('detail_public_transport')}: ${transportLabels[locInfo.public_transport]}</span>`;
             hasItems = true;
         }
 
@@ -1173,12 +1300,12 @@
         let hasItems = false;
 
         if (miscData.anmeldung_possible) {
-            list.innerHTML += '<span class="feature-tag highlight">\u2705 ' + tr('detail_registration_possible') + '</span>';
+            list.innerHTML += `<span class="feature-tag highlight">\u2705 ${tr('detail_registration_possible')}</span>`;
             hasItems = true;
         }
 
         if (miscData.commission_free) {
-            list.innerHTML += '<span class="feature-tag highlight">\u2705 ' + tr('detail_commission_free') + '</span>';
+            list.innerHTML += `<span class="feature-tag highlight">\u2705 ${tr('detail_commission_free')}</span>`;
             hasItems = true;
         }
 
@@ -1195,7 +1322,7 @@
             'no_answer': '👤'
         };
 
-        var hobbyLabels = {
+        const hobbyLabels = {
             'sport': '\uD83C\uDFC3 ' + tr('detail_hobby_sport'),
             'music': '\uD83C\uDFB5 ' + tr('detail_hobby_music'),
             'gaming': '\uD83C\uDFAE ' + tr('detail_hobby_gaming'),
@@ -1228,13 +1355,13 @@
         // Situation Tags
         let tags = [];
         if (profile.is_smoker) tags.push('\uD83D\uDEAC ' + tr('detail_smoker'));
-        if (profile.has_pet) tags.push('\uD83D\uDC3E ' + tr('detail_has_pet') + (profile.pet_type ? ' (' + profile.pet_type + ')' : ''));
+        if (profile.has_pet) tags.push('\uD83D\uDC3E ' + tr('detail_has_pet') + (profile.pet_type ? ` (${profile.pet_type})` : ''));
         if (profile.needs_anmeldung) tags.push('\uD83D\uDCCB ' + tr('detail_needs_registration'));
-
-        var flexLabels = {
+        
+        const flexLabels = {
             'immediate': '\u26A1 ' + tr('detail_immediate'),
-            '1-2_weeks': '\uD83D\uDCC5 1-2 Weeks',
-            '1_month': '\uD83D\uDDD3\uFE0F ~1 Month',
+            '1-2_weeks': '\uD83D\uDCC5 1-2 weeks',
+            '1_month': '\uD83D\uDDD3\uFE0F ~1 month',
             'flexible': '\uD83D\uDD04 ' + tr('detail_flex_very')
         };
         if (profile.move_flexibility && flexLabels[profile.move_flexibility]) {
@@ -1264,47 +1391,47 @@
         const list = document.getElementById('wgPreferencesList');
         let hasItems = false;
 
-        var genderLabelsP = {
+        const genderLabels = {
             'any': '\uD83D\uDC65 Any',
             'female_only': '\uD83D\uDC69 ' + tr('detail_female_only'),
             'male_only': '\uD83D\uDC68 ' + tr('detail_male_only'),
             'mixed': '\uD83D\uDD00 ' + tr('detail_mixed')
         };
 
-        var typeLabelsP = {
+        const typeLabels = {
             'any': '\uD83C\uDFE0 Any',
             'students': '\uD83C\uDF93 ' + tr('detail_students_wg'),
             'working': '\uD83D\uDCBC ' + tr('detail_workers_wg'),
             'mixed': '\uD83D\uDD00 ' + tr('detail_mixed'),
-            'purpose': '\uD83C\uDFAF Purpose',
-            'community': '\u2764\uFE0F Community'
+            'purpose': '\uD83C\uDFAF Purpose WG',
+            'community': '\u2764\uFE0F Community WG'
         };
 
-        if (prefs.pref_gender && genderLabelsP[prefs.pref_gender]) {
-            list.innerHTML += '<span class="feature-tag">' + genderLabelsP[prefs.pref_gender] + '</span>';
+        if (prefs.pref_gender && genderLabels[prefs.pref_gender]) {
+            list.innerHTML += `<span class="feature-tag">${genderLabels[prefs.pref_gender]}</span>`;
             hasItems = true;
         }
 
         if (prefs.pref_age_min || prefs.pref_age_max) {
-            var ageText = '\uD83D\uDC64 Age: ';
+            let ageText = '\uD83D\uDC64 Age: ';
             if (prefs.pref_age_min && prefs.pref_age_max) {
-                ageText += prefs.pref_age_min + '-' + prefs.pref_age_max;
+                ageText += `${prefs.pref_age_min}-${prefs.pref_age_max}`;
             } else if (prefs.pref_age_min) {
-                ageText += prefs.pref_age_min + '+';
+                ageText += `${prefs.pref_age_min}+`;
             } else {
-                ageText += '-' + prefs.pref_age_max;
+                ageText += `<${prefs.pref_age_max}`;
             }
-            list.innerHTML += '<span class="feature-tag">' + ageText + '</span>';
+            list.innerHTML += `<span class="feature-tag">${ageText}</span>`;
             hasItems = true;
         }
 
-        if (prefs.pref_wg_type && typeLabelsP[prefs.pref_wg_type]) {
-            list.innerHTML += '<span class="feature-tag">' + typeLabelsP[prefs.pref_wg_type] + '</span>';
+        if (prefs.pref_wg_type && typeLabels[prefs.pref_wg_type]) {
+            list.innerHTML += `<span class="feature-tag">${typeLabels[prefs.pref_wg_type]}</span>`;
             hasItems = true;
         }
 
         if (prefs.pref_smoker_ok) {
-            list.innerHTML += '<span class="feature-tag">\uD83D\uDEAC ' + tr('detail_smoking_yes') + ' ok</span>';
+            list.innerHTML += `<span class="feature-tag">\uD83D\uDEAC ${tr('detail_smoking_yes')} ok</span>`;
             hasItems = true;
         }
 
@@ -1342,7 +1469,7 @@
         }
 
         if (swapData.min_size) {
-            html += `<div class="swap-detail-row"><span class="swap-label">${tr('detail_swap_min_size')}:</span><span class="swap-value">${swapData.min_size} m\u00B2</span></div>`;
+            html += `<div class="swap-detail-row"><span class="swap-label">${tr('detail_swap_min_size')}:</span><span class="swap-value">${swapData.min_size} ${tr('detail_sqm')}</span></div>`;
         }
 
         if (swapData.max_rent) {
@@ -1381,14 +1508,14 @@
         
         if (photos && photos.length > 0) {
             wrapper.innerHTML = ''; // Remove placeholder
-            
+
             photos.forEach((p, index) => {
                 const { data } = sb.storage.from('listing-images').getPublicUrl(p.storage_path);
                 if (data) {
                     // Slide add
                     const slide = document.createElement('div');
                     slide.className = 'slide';
-                    slide.innerHTML = `<img src="${data.publicUrl}" loading="lazy">`;
+                    slide.innerHTML = `<img src="${data.publicUrl}" loading="lazy" onclick="openFullscreen(${index})" style="cursor:pointer;">`;
                     wrapper.appendChild(slide);
 
                     // Dot add
@@ -1397,19 +1524,84 @@
                     dots.appendChild(dot);
                 }
             });
+        } else {
+            // Kein Bild vorhanden - ordentlicher Placeholder
+            wrapper.innerHTML = `<div class="slide" style="background: #EBEBEB; display: flex; align-items: center; justify-content: center;">
+                <div style="text-align: center; color: #929292;">
+                    <div style="font-size: 3.5rem; margin-top: -20px;">🏠</div>
+                    <div style="font-size: 0.9rem; font-weight: 600; color: #929292; margin-top: 4px;">No Image</div>
+                </div>
+            </div>`;
         }
     }
 
+    // === FULLSCREEN IMAGE VIEWER ===
+    function openFullscreen(startIndex) {
+        var slides = document.querySelectorAll('#sliderWrapper .slide img');
+        if (!slides.length) return;
+
+        var wrapper = document.getElementById('fullscreenWrapper');
+        var dots = document.getElementById('fullscreenDots');
+        wrapper.innerHTML = '';
+        dots.innerHTML = '';
+
+        slides.forEach(function(img, i) {
+            var slide = document.createElement('div');
+            slide.className = 'fullscreen-slide';
+            slide.innerHTML = '<img src="' + img.src + '">';
+            wrapper.appendChild(slide);
+
+            var dot = document.createElement('div');
+            dot.className = 'dot' + (i === startIndex ? ' active' : '');
+            dots.appendChild(dot);
+        });
+
+        var overlay = document.getElementById('fullscreenOverlay');
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        // Zum angeklickten Bild scrollen
+        setTimeout(function() {
+            wrapper.scrollTo({ left: startIndex * wrapper.offsetWidth, behavior: 'instant' });
+        }, 10);
+
+        // Scroll-Listener fuer Dot-Update
+        wrapper.onscroll = function() {
+            var idx = Math.round(wrapper.scrollLeft / wrapper.offsetWidth);
+            var allDots = dots.querySelectorAll('.dot');
+            allDots.forEach(function(d, i) {
+                d.classList.toggle('active', i === idx);
+            });
+        };
+    }
+
+    function closeFullscreen() {
+        document.getElementById('fullscreenOverlay').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    // ESC-Taste schliesst Fullscreen
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeFullscreen();
+    });
+
     // Helpers
+    // Generischer Fallback: underscore_text → Lesbarer Text
+    function humanize(str) {
+        if (!str) return '';
+        return str.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+    }
+
     function formatRoomType(type) {
-        const map = { 'wg_room': tr('detail_room_wg'), 'entire_apartment': tr('detail_room_apartment'), 'studio': tr('detail_room_studio'), 'house': tr('detail_room_house'), 'shared_room': tr('detail_room_shared_room') };
-        return map[type] || type;
+        const map = { 'wg_room': tr('detail_room_wg'), 'entire_apartment': tr('detail_room_apartment'), 'studio': tr('detail_room_studio'), 'house': tr('detail_room_house'), 'shared_room': tr('detail_room_shared_room'), 'room': tr('detail_rooms') };
+        return map[type] || humanize(type);
     }
 
     function formatDate(dateStr) {
         if (!dateStr) return tr('detail_immediate');
         var lang = localStorage.getItem('room8_language') || 'de';
-        return new Date(dateStr).toLocaleDateString(lang === 'en' ? 'en-US' : 'de-DE');
+        var locale = lang === 'en' ? 'en-US' : 'de-DE';
+        return new Date(dateStr).toLocaleDateString(locale);
     }
 
     // Favorites Logic
@@ -1447,7 +1639,7 @@
             if (wasNotFavorited && currentListing && currentListing.owner_id && currentListing.owner_id !== currentUserId && window.NotificationHelpers) {
                 try {
                     var profileRes = await sb.from('profiles').select('username, full_name').eq('id', currentUserId).single();
-                    var faverName = profileRes.data ? (profileRes.data.full_name || profileRes.data.username || 'Jemand') : 'Jemand';
+                    var faverName = profileRes.data ? (profileRes.data.full_name || profileRes.data.username || tr('detail_user_fallback')) : tr('detail_user_fallback');
                     NotificationHelpers.notifyFavorite(currentListing.owner_id, faverName, currentListing.title, listingId);
                 } catch(e) { console.log('Notification error:', e); }
             }
@@ -1468,43 +1660,95 @@
     }
     
     // Reporting Function
-    function reportListing() {
-        if (!currentUserId) {
-            Room8UI.warning(tr('detail_report_login_required'));
-            return;
-        }
+    var selectedReportReason = null;
+    var reportReasons = [
+        { icon: '\uD83D\uDEAB', label: tr('detail_report_fraud') },
+        { icon: '\u274C', label: tr('detail_report_wrong_info') },
+        { icon: '\u2705', label: tr('detail_report_rented') },
+        { icon: '\uD83D\uDCE2', label: tr('detail_report_spam') },
+        { icon: '\uD83D\uDDBC\uFE0F', label: tr('detail_report_images') },
+        { icon: '\uD83D\uDCDD', label: tr('detail_report_other') }
+    ];
 
-        // Pruefen ob User eigenes Inserat melden will
-        if (currentListing && currentListing.owner_id === currentUserId) {
-            Room8UI.warning(tr('detail_report_cant_own'));
-            return;
-        }
+    // Report Modal aufbauen
+    (function() {
+        var container = document.getElementById('reportReasons');
+        if (!container) return;
+        reportReasons.forEach(function(r) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'report-reason-btn';
+            btn.style.cssText = 'display:flex;align-items:center;gap:0.7rem;padding:0.75rem 1rem;border:1.5px solid #e5e7eb;border-radius:10px;background:white;cursor:pointer;font-size:0.88rem;color:#374151;transition:all 0.15s;text-align:left;width:100%;';
+            btn.innerHTML = '<span style="font-size:1.1rem;">' + r.icon + '</span><span>' + r.label + '</span>';
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.report-reason-btn').forEach(function(b) {
+                    b.style.borderColor = '#e5e7eb';
+                    b.style.background = 'white';
+                });
+                btn.style.borderColor = '#EF4444';
+                btn.style.background = '#FEF2F2';
+                selectedReportReason = r.label;
+                document.getElementById('reportSubmitBtn').disabled = false;
+                document.getElementById('reportSubmitBtn').style.opacity = '1';
+            });
+            container.appendChild(btn);
+        });
 
-        // Vordefinierte Melde-Gruende
-        const reasons = [
-            tr('detail_report_fraud'),
-            tr('detail_report_wrong_info'),
-            tr('detail_report_rented'),
-            tr('detail_report_spam'),
-            tr('detail_report_images'),
-            tr('detail_report_other')
-        ];
-        const reasonList = reasons.map((r, i) => `${i + 1}. ${r}`).join('\n');
-        const choice = prompt(`${tr('detail_report_prompt')}\n\n${reasonList}\n\n${tr('detail_report_enter_number')}`);
-        if (choice) {
-            const idx = parseInt(choice) - 1;
-            const reason = (idx >= 0 && idx < reasons.length) ? reasons[idx] : choice;
+        document.getElementById('reportModalClose').addEventListener('click', closeReportModal);
+        document.getElementById('reportModal').addEventListener('click', function(e) {
+            if (e.target === document.getElementById('reportModal')) closeReportModal();
+        });
+
+        document.getElementById('reportSubmitBtn').addEventListener('click', function() {
+            if (!selectedReportReason || !currentUserId) return;
+            var btn = document.getElementById('reportSubmitBtn');
+            btn.disabled = true;
+            btn.textContent = tr('detail_report_sending');
+            var desc = document.getElementById('reportDescription').value.trim();
+            var reason = selectedReportReason + (desc ? ' - ' + desc : '');
             sb.from('reports').insert({
                 reporter_id: currentUserId,
                 reported_type: 'listing',
                 reported_id: listingId,
                 reason: reason,
                 status: 'open'
-            }).then(({ error }) => {
-                if (error) Room8UI.error(tr('detail_report_sent_error'));
-                else Room8UI.success(tr('detail_report_sent_success'));
+            }).then(function(result) {
+                if (result.error) {
+                    Room8UI.error(tr('detail_report_sent_error'));
+                    btn.disabled = false;
+                    btn.textContent = tr('detail_report_submit');
+                } else {
+                    Room8UI.success(tr('detail_report_sent_success'));
+                    closeReportModal();
+                }
             });
+        });
+    })();
+
+    function closeReportModal() {
+        document.getElementById('reportModal').style.display = 'none';
+        selectedReportReason = null;
+        document.getElementById('reportDescription').value = '';
+        document.querySelectorAll('.report-reason-btn').forEach(function(b) {
+            b.style.borderColor = '#e5e7eb';
+            b.style.background = 'white';
+        });
+        var btn = document.getElementById('reportSubmitBtn');
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.textContent = tr('detail_report_submit');
+    }
+
+    function reportListing() {
+        if (!currentUserId) {
+            Room8UI.warning(tr('detail_report_login_required'));
+            return;
         }
+        if (currentListing && currentListing.owner_id === currentUserId) {
+            Room8UI.warning(tr('detail_report_cant_own'));
+            return;
+        }
+        document.getElementById('reportModal').style.display = 'flex';
     }
 
     // Init

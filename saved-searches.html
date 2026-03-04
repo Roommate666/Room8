@@ -88,9 +88,9 @@
         .fab {
             position: fixed; bottom: 90px; right: 20px;
             width: 56px; height: 56px;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            background: #1A1A2E;
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             cursor: pointer; z-index: 100; color: white; font-size: 1.5rem; border: none;
         }
 
@@ -271,12 +271,15 @@
             </div>
 
             <button type="submit" class="submit-btn" id="saveBtn">Alarm speichern</button>
+            <div style="height: calc(120px + env(safe-area-inset-bottom, 20px));"></div>
         </form>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script src="cities.js"></script>
 <script src="navigation.js"></script>
@@ -478,7 +481,7 @@
 
         } catch (err) {
             console.error('Fehler beim Speichern:', err);
-            Room8UI.error("Suchauftrag konnte nicht gespeichert werden. Bitte versuche es erneut.");
+            Room8UI.error("Fehler: " + (err.message || 'Unbekannter Fehler'));
         } finally {
             btn.disabled = false;
             btn.textContent = 'Alarm speichern';

@@ -112,7 +112,7 @@ public class Room8MessagingService extends FirebaseMessagingService {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            .setColor(0xFF6366F1)
+            .setColor(0xFFE8604C)
             .setDefaults(NotificationCompat.DEFAULT_SOUND | NotificationCompat.DEFAULT_VIBRATE);
 
         // Badge-Count auf Notification setzen

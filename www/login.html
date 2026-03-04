@@ -10,38 +10,75 @@
       padding-bottom: 0;
     }
 
+    /* Pattern: Magic UI BlurFade */
+    @keyframes blurFadeIn {
+      from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+      to { opacity: 1; filter: blur(0px); transform: translateY(0); }
+    }
+
+    /* Animated Mesh Gradient Background */
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .app-content::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(-45deg, #EFF6FF, #DBEAFE, #F0F9FF, #E0F2FE, #EFF6FF);
+      background-size: 400% 400%;
+      animation: gradientShift 12s ease infinite;
+      z-index: -1;
+    }
+
     .login-header {
       text-align: center;
       margin-bottom: 2rem;
       margin-top: 1rem;
+      animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
     }
 
     .login-logo {
-      width: 60px;
-      height: 60px;
+      width: 64px;
+      height: 64px;
       margin: 0 auto 1rem;
-      background: var(--gradient-primary);
-      border-radius: 16px;
+      background: linear-gradient(135deg, #3B82F6, #2563EB);
+      border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Pattern: Magic UI ShineBorder - dezenter Glanz auf dem Logo */
+    .login-logo::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(255,255,255,0.3), transparent 50%, rgba(255,255,255,0.1));
+      pointer-events: none;
     }
 
     .login-logo svg {
       width: 30px;
       height: 30px;
       color: white;
+      position: relative;
+      z-index: 1;
     }
 
     .login-header h1 {
       font-size: 1.6rem;
-      font-weight: 700;
+      font-weight: 800;
       margin-bottom: 0.5rem;
-      background: var(--gradient-primary);
+      background: linear-gradient(135deg, #3B82F6, #2563EB);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      letter-spacing: -0.02em;
     }
 
     .login-header p {
@@ -49,12 +86,65 @@
       font-size: 0.95rem;
     }
 
+    /* Form-Felder verschoenern */
+    #loginForm {
+      animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+    }
+
+    #loginForm .form-group input {
+      border-radius: 14px;
+      padding: 0.9rem 1rem;
+      border: 1.5px solid #E5E7EB;
+      font-size: 0.95rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #FAFAFA;
+    }
+    #loginForm .form-group input:focus {
+      border-color: #3B82F6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
+      background: #fff;
+    }
+    #loginForm .form-group label {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #374151;
+      margin-bottom: 0.4rem;
+    }
+
+    /* Submit-Button - Pattern: Magic UI ShimmerButton */
+    #loginForm .submit-btn {
+      border-radius: 999px;
+      padding: 0.95rem 1.5rem;
+      font-weight: 700;
+      font-size: 1rem;
+      background: linear-gradient(135deg, #3B82F6, #2563EB);
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.35);
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    #loginForm .submit-btn::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%; width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      animation: shimmerSlide 3s ease-in-out infinite;
+    }
+    @keyframes shimmerSlide {
+      0%, 100% { left: -100%; }
+      50% { left: 100%; }
+    }
+    #loginForm .submit-btn:active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 12px rgba(59, 130, 246, 0.3);
+    }
+
     .forgot-password-link {
       display: block;
       text-align: right;
       margin-top: 0.5rem;
       font-size: 0.85rem;
-      color: var(--primary-color);
+      color: #3B82F6;
       text-decoration: none;
       font-weight: 600;
       transition: opacity 0.2s;
@@ -70,14 +160,17 @@
       padding: 1.5rem;
       font-size: 0.9rem;
       color: var(--text-light);
-      background: var(--glass-bg);
-      backdrop-filter: blur(10px);
-      border-radius: var(--border-radius);
-      border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.6);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+      animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
     }
 
     .register-hint a {
-      color: var(--primary-color);
+      color: #3B82F6;
       font-weight: 700;
       text-decoration: none;
     }
@@ -86,6 +179,10 @@
       text-decoration: underline;
     }
 
+    @media (prefers-reduced-motion: reduce) {
+      .login-header, #loginForm, .register-hint { animation: none; opacity: 1; }
+      #loginForm .submit-btn::after { animation: none; }
+    }
   </style>
 </head>
 <body>
@@ -135,8 +232,9 @@
     <footer class="app-footer-nav" id="app-footer-nav"></footer>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+  <script src="lib/supabase.min.js"></script>
   <script src="config.js"></script>
+<script src="session-cache.js"></script>
   <script src="room8-ui.js"></script>
   <script>
     // Supabase Client - Direkte Initialisierung
@@ -170,10 +268,9 @@
         })
         .catch(function(err) {
           console.error("Login Error:", err);
-          var msg = 'Login fehlgeschlagen. Bitte versuche es erneut.';
-          if (err.message === 'Invalid login credentials') msg = 'Falsches Passwort oder E-Mail.';
-          else if (err.message === 'Email not confirmed') msg = 'Bitte bestätige zuerst deine E-Mail-Adresse.';
-          Room8UI.error(msg);
+          var msg = err.message;
+          if (msg === 'Invalid login credentials') msg = 'Falsches Passwort oder E-Mail.';
+          Room8UI.error('Login fehlgeschlagen: ' + msg);
           
           loginBtn.disabled = false;
           loginBtn.textContent = originalText;

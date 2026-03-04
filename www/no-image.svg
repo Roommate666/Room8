@@ -1,18 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
   <rect width="400" height="300" rx="8" fill="#F3F4F6"/>
-  <g transform="translate(155, 55)">
-    <!-- Dach / Roof - klar nach oben zeigend -->
-    <path d="M45 20 L5 55 L85 55 Z" stroke="#9CA3AF" stroke-width="3" fill="#E5E7EB" stroke-linejoin="round"/>
-    <!-- Haus-Koerper -->
-    <rect x="12" y="55" width="66" height="50" rx="3" stroke="#9CA3AF" stroke-width="3" fill="none"/>
-    <!-- Tuer -->
-    <rect x="34" y="75" width="22" height="30" rx="2" stroke="#9CA3AF" stroke-width="2.5" fill="none"/>
-    <!-- Tuerknauf -->
-    <circle cx="52" cy="91" r="2" fill="#9CA3AF"/>
-    <!-- Fenster links -->
-    <rect x="18" y="63" width="12" height="12" rx="1.5" stroke="#9CA3AF" stroke-width="2" fill="none"/>
-    <!-- Fenster rechts -->
-    <rect x="60" y="63" width="12" height="12" rx="1.5" stroke="#9CA3AF" stroke-width="2" fill="none"/>
+  <g transform="translate(150, 70)">
+    <rect x="10" y="40" width="80" height="55" rx="4" stroke="#9CA3AF" stroke-width="3" fill="none"/>
+    <path d="M15 48 L50 25 L85 48" stroke="#9CA3AF" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="40" y="65" width="20" height="30" rx="2" stroke="#9CA3AF" stroke-width="2.5" fill="none"/>
+    <circle cx="30" cy="60" r="5" stroke="#9CA3AF" stroke-width="2" fill="none"/>
   </g>
   <text x="200" y="200" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="500" fill="#9CA3AF">Kein Bild vorhanden</text>
 </svg>

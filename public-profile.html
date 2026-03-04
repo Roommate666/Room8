@@ -22,8 +22,8 @@
             width: 90px;
             height: 90px;
             border-radius: 50%;
-            background: #EEF2FF;
-            color: var(--primary-color);
+            background: #F2F2F0;
+            color: #3B82F6;
             font-size: 2.5rem;
             font-weight: 700;
             display: flex;
@@ -119,7 +119,7 @@
             font-size: 1rem;
             cursor: pointer;
             text-decoration: none;
-            display: inline-flex !important;
+            display: inline-flex;
             align-items: center;
             gap: 0.5rem;
             box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
@@ -286,6 +286,18 @@
         .review-date { font-size: 0.8rem; color: var(--text-muted); }
         .review-stars { color: #F59E0B; font-size: 0.9rem; }
         .review-text { font-size: 0.9rem; color: #4B5563; line-height: 1.4; margin: 0; }
+        .delete-review-btn {
+            background: none;
+            border: none;
+            color: #EF4444;
+            font-size: 0.8rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+        .delete-review-btn:hover { background: #FEE2E2; }
 
         .empty-state {
             text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 2rem;
@@ -293,6 +305,15 @@
     </style>
 </head>
 <body>
+
+<!-- Blocked User Overlay -->
+<div id="blockedOverlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:#f9fafb; z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:2rem; text-align:center;">
+    <div style="font-size:3rem; margin-bottom:1rem;">🚫</div>
+    <h2 style="font-size:1.3rem; color:#1f2937; margin-bottom:0.5rem;">Nutzer blockiert</h2>
+    <p style="color:#6b7280; font-size:0.95rem; line-height:1.5; margin-bottom:1.5rem;">Du hast diesen Nutzer blockiert und kannst sein Profil nicht sehen.</p>
+    <button onclick="history.back()" style="display:inline-block; background:linear-gradient(135deg,#3b82f6,#2563eb); color:white; padding:0.85rem 2rem; border-radius:12px; border:none; font-weight:600; font-size:0.95rem; cursor:pointer; margin-bottom:0.75rem; width:200px;">Zurück</button>
+    <button id="unblockFromOverlay" style="display:inline-block; background:white; color:#059669; padding:0.85rem 2rem; border-radius:12px; border:2px solid #6EE7B7; font-weight:600; font-size:0.95rem; cursor:pointer; width:200px;">Entsperren</button>
+</div>
 
 <div class="app-container">
     <header class="app-header">
@@ -395,8 +416,10 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script src="room8-utils.js"></script>
@@ -449,6 +472,22 @@
             document.getElementById('reportBtn').style.display = 'none';
             document.getElementById('blockBtn').style.display = 'none';
             document.getElementById('reviewBtn').style.display = 'none';
+        }
+
+        // Block-Check: Ist dieser Nutzer blockiert?
+        if (currentUser && currentUser.id !== userId && window.Room8) {
+            var isBlocked = await Room8.isUserBlocked(userId);
+            if (isBlocked) {
+                document.querySelector('.app-container').style.display = 'none';
+                document.getElementById('blockedOverlay').style.display = 'flex';
+                // Entsperren-Button
+                document.getElementById('unblockFromOverlay').addEventListener('click', async function() {
+                    await sb.from('blocked_users').delete().eq('blocker_id', currentUser.id).eq('blocked_id', userId);
+                    if (window.Room8) Room8.clearBlockedUsersCache();
+                    location.reload();
+                });
+                return;
+            }
         }
 
         loadUserProfile();
@@ -607,7 +646,7 @@
                         .eq('blocked_id', userId);
 
                     if (error) {
-                        Room8UI.error('Entsperren fehlgeschlagen. Bitte versuche es erneut.');
+                        Room8UI.error('Fehler beim Entsperren: ' + error.message);
                         return;
                     }
 
@@ -631,7 +670,7 @@
                         if (error.code === '23505') {
                             Room8UI.warning('Nutzer ist bereits blockiert.');
                         } else {
-                            Room8UI.error('Blockieren fehlgeschlagen. Bitte versuche es erneut.');
+                            Room8UI.error('Fehler beim Blockieren: ' + error.message);
                         }
                         return;
                     }
@@ -675,21 +714,29 @@
 
         container.innerHTML = '';
         listings.forEach(l => {
-            let imgUrl = 'no-image.svg';
+            let imgUrl = null;
             if (l.listing_photos && l.listing_photos.length > 0) {
                 const { data } = sb.storage.from('listing-images').getPublicUrl(l.listing_photos[0].storage_path);
                 if (data) imgUrl = data.publicUrl;
             }
 
             const price = l.type === 'wohnung' ? (l.monthly_rent ? l.monthly_rent + ' €' : 'VB') : (l.price ? l.price + ' €' : 'VB');
+            const placeholderIcon = l.type === 'wohnung' ? '🏠' : '📦';
+            const placeholderLabel = l.type === 'wohnung' ? 'Wohnung' : 'Gegenstand';
 
-            // Verwende onclick statt href für Sicherheit in Vorschau
+            let imageHtml;
+            if (imgUrl) {
+                imageHtml = `<img src="${imgUrl}" class="mini-card-img" onerror="this.outerHTML='<div class=\\'mini-card-img\\' style=\\'display:flex;align-items:center;justify-content:center;background:#EBEBEB;\\'><div style=\\'text-align:center;color:#929292;\\'><div style=\\'font-size:1.5rem;\\'>${placeholderIcon}</div><div style=\\'font-size:0.6rem;font-weight:600;color:#929292;\\'>${placeholderLabel}</div></div></div>'">`;
+            } else {
+                imageHtml = `<div class="mini-card-img" style="display:flex;align-items:center;justify-content:center;background:#EBEBEB;"><div style="text-align:center;color:#929292;"><div style="font-size:1.5rem;">${placeholderIcon}</div><div style="font-size:0.6rem;font-weight:600;color:#929292;">${placeholderLabel}</div></div></div>`;
+            }
+
             const item = document.createElement('div');
             item.className = 'mini-card';
             item.onclick = () => navigateTo(`listing-details.html?id=${l.id}`);
             item.style.cursor = 'pointer';
             item.innerHTML = `
-                <img src="${imgUrl}" class="mini-card-img">
+                ${imageHtml}
                 <div class="mini-card-body">
                     <h4 class="mini-card-title">${l.title}</h4>
                     <div class="mini-card-price">${price}</div>
@@ -702,7 +749,7 @@
     async function loadUserReviews() {
         const { data: reviews } = await sb
             .from('reviews')
-            .select('rating, comment, created_at, reviewer:reviewer_id(username)')
+            .select('id, rating, comment, created_at, reviewer_id, reviewer:reviewer_id(username)')
             .eq('reviewee_id', userId)
             .order('created_at', { ascending: false });
 
@@ -724,6 +771,8 @@
             document.getElementById('ratingScore').textContent = avgRating.toFixed(1);
             document.getElementById('ratingCount').textContent = `(${reviews.length} Bewertung${reviews.length > 1 ? 'en' : ''})`;
             document.getElementById('ratingDisplay').style.display = 'flex';
+        } else {
+            document.getElementById('ratingDisplay').style.display = 'none';
         }
 
         if (!reviews || reviews.length === 0) {
@@ -736,18 +785,36 @@
             const stars = '⭐'.repeat(r.rating);
             const date = new Date(r.created_at).toLocaleDateString();
             const reviewerName = r.reviewer ? r.reviewer.username : 'Anonym';
+            const isOwnReview = currentUser && currentUser.id === r.reviewer_id;
 
             container.innerHTML += `
-                <div class="review-item">
+                <div class="review-item" id="review-${r.id}">
                     <div class="review-header">
                         <span class="review-author">${escapeHtml(reviewerName)}</span>
                         <span class="review-date">${date}</span>
                     </div>
                     <div class="review-stars">${stars}</div>
                     <p class="review-text">${escapeHtml(r.comment || '')}</p>
+                    ${isOwnReview ? `<button class="delete-review-btn" onclick="deleteReview('${r.id}')">Bewertung löschen</button>` : ''}
                 </div>
             `;
         });
+    }
+
+    async function deleteReview(reviewId) {
+        if (!confirm('Bewertung wirklich löschen?')) return;
+
+        var el = document.getElementById('review-' + reviewId);
+        if (el) el.style.opacity = '0.5';
+
+        try {
+            var { error } = await sb.from('reviews').delete().eq('id', reviewId);
+            if (error) throw error;
+            loadUserReviews();
+        } catch (err) {
+            if (window.Room8UI) Room8UI.error('Fehler: ' + err.message);
+            if (el) el.style.opacity = '1';
+        }
     }
 
     // Init

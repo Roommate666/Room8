@@ -6,60 +6,18 @@
 (function() {
     'use strict';
 
-    var BELL_SUPABASE_URL = null;
-    var BELL_SUPABASE_KEY = null;
-    var bellSupabase = null;
+    // Push-Logic auf allen Seiten automatisch laden
+    if (!document.querySelector('script[src="push-logic.js"]')) {
+        var pushScript = document.createElement('script');
+        pushScript.src = 'push-logic.js';
+        document.head.appendChild(pushScript);
+    }
+
     var bellInitialized = false;
-    var bellRetryCount = 0;
-    var MAX_RETRIES = 10;
 
-    // Hole Config-Werte
-    function getConfig() {
-        if (typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined') {
-            BELL_SUPABASE_URL = SUPABASE_URL;
-            BELL_SUPABASE_KEY = SUPABASE_ANON_KEY;
-            return true;
-        }
-        if (typeof window.SUPABASE_URL !== 'undefined' && typeof window.SUPABASE_ANON_KEY !== 'undefined') {
-            BELL_SUPABASE_URL = window.SUPABASE_URL;
-            BELL_SUPABASE_KEY = window.SUPABASE_ANON_KEY;
-            return true;
-        }
-        return false;
-    }
-
-    // Erstelle Supabase Client
-    function createSupabaseClient() {
-        if (bellSupabase) return bellSupabase;
-
-        if (!getConfig()) {
-            return null;
-        }
-
-        if (window.supabase && window.supabase.createClient) {
-            bellSupabase = window.supabase.createClient(BELL_SUPABASE_URL, BELL_SUPABASE_KEY);
-            return bellSupabase;
-        }
-
-        return null;
-    }
-
-    // Lade Supabase Library dynamisch falls noetig
-    function ensureSupabaseLoaded(callback) {
-        if (window.supabase && window.supabase.createClient) {
-            callback();
-            return;
-        }
-
-        var script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14';
-        script.onload = function() {
-            setTimeout(callback, 100);
-        };
-        script.onerror = function() {
-            console.log('NotificationBell: Could not load supabase');
-        };
-        document.head.appendChild(script);
+    // Nutze globalen Supabase Client aus config.js
+    function getClient() {
+        return window.sb || null;
     }
 
     // Inject CSS Styles - EINHEITLICH
@@ -173,7 +131,7 @@
     function needsOverlayStyle() {
         var path = window.location.pathname;
         var filename = path.substring(path.lastIndexOf('/') + 1);
-        var overlayPages = ['listing-details.html', 'job-detail.html', 'coupon-detail.html'];
+        var overlayPages = ['listing-details.html', 'detail.html', 'job-detail.html', 'coupon-detail.html'];
         return overlayPages.indexOf(filename) !== -1;
     }
 
@@ -221,32 +179,20 @@
         return true;
     }
 
-    // Native App Badge aktualisieren (Capacitor BadgePlugin)
-    function updateNativeBadge(count) {
-        try {
-            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Badge) {
-                if (count > 0) {
-                    window.Capacitor.Plugins.Badge.setBadge({ count: count });
-                } else {
-                    window.Capacitor.Plugins.Badge.clearBadge();
-                }
-            }
-        } catch (e) {
-            // Kein nativer Badge-Support (z.B. im Browser)
-        }
-    }
-
     // Lade ungelesene Anzahl
     function loadUnreadCount(callback) {
-        var sb = createSupabaseClient();
+        var sb = getClient();
         if (!sb) {
             callback(0);
             return;
         }
 
-        sb.auth.getUser()
-            .then(function(response) {
-                var user = response.data ? response.data.user : null;
+        var userPromise = window.SessionCache
+            ? window.SessionCache.getUser()
+            : sb.auth.getUser().then(function(r) { return r.data ? r.data.user : null; });
+
+        Promise.resolve(userPromise)
+            .then(function(user) {
                 if (!user) {
                     callback(0);
                     return;
@@ -261,8 +207,6 @@
                         if (!result.error && result.count !== undefined) {
                             count = result.count;
                         }
-                        // Native App Badge aktualisieren (MIUI/Xiaomi)
-                        updateNativeBadge(count);
                         callback(count);
                     })
                     .catch(function() {
@@ -306,13 +250,9 @@
         }
 
         // Lade dann den Count
-        if (getConfig()) {
-            ensureSupabaseLoaded(function() {
-                loadUnreadCount(function(count) {
-                    renderBell(count);
-                });
-            });
-        }
+        loadUnreadCount(function(count) {
+            renderBell(count);
+        });
     }
 
     // Starte wenn DOM ready
@@ -328,149 +268,103 @@
     setTimeout(initBell, 500);
     setTimeout(initBell, 1500);
 
-    // In-App Toast bei neuer Benachrichtigung
-    function showInAppToast(title, message) {
-        // Toast CSS injizieren
-        if (!document.getElementById('toast-notification-style')) {
-            var toastCSS = document.createElement('style');
-            toastCSS.id = 'toast-notification-style';
-            toastCSS.textContent = [
-                '.room8-toast {',
-                '    position: fixed;',
-                '    top: calc(60px + env(safe-area-inset-top, 0px));',
-                '    left: 16px;',
-                '    right: 16px;',
-                '    background: white;',
-                '    border-radius: 12px;',
-                '    box-shadow: 0 8px 32px rgba(0,0,0,0.18);',
-                '    padding: 12px 16px;',
-                '    display: flex;',
-                '    align-items: center;',
-                '    gap: 12px;',
-                '    z-index: 99999;',
-                '    transform: translateY(-120%);',
-                '    transition: transform 0.3s ease;',
-                '    border-left: 4px solid #6366F1;',
-                '    cursor: pointer;',
-                '}',
-                '.room8-toast.show { transform: translateY(0); }',
-                '.room8-toast-icon { font-size: 1.5rem; flex-shrink: 0; }',
-                '.room8-toast-content { flex: 1; min-width: 0; }',
-                '.room8-toast-title { font-weight: 700; font-size: 0.85rem; margin: 0; color: #1F2937; }',
-                '.room8-toast-msg { font-size: 0.8rem; color: #6B7280; margin: 2px 0 0; ',
-                '    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }',
-                '.room8-toast-close { background: none; border: none; font-size: 1.2rem; color: #9CA3AF; cursor: pointer; padding: 4px; }'
-            ].join('\n');
-            document.head.appendChild(toastCSS);
-        }
-
-        // Alten Toast entfernen
-        var old = document.querySelector('.room8-toast');
-        if (old) old.remove();
-
-        var toast = document.createElement('div');
-        toast.className = 'room8-toast';
-        toast.innerHTML =
-            '<span class="room8-toast-icon">🔔</span>' +
-            '<div class="room8-toast-content">' +
-                '<p class="room8-toast-title">' + (title || 'Room8') + '</p>' +
-                '<p class="room8-toast-msg">' + (message && message.indexOf('[IMG]') !== -1 ? (message.replace(/\[IMG\].*?\[\/IMG\]\n?/, '').trim() || 'Bild') : (message || '')) + '</p>' +
-            '</div>' +
-            '<button class="room8-toast-close">&times;</button>';
-
-        toast.addEventListener('click', function() {
-            window.location.href = 'notifications.html';
-        });
-        toast.querySelector('.room8-toast-close').addEventListener('click', function(e) {
-            e.stopPropagation();
-            toast.classList.remove('show');
-            setTimeout(function() { toast.remove(); }, 300);
-        });
-
-        document.body.appendChild(toast);
-        setTimeout(function() { toast.classList.add('show'); }, 50);
-        setTimeout(function() {
-            if (toast.parentNode) {
-                toast.classList.remove('show');
-                setTimeout(function() { toast.remove(); }, 300);
-            }
-        }, 5000);
-    }
-
-    // Realtime Subscription fuer Live-Updates
-    var realtimeSubscribed = false;
+    // Realtime subscription für Notification-Änderungen
     function subscribeToNotifications() {
-        if (realtimeSubscribed) return;
-        var sb = createSupabaseClient();
+        var sb = getClient();
         if (!sb) return;
 
-        sb.auth.getUser().then(function(response) {
-            var user = response.data ? response.data.user : null;
+        var userPromise = window.SessionCache
+            ? window.SessionCache.getUser()
+            : sb.auth.getUser().then(function(r) { return r.data ? r.data.user : null; });
+
+        Promise.resolve(userPromise).then(function(user) {
             if (!user) return;
 
-            realtimeSubscribed = true;
-            sb.channel('bell-notifications')
+            var currentUserId = user.id;
+
+            // Subscribe OHNE Filter (robuster) - filtern im Callback
+            sb.channel('notification-bell-rt-' + currentUserId)
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'notifications'
+                }, function(payload) {
+                    // Nur eigene Notifications beachten
+                    var row = payload.new || payload.old || {};
+                    if (row.user_id && row.user_id !== currentUserId) return;
+
+                    console.log('Realtime: Notification geändert', payload.eventType);
+                    // Badge neu laden
+                    loadUnreadCount(function(count) {
+                        renderBell(count);
+                        if (window.updateAppBadge) window.updateAppBadge();
+                        if (window.updateChatBadge) window.updateChatBadge();
+                    });
+                })
+                .subscribe(function(status) {
+                    console.log('Realtime notifications subscription:', status);
+                });
+
+            // Auch messages-Tabelle subscriben für sofortige Updates
+            sb.channel('messages-bell-rt-' + currentUserId)
                 .on('postgres_changes', {
                     event: 'INSERT',
                     schema: 'public',
-                    table: 'notifications',
-                    filter: 'user_id=eq.' + user.id
+                    table: 'messages'
                 }, function(payload) {
-                    // Neue Benachrichtigung - Badge aktualisieren
-                    loadUnreadCount(function(count) {
-                        renderBell(count);
-                    });
-                    // Nav-Badge auch aktualisieren
-                    if (window.updateNavChatBadge) window.updateNavChatBadge();
-                    // In-App Toast anzeigen
-                    if (payload.new) {
-                        showInAppToast(payload.new.title, payload.new.message);
+                    if (payload.new && payload.new.receiver_id === currentUserId) {
+                        console.log('Realtime: Neue Nachricht erhalten');
+                        // Kurz warten bis die Notification in DB erstellt wurde
+                        setTimeout(function() {
+                            loadUnreadCount(function(count) {
+                                renderBell(count);
+                                if (window.updateAppBadge) window.updateAppBadge();
+                                if (window.updateChatBadge) window.updateChatBadge();
+                            });
+                        }, 1000);
                     }
                 })
-                .on('postgres_changes', {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'notifications',
-                    filter: 'user_id=eq.' + user.id
-                }, function() {
-                    // Notification gelesen - Badge aktualisieren
-                    loadUnreadCount(function(count) {
-                        renderBell(count);
-                    });
-                    // Nav-Badge auch aktualisieren
-                    if (window.updateNavChatBadge) window.updateNavChatBadge();
-                })
-                .subscribe();
+                .subscribe(function(status) {
+                    console.log('Realtime messages subscription:', status);
+                });
+        }).catch(function(e) {
+            console.log('Realtime subscribe error:', e);
         });
     }
 
+    // Starte Realtime nach Init
+    setTimeout(subscribeToNotifications, 2000);
+
+    // Alle Badges refreshen
+    function refreshAllBadges() {
+        if (!bellInitialized) return;
+        loadUnreadCount(function(count) {
+            renderBell(count);
+            if (window.updateAppBadge) window.updateAppBadge();
+            if (window.updateChatBadge) window.updateChatBadge();
+        });
+    }
+
+    // Refresh wenn Seite wieder sichtbar wird (z.B. zurück vom Chat)
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            refreshAllBadges();
+        }
+    });
+
+    // Auch bei pageshow (für Safari iOS back/forward cache)
+    window.addEventListener('pageshow', function() {
+        refreshAllBadges();
+    });
+
+    // POLLING FALLBACK: Alle 15 Sekunden Badges aktualisieren
+    // Falls Supabase Realtime nicht aktiviert ist, funktioniert das trotzdem
+    setInterval(refreshAllBadges, 15000);
+
     // Expose refresh Funktion
     window.NotificationBell = {
-        refresh: function() {
-            loadUnreadCount(function(count) {
-                renderBell(count);
-            });
-        },
-        init: initBell,
-        showToast: showInAppToast
+        refresh: refreshAllBadges,
+        init: initBell
     };
-
-    // Starte Realtime nach Init
-    setTimeout(function() {
-        if (shouldShowBell()) {
-            ensureSupabaseLoaded(function() {
-                subscribeToNotifications();
-            });
-        }
-    }, 2000);
-
-    // Polling-Fallback alle 30 Sekunden (falls Realtime nicht funktioniert)
-    setInterval(function() {
-        if (shouldShowBell() && bellInitialized) {
-            loadUnreadCount(function(count) {
-                renderBell(count);
-            });
-        }
-    }, 30000);
 
 })();

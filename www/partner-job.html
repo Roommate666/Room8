@@ -6,8 +6,13 @@
     <title>Job einreichen - Room8 Partner</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
             min-height: 100vh;
         }
         .partner-container {
@@ -20,10 +25,13 @@
             text-align: center;
             color: white;
             padding: 2rem 1rem;
+            animation: blurFadeIn 0.5s ease-out both;
         }
         .partner-header h1 {
             font-size: 1.8rem;
             margin: 0 0 0.5rem 0;
+            font-weight: 800;
+            letter-spacing: -0.02em;
         }
         .partner-header p {
             opacity: 0.9;
@@ -33,11 +41,14 @@
             font-size: 3rem;
             margin-bottom: 1rem;
         }
+        /* Glasmorphismus Card */
         .form-card {
-            background: white;
-            border-radius: 20px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
             padding: 2rem;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(255,255,255,0.3);
+            animation: blurFadeIn 0.5s 0.15s ease-out both;
         }
         .section-title {
             font-size: 1.1rem;
@@ -74,8 +85,8 @@
         }
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
         .form-group textarea {
             min-height: 100px;
@@ -98,10 +109,10 @@
         .submit-btn {
             width: 100%;
             padding: 1rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
             color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 999px;
             font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
@@ -110,7 +121,7 @@
         }
         .submit-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 20px rgba(59, 130, 246, 0.4);
         }
         .submit-btn:disabled {
             opacity: 0.6;
@@ -134,13 +145,17 @@
             color: #6B7280;
         }
         .info-box {
-            background: #F0F9FF;
-            border: 1px solid #BAE6FD;
-            border-radius: 10px;
+            background: rgba(240,249,255,0.88);
+            border: 1px solid rgba(186,230,253,0.6);
+            border-radius: 14px;
             padding: 1rem;
             margin-bottom: 1.5rem;
             font-size: 0.9rem;
             color: #0369A1;
+        }
+        /* Barrierefreiheit */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
     </style>
 </head>
@@ -287,8 +302,11 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
+<script src="room8-ui.js"></script>
 <script>
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -328,7 +346,7 @@
 
         } catch (err) {
             console.error(err);
-            Room8UI.error('Einreichung fehlgeschlagen. Bitte versuche es erneut.');
+            Room8UI.error('Fehler beim Einreichen: ' + err.message);
             btn.disabled = false;
             btn.textContent = '📤 Job einreichen';
         }

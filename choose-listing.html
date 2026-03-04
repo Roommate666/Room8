@@ -54,7 +54,7 @@
         }
 
         /* Theme Variants */
-        .theme-housing .icon-box { background: #EEF2FF; } /* Blau */
+        .theme-housing .icon-box { background: #F2F2F0; } /* Blau */
         .theme-market .icon-box { background: #ECFDF5; }  /* Grün */
 
         .content h3 {
@@ -180,9 +180,11 @@
 </div>
 
 <!-- Lade-Reihenfolge ist entscheidend! -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <!-- Erst config.js laden, da hier die URL und KEY definiert sind -->
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
 

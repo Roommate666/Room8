@@ -5,36 +5,45 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Benachrichtigungen - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .settings-container { max-width: 800px; margin: 0 auto; padding: 1rem; padding-bottom: 6rem; }
-        
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
+
+        .settings-container { max-width: 800px; margin: 0 auto; padding: 1rem; padding-bottom: 6rem; animation: blurFadeIn 0.5s ease-out both; }
+
         /* Header */
         .settings-header { text-align: center; margin-bottom: 2rem; }
-        .settings-header h1 { margin: 0 0 0.5rem 0; font-size: 1.5rem; color: var(--text-main); }
+        .settings-header h1 { margin: 0 0 0.5rem 0; font-size: 1.5rem; color: var(--text-main); font-weight: 800; letter-spacing: -0.02em; }
         .settings-header p { color: var(--text-muted); font-size: 0.9rem; margin: 0; }
 
-        /* Master Switch Card */
+        /* Master Switch Card - Glasmorphismus */
         .master-card {
-            background: #EFF6FF;
-            border: 2px solid var(--primary-color);
-            border-radius: 16px;
+            background: rgba(239,246,255,0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(59,130,246,0.15);
+            border-radius: 18px;
             padding: 1.5rem;
             margin-bottom: 2rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1), inset 0 1px 0 rgba(255,255,255,0.6);
         }
-        .master-info h3 { margin: 0 0 0.25rem 0; color: var(--primary-color); font-size: 1.1rem; }
+        .master-info h3 { margin: 0 0 0.25rem 0; color: var(--primary-color); font-size: 1.1rem; font-weight: 800; }
         .master-info p { margin: 0; font-size: 0.85rem; color: #1E40AF; }
 
-        /* Section Styling */
+        /* Section Styling - Glasmorphismus */
         .settings-section {
-            background: white;
-            border-radius: 16px;
-            padding: 0; /* Padding inside items */
+            background: rgba(255,255,255,0.92);
+            border-radius: 18px;
+            padding: 0;
             margin-bottom: 1.5rem;
-            border: 1px solid var(--border-color);
+            border: 1px solid rgba(0,0,0,0.04);
             overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
         }
         
         .section-header {
@@ -68,22 +77,69 @@
         input:checked + .toggle-slider { background-color: var(--primary-color); }
         input:checked + .toggle-slider:before { transform: translateX(22px); }
 
-        /* Save Button */
-        .save-bar {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: white; padding: 1rem; border-top: 1px solid var(--border-color);
-            display: flex; justify-content: center; z-index: 100;
-            padding-bottom: max(1rem, env(safe-area-inset-bottom));
-        }
+        /* Save Button - Pill */
         .save-btn {
-            width: 100%; max-width: 600px;
             padding: 1rem;
             background: var(--primary-gradient);
-            color: white; border: none; border-radius: 12px;
+            color: white; border: none; border-radius: 999px;
             font-size: 1rem; font-weight: 700; cursor: pointer;
             box-shadow: var(--shadow-glow);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
+        .save-btn:active { transform: scale(0.97); }
         .save-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        /* City Input */
+        .city-input-wrap {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .city-input-wrap label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 0.4rem;
+        }
+        .city-input-wrap input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #E5E7EB;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            background: #F9FAFB;
+        }
+        .city-input-wrap input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: white;
+        }
+        .city-suggestions {
+            list-style: none;
+            padding: 0;
+            margin: 0.25rem 0 0;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #E5E7EB;
+            border-radius: 10px;
+            display: none;
+            background: white;
+        }
+        .city-suggestions.show { display: block; }
+        .city-suggestions li {
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .city-suggestions li:hover, .city-suggestions li.active {
+            background: #EFF6FF;
+            color: var(--primary-color);
+        }
+
+        /* Barrierefreiheit */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
     </style>
 </head>
 <body>
@@ -159,22 +215,19 @@
                     </label>
                 </div>
 
-                <div class="setting-item">
-                    <div class="setting-text">
-                        <h4>Interesse</h4>
-                        <p>Wenn jemand Interesse bekundet</p>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="interest" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
             </div>
 
             <!-- 4. Neuigkeiten & Stadt -->
             <div class="settings-section">
                 <div class="section-header">📍 Neu in deiner Stadt</div>
-                
+
+                <div class="city-input-wrap">
+                    <label for="notification_city">Deine Stadt</label>
+                    <input type="text" id="notification_city" placeholder="z.B. Augsburg" autocomplete="off">
+                    <ul class="city-suggestions" id="citySuggestions"></ul>
+                    <button id="saveCityBtn" class="save-btn" style="width:100%; margin-top:0.75rem; padding:0.75rem; font-size:0.9rem;">Stadt speichern</button>
+                </div>
+
                 <div class="setting-item">
                     <div class="setting-text">
                         <h4>Neue Wohnungen & Items</h4>
@@ -225,17 +278,18 @@
                 </div>
             </div>
 
+            <button id="saveBtn" class="save-btn" style="width:100%; margin-top:1rem; margin-bottom:1rem; background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); font-size:1.1rem; padding:1.1rem; box-shadow: 0 6px 20px rgba(59,130,246,0.35); border-radius: 999px;">Einstellungen speichern</button>
+
         </div>
     </main>
-    
-    <div class="save-bar">
-        <button id="saveBtn" class="save-btn">Einstellungen speichern</button>
-    </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
+<script src="cities.js"></script>
 <script src="push-logic.js"></script>
 <script>
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -250,13 +304,12 @@
     async function loadSettings() {
         if (!supabase) return;
 
-        const { data: { session } } = await sb.auth.getSession();
-        if (!session) {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) {
             // FIX: Verwende sichere Navigation
             navigateTo('login.html');
             return;
         }
-        const user = session.user;
         currentUser = user;
 
         // Versuche Einstellungen zu laden
@@ -268,11 +321,15 @@
 
         if (settings) {
             // Checkboxen setzen
-            const ids = ['chat_message', 'review', 'favorite', 'interest', 'new_listing_city', 'new_job_city', 'new_coupon_city', 'saved_search_match'];
+            const ids = ['chat_message', 'review', 'favorite', 'new_listing_city', 'new_job_city', 'new_coupon_city', 'saved_search_match'];
             ids.forEach(id => {
                 const el = document.getElementById(id);
                 if (el && settings[id] !== undefined) el.checked = settings[id];
             });
+            // Stadt laden
+            if (settings.notification_city) {
+                document.getElementById('notification_city').value = settings.notification_city;
+            }
         }
     }
 
@@ -307,41 +364,100 @@
         }
     });
 
-    // SPEICHERN BUTTON
+    // SPEICHERN BUTTON (beide Buttons nutzen gleiche Logik)
+    document.getElementById('saveCityBtn').addEventListener('click', function() {
+        document.getElementById('saveBtn').click();
+    });
+
     document.getElementById('saveBtn').addEventListener('click', async function() {
         const btn = document.getElementById('saveBtn');
+        const cityBtn = document.getElementById('saveCityBtn');
         btn.textContent = "Speichere...";
         btn.disabled = true;
+        if (cityBtn) { cityBtn.textContent = "Speichere..."; cityBtn.disabled = true; }
 
-        const newSettings = {
-            user_id: currentUser.id,
-            chat_message: document.getElementById('chat_message').checked,
-            review: document.getElementById('review').checked,
-            favorite: document.getElementById('favorite').checked,
-            interest: document.getElementById('interest').checked,
-            new_listing_city: document.getElementById('new_listing_city').checked,
-            new_job_city: document.getElementById('new_job_city').checked,
-            new_coupon_city: document.getElementById('new_coupon_city').checked,
-            saved_search_match: document.getElementById('saved_search_match').checked,
-            updated_at: new Date().toISOString()
-        };
+        try {
+            if (!currentUser) {
+                var { data: { user } } = await sb.auth.getUser();
+                if (!user) { Room8UI.error("Nicht eingeloggt!"); return; }
+                currentUser = user;
+            }
 
-        const { error } = await sb
-            .from('notification_settings')
-            .upsert(newSettings, { onConflict: 'user_id' });
+            var newSettings = {
+                user_id: currentUser.id,
+                chat_message: document.getElementById('chat_message').checked,
+                review: document.getElementById('review').checked,
+                favorite: document.getElementById('favorite').checked,
+                new_listing_city: document.getElementById('new_listing_city').checked,
+                new_job_city: document.getElementById('new_job_city').checked,
+                new_coupon_city: document.getElementById('new_coupon_city').checked,
+                saved_search_match: document.getElementById('saved_search_match').checked,
+                notification_city: document.getElementById('notification_city').value.trim() || null,
+                updated_at: new Date().toISOString()
+            };
 
-        if (error) {
-            Room8UI.error("Einstellungen konnten nicht gespeichert werden. Bitte versuche es erneut.");
-        } else {
-            // Button Feedback
-            btn.textContent = "Gespeichert! ✓";
-            btn.style.background = "#10B981";
-            setTimeout(() => {
+            console.log('Saving settings:', JSON.stringify(newSettings));
+
+            var { error } = await sb
+                .from('notification_settings')
+                .upsert(newSettings, { onConflict: 'user_id' });
+
+            if (error) {
+                console.error('Save error:', error);
+                Room8UI.error("Fehler: " + error.message + " (Code: " + error.code + ")");
                 btn.textContent = "Einstellungen speichern";
-                btn.style.background = "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)";
                 btn.disabled = false;
-            }, 2000);
+                if (cityBtn) { cityBtn.textContent = "Stadt speichern"; cityBtn.disabled = false; }
+            } else {
+                console.log('Settings saved successfully!');
+                btn.textContent = "Gespeichert! \u2713";
+                btn.style.background = "#10B981";
+                if (cityBtn) { cityBtn.textContent = "Gespeichert! \u2713"; cityBtn.style.background = "#10B981"; }
+                setTimeout(function() {
+                    btn.textContent = "Einstellungen speichern";
+                    btn.style.background = "";
+                    btn.disabled = false;
+                    if (cityBtn) { cityBtn.textContent = "Stadt speichern"; cityBtn.style.background = ""; cityBtn.disabled = false; }
+                }, 2000);
+            }
+        } catch (err) {
+            console.error('Save exception:', err);
+            Room8UI.error("Fehler: " + err.message);
+            btn.textContent = "Einstellungen speichern";
+            btn.disabled = false;
+            if (cityBtn) { cityBtn.textContent = "Stadt speichern"; cityBtn.disabled = false; }
         }
+    });
+
+    // City Autocomplete
+    var cityInput = document.getElementById('notification_city');
+    var citySuggestions = document.getElementById('citySuggestions');
+
+    cityInput.addEventListener('input', function() {
+        var val = this.value.trim().toLowerCase();
+        citySuggestions.innerHTML = '';
+        if (val.length < 2) { citySuggestions.classList.remove('show'); return; }
+
+        var matches = (typeof germanCities !== 'undefined' ? germanCities : [])
+            .filter(function(c) { return c.toLowerCase().indexOf(val) === 0; })
+            .slice(0, 6);
+
+        if (matches.length === 0) { citySuggestions.classList.remove('show'); return; }
+
+        matches.forEach(function(city) {
+            var li = document.createElement('li');
+            li.textContent = city;
+            li.addEventListener('click', function() {
+                cityInput.value = city;
+                citySuggestions.classList.remove('show');
+            });
+            citySuggestions.appendChild(li);
+        });
+        citySuggestions.classList.add('show');
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.city-input-wrap')) citySuggestions.classList.remove('show');
     });
 
     document.addEventListener('DOMContentLoaded', loadSettings);

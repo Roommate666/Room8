@@ -49,7 +49,7 @@
 
         .upload-area:hover {
             border-color: var(--primary-color);
-            background-color: #EEF2FF;
+            background-color: #F2F2F0;
         }
 
         .upload-icon {
@@ -255,8 +255,10 @@
 </div>
 
 <!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script src="cities.js"></script>
 <script src="notificationHelpers.js"></script>
@@ -335,7 +337,7 @@
 
         } catch (err) {
             console.error('Fehler beim Laden:', err);
-            Room8UI.error('Inserat konnte nicht geladen werden. Bitte versuche es erneut.');
+            Room8UI.error('Fehler beim Laden des Inserats: ' + err.message);
         }
     }
 
@@ -546,44 +548,55 @@
             // Erfolg!
             Room8UI.success(editListingId ? "Änderungen gespeichert!" : "Erfolgreich erstellt!");
 
-            // NEU: Benachrichtige User in der Stadt (nur bei neuen Inseraten)
+            // Suchaufträge-Treffer: Prüfe ob das neue Inserat zu gespeicherten Suchen passt
             if (!editListingId && listing.city && window.NotificationHelpers) {
                 try {
-                    // Hole alle User in dieser Stadt mit aktivierter Benachrichtigung
-                    var cityUsersRes = await sb
-                        .from('profiles')
-                        .select('id')
-                        .ilike('city', listing.city);
+                    var searchQuery = sb
+                        .from('saved_searches')
+                        .select('*')
+                        .eq('search_type', 'gegenstand')
+                        .eq('is_active', true)
+                        .ilike('city', listing.city)
+                        .neq('user_id', user.id);
 
-                    if (cityUsersRes.data && cityUsersRes.data.length > 0) {
-                        for (var u of cityUsersRes.data) {
-                            // Nicht den Ersteller selbst benachrichtigen
-                            if (u.id === user.id) continue;
+                    var searchRes = await searchQuery;
 
-                            // Prüfe Benachrichtigungseinstellungen
-                            var settingsRes = await sb
+                    if (searchRes.data && searchRes.data.length > 0) {
+                        var notifiedUsers = {};
+                        for (var s of searchRes.data) {
+                            if (notifiedUsers[s.user_id]) continue;
+
+                            // Preis-Check (wenn gesetzt)
+                            if (s.min_price && listing.price && listing.price < s.min_price) continue;
+                            if (s.max_price && listing.price && listing.price > s.max_price) continue;
+
+                            // Kategorie-Check (wenn gesetzt)
+                            if (s.category && listing.category && s.category !== listing.category) continue;
+
+                            // Einstellung prüfen
+                            var sSettingsRes = await sb
                                 .from('notification_settings')
-                                .select('new_listing_city')
-                                .eq('user_id', u.id)
+                                .select('saved_search_match')
+                                .eq('user_id', s.user_id)
                                 .single();
 
-                            // Standard: aktiviert wenn keine Einstellung
-                            var notify = !settingsRes.data || settingsRes.data.new_listing_city !== false;
+                            var sNotify = !sSettingsRes.data || sSettingsRes.data.saved_search_match !== false;
 
-                            if (notify) {
+                            if (sNotify) {
                                 await NotificationHelpers.createNotification(
-                                    u.id,
-                                    'new_listing_city',
-                                    '📦 Neuer Artikel in ' + listing.city,
-                                    listing.title,
+                                    s.user_id,
+                                    'saved_search_match',
+                                    '\uD83D\uDD14 Neuer Treffer f\u00FCr deine Suche',
+                                    listing.title + ' in ' + listing.city,
                                     'listing-details.html?id=' + listing.id,
                                     listing.id
                                 );
+                                notifiedUsers[s.user_id] = true;
                             }
                         }
                     }
-                } catch (notifyErr) {
-                    console.log('City notification error:', notifyErr);
+                } catch (searchErr) {
+                    console.log('Saved search notification error:', searchErr);
                 }
             }
 
@@ -591,7 +604,7 @@
 
         } catch (err) {
             console.error(err);
-            Room8UI.error("Inserat konnte nicht gespeichert werden. Bitte versuche es erneut.");
+            Room8UI.error("Fehler: " + err.message);
             btn.disabled = false;
             btn.textContent = originalText;
         }

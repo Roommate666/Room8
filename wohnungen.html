@@ -53,23 +53,11 @@
         
         .listings-grid {
             padding: 0 1rem;
-            display: grid;
-            grid-template-columns: 1fr;
+            display: flex;
+            flex-direction: column;
             gap: 0.75rem;
-            max-width: 1200px;
+            max-width: 600px;
             margin: 0 auto;
-        }
-        @media (min-width: 768px) {
-            .listings-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1rem;
-                padding: 0 2rem;
-            }
-        }
-        @media (min-width: 1100px) {
-            .listings-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
         }
 
         .housing-card {
@@ -200,7 +188,7 @@
         }
         .stat-item { display: flex; align-items: center; gap: 4px; }
         
-        .fab { position: fixed; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4); cursor: pointer; text-decoration: none; color: white; z-index: 10000; }
+        .fab { position: fixed; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, #3B82F6, #2563EB); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4); cursor: pointer; text-decoration: none; color: white; z-index: 10000; }
 
         /* === MATCHING SCORE BADGE (im Footer) === */
         .match-badge {
@@ -230,8 +218,8 @@
 
         /* === INFO BANNER für Matching === */
         .match-info-banner {
-            background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
-            border: 1px solid #C7D2FE;
+            background: linear-gradient(135deg, #F2F2F0 0%, #EBEBEB 100%);
+            border: 1px solid #EBEBEB;
             border-radius: 12px;
             padding: 0.75rem 1rem;
             margin: 0 1.5rem 1rem;
@@ -239,7 +227,7 @@
             align-items: center;
             gap: 0.75rem;
             font-size: 0.85rem;
-            color: #4338CA;
+            color: #1A1A2E;
         }
         
         .match-info-banner.hidden { display: none; }
@@ -249,14 +237,60 @@
         .match-info-text { flex: 1; }
         
         .match-info-link {
-            color: #4338CA;
+            color: #1A1A2E;
             font-weight: 600;
             text-decoration: none;
             white-space: nowrap;
         }
+        /* Verification Overlay */
+        .verify-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        .verify-overlay.active { display: flex; }
+        .verify-overlay-box {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            max-width: 360px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        .verify-overlay-box .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .verify-overlay-box h2 { font-size: 1.3rem; margin-bottom: 0.5rem; color: #1f2937; }
+        .verify-overlay-box p { color: #6b7280; font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; }
+        .verify-overlay-box a {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 0.85rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
     </style>
 </head>
 <body>
+<!-- Verification Overlay (außerhalb app-container für echtes position:fixed) -->
+<div class="verify-overlay" id="verifyOverlay">
+    <div class="verify-overlay-box">
+        <div class="icon">🔒</div>
+        <h2>Verifizierung erforderlich</h2>
+        <p>Um Wohnungen zu sehen und Inserate zu erstellen, musst du zuerst deinen Studentenstatus verifizieren.</p>
+        <a href="verify-options.html">Jetzt verifizieren</a>
+    </div>
+</div>
+
 <div class="app-container">
     <header class="app-header">
         <a href="javascript:history.back()" class="back-btn">
@@ -304,8 +338,10 @@
     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
 </a>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
 <script src="notificationHelpers.js"></script>
@@ -328,6 +364,17 @@
     var userFavorites = {};
     var blockedUserIds = []; // Blockierte User ausblenden
     var userSavedSearches = []; // NEU: Gespeicherte Suchen für Matching
+
+    async function checkVerification() {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) return;
+        const { data: profile } = await sb.from('profiles').select('is_verified, is_student_verified').eq('id', user.id).single();
+        var isVerified = profile && (profile.is_verified || profile.is_student_verified);
+        if (!isVerified) {
+            document.getElementById('verifyOverlay').classList.add('active');
+            window.scrollTo(0, 0);
+        }
+    }
 
     async function loadCurrentUser() {
         const { data: { user } } = await sb.auth.getUser();
@@ -488,6 +535,8 @@
         }
     }
 
+    function escHtml(t) { return t ? String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
+
     function renderHousingCard(listing) {
         var imageUrl = null;
         var isSearchListing = listing.listing_mode === 'search';
@@ -537,10 +586,19 @@
                     </div>
                     <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
                 </div>`;
+        } else if (!imageUrl) {
+            imageHtml = `
+                <div class="card-image-container" style="background: #EBEBEB; display: flex; align-items: center; justify-content: center;">
+                    <div style="text-align: center; color: #929292;">
+                        <div style="font-size: 1.8rem; margin-top: -8px;">🏠</div>
+                        <div style="font-size: 0.6rem; font-weight: 600; margin-top: 2px; color: #929292;">Kein Bild</div>
+                    </div>
+                    <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
+                </div>`;
         } else {
             imageHtml = `
                 <div class="card-image-container">
-                    <img src="${imageUrl || 'no-image.svg'}" alt="${listing.title}" onerror="this.src='no-image.svg';">
+                    <img src="${imageUrl}" alt="${listing.title}" onerror="this.parentElement.innerHTML='<div style=\\'background:#EBEBEB;width:100%;height:100%;display:flex;align-items:center;justify-content:center;\\'><div style=\\'text-align:center;color:#929292;\\'>🏠<br><span style=\\'font-size:0.6rem;font-weight:600;color:#929292;\\'>Kein Bild</span></div></div>'">
                     <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
                 </div>`;
         }
@@ -550,12 +608,12 @@
                 ${imageHtml}
                 <div class="card-content">
                     <div class="card-header">
-                        <h3 class="card-title">${listing.title}</h3>
+                        <h3 class="card-title">${escHtml(listing.title)}</h3>
                         <span class="card-price">${priceStr}</span>
                     </div>
                     <div class="card-location">
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                        ${listing.city || 'Unbekannt'}
+                        ${escHtml(listing.city) || 'Unbekannt'}
                     </div>
                     <div class="card-footer">
                         ${matchBadgeHtml}
@@ -645,6 +703,7 @@
     });
     
     document.addEventListener('DOMContentLoaded', function() {
+        checkVerification();
         loadCurrentUser();
         loadWohnungen();
     });

@@ -6,6 +6,11 @@
     <title>Coupon einreichen - Room8 Partner</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
         body {
             background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
             min-height: 100vh;
@@ -20,10 +25,13 @@
             text-align: center;
             color: white;
             padding: 2rem 1rem;
+            animation: blurFadeIn 0.5s ease-out both;
         }
         .partner-header h1 {
             font-size: 1.8rem;
             margin: 0 0 0.5rem 0;
+            font-weight: 800;
+            letter-spacing: -0.02em;
         }
         .partner-header p {
             opacity: 0.9;
@@ -33,11 +41,14 @@
             font-size: 3rem;
             margin-bottom: 1rem;
         }
+        /* Glasmorphismus Card */
         .form-card {
-            background: white;
-            border-radius: 20px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
             padding: 2rem;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(255,255,255,0.3);
+            animation: blurFadeIn 0.5s 0.15s ease-out both;
         }
         .section-title {
             font-size: 1.1rem;
@@ -95,23 +106,26 @@
         @media (max-width: 500px) {
             .row { grid-template-columns: 1fr; }
         }
+        /* Kibo UI Pill */
         .submit-btn {
             width: 100%;
             padding: 1rem;
             background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
             color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 999px;
             font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
             margin-top: 1.5rem;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
         }
         .submit-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(245, 158, 11, 0.4);
         }
+        .submit-btn:active { transform: scale(0.97); }
         .submit-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -157,6 +171,10 @@
         .discount-preview .label {
             font-size: 0.85rem;
             color: #92400E;
+        }
+        /* Barrierefreiheit */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
     </style>
 </head>
@@ -299,8 +317,11 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
+<script src="room8-ui.js"></script>
 <script>
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -341,7 +362,7 @@
 
         } catch (err) {
             console.error(err);
-            Room8UI.error('Einreichung fehlgeschlagen. Bitte versuche es erneut.');
+            Room8UI.error('Fehler beim Einreichen: ' + err.message);
             btn.disabled = false;
             btn.textContent = '🎟️ Coupon einreichen';
         }
