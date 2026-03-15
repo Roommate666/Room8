@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Profil - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* PROFILE HEADER CARD */
+        .profile-header-card {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .profile-avatar-large {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: #EEF2FF;
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem auto;
+            background-size: cover;
+            background-position: center;
+            border: 4px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .profile-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 0 0 0.25rem 0;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .profile-meta {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        /* BADGES */
+        .badge-container {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-verified { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
+        .badge-student { background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; }
+
+        /* RATING DISPLAY */
+        .rating-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            background: #FFFBEB;
+            border-radius: 12px;
+            border: 1px solid #FDE68A;
+        }
+        .rating-stars {
+            color: #F59E0B;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+        }
+        .rating-score {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #92400E;
+        }
+        .rating-count {
+            font-size: 0.85rem;
+            color: #B45309;
+        }
+
+        /* ACTION BUTTONS */
+        .profile-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn-message {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+            border: none;
+            padding: 0.85rem 2.5rem;
+            border-radius: 99px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            transition: transform 0.1s;
+            margin-bottom: 1rem;
+        }
+        .btn-message:active { transform: scale(0.95); }
+
+        .btn-report {
+            background: #FEF3C7;
+            color: #D97706;
+            border: 1px solid #FCD34D;
+            padding: 0.7rem 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .btn-report:hover { background: #FDE68A; transform: scale(1.02); }
+
+        .btn-block {
+            background: #FEE2E2;
+            color: #DC2626;
+            border: 1px solid #FCA5A5;
+            padding: 0.7rem 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .btn-block:hover { background: #FECACA; transform: scale(1.02); }
+
+        .btn-review {
+            background: #DBEAFE;
+            color: #1D4ED8;
+            border: 1px solid #93C5FD;
+            padding: 0.7rem 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .btn-review:hover { background: #BFDBFE; transform: scale(1.02); }
+
+        /* TABS */
+        .profile-tabs {
+            display: flex;
+            background: #F3F4F6;
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 0.7rem;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 10px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            background: transparent;
+            border: none;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: var(--text-main);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* INFO GRID */
+        .info-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+        }
+        .info-section h3 { margin: 0 0 1rem 0; font-size: 1rem; color: var(--text-main); }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        .info-item { display: flex; flex-direction: column; }
+        .info-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; }
+        .info-value { font-size: 0.95rem; font-weight: 500; color: var(--text-main); }
+
+        /* TAGS */
+        .tags-container { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .tag {
+            padding: 0.4rem 0.8rem;
+            background-color: #F3F4F6;
+            border: 1px solid #E5E7EB;
+            border-radius: 99px;
+            font-size: 0.85rem;
+            color: var(--text-main);
+        }
+
+        /* LISTINGS GRID */
+        .mini-listings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+
+        .mini-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .mini-card-img {
+            height: 100px;
+            width: 100%;
+            object-fit: cover;
+            background: #F3F4F6;
+        }
+
+        .mini-card-body { padding: 0.75rem; }
+        .mini-card-title {
+            font-size: 0.85rem; font-weight: 600; margin: 0 0 0.25rem 0;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .mini-card-price { font-size: 0.85rem; color: var(--primary-color); font-weight: 700; }
+
+        /* REVIEWS */
+        .review-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+        .review-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+        .review-author { font-weight: 600; font-size: 0.9rem; }
+        .review-date { font-size: 0.8rem; color: var(--text-muted); }
+        .review-stars { color: #F59E0B; font-size: 0.9rem; }
+        .review-text { font-size: 0.9rem; color: #4B5563; line-height: 1.4; margin: 0; }
+
+        .empty-state {
+            text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <h1 id="pageTitle">Profil</h1>
+        <div style="width: 40px;"></div>
+    </header>
+
+    <main class="app-content">
+        
+        <div id="loading" style="text-align: center; padding: 3rem;">Lade Profil...</div>
+
+        <div id="profileContent" style="display:none;">
+            <!-- Profile Header -->
+            <div class="profile-header-card">
+                <div class="profile-avatar-large" id="profileAvatar"></div>
+                <h2 class="profile-name">
+                    <span id="profileName">Name</span>
+                    <span id="verifiedBadge" class="badge badge-verified" style="display:none; font-size: 0.7rem; padding: 2px 6px; margin-left: 0.5rem;">✓</span>
+                </h2>
+                <p class="profile-meta" id="profileMeta">Mitglied seit ...</p>
+
+                <!-- Durchschnittsbewertung -->
+                <div class="rating-display" id="ratingDisplay" style="display: none;">
+                    <span class="rating-stars" id="ratingStars"></span>
+                    <span class="rating-score" id="ratingScore"></span>
+                    <span class="rating-count" id="ratingCount"></span>
+                </div>
+
+                <div class="badge-container" id="badges">
+                    <!-- Badges werden hier eingefügt -->
+                </div>
+
+                <div class="profile-actions" style="margin-bottom: 0.5rem;">
+                    <button class="btn-message" id="messageBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        Nachricht schicken
+                    </button>
+                </div>
+                <!-- Melden/Blockieren/Bewerten zentriert -->
+                <div style="display: flex; justify-content: center; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap;">
+                    <button class="btn-review" id="reviewBtn">
+                        ⭐ Bewerten
+                    </button>
+                    <button class="btn-report" id="reportBtn">
+                        ⚠️ Melden
+                    </button>
+                    <button class="btn-block" id="blockBtn">
+                        🚫 Blockieren
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="profile-tabs">
+                <button class="tab-btn active" onclick="switchTab('info')">Info</button>
+                <button class="tab-btn" onclick="switchTab('listings')" id="tabListingsLabel">Inserate</button>
+                <button class="tab-btn" onclick="switchTab('reviews')" id="tabReviewsLabel">Bewertungen</button>
+            </div>
+
+            <!-- Tab: Info -->
+            <div id="tab-info" class="tab-content active">
+                <div class="info-section" id="bioSection" style="display:none;">
+                    <h3>Über mich</h3>
+                    <p id="bioText" style="color: #4B5563; line-height: 1.5;"></p>
+                </div>
+
+                <div class="info-section">
+                    <h3>Details</h3>
+                    <div class="info-grid" id="detailsGrid">
+                        <!-- Wird dynamisch gefüllt -->
+                    </div>
+                </div>
+
+                <div class="info-section" id="interestsSection" style="display:none;">
+                    <h3>Interessen</h3>
+                    <div class="tags-container" id="interestsTags"></div>
+                </div>
+            </div>
+
+            <!-- Tab: Listings -->
+            <div id="tab-listings" class="tab-content">
+                <div class="mini-listings-grid" id="listingsContainer">
+                    <div class="empty-state">Keine aktiven Inserate</div>
+                </div>
+            </div>
+
+            <!-- Tab: Reviews -->
+            <div id="tab-reviews" class="tab-content">
+                <div id="reviewsContainer">
+                    <div class="empty-state">Noch keine Bewertungen</div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="app-footer-nav"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="room8-ui.js"></script>
+<script src="navigation.js"></script>
+<script src="room8-utils.js"></script>
+<script src="verifyGate.js"></script>
+<script>
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // URL Params
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('id');
+
+    var currentUser = null;
+
+    // Helper: Navigation
+    function navigateTo(url) {
+        try { window.location.href = url; } catch(e) { console.warn(e); }
+    }
+
+    // XSS Protection
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+        // Finde den Button, der geklickt wurde (etwas hacky aber funktional)
+        const buttons = document.querySelectorAll('.tab-btn');
+        if (tabName === 'info') buttons[0].classList.add('active');
+        if (tabName === 'listings') buttons[1].classList.add('active');
+        if (tabName === 'reviews') buttons[2].classList.add('active');
+
+        document.getElementById('tab-' + tabName).classList.add('active');
+    }
+
+    async function initProfile() {
+        if (!userId || !sb) {
+            document.getElementById('loading').textContent = "Nutzer nicht gefunden.";
+            return;
+        }
+
+        // Auth Check
+        const { data: { user } } = await sb.auth.getUser();
+        currentUser = user;
+
+        // Verifizierungs-Status merken fuer Blur
+        var isVerifiedUser = false;
+        if (currentUser) {
+            const { data: myProfile } = await sb.from('profiles').select('is_verified, is_student_verified').eq('id', currentUser.id).single();
+            isVerifiedUser = myProfile && (myProfile.is_verified || myProfile.is_student_verified);
+        }
+
+        // Eigene Profilseite?
+        if (currentUser && currentUser.id === userId) {
+            document.getElementById('messageBtn').style.display = 'none';
+            document.getElementById('reportBtn').style.display = 'none';
+            document.getElementById('blockBtn').style.display = 'none';
+            document.getElementById('reviewBtn').style.display = 'none';
+        }
+
+        await loadUserProfile();
+        loadUserListings();
+        loadUserReviews();
+        checkBlockStatus();
+
+        // Blur-Overlay fuer nicht-verifizierte User (nicht fuer eigenes Profil)
+        var isOwnProfile = currentUser && currentUser.id === userId;
+        if (!isVerifiedUser && !isOwnProfile) {
+            showVerifyOverlay(['#profileContent'], 'Verifiziere dich, um Profile ansehen zu k\u00f6nnen.');
+        }
+    }
+
+    async function checkBlockStatus() {
+        if (!currentUser || currentUser.id === userId) return;
+
+        // Prüfen ob User bereits blockiert ist
+        var { data } = await sb
+            .from('blocked_users')
+            .select('id')
+            .eq('blocker_id', currentUser.id)
+            .eq('blocked_id', userId)
+            .single();
+
+        if (data) {
+            // User ist bereits blockiert - Button zu "Entsperren" ändern
+            var blockBtn = document.getElementById('blockBtn');
+            blockBtn.textContent = '✓ Entsperren';
+            blockBtn.style.background = '#D1FAE5';
+            blockBtn.style.color = '#059669';
+            blockBtn.style.borderColor = '#6EE7B7';
+            blockBtn.dataset.blocked = 'true';
+            blockBtn.dataset.blockId = data.id;
+        }
+    }
+
+    async function loadUserProfile() {
+        const { data: profile, error } = await sb
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+
+        if (error || !profile) {
+            document.getElementById('loading').innerHTML = "Profil konnte nicht geladen werden.";
+            return;
+        }
+
+        // Show Content
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('profileContent').style.display = 'block';
+
+        // Fill Header
+        const name = profile.full_name || profile.username || 'Nutzer';
+        document.getElementById('pageTitle').textContent = name;
+        document.getElementById('profileName').textContent = name;
+        
+        const joined = new Date(profile.created_at).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+        document.getElementById('profileMeta').textContent = `Mitglied seit ${joined}`;
+
+        const avatarEl = document.getElementById('profileAvatar');
+        if (profile.avatar_url) {
+            avatarEl.style.backgroundImage = `url('${profile.avatar_url}')`;
+            avatarEl.textContent = '';
+        } else {
+            avatarEl.textContent = name.charAt(0).toUpperCase();
+        }
+
+        // Badges
+        const badgesContainer = document.getElementById('badges');
+        if (profile.is_verified) {
+            document.getElementById('verifiedBadge').style.display = 'inline';
+            badgesContainer.innerHTML += `<span class="badge badge-verified">✓ Verifiziert</span>`;
+        }
+        if (profile.is_student_verified) {
+            badgesContainer.innerHTML += `<span class="badge badge-student">🎓 Student</span>`;
+        }
+
+        // INFO TAB FILL
+        if (profile.bio) {
+            document.getElementById('bioText').textContent = profile.bio;
+            document.getElementById('bioSection').style.display = 'block';
+        }
+
+        // Detailed Info Grid
+        const grid = document.getElementById('detailsGrid');
+        
+        function addInfo(label, val) {
+            if(val) grid.innerHTML += `<div class="info-item"><span class="info-label">${escapeHtml(label)}</span><span class="info-value">${escapeHtml(val)}</span></div>`;
+        }
+
+        addInfo('Stadt', profile.city);
+        addInfo('Universität', profile.university);
+        addInfo('Studiengang', profile.study_field);
+        addInfo('Semester', profile.semester);
+        addInfo('Alter', profile.age);
+        addInfo('Sprachen', profile.languages);
+
+        // Interests
+        if (profile.interests) {
+            const tagsContainer = document.getElementById('interestsTags');
+            const interests = profile.interests.split(',').map(i => i.trim());
+            interests.forEach(i => {
+                if(i) tagsContainer.innerHTML += `<span class="tag">${escapeHtml(i)}</span>`;
+            });
+            document.getElementById('interestsSection').style.display = 'block';
+        }
+
+        // Buttons
+        document.getElementById('messageBtn').onclick = () => {
+            if (!currentUser) {
+                if(confirm("Bitte einloggen um Nachrichten zu senden.")) navigateTo('login.html');
+                return;
+            }
+            navigateTo(`chat.html?user=${userId}`);
+        };
+
+        document.getElementById('reportBtn').onclick = () => {
+            if (!currentUser) return Room8UI.warning("Bitte einloggen.");
+            if (currentUser.id === userId) {
+                return Room8UI.warning("Du kannst dich nicht selbst melden.");
+            }
+            // Vordefinierte Melde-Gründe
+            const reasons = [
+                "Fake-Profil / Identitätsbetrug",
+                "Belästigung / Beleidigung",
+                "Spam / Werbung",
+                "Unangemessene Inhalte",
+                "Betrugsversuch",
+                "Sonstiges"
+            ];
+            const reasonList = reasons.map((r, i) => `${i + 1}. ${r}`).join('\n');
+            const choice = prompt(`Warum möchtest du diesen Nutzer melden?\n\n${reasonList}\n\nGib die Nummer ein (1-6):`);
+            if (choice) {
+                const idx = parseInt(choice) - 1;
+                const reason = (idx >= 0 && idx < reasons.length) ? reasons[idx] : choice;
+                sb.from('reports').insert({
+                    reporter_id: currentUser.id,
+                    reported_type: 'user',
+                    reported_id: userId,
+                    reason: reason,
+                    status: 'open'
+                }).then(() => Room8UI.success("Gemeldet. Danke für deine Hilfe!"));
+            }
+        };
+        document.getElementById('blockBtn').onclick = async () => {
+            if (!currentUser) return Room8UI.warning('Bitte einloggen');
+            if (currentUser.id === userId) {
+                return Room8UI.warning("Du kannst dich nicht selbst blockieren.");
+            }
+
+            var blockBtn = document.getElementById('blockBtn');
+            var isBlocked = blockBtn.dataset.blocked === 'true';
+
+            if (isBlocked) {
+                // ENTSPERREN
+                if (confirm('Möchtest du diesen Nutzer entsperren?')) {
+                    var { error } = await sb.from('blocked_users')
+                        .delete()
+                        .eq('blocker_id', currentUser.id)
+                        .eq('blocked_id', userId);
+
+                    if (error) {
+                        Room8UI.error('Entsperren fehlgeschlagen. Bitte versuche es erneut.');
+                        return;
+                    }
+
+                    Room8UI.success('Nutzer wurde entsperrt.');
+                    blockBtn.textContent = '🚫 Blockieren';
+                    blockBtn.style.background = '#FEE2E2';
+                    blockBtn.style.color = '#DC2626';
+                    blockBtn.style.borderColor = '#FCA5A5';
+                    blockBtn.dataset.blocked = 'false';
+                }
+            } else {
+                // BLOCKIEREN
+                if (confirm('Möchtest du diesen Nutzer wirklich blockieren? Du wirst keine Nachrichten oder Inserate von diesem Nutzer mehr sehen.')) {
+                    var { error } = await sb.from('blocked_users').insert({
+                        blocker_id: currentUser.id,
+                        blocked_id: userId
+                    });
+
+                    if (error) {
+                        console.error('Block error:', error);
+                        if (error.code === '23505') {
+                            Room8UI.warning('Nutzer ist bereits blockiert.');
+                        } else {
+                            Room8UI.error('Blockieren fehlgeschlagen. Bitte versuche es erneut.');
+                        }
+                        return;
+                    }
+
+                    Room8UI.success('Nutzer wurde blockiert.');
+                    blockBtn.textContent = '✓ Entsperren';
+                    blockBtn.style.background = '#D1FAE5';
+                    blockBtn.style.color = '#059669';
+                    blockBtn.style.borderColor = '#6EE7B7';
+                    blockBtn.dataset.blocked = 'true';
+                }
+            }
+        };
+
+        document.getElementById('reviewBtn').onclick = () => {
+            if (!currentUser) {
+                return Room8UI.warning("Bitte einloggen um Bewertungen abzugeben.");
+            }
+            if (currentUser.id === userId) {
+                return Room8UI.warning("Du kannst dich nicht selbst bewerten.");
+            }
+            navigateTo(`review.html?revieweeId=${userId}`);
+        };
+    }
+
+    async function loadUserListings() {
+        const { data: listings } = await sb
+            .from('listings')
+            .select('id, title, price, monthly_rent, type, listing_photos(storage_path)')
+            .eq('owner_id', userId)
+            .eq('is_active', true)
+            .order('created_at', { ascending: false });
+
+        document.getElementById('tabListingsLabel').textContent = `Inserate (${listings ? listings.length : 0})`;
+        const container = document.getElementById('listingsContainer');
+
+        if (!listings || listings.length === 0) {
+            container.innerHTML = '<div class="empty-state">Keine aktiven Inserate</div>';
+            return;
+        }
+
+        container.innerHTML = '';
+        listings.forEach(l => {
+            let imgUrl = 'no-image.svg';
+            if (l.listing_photos && l.listing_photos.length > 0) {
+                const { data } = sb.storage.from('listing-images').getPublicUrl(l.listing_photos[0].storage_path);
+                if (data) imgUrl = data.publicUrl;
+            }
+
+            const price = l.type === 'wohnung' ? (l.monthly_rent ? l.monthly_rent + ' €' : 'VB') : (l.price ? l.price + ' €' : 'VB');
+
+            // Verwende onclick statt href für Sicherheit in Vorschau
+            const item = document.createElement('div');
+            item.className = 'mini-card';
+            item.onclick = () => navigateTo(`listing-details.html?id=${l.id}`);
+            item.style.cursor = 'pointer';
+            item.innerHTML = `
+                <img src="${imgUrl}" class="mini-card-img">
+                <div class="mini-card-body">
+                    <h4 class="mini-card-title">${l.title}</h4>
+                    <div class="mini-card-price">${price}</div>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    async function loadUserReviews() {
+        const { data: reviews } = await sb
+            .from('reviews')
+            .select('rating, comment, created_at, reviewer:reviewer_id(username)')
+            .eq('reviewee_id', userId)
+            .order('created_at', { ascending: false });
+
+        document.getElementById('tabReviewsLabel').textContent = `Bewertungen (${reviews ? reviews.length : 0})`;
+        const container = document.getElementById('reviewsContainer');
+
+        // Durchschnittsbewertung berechnen und anzeigen
+        if (reviews && reviews.length > 0) {
+            const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+            const avgRating = totalRating / reviews.length;
+            const fullStars = Math.floor(avgRating);
+            const hasHalfStar = avgRating - fullStars >= 0.5;
+
+            let starsHtml = '★'.repeat(fullStars);
+            if (hasHalfStar && fullStars < 5) starsHtml += '½';
+            starsHtml += '☆'.repeat(5 - fullStars - (hasHalfStar ? 1 : 0));
+
+            document.getElementById('ratingStars').textContent = starsHtml;
+            document.getElementById('ratingScore').textContent = avgRating.toFixed(1);
+            document.getElementById('ratingCount').textContent = `(${reviews.length} Bewertung${reviews.length > 1 ? 'en' : ''})`;
+            document.getElementById('ratingDisplay').style.display = 'flex';
+        }
+
+        if (!reviews || reviews.length === 0) {
+            container.innerHTML = '<div class="empty-state">Noch keine Bewertungen</div>';
+            return;
+        }
+
+        container.innerHTML = '';
+        reviews.forEach(r => {
+            const stars = '⭐'.repeat(r.rating);
+            const date = new Date(r.created_at).toLocaleDateString();
+            const reviewerName = r.reviewer ? r.reviewer.username : 'Anonym';
+
+            container.innerHTML += `
+                <div class="review-item">
+                    <div class="review-header">
+                        <span class="review-author">${escapeHtml(reviewerName)}</span>
+                        <span class="review-date">${date}</span>
+                    </div>
+                    <div class="review-stars">${stars}</div>
+                    <p class="review-text">${escapeHtml(r.comment || '')}</p>
+                </div>
+            `;
+        });
+    }
+
+    // Init
+    if(supabase) initProfile();
+</script>
+<script src="notificationBell.js"></script>
+</body>
+</html>

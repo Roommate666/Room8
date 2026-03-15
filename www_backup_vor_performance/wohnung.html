@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Wohnung inserieren - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Header - Blau mit weißer Schrift */
+        .app-header {
+            display: grid;
+            grid-template-columns: 40px 1fr 40px;
+            align-items: center;
+            padding: calc(1.5rem + env(safe-area-inset-top)) 1.5rem 1.5rem 1.5rem;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25);
+            margin-bottom: 1.25rem;
+        }
+        .app-header h1 {
+            color: white !important;
+            -webkit-text-fill-color: white !important;
+            background: none !important;
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 800;
+            text-align: center;
+        }
+        .back-arrow {
+            color: white !important;
+            background: rgba(255,255,255,0.2) !important;
+            border: none !important;
+        }
+
+        /* Spezifische Styles für dieses Formular */
+        .mode-switch {
+            display: flex;
+            background: #F3F4F6;
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .mode-option {
+            flex: 1;
+            text-align: center;
+            padding: 0.7rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 10px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .mode-option.active {
+            background: white;
+            color: var(--text-main);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-weight: 700;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 2rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .section-subtitle {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin: 1.25rem 0 0.75rem 0;
+        }
+
+        /* Checkbox Grid Layout */
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .checkbox-card {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 0.5rem;
+        }
+
+        .checkbox-card:hover {
+            border-color: var(--primary-color);
+            background: #F2F2F0;
+        }
+
+        .checkbox-card input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-color);
+        }
+
+        .checkbox-card label {
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            flex: 1;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        /* Radio Cards für Eigen/Geteilt */
+        .radio-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .radio-card {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .radio-card:hover {
+            border-color: var(--primary-color);
+            background: #F2F2F0;
+        }
+
+        .radio-card input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary-color);
+        }
+
+        .radio-card label {
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            font-weight: 500;
+            margin: 0;
+        }
+
+        /* Kostenfeld (versteckt/sichtbar) */
+        .cost-input-wrapper {
+            margin-left: 1rem;
+            margin-bottom: 0.5rem;
+            display: none;
+            padding: 0.5rem;
+            background: #FFFBEB;
+            border-radius: 6px;
+            border-left: 2px solid #F59E0B;
+        }
+        
+        .cost-input-wrapper input {
+            width: 100%;
+            padding: 0.4rem;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+            font-size: 0.9rem;
+        }
+
+        /* Upload Bereich */
+        .upload-area {
+            background-color: #F9FAFB;
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            transition: 0.2s;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: #f0fdf4;
+        }
+        
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+        
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .hidden { display: none !important; }
+        
+        .helper-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: #F2F2F0;
+            border: 1px solid #EBEBEB;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            color: #6A6A6A;
+        }
+
+        /* Tags für Hobbys etc. */
+        .tag-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag-item {
+            background: #F3F4F6;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tag-item:hover, .tag-item.selected {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* Date Input Styling - verhindert Überlappung */
+        input[type="date"] {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: white;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type="date"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Grid für Datum-Felder */
+        .date-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .date-grid .form-group {
+            margin: 0;
+            min-width: 0; /* Verhindert Overflow */
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <h1 id="pageTitle">Wohnung inserieren</h1>
+        <div style="width: 40px;"></div>
+    </header>
+
+    <main class="app-content">
+        
+        <!-- Modus Auswahl (Angebot / Gesuch / Tausch) -->
+        <div class="mode-switch">
+            <div class="mode-option active" id="mode-offer" onclick="setMode('offer')">Angebot</div>
+            <div class="mode-option" id="mode-search" onclick="setMode('search')">Gesuch</div>
+            <div class="mode-option" id="mode-swap" onclick="setMode('swap')">Tausch</div>
+        </div>
+
+        <form id="listingForm">
+            
+            <!-- ========== ÜBER MICH - BASIC (Nur für Suche, alle Typen) ========== -->
+            <div id="group-about-me-basic" class="hidden">
+                <div class="section-title">👤 Über mich</div>
+
+                <div class="form-group">
+                    <label for="about_text">Kurze Selbstbeschreibung</label>
+                    <textarea id="about_text" rows="3" placeholder="Erzähle kurz etwas über dich..."></textarea>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="seeker_age">Alter</label>
+                        <input type="number" id="seeker_age" placeholder="22" min="16" max="99">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="seeker_occupation">Beruf</label>
+                        <input type="text" id="seeker_occupation" placeholder="z.B. Student, Angestellter">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="seeker_move_flexibility">Einzug möglich</label>
+                    <select id="seeker_move_flexibility">
+                        <option value="immediate">Sofort</option>
+                        <option value="1-2_weeks">In 1-2 Wochen</option>
+                        <option value="1_month">In ca. 1 Monat</option>
+                        <option value="flexible">Flexibel</option>
+                    </select>
+                </div>
+
+                <div class="checkbox-grid">
+                    <div class="checkbox-card"><input type="checkbox" id="seeker_has_pet"><label for="seeker_has_pet">Ich habe ein Haustier</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="seeker_needs_anmeldung"><label for="seeker_needs_anmeldung">Brauche Anmeldung</label></div>
+                </div>
+
+                <div class="form-group" id="group-pet-type" style="display: none;">
+                    <label for="seeker_pet_type">Welches Haustier?</label>
+                    <input type="text" id="seeker_pet_type" placeholder="z.B. Katze, kleiner Hund">
+                </div>
+            </div>
+
+            <!-- ========== WG-SPEZIFISCH: Über mich Details (Nur bei WG-Suche) ========== -->
+            <div id="group-about-me-wg" class="hidden">
+                <div class="section-title">👥 WG-Profil</div>
+                <div class="info-box">Diese Infos helfen WGs, dich besser kennenzulernen!</div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="seeker_gender">Geschlecht</label>
+                        <select id="seeker_gender">
+                            <option value="">Bitte wählen</option>
+                            <option value="male">Männlich</option>
+                            <option value="female">Weiblich</option>
+                            <option value="diverse">Divers</option>
+                            <option value="no_answer">Keine Angabe</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="seeker_semester">Semester</label>
+                        <input type="text" id="seeker_semester" placeholder="z.B. 3. Semester">
+                    </div>
+                </div>
+
+                <div class="section-subtitle">Interessen</div>
+                <div class="tag-grid" id="hobby-tags">
+                    <span class="tag-item" data-tag="sport">🏃 Sport</span>
+                    <span class="tag-item" data-tag="music">🎵 Musik</span>
+                    <span class="tag-item" data-tag="gaming">🎮 Gaming</span>
+                    <span class="tag-item" data-tag="cooking">🍳 Kochen</span>
+                    <span class="tag-item" data-tag="reading">📚 Lesen</span>
+                    <span class="tag-item" data-tag="movies">🎬 Filme/Serien</span>
+                    <span class="tag-item" data-tag="travel">✈️ Reisen</span>
+                    <span class="tag-item" data-tag="party">🎉 Feiern</span>
+                </div>
+
+                <div class="checkbox-grid" style="margin-top: 1rem;">
+                    <div class="checkbox-card"><input type="checkbox" id="seeker_smoker"><label for="seeker_smoker">Ich bin Raucher</label></div>
+                </div>
+            </div>
+
+            <!-- ========== WG PRÄFERENZEN (Nur bei WG-Suche) ========== -->
+            <div id="group-wg-preferences" class="hidden">
+                <div class="section-title">🏠 Was für eine WG suchst du?</div>
+
+                <div class="form-group">
+                    <label for="pref_wg_type">WG-Typ</label>
+                    <select id="pref_wg_type">
+                        <option value="any">Egal</option>
+                        <option value="students">Studenten-WG</option>
+                        <option value="working">Berufs-WG</option>
+                        <option value="mixed">Gemischt</option>
+                        <option value="purpose">Zweck-WG (wenig Kontakt)</option>
+                        <option value="community">Gemeinschafts-WG (viel zusammen)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="pref_gender">Geschlecht der Mitbewohner</label>
+                    <select id="pref_gender">
+                        <option value="any">Egal</option>
+                        <option value="female_only">Nur Frauen</option>
+                        <option value="male_only">Nur Männer</option>
+                        <option value="mixed">Gemischt</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="pref_age_min">Alter von</label>
+                        <input type="number" id="pref_age_min" placeholder="18" min="16">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="pref_age_max">Alter bis</label>
+                        <input type="number" id="pref_age_max" placeholder="35" max="99">
+                    </div>
+                </div>
+
+                <div class="checkbox-grid">
+                    <div class="checkbox-card"><input type="checkbox" id="pref_smoker_ok"><label for="pref_smoker_ok">Raucher-WG ok</label></div>
+                </div>
+            </div>
+
+            <!-- ========== BASIS DATEN ========== -->
+            <div class="form-group">
+                <label for="title">Titel der Anzeige *</label>
+                <input type="text" id="title" required placeholder="z.B. Helles 20m² WG-Zimmer am Campus">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Beschreibung *</label>
+                <textarea id="description" rows="6" required placeholder="Beschreibe das Zimmer, die Lage, die Mitbewohner und was dir wichtig ist..."></textarea>
+            </div>
+
+            <!-- ========== STANDORT ========== -->
+            <div class="section-title">📍 Standort</div>
+            <div class="form-group">
+                <label for="city">Stadt *</label>
+                <input type="text" id="city" required placeholder="z.B. Berlin" list="citySuggestions">
+                <datalist id="citySuggestions"></datalist>
+            </div>
+            <div class="form-group">
+                <label for="district">Stadtteil</label>
+                <input type="text" id="district" placeholder="z.B. Friedrichshain">
+            </div>
+            <div class="form-group" id="group-address">
+                <label for="address_line">Straße & Hausnummer</label>
+                <input type="text" id="address_line" placeholder="Musterstraße 12">
+                <span class="helper-text">Wird aus Sicherheitsgründen nur verifizierten Nutzern angezeigt.</span>
+            </div>
+
+            <!-- ========== LAGE-INFOS ========== -->
+            <div id="group-location-info">
+                <div class="section-subtitle">Anbindung</div>
+                <div style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="uni_distance">Entfernung zur Uni (Min.)</label>
+                        <input type="number" id="uni_distance" placeholder="15" min="0">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="public_transport">ÖPNV-Anbindung</label>
+                        <select id="public_transport">
+                            <option value="">Bitte wählen</option>
+                            <option value="excellent">Sehr gut</option>
+                            <option value="good">Gut</option>
+                            <option value="medium">Mittel</option>
+                            <option value="poor">Schlecht</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" id="group-uni-name">
+                    <label for="uni_name">Nächste Uni/Hochschule</label>
+                    <input type="text" id="uni_name" placeholder="z.B. TU München, FU Berlin">
+                </div>
+            </div>
+
+            <!-- ========== ECKDATEN ========== -->
+            <div class="section-title" id="section-eckdaten">📐 Eckdaten</div>
+
+            <div class="form-group">
+                <label for="room_type" id="label-room-type">Art der Unterkunft *</label>
+                <select id="room_type" required onchange="toggleWGFields(); updateSearchFields();">
+                    <option value="" disabled selected>Bitte wählen</option>
+                    <option value="wg_room">WG-Zimmer</option>
+                    <option value="entire_apartment">Ganze Wohnung</option>
+                    <option value="studio">1-Zimmer-Appartement / Studio</option>
+                    <option value="house">Haus</option>
+                    <option value="shared_room">Geteiltes Zimmer</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 1rem;" id="group-size-rooms">
+                <div class="form-group" style="flex: 1;">
+                    <label for="room_size" id="label-room-size">Größe (m²)</label>
+                    <input type="number" id="room_size" placeholder="20">
+                </div>
+                <div class="form-group" style="flex: 1;" id="group-number-rooms">
+                    <label for="number_of_rooms">Zimmer gesamt</label>
+                    <input type="number" id="number_of_rooms" placeholder="3">
+                </div>
+            </div>
+
+            <!-- ========== WG-SPEZIFISCH (Nur bei WG-Zimmer) ========== -->
+            <div id="group-wg-details" class="hidden">
+                <div class="section-title">👥 WG-Details</div>
+                
+                <div style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="wg_size">Anzahl Mitbewohner</label>
+                        <input type="number" id="wg_size" placeholder="2" min="1" max="20">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="wg_gender">Geschlecht d. Mitbewohner</label>
+                        <select id="wg_gender">
+                            <option value="">Bitte wählen</option>
+                            <option value="female_only">Nur Frauen</option>
+                            <option value="male_only">Nur Männer</option>
+                            <option value="mixed">Gemischt</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="wg_type">WG-Typ</label>
+                    <select id="wg_type">
+                        <option value="">Bitte wählen</option>
+                        <option value="students">Studenten-WG</option>
+                        <option value="working">Berufs-WG</option>
+                        <option value="mixed">Gemischt</option>
+                        <option value="purpose">Zweck-WG</option>
+                        <option value="community">Gemeinschafts-WG</option>
+                    </select>
+                </div>
+
+                <div class="checkbox-grid">
+                    <div class="checkbox-card"><input type="checkbox" id="wg_smoking"><label for="wg_smoking">Raucher-WG</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="wg_smoking_outside"><label for="wg_smoking_outside">Rauchen nur draußen</label></div>
+                </div>
+            </div>
+
+            <!-- ========== RÄUME (Eigen/Geteilt) ========== -->
+            <div id="group-rooms">
+                <div class="section-title">🚪 Räume</div>
+                
+                <!-- Badezimmer -->
+                <div class="section-subtitle">Badezimmer</div>
+                <div class="radio-group">
+                    <div class="radio-card"><input type="radio" name="bathroom_type" id="bath_private" value="private"><label for="bath_private">Eigen</label></div>
+                    <div class="radio-card"><input type="radio" name="bathroom_type" id="bath_shared" value="shared"><label for="bath_shared">Geteilt</label></div>
+                </div>
+                <div class="form-group" style="max-width: 150px;">
+                    <label for="bathroom_count">Anzahl Bäder</label>
+                    <input type="number" id="bathroom_count" placeholder="1" min="1" max="10">
+                </div>
+
+                <!-- Küche -->
+                <div class="section-subtitle">Küche</div>
+                <div class="radio-group">
+                    <div class="radio-card"><input type="radio" name="kitchen_type" id="kitchen_private" value="private"><label for="kitchen_private">Eigen</label></div>
+                    <div class="radio-card"><input type="radio" name="kitchen_type" id="kitchen_shared" value="shared"><label for="kitchen_shared">Geteilt</label></div>
+                </div>
+
+                <!-- Wohnzimmer -->
+                <div class="section-subtitle">Wohnzimmer</div>
+                <div class="radio-group">
+                    <div class="radio-card"><input type="radio" name="livingroom_type" id="living_private" value="private"><label for="living_private">Eigen</label></div>
+                    <div class="radio-card"><input type="radio" name="livingroom_type" id="living_shared" value="shared"><label for="living_shared">Geteilt</label></div>
+                    <div class="radio-card"><input type="radio" name="livingroom_type" id="living_none" value="none"><label for="living_none">Keins</label></div>
+                </div>
+
+                <!-- WC -->
+                <div class="section-subtitle">WC</div>
+                <div class="radio-group">
+                    <div class="radio-card"><input type="radio" name="toilet_type" id="toilet_in_bath" value="in_bath"><label for="toilet_in_bath">Im Bad</label></div>
+                    <div class="radio-card"><input type="radio" name="toilet_type" id="toilet_separate" value="separate"><label for="toilet_separate">Separat</label></div>
+                    <div class="radio-card"><input type="radio" name="toilet_type" id="toilet_shared" value="shared"><label for="toilet_shared">Geteilt</label></div>
+                </div>
+            </div>
+
+            <!-- ========== BADEZIMMER DETAILS ========== -->
+            <div id="group-bathroom-details">
+                <div class="section-title">🚿 Badezimmer-Ausstattung</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-card"><input type="checkbox" id="bath_shower"><label for="bath_shower">Dusche</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="bath_tub"><label for="bath_tub">Badewanne</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="bath_towel_heater"><label for="bath_towel_heater">Handtuchheizung</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="bath_window"><label for="bath_window">Fenster im Bad</label></div>
+                </div>
+            </div>
+
+            <!-- ========== KÜCHEN AUSSTATTUNG ========== -->
+            <div id="group-kitchen-details">
+                <div class="section-title">🍳 Küchen-Ausstattung</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-card"><input type="checkbox" id="kitchen_stove"><label for="kitchen_stove">Herd/Ceranfeld</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="kitchen_oven"><label for="kitchen_oven">Backofen</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="kitchen_fridge"><label for="kitchen_fridge">Kühlschrank</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="kitchen_freezer"><label for="kitchen_freezer">Gefrierschrank</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="kitchen_dishwasher"><label for="kitchen_dishwasher">Geschirrspüler</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="kitchen_microwave"><label for="kitchen_microwave">Mikrowelle</label></div>
+                </div>
+            </div>
+
+            <!-- ========== AUSSTATTUNG & MERKMALE ========== -->
+            <div id="group-features">
+                <div class="section-title">🏠 Ausstattung & Merkmale</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-card"><input type="checkbox" id="feat_balcony"><label for="feat_balcony">Balkon/Terrasse</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="feat_garden"><label for="feat_garden">Garten</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="feat_elevator"><label for="feat_elevator">Aufzug</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="feat_parking"><label for="feat_parking">Stellplatz</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="feat_cellar"><label for="feat_cellar">Keller</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="feat_pets"><label for="feat_pets">Haustiere erlaubt</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="feat_barrier_free"><label for="feat_barrier_free">Barrierefrei</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="feat_washing"><label for="feat_washing">Waschmaschine</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="feat_dryer"><label for="feat_dryer">Trockner</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="feat_storage"><label for="feat_storage">Abstellraum</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="feat_attic"><label for="feat_attic">Dachboden</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="feat_bike_room"><label for="feat_bike_room">Fahrradkeller</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="feat_ac"><label for="feat_ac">Klimaanlage</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="feat_floor_heating"><label for="feat_floor_heating">Fußbodenheizung</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="feat_shutters"><label for="feat_shutters">Rollläden/Jalousien</label></div>
+                </div>
+            </div>
+
+            <!-- ========== MÖBLIERUNG ========== -->
+            <div id="group-furniture">
+                <div class="section-title">🛋️ Möblierung</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-card"><input type="checkbox" id="furn_bed"><label for="furn_bed">Bett</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="furn_desk"><label for="furn_desk">Schreibtisch</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="furn_wardrobe"><label for="furn_wardrobe">Kleiderschrank</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="furn_kitchen"><label for="furn_kitchen">Einbauküche</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="furn_sofa"><label for="furn_sofa">Sofa</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="furn_tv"><label for="furn_tv">TV</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="furn_chair"><label for="furn_chair">Stuhl</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="furn_shelf"><label for="furn_shelf">Regal</label></div>
+                </div>
+            </div>
+
+            <!-- ========== SONSTIGES ========== -->
+            <div id="group-misc">
+                <div class="section-title">📋 Sonstiges</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-card"><input type="checkbox" id="misc_anmeldung"><label for="misc_anmeldung">Wohnsitz-Anmeldung möglich</label></div>
+                    <span class="helper-text" style="margin-top: -0.5rem; margin-bottom: 0.75rem;">*Mieter kann sich offiziell beim Einwohnermeldeamt anmelden</span>
+                    <div class="checkbox-card"><input type="checkbox" id="misc_commission_free"><label for="misc_commission_free">Provisionsfrei</label></div>
+                    <span class="helper-text" style="margin-top: -0.5rem; margin-bottom: 0.75rem;">*Keine Maklergebühren für den Mieter</span>
+                </div>
+            </div>
+
+            <!-- ========== KOSTEN ========== -->
+            <div class="section-title">💰 Kosten</div>
+            
+            <div class="form-group" id="group-rent">
+                <label for="monthly_rent">Monatliche Miete (Kalt) € *</label>
+                <input type="number" id="monthly_rent" required placeholder="450" step="0.01">
+            </div>
+
+            <!-- Preis Range (Nur für Suche) -->
+            <div class="hidden" id="group-price-range" style="display: flex; gap: 1rem;">
+                <div class="form-group" style="flex: 1;">
+                    <label>Min Miete €</label>
+                    <input type="number" id="price_min" step="0.01">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>Max Miete €</label>
+                    <input type="number" id="price_max" step="0.01">
+                </div>
+            </div>
+
+            <div class="form-group" id="group-deposit">
+                <label for="deposit">Kaution €</label>
+                <input type="number" id="deposit" placeholder="900" step="0.01">
+            </div>
+
+            <!-- ========== NEBENKOSTEN ========== -->
+            <div class="form-group" id="group-utilities">
+                <label style="margin-bottom: 0.5rem; display: block; font-weight: 600;">Nebenkosten (Häkchen = Inklusive)</label>
+                
+                <!-- Strom -->
+                <div>
+                    <div class="checkbox-card"><input type="checkbox" id="util_electricity" onchange="toggleCost('electricity')"><label for="util_electricity">Strom inklusive</label></div>
+                    <div id="cost_electricity" class="cost-input-wrapper"><input type="number" id="val_electricity" placeholder="Kosten in € (ca.)"></div>
+                </div>
+
+                <!-- Wasser -->
+                <div>
+                    <div class="checkbox-card"><input type="checkbox" id="util_water" onchange="toggleCost('water')"><label for="util_water">Wasser inklusive</label></div>
+                    <div id="cost_water" class="cost-input-wrapper"><input type="number" id="val_water" placeholder="Kosten in € (ca.)"></div>
+                </div>
+
+                <!-- Internet -->
+                <div>
+                    <div class="checkbox-card"><input type="checkbox" id="util_internet" onchange="toggleCost('internet')"><label for="util_internet">Internet / WLAN inklusive</label></div>
+                    <div id="cost_internet" class="cost-input-wrapper"><input type="number" id="val_internet" placeholder="Kosten in € (ca.)"></div>
+                </div>
+
+                <!-- Heizung -->
+                <div>
+                    <div class="checkbox-card"><input type="checkbox" id="util_heating" onchange="toggleCost('heating')"><label for="util_heating">Heizung inklusive</label></div>
+                    <div id="cost_heating" class="cost-input-wrapper"><input type="number" id="val_heating" placeholder="Kosten in € (ca.)"></div>
+                </div>
+            </div>
+
+            <!-- ========== VERFÜGBARKEIT ========== -->
+            <div class="section-title">📅 Verfügbarkeit</div>
+            <div class="date-grid">
+                <div class="form-group">
+                    <label for="available_from">Frei ab</label>
+                    <input type="date" id="available_from">
+                </div>
+                <div class="form-group">
+                    <label for="available_to">Frei bis</label>
+                    <input type="date" id="available_to">
+                </div>
+            </div>
+            <span class="helper-text" style="display: block; margin-bottom: 1rem; color: #6b7280; font-size: 0.8rem;">Leer lassen für unbefristet</span>
+
+            <!-- ========== TAUSCH DETAILS (Nur für Tausch) ========== -->
+            <div class="hidden" id="group-swap-target">
+                <div class="section-title">🔄 Tausch-Details</div>
+                
+                <div class="form-group">
+                    <label for="swap_type">Art des Tauschs</label>
+                    <select id="swap_type" onchange="toggleSwapDuration()">
+                        <option value="permanent">Dauerhaft (komplett wechseln)</option>
+                        <option value="temporary">Temporär (z.B. für Praktikum)</option>
+                    </select>
+                </div>
+
+                <div id="group-swap-duration" class="hidden">
+                    <div class="date-grid">
+                        <div class="form-group">
+                            <label for="swap_from">Tausch von</label>
+                            <input type="date" id="swap_from">
+                        </div>
+                        <div class="form-group">
+                            <label for="swap_to">Tausch bis</label>
+                            <input type="date" id="swap_to">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="swap_reason">Grund für Tausch</label>
+                    <select id="swap_reason">
+                        <option value="">Bitte wählen</option>
+                        <option value="internship">Praktikum in anderer Stadt</option>
+                        <option value="exchange">Auslandssemester</option>
+                        <option value="job">Job / Werkstudent</option>
+                        <option value="relationship">Beziehung / Zusammenziehen</option>
+                        <option value="other">Sonstiges</option>
+                    </select>
+                </div>
+
+                <div class="section-subtitle">Deine aktuelle Situation</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-card"><input type="checkbox" id="swap_landlord_informed"><label for="swap_landlord_informed">Vermieter informiert</label></div>
+                </div>
+                <div class="form-group">
+                    <label for="swap_contract_until">Dein Mietvertrag läuft bis</label>
+                    <input type="date" id="swap_contract_until">
+                    <span class="helper-text">Optional - zeigt Seriosität</span>
+                </div>
+
+                <div class="section-subtitle">Was ich suche</div>
+                <div class="form-group">
+                    <label>In welcher Stadt suchst du?</label>
+                    <input type="text" id="swap_target_city" placeholder="z.B. Hamburg" list="citySuggestions">
+                </div>
+                <div class="form-group">
+                    <label>Stadtteil / Gegend (optional)</label>
+                    <input type="text" id="swap_target_district" placeholder="z.B. Altona, Eimsbüttel">
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Min. Zimmergröße (m²)</label>
+                        <input type="number" id="swap_min_size" placeholder="15">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Max. Miete (€)</label>
+                        <input type="number" id="swap_max_rent" placeholder="500">
+                    </div>
+                </div>
+
+                <div class="section-subtitle">Flexibilität</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-card"><input type="checkbox" id="swap_surcharge_ok"><label for="swap_surcharge_ok">Mietzuschlag möglich</label></div>
+                    <div class="checkbox-card"><input type="checkbox" id="swap_time_flexible"><label for="swap_time_flexible">Zeitlich flexibel (±2 Wochen)</label></div>
+                </div>
+
+            </div>
+
+            <!-- ========== BILDER ========== -->
+            <div id="group-images">
+                <div class="section-title">📷 Bilder</div>
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📷</div>
+                    <div style="font-weight: 600;">Bilder auswählen</div>
+                    <div style="font-size: 0.8rem; color: #6b7280;">Max. 5 Bilder (JPG, PNG)</div>
+                </div>
+                <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" onchange="handleFiles(this.files)">
+                <div class="preview-grid" id="previewGrid"></div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">Inserat veröffentlichen</button>
+            <div style="height: 20px;"></div>
+        </form>
+
+    </main>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
+<script src="room8-ui.js"></script>
+<script src="cities.js"></script>
+<script src="notificationHelpers.js"></script>
+<script>
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // 2. Städte-Vorschläge aktivieren
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof populateCityDatalist === 'function') {
+            populateCityDatalist('citySuggestions');
+        }
+
+        // Initiale Kosten-Anzeige
+        ['electricity', 'water', 'internet', 'heating'].forEach(function(type) {
+            toggleCost(type);
+        });
+
+        // Hobby Tags Click Handler
+        document.querySelectorAll('#hobby-tags .tag-item').forEach(function(tag) {
+            tag.addEventListener('click', function() {
+                this.classList.toggle('selected');
+            });
+        });
+
+        // Haustier Feld Toggle
+        document.getElementById('seeker_has_pet').addEventListener('change', function() {
+            document.getElementById('group-pet-type').style.display = this.checked ? 'block' : 'none';
+        });
+    });
+
+    // Toggle logic for costs
+    function toggleCost(type) {
+        var checkbox = document.getElementById('util_' + type);
+        var costDiv = document.getElementById('cost_' + type);
+        
+        if (!checkbox || !costDiv) return;
+
+        if (!checkbox.checked) {
+            costDiv.style.display = 'block';
+        } else {
+            costDiv.style.display = 'none';
+        }
+    }
+
+    // Toggle WG-spezifische Felder und Räume-Optionen basierend auf Wohnungstyp
+    function toggleWGFields() {
+        var roomType = document.getElementById('room_type').value;
+        var wgDetails = document.getElementById('group-wg-details');
+        var groupRooms = document.getElementById('group-rooms');
+
+        // Bei WG-Zimmer oder geteiltem Zimmer: WG-Details und Räume anzeigen
+        if (roomType === 'wg_room' || roomType === 'shared_room') {
+            wgDetails.classList.remove('hidden');
+            groupRooms.classList.remove('hidden');
+        }
+        // Bei Studio, ganzer Wohnung oder Haus: Alles ist privat - keine Auswahl nötig
+        else if (roomType === 'studio' || roomType === 'entire_apartment' || roomType === 'house') {
+            wgDetails.classList.add('hidden');
+            groupRooms.classList.add('hidden');
+
+            // Auto-set alle Räume auf "privat"
+            var bathPrivate = document.getElementById('bath_private');
+            var kitchenPrivate = document.getElementById('kitchen_private');
+            var livingPrivate = document.getElementById('living_private');
+            var toiletInBath = document.getElementById('toilet_in_bath');
+
+            if (bathPrivate) bathPrivate.checked = true;
+            if (kitchenPrivate) kitchenPrivate.checked = true;
+            if (livingPrivate) livingPrivate.checked = true;
+            if (toiletInBath) toiletInBath.checked = true;
+        }
+        // Sonst (leer): WG-Details ausblenden, Räume einblenden
+        else {
+            wgDetails.classList.add('hidden');
+            if (roomType) {
+                groupRooms.classList.remove('hidden');
+            }
+        }
+    }
+
+    // Toggle Tausch Zeitraum
+    function toggleSwapDuration() {
+        var swapType = document.getElementById('swap_type').value;
+        var durationGroup = document.getElementById('group-swap-duration');
+
+        if (swapType === 'temporary') {
+            durationGroup.classList.remove('hidden');
+        } else {
+            durationGroup.classList.add('hidden');
+        }
+    }
+
+    // Update Felder basierend auf Wohnungstyp bei Suche
+    function updateSearchFields() {
+        if (currentMode !== 'search') return;
+
+        var roomType = document.getElementById('room_type').value;
+        var groupAboutMeBasic = document.getElementById('group-about-me-basic');
+        var groupAboutMeWg = document.getElementById('group-about-me-wg');
+        var groupWgPrefs = document.getElementById('group-wg-preferences');
+        var descInput = document.getElementById('description');
+
+        // Erstmal alles verstecken
+        groupAboutMeBasic.classList.add('hidden');
+        groupAboutMeWg.classList.add('hidden');
+        groupWgPrefs.classList.add('hidden');
+
+        // Nur anzeigen wenn ein Typ ausgewählt wurde
+        if (!roomType) return;
+
+        // Basic "Über mich" für alle Typen
+        groupAboutMeBasic.classList.remove('hidden');
+
+        // WG-spezifische Felder nur bei WG-Zimmer oder geteiltem Zimmer
+        if (roomType === 'wg_room' || roomType === 'shared_room') {
+            groupAboutMeWg.classList.remove('hidden');
+            groupWgPrefs.classList.remove('hidden');
+            descInput.placeholder = 'Beschreibe was du suchst und was dir bei einer WG wichtig ist...';
+        } else {
+            descInput.placeholder = 'Beschreibe was du suchst und wann du einziehen möchtest...';
+        }
+    }
+
+    var selectedFiles = [];
+    var currentMode = 'offer';
+    var selectedHobbies = [];
+    var editListingId = null;
+    var existingPhotos = [];
+
+    // URL Parameter prüfen (z.B. ?mode=search oder ?id=123)
+    var urlParams = new URLSearchParams(window.location.search);
+    var modeParam = urlParams.get('mode');
+    var idParam = urlParams.get('id');
+
+    if (idParam) {
+        editListingId = idParam;
+        loadListingForEdit(idParam);
+    } else if (modeParam) {
+        setMode(modeParam);
+    }
+
+    // Listing laden für Bearbeitung
+    async function loadListingForEdit(listingId) {
+        try {
+            var result = await sb.from('listings').select('*').eq('id', listingId).single();
+            if (result.error) throw result.error;
+
+            var listing = result.data;
+
+            // Titel anpassen
+            document.getElementById('pageTitle').textContent = 'Inserat bearbeiten';
+            document.getElementById('submitBtn').textContent = 'Änderungen speichern';
+
+            // Modus setzen
+            if (listing.listing_mode) {
+                setMode(listing.listing_mode);
+            }
+
+            // Basis-Felder
+            document.getElementById('title').value = listing.title || '';
+            document.getElementById('description').value = listing.description || '';
+            document.getElementById('city').value = listing.city || '';
+            document.getElementById('district').value = listing.district || '';
+            document.getElementById('address_line').value = listing.address_line || '';
+            document.getElementById('room_type').value = listing.room_type || '';
+            document.getElementById('room_size').value = listing.room_size || '';
+            document.getElementById('number_of_rooms').value = listing.number_of_rooms || '';
+            document.getElementById('monthly_rent').value = listing.monthly_rent || '';
+            document.getElementById('deposit').value = listing.deposit || '';
+            document.getElementById('price_min').value = listing.price_range_min || '';
+            document.getElementById('price_max').value = listing.price_range_max || '';
+            document.getElementById('available_from').value = listing.available_from || '';
+            document.getElementById('available_to').value = listing.available_to || '';
+
+            // WG Details Toggle
+            toggleWGFields();
+
+            // Location Info
+            if (listing.location_info) {
+                var loc = listing.location_info;
+                document.getElementById('uni_distance').value = loc.uni_distance || '';
+                document.getElementById('public_transport').value = loc.public_transport || '';
+                document.getElementById('uni_name').value = loc.uni_name || '';
+            }
+
+            // WG Details
+            if (listing.wg_details) {
+                var wg = listing.wg_details;
+                document.getElementById('wg_size').value = wg.size || '';
+                document.getElementById('wg_gender').value = wg.gender || '';
+                document.getElementById('wg_type').value = wg.type || '';
+                document.getElementById('wg_smoking').checked = wg.smoking || false;
+                document.getElementById('wg_smoking_outside').checked = wg.smoking_outside || false;
+            }
+
+            // Rooms Data
+            if (listing.rooms_data) {
+                var rooms = listing.rooms_data;
+                if (rooms.bathroom_type) {
+                    var bathRadio = document.querySelector('input[name="bathroom_type"][value="' + rooms.bathroom_type + '"]');
+                    if (bathRadio) bathRadio.checked = true;
+                }
+                if (rooms.kitchen_type) {
+                    var kitchenRadio = document.querySelector('input[name="kitchen_type"][value="' + rooms.kitchen_type + '"]');
+                    if (kitchenRadio) kitchenRadio.checked = true;
+                }
+                if (rooms.livingroom_type) {
+                    var livingRadio = document.querySelector('input[name="livingroom_type"][value="' + rooms.livingroom_type + '"]');
+                    if (livingRadio) livingRadio.checked = true;
+                }
+                if (rooms.toilet_type) {
+                    var toiletRadio = document.querySelector('input[name="toilet_type"][value="' + rooms.toilet_type + '"]');
+                    if (toiletRadio) toiletRadio.checked = true;
+                }
+                document.getElementById('bathroom_count').value = rooms.bathroom_count || '';
+            }
+
+            // Bathroom Details
+            if (listing.bathroom_details) {
+                var bath = listing.bathroom_details;
+                document.getElementById('bath_shower').checked = bath.shower || false;
+                document.getElementById('bath_tub').checked = bath.bathtub || false;
+                document.getElementById('bath_towel_heater').checked = bath.towel_heater || false;
+                document.getElementById('bath_window').checked = bath.window || false;
+            }
+
+            // Kitchen Details
+            if (listing.kitchen_details) {
+                var kit = listing.kitchen_details;
+                document.getElementById('kitchen_stove').checked = kit.stove || false;
+                document.getElementById('kitchen_oven').checked = kit.oven || false;
+                document.getElementById('kitchen_fridge').checked = kit.fridge || false;
+                document.getElementById('kitchen_freezer').checked = kit.freezer || false;
+                document.getElementById('kitchen_dishwasher').checked = kit.dishwasher || false;
+                document.getElementById('kitchen_microwave').checked = kit.microwave || false;
+            }
+
+            // Features
+            if (listing.room_features) {
+                var feat = listing.room_features;
+                document.getElementById('feat_balcony').checked = feat.balcony || false;
+                document.getElementById('feat_garden').checked = feat.garden || false;
+                document.getElementById('feat_elevator').checked = feat.elevator || false;
+                document.getElementById('feat_parking').checked = feat.parking || false;
+                document.getElementById('feat_cellar').checked = feat.cellar || false;
+                document.getElementById('feat_pets').checked = feat.pets_allowed || false;
+                document.getElementById('feat_barrier_free').checked = feat.barrier_free || false;
+                document.getElementById('feat_washing').checked = feat.washing_machine || false;
+                document.getElementById('feat_dryer').checked = feat.dryer || false;
+                document.getElementById('feat_storage').checked = feat.storage_room || false;
+                document.getElementById('feat_attic').checked = feat.attic || false;
+                document.getElementById('feat_bike_room').checked = feat.bike_room || false;
+                document.getElementById('feat_ac').checked = feat.air_conditioning || false;
+                document.getElementById('feat_floor_heating').checked = feat.floor_heating || false;
+                document.getElementById('feat_shutters').checked = feat.shutters || false;
+            }
+
+            // Furniture
+            if (listing.furniture_data) {
+                var furn = listing.furniture_data;
+                document.getElementById('furn_bed').checked = furn.bed || false;
+                document.getElementById('furn_desk').checked = furn.desk || false;
+                document.getElementById('furn_wardrobe').checked = furn.wardrobe || false;
+                document.getElementById('furn_kitchen').checked = furn.kitchen || false;
+                document.getElementById('furn_sofa').checked = furn.sofa || false;
+                document.getElementById('furn_tv').checked = furn.tv || false;
+                document.getElementById('furn_chair').checked = furn.chair || false;
+                document.getElementById('furn_shelf').checked = furn.shelf || false;
+            }
+
+            // Misc Details
+            if (listing.misc_details) {
+                var misc = listing.misc_details;
+                document.getElementById('misc_anmeldung').checked = misc.anmeldung_possible || false;
+                document.getElementById('misc_commission_free').checked = misc.commission_free || false;
+            }
+
+            // Utilities
+            if (listing.utilities_data) {
+                var util = listing.utilities_data;
+                document.getElementById('util_electricity').checked = util.electricity || false;
+                document.getElementById('val_electricity').value = util.electricity_cost || '';
+                document.getElementById('util_water').checked = util.water || false;
+                document.getElementById('val_water').value = util.water_cost || '';
+                document.getElementById('util_internet').checked = util.internet || false;
+                document.getElementById('val_internet').value = util.internet_cost || '';
+                document.getElementById('util_heating').checked = util.heating || false;
+                document.getElementById('val_heating').value = util.heating_cost || '';
+
+                // Toggle cost fields
+                ['electricity', 'water', 'internet', 'heating'].forEach(function(type) {
+                    toggleCost(type);
+                });
+            }
+
+            // Seeker Profile (für Suche)
+            if (listing.seeker_profile) {
+                var seeker = listing.seeker_profile;
+                document.getElementById('about_text').value = seeker.about_text || '';
+                document.getElementById('seeker_age').value = seeker.age || '';
+                document.getElementById('seeker_gender').value = seeker.gender || '';
+                document.getElementById('seeker_occupation').value = seeker.occupation || '';
+                document.getElementById('seeker_semester').value = seeker.semester || '';
+                document.getElementById('seeker_smoker').checked = seeker.is_smoker || false;
+                document.getElementById('seeker_has_pet').checked = seeker.has_pet || false;
+                document.getElementById('seeker_pet_type').value = seeker.pet_type || '';
+                document.getElementById('seeker_needs_anmeldung').checked = seeker.needs_anmeldung || false;
+                document.getElementById('seeker_move_flexibility').value = seeker.move_flexibility || '';
+
+                // Hobbies
+                if (seeker.hobbies && seeker.hobbies.length > 0) {
+                    seeker.hobbies.forEach(function(hobby) {
+                        var tag = document.querySelector('#hobby-tags .tag-item[data-tag="' + hobby + '"]');
+                        if (tag) tag.classList.add('selected');
+                    });
+                }
+
+                // Pet type toggle
+                if (seeker.has_pet) {
+                    document.getElementById('group-pet-type').style.display = 'block';
+                }
+            }
+
+            // WG Preferences (für Suche)
+            if (listing.wg_preferences) {
+                var pref = listing.wg_preferences;
+                document.getElementById('pref_gender').value = pref.pref_gender || '';
+                document.getElementById('pref_age_min').value = pref.pref_age_min || '';
+                document.getElementById('pref_age_max').value = pref.pref_age_max || '';
+                document.getElementById('pref_wg_type').value = pref.pref_wg_type || '';
+                document.getElementById('pref_smoker_ok').checked = pref.pref_smoker_ok || false;
+            }
+
+            // Swap Data (für Tausch)
+            if (listing.swap_target_data) {
+                var swap = listing.swap_target_data;
+                document.getElementById('swap_type').value = swap.swap_type || '';
+                document.getElementById('swap_from').value = swap.swap_from || '';
+                document.getElementById('swap_to').value = swap.swap_to || '';
+                document.getElementById('swap_reason').value = swap.swap_reason || '';
+                document.getElementById('swap_target_city').value = swap.target_city || '';
+                document.getElementById('swap_target_district').value = swap.target_district || '';
+                document.getElementById('swap_min_size').value = swap.min_size || '';
+                document.getElementById('swap_max_rent').value = swap.max_rent || '';
+                document.getElementById('swap_surcharge_ok').checked = swap.surcharge_ok || false;
+                document.getElementById('swap_time_flexible').checked = swap.time_flexible || false;
+                document.getElementById('swap_landlord_informed').checked = swap.landlord_informed || false;
+                document.getElementById('swap_contract_until').value = swap.contract_until || '';
+
+                toggleSwapDuration();
+            }
+
+            // Existierende Bilder laden
+            var photosResult = await sb.from('listing_photos').select('*').eq('listing_id', listingId).order('display_order');
+            if (photosResult.data && photosResult.data.length > 0) {
+                existingPhotos = photosResult.data;
+                var grid = document.getElementById('previewGrid');
+
+                for (var i = 0; i < photosResult.data.length; i++) {
+                    var photo = photosResult.data[i];
+                    var publicUrl = sb.storage.from('listing-images').getPublicUrl(photo.storage_path).data.publicUrl;
+
+                    var div = document.createElement('div');
+                    div.className = 'preview-item';
+                    div.innerHTML = '<img src="' + publicUrl + '">';
+                    grid.appendChild(div);
+                }
+            }
+
+        } catch (err) {
+            console.error('Fehler beim Laden:', err);
+            Room8UI.error('Fehler beim Laden des Inserats: ' + err.message);
+        }
+    }
+
+    function setMode(mode) {
+        currentMode = mode;
+
+        // UI Updates
+        document.querySelectorAll('.mode-option').forEach(el => el.classList.remove('active'));
+        document.getElementById('mode-' + mode).classList.add('active');
+
+        // Alle Gruppen
+        const groupAddress = document.getElementById('group-address');
+        const groupRent = document.getElementById('group-rent');
+        const groupPriceRange = document.getElementById('group-price-range');
+        const groupDeposit = document.getElementById('group-deposit');
+        const groupSwap = document.getElementById('group-swap-target');
+        const groupFeatures = document.getElementById('group-features');
+        const groupFurniture = document.getElementById('group-furniture');
+        const groupUtilities = document.getElementById('group-utilities');
+        const groupRooms = document.getElementById('group-rooms');
+        const groupBathDetails = document.getElementById('group-bathroom-details');
+        const groupKitchenDetails = document.getElementById('group-kitchen-details');
+        const groupWgDetails = document.getElementById('group-wg-details');
+        const groupMisc = document.getElementById('group-misc');
+        const groupLocationInfo = document.getElementById('group-location-info');
+        const groupAboutMeBasic = document.getElementById('group-about-me-basic');
+        const groupAboutMeWg = document.getElementById('group-about-me-wg');
+        const groupWgPrefs = document.getElementById('group-wg-preferences');
+        const groupImages = document.getElementById('group-images');
+        const groupNumberRooms = document.getElementById('group-number-rooms');
+
+        const btn = document.getElementById('submitBtn');
+        const title = document.getElementById('pageTitle');
+        const labelRoomType = document.getElementById('label-room-type');
+        const labelRoomSize = document.getElementById('label-room-size');
+        const titleInput = document.getElementById('title');
+        const descInput = document.getElementById('description');
+
+        // Reset: Alles anzeigen (Angebot-Standard)
+        groupAddress.classList.remove('hidden');
+        groupRent.classList.remove('hidden');
+        groupDeposit.classList.remove('hidden');
+        groupFeatures.classList.remove('hidden');
+        groupFurniture.classList.remove('hidden');
+        groupUtilities.classList.remove('hidden');
+        groupRooms.classList.remove('hidden');
+        groupBathDetails.classList.remove('hidden');
+        groupKitchenDetails.classList.remove('hidden');
+        groupMisc.classList.remove('hidden');
+        groupLocationInfo.classList.remove('hidden');
+        groupImages.classList.remove('hidden');
+        groupNumberRooms.classList.remove('hidden');
+
+        // Standardmäßig verstecken
+        groupPriceRange.classList.add('hidden');
+        groupSwap.classList.add('hidden');
+        groupAboutMeBasic.classList.add('hidden');
+        groupAboutMeWg.classList.add('hidden');
+        groupWgPrefs.classList.add('hidden');
+
+        // Reset Labels und Placeholders
+        labelRoomType.textContent = 'Art der Unterkunft *';
+        labelRoomSize.textContent = 'Größe (m²)';
+        titleInput.placeholder = 'z.B. Helles 20m² WG-Zimmer am Campus';
+        descInput.placeholder = 'Beschreibe das Zimmer, die Lage, die Mitbewohner und was dir wichtig ist...';
+
+        // WG Details je nach room_type
+        toggleWGFields();
+
+        if (mode === 'search') {
+            title.textContent = 'Gesuch aufgeben';
+            btn.textContent = 'Gesuch veröffentlichen';
+
+            // Labels und Placeholders für Gesuch anpassen
+            labelRoomType.textContent = 'Was suchst du? *';
+            labelRoomSize.textContent = 'Mindestgröße (m²)';
+            titleInput.placeholder = 'z.B. Student sucht WG-Zimmer in Uninähe';
+            descInput.placeholder = 'Wähle zuerst oben aus was du suchst...';
+
+            // Über mich und WG-Präferenzen werden durch updateSearchFields() gesteuert
+            // (erst nach Auswahl des Wohnungstyps)
+
+            // Bei Suche machen manche Felder keinen Sinn (beschreiben eine bestimmte Wohnung)
+            groupAddress.classList.add('hidden');
+            groupRent.classList.add('hidden');
+            groupPriceRange.classList.remove('hidden');
+            groupDeposit.classList.add('hidden');
+            groupRooms.classList.add('hidden');
+            groupBathDetails.classList.add('hidden');
+            groupKitchenDetails.classList.add('hidden');
+            groupWgDetails.classList.add('hidden');
+            groupMisc.classList.add('hidden');
+            groupLocationInfo.classList.add('hidden');
+            groupUtilities.classList.add('hidden');
+            groupFurniture.classList.add('hidden');
+            groupFeatures.classList.add('hidden');
+            groupImages.classList.add('hidden');
+            groupNumberRooms.classList.add('hidden');
+
+            // WG-Präferenzen nur bei WG-Zimmer/Geteiltes Zimmer anzeigen
+            updateSearchFields();
+
+            document.getElementById('monthly_rent').required = false;
+
+        } else if (mode === 'swap') {
+            title.textContent = 'Wohnungstausch';
+            btn.textContent = 'Tauschangebot erstellen';
+            groupSwap.classList.remove('hidden');
+            document.getElementById('monthly_rent').required = true;
+        } else {
+            title.textContent = 'Wohnung inserieren';
+            btn.textContent = 'Inserat veröffentlichen';
+            document.getElementById('monthly_rent').required = true;
+        }
+    }
+
+    // Datei Handling
+    function handleFiles(files) {
+        var grid = document.getElementById('previewGrid');
+        for (var i = 0; i < files.length; i++) {
+            if (selectedFiles.length >= 5) break;
+            var file = files[i];
+            selectedFiles.push(file);
+            var div = document.createElement('div');
+            div.className = 'preview-item';
+            div.innerHTML = `<img src="${URL.createObjectURL(file)}">`;
+            grid.appendChild(div);
+        }
+    }
+
+    // Hilfsfunktion: Radio-Wert auslesen
+    function getRadioValue(name) {
+        var selected = document.querySelector('input[name="' + name + '"]:checked');
+        return selected ? selected.value : null;
+    }
+
+    // Hilfsfunktion: Ausgewählte Hobbies sammeln
+    function getSelectedHobbies() {
+        var hobbies = [];
+        document.querySelectorAll('#hobby-tags .tag-item.selected').forEach(function(tag) {
+            hobbies.push(tag.dataset.tag);
+        });
+        return hobbies;
+    }
+
+    // Formular Absenden
+    document.getElementById('listingForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.textContent = "Speichere...";
+
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+            if (!user) {
+                Room8UI.warning("Bitte erst einloggen.");
+                setTimeout(function() { window.location.href = 'login.html'; }, 1500);
+                return;
+            }
+
+            // 1. Daten Sammeln (JSON Objekte bauen)
+            
+            // Nebenkosten
+            const utilities = {
+                electricity: document.getElementById('util_electricity').checked,
+                electricity_cost: document.getElementById('val_electricity').value,
+                water: document.getElementById('util_water').checked,
+                water_cost: document.getElementById('val_water').value,
+                internet: document.getElementById('util_internet').checked,
+                internet_cost: document.getElementById('val_internet').value,
+                heating: document.getElementById('util_heating').checked,
+                heating_cost: document.getElementById('val_heating').value
+            };
+
+            // Ausstattung (erweitert)
+            const features = {
+                balcony: document.getElementById('feat_balcony').checked,
+                garden: document.getElementById('feat_garden').checked,
+                elevator: document.getElementById('feat_elevator').checked,
+                parking: document.getElementById('feat_parking').checked,
+                cellar: document.getElementById('feat_cellar').checked,
+                pets_allowed: document.getElementById('feat_pets').checked,
+                barrier_free: document.getElementById('feat_barrier_free').checked,
+                washing_machine: document.getElementById('feat_washing').checked,
+                dryer: document.getElementById('feat_dryer').checked,
+                storage_room: document.getElementById('feat_storage').checked,
+                attic: document.getElementById('feat_attic').checked,
+                bike_room: document.getElementById('feat_bike_room').checked,
+                air_conditioning: document.getElementById('feat_ac').checked,
+                floor_heating: document.getElementById('feat_floor_heating').checked,
+                shutters: document.getElementById('feat_shutters').checked
+            };
+
+            // Möbel (erweitert)
+            const furniture = {
+                bed: document.getElementById('furn_bed').checked,
+                desk: document.getElementById('furn_desk').checked,
+                wardrobe: document.getElementById('furn_wardrobe').checked,
+                kitchen: document.getElementById('furn_kitchen').checked,
+                sofa: document.getElementById('furn_sofa').checked,
+                tv: document.getElementById('furn_tv').checked,
+                chair: document.getElementById('furn_chair').checked,
+                shelf: document.getElementById('furn_shelf').checked
+            };
+
+            // Räume
+            const rooms = {
+                bathroom_type: getRadioValue('bathroom_type'),
+                bathroom_count: document.getElementById('bathroom_count').value || null,
+                kitchen_type: getRadioValue('kitchen_type'),
+                livingroom_type: getRadioValue('livingroom_type'),
+                toilet_type: getRadioValue('toilet_type')
+            };
+
+            // Badezimmer Details
+            const bathroomDetails = {
+                shower: document.getElementById('bath_shower').checked,
+                bathtub: document.getElementById('bath_tub').checked,
+                towel_heater: document.getElementById('bath_towel_heater').checked,
+                window: document.getElementById('bath_window').checked
+            };
+
+            // Küchen Details
+            const kitchenDetails = {
+                stove: document.getElementById('kitchen_stove').checked,
+                oven: document.getElementById('kitchen_oven').checked,
+                fridge: document.getElementById('kitchen_fridge').checked,
+                freezer: document.getElementById('kitchen_freezer').checked,
+                dishwasher: document.getElementById('kitchen_dishwasher').checked,
+                microwave: document.getElementById('kitchen_microwave').checked
+            };
+
+            // WG Details
+            const wgDetails = {
+                size: document.getElementById('wg_size').value || null,
+                gender: document.getElementById('wg_gender').value || null,
+                type: document.getElementById('wg_type').value || null,
+                smoking: document.getElementById('wg_smoking').checked,
+                smoking_outside: document.getElementById('wg_smoking_outside').checked
+            };
+
+            // Sonstiges
+            const miscDetails = {
+                anmeldung_possible: document.getElementById('misc_anmeldung').checked,
+                commission_free: document.getElementById('misc_commission_free').checked
+            };
+
+            // Lage
+            const locationInfo = {
+                uni_distance: document.getElementById('uni_distance').value || null,
+                public_transport: document.getElementById('public_transport').value || null,
+                uni_name: document.getElementById('uni_name').value || null
+            };
+
+            // Sucher-Profil (nur bei Suche)
+            const seekerProfile = currentMode === 'search' ? {
+                about_text: document.getElementById('about_text').value || null,
+                age: document.getElementById('seeker_age').value || null,
+                gender: document.getElementById('seeker_gender').value || null,
+                occupation: document.getElementById('seeker_occupation').value || null,
+                semester: document.getElementById('seeker_semester').value || null,
+                hobbies: getSelectedHobbies(),
+                is_smoker: document.getElementById('seeker_smoker').checked,
+                has_pet: document.getElementById('seeker_has_pet').checked,
+                pet_type: document.getElementById('seeker_pet_type').value || null,
+                needs_anmeldung: document.getElementById('seeker_needs_anmeldung').checked,
+                move_flexibility: document.getElementById('seeker_move_flexibility').value || null
+            } : null;
+
+            // WG Präferenzen (nur bei Suche)
+            const wgPreferences = currentMode === 'search' ? {
+                pref_gender: document.getElementById('pref_gender').value || null,
+                pref_age_min: document.getElementById('pref_age_min').value || null,
+                pref_age_max: document.getElementById('pref_age_max').value || null,
+                pref_wg_type: document.getElementById('pref_wg_type').value || null,
+                pref_smoker_ok: document.getElementById('pref_smoker_ok').checked
+            } : null;
+
+            // Tauschdaten (erweitert)
+            const swapTarget = currentMode === 'swap' ? {
+                swap_type: document.getElementById('swap_type').value || null,
+                swap_from: document.getElementById('swap_from').value || null,
+                swap_to: document.getElementById('swap_to').value || null,
+                swap_reason: document.getElementById('swap_reason').value || null,
+                target_city: document.getElementById('swap_target_city').value || null,
+                target_district: document.getElementById('swap_target_district').value || null,
+                min_size: document.getElementById('swap_min_size').value || null,
+                max_rent: document.getElementById('swap_max_rent').value || null,
+                surcharge_ok: document.getElementById('swap_surcharge_ok').checked,
+                time_flexible: document.getElementById('swap_time_flexible').checked,
+                landlord_informed: document.getElementById('swap_landlord_informed').checked,
+                contract_until: document.getElementById('swap_contract_until').value || null
+            } : null;
+
+            // Haupt-Objekt
+            const insertData = {
+                owner_id: user.id,
+                type: 'wohnung',
+                listing_mode: currentMode,
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                
+                city: document.getElementById('city').value,
+                district: document.getElementById('district').value,
+                address_line: document.getElementById('address_line').value,
+                
+                // Details
+                room_type: document.getElementById('room_type').value,
+                room_size: document.getElementById('room_size').value || null,
+                number_of_rooms: document.getElementById('number_of_rooms').value || null,
+                
+                // Kosten
+                monthly_rent: document.getElementById('monthly_rent').value || null,
+                deposit: document.getElementById('deposit').value || null,
+                price_range_min: document.getElementById('price_min').value || null,
+                price_range_max: document.getElementById('price_max').value || null,
+                
+                // Datum
+                available_from: document.getElementById('available_from').value || null,
+                available_to: document.getElementById('available_to').value || null,
+                
+                // JSON Daten (erweitert)
+                utilities_data: utilities,
+                room_features: features,
+                furniture_data: furniture,
+                rooms_data: rooms,
+                bathroom_details: bathroomDetails,
+                kitchen_details: kitchenDetails,
+                wg_details: wgDetails,
+                misc_details: miscDetails,
+                location_info: locationInfo,
+                seeker_profile: seekerProfile,
+                wg_preferences: wgPreferences,
+                swap_target_data: swapTarget,
+                
+                is_active: true
+            };
+
+            // 2. Insert oder Update in DB
+            var listing;
+            if (editListingId) {
+                // UPDATE
+                var updateResult = await sb.from('listings').update(insertData).eq('id', editListingId).select().single();
+                if (updateResult.error) throw updateResult.error;
+                listing = updateResult.data;
+            } else {
+                // INSERT
+                var insertResult = await sb.from('listings').insert(insertData).select().single();
+                if (insertResult.error) throw insertResult.error;
+                listing = insertResult.data;
+            }
+
+            // 3. Bilder Upload (nur neue Bilder)
+            if (selectedFiles.length > 0) {
+                btn.textContent = "Lade Bilder hoch...";
+                var startIndex = existingPhotos.length;
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    const file = selectedFiles[i];
+                    const ext = file.name.split('.').pop();
+                    const path = `${listing.id}_${startIndex + i}.${ext}`;
+
+                    var uploadResult = await sb.storage.from('listing-images').upload(path, file);
+                    if (uploadResult.error) {
+                        console.error("Bild Upload Fehler:", uploadResult.error);
+                        continue; // Nächstes Bild versuchen
+                    }
+
+                    await sb.from('listing_photos').insert({
+                        listing_id: listing.id,
+                        storage_path: path,
+                        display_order: startIndex + i
+                    });
+                }
+            }
+
+            Room8UI.success(editListingId ? "Änderungen gespeichert!" : "Inserat erfolgreich erstellt!");
+
+            // City-Notifications + Saved-Search-Notifications werden jetzt
+            // komplett server-seitig via DB-Trigger gehandhabt:
+            // - trigger_notify_new_listing_city (notification_settings)
+            // - trigger_match_saved_searches (saved_searches)
+
+            setTimeout(function() { window.location.href = "wohnungen.html"; }, 1500);
+
+        } catch (err) {
+            console.error(err);
+            Room8UI.error("Fehler: " + err.message);
+            btn.disabled = false;
+            btn.textContent = "Erneut versuchen";
+        }
+    });
+</script>
+<script src="notificationBell.js"></script>
+</body>
+</html>

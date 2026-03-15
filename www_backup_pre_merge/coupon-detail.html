@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Coupon - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .coupon-hero { height: 250px; background-color: #FED7AA; position: relative; }
+        .coupon-hero img { width: 100%; height: 100%; object-fit: cover; }
+        .coupon-content { background: white; border-radius: 20px 20px 0 0; margin-top: -20px; position: relative; padding: 2rem 1.5rem; text-align: center; }
+        .discount-big { font-size: 2.5rem; font-weight: 800; color: #EA580C; margin: 1rem 0; }
+        .code-box { background: #F3F4F6; border: 2px dashed #D1D5DB; padding: 1.5rem; margin: 2rem 0; border-radius: 12px; font-family: monospace; font-size: 1.8rem; font-weight: 700; cursor: pointer; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header" style="position:absolute; top:0; left:0; width:100%; background:transparent; border:none; box-shadow:none; z-index:10;">
+        <a href="javascript:history.back()" class="back-arrow" style="background:rgba(0,0,0,0.3); border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; color:white;">&#8592;</a>
+    </header>
+
+    <div class="coupon-hero">
+        <img id="heroImg" src="no-image.svg" alt="Deal">
+    </div>
+
+    <div class="coupon-content">
+        <h2 id="companyName" style="color:#6B7280; font-size:0.9rem; text-transform:uppercase; margin-bottom:0.5rem;">Lade...</h2>
+        <h1 id="dealTitle" style="font-size:1.5rem; margin:0;"></h1>
+        <div class="discount-big" id="discountValue"></div>
+        <p id="description" style="color:#4B5563; line-height:1.6;"></p>
+        
+        <div class="code-box" onclick="copyCode()">
+            <span id="couponCode">CODE</span>
+            <div style="font-size:0.8rem; font-weight:400; color:#9CA3AF; margin-top:0.5rem; letter-spacing:0;">Tippen zum Kopieren</div>
+        </div>
+        
+        <p style="font-size:0.8rem; color:#9CA3AF;">Gültig bis: <span id="validDate">-</span></p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="config.js"></script>
+<script src="room8-ui.js"></script>
+<script>
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const id = new URLSearchParams(window.location.search).get('id');
+
+    async function load() {
+        if(!id) return;
+        const { data: coupon } = await sb.from('coupons').select('*, coupon_photos(storage_path)').eq('id', id).single();
+        
+        if(coupon) {
+            document.getElementById('companyName').textContent = coupon.business_name;
+            document.getElementById('dealTitle').textContent = coupon.title;
+            document.getElementById('discountValue').textContent = coupon.discount_value;
+            document.getElementById('description').textContent = coupon.description;
+            document.getElementById('couponCode').textContent = coupon.discount_code;
+            if(coupon.valid_until) document.getElementById('validDate').textContent = new Date(coupon.valid_until).toLocaleDateString('de-DE');
+
+            if (coupon.coupon_photos && coupon.coupon_photos.length > 0) {
+                const { data } = sb.storage.from('listing-images').getPublicUrl(coupon.coupon_photos[0].storage_path);
+                document.getElementById('heroImg').src = data.publicUrl;
+            }
+        }
+    }
+
+    function copyCode() {
+        const code = document.getElementById('couponCode').textContent;
+        navigator.clipboard.writeText(code);
+        Room8UI.success("Code kopiert: " + code);
+    }
+    load();
+</script>
+<script src="notificationBell.js"></script>
+</body>
+</html>

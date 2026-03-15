@@ -3,141 +3,433 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Willkommen bei Room8</title>
+  <title>Room8 - Die Studenten-Plattform</title>
+  <meta name="description" content="Room8 ist die exklusive Plattform von Studenten, für Studenten. WG-Suche, Marktplatz, Jobs und Coupons - alles an einem Ort.">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="stylesheet" href="style.css">
   <style>
-    body, html {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
+    html { scroll-behavior: smooth; }
+    body, html { height: auto; margin: 0; padding: 0; }
 
-    /* Pattern: Magic UI BlurFade */
     @keyframes blurFadeIn {
-      from { opacity: 0; filter: blur(8px); transform: translateY(12px); }
+      from { opacity: 0; filter: blur(8px); transform: translateY(16px); }
       to { opacity: 1; filter: blur(0px); transform: translateY(0); }
-    }
-
-    .welcome-screen-container {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 2rem 3rem;
-      background: url('https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=2070&auto=format&fit=crop') no-repeat center center;
-      background-size: cover;
-      position: relative;
-      text-align: center;
-    }
-
-    .welcome-screen-container::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.95) 100%);
-    }
-
-    .welcome-content {
-        position: relative;
-        z-index: 2;
-        animation: blurFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
-    }
-
-    .welcome-content h1 {
-      font-size: 2.2rem;
-      font-weight: 800;
-      margin-bottom: 0.75rem;
-      background: linear-gradient(135deg, #1E293B, #334155);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: -0.03em;
-      line-height: 1.15;
-    }
-
-    .welcome-content p {
-      font-size: 1rem;
-      color: #64748B;
-      max-width: 340px;
-      margin: 0 auto 2.5rem;
-      line-height: 1.5;
-    }
-
-    .welcome-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      width: 100%;
-      max-width: 350px;
-      margin: 0 auto;
-      animation: blurFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
-    }
-
-    /* Pattern: Magic UI ShimmerButton fuer primaeren CTA */
-    .welcome-btn {
-      display: block;
-      padding: 1rem;
-      border: 1px solid transparent;
-      border-radius: 999px;
-      font-size: 1rem;
-      font-weight: 700;
-      text-decoration: none;
-      text-align: center;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .welcome-btn:active { transform: scale(0.98); }
-
-    .btn-register {
-      background: linear-gradient(135deg, #3B82F6, #2563EB);
-      color: white;
-      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.35);
-      position: relative;
-      overflow: hidden;
-    }
-    .btn-register::after {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%; width: 50%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      animation: shimmerSlide 3s ease-in-out infinite;
     }
     @keyframes shimmerSlide {
       0%, 100% { left: -100%; }
       50% { left: 100%; }
     }
-    .btn-register:active {
-        box-shadow: 0 2px 12px rgba(59, 130, 246, 0.3);
-    }
+    .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
 
-    .btn-login {
+    /* ===== NAVBAR ===== */
+    .lp-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.875rem 1.25rem;
       background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      color: #3B82F6;
-      border: 1.5px solid rgba(59, 130, 246, 0.2);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(235,235,235,0.6);
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    .lp-nav.scrolled {
+      background: rgba(255,255,255,0.95);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .lp-nav-brand {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 1.25rem; font-weight: 800; color: #1A1A2E;
+      text-decoration: none; letter-spacing: -0.03em;
+    }
+    .lp-nav-brand-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, #3B82F6, #2563EB);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(59,130,246,0.25);
+    }
+    .lp-nav-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .lp-nav-link {
+      padding: 0.5rem 1rem; border-radius: 999px;
+      font-size: 0.875rem; font-weight: 600; text-decoration: none;
+      transition: all 0.2s;
+    }
+    .lp-nav-link--ghost { color: #3B82F6; background: transparent; }
+    .lp-nav-link--ghost:hover { background: rgba(59,130,246,0.08); }
+    .lp-nav-link--primary {
+      color: white; background: linear-gradient(135deg, #3B82F6, #2563EB);
+      box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+    }
+    .lp-nav-link--primary:active { transform: scale(0.97); }
+
+    /* ===== HERO ===== */
+    .lp-hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 6rem 1.5rem 4rem; text-align: center;
+      position: relative; overflow: hidden;
+      background: linear-gradient(180deg, #EFF6FF 0%, #F7F7F5 100%);
+    }
+    .lp-hero::before {
+      content: ''; position: absolute; top: -50%; right: -30%;
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .lp-hero::after {
+      content: ''; position: absolute; bottom: -40%; left: -20%;
+      width: 500px; height: 500px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(59,130,246,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .lp-hero-content {
+      position: relative; z-index: 2; max-width: 620px;
+      animation: blurFadeIn 0.7s cubic-bezier(0.4, 0, 0.2, 1) 1.6s both;
+    }
+    .lp-badge {
+      display: inline-flex; align-items: center; gap: 0.375rem;
+      padding: 0.375rem 0.875rem; border-radius: 999px;
+      background: rgba(59,130,246,0.08); color: #3B82F6;
+      font-size: 0.8rem; font-weight: 600; margin-bottom: 1.25rem;
+      border: 1px solid rgba(59,130,246,0.12);
+    }
+    .lp-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #3B82F6; animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+    }
+    .lp-hero h1 {
+      font-size: 2.5rem; font-weight: 800; line-height: 1.1;
+      letter-spacing: -0.03em; margin-bottom: 1rem; color: #1A1A2E;
+    }
+    .lp-hero h1 span { color: #3B82F6; }
+    .lp-hero-sub {
+      font-size: 1.1rem; color: #64748B; line-height: 1.6;
+      max-width: 480px; margin: 0 auto 2rem;
+    }
+    .lp-hero-actions {
+      display: flex; flex-direction: column; gap: 0.75rem;
+      max-width: 340px; margin: 0 auto;
+      animation: blurFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 1.8s both;
+    }
+    .lp-btn {
+      display: block; padding: 0.875rem 1.5rem; border-radius: 999px;
+      font-size: 1rem; font-weight: 700; text-decoration: none;
+      text-align: center; transition: transform 0.2s, box-shadow 0.2s;
+      border: none; cursor: pointer;
+    }
+    .lp-btn:active { transform: scale(0.97); }
+    .lp-btn--primary {
+      background: linear-gradient(135deg, #3B82F6, #2563EB); color: white;
+      box-shadow: 0 4px 20px rgba(59,130,246,0.35);
+      position: relative; overflow: hidden;
+    }
+    .lp-btn--primary::after {
+      content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      animation: shimmerSlide 3s ease-in-out infinite;
+    }
+    .lp-btn--outline {
+      background: rgba(255,255,255,0.9); color: #3B82F6;
+      border: 1.5px solid rgba(59,130,246,0.2);
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
-    .btn-login:active {
-        background: rgba(255,255,255,0.95);
+    .lp-scroll-hint {
+      position: absolute; bottom: 2rem; left: 50%;
+      transform: translateX(-50%); color: #94A3B8;
+      font-size: 0.8rem; display: flex; flex-direction: column;
+      align-items: center; gap: 0.25rem;
+      animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 2.2s both;
+    }
+    .lp-scroll-arrow {
+      width: 20px; height: 20px;
+      animation: bounceDown 2s ease-in-out infinite;
+    }
+    @keyframes bounceDown {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(6px); }
     }
 
+    /* ===== FEATURES ===== */
+    .lp-section {
+      padding: 4rem 1.5rem;
+      max-width: 960px; margin: 0 auto;
+    }
+    .lp-section-header {
+      text-align: center; margin-bottom: 2.5rem;
+    }
+    .lp-section-header h2 {
+      font-size: 1.75rem; font-weight: 800; color: #1A1A2E;
+      letter-spacing: -0.02em; margin-bottom: 0.5rem;
+    }
+    .lp-section-header p {
+      font-size: 1rem; color: #64748B; max-width: 480px; margin: 0 auto;
+    }
+    .lp-features-grid {
+      display: grid; grid-template-columns: 1fr; gap: 1rem;
+    }
+    .lp-feature-card {
+      background: white; border-radius: 1rem; padding: 1.5rem;
+      border: 1px solid #EBEBEB; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .lp-feature-card:hover {
+      transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+    .lp-feature-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .lp-feature-card h3 {
+      font-size: 1.1rem; font-weight: 700; color: #1A1A2E; margin-bottom: 0.375rem;
+    }
+    .lp-feature-card p {
+      font-size: 0.9rem; color: #64748B; line-height: 1.5;
+    }
+
+    /* ===== HOW IT WORKS ===== */
+    .lp-steps { background: #F7F7F5; }
+    .lp-steps-list {
+      display: flex; flex-direction: column; gap: 1.5rem;
+      counter-reset: step;
+    }
+    .lp-step {
+      display: flex; gap: 1rem; align-items: flex-start;
+      counter-increment: step;
+    }
+    .lp-step-num {
+      flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, #3B82F6, #2563EB);
+      color: white; font-size: 1rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(59,130,246,0.25);
+    }
+    .lp-step-text h3 {
+      font-size: 1rem; font-weight: 700; color: #1A1A2E; margin-bottom: 0.25rem;
+    }
+    .lp-step-text p {
+      font-size: 0.9rem; color: #64748B; line-height: 1.5;
+    }
+
+    /* ===== STATS ===== */
+    .lp-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+      margin-top: 2.5rem; text-align: center;
+    }
+    .lp-stat-num {
+      font-size: 1.75rem; font-weight: 800; color: #3B82F6;
+      letter-spacing: -0.02em;
+    }
+    .lp-stat-label {
+      font-size: 0.8rem; color: #64748B; margin-top: 0.125rem;
+    }
+
+    /* ===== PROBLEM SECTION ===== */
+    .lp-problem { background: #F7F7F5; }
+    .lp-problem-grid {
+      display: grid; grid-template-columns: 1fr; gap: 0.75rem;
+      max-width: 680px; margin: 0 auto;
+    }
+    .lp-problem-card {
+      display: flex; align-items: flex-start; gap: 0.875rem;
+      background: white; border-radius: 0.875rem; padding: 1.125rem 1.25rem;
+      border: 1px solid #EBEBEB;
+    }
+    .lp-problem-icon {
+      flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px;
+      background: rgba(239,68,68,0.08);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .lp-problem-card h3 {
+      font-size: 0.95rem; font-weight: 700; color: #1A1A2E; margin-bottom: 0.125rem;
+    }
+    .lp-problem-card p {
+      font-size: 0.8rem; color: #64748B; line-height: 1.4;
+    }
+
+    /* ===== SOLUTION BRIDGE ===== */
+    .lp-solution-bridge {
+      text-align: center; padding: 3rem 1.5rem 1rem;
+      max-width: 600px; margin: 0 auto;
+    }
+    .lp-solution-bridge h2 {
+      font-size: 1.75rem; font-weight: 800; color: #1A1A2E;
+      letter-spacing: -0.02em; margin-bottom: 0.5rem;
+    }
+    .lp-solution-bridge h2 span { color: #3B82F6; }
+    .lp-solution-bridge p {
+      font-size: 1rem; color: #64748B; line-height: 1.6;
+    }
+
+    /* ===== TRUST / VERIFICATION ===== */
+    .lp-trust-section { background: linear-gradient(180deg, #EFF6FF 0%, #F7F7F5 100%); }
+    .lp-trust-intro {
+      text-align: center; max-width: 560px; margin: 0 auto 2rem;
+    }
+    .lp-trust-intro p {
+      font-size: 0.95rem; color: #64748B; line-height: 1.6;
+    }
+    .lp-trust-grid {
+      display: grid; grid-template-columns: 1fr; gap: 0.75rem;
+      max-width: 680px; margin: 0 auto 2rem;
+    }
+    .lp-trust-card {
+      display: flex; align-items: flex-start; gap: 1rem;
+      background: white; border-radius: 0.875rem; padding: 1.25rem;
+      border: 1px solid #EBEBEB;
+    }
+    .lp-trust-icon {
+      flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .lp-trust-card h3 {
+      font-size: 0.95rem; font-weight: 700; color: #1A1A2E; margin-bottom: 0.25rem;
+    }
+    .lp-trust-card p {
+      font-size: 0.8rem; color: #64748B; line-height: 1.5;
+    }
+    .lp-trust-badge-row {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;
+    }
+    .lp-trust-badge {
+      display: inline-flex; align-items: center; gap: 0.25rem;
+      padding: 0.25rem 0.625rem; border-radius: 999px;
+      font-size: 0.7rem; font-weight: 600;
+      background: rgba(59,130,246,0.08); color: #3B82F6;
+      border: 1px solid rgba(59,130,246,0.1);
+    }
+
+    /* ===== TARGET GROUP ===== */
+    .lp-target-cards {
+      display: grid; grid-template-columns: 1fr; gap: 0.75rem;
+    }
+    .lp-target-card {
+      display: flex; align-items: center; gap: 1rem;
+      background: white; border-radius: 0.875rem; padding: 1.125rem 1.25rem;
+      border: 1px solid #EBEBEB;
+    }
+    .lp-target-icon {
+      flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem;
+    }
+    .lp-target-card h3 {
+      font-size: 0.95rem; font-weight: 700; color: #1A1A2E; margin-bottom: 0.125rem;
+    }
+    .lp-target-card p {
+      font-size: 0.8rem; color: #64748B; line-height: 1.4;
+    }
+
+    /* ===== FAQ ===== */
+    .lp-faq { background: #F7F7F5; }
+    .lp-faq-list {
+      display: flex; flex-direction: column; gap: 0.625rem;
+      max-width: 680px; margin: 0 auto;
+    }
+    .lp-faq-item {
+      background: white; border-radius: 0.875rem;
+      border: 1px solid #EBEBEB; overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    .lp-faq-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .lp-faq-q {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.25rem; cursor: pointer;
+      font-size: 0.95rem; font-weight: 600; color: #1A1A2E;
+      -webkit-user-select: none; user-select: none;
+      gap: 0.75rem;
+    }
+    .lp-faq-q:hover { color: #3B82F6; }
+    .lp-faq-arrow {
+      width: 20px; height: 20px; flex-shrink: 0;
+      transition: transform 0.3s ease; color: #94A3B8;
+    }
+    .lp-faq-item.open .lp-faq-arrow { transform: rotate(180deg); color: #3B82F6; }
+    .lp-faq-a {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.35s ease;
+      padding: 0 1.25rem;
+    }
+    .lp-faq-item.open .lp-faq-a {
+      max-height: 300px; padding: 0 1.25rem 1.125rem;
+    }
+    .lp-faq-a p {
+      font-size: 0.875rem; color: #64748B; line-height: 1.6;
+    }
+
+    /* ===== CTA ===== */
+    .lp-cta {
+      text-align: center; padding: 3.5rem 1.5rem;
+      background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+      color: white; position: relative; overflow: hidden;
+    }
+    .lp-cta::before {
+      content: ''; position: absolute; top: -50%; right: -30%;
+      width: 400px; height: 400px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+    }
+    .lp-cta h2 {
+      font-size: 1.75rem; font-weight: 800; margin-bottom: 0.75rem;
+      position: relative; letter-spacing: -0.02em;
+    }
+    .lp-cta p {
+      font-size: 1rem; opacity: 0.8; margin-bottom: 2rem;
+      max-width: 400px; margin-left: auto; margin-right: auto;
+      position: relative;
+    }
+    .lp-cta-actions {
+      display: flex; flex-direction: column; gap: 0.75rem;
+      max-width: 320px; margin: 0 auto; position: relative;
+    }
+    .lp-btn--white {
+      background: white; color: #2563EB; font-weight: 700;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    .lp-btn--ghost-white {
+      background: rgba(255,255,255,0.12); color: white;
+      border: 1.5px solid rgba(255,255,255,0.25);
+    }
+
+    /* ===== FOOTER ===== */
+    .lp-footer {
+      text-align: center; padding: 2rem 1.5rem;
+      border-top: 1px solid #EBEBEB;
+    }
+    .lp-footer-links {
+      display: flex; justify-content: center; gap: 1.25rem;
+      flex-wrap: wrap; margin-bottom: 0.75rem;
+    }
+    .lp-footer-links a {
+      font-size: 0.8rem; color: #64748B; text-decoration: none;
+    }
+    .lp-footer-links a:hover { color: #3B82F6; }
+    .lp-footer-copy {
+      font-size: 0.75rem; color: #94A3B8;
+    }
+
+    /* ===== DESKTOP ===== */
     @media (min-width: 768px) {
-      .welcome-actions {
-        flex-direction: row;
-      }
-      .welcome-btn {
-        flex: 1;
-      }
-      .welcome-content h1 {
-        font-size: 3.5rem;
-      }
+      .lp-hero h1 { font-size: 3.5rem; }
+      .lp-hero-sub { font-size: 1.2rem; }
+      .lp-hero-actions { flex-direction: row; max-width: 400px; }
+      .lp-hero-actions .lp-btn { flex: 1; }
+      .lp-features-grid { grid-template-columns: 1fr 1fr; }
+      .lp-trust-grid { grid-template-columns: 1fr 1fr; }
+      .lp-target-cards { grid-template-columns: 1fr 1fr; }
+      .lp-solution-bridge h2 { font-size: 2.25rem; }
+      .lp-cta-actions { flex-direction: row; max-width: 380px; }
+      .lp-cta-actions .lp-btn { flex: 1; }
+      .lp-section-header h2 { font-size: 2.25rem; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .welcome-content, .welcome-actions { animation: none; opacity: 1; }
-      .btn-register::after { animation: none; }
+      .lp-hero-content, .lp-hero-actions, .lp-scroll-hint { animation: none !important; opacity: 1; }
+      .lp-btn--primary::after { animation: none; }
+      .fade-in { opacity: 1; transform: none; transition: none; }
     }
   </style>
 </head>
@@ -189,35 +481,463 @@
     }, 1600);
   </script>
 
-  <main class="welcome-screen-container">
-    <div class="welcome-content">
-      <h1 data-i18n="hero_title">Dein Campus. Dein Deal.</h1>
-      <p data-i18n="hero_subtitle">
-        Die exklusive Plattform von Studenten, für Studenten. Finde deine nächste WG oder verkaufe gebrauchte Sachen an deine Kommilitonen - ohne Stress.
+  <!-- Navbar -->
+  <nav class="lp-nav" id="lpNav">
+    <a href="#" class="lp-nav-brand">
+      <span class="lp-nav-brand-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+      </span>
+      Room8
+    </a>
+    <div class="lp-nav-actions">
+      <a href="login.html" class="lp-nav-link lp-nav-link--ghost">Anmelden</a>
+      <a href="register.html" class="lp-nav-link lp-nav-link--primary">Registrieren</a>
+    </div>
+  </nav>
+
+  <!-- Hero: Problem-first -->
+  <section class="lp-hero">
+    <div class="lp-hero-content">
+      <div class="lp-badge">
+        <span class="lp-badge-dot"></span>
+        Exklusiv für Studenten
+      </div>
+      <h1>WG-Suche nervt.<br><span>Muss nicht sein.</span></h1>
+      <p class="lp-hero-sub">
+        Fake-Anzeigen, überteuerte Makler, Ghosting auf WG-Gesucht und 50 Tabs offen für Möbel, Jobs und Rabatte. Kommt dir bekannt vor? Damit ist jetzt Schluss.
       </p>
-      <div class="welcome-actions">
-        <a href="register.html" class="welcome-btn btn-register" data-i18n="nav_register">Registrieren</a>
-        <a href="login.html" class="welcome-btn btn-login" data-i18n="nav_login">Anmelden</a>
+      <div class="lp-hero-actions">
+        <a href="register.html" class="lp-btn lp-btn--primary">Kostenlos starten</a>
+        <a href="#problem" class="lp-btn lp-btn--outline">Was ist das Problem?</a>
       </div>
     </div>
-  </main>
+    <div class="lp-scroll-hint">
+      <span>Scroll</span>
+      <svg class="lp-scroll-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Problem: Pain Points -->
+  <section class="lp-problem" id="problem">
+    <div class="lp-section" style="padding-top: 4rem; padding-bottom: 3rem;">
+      <div class="lp-section-header fade-in">
+        <h2>Das kennt jeder Student</h2>
+        <p>Der Studienalltag ist stressig genug. Und dann noch das hier:</p>
+      </div>
+      <div class="lp-problem-grid">
+        <div class="lp-problem-card fade-in">
+          <div class="lp-problem-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          </div>
+          <div>
+            <h3>WG-Suche = Vollzeitjob</h3>
+            <p>200 Bewerber auf ein Zimmer. Makler wollen Provision. Und die Hälfte der Anzeigen ist fake oder schon vergeben.</p>
+          </div>
+        </div>
+        <div class="lp-problem-card fade-in">
+          <div class="lp-problem-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+          </div>
+          <div>
+            <h3>eBay Kleinanzeigen = Zeitverschwendung</h3>
+            <p>"Ist noch da?" - Keine Antwort. Komische Nachrichten von Fremden. Abholung quer durch die Stadt für 5 Euro.</p>
+          </div>
+        </div>
+        <div class="lp-problem-card fade-in">
+          <div class="lp-problem-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+          </div>
+          <div>
+            <h3>Nebenjob suchen = Nadel im Heuhaufen</h3>
+            <p>Indeed, Jobportale, Schwarzes Brett - überall suchen, nirgends was Passendes für deinen Stundenplan finden.</p>
+          </div>
+        </div>
+        <div class="lp-problem-card fade-in">
+          <div class="lp-problem-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          </div>
+          <div>
+            <h3>Kein Vertrauen</h3>
+            <p>Du weißt nie, wer auf der anderen Seite sitzt. Ist das ein echter Student oder irgendein Random? Null Transparenz.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Solution Bridge -->
+  <div class="lp-solution-bridge fade-in">
+    <h2>Was wäre, wenn es einen Ort gäbe,<br>der <span>nur für Studenten</span> ist?</h2>
+    <p>Einen Ort, an dem du weißt, dass jeder verifiziert ist. Wo WG-Suche, Marktplatz, Jobs und Rabatte an einem Platz sind. Ohne Makler, ohne Fake-Accounts, ohne Stress.</p>
+  </div>
+
+  <!-- Features -->
+  <section class="lp-section" id="features">
+    <div class="lp-section-header fade-in">
+      <h2>Das ist Room8</h2>
+      <p>Vier Bereiche, eine App. Alles was du im Studienalltag brauchst - von Studenten, für Studenten.</p>
+    </div>
+    <div class="lp-features-grid">
+      <div class="lp-feature-card fade-in">
+        <div class="lp-feature-icon" style="background: rgba(59,130,246,0.1);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
+        <h3>WG-Suche</h3>
+        <p>Finde WG-Zimmer und Wohnungen in deiner Unistadt. Direkt von Studenten an Studenten - ohne Makler, ohne Stress.</p>
+      </div>
+      <div class="lp-feature-card fade-in">
+        <div class="lp-feature-icon" style="background: rgba(16,185,129,0.1);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+        </div>
+        <h3>Marktplatz</h3>
+        <p>Verkaufe Bücher, Möbel oder Technik an deine Kommilitonen. Schnell, einfach und ohne Versandkosten.</p>
+      </div>
+      <div class="lp-feature-card fade-in">
+        <div class="lp-feature-icon" style="background: rgba(245,158,11,0.1);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+        </div>
+        <h3>Nebenjobs</h3>
+        <p>Studentenjobs in deiner Nähe: Nachhilfe, Werkstudent, Aushilfe oder Freelance. Finde den passenden Job neben dem Studium.</p>
+      </div>
+      <div class="lp-feature-card fade-in">
+        <div class="lp-feature-icon" style="background: rgba(232,96,76,0.1);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E8604C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 12 20 22 4 22 4 12"></polyline>
+            <rect x="2" y="7" width="20" height="5"></rect>
+            <line x1="12" y1="22" x2="12" y2="7"></line>
+            <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+            <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+          </svg>
+        </div>
+        <h3>Coupons & Rabatte</h3>
+        <p>Exklusive Studentenrabatte von lokalen Unternehmen: Restaurants, Fitnessstudios, Läden und mehr in deiner Stadt.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Wie funktionierts -->
+  <section class="lp-steps">
+    <div class="lp-section" style="padding-top: 4rem; padding-bottom: 4rem;">
+      <div class="lp-section-header fade-in">
+        <h2>So einfach geht's</h2>
+        <p>In 3 Schritten bist du dabei.</p>
+      </div>
+      <div class="lp-steps-list">
+        <div class="lp-step fade-in">
+          <div class="lp-step-num">1</div>
+          <div class="lp-step-text">
+            <h3>Registriere dich kostenlos</h3>
+            <p>Erstelle dein Profil mit deiner Uni-Mail. Dein Account wird verifiziert, damit nur echte Studenten dabei sind.</p>
+          </div>
+        </div>
+        <div class="lp-step fade-in">
+          <div class="lp-step-num">2</div>
+          <div class="lp-step-text">
+            <h3>Entdecke deine Stadt</h3>
+            <p>Durchsuche Wohnungen, Gegenstände, Jobs und Coupons in deiner Unistadt. Alles von Studenten, für Studenten.</p>
+          </div>
+        </div>
+        <div class="lp-step fade-in">
+          <div class="lp-step-num">3</div>
+          <div class="lp-step-text">
+            <h3>Vernetze dich</h3>
+            <p>Chatte direkt mit anderen Studenten, mach Deals und spare Zeit und Geld im Studienalltag.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lp-stats fade-in">
+        <div>
+          <div class="lp-stat-num">100%</div>
+          <div class="lp-stat-label">Kostenlos</div>
+        </div>
+        <div>
+          <div class="lp-stat-num">Nur</div>
+          <div class="lp-stat-label">für Studenten</div>
+        </div>
+        <div>
+          <div class="lp-stat-num">0</div>
+          <div class="lp-stat-label">Maklergebühren</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fuer wen -->
+  <section class="lp-section">
+    <div class="lp-section-header fade-in">
+      <h2>Für wen ist Room8?</h2>
+      <p>Egal ob Ersti oder kurz vor dem Abschluss - Room8 ist für alle Studenten.</p>
+    </div>
+    <div class="lp-target-cards">
+      <div class="lp-target-card fade-in">
+        <div class="lp-target-icon" style="background: rgba(59,130,246,0.1); color: #3B82F6; font-size: 1.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div>
+          <h3>WG-Suchende</h3>
+          <p>Du ziehst in eine neue Stadt und brauchst ein Zimmer? Finde WGs direkt von Studenten.</p>
+        </div>
+      </div>
+      <div class="lp-target-card fade-in">
+        <div class="lp-target-icon" style="background: rgba(16,185,129,0.1);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+        </div>
+        <div>
+          <h3>Käufer & Verkäufer</h3>
+          <p>Brauchst du was oder willst du was loswerden? Der Marktplatz ist nur für deine Uni-Community.</p>
+        </div>
+      </div>
+      <div class="lp-target-card fade-in">
+        <div class="lp-target-icon" style="background: rgba(245,158,11,0.1);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <div>
+          <h3>Jobsuchende</h3>
+          <p>Nebenjob gesucht? Finde flexible Stellen die zu deinem Stundenplan passen.</p>
+        </div>
+      </div>
+      <div class="lp-target-card fade-in">
+        <div class="lp-target-icon" style="background: rgba(232,96,76,0.1);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8604C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+        </div>
+        <div>
+          <h3>Lokale Unternehmen</h3>
+          <p>Du bist Partner? Biete Studenten exklusive Rabatte und gewinne eine treue Zielgruppe.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Verifizierung & Vertrauen -->
+  <section class="lp-trust-section">
+    <div class="lp-section" style="padding-top: 4rem; padding-bottom: 4rem;">
+      <div class="lp-section-header fade-in">
+        <h2>Verifiziert. Vertrauenswürdig. Sicher.</h2>
+        <p>Bei Room8 weißt du immer, mit wem du es zu tun hast.</p>
+      </div>
+      <div class="lp-trust-intro fade-in">
+        <p>Room8 ist nicht nur für Uni-Studenten - wir sind offen für <strong>alle, die studieren</strong>. Egal ob Universität, Hochschule, Fachhochschule, Duale Hochschule oder Akademie. Wichtig ist nur eins: Du bist Teil der Studenten-Community.</p>
+      </div>
+      <div class="lp-trust-grid">
+        <div class="lp-trust-card fade-in">
+          <div class="lp-trust-icon" style="background: rgba(59,130,246,0.1);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+          </div>
+          <div>
+            <h3>Uni- oder Hochschul-Mail</h3>
+            <p>Verifiziere dich in Sekunden mit deiner offiziellen Hochschul-Mail. Ob @uni-ulm.de, @hs-esslingen.de oder @dhbw-heidenheim.de - wir erkennen sie automatisch.</p>
+            <div class="lp-trust-badge-row">
+              <span class="lp-trust-badge">Universitäten</span>
+              <span class="lp-trust-badge">Hochschulen</span>
+              <span class="lp-trust-badge">Fachhochschulen</span>
+              <span class="lp-trust-badge">Duale Hochschulen</span>
+            </div>
+          </div>
+        </div>
+        <div class="lp-trust-card fade-in">
+          <div class="lp-trust-icon" style="background: rgba(16,185,129,0.1);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          </div>
+          <div>
+            <h3>Immatrikulationsbescheinigung</h3>
+            <p>Keine Hochschul-Mail? Kein Problem. Lade einfach deine aktuelle Immatrikulationsbescheinigung hoch und wir prüfen sie manuell. Funktioniert für jede Bildungseinrichtung.</p>
+            <div class="lp-trust-badge-row">
+              <span class="lp-trust-badge">PDF-Upload</span>
+              <span class="lp-trust-badge">Manuelle Prüfung</span>
+              <span class="lp-trust-badge">Alle Hochschularten</span>
+            </div>
+          </div>
+        </div>
+        <div class="lp-trust-card fade-in">
+          <div class="lp-trust-icon" style="background: rgba(245,158,11,0.1);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          </div>
+          <div>
+            <h3>Verifizierungs-Badge</h3>
+            <p>Verifizierte Nutzer bekommen ein sichtbares Badge auf ihrem Profil. So erkennt jeder auf den ersten Blick: Diese Person ist ein echter Student.</p>
+            <div class="lp-trust-badge-row">
+              <span class="lp-trust-badge">Sichtbar im Profil</span>
+              <span class="lp-trust-badge">Mehr Vertrauen</span>
+              <span class="lp-trust-badge">Schnellere Deals</span>
+            </div>
+          </div>
+        </div>
+        <div class="lp-trust-card fade-in">
+          <div class="lp-trust-icon" style="background: rgba(232,96,76,0.1);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8604C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          </div>
+          <div>
+            <h3>Deine Daten bleiben privat</h3>
+            <p>Deine Immatrikulationsbescheinigung und E-Mail-Adresse sehen nur wir - nie andere Nutzer. Die Kommunikation läuft komplett über den Room8-Chat.</p>
+            <div class="lp-trust-badge-row">
+              <span class="lp-trust-badge">DSGVO-konform</span>
+              <span class="lp-trust-badge">Kein Datenweitergabe</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="lp-faq">
+    <div class="lp-section" style="padding-top: 4rem; padding-bottom: 4rem;">
+      <div class="lp-section-header fade-in">
+        <h2>Häufige Fragen</h2>
+        <p>Was du wissen solltest, bevor du loslegst.</p>
+      </div>
+      <div class="lp-faq-list">
+        <div class="lp-faq-item fade-in">
+          <div class="lp-faq-q" onclick="this.parentElement.classList.toggle('open')">
+            <span>Ist Room8 wirklich komplett kostenlos?</span>
+            <svg class="lp-faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+          <div class="lp-faq-a"><p>Ja, zu 100%. Kein Premium-Abo, keine versteckten Kosten, keine Provision. Du kannst Anzeigen aufgeben, chatten und alles nutzen - ohne einen Cent zu zahlen.</p></div>
+        </div>
+        <div class="lp-faq-item fade-in">
+          <div class="lp-faq-q" onclick="this.parentElement.classList.toggle('open')">
+            <span>Wie kann ich mich verifizieren?</span>
+            <svg class="lp-faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+          <div class="lp-faq-a"><p>Du hast zwei Wege: Entweder verifizierst du dich über deine Hochschul-Mail (Uni, FH, DHBW etc.) - das geht in Sekunden. Oder du lädst deine aktuelle Immatrikulationsbescheinigung hoch, die wir dann manuell prüfen. Beides gibt dir ein Verifizierungs-Badge auf deinem Profil.</p></div>
+        </div>
+        <div class="lp-faq-item fade-in">
+          <div class="lp-faq-q" onclick="this.parentElement.classList.toggle('open')">
+            <span>Ich studiere an einer FH / DHBW / Akademie - darf ich mitmachen?</span>
+            <svg class="lp-faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+          <div class="lp-faq-a"><p>Auf jeden Fall! Room8 ist für alle Studierenden - egal ob Universität, Fachhochschule, Duale Hochschule, Berufsakademie oder Kunsthochschule. Wenn du studierst, bist du willkommen. Verifiziere dich über deine Hochschul-Mail oder Immatrikulationsbescheinigung.</p></div>
+        </div>
+        <div class="lp-faq-item fade-in">
+          <div class="lp-faq-q" onclick="this.parentElement.classList.toggle('open')">
+            <span>Ich ziehe nächstes Semester um - kann ich jetzt schon suchen?</span>
+            <svg class="lp-faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+          <div class="lp-faq-a"><p>Klar! Du kannst in jeder Stadt suchen und dir Suchaufträge speichern. Sobald etwas Passendes reinkommt, wirst du sofort benachrichtigt - egal ob du noch 3 Monate oder 3 Wochen Zeit hast.</p></div>
+        </div>
+        <div class="lp-faq-item fade-in">
+          <div class="lp-faq-q" onclick="this.parentElement.classList.toggle('open')">
+            <span>Was ist der Unterschied zu WG-Gesucht oder eBay Kleinanzeigen?</span>
+            <svg class="lp-faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+          <div class="lp-faq-a"><p>Room8 ist nur für Studenten. Keine Makler, keine Fake-Anzeigen, keine Random-Nachrichten. Du weißt, dass auf der anderen Seite auch ein Student sitzt. Plus: Wohnungen, Marktplatz, Jobs und Coupons an einem Ort statt 4 verschiedene Apps.</p></div>
+        </div>
+        <div class="lp-faq-item fade-in">
+          <div class="lp-faq-q" onclick="this.parentElement.classList.toggle('open')">
+            <span>Kann ich Room8 auch als App auf dem Handy nutzen?</span>
+            <svg class="lp-faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+          <div class="lp-faq-a"><p>Ja! Room8 gibt es im Google Play Store und Apple App Store. Du bekommst Push-Benachrichtigungen für neue Nachrichten und verpasst nichts mehr - auch wenn du gerade in der Vorlesung sitzt.</p></div>
+        </div>
+        <div class="lp-faq-item fade-in">
+          <div class="lp-faq-q" onclick="this.parentElement.classList.toggle('open')">
+            <span>Ist mein Profil für jeden sichtbar?</span>
+            <svg class="lp-faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+          <div class="lp-faq-a"><p>Nur registrierte Nutzer können dein Profil und deine Anzeigen sehen. Deine E-Mail-Adresse bleibt immer privat - die Kommunikation läuft komplett über den Room8-Chat.</p></div>
+        </div>
+        <div class="lp-faq-item fade-in">
+          <div class="lp-faq-q" onclick="this.parentElement.classList.toggle('open')">
+            <span>Meine Stadt ist noch nicht dabei - was jetzt?</span>
+            <svg class="lp-faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+          <div class="lp-faq-a"><p>Registriere dich trotzdem! Je mehr Studenten mitmachen, desto schneller wächst Room8 in deiner Stadt. Sei einer der Ersten und gestalte deine lokale Community von Anfang an mit.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="lp-cta">
+    <div class="fade-in">
+      <h2>Bereit für Room8?</h2>
+      <p>Melde dich kostenlos an und werde Teil der Studenten-Community in deiner Stadt.</p>
+      <div class="lp-cta-actions">
+        <a href="register.html" class="lp-btn lp-btn--white">Jetzt registrieren</a>
+        <a href="login.html" class="lp-btn lp-btn--ghost-white">Anmelden</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="lp-footer">
+    <div class="lp-footer-links">
+      <a href="impressum.html">Impressum</a>
+      <a href="datenschutz.html">Datenschutz</a>
+      <a href="nutzungsbedingungen.html">Nutzungsbedingungen</a>
+      <a href="faq.html">FAQ</a>
+    </div>
+    <p class="lp-footer-copy">Room8 - Von Studenten, für Studenten.</p>
+  </footer>
 
   <script src="lib/supabase.min.js"></script>
   <script src="config.js"></script>
-<script src="session-cache.js"></script>
+  <script src="session-cache.js"></script>
   <script src="translations.js"></script>
   <script>
     // AUTO-REDIRECT: Wenn schon eingeloggt, direkt zum Dashboard
     if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-        // Supabase Client - Direkte Initialisierung
         var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         sb.auth.getUser().then(({ data }) => {
             if (data && data.user) {
-                // User ist eingeloggt -> Weiterleitung zum Dashboard
                 window.location.replace('dashboard.html');
             }
         });
     }
+
+    // Navbar Scroll-Effekt
+    window.addEventListener('scroll', function() {
+      var nav = document.getElementById('lpNav');
+      if (window.scrollY > 20) {
+        nav.classList.add('scrolled');
+      } else {
+        nav.classList.remove('scrolled');
+      }
+    });
+
+    // Scroll-Animation: fade-in Elemente werden sichtbar
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.fade-in').forEach(function(el) {
+      observer.observe(el);
+    });
   </script>
 </body>
 </html>

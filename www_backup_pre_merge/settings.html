@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Einstellungen - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .settings-header {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            background: white;
+            border-radius: var(--radius-md);
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .settings-header:active {
+            transform: scale(0.98);
+        }
+
+        .user-avatar-small {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #EEF2FF;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-right: 1rem;
+            background-size: cover;
+            background-position: center;
+            border: 2px solid #e5e7eb;
+        }
+
+        .user-info h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .user-info p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .settings-group {
+            background: white;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .settings-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-item:active {
+            background-color: #F9FAFB;
+        }
+
+        .item-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        /* Icon Colors */
+        .icon-profile { background: #EEF2FF; color: #4F46E5; }
+        .icon-notify { background: #FFFBEB; color: #F59E0B; }
+        .icon-search { background: #ECFDF5; color: #10B981; }
+        .icon-legal { background: #F3F4F6; color: #6B7280; }
+        .icon-logout { background: #FEE2E2; color: #EF4444; }
+        .icon-delete { background: #FEE2E2; color: #DC2626; }
+.delete-btn { color: #DC2626; font-weight: 600; }
+        .icon-admin { background: #111827; color: #FBBF24; }
+        .icon-blocked { background: #FEE2E2; color: #991B1B; }
+
+        .item-text {
+            flex: 1;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .item-arrow {
+            color: #D1D5DB;
+            width: 20px;
+            height: 20px;
+        }
+
+        .logout-btn {
+            color: #EF4444;
+            font-weight: 600;
+        }
+        
+        .section-label {
+            margin: 0 0 0.5rem 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .version-info {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 2rem;
+            opacity: 0.6;
+        }
+        
+        /* ADMIN SECTION - Versteckt standardmäßig */
+        .admin-section {
+            display: none;
+        }
+        
+        .admin-section.visible {
+            display: block;
+        }
+        
+        .admin-badge {
+            background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+            color: #111827;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <h1>Einstellungen</h1>
+        <div style="width: 40px;"></div>
+    </header>
+
+    <main class="app-content">
+        
+        <!-- User Info Header -->
+        <div class="settings-header" onclick="window.location.href='profile.html'">
+            <div class="user-avatar-small" id="userAvatar">?</div>
+            <div class="user-info">
+                <h2 id="userName">Lädt...</h2>
+                <p id="userEmail">...</p>
+            </div>
+        </div>
+
+        <!-- ============================================
+             ADMIN SECTION - Nur für dich sichtbar!
+             ============================================ -->
+        <div class="admin-section" id="adminSection">
+            <h3 class="section-label">Admin <span class="admin-badge">🔐 Nur du</span></h3>
+            <div class="settings-group">
+                <a href="admin.html" class="settings-item">
+                    <div class="item-icon icon-admin">🛡️</div>
+                    <span class="item-text">Admin Panel</span>
+                    <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </a>
+                <a href="job-create.html" class="settings-item">
+                    <div class="item-icon icon-admin">💼</div>
+                    <span class="item-text">Job erstellen</span>
+                    <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </a>
+                <a href="coupon-create.html" class="settings-item">
+                    <div class="item-icon icon-admin">🎟️</div>
+                    <span class="item-text">Coupon erstellen</span>
+                    <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- App Settings -->
+        <h3 class="section-label">App</h3>
+        <div class="settings-group">
+            <a href="notification-settings.html" class="settings-item">
+                <div class="item-icon icon-notify">🔔</div>
+                <span class="item-text">Benachrichtigungen</span>
+                <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+            <a href="saved-searches.html" class="settings-item">
+                <div class="item-icon icon-search">🔍</div>
+                <span class="item-text">Gespeicherte Suchen</span>
+                <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+        </div>
+
+        <!-- Account Settings -->
+        <h3 class="section-label">Konto</h3>
+        <div class="settings-group">
+            <a href="edit-profile.html" class="settings-item">
+                <div class="item-icon icon-profile">👤</div>
+                <span class="item-text">Profil bearbeiten</span>
+                <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+            <a href="verify-options.html" class="settings-item">
+                <div class="item-icon icon-profile">🎓</div>
+                <span class="item-text">Verifizierung</span>
+                <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+            <a href="blocked-users.html" class="settings-item">
+                <div class="item-icon icon-blocked">🚫</div>
+                <span class="item-text">Blockierte Nutzer</span>
+                <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+        </div>
+
+        <!-- Legal & Support -->
+        <h3 class="section-label">Rechtliches</h3>
+        <div class="settings-group">
+            <a href="faq.html" class="settings-item">
+                <div class="item-icon icon-legal">❓</div>
+                <span class="item-text">Hilfe & FAQ</span>
+                <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+            <a href="nutzungsbedingungen.html" class="settings-item">
+                <div class="item-icon icon-legal">⚖️</div>
+                <span class="item-text">AGB</span>
+                <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+            <a href="datenschutz.html" class="settings-item">
+                <div class="item-icon icon-legal">🔒</div>
+                <span class="item-text">Datenschutz</span>
+                <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+            <a href="impressum.html" class="settings-item">
+                <div class="item-icon icon-legal">📄</div>
+                <span class="item-text">Impressum</span>
+                <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+        </div>
+            <!-- Konto löschen -->
+<h3 class="section-label">Gefahrenzone</h3>
+<div class="settings-group">
+    <div class="settings-item" id="deleteAccountBtn" style="cursor: pointer;">
+        <div class="item-icon icon-delete">🗑️</div>
+        <span class="item-text delete-btn">Konto löschen</span>
+        <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    </div>
+</div>
+
+        <!-- Logout -->
+        <div class="settings-group">
+            <div class="settings-item" id="logoutBtn" style="cursor: pointer;">
+                <div class="item-icon icon-logout">🚪</div>
+                <span class="item-text logout-btn">Abmelden</span>
+            </div>
+        </div>
+
+        <div class="version-info">
+            Room8 Version 2.0<br>
+            Made with ❤️ for Students
+        </div>
+
+    </main>
+
+    <div id="app-footer-nav"></div>
+</div>
+
+<!-- Custom Delete Account Modal -->
+<div id="deleteModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:99999;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:white;border-radius:20px;max-width:400px;width:100%;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.2);">
+        <div style="background:linear-gradient(135deg,#ef4444,#dc2626);padding:2rem;text-align:center;">
+            <div style="font-size:3rem;margin-bottom:0.5rem;">&#9888;&#65039;</div>
+            <h3 style="color:white;margin:0;font-size:1.3rem;">Konto l&#246;schen?</h3>
+        </div>
+        <div style="padding:1.5rem;">
+            <p style="color:#374151;line-height:1.6;margin:0 0 1rem 0;font-size:0.95rem;">Alle deine Daten, Inserate und Nachrichten werden <strong>unwiderruflich gel&#246;scht</strong>.</p>
+            <p style="color:#6b7280;font-size:0.85rem;margin:0 0 1rem 0;">Gib <strong>L&#214;SCHEN</strong> ein, um zu best&#228;tigen:</p>
+            <input type="text" id="deleteConfirmInput" placeholder="L&#214;SCHEN" style="width:100%;padding:0.75rem 1rem;border:2px solid #e5e7eb;border-radius:12px;font-size:1rem;text-align:center;font-weight:600;letter-spacing:2px;box-sizing:border-box;outline:none;transition:border-color 0.2s;">
+            <div style="display:flex;gap:0.75rem;margin-top:1.5rem;">
+                <button id="cancelDeleteBtn" style="flex:1;padding:0.85rem;border-radius:12px;border:1px solid #e5e7eb;background:#f9fafb;color:#374151;font-weight:600;font-size:0.95rem;cursor:pointer;">Abbrechen</button>
+                <button id="confirmDeleteBtn" style="flex:1;padding:0.85rem;border-radius:12px;border:none;background:#ef4444;color:white;font-weight:600;font-size:0.95rem;cursor:pointer;opacity:0.4;pointer-events:none;">Endg&#252;ltig l&#246;schen</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="room8-ui.js"></script>
+<script src="navigation.js"></script>
+<script src="notificationBell.js"></script>
+<script>
+    // DEINE ADMIN E-MAIL
+    var ADMIN_EMAIL = 'albayrak_yusuf@icloud.com';
+
+    // Init
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function navigateTo(url) {
+        try {
+            window.location.href = url;
+        } catch (e) {
+            console.warn("Navigation blockiert:", e);
+        }
+    }
+
+    async function loadUser() {
+        if (!supabase) return;
+
+        var result = await sb.auth.getUser();
+        var user = result.data ? result.data.user : null;
+        
+        if (!user) {
+            navigateTo('login.html');
+            return;
+        }
+
+        // ============================================
+        // ADMIN CHECK - Zeigt Admin-Bereich nur für dich
+        // ============================================
+        if (user.email === ADMIN_EMAIL) {
+            document.getElementById('adminSection').classList.add('visible');
+        }
+
+        // Profil laden
+        var profileResult = await sb
+            .from('profiles')
+            .select('username, email, full_name, avatar_url')
+            .eq('id', user.id)
+            .single();
+
+        var profile = profileResult.data;
+
+        if (profile) {
+            var displayName = profile.full_name || profile.username || 'Benutzer';
+            document.getElementById('userName').textContent = displayName;
+            document.getElementById('userEmail').textContent = profile.email || user.email;
+
+            if (profile.avatar_url) {
+                var avatarEl = document.getElementById('userAvatar');
+                avatarEl.style.backgroundImage = 'url(' + profile.avatar_url + ')';
+                avatarEl.textContent = '';
+            } else {
+                document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
+            }
+        }
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', async function() {
+        if (confirm('Möchtest du dich wirklich abmelden?')) {
+            await sb.auth.signOut();
+            navigateTo('login.html');
+        }
+    });
+     // Konto loeschen - Custom Modal
+    var deleteModal = document.getElementById('deleteModal');
+    var deleteInput = document.getElementById('deleteConfirmInput');
+    var confirmBtn = document.getElementById('confirmDeleteBtn');
+    var cancelBtn = document.getElementById('cancelDeleteBtn');
+
+    document.getElementById('deleteAccountBtn').addEventListener('click', function() {
+        deleteModal.style.display = 'flex';
+        deleteInput.value = '';
+        confirmBtn.style.opacity = '0.4';
+        confirmBtn.style.pointerEvents = 'none';
+        setTimeout(function() { deleteInput.focus(); }, 100);
+    });
+
+    cancelBtn.addEventListener('click', function() {
+        deleteModal.style.display = 'none';
+    });
+
+    deleteInput.addEventListener('input', function() {
+        var val = deleteInput.value.trim().toUpperCase();
+        if (val === 'L\u00D6SCHEN' || val === 'LOESCHEN') {
+            confirmBtn.style.opacity = '1';
+            confirmBtn.style.pointerEvents = 'auto';
+        } else {
+            confirmBtn.style.opacity = '0.4';
+            confirmBtn.style.pointerEvents = 'none';
+        }
+    });
+
+    confirmBtn.addEventListener('click', async function() {
+        deleteModal.style.display = 'none';
+
+    try {
+        var result = await sb.auth.getUser();
+        var user = result.data ? result.data.user : null;
+        if (!user) return;
+
+        Room8UI.info('Lösche deine Daten...');
+
+        // 1. Listing-Fotos aus Storage löschen
+        try {
+            const { data: photos } = await sb.from('listing_photos').select('storage_path').eq('user_id', user.id);
+            if (photos && photos.length > 0) {
+                const paths = photos.map(p => p.storage_path);
+                await sb.storage.from('listing-images').remove(paths);
+            }
+        } catch (e) { console.log('Storage cleanup error:', e); }
+
+        // 2. Chat-Bilder aus Storage löschen
+        try {
+            const { data: chatFiles } = await sb.storage.from('chat-images').list(user.id);
+            if (chatFiles && chatFiles.length > 0) {
+                const chatPaths = chatFiles.map(f => user.id + '/' + f.name);
+                await sb.storage.from('chat-images').remove(chatPaths);
+            }
+        } catch (e) { console.log('Chat images cleanup error:', e); }
+
+        // 3. Avatar aus Storage löschen
+        try {
+            const { data: avatarFiles } = await sb.storage.from('avatars').list(user.id);
+            if (avatarFiles && avatarFiles.length > 0) {
+                const avatarPaths = avatarFiles.map(f => user.id + '/' + f.name);
+                await sb.storage.from('avatars').remove(avatarPaths);
+            }
+        } catch (e) { console.log('Avatar cleanup error:', e); }
+
+        // 4. Alle Datenbank-Einträge löschen
+        await sb.from('listing_photos').delete().eq('user_id', user.id);
+        await sb.from('listings').delete().eq('owner_id', user.id);
+        await sb.from('messages').delete().eq('sender_id', user.id);
+        await sb.from('messages').delete().eq('receiver_id', user.id);
+        await sb.from('favorites').delete().eq('user_id', user.id);
+        await sb.from('notifications').delete().eq('user_id', user.id);
+        await sb.from('reviews').delete().eq('reviewer_id', user.id);
+        await sb.from('reviews').delete().eq('reviewee_id', user.id);
+        await sb.from('reports').delete().eq('reporter_id', user.id);
+        await sb.from('saved_searches').delete().eq('user_id', user.id);
+        await sb.from('profiles').delete().eq('id', user.id);
+
+        // 5. Auth-User löschen (via Edge Function)
+        try {
+            await sb.functions.invoke('delete-user', { body: { userId: user.id } });
+        } catch (e) {
+            console.log('Auth deletion needs Edge Function:', e);
+        }
+
+        await sb.auth.signOut();
+
+        Room8UI.success('Dein Konto wurde gelöscht. Auf Wiedersehen!');
+        setTimeout(function() { navigateTo('login.html'); }, 1500);
+    } catch (err) {
+        console.error('Fehler beim Löschen:', err);
+        Room8UI.error('Konto konnte nicht gelöscht werden. Bitte versuche es erneut.');
+    }
+});
+
+    loadUser();
+</script>
+</body>
+</html>

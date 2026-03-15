@@ -105,7 +105,7 @@
             background: #F9FAFB;
         }
 
-        #success-view {
+        #success-view, #success-view-email {
             display: none;
             text-align: center;
             padding: 3rem 1rem;
@@ -197,7 +197,7 @@
             </div>
         </div>
 
-        <!-- Success Screen -->
+        <!-- Success Screen: Dokument Upload -->
         <div id="success-view">
             <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
             <h2>Einreichung erfolgreich!</h2>
@@ -207,6 +207,18 @@
                 Du erhältst eine Benachrichtigung.
             </p>
             <button onclick="navigateTo('profile.html')" class="submit-btn">Zurück zum Profil</button>
+        </div>
+
+        <!-- Success Screen: Uni-Email -->
+        <div id="success-view-email">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">📧</div>
+            <h2>E-Mail wurde gesendet!</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6;">
+                Wir haben einen Bestätigungslink an deine Uni-E-Mail gesendet.<br>
+                Bitte check deine Mailbox und klicke auf den Link.<br>
+                <span style="font-size: 0.85rem; color: #9CA3AF;">Auch im Spam-Ordner nachschauen!</span>
+            </p>
+            <button onclick="navigateTo('verification-status.html')" class="submit-btn">Status prüfen</button>
         </div>
 
     </main>
@@ -238,11 +250,16 @@
         currentUser = user;
 
         // Check if already pending
-        const { data: profile } = await sb.from('profiles').select('verification_status').eq('id', user.id).single();
+        const { data: profile } = await sb.from('profiles').select('verification_status, verification_method').eq('id', user.id).single();
         if (profile && (profile.verification_status === 'pending' || profile.verification_status === 'approved')) {
-            showSuccess();
-            document.querySelector('#success-view h2').textContent = "Status: " + (profile.verification_status === 'approved' ? "Verifiziert" : "In Prüfung");
-            document.querySelector('#success-view p').innerHTML = "Du hast deine Unterlagen bereits eingereicht.";
+            showSuccess(profile.verification_method === 'uni-email' ? 'email' : 'document');
+            var targetView = profile.verification_method === 'uni-email' ? '#success-view-email' : '#success-view';
+            document.querySelector(targetView + ' h2').textContent = "Status: " + (profile.verification_status === 'approved' ? "Verifiziert ✅" : "In Prüfung ⏳");
+            if (profile.verification_method === 'uni-email' && profile.verification_status === 'pending') {
+                document.querySelector(targetView + ' p').innerHTML = "Wir haben dir einen Bestätigungslink gesendet.<br>Bitte check deine Uni-Mailbox.";
+            } else {
+                document.querySelector(targetView + ' p').innerHTML = "Du hast deine Unterlagen bereits eingereicht.";
+            }
         }
     }
 
@@ -267,9 +284,13 @@
         }
     }
 
-    function showSuccess() {
+    function showSuccess(type) {
         document.getElementById('selection-view').style.display = 'none';
-        document.getElementById('success-view').style.display = 'block';
+        if (type === 'email') {
+            document.getElementById('success-view-email').style.display = 'block';
+        } else {
+            document.getElementById('success-view').style.display = 'block';
+        }
     }
 
     // --- LOGIC: EMAIL SUBMIT ---
@@ -377,7 +398,7 @@
 
             if (fnError) console.error('E-Mail senden fehlgeschlagen:', fnError);
 
-            showSuccess();
+            showSuccess('email');
 
         } catch (err) {
             Room8UI.error("Code konnte nicht gesendet werden. Bitte versuche es erneut.");

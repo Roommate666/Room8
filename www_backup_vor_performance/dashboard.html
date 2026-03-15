@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Home - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* DASHBOARD HEADER */
+        .dashboard-header {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+            padding: 2rem 1.5rem 4rem 1.5rem;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .app-logo { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
+
+        .header-bell {
+            position: relative;
+            color: white;
+            text-decoration: none;
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .header-bell:active { background: rgba(255, 255, 255, 0.3); }
+
+        .notification-dot {
+            position: absolute;
+            top: 8px; right: 8px; width: 8px; height: 8px;
+            background-color: #EF4444; border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: none;
+        }
+
+        .greeting-section { display: flex; align-items: center; gap: 1rem; cursor: pointer; }
+        
+        .user-avatar-dash {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: white; color: #3B82F6;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1.5rem;
+            border: 3px solid rgba(255,255,255,0.3);
+            background-size: cover; background-position: center;
+        }
+
+        .greeting-text h2 { margin: 0; font-size: 1.4rem; font-weight: 700; }
+        .greeting-text p { margin: 0; font-size: 0.9rem; opacity: 0.9; }
+
+        /* PUSH BANNER (WICHTIG!) */
+        .push-alert {
+            background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF;
+            margin: -2rem 1.5rem 1rem; padding: 1rem; border-radius: 12px;
+            position: relative; z-index: 20; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: none; /* Wird per JS aktiviert */
+            text-align: center;
+        }
+        .push-btn {
+            background: #2563EB; color: white; border: none;
+            padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600;
+            margin-top: 0.5rem; cursor: pointer;
+        }
+
+        /* MAIN CARDS */
+        .action-cards-container {
+            padding: 0 1.5rem;
+            margin-top: -3rem; /* Zieht Karten nach oben */
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            position: relative; z-index: 10;
+        }
+
+        .dash-card {
+            background: white; border-radius: 20px; padding: 1.25rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            text-decoration: none; color: var(--text-color);
+            transition: transform 0.2s;
+            display: flex; flex-direction: column;
+            align-items: center; text-align: center;
+            border: 1px solid rgba(0,0,0,0.03);
+            height: 100%; justify-content: center;
+        }
+        .dash-card:active { transform: scale(0.98); }
+
+        .dash-icon {
+            width: 45px; height: 45px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; margin-bottom: 0.5rem;
+        }
+
+        .icon-housing { background: #F2F2F0; color: #3B82F6; }
+        .icon-market { background: #ECFDF5; color: #10B981; }
+        .icon-jobs { background: #F3E8FF; color: #8B5CF6; }
+        .icon-coupons { background: #FFF7ED; color: #F59E0B; }
+
+        .dash-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.1rem; }
+        .dash-subtitle { font-size: 0.7rem; color: var(--text-muted); }
+
+        /* Category-specific title colors */
+        .dash-card:nth-child(1) .dash-title { color: #3B82F6; } /* Wohnungen - blue */
+        .dash-card:nth-child(2) .dash-title { color: #10B981; } /* Marktplatz - green */
+        .dash-card:nth-child(3) .dash-title { color: #8B5CF6; } /* Jobs - purple */
+        .dash-card:nth-child(4) .dash-title { color: #F59E0B; } /* Coupons - amber */
+
+        /* SECTIONS */
+        .content-section { padding: 1rem 1.5rem; margin-top: 1rem; }
+        
+        .section-header {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 1rem;
+        }
+        .section-header h3 { margin: 0; font-size: 1.1rem; color: var(--text-main); }
+
+        /* STATS */
+        .stats-banner {
+            background: #F8FAFC; padding: 1rem; border-radius: 16px;
+            border: 1px solid var(--border-color);
+            display: flex; justify-content: space-around;
+        }
+        .stat-box { text-align: center; cursor: pointer; }
+        .stat-val { font-size: 1.2rem; font-weight: 700; color: #3B82F6; }
+        .stat-lbl { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+
+        /* QUICK ACTIONS */
+        .quick-actions {
+            display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem;
+            scrollbar-width: none;
+        }
+        .quick-actions::-webkit-scrollbar { display: none; }
+
+        .quick-btn {
+            background: white; border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 0.75rem 1rem;
+            display: flex; align-items: center; gap: 0.5rem;
+            white-space: nowrap; text-decoration: none;
+            color: var(--text-main); font-size: 0.9rem; font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="header-top">
+            <div class="app-logo">Room8</div>
+            <a href="notifications.html" class="header-bell">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                <div class="notification-dot" id="notifDot"></div>
+            </a>
+        </div>
+
+        <div class="greeting-section" onclick="navigateTo('profile.html')">
+            <div class="user-avatar-dash" id="userAvatar">?</div>
+            <div class="greeting-text">
+                <p>Willkommen zurück,</p>
+                <h2 id="userName">Gast</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- PUSH PERMISSION BANNER -->
+    <div id="pushPermissionBanner" class="push-alert">
+        <strong>🔔 Benachrichtigungen aktivieren</strong>
+        <p style="margin: 0.5rem 0; font-size: 0.85rem;">Verpasse keine Nachrichten oder neuen Inserate mehr!</p>
+        <button class="push-btn" onclick="enablePush()">Jetzt aktivieren</button>
+    </div>
+
+    <!-- MAIN CARDS -->
+    <div class="action-cards-container">
+        <a href="wohnungen.html" class="dash-card">
+            <div class="dash-icon icon-housing">🏠</div>
+            <div class="dash-title">Wohnungen</div>
+            <div class="dash-subtitle">WG & Zimmer</div>
+        </a>
+        <a href="gegenstaende.html" class="dash-card">
+            <div class="dash-icon icon-market">🛍️</div>
+            <div class="dash-title">Marktplatz</div>
+            <div class="dash-subtitle">Kaufen & Verkaufen</div>
+        </a>
+        <a href="jobs.html" class="dash-card">
+            <div class="dash-icon icon-jobs">💼</div>
+            <div class="dash-title">Jobs</div>
+            <div class="dash-subtitle">Studentenjobs</div>
+        </a>
+        <a href="coupons.html" class="dash-card">
+            <div class="dash-icon icon-coupons">🎟️</div>
+            <div class="dash-title">Coupons</div>
+            <div class="dash-subtitle">Rabatte & Deals</div>
+        </a>
+    </div>
+
+    <!-- STATS -->
+    <div class="content-section">
+        <div class="section-header">
+            <h3>Deine Aktivitäten</h3>
+        </div>
+        <div class="stats-banner">
+            <div class="stat-box" onclick="navigateTo('nachrichten.html')">
+                <div class="stat-val" id="statMsg">0</div>
+                <div class="stat-lbl">Nachrichten</div>
+            </div>
+            <div class="stat-box" onclick="navigateTo('profile.html')">
+                <div class="stat-val" id="statListings">0</div>
+                <div class="stat-lbl">Inserate</div>
+            </div>
+            <div class="stat-box" onclick="navigateTo('favorites.html')">
+                <div class="stat-val" id="statFavs">0</div>
+                <div class="stat-lbl">Favoriten</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="content-section" style="padding-top: 0;">
+        <div class="section-header"><h3>Schnellzugriff</h3></div>
+        <div class="quick-actions">
+            <a href="choose-listing.html" class="quick-btn"><span>➕</span> Inserieren</a>
+            <a href="saved-searches.html" class="quick-btn"><span>🔍</span> Suchaufträge</a>
+            <a href="settings.html" class="quick-btn"><span>⚙️</span> Einstellungen</a>
+        </div>
+    </div>
+
+    <!-- REINIGUNGSSERVICE BANNER (Aufklappbar) -->
+    <div class="content-section" style="padding-top: 0;">
+        <div id="cleaningBanner" style="background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%); border-radius: 16px; padding: 1rem 1.25rem; color: white; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3); cursor: pointer;" onclick="toggleCleaningDetails()">
+
+            <!-- Header (immer sichtbar) -->
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="font-size: 1.75rem;">🧹</div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 700; font-size: 1rem;">Übergabe-Reinigung gesucht?</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9;">15% Studentenrabatt verfügbar</div>
+                </div>
+                <div id="cleaningArrow" style="font-size: 1.2rem; transition: transform 0.3s;">▼</div>
+            </div>
+
+            <!-- Details (versteckt) -->
+            <div id="cleaningDetails" style="display: none; margin-top: 1rem;">
+                <!-- Vorteile -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem; font-size: 0.8rem;">
+                    <div style="background: rgba(255,255,255,0.15); padding: 0.5rem 0.75rem; border-radius: 8px;">✨ Grundreinigung</div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 0.5rem 0.75rem; border-radius: 8px;">🪟 Fenster & Böden</div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 0.5rem 0.75rem; border-radius: 8px;">🚿 Bad & Küche</div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 0.5rem 0.75rem; border-radius: 8px;">📋 Abnahme-Garantie</div>
+                </div>
+
+                <!-- Rabatt-Banner -->
+                <div style="background: rgba(255,255,255,0.2); border-radius: 10px; padding: 0.75rem; margin-bottom: 1rem; text-align: center;">
+                    <div style="font-size: 1.3rem; font-weight: 800;">15% RABATT</div>
+                    <div style="font-size: 0.75rem; opacity: 0.9;">für Studenten mit gültigem Ausweis</div>
+                </div>
+
+                <!-- So gehts -->
+                <div style="background: rgba(0,0,0,0.1); border-radius: 10px; padding: 0.75rem; margin-bottom: 1rem; font-size: 0.8rem;">
+                    <div style="font-weight: 600; margin-bottom: 0.5rem;">📝 So funktioniert's:</div>
+                    <div style="line-height: 1.5;">
+                        1. Öffne eine Wohnung → Referenz-Nr notieren<br>
+                        2. Anfrage auf ayaservice.de stellen<br>
+                        3. Referenz-Nr nennen + Ausweis zeigen<br>
+                        4. 15% Rabatt erhalten!
+                    </div>
+                </div>
+
+                <a href="https://www.ayaservice.de" target="_blank" onclick="event.stopPropagation()" style="display: block; background: white; color: #0284C7; text-decoration: none; padding: 0.85rem 1rem; border-radius: 10px; font-weight: 700; text-align: center; font-size: 0.95rem; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                    Jetzt Anfrage stellen →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleCleaningDetails() {
+            const details = document.getElementById('cleaningDetails');
+            const arrow = document.getElementById('cleaningArrow');
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                arrow.style.transform = 'rotate(180deg)';
+            } else {
+                details.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+    </script>
+
+    <div style="height: 2rem;"></div>
+    <div id="app-footer-nav"></div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
+<script src="room8-ui.js"></script>
+<script src="navigation.js"></script>
+<script src="notificationBell.js"></script>
+<script src="push-logic.js"></script>
+<script>
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function navigateTo(url) {
+        try { window.location.href = url; } catch(e) { console.warn(e); }
+    }
+
+    async function initDashboard() {
+        // PUSH STATUS PRÜFEN
+        checkPushStatus();
+
+        if (!sb) return;
+        const { data: { user } } = await sb.auth.getUser();
+        
+        if (!user) { navigateTo('index.html'); return; }
+
+        const { data: profile } = await sb.from('profiles').select('full_name, username, avatar_url').eq('id', user.id).single();
+
+        if (profile) {
+            const name = profile.full_name || profile.username || 'Nutzer';
+            document.getElementById('userName').textContent = name; 
+            if (profile.avatar_url) {
+                document.getElementById('userAvatar').style.backgroundImage = `url('${profile.avatar_url}')`;
+                document.getElementById('userAvatar').textContent = '';
+            } else {
+                document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+            }
+        }
+        loadStats(user.id);
+        checkNotifications(user.id);
+    }
+
+    function checkPushStatus() {
+        // Wenn noch nie erlaubt wurde, zeigen wir den Banner
+        if (localStorage.getItem('push_enabled') !== 'true') {
+            document.getElementById('pushPermissionBanner').style.display = 'block';
+            // Verschiebe Container nach unten, damit Banner Platz hat
+            document.querySelector('.action-cards-container').style.marginTop = '0';
+        } else {
+            // Wenn schon erlaubt, initialisieren wir im Hintergrund
+            if (typeof PushService !== 'undefined') PushService.init();
+        }
+    }
+
+    window.enablePush = async function() {
+        if (typeof PushService !== 'undefined') {
+            const granted = await PushService.requestPermission();
+            if (granted) {
+                document.getElementById('pushPermissionBanner').style.display = 'none';
+                document.querySelector('.action-cards-container').style.marginTop = '-3rem'; // Reset Layout
+                localStorage.setItem('push_enabled', 'true');
+            } else {
+                Room8UI.warning("Erlaubnis verweigert. Bitte in den Einstellungen aktivieren.");
+            }
+        } else {
+            Room8UI.info("Push-Dienst nicht verfügbar (nur in der App).");
+        }
+    }
+
+    async function loadStats(userId) {
+        const { count: msgCount } = await sb.from('messages').select('*', { count: 'exact', head: true }).eq('receiver_id', userId).eq('is_read', false);
+        document.getElementById('statMsg').textContent = msgCount || 0;
+        const { count: listCount } = await sb.from('listings').select('*', { count: 'exact', head: true }).eq('owner_id', userId).eq('is_active', true);
+        document.getElementById('statListings').textContent = listCount || 0;
+        const { count: favCount } = await sb.from('favorites').select('*', { count: 'exact', head: true }).eq('user_id', userId);
+        document.getElementById('statFavs').textContent = favCount || 0;
+    }
+
+    async function checkNotifications(userId) {
+        const { count } = await sb.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('is_read', false);
+        if (count > 0) document.getElementById('notifDot').style.display = 'block';
+    }
+
+    document.addEventListener('DOMContentLoaded', initDashboard);
+</script>
+</body>
+</html>

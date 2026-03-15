@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room8 Error Console</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: #0f1117; color: #e4e4e7; min-height: 100vh; }
+
+        #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        .login-box { background: #1a1b23; border: 1px solid #2a2b35; border-radius: 16px; padding: 40px; max-width: 400px; width: 100%; }
+        .login-box h1 { font-size: 24px; margin-bottom: 8px; color: #fff; }
+        .login-box p { color: #71717a; margin-bottom: 24px; font-size: 14px; }
+        .login-box input { width: 100%; padding: 12px 16px; background: #0f1117; border: 1px solid #2a2b35; border-radius: 8px; color: #fff; font-size: 14px; margin-bottom: 12px; outline: none; }
+        .login-box input:focus { border-color: #E8604C; }
+        .login-box button { width: 100%; padding: 12px; background: #E8604C; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .login-box button:hover { background: #d4553f; }
+        .login-error { color: #ef4444; font-size: 13px; margin-bottom: 12px; display: none; }
+
+        #console-screen { display: none; }
+        .topbar { background: #1a1b23; border-bottom: 1px solid #2a2b35; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+        .topbar h1 { font-size: 18px; color: #fff; display: flex; align-items: center; gap: 10px; }
+        .topbar .dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .topbar-actions { display: flex; gap: 8px; align-items: center; }
+        .topbar-actions button { padding: 8px 14px; border-radius: 6px; border: 1px solid #2a2b35; background: #1a1b23; color: #a1a1aa; font-size: 13px; cursor: pointer; }
+        .topbar-actions button:hover { background: #2a2b35; color: #fff; }
+        .topbar-actions .btn-danger { border-color: #7f1d1d; color: #ef4444; }
+        .topbar-actions .btn-danger:hover { background: #7f1d1d; color: #fff; }
+
+        .stats { display: flex; gap: 12px; padding: 16px 24px; overflow-x: auto; }
+        .stat-card { background: #1a1b23; border: 1px solid #2a2b35; border-radius: 10px; padding: 16px 20px; min-width: 160px; flex-shrink: 0; }
+        .stat-card .label { font-size: 12px; color: #71717a; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card .value { font-size: 28px; font-weight: 700; color: #fff; margin-top: 4px; }
+        .stat-card.errors .value { color: #ef4444; }
+        .stat-card.promises .value { color: #f59e0b; }
+        .stat-card.console .value { color: #3b82f6; }
+
+        .filters { padding: 12px 24px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .filters input, .filters select { padding: 8px 12px; background: #1a1b23; border: 1px solid #2a2b35; border-radius: 6px; color: #fff; font-size: 13px; outline: none; }
+        .filters input { flex: 1; min-width: 200px; }
+        .filters input:focus, .filters select:focus { border-color: #E8604C; }
+
+        .error-list { padding: 0 24px 24px; }
+        .error-item { background: #1a1b23; border: 1px solid #2a2b35; border-radius: 10px; margin-bottom: 8px; overflow: hidden; transition: border-color 0.2s; }
+        .error-item:hover { border-color: #3a3b45; }
+        .error-header { padding: 14px 16px; cursor: pointer; display: flex; align-items: flex-start; gap: 12px; }
+        .error-type { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
+        .error-type.js { background: #7f1d1d; color: #fca5a5; }
+        .error-type.promise { background: #78350f; color: #fcd34d; }
+        .error-type.console { background: #1e3a5f; color: #93c5fd; }
+        .error-info { flex: 1; min-width: 0; }
+        .error-msg { font-size: 13px; color: #e4e4e7; font-family: 'SF Mono', 'Fira Code', monospace; word-break: break-word; line-height: 1.4; }
+        .error-meta { font-size: 11px; color: #52525b; margin-top: 6px; display: flex; gap: 16px; flex-wrap: wrap; }
+        .error-detail { display: none; padding: 0 16px 14px; }
+        .error-detail.open { display: block; }
+        .error-stack { background: #0f1117; border-radius: 6px; padding: 12px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #a1a1aa; white-space: pre-wrap; word-break: break-word; line-height: 1.5; max-height: 300px; overflow-y: auto; }
+        .error-page { color: #E8604C; }
+        .empty-state { text-align: center; padding: 80px 20px; color: #52525b; }
+        .empty-state p { font-size: 14px; }
+        .loading { text-align: center; padding: 40px; color: #52525b; }
+        .auto-refresh { font-size: 11px; color: #52525b; display: flex; align-items: center; gap: 6px; }
+        .del-btn { margin-top: 8px; padding: 4px 12px; background: #7f1d1d; color: #fca5a5; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; }
+
+        @media (max-width: 640px) {
+            .topbar { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+            .stats { padding: 12px 16px; }
+            .filters { padding: 8px 16px; }
+            .error-list { padding: 0 16px 16px; }
+            .error-meta { flex-direction: column; gap: 4px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="login-screen">
+        <div class="login-box">
+            <h1>Room8 Error Console</h1>
+            <p>Melde dich mit deinem Admin-Account an.</p>
+            <div class="login-error" id="login-error"></div>
+            <input type="email" id="login-email" placeholder="E-Mail" autocomplete="email">
+            <input type="password" id="login-password" placeholder="Passwort" autocomplete="current-password">
+            <button onclick="doLogin()">Anmelden</button>
+        </div>
+    </div>
+
+    <div id="console-screen">
+        <div class="topbar">
+            <h1><div class="dot"></div> Error Console</h1>
+            <div class="topbar-actions">
+                <div class="auto-refresh">Auto-Refresh: 30s</div>
+                <button onclick="loadErrors()">Aktualisieren</button>
+                <button class="btn-danger" onclick="clearAllErrors()">Alle loeschen</button>
+                <button onclick="doLogout()">Logout</button>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card errors"><div class="label">JS Errors</div><div class="value" id="stat-errors">0</div></div>
+            <div class="stat-card promises"><div class="label">Promise Rejections</div><div class="value" id="stat-promises">0</div></div>
+            <div class="stat-card console"><div class="label">Console Errors</div><div class="value" id="stat-console">0</div></div>
+            <div class="stat-card"><div class="label">Heute</div><div class="value" id="stat-today">0</div></div>
+        </div>
+
+        <div class="filters">
+            <input type="text" id="filter-search" placeholder="Fehler durchsuchen..." oninput="applyFilters()">
+            <select id="filter-type" onchange="applyFilters()">
+                <option value="">Alle Typen</option>
+                <option value="js">JS Errors</option>
+                <option value="promise">Promise</option>
+                <option value="console">Console</option>
+            </select>
+            <select id="filter-time" onchange="applyFilters()">
+                <option value="">Alle</option>
+                <option value="1h">Letzte Stunde</option>
+                <option value="24h">Letzte 24h</option>
+                <option value="7d">Letzte 7 Tage</option>
+            </select>
+        </div>
+
+        <div class="error-list" id="error-list">
+            <div class="loading">Lade Fehler...</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        var SUPABASE_URL = 'https://tvnvmogaqmduzcycmvby.supabase.co';
+        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVVZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw';
+
+        var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        var allErrors = [];
+        var refreshInterval = null;
+
+        // --- Login ---
+        async function doLogin() {
+            var email = document.getElementById('login-email').value.trim();
+            var password = document.getElementById('login-password').value;
+            var errorEl = document.getElementById('login-error');
+            errorEl.style.display = 'none';
+
+            if (!email || !password) {
+                errorEl.textContent = 'Bitte E-Mail und Passwort eingeben.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            var result = await sb.auth.signInWithPassword({ email: email, password: password });
+            if (result.error) {
+                errorEl.textContent = result.error.message;
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            var profile = await sb.from('profiles').select('is_admin').eq('id', result.data.user.id).single();
+            if (!profile.data || !profile.data.is_admin) {
+                await sb.auth.signOut();
+                errorEl.textContent = 'Kein Admin-Zugriff.';
+                errorEl.style.display = 'block';
+                return;
+            }
+            showConsole();
+        }
+
+        document.getElementById('login-password').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') doLogin();
+        });
+
+        async function doLogout() {
+            await sb.auth.signOut();
+            clearInterval(refreshInterval);
+            document.getElementById('console-screen').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+        }
+
+        function showConsole() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('console-screen').style.display = 'block';
+            loadErrors();
+            refreshInterval = setInterval(loadErrors, 30000);
+        }
+
+        // --- Fehler laden ---
+        async function loadErrors() {
+            var result = await sb.from('error_logs').select('*').order('created_at', { ascending: false }).limit(500);
+            if (result.error) {
+                var list = document.getElementById('error-list');
+                list.textContent = '';
+                var p = document.createElement('p');
+                p.className = 'empty-state';
+                p.textContent = 'Fehler beim Laden: ' + result.error.message;
+                list.appendChild(p);
+                return;
+            }
+            allErrors = result.data || [];
+            updateStats();
+            applyFilters();
+        }
+
+        // --- Stats ---
+        function updateStats() {
+            var jsErrors = 0, promises = 0, consoleErrors = 0, today = 0;
+            var todayStr = new Date().toISOString().substring(0, 10);
+
+            allErrors.forEach(function(e) {
+                var type = getErrorType(e.error_message);
+                if (type === 'promise') promises++;
+                else if (type === 'console') consoleErrors++;
+                else jsErrors++;
+                if (e.created_at && e.created_at.substring(0, 10) === todayStr) today++;
+            });
+
+            document.getElementById('stat-errors').textContent = jsErrors;
+            document.getElementById('stat-promises').textContent = promises;
+            document.getElementById('stat-console').textContent = consoleErrors;
+            document.getElementById('stat-today').textContent = today;
+        }
+
+        function getErrorType(msg) {
+            if (!msg) return 'js';
+            if (msg.startsWith('Unhandled Promise')) return 'promise';
+            if (msg.startsWith('console.error')) return 'console';
+            return 'js';
+        }
+
+        // --- Filter ---
+        function applyFilters() {
+            var search = document.getElementById('filter-search').value.toLowerCase();
+            var type = document.getElementById('filter-type').value;
+            var time = document.getElementById('filter-time').value;
+            var now = Date.now();
+
+            var filtered = allErrors.filter(function(e) {
+                if (search && !(e.error_message || '').toLowerCase().includes(search) && !(e.page_url || '').toLowerCase().includes(search)) return false;
+                if (type && getErrorType(e.error_message) !== type) return false;
+                if (time) {
+                    var errorTime = new Date(e.created_at).getTime();
+                    if (time === '1h' && now - errorTime > 3600000) return false;
+                    if (time === '24h' && now - errorTime > 86400000) return false;
+                    if (time === '7d' && now - errorTime > 604800000) return false;
+                }
+                return true;
+            });
+            renderErrors(filtered);
+        }
+
+        // --- Render mit DOM-Methoden (kein innerHTML) ---
+        function renderErrors(errors) {
+            var list = document.getElementById('error-list');
+            list.textContent = '';
+
+            if (errors.length === 0) {
+                var empty = document.createElement('div');
+                empty.className = 'empty-state';
+                var p = document.createElement('p');
+                p.textContent = 'Keine Fehler gefunden';
+                empty.appendChild(p);
+                list.appendChild(empty);
+                return;
+            }
+
+            errors.forEach(function(e, i) {
+                var type = getErrorType(e.error_message);
+                var typeLabel = type === 'promise' ? 'Promise' : type === 'console' ? 'Console' : 'Error';
+
+                // Nachricht kuerzen
+                var shortMsg = (e.error_message || 'Unbekannter Fehler');
+                if (shortMsg.startsWith('console.error: ')) shortMsg = shortMsg.substring(15);
+                if (shortMsg.startsWith('Unhandled Promise: ')) shortMsg = shortMsg.substring(19);
+                if (shortMsg.length > 200) shortMsg = shortMsg.substring(0, 200) + '...';
+
+                var page = (e.page_url || '').replace(/https?:\/\/[^\/]+\//, '/').split('?')[0] || '-';
+                var time = formatTime(e.created_at);
+
+                // Error Item Container
+                var item = document.createElement('div');
+                item.className = 'error-item';
+
+                // Header (klickbar)
+                var header = document.createElement('div');
+                header.className = 'error-header';
+                header.addEventListener('click', function() {
+                    detail.classList.toggle('open');
+                });
+
+                // Type Badge
+                var badge = document.createElement('span');
+                badge.className = 'error-type ' + type;
+                badge.textContent = typeLabel;
+
+                // Info Container
+                var info = document.createElement('div');
+                info.className = 'error-info';
+
+                var msg = document.createElement('div');
+                msg.className = 'error-msg';
+                msg.textContent = shortMsg;
+
+                var meta = document.createElement('div');
+                meta.className = 'error-meta';
+
+                var timeSpan = document.createElement('span');
+                timeSpan.textContent = time;
+                meta.appendChild(timeSpan);
+
+                var pageSpan = document.createElement('span');
+                pageSpan.className = 'error-page';
+                pageSpan.textContent = page;
+                meta.appendChild(pageSpan);
+
+                if (e.user_id) {
+                    var userSpan = document.createElement('span');
+                    userSpan.textContent = 'User: ' + e.user_id.substring(0, 8) + '...';
+                    meta.appendChild(userSpan);
+                }
+
+                info.appendChild(msg);
+                info.appendChild(meta);
+                header.appendChild(badge);
+                header.appendChild(info);
+
+                // Detail-Bereich
+                var detail = document.createElement('div');
+                detail.className = 'error-detail';
+
+                if (e.stack_trace) {
+                    var stack = document.createElement('pre');
+                    stack.className = 'error-stack';
+                    stack.textContent = e.stack_trace;
+                    detail.appendChild(stack);
+                }
+
+                var detailInfo = document.createElement('div');
+                detailInfo.style.cssText = 'margin-top:8px;font-size:12px;color:#52525b;';
+
+                var pageLine = document.createElement('div');
+                pageLine.textContent = 'Seite: ' + (e.page_url || '-');
+                detailInfo.appendChild(pageLine);
+
+                var browserLine = document.createElement('div');
+                browserLine.textContent = 'Browser: ' + (e.user_agent || '').substring(0, 100);
+                detailInfo.appendChild(browserLine);
+
+                var timeLine = document.createElement('div');
+                timeLine.textContent = 'Zeit: ' + new Date(e.created_at).toLocaleString('de-DE');
+                detailInfo.appendChild(timeLine);
+
+                if (e.user_id) {
+                    var userLine = document.createElement('div');
+                    userLine.textContent = 'User ID: ' + e.user_id;
+                    detailInfo.appendChild(userLine);
+                }
+
+                var delBtn = document.createElement('button');
+                delBtn.className = 'del-btn';
+                delBtn.textContent = 'Loeschen';
+                delBtn.addEventListener('click', function() { deleteError(e.id); });
+                detailInfo.appendChild(delBtn);
+
+                detail.appendChild(detailInfo);
+
+                item.appendChild(header);
+                item.appendChild(detail);
+                list.appendChild(item);
+            });
+        }
+
+        // --- Aktionen ---
+        async function deleteError(id) {
+            await sb.from('error_logs').delete().eq('id', id);
+            loadErrors();
+        }
+
+        async function clearAllErrors() {
+            if (!confirm('Alle Fehler wirklich loeschen?')) return;
+            var result = await sb.from('error_logs').select('id');
+            if (result.data && result.data.length > 0) {
+                var ids = result.data.map(function(e) { return e.id; });
+                await sb.from('error_logs').delete().in('id', ids);
+            }
+            loadErrors();
+        }
+
+        // --- Hilfsfunktionen ---
+        function formatTime(dateStr) {
+            if (!dateStr) return '-';
+            var d = new Date(dateStr);
+            var diff = Date.now() - d;
+            if (diff < 60000) return 'gerade eben';
+            if (diff < 3600000) return Math.floor(diff / 60000) + ' Min.';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + ' Std.';
+            if (diff < 604800000) return Math.floor(diff / 86400000) + ' Tage';
+            return d.toLocaleDateString('de-DE');
+        }
+
+        // --- Session pruefen ---
+        async function checkSession() {
+            var result = await sb.auth.getSession();
+            if (result.data?.session) {
+                var profile = await sb.from('profiles').select('is_admin').eq('id', result.data.session.user.id).single();
+                if (profile.data?.is_admin) {
+                    showConsole();
+                    return;
+                }
+            }
+            document.getElementById('login-screen').style.display = 'flex';
+        }
+
+        checkSession();
+    </script>
+</body>
+</html>

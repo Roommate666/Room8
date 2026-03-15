@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Benachrichtigungen - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Spezifische Styles für Benachrichtigungen */
+        .notifications-list {
+            padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem 1rem 0.5rem 1rem;
+            background: #fff;
+            overflow-x: auto;
+            border-bottom: 1px solid var(--border-color);
+            scrollbar-width: none; /* Firefox */
+        }
+        .filter-tabs::-webkit-scrollbar { display: none; }
+
+        .filter-tab {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: #F9FAFB;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-tab.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+        }
+
+        .notification-item {
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            cursor: pointer;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .notification-item:active {
+            background: #F3F4F6;
+        }
+
+        .notification-item.unread {
+            background: #EFF6FF; /* Hellblau */
+        }
+        .notification-item.unread::after {
+            content: '';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 8px;
+            height: 8px;
+            background: #EF4444;
+            border-radius: 50%;
+        }
+
+        .notif-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.2rem;
+        }
+
+        /* Icon Farben */
+        .type-chat { background: #EEF2FF; color: #3B82F6; }
+        .type-review { background: #FFFBEB; color: #F59E0B; }
+        .type-favorite { background: #FEF2F2; color: #EF4444; }
+        .type-search { background: #F0FDF4; color: #16A34A; }
+        .type-info { background: #F3F4F6; color: #6B7280; }
+
+        .notif-content { flex: 1; min-width: 0; }
+
+        .notif-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin: 0 0 0.25rem 0;
+            color: var(--text-main);
+        }
+
+        .notif-message {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .notif-time {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+        .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+
+        .mark-read-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <h1>Aktivitäten</h1>
+        <button class="mark-read-btn" id="markAllBtn" style="display:none;">Alle lesen</button>
+    </header>
+
+    <div class="filter-tabs" id="filterTabs">
+        <div class="filter-tab active" data-filter="all">Alle</div>
+        <div class="filter-tab" data-filter="unread">Ungelesen</div>
+        <div class="filter-tab" data-filter="search_match">Suchalarme</div>
+        <div class="filter-tab" data-filter="chat_message">Chats</div>
+        <div class="filter-tab" data-filter="review">Bewertungen</div>
+        <div class="filter-tab" data-filter="favorite">Favoriten</div>
+    </div>
+
+    <main class="app-content" style="padding: 0;">
+        <div class="notifications-list" id="notifList">
+            <div style="padding: 2rem; text-align: center; color: var(--text-muted);">Lade...</div>
+        </div>
+    </main>
+
+    <div id="app-footer-nav"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="navigation.js"></script>
+<!-- No notificationBell.js on this page - we're already on notifications -->
+<script>
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Helper: Navigation (Vorschau-Fix)
+    function navigateTo(url) {
+        try { window.location.href = url; } catch(e) { console.warn(e); }
+    }
+
+    var allNotifications = [];
+    var currentFilter = 'all';
+    var currentUserId = null;
+
+    async function loadNotifications() {
+        if (!supabase) return;
+
+        const container = document.getElementById('notifList');
+        const markAllBtn = document.getElementById('markAllBtn');
+
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+            if (!user) {
+                container.innerHTML = '<div class="empty-state"><p>Bitte einloggen.</p></div>';
+                return;
+            }
+            currentUserId = user.id;
+
+            const { data: notifications, error } = await sb
+                .from('notifications')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false })
+                .limit(50); 
+
+            if (error) throw error;
+            
+            allNotifications = notifications || [];
+            renderNotifications();
+
+        } catch (err) {
+            console.error(err);
+            container.innerHTML = '<div style="padding:2rem;text-align:center;">Fehler beim Laden.</div>';
+        }
+    }
+
+    function renderNotifications() {
+        const container = document.getElementById('notifList');
+        const markAllBtn = document.getElementById('markAllBtn');
+        
+        // Filtern
+        let filtered = allNotifications;
+        if (currentFilter === 'unread') {
+            filtered = allNotifications.filter(n => !n.is_read);
+        } else if (currentFilter !== 'all') {
+            filtered = allNotifications.filter(n => n.type === currentFilter);
+        }
+
+        // Button Logik
+        const hasUnread = allNotifications.some(n => !n.is_read);
+        markAllBtn.style.display = hasUnread ? 'block' : 'none';
+        markAllBtn.onclick = () => markAllRead();
+
+        // Empty State
+        if (filtered.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🔕</div>
+                    <h3>Keine Neuigkeiten</h3>
+                    <p>Aktuell gibt es nichts Neues für diesen Filter.</p>
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = '';
+        filtered.forEach(n => {
+            container.appendChild(createNotificationItem(n));
+        });
+    }
+
+    function createNotificationItem(n) {
+        const item = document.createElement('div');
+        item.className = `notification-item ${n.is_read ? '' : 'unread'}`;
+        
+        // Icon & Style bestimmen
+        let icon = 'ℹ️';
+        let typeClass = 'type-info';
+        
+        if (n.type === 'chat_message') { icon = '💬'; typeClass = 'type-chat'; }
+        else if (n.type === 'review') { icon = '⭐'; typeClass = 'type-review'; }
+        else if (n.type === 'favorite') { icon = '❤️'; typeClass = 'type-favorite'; }
+        else if (n.type === 'search_match') { icon = '🔔'; typeClass = 'type-search'; }
+
+        // Zeit formatieren (z.B. "vor 5 Min")
+        const timeStr = timeAgo(n.created_at);
+
+        item.innerHTML = `
+            <div class="notif-icon ${typeClass}">${icon}</div>
+            <div class="notif-content">
+                <div class="notif-title">${escapeHtml(n.title)}</div>
+                <p class="notif-message">${escapeHtml(n.message && n.message.match(/\[IMG\]/) ? (n.message.replace(/\[IMG\].*?\[\/IMG\]\n?/, '').trim() || 'Bild') : n.message)}</p>
+                <div class="notif-time">${timeStr}</div>
+            </div>
+        `;
+
+        // Click Handler
+        item.onclick = async () => {
+            // 1. Mark as read in DB
+            if (!n.is_read) {
+                item.classList.remove('unread');
+                await sb.from('notifications').update({ is_read: true }).eq('id', n.id);
+                // Lokal updaten damit Badge verschwindet beim Neurendern
+                n.is_read = true; 
+            }
+            
+            // 2. Navigate - mit Typ-spezifischen Fixes
+            var targetLink = n.link;
+            if (n.type === 'review' && currentUserId) {
+                // Review-Notifications immer zum öffentlichen Profil
+                targetLink = 'public-profile.html?id=' + currentUserId;
+            }
+            if (targetLink) {
+                navigateTo(targetLink);
+            }
+        };
+
+        return item;
+    }
+
+    async function markAllRead() {
+        const { data: { user } } = await sb.auth.getUser();
+        if(!user) return;
+
+        const { error } = await sb
+            .from('notifications')
+            .update({ is_read: true })
+            .eq('user_id', user.id)
+            .eq('is_read', false);
+
+        if (!error) {
+            // Lokal alle auf gelesen setzen
+            allNotifications.forEach(n => n.is_read = true);
+            renderNotifications();
+        }
+    }
+
+    function timeAgo(dateString) {
+        const date = new Date(dateString);
+        const seconds = Math.floor((new Date() - date) / 1000);
+        
+        if (seconds < 60) return 'Gerade eben';
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `vor ${minutes} Min`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `vor ${hours} Std`;
+        const days = Math.floor(hours / 24);
+        return `vor ${days} Tagen`;
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // Filter Logic
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            e.target.classList.add('active');
+            currentFilter = e.target.dataset.filter;
+            renderNotifications();
+        });
+    });
+
+    loadNotifications();
+</script>
+</body>
+</html>

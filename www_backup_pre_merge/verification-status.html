@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Verifizierungsstatus - Room8</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .status-container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .status-card {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1.5rem;
+    }
+
+    .status-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .status-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+
+    .status-verified {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-not-verified {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 1rem 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #4b5563;
+    }
+
+    .info-value {
+      color: #1f2937;
+      text-align: right;
+      max-width: 60%;
+      word-break: break-word;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 0.875rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .help-text {
+      background: #f3f4f6;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      color: #4b5563;
+    }
+
+    .help-text a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .document-preview {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f9fafb;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .document-icon {
+      font-size: 2rem;
+    }
+
+    .document-info {
+      flex: 1;
+    }
+
+    .document-name {
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.25rem;
+    }
+
+    .document-meta {
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <header class="app-header">
+      <a href="profile.html" class="back-arrow">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </a>
+      <h1>Verifizierungsstatus</h1>
+      <div style="width: 40px;"></div>
+    </header>
+
+    <main class="app-content">
+      <div class="status-container">
+
+        <!-- Status Card -->
+        <div class="status-card">
+          <div class="status-header">
+            <div class="status-icon" id="statusIcon">...</div>
+            <h2 id="statusTitle">Status wird geladen...</h2>
+            <span class="status-badge" id="statusBadge">Laden...</span>
+          </div>
+
+          <div id="statusDetails">
+            <!-- Will be filled by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <a href="profile.html" class="btn btn-secondary">
+            Zurück zum Profil
+          </a>
+          <a href="verify-options.html" id="retryBtn" class="btn btn-primary" style="display: none;">
+            Erneut versuchen
+          </a>
+        </div>
+
+        <!-- Help Text -->
+        <div class="help-text">
+          <strong>Brauchst du Hilfe?</strong><br>
+          Bei Fragen zur Verifizierung kontaktiere uns: <a href="mailto:help@room8.club">help@room8.club</a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+  <script src="config.js"></script>
+  <script>
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    var statusIcon = document.getElementById('statusIcon');
+    var statusTitle = document.getElementById('statusTitle');
+    var statusBadge = document.getElementById('statusBadge');
+    var statusDetails = document.getElementById('statusDetails');
+    var retryBtn = document.getElementById('retryBtn');
+
+    async function loadVerificationStatus() {
+      try {
+        // Check auth
+        var { data: { user }, error: authError } = await sb.auth.getUser();
+
+        if (authError || !user) {
+          window.location.href = 'login.html';
+          return;
+        }
+
+        var { data: profile, error } = await sb
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (error) throw error;
+
+        var isVerified = profile.is_verified;
+        var verificationStatus = profile.verification_status || 'not_started';
+        var verificationMethod = profile.verification_method;
+        var uniEmail = profile.uni_email || profile.edu_email;
+        var documentUrl = profile.verification_document_url;
+
+        var detailsHTML = '';
+
+        if (isVerified) {
+          // VERIFIED
+          statusIcon.textContent = '✅';
+          statusTitle.textContent = 'Du bist verifiziert!';
+          statusBadge.textContent = 'Verifiziert';
+          statusBadge.className = 'status-badge status-verified';
+
+          detailsHTML = `
+            <div class="info-row">
+              <span class="info-label">Status</span>
+              <span class="info-value">Verifizierter Student</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Methode</span>
+              <span class="info-value">${verificationMethod === 'uni-email' ? 'Uni-Email' : verificationMethod === 'document' ? 'Dokument-Upload' : 'Verifiziert'}</span>
+            </div>
+            ${uniEmail ? `
+            <div class="info-row">
+              <span class="info-label">Uni-Email</span>
+              <span class="info-value">${uniEmail}</span>
+            </div>
+            ` : ''}
+            <div class="info-row">
+              <span class="info-label">Vorteile</span>
+              <span class="info-value">Voller Zugang zu allen Funktionen</span>
+            </div>
+          `;
+
+        } else if (verificationStatus === 'pending') {
+          // PENDING
+          statusIcon.textContent = '⏳';
+          statusTitle.textContent = 'Wird bearbeitet';
+          statusBadge.textContent = 'In Prüfung';
+          statusBadge.className = 'status-badge status-pending';
+
+          detailsHTML = `
+            <div class="info-row">
+              <span class="info-label">Status</span>
+              <span class="info-value">Wird geprüft</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Methode</span>
+              <span class="info-value">${verificationMethod === 'uni-email' ? 'Uni-Email' : verificationMethod === 'document' ? 'Dokument-Upload' : 'Ausstehend'}</span>
+            </div>
+            ${uniEmail ? `
+            <div class="info-row">
+              <span class="info-label">Uni-Email</span>
+              <span class="info-value">${uniEmail}</span>
+            </div>
+            ` : ''}
+            ${documentUrl ? `
+            <div class="document-preview">
+              <div class="document-icon">📄</div>
+              <div class="document-info">
+                <div class="document-name">Immatrikulationsbescheinigung</div>
+                <div class="document-meta">Hochgeladen - In Prüfung</div>
+              </div>
+            </div>
+            ` : ''}
+            <div style="margin-top: 1.5rem; padding: 1rem; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+              <strong style="color: #92400e;">Deine Verifizierung wird geprüft</strong>
+              <p style="margin: 0.5rem 0 0 0; color: #92400e; font-size: 0.9rem;">
+                Unser Team prüft deine ${verificationMethod === 'document' ? 'Dokumente' : 'Uni-Email'}. Du erhältst eine E-Mail sobald die Prüfung abgeschlossen ist. Dies dauert normalerweise 24-48 Stunden.
+              </p>
+            </div>
+          `;
+
+        } else {
+          // NOT VERIFIED
+          statusIcon.textContent = '❌';
+          statusTitle.textContent = 'Nicht verifiziert';
+          statusBadge.textContent = 'Nicht verifiziert';
+          statusBadge.className = 'status-badge status-not-verified';
+
+          detailsHTML = `
+            <div class="info-row">
+              <span class="info-label">Status</span>
+              <span class="info-value">Nicht verifiziert</span>
+            </div>
+            <div style="margin-top: 1.5rem; padding: 1rem; background: #fee2e2; border-radius: 8px; border-left: 4px solid #ef4444;">
+              <strong style="color: #991b1b;">Verifizierung erforderlich</strong>
+              <p style="margin: 0.5rem 0 0 0; color: #991b1b; font-size: 0.9rem;">
+                Du musst deinen Studentenstatus verifizieren, um alle Funktionen nutzen zu können. Klicke auf "Erneut versuchen" um den Verifizierungsprozess zu starten.
+              </p>
+            </div>
+          `;
+
+          retryBtn.style.display = 'block';
+        }
+
+        statusDetails.innerHTML = detailsHTML;
+
+      } catch (error) {
+        console.error('Error loading status:', error);
+        statusIcon.textContent = '⚠️';
+        statusTitle.textContent = 'Fehler beim Laden';
+        statusBadge.textContent = 'Fehler';
+        statusBadge.className = 'status-badge status-not-verified';
+        statusDetails.innerHTML = `
+          <div style="padding: 1rem; background: #fee2e2; border-radius: 8px; color: #991b1b;">
+            Status konnte nicht geladen werden. Bitte versuche es später erneut.
+          </div>
+        `;
+        retryBtn.style.display = 'block';
+      }
+    }
+
+    loadVerificationStatus();
+  </script>
+</body>
+</html>

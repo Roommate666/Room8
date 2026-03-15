@@ -1,0 +1,13 @@
+{
+  "appId": "club.room8.app",
+  "appName": "Room8",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    }
+  }
+}

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Nachrichten - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .search-bar-container {
+            padding: 1rem;
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 99px;
+            border: 1px solid var(--border-color);
+            background: #F9FAFB;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .search-input:focus {
+            background: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .conversations-list {
+            padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px);
+        }
+
+        .conversation-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            padding-right: 50px;
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .conversation-item:active {
+            background-color: #F3F4F6;
+        }
+
+        .avatar-placeholder {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #F2F2F0;
+            color: #3B82F6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .convo-details {
+            flex: 1;
+            min-width: 0; /* Wichtig für Text-Truncate */
+        }
+
+        .convo-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+
+        .partner-name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+
+        .timestamp {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .listing-title-hint {
+            font-size: 0.75rem;
+            color: #3B82F6;
+            background: #EFF6FF;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 0.25rem;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .last-message {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .unread-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #EF4444;
+            border-radius: 50%;
+            position: absolute;
+            top: 1rem;
+            right: 50px;
+            display: none; /* Logic via JS */
+        }
+
+        .delete-chat-btn {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.9);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            color: #EF4444;
+            font-size: 1rem;
+            z-index: 10;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+        .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+
+        /* Verification Overlay */
+        .verify-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        .verify-overlay.active { display: flex; }
+        .verify-overlay-box {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            max-width: 360px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        .verify-overlay-box .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .verify-overlay-box h2 { font-size: 1.3rem; margin-bottom: 0.5rem; color: #1f2937; }
+        .verify-overlay-box p { color: #6b7280; font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; }
+        .verify-overlay-box a {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 0.85rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Verification Overlay -->
+    <div class="verify-overlay" id="verifyOverlay">
+        <div class="verify-overlay-box">
+            <div class="icon">🔒</div>
+            <h2>Verifizierung erforderlich</h2>
+            <p>Um Nachrichten zu senden und zu empfangen, musst du zuerst deinen Studentenstatus verifizieren.</p>
+            <a href="verify-options.html">Jetzt verifizieren</a>
+        </div>
+    </div>
+
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <h1>Nachrichten</h1>
+        <!-- Glocke für Konsistenz -->
+        <a href="notifications.html" class="header-icon-btn" style="background:transparent; width:auto; margin-left: auto;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        </a>
+    </header>
+
+    <div class="search-bar-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Suchen...">
+    </div>
+
+    <main class="app-content" style="padding: 0;">
+        <div class="conversations-list" id="inboxContainer">
+            <div style="padding: 2rem; text-align: center; color: var(--text-muted);">Lade Nachrichten...</div>
+        </div>
+    </main>
+
+    <div id="app-footer-nav"></div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
+<script src="room8-utils.js"></script>
+<script src="navigation.js"></script>
+<script src="notificationBell.js"></script>
+<script>
+    // Supabase Client - mit Cache-Bypass für WKWebView (iOS)
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        global: {
+            fetch: function(url, options) {
+                options = options || {};
+                options.cache = 'no-store';
+                return fetch(url, options);
+            }
+        }
+    });
+
+    var allConversations = [];
+    var currentUser = null;
+
+    // Helper: Navigation sicher machen (Vorschau-Fix)
+    function navigateTo(url) {
+        try { window.location.href = url; } catch(e) { console.warn(e); }
+    }
+
+    async function checkVerification(userId) {
+        const { data: profile } = await sb.from('profiles').select('is_verified, is_student_verified').eq('id', userId).single();
+        var isVerified = profile && (profile.is_verified || profile.is_student_verified);
+        if (!isVerified) {
+            document.getElementById('verifyOverlay').classList.add('active');
+        }
+    }
+
+    async function loadInbox() {
+        if (!sb) return;
+
+        const container = document.getElementById('inboxContainer');
+
+        try {
+            const { data: { user } } = await sb.auth.getUser();
+            if (!user) {
+                navigateTo('login.html');
+                return;
+            }
+            currentUser = user;
+            checkVerification(user.id);
+
+            // Nachrichten laden (Sender ODER Empfänger bin ich)
+            const { data: messages, error } = await sb
+                .from('messages')
+                .select('id, sender_id, receiver_id, listing_id, content, created_at, is_read')
+                .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            if (!messages || messages.length === 0) {
+                renderEmptyState();
+                return;
+            }
+
+            // Gruppieren
+            const conversations = {};
+
+            messages.forEach(msg => {
+                const partnerId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
+                // Unique Key pro Partner UND Inserat (optional: nur Partner)
+                // Hier gruppieren wir pro Inserat, damit man Kontext behält
+                const key = `${partnerId}-${msg.listing_id || 'general'}`;
+
+                if (!conversations[key]) {
+                    conversations[key] = {
+                        partnerId: partnerId,
+                        listingId: msg.listing_id,
+                        lastMessage: msg.content,
+                        lastDate: new Date(msg.created_at),
+                        isUnread: (!msg.is_read && msg.receiver_id === user.id)
+                    };
+                }
+            });
+
+            // Blockierte User filtern
+            if (window.Room8) {
+                var blockedIds = await Room8.loadBlockedUsers();
+                if (blockedIds.length > 0) {
+                    Object.keys(conversations).forEach(function(key) {
+                        if (blockedIds.includes(conversations[key].partnerId)) {
+                            delete conversations[key];
+                        }
+                    });
+                }
+            }
+
+            // Ausgeblendete Chats filtern
+            var { data: hiddenChats } = await sb
+                .from('hidden_chats')
+                .select('partner_id, listing_id, hidden_at')
+                .eq('user_id', user.id);
+
+            if (hiddenChats && hiddenChats.length > 0) {
+                Object.keys(conversations).forEach(function(key) {
+                    var convo = conversations[key];
+                    var hidden = hiddenChats.find(function(h) {
+                        return h.partner_id === convo.partnerId &&
+                               (h.listing_id || '') === (convo.listingId || '');
+                    });
+                    if (hidden && new Date(hidden.hidden_at) > convo.lastDate) {
+                        delete conversations[key];
+                    }
+                });
+            }
+
+            if (Object.keys(conversations).length === 0) {
+                renderEmptyState();
+                return;
+            }
+
+            // Details laden (Namen & Listing Titel)
+            const promises = Object.values(conversations).map(async (convo) => {
+                // Partner Profil
+                const { data: profile } = await sb
+                    .from('profiles')
+                    .select('username, full_name, avatar_url')
+                    .eq('id', convo.partnerId)
+                    .single();
+
+                convo.partnerName = profile ? (profile.full_name || profile.username) : 'Unbekannt';
+                convo.partnerAvatar = profile ? profile.avatar_url : null;
+
+                // Listing Info
+                if (convo.listingId) {
+                    const { data: listing } = await sb
+                        .from('listings')
+                        .select('title')
+                        .eq('id', convo.listingId)
+                        .single();
+                    convo.listingTitle = listing ? listing.title : 'Inserat gelöscht';
+                } else {
+                    convo.listingTitle = 'Allgemein';
+                }
+                return convo;
+            });
+
+            allConversations = await Promise.all(promises);
+            renderList(allConversations);
+
+        } catch (err) {
+            console.error("Inbox Error:", err);
+            container.innerHTML = '<div style="padding:2rem;text-align:center;color:red;">Fehler: ' + (err.message || err) + '</div>';
+        }
+    }
+
+    function renderList(list) {
+        const container = document.getElementById('inboxContainer');
+        container.innerHTML = '';
+
+        if (list.length === 0) {
+            renderEmptyState();
+            return;
+        }
+
+        list.forEach(convo => {
+            const dateStr = convo.lastDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+            const avatarStyle = convo.partnerAvatar 
+                ? `background-image: url('${convo.partnerAvatar}');` 
+                : '';
+            const avatarContent = convo.partnerAvatar ? '' : convo.partnerName.charAt(0).toUpperCase();
+
+            // Link zum Chat
+            const link = `chat.html?user=${convo.partnerId}&listing=${convo.listingId || ''}`;
+
+            const item = document.createElement('div');
+            item.innerHTML = `
+                <a href="${link}" class="conversation-item" onclick="event.preventDefault(); navigateTo('${link}');">
+                    <div class="avatar-placeholder" style="${avatarStyle}">${avatarContent}</div>
+                    <div class="convo-details">
+                        <div class="convo-header">
+                            <span class="partner-name">${escapeHtml(convo.partnerName)}</span>
+                            <span class="timestamp">${dateStr}</span>
+                        </div>
+                        <div class="listing-title-hint">${escapeHtml(convo.listingTitle)}</div>
+                        <div class="last-message" style="${convo.isUnread ? 'font-weight:700;color:var(--text-main);' : ''}">
+                            ${escapeHtml(convo.lastMessage)}
+                        </div>
+                    </div>
+                    ${convo.isUnread ? '<div class="unread-dot" style="display:block"></div>' : ''}
+                    <button class="delete-chat-btn" data-partner="${convo.partnerId}" data-listing="${convo.listingId || ''}" onclick="event.preventDefault();event.stopPropagation();deleteChat(this);">🗑️</button>
+                </a>
+            `;
+            container.appendChild(item.firstElementChild); // Append the A tag
+        });
+    }
+
+    async function deleteChat(btn) {
+        if (!confirm('Chat ausblenden? Er erscheint wieder, wenn eine neue Nachricht kommt.')) return;
+        var partnerId = btn.dataset.partner;
+        var listingId = btn.dataset.listing || null;
+
+        btn.closest('.conversation-item').style.opacity = '0.3';
+
+        await sb.from('hidden_chats').upsert({
+            user_id: currentUser.id,
+            partner_id: partnerId,
+            listing_id: listingId,
+            hidden_at: new Date().toISOString()
+        }, { onConflict: 'user_id,partner_id,listing_id' });
+
+        loadInbox();
+    }
+
+    function renderEmptyState() {
+        const container = document.getElementById('inboxContainer');
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">💬</div>
+                <h3>Keine Nachrichten</h3>
+                <p>Starte einen Chat über ein Inserat, um hier Konversationen zu sehen.</p>
+                <a href="choose-listing.html" style="color:var(--primary-color);font-weight:600;text-decoration:none;">Jetzt stöbern</a>
+            </div>
+        `;
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // Suche (Client-Side Filter)
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const filtered = allConversations.filter(c => 
+            c.partnerName.toLowerCase().includes(term) || 
+            c.listingTitle.toLowerCase().includes(term)
+        );
+        renderList(filtered);
+    });
+
+    // Realtime: Neue Nachrichten live anzeigen
+    function subscribeToNewMessages() {
+        if (!currentUser) return;
+        sb.channel('inbox-rt-' + currentUser.id + '-' + Date.now())
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'messages'
+            }, function(payload) {
+                // Nur Nachrichten die mich betreffen
+                if (payload.new.receiver_id === currentUser.id || payload.new.sender_id === currentUser.id) {
+                    console.log('Inbox: Neue Nachricht, lade neu...');
+                    loadInbox();
+                }
+            }).subscribe(function(status) {
+                console.log('Inbox realtime subscription:', status);
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadInbox().then(function() {
+            subscribeToNewMessages();
+        });
+    });
+
+    // WKWebView iOS Fix: Stale-Page-Erkennung via setInterval
+    // Wenn WKWebView eine gecachte Seite wiederherstellt, läuft der Interval weiter
+    // aber Date.now() springt → wir erkennen den Zeitsprung und laden neu
+    var _lastTick = Date.now();
+    setInterval(function() {
+        var now = Date.now();
+        if (now - _lastTick > 2000 && currentUser) {
+            console.log('Inbox: Stale page detected, reloading...');
+            loadInbox();
+        }
+        _lastTick = now;
+    }, 1000);
+</script>
+</body>
+</html>

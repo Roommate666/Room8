@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title data-i18n="privacy_page_title">Datenschutz - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .legal-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem 4rem;
+        }
+        .content-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+            line-height: 1.8;
+            color: #374151;
+            font-size: 0.95rem;
+            margin-top: 1rem;
+        }
+
+        h2 {
+            color: var(--text-main);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            border-bottom: 2px solid #F3F4F6;
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            color: var(--text-main);
+            margin-top: 1.5rem;
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        p, li { margin-bottom: 0.8rem; }
+        ul { padding-left: 1.2rem; margin-bottom: 1rem; }
+        li { margin-bottom: 0.5rem; }
+
+        /* Highlight Boxes */
+        .info-box {
+            background: #EFF6FF;
+            border-left: 4px solid #3B82F6;
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            margin: 0 0 2rem 0;
+            color: #1E40AF;
+        }
+
+        .highlight-box {
+            background: #ECFDF5;
+            border-left: 4px solid #10B981;
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            color: #065F46;
+        }
+
+        /* Contact Address Box */
+        .contact-box {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin: 1rem 0;
+        }
+
+        .email-link {
+            background: #EFF6FF;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .email-link:hover { text-decoration: underline; }
+
+        a { color: var(--primary-color); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <h1 data-i18n="privacy_title">Datenschutz</h1>
+        <div style="width:40px;"></div>
+    </header>
+
+    <main class="legal-content">
+        <div class="content-card">
+            
+            <div class="info-box">
+                <strong data-i18n="privacy_summary_label">Kurzfassung:</strong>
+                <span data-i18n="privacy_summary_text">Wir sammeln nur Daten, die für den Betrieb notwendig sind. Kein Verkauf, kein Tracking. Deine Sicherheit steht an erster Stelle.</span>
+            </div>
+
+            <p style="font-size: 0.85rem; color: #9ca3af; margin-bottom: 2rem;">
+                Stand: Februar 2026
+            </p>
+            
+            <h2 data-i18n="privacy_responsible_title">1. Verantwortlicher</h2>
+            <p data-i18n="privacy_responsible_intro">Verantwortlich für die Datenverarbeitung auf dieser Website ist:</p>
+            
+            <div class="contact-box">
+                <strong>Yusuf Albayrak</strong><br>
+                Am Silbermannpark 13<br>
+                86161 Augsburg<br>
+                <span data-i18n="privacy_country">Deutschland</span><br><br>
+                <span data-i18n="privacy_email_label">E-Mail:</span> <a href="mailto:admin@room8.club" class="email-link">admin@room8.club</a>
+            </div>
+            
+            <h2 data-i18n="privacy_data_title">2. Welche Daten wir erheben</h2>
+            
+            <h3 data-i18n="privacy_registration_title">2.1 Registrierungsdaten</h3>
+            <p data-i18n="privacy_registration_intro">Bei der Registrierung erheben wir:</p>
+            <ul>
+                <li data-i18n="privacy_registration_item1">E-Mail-Adresse</li>
+                <li data-i18n="privacy_registration_item2">Name (Vorname und Nachname)</li>
+                <li data-i18n="privacy_registration_item3">Passwort (verschlüsselt gespeichert)</li>
+                <li data-i18n="privacy_registration_item4">Optional: Profilbild</li>
+                <li data-i18n="privacy_registration_item5">Optional: Universität/Hochschule</li>
+            </ul>
+
+            <h3>2.2 Verifizierungsdaten</h3>
+            <p>Zur Verifikation deines Studierendenstatus erheben wir:</p>
+            <ul>
+                <li>Uni-E-Mail-Adresse (zur E-Mail-Verifizierung)</li>
+                <li>Optional: Foto des Studierendenausweises (wird nach erfolgreicher Prüfung gelöscht)</li>
+            </ul>
+            
+            <h3>2.3 Inseratsdaten</h3>
+            <p data-i18n="privacy_listings_intro">Wenn du ein Inserat erstellst, speichern wir:</p>
+            <ul>
+                <li data-i18n="privacy_listings_item1">Titel und Beschreibung</li>
+                <li data-i18n="privacy_listings_item2">Adresse/Standort</li>
+                <li data-i18n="privacy_listings_item3">Preisinformationen</li>
+                <li data-i18n="privacy_listings_item4">Hochgeladene Fotos</li>
+                <li data-i18n="privacy_listings_item5">Kontaktinformationen</li>
+            </ul>
+            
+            <h3>2.4 Nachrichten</h3>
+            <p data-i18n="privacy_messages_text">
+                Nachrichten, die du über unsere Plattform sendest, werden verschlüsselt gespeichert, um die Kommunikation zwischen Nutzern zu ermöglichen.
+            </p>
+            
+            <h3>2.5 Technische Daten</h3>
+            <p>Bei jedem Zugriff werden automatisch erfasst:</p>
+            <ul>
+                <li>IP-Adresse (anonymisiert)</li>
+                <li>Datum und Uhrzeit des Zugriffs</li>
+                <li>Browsertyp und -version</li>
+                <li>Gerätetyp und Betriebssystem</li>
+            </ul>
+
+            <h3>2.6 Push-Benachrichtigungen</h3>
+            <p>Wenn du Push-Benachrichtigungen aktivierst, speichern wir:</p>
+            <ul>
+                <li>Einen gerätegebundenen Push-Token (FCM-Token bzw. APNs-Token)</li>
+                <li>Dieser wird ausschließlich zum Versand von Benachrichtigungen verwendet</li>
+                <li>Du kannst Push-Benachrichtigungen jederzeit in den Geräteeinstellungen deaktivieren</li>
+            </ul>
+
+            <h3>2.7 Lokale Speicherung (LocalStorage/SessionStorage)</h3>
+            <p>Die App nutzt lokale Speichertechnologien deines Browsers/Geräts:</p>
+            <ul>
+                <li><strong>SessionStorage:</strong> Temporäre Zwischenspeicherung von Sitzungsdaten (z.B. Nutzer-Cache) zur Performance-Optimierung. Wird beim Schließen der App automatisch gelöscht.</li>
+                <li><strong>LocalStorage:</strong> Speicherung von Einstellungen (z.B. Sprache, Push-Präferenzen). Bleibt bis zur manuellen Löschung erhalten.</li>
+            </ul>
+            <p>Es werden keine Tracking-Cookies verwendet.</p>
+            
+            <h2 data-i18n="privacy_not_title">3. Was wir NICHT tun</h2>
+            <div class="highlight-box">
+                <ul style="margin-bottom: 0;">
+                    <li><strong data-i18n="privacy_not_tracking_label">Kein Tracking:</strong> <span data-i18n="privacy_not_tracking_text">Wir verwenden kein Google Analytics</span></li>
+                    <li><strong data-i18n="privacy_not_sale_label">Kein Datenverkauf:</strong> <span data-i18n="privacy_not_sale_text">Wir verkaufen deine Daten niemals an Dritte</span></li>
+                    <li><strong data-i18n="privacy_not_ads_label">Keine Werbung:</strong> <span data-i18n="privacy_not_ads_text">Wir zeigen keine personalisierte Werbung</span></li>
+                </ul>
+            </div>
+            
+            <h2 data-i18n="privacy_legal_title">4. Rechtsgrundlage</h2>
+            <p data-i18n="privacy_legal_intro">Die Verarbeitung erfolgt auf Grundlage von:</p>
+            <ul>
+                <li><strong>Art. 6 Abs. 1 lit. b DSGVO</strong> - <span data-i18n="privacy_legal_item1">Vertragserfüllung</span></li>
+                <li><strong>Art. 6 Abs. 1 lit. a DSGVO</strong> - <span data-i18n="privacy_legal_item2">Einwilligung</span></li>
+                <li><strong>Art. 6 Abs. 1 lit. f DSGVO</strong> - <span data-i18n="privacy_legal_item3">Berechtigtes Interesse</span></li>
+            </ul>
+            
+            <h2 data-i18n="privacy_hosting_title">5. Hosting und Speicherung</h2>
+            
+            <h3 data-i18n="privacy_database_title">5.1 Datenbank (Supabase)</h3>
+            <p>
+                <span data-i18n="privacy_database_text">Unsere Datenbank wird bei Supabase gehostet, mit Servern in der Europäischen Union (Frankfurt, Deutschland). Supabase erfüllt hohe Sicherheitsstandards.</span>
+                <br><a href="https://sb.com/privacy" target="_blank" style="font-size:0.9rem;">Supabase Datenschutz →</a>
+            </p>
+            
+            <h3>5.2 Webhosting</h3>
+            <p>
+                Unsere Website wird bei Vercel Inc. gehostet.
+                <br><a href="https://vercel.com/legal/privacy-policy" target="_blank" style="font-size:0.9rem;">Vercel Datenschutz →</a>
+            </p>
+
+            <h3>5.3 Push-Dienste</h3>
+            <p>Für den Versand von Push-Benachrichtigungen nutzen wir:</p>
+            <ul>
+                <li><strong>Firebase Cloud Messaging (FCM)</strong> von Google Ireland Limited – für die Zustellung auf Android- und iOS-Geräten. <br><a href="https://firebase.google.com/support/privacy" target="_blank" style="font-size:0.9rem;">Firebase Datenschutz →</a></li>
+                <li><strong>Apple Push Notification Service (APNs)</strong> von Apple Inc. – für die Zustellung auf iOS-Geräten. <br><a href="https://www.apple.com/legal/privacy/" target="_blank" style="font-size:0.9rem;">Apple Datenschutz →</a></li>
+            </ul>
+
+            <h3>5.4 Datentransfer in Drittländer</h3>
+            <p>Einige unserer Dienstleister haben ihren Sitz in den USA (Google/Firebase, Vercel, Apple). Der Datentransfer erfolgt auf Grundlage von:</p>
+            <ul>
+                <li><strong>EU-US Data Privacy Framework</strong> – Google, Vercel und Apple sind unter dem Data Privacy Framework zertifiziert</li>
+                <li><strong>Standardvertragsklauseln (SCC)</strong> gemäß Art. 46 Abs. 2 lit. c DSGVO als zusätzliche Absicherung</li>
+            </ul>
+
+            <h2>6. Aufbewahrungsfristen</h2>
+            <p>Wir speichern deine Daten nur so lange, wie es für den jeweiligen Zweck erforderlich ist:</p>
+            <ul>
+                <li><strong>Kontodaten:</strong> Bis zur Löschung deines Kontos</li>
+                <li><strong>Inserate:</strong> Bis zur Löschung durch dich oder Deaktivierung des Kontos</li>
+                <li><strong>Nachrichten:</strong> Bis zur Kontolöschung durch einen der Gesprächspartner</li>
+                <li><strong>Verifizierungsdokumente:</strong> Werden nach erfolgreicher Prüfung umgehend gelöscht</li>
+                <li><strong>Technische Logs:</strong> Maximal 30 Tage</li>
+                <li><strong>Push-Token:</strong> Bis zur Deaktivierung von Push oder Kontolöschung</li>
+            </ul>
+            <p>Nach Löschung deines Kontos werden alle personenbezogenen Daten innerhalb von 30 Tagen unwiderruflich entfernt, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen.</p>
+
+            <h2>7. Deine Rechte</h2>
+            <p data-i18n="privacy_rights_intro">Du hast jederzeit das Recht auf:</p>
+            <ul>
+                <li><strong data-i18n="privacy_rights_access_label">Auskunft</strong> über deine gespeicherten Daten</li>
+                <li><strong data-i18n="privacy_rights_correction_label">Berichtigung</strong> falscher Daten</li>
+                <li><strong data-i18n="privacy_rights_deletion_label">Löschung</strong> deiner Daten</li>
+                <li><strong>Datenübertragbarkeit</strong> (Art. 20 DSGVO)</li>
+                <li><strong>Widerspruch</strong> gegen die Verarbeitung (Art. 21 DSGVO) – Du hast das Recht, aus Gründen, die sich aus deiner besonderen Situation ergeben, jederzeit gegen die Verarbeitung deiner Daten Widerspruch einzulegen, sofern diese auf Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse) basiert.</li>
+                <li><strong>Widerruf der Einwilligung</strong> (Art. 7 Abs. 3 DSGVO) – Eine erteilte Einwilligung kannst du jederzeit widerrufen. Die Rechtmäßigkeit der bis zum Widerruf erfolgten Verarbeitung bleibt unberührt.</li>
+            </ul>
+
+            <h3>Beschwerderecht bei der Aufsichtsbehörde</h3>
+            <p>Du hast das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu beschweren (Art. 77 DSGVO). Die für uns zuständige Aufsichtsbehörde ist:</p>
+            <div class="contact-box">
+                <strong>Bayerisches Landesamt für Datenschutzaufsicht (BayLDA)</strong><br>
+                Promenade 18<br>
+                91522 Ansbach<br>
+                <a href="https://www.lda.bayern.de" target="_blank">www.lda.bayern.de</a>
+            </div>
+
+            <h2>8. Kontolöschung</h2>
+            <p data-i18n="privacy_deletion_text">
+                Du kannst dein Konto jederzeit in den Profileinstellungen löschen. Dabei werden alle deine personenbezogenen Daten, Inserate und Nachrichten unwiderruflich entfernt.
+            </p>
+
+            <h2>9. Minderjährigenschutz</h2>
+            <p>Die App richtet sich an Personen ab 16 Jahren. Wir erheben wissentlich keine Daten von Personen unter 16 Jahren. Sollten wir Kenntnis davon erlangen, dass personenbezogene Daten von Personen unter 16 Jahren erfasst wurden, werden wir diese umgehend löschen.</p>
+
+            <h2>10. Kontakt</h2>
+            <p>
+                <span data-i18n="privacy_contact_text">Bei Fragen zum Datenschutz:</span><br>
+                <a href="mailto:admin@room8.club" class="email-link">admin@room8.club</a>
+            </p>
+
+        </div>
+    </main>
+</div>
+
+<script src="config.js"></script>
+<script src="session-cache.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>

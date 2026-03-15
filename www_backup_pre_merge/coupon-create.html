@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Coupon erstellen - Admin</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .app-container { --primary-color: #111827; }
+        .app-header { background: linear-gradient(135deg, #111827 0%, #1F2937 100%); color: white; }
+        .app-header h1 { color: white; }
+        
+        .section-divider {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #6B7280;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #E5E7EB;
+        }
+        
+        .row {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .col {
+            flex: 1;
+        }
+        
+        .upload-area {
+            border: 2px dashed #D1D5DB;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #F9FAFB;
+        }
+        
+        .upload-area:hover {
+            border-color: #9CA3AF;
+            background: #F3F4F6;
+        }
+        
+        .upload-preview {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #10B981;
+            font-weight: 600;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #111827 0%, #374151 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 15px rgba(17, 24, 39, 0.3);
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .info-text {
+            font-size: 0.8rem;
+            color: #9CA3AF;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <a href="admin.html" class="back-arrow" onclick="navigateTo('admin.html'); return false;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <h1>Coupon erstellen</h1>
+        <div style="width: 40px;"></div>
+    </header>
+
+    <main class="app-content">
+        <form id="createCouponForm">
+            
+            <!-- DEAL INFOS -->
+            <div class="section-divider">🎟️ Deal Informationen</div>
+            
+            <div class="form-group">
+                <label>Hintergrundbild</label>
+                <div class="upload-area" onclick="document.getElementById('imgInput').click()">
+                    <div id="previewContainer">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📷</div>
+                        <div>Klicken zum Hochladen</div>
+                        <div class="info-text">Empfohlen: 600x400px</div>
+                    </div>
+                </div>
+                <input type="file" id="imgInput" accept="image/*" style="display:none">
+            </div>
+            
+            <div class="form-group">
+                <label>Titel (Deal) *</label>
+                <input type="text" id="title" required placeholder="z.B. 2 für 1 Kaffee">
+            </div>
+            
+            <div class="row">
+                <div class="col form-group">
+                    <label>Rabatt-Badge *</label>
+                    <input type="text" id="discountValue" required placeholder="-20% oder GRATIS">
+                </div>
+                <div class="col form-group">
+                    <label>Code *</label>
+                    <input type="text" id="code" required style="text-transform:uppercase;" placeholder="DEAL2025">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Kategorie</label>
+                <select id="category">
+                    <option value="food">🍕 Essen & Trinken</option>
+                    <option value="tech">💻 Technik</option>
+                    <option value="fashion">👕 Mode</option>
+                    <option value="leisure">🎮 Freizeit</option>
+                    <option value="beauty">💅 Beauty & Wellness</option>
+                    <option value="education">📚 Bildung</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Beschreibung *</label>
+                <textarea id="description" rows="3" required placeholder="Was beinhaltet der Deal? Welche Bedingungen gibt es?"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Gültig bis</label>
+                <input type="date" id="validUntil">
+            </div>
+
+            <!-- PARTNER INFOS -->
+            <div class="section-divider">🏪 Partner Informationen</div>
+            
+            <div class="form-group">
+                <label>Partner Logo</label>
+                <div class="upload-area" onclick="document.getElementById('logoInput').click()" style="padding: 1rem;">
+                    <div id="logoPreview">
+                        <span style="font-size: 1.5rem;">🏢</span> Logo hochladen (optional)
+                    </div>
+                </div>
+                <input type="file" id="logoInput" accept="image/*" style="display:none">
+            </div>
+            
+            <div class="form-group">
+                <label>Firmenname *</label>
+                <input type="text" id="businessName" required placeholder="z.B. Campus Café">
+            </div>
+            
+            <div class="form-group">
+                <label>Kurzbeschreibung des Partners</label>
+                <input type="text" id="businessDesc" placeholder="z.B. Gemütliches Café direkt am Campus">
+            </div>
+            
+            <div class="row">
+                <div class="col form-group">
+                    <label>Stadt *</label>
+                    <input type="text" id="city" required placeholder="München">
+                </div>
+                <div class="col form-group">
+                    <label>PLZ</label>
+                    <input type="text" id="zipCode" placeholder="80333">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Straße & Hausnummer</label>
+                <input type="text" id="address" placeholder="Musterstraße 123">
+            </div>
+            
+            <div class="form-group">
+                <label>Webseite</label>
+                <input type="url" id="website" placeholder="https://www.beispiel.de">
+            </div>
+            
+            <div class="form-group">
+                <label>Instagram</label>
+                <input type="text" id="instagram" placeholder="@beispiel_cafe">
+            </div>
+            
+            <div class="form-group">
+                <label>Öffnungszeiten</label>
+                <input type="text" id="openingHours" placeholder="Mo-Fr: 8-18 Uhr, Sa: 10-16 Uhr">
+            </div>
+            
+            <div class="form-group">
+                <label>Telefon</label>
+                <input type="tel" id="phone" placeholder="+49 123 456789">
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">Coupon Veröffentlichen</button>
+        </form>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="config.js"></script>
+<script src="room8-ui.js"></script>
+<script>
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const ADMIN_EMAIL = 'albayrak_yusuf@icloud.com';
+
+    function navigateTo(url) {
+        try { window.location.href = url; } catch(e) { console.warn("Nav Error:", e); }
+    }
+
+    async function checkAdmin() {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user || user.email !== ADMIN_EMAIL) {
+            Room8UI.error("Kein Admin-Zugriff!");
+            setTimeout(function() { navigateTo('dashboard.html'); }, 1500);
+            return null;
+        }
+        return user;
+    }
+
+    // Image Preview mit Bildvorschau
+    const fileInput = document.getElementById('imgInput');
+    fileInput.addEventListener('change', (e) => {
+        if(e.target.files[0]) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('previewContainer').innerHTML = `
+                    <img src="${event.target.result}" style="max-width:200px; max-height:150px; border-radius:12px; margin-bottom:0.5rem; object-fit:cover;">
+                    <div style="color:#10B981; font-weight:600;">✅ ${file.name}</div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Logo Preview mit Bildvorschau
+    const logoInput = document.getElementById('logoInput');
+    logoInput.addEventListener('change', (e) => {
+        if(e.target.files[0]) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('logoPreview').innerHTML = `
+                    <img src="${event.target.result}" style="max-width:80px; max-height:80px; border-radius:12px; margin-bottom:0.5rem;">
+                    <div style="color:#10B981; font-weight:600;">✅ ${file.name}</div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    document.getElementById('createCouponForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user = await checkAdmin();
+        if (!user) return;
+        
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Wird erstellt...';
+
+        try {
+            const data = {
+                user_id: user.id,
+                business_name: document.getElementById('businessName').value,
+                title: document.getElementById('title').value,
+                category: document.getElementById('category').value,
+                discount_value: document.getElementById('discountValue').value,
+                discount_code: document.getElementById('code').value.toUpperCase(),
+                valid_until: document.getElementById('validUntil').value || null,
+                description: document.getElementById('description').value,
+                city: document.getElementById('city').value,
+                status: 'active'
+            };
+
+            const { data: coupon, error } = await sb.from('coupons').insert(data).select().single();
+            if (error) throw error;
+
+            // Hauptbild hochladen
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const path = `coupons/${coupon.id}_img.${file.name.split('.').pop()}`;
+                await sb.storage.from('listing-images').upload(path, file);
+                await sb.from('coupon_photos').insert({ coupon_id: coupon.id, storage_path: path, photo_type: 'cover' });
+            }
+            
+            // Logo hochladen
+            if (logoInput.files.length > 0) {
+                const file = logoInput.files[0];
+                const path = `coupons/${coupon.id}_logo.${file.name.split('.').pop()}`;
+                await sb.storage.from('listing-images').upload(path, file);
+                await sb.from('coupon_photos').insert({ coupon_id: coupon.id, storage_path: path, photo_type: 'logo' });
+            }
+
+            Room8UI.success("Coupon erfolgreich erstellt!");
+            setTimeout(function() { navigateTo("admin.html"); }, 1500);
+        } catch (err) {
+            Room8UI.error("Coupon konnte nicht erstellt werden. Bitte versuche es erneut.");
+            btn.disabled = false;
+            btn.textContent = 'Coupon Veröffentlichen';
+        }
+    });
+
+    // Admin Check beim Laden
+    checkAdmin();
+</script>
+<script src="notificationBell.js"></script>
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Profil bearbeiten - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .avatar-upload-container { text-align: center; margin-bottom: 2rem; }
+        .avatar-preview { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; background-color: #eee; border: 4px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; }
+        #avatarFile { display: none; }
+        .verification-section { background-color: white; padding: 1.5rem; border-radius: var(--radius-md); margin-top: 2rem; border: 1px solid var(--border-color); }
+        .status-badge { font-weight: bold; padding: 0.4rem 0.8rem; border-radius: 999px; color: white; display: inline-block; font-size: 0.85rem; }
+        .status-unverified { background-color: #ef4444; }
+        .status-pending { background-color: #f59e0b; }
+        .status-verified { background-color: #10b981; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+        }
+        .section-title { font-size: 1.1rem; font-weight: 600; margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border-color); color: var(--text-color); }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <h1 data-i18n="edit_profile_title">Profil bearbeiten</h1>
+        <div style="width: 40px;"></div>
+    </header>
+    <main class="app-content">
+        <form id="editProfileForm">
+            <!-- Avatar Upload -->
+            <div class="avatar-upload-container">
+                <label for="avatarFile">
+                    <img src="placeholder.png" alt="Dein Avatar" id="avatar-preview" class="avatar-preview" onerror="this.src='no-image.svg'">
+                    <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-light);" data-i18n="edit_profile_change_photo">Klicke, um Bild zu ändern</p>
+                </label>
+                <input type="file" id="avatarFile" accept="image/*">
+            </div>
+
+            <!-- Basis-Informationen -->
+            <h3 class="section-title" data-i18n="edit_profile_basic_info">📝 Basis-Informationen</h3>
+            
+            <div class="form-group">
+                <label for="username" data-i18n="edit_profile_username">Benutzername *</label>
+                <input type="text" id="username" required data-i18n-placeholder="edit_profile_username_placeholder" placeholder="Dein Benutzername">
+            </div>
+
+            <div class="form-group">
+                <label for="full_name" data-i18n="edit_profile_fullname">Vollständiger Name</label>
+                <input type="text" id="full_name" data-i18n-placeholder="edit_profile_fullname_placeholder" placeholder="z.B. Max Mustermann">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="city" data-i18n="edit_profile_city">Stadt</label>
+                    <input type="text" id="city" data-i18n-placeholder="edit_profile_city_placeholder" placeholder="z.B. Berlin">
+                </div>
+                <div class="form-group">
+                    <label for="age" data-i18n="edit_profile_age">Alter</label>
+                    <input type="number" id="age" min="16" max="99" data-i18n-placeholder="edit_profile_age_placeholder" placeholder="z.B. 22">
+                </div>
+            </div>
+
+            <!-- Studium -->
+            <h3 class="section-title" data-i18n="edit_profile_studies">🎓 Studium</h3>
+
+            <div class="form-group">
+                <label for="university" data-i18n="edit_profile_university">Universität</label>
+                <input type="text" id="university" data-i18n-placeholder="edit_profile_university_placeholder" placeholder="z.B. TU Berlin">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="study_field" data-i18n="edit_profile_field">Studienfach</label>
+                    <input type="text" id="study_field" data-i18n-placeholder="edit_profile_field_placeholder" placeholder="z.B. Informatik">
+                </div>
+                <div class="form-group">
+                    <label for="semester" data-i18n="edit_profile_semester">Semester</label>
+                    <select id="semester">
+                        <option value="" data-i18n="edit_profile_select">Bitte wählen</option>
+                        <option value="1">1. Semester</option>
+                        <option value="2">2. Semester</option>
+                        <option value="3">3. Semester</option>
+                        <option value="4">4. Semester</option>
+                        <option value="5">5. Semester</option>
+                        <option value="6">6. Semester</option>
+                        <option value="7">7. Semester</option>
+                        <option value="8">8. Semester</option>
+                        <option value="9">9. Semester</option>
+                        <option value="10">10. Semester</option>
+                        <option value="11">11. Semester</option>
+                        <option value="12">12. Semester</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Persönliches -->
+            <h3 class="section-title" data-i18n="edit_profile_about">💬 Über mich</h3>
+
+            <div class="form-group">
+                <label for="bio" data-i18n="edit_profile_bio">Biografie</label>
+                <textarea id="bio" rows="4" data-i18n-placeholder="edit_profile_bio_placeholder" placeholder="Erzähl etwas über dich..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="languages" data-i18n="edit_profile_languages">Sprachen</label>
+                <input type="text" id="languages" data-i18n-placeholder="edit_profile_languages_placeholder" placeholder="z.B. Deutsch, Englisch, Spanisch">
+                <small style="color: var(--text-light); font-size: 0.8rem;" data-i18n="edit_profile_languages_hint">Mehrere Sprachen mit Komma trennen</small>
+            </div>
+
+            <div class="form-group">
+                <label for="interests" data-i18n="edit_profile_interests">Interessen & Hobbys</label>
+                <textarea id="interests" rows="3" data-i18n-placeholder="edit_profile_interests_placeholder" placeholder="z.B. Fitness, Kochen, Reisen, Gaming..."></textarea>
+            </div>
+            
+            <button type="submit" class="submit-btn" style="margin-top: 2rem;" data-i18n="edit_profile_save">Änderungen speichern</button>
+            
+            <!-- Verifizierungs-Sektion -->
+            <div class="verification-section">
+                <h3 style="margin: 0 0 1rem 0;" data-i18n="edit_profile_verification_title">🎓 Studenten-Verifizierung</h3>
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <p style="margin: 0 0 0.5rem 0; color: var(--text-color); font-weight: 600;">
+                            <span data-i18n="edit_profile_status">Status:</span> <span id="verification-status" class="status-badge" data-i18n="general_loading">Lädt...</span>
+                        </p>
+                        <p id="verification-info" style="margin: 0; color: var(--text-light); font-size: 0.9rem;" data-i18n="edit_profile_checking">
+                            Prüfe Verifizierungsstatus...
+                        </p>
+                    </div>
+                    <a href="verify-options.html" id="verify-btn" class="submit-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); margin: 0; padding: 0.75rem 1.5rem; text-decoration: none; display: inline-block; white-space: nowrap; width: auto;" data-i18n="edit_profile_verify_btn">
+                        Jetzt verifizieren &#8594;
+                    </a>
+                </div>
+            </div>
+            
+            <div id="form-message" style="margin-top: 2rem; text-align: center; font-weight: 600;"></div>
+        </form>
+    </main>
+    <div id="app-footer-nav"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="config.js"></script>
+<script src="navigation.js"></script>
+<script src="translations.js"></script>
+<script>
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Helper: Navigation
+    function navigateTo(url) {
+        try { window.location.href = url; } catch(e) { console.warn(e); }
+    }
+
+    var form = document.getElementById('editProfileForm');
+    var usernameInput = document.getElementById('username');
+    var fullNameInput = document.getElementById('full_name');
+    var cityInput = document.getElementById('city');
+    var ageInput = document.getElementById('age');
+    var universityInput = document.getElementById('university');
+    var studyFieldInput = document.getElementById('study_field');
+    var semesterInput = document.getElementById('semester');
+    var bioInput = document.getElementById('bio');
+    var languagesInput = document.getElementById('languages');
+    var interestsInput = document.getElementById('interests');
+    var avatarFileInput = document.getElementById('avatarFile');
+    var avatarPreview = document.getElementById('avatar-preview');
+    var msgContainer = document.getElementById('form-message');
+    var submitBtn = form.querySelector('button[type="submit"]');
+    var statusBadge = document.getElementById('verification-status');
+    var verificationInfo = document.getElementById('verification-info');
+    var verifyBtn = document.getElementById('verify-btn');
+
+    var currentUser = null;
+
+    // Einfache Übersetzungs-Funktion (Fallback falls translations.js nicht lädt)
+    function getTranslation(key, fallback) {
+        if (typeof t === 'function') return t(key); // Nutze globale t()
+        return fallback;
+    }
+
+    async function loadProfileData() {
+        if (!sb) {
+            console.error('Supabase nicht initialisiert');
+            return;
+        }
+
+        try {
+            var authResult = await sb.auth.getUser();
+            var user = authResult.data ? authResult.data.user : null;
+
+            if (!user) {
+                navigateTo('login.html');
+                return;
+            }
+            currentUser = user;
+
+            var profileResult = await sb
+                .from('profiles')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+
+            var profile = profileResult.data;
+            var error = profileResult.error;
+
+            if (error && error.code !== 'PGRST116') {
+                console.error('Fehler beim Laden:', error);
+                return;
+            }
+
+            if (!profile) {
+                console.log('Kein Profil gefunden - User kann jetzt eines erstellen');
+                return;
+            }
+        } catch (err) {
+            console.error('Fehler:', err);
+            return;
+        }
+
+        if (profile) {
+            usernameInput.value = profile.username || '';
+            fullNameInput.value = profile.full_name || '';
+            cityInput.value = profile.city || '';
+            ageInput.value = profile.age || '';
+            universityInput.value = profile.university || '';
+            studyFieldInput.value = profile.study_field || '';
+            semesterInput.value = profile.semester || '';
+            bioInput.value = profile.bio || '';
+            languagesInput.value = profile.languages || '';
+            interestsInput.value = profile.interests || '';
+            
+            if (profile.avatar_url) {
+                avatarPreview.src = profile.avatar_url;
+            }
+            
+            // Verifizierungs-Status anzeigen
+            var isVerified = profile.is_verified;
+            var verificationStatus = profile.verification_status || 'not_started';
+            var uniEmail = profile.uni_email || profile.edu_email;
+            
+            if (isVerified) {
+                statusBadge.innerHTML = '&#10004; Verifiziert';
+                statusBadge.className = 'status-badge status-verified';
+                verificationInfo.textContent = uniEmail 
+                    ? 'Verifiziert mit ' + uniEmail 
+                    : 'Dein Studentenstatus ist verifiziert';
+                verifyBtn.style.display = 'none';
+            } else if (verificationStatus === 'pending') {
+                statusBadge.innerHTML = '&#8987; Ausstehend';
+                statusBadge.className = 'status-badge status-pending';
+                verificationInfo.textContent = 'Deine Verifizierung wird überprüft';
+                verifyBtn.href = 'verification-status.html';
+                verifyBtn.innerHTML = 'Status prüfen &#8594;';
+            } else {
+                statusBadge.innerHTML = '&#10007; Nicht verifiziert';
+                statusBadge.className = 'status-badge status-unverified';
+                verificationInfo.textContent = 'Verifiziere deinen Studentenstatus um alle Features freizuschalten';
+                verifyBtn.href = 'verify-options.html';
+                verifyBtn.innerHTML = 'Jetzt verifizieren &#8594;';
+            }
+        }
+    }
+
+    avatarFileInput.addEventListener('change', function() {
+        var file = avatarFileInput.files[0];
+        if (file) {
+            avatarPreview.src = URL.createObjectURL(file);
+        }
+    });
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Speichere...';
+        msgContainer.textContent = '';
+        
+        var updates = {
+            username: usernameInput.value,
+            full_name: fullNameInput.value,
+            city: cityInput.value,
+            age: ageInput.value ? parseInt(ageInput.value) : null,
+            university: universityInput.value,
+            study_field: studyFieldInput.value,
+            semester: semesterInput.value ? parseInt(semesterInput.value) : null,
+            bio: bioInput.value,
+            languages: languagesInput.value,
+            interests: interestsInput.value,
+            updated_at: new Date().toISOString()
+        };
+
+        try {
+            var file = avatarFileInput.files[0];
+            
+            if (file) {
+                var filePath = currentUser.id + '/' + Date.now() + '_' + file.name;
+                var { error: uploadError } = await sb.storage.from('avatars').upload(filePath, file);
+                
+                if (uploadError) throw uploadError;
+                
+                var { data } = sb.storage.from('avatars').getPublicUrl(filePath);
+                updates.avatar_url = data.publicUrl;
+            }
+            
+            var { error } = await sb
+                .from('profiles')
+                .update(updates)
+                .eq('id', currentUser.id);
+
+            if (error) throw error;
+            
+            msgContainer.style.color = 'green';
+            msgContainer.innerHTML = '&#10004; Profil erfolgreich aktualisiert!';
+            
+            setTimeout(function() {
+                navigateTo('profile.html');
+            }, 1500);
+
+        } catch (error) {
+            console.error(error);
+            msgContainer.style.color = 'red';
+            msgContainer.textContent = 'Profil konnte nicht gespeichert werden. Bitte versuche es erneut.';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Änderungen speichern';
+        }
+    });
+
+    loadProfileData();
+</script>
+<script src="notificationBell.js"></script>
+</body>
+</html>

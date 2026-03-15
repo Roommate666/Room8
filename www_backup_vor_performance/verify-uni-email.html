@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>E-Mail wird verifiziert - Room8</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { background: #f3f4f6; }
+    .verify-container {
+      max-width: 500px;
+      margin: 4rem auto;
+      padding: 3rem 2rem;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .verify-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+    }
+    .verify-icon.loading {
+      animation: spin 2s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .verify-title {
+      font-size: 1.6rem;
+      margin-bottom: 0.75rem;
+      color: #1f2937;
+      font-weight: 700;
+    }
+    .verify-message {
+      color: #6b7280;
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+    .verify-button {
+      display: inline-block;
+      padding: 1rem 2.5rem;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    .verify-button.success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .success-box {
+      background: #f0fdf4;
+      border: 2px solid #10b981;
+      padding: 1.5rem;
+      border-radius: 16px;
+      margin-bottom: 2rem;
+      color: #065f46;
+      line-height: 1.6;
+    }
+    .error-box {
+      background: #fef2f2;
+      border: 2px solid #ef4444;
+      padding: 1.5rem;
+      border-radius: 16px;
+      margin-bottom: 2rem;
+      color: #991b1b;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="verify-container" id="verifyContainer">
+    <div class="verify-icon loading" id="verifyIcon">&#x23F3;</div>
+    <h1 class="verify-title" id="verifyTitle">E-Mail wird verifiziert...</h1>
+    <p class="verify-message" id="verifyMessage">Bitte warte, wir pr&uuml;fen deinen Verifizierungstoken.</p>
+  </div>
+
+  <script src="lib/supabase.min.js"></script>
+  <script src="config.js"></script>
+<script src="translations.js"></script>
+  <script>
+    var icon = document.getElementById('verifyIcon');
+    var title = document.getElementById('verifyTitle');
+    var msg = document.getElementById('verifyMessage');
+    var container = document.getElementById('verifyContainer');
+
+    async function verifyToken() {
+      try {
+        var urlParams = new URLSearchParams(window.location.search);
+        var token = urlParams.get('token');
+
+        if (!token) {
+          throw new Error('Kein Verifizierungstoken in der URL gefunden.');
+        }
+
+        // Edge Function aufrufen (serverseitig, umgeht RLS)
+        var response = await fetch(SUPABASE_URL + '/functions/v1/verify-uni-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({ token: token })
+        });
+
+        var result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Verifizierung fehlgeschlagen');
+        }
+
+        // Erfolg!
+        icon.textContent = '\uD83C\uDF89';
+        icon.className = 'verify-icon';
+        title.textContent = 'E-Mail verifiziert!';
+
+        var successBox = document.createElement('div');
+        successBox.className = 'success-box';
+        successBox.innerHTML = '<strong>\u2705 Erfolgreich!</strong><br>' +
+          'Deine Uni-E-Mail <strong>' + (result.uni_email || '') + '</strong> wurde verifiziert.<br>' +
+          'Du hast jetzt vollen Zugang zu Room8!';
+        msg.replaceWith(successBox);
+
+        var button = document.createElement('a');
+        button.href = 'https://room8.club/wohnungen.html';
+        button.className = 'verify-button success';
+        button.textContent = '\uD83C\uDFE0 Wohnungen entdecken';
+        container.appendChild(button);
+
+      } catch (error) {
+        console.error('Verification error:', error);
+
+        icon.textContent = '\u274C';
+        icon.className = 'verify-icon';
+        title.textContent = 'Verifizierung fehlgeschlagen';
+
+        var errorBox = document.createElement('div');
+        errorBox.className = 'error-box';
+        errorBox.innerHTML = '<strong>\u274C Fehler:</strong><br>' +
+          error.message + '<br><br>' +
+          'Der Link ist m\u00f6glicherweise ung\u00fcltig oder abgelaufen.';
+        msg.replaceWith(errorBox);
+
+        var button = document.createElement('a');
+        button.href = 'https://room8.club/verify-options.html';
+        button.className = 'verify-button';
+        button.textContent = 'Erneut versuchen';
+        container.appendChild(button);
+      }
+    }
+
+    verifyToken();
+  </script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room8 Sticker — A7</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        @page { size: 74mm 105mm; margin: 0; }
+        html, body {
+            width: 74mm; height: 105mm;
+            font-family: 'Inter', sans-serif;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            color-adjust: exact;
+            overflow: hidden;
+        }
+        body { background: #888; display: flex; justify-content: center; padding: 0; }
+
+        .sticker {
+            width: 74mm; height: 105mm;
+            position: relative; overflow: hidden;
+            background: #07080f;
+        }
+
+        .bg-glow { position: absolute; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(12mm); }
+        .bg-glow.g1 { width: 50mm; height: 50mm; background: rgba(41,121,236,0.22); top: -15mm; left: -10mm; }
+        .bg-glow.g2 { width: 40mm; height: 40mm; background: rgba(76,195,84,0.18); top: 20mm; right: -10mm; }
+        .bg-glow.g3 { width: 45mm; height: 45mm; background: rgba(157,89,210,0.18); bottom: 15mm; left: -10mm; }
+        .bg-glow.g4 { width: 35mm; height: 35mm; background: rgba(243,156,55,0.2); bottom: -8mm; right: 5mm; }
+
+        .top-accent {
+            position: absolute; top: 0; left: 0; right: 0; height: 1mm; z-index: 2;
+            background: linear-gradient(90deg, #2979ec, #4cc5eb, #4cc354, #f3a137, #9d59d2);
+        }
+        .bottom-accent {
+            position: absolute; bottom: 0; left: 0; right: 0; height: 1mm; z-index: 2;
+            background: linear-gradient(90deg, #9d59d2, #f3a137, #4cc354, #4cc5eb, #2979ec);
+        }
+
+        .content {
+            position: relative; z-index: 1;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center;
+            padding: 3mm 4mm 2.5mm;
+        }
+
+        .new-badge {
+            display: inline-block; padding: 0.8mm 2.5mm; border-radius: 5mm;
+            font-size: 1.6mm; font-weight: 900; letter-spacing: 0.8mm; text-transform: uppercase;
+            background: linear-gradient(135deg, #f43f5e, #f97316);
+            color: #fff; margin-bottom: 1.5mm;
+            box-shadow: 0 0.5mm 2mm rgba(244,63,94,0.4);
+        }
+
+        .logo-img {
+            width: 12mm; height: 12mm; border-radius: 3mm;
+            box-shadow: 0 1mm 5mm rgba(41,121,236,0.35), 0 1mm 5mm rgba(76,195,84,0.2);
+            margin-bottom: 1mm;
+        }
+
+        .app-name {
+            font-size: 8mm; font-weight: 900; letter-spacing: -0.3mm; line-height: 1;
+            background: linear-gradient(135deg, #4cc5eb, #4cc354, #f3a137, #9d59d2);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.8mm;
+        }
+        .tagline {
+            font-size: 1.8mm; font-weight: 700; letter-spacing: 1mm;
+            text-transform: uppercase; color: rgba(255,255,255,0.45);
+            margin-bottom: 2mm;
+        }
+
+        .hero-de {
+            font-size: 3.8mm; font-weight: 900; color: #fff; text-align: center;
+            line-height: 1.2; margin-bottom: 0.8mm;
+        }
+        .hero-de .pop {
+            background: linear-gradient(90deg, #4cc5eb, #4cc354);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-en {
+            font-size: 1.8mm; color: rgba(255,255,255,0.35); font-style: italic;
+            text-align: center; margin-bottom: 2mm;
+        }
+
+        /* Compact pills - single row */
+        .benefits {
+            display: flex; gap: 1.2mm; margin-bottom: 2.5mm; flex-wrap: wrap;
+            justify-content: center;
+        }
+        .pill {
+            display: flex; align-items: center; gap: 0.6mm;
+            padding: 0.8mm 1.8mm; border-radius: 5mm;
+            font-size: 1.5mm; font-weight: 700;
+        }
+        .pill-blue { background: rgba(41,121,236,0.15); color: #6cb8ff; border: 0.2mm solid rgba(41,121,236,0.25); }
+        .pill-green { background: rgba(76,195,84,0.15); color: #6ee67a; border: 0.2mm solid rgba(76,195,84,0.25); }
+        .pill-purple { background: rgba(157,89,210,0.15); color: #c49aef; border: 0.2mm solid rgba(157,89,210,0.25); }
+        .pill-orange { background: rgba(243,156,55,0.15); color: #ffc164; border: 0.2mm solid rgba(243,156,55,0.25); }
+        .pill-icon { font-size: 1.8mm; }
+
+        /* QR Section - central focus for sticker */
+        .qr-section {
+            display: flex; align-items: flex-start; justify-content: center;
+            gap: 3mm; margin-bottom: 2mm;
+        }
+        .qr-card {
+            text-align: center; padding: 1.5mm;
+            background: rgba(255,255,255,0.04);
+            border: 0.2mm solid rgba(255,255,255,0.08);
+            border-radius: 2mm;
+        }
+        .qr-card > div:first-child { margin-bottom: 1mm; }
+        .qr-card img, .qr-card canvas { display: block; border-radius: 1mm; }
+        .qr-label { font-size: 1.5mm; font-weight: 700; }
+        .qr-label.apple { color: #ccc; }
+        .qr-label.play { color: #6ee67a; }
+        .qr-sublabel { font-size: 1.2mm; color: rgba(255,255,255,0.3); margin-top: 0.3mm; }
+
+        .scan-cta {
+            text-align: center; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 0.5mm;
+        }
+        .scan-arrow { font-size: 2.5mm; color: rgba(255,255,255,0.15); }
+        .scan-text-de { font-size: 2.5mm; font-weight: 900; color: #fff; }
+        .scan-text-en { font-size: 1.5mm; color: rgba(255,255,255,0.35); }
+        .scan-free {
+            margin-top: 1mm; font-size: 2.5mm; font-weight: 900;
+            letter-spacing: 0.5mm; text-transform: uppercase;
+            background: linear-gradient(90deg, #4cc354, #4ade80);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 1.5mm rgba(76,195,84,0.4));
+        }
+
+        .footer { text-align: center; margin-top: auto; }
+        .footer-url {
+            font-size: 2.5mm; font-weight: 800;
+            background: linear-gradient(90deg, #4cc5eb, #4cc354, #f3a137);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 0.5mm;
+        }
+        .footer-social { font-size: 1.3mm; color: rgba(255,255,255,0.3); }
+        .footer-social span { margin: 0 0.5mm; }
+
+        @media print {
+            body { padding: 0; background: none; }
+            .print-hint { display: none; }
+        }
+        .print-hint {
+            position: fixed; bottom: 3mm; left: 50%; transform: translateX(-50%);
+            background: #1e293b; color: #94a3b8; font-size: 11px;
+            padding: 6px 14px; border-radius: 6px; z-index: 100;
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body>
+<div class="sticker">
+    <div class="top-accent"></div>
+    <div class="bg-glow g1"></div>
+    <div class="bg-glow g2"></div>
+    <div class="bg-glow g3"></div>
+    <div class="bg-glow g4"></div>
+
+    <div class="content">
+        <div class="new-badge">🚀 NEU</div>
+        <img src="logo-room8.png" alt="Room8" class="logo-img">
+        <div class="app-name">Room8</div>
+        <div class="tagline">Dein Campus · Dein Deal</div>
+
+        <div class="hero-de">
+            Deine Wohnung. Dein Markt.<br>
+            <span class="pop">Deine Student-App.</span>
+        </div>
+        <div class="hero-en">Your housing. Your marketplace. Your student app.</div>
+
+        <div class="benefits">
+            <div class="pill pill-blue"><span class="pill-icon">🏠</span> WG</div>
+            <div class="pill pill-green"><span class="pill-icon">🛒</span> Marktplatz</div>
+            <div class="pill pill-purple"><span class="pill-icon">💼</span> Jobs</div>
+            <div class="pill pill-orange"><span class="pill-icon">🎫</span> Rabatte</div>
+        </div>
+
+        <div class="qr-section">
+            <div class="qr-card">
+                <div id="qr-apple"></div>
+                <div class="qr-label apple"> App Store</div>
+                <div class="qr-sublabel">iPhone</div>
+            </div>
+
+            <div class="scan-cta">
+                <div class="scan-arrow">←  →</div>
+                <div class="scan-text-de">Scann mich!</div>
+                <div class="scan-text-en">Scan to download</div>
+                <div class="scan-free">100% kostenlos</div>
+            </div>
+
+            <div class="qr-card">
+                <div id="qr-play"></div>
+                <div class="qr-label play">▶ Google Play</div>
+                <div class="qr-sublabel">Android</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-url">www.room8.club</div>
+            <div class="footer-social">
+                <span>@room8.app</span> <span>·</span>
+                <span>Instagram</span> <span>·</span>
+                <span>TikTok</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-accent"></div>
+</div>
+
+<div class="print-hint">Room8 Sticker A7 — Strg+P / Cmd+P (Hintergrundgrafiken aktivieren!)</div>
+
+<script>
+    var qrOpts = { width: 70, height: 70, colorDark: "#07080f", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M };
+    new QRCode(document.getElementById("qr-apple"), Object.assign({ text: "https://apps.apple.com/de/app/room8-club/id6757254250" }, qrOpts));
+    new QRCode(document.getElementById("qr-play"), Object.assign({ text: "https://play.google.com/store/apps/details?id=club.room8.app&pcampaignid=web_share" }, qrOpts));
+</script>
+</body>
+</html>

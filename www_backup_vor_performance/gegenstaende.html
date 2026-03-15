@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Marktplatz - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .app-container { --primary-color: #10b981; --primary-dark: #059669; background-color: #f3f4f6; padding-bottom: calc(450px + env(safe-area-inset-bottom, 20px)); }
+        
+        /* HEADER FIX - Luftiger */
+        .app-header {
+            display: grid;
+            grid-template-columns: 40px 1fr 40px;
+            align-items: center;
+            padding: calc(1.5rem + env(safe-area-inset-top)) 1.5rem 1.5rem 1.5rem;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
+            margin-bottom: 1.25rem;
+        }
+        
+        .back-btn {
+            color: white; text-decoration: none;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .app-header h1 {
+            color: white; margin: 0; font-size: 1.5rem; font-weight: 800;
+            text-align: center;
+            letter-spacing: -0.02em;
+        }
+        
+        /* Rest wie gehabt */
+        .search-section { padding: 0 1.5rem 1rem; background-color: transparent; }
+        .search-bar { position: relative; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 999px; }
+        .search-bar input { width: 100%; padding: 0.9rem 1rem 0.9rem 3rem; border-radius: 999px; border: 1px solid white; font-size: 1rem; background: white; transition: all 0.2s; }
+        .search-bar input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
+        .search-icon { position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; }
+        
+        .filter-container { display: flex; flex-direction: column; gap: 0.8rem; }
+        .filter-label { font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; margin-left: 0.5rem; }
+        .filter-bar { display: flex; gap: 0.6rem; overflow-x: auto; padding-bottom: 0.5rem; scrollbar-width: none; }
+        .filter-bar::-webkit-scrollbar { display: none; }
+        .filter-btn { padding: 0.5rem 1rem; border-radius: 999px; border: 1px solid rgba(0,0,0,0.05); background-color: white; color: #4b5563; font-size: 0.85rem; white-space: nowrap; cursor: pointer; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.03); transition: all 0.2s; }
+        .filter-btn:hover { transform: translateY(-1px); }
+        .filter-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
+        
+        .listings-grid {
+            padding: 0 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .item-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            transition: transform 0.2s;
+            text-decoration: none;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: row;
+            position: relative;
+            cursor: pointer;
+            height: 110px;
+        }
+        .item-card:hover { transform: translateY(-3px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+
+        .card-image-container {
+            position: relative;
+            width: 110px;
+            min-width: 110px;
+            height: 100%;
+            overflow: hidden;
+            background-color: #e5e7eb;
+        }
+        .card-image-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .listing-mode-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            padding: 0.2rem 0.5rem;
+            border-radius: 8px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            z-index: 5;
+            backdrop-filter: blur(4px);
+        }
+        .listing-mode-badge.offer { background: rgba(255,255,255,0.95); color: #059669; }
+        .listing-mode-badge.search { background: rgba(255,255,255,0.95); color: #d97706; }
+
+        .favorite-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .favorite-btn svg { width: 16px; height: 16px; }
+        .favorite-btn.favorited svg { fill: #ef4444; stroke: #ef4444; }
+
+        .card-content {
+            padding: 0.75rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin: 0;
+            color: #1f2937;
+            line-height: 1.25;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .card-price {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: white;
+            white-space: nowrap;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .card-location {
+            font-size: 0.75rem;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 0.5rem;
+            font-size: 0.7rem;
+            color: #9ca3af;
+        }
+        
+        .empty-state-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 1.5rem; text-align: center; width: 100%; }
+        .empty-state-icon { width: 80px; height: 80px; color: #d1d5db; margin-bottom: 1rem; }
+        
+        .fab { position: fixed; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); cursor: pointer; text-decoration: none; color: white; z-index: 10000; }
+
+        /* Verification Overlay */
+        .verify-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        .verify-overlay.active { display: flex; }
+        .verify-overlay-box {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            max-width: 360px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        .verify-overlay-box .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .verify-overlay-box h2 { font-size: 1.3rem; margin-bottom: 0.5rem; color: #1f2937; }
+        .verify-overlay-box p { color: #6b7280; font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; }
+        .verify-overlay-box a {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 0.85rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <!-- Verification Overlay -->
+    <div class="verify-overlay" id="verifyOverlay">
+        <div class="verify-overlay-box">
+            <div class="icon">🔒</div>
+            <h2>Verifizierung erforderlich</h2>
+            <p>Um den Marktplatz zu nutzen und Artikel zu kaufen oder verkaufen, musst du zuerst deinen Studentenstatus verifizieren.</p>
+            <a href="verify-options.html">Jetzt verifizieren</a>
+        </div>
+    </div>
+
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <h1>Marktplatz</h1>
+        <div class="header-spacer"></div>
+    </header>
+    
+    <div class="search-section">
+        <div class="search-bar">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+            <input type="text" id="searchInput" placeholder="Möbel, Technik, Bücher...">
+        </div>
+        
+        <div class="filter-container">
+            <div>
+                <div class="filter-bar" id="modeFilter">
+                    <button class="filter-btn active" data-filter="all">Alle</button>
+                    <button class="filter-btn" data-filter="offer">Verkauf</button>
+                    <button class="filter-btn" data-filter="search">Gesucht</button>
+                </div>
+            </div>
+            <div>
+                <div class="filter-label">Kategorien</div>
+                <div class="filter-bar" id="categoryFilter">
+                    <button class="filter-btn active" data-category="all">Alle</button>
+                    <button class="filter-btn" data-category="Furniture & Home">Möbel</button>
+                    <button class="filter-btn" data-category="Electronics & Tech">Elektronik</button>
+                    <button class="filter-btn" data-category="Books & Study">Bücher</button>
+                    <button class="filter-btn" data-category="Clothing & Fashion">Kleidung</button>
+                    <button class="filter-btn" data-category="Kitchen & Appliances">Küche</button>
+                    <button class="filter-btn" data-category="Sports & Outdoor">Sport</button>
+                    <button class="filter-btn" data-category="Bikes & Transport">Fahrrad</button>
+                    <button class="filter-btn" data-category="Music & Instruments">Musik</button>
+                    <button class="filter-btn" data-category="Others">Sonstiges</button>
+                </div>
+            </div>
+            <div>
+                <div class="filter-label">Sortierung</div>
+                <div class="filter-bar" id="sortFilter">
+                    <button class="filter-btn active" data-sort="newest">Neueste</button>
+                    <button class="filter-btn" data-sort="price-asc">Preis ↑</button>
+                    <button class="filter-btn" data-sort="price-desc">Preis ↓</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <main style="flex:1;">
+        <div class="listings-grid" id="listingsContainer">
+            <div style="grid-column:1/-1; text-align:center; padding:3rem; color:#9ca3af;">
+                Lade Artikel...
+            </div>
+        </div>
+    </main>
+    
+    <div id="app-footer-nav"></div>
+</div>
+
+<a href="gegenstand.html?mode=offer" class="fab" title="Neues Inserat" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4) !important;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+</a>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
+<script src="navigation.js"></script>
+<script src="notificationBell.js"></script>
+<script src="notificationHelpers.js"></script>
+<script>
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function navigateTo(url) {
+        try { window.location.href = url; } catch(e) { console.warn("Nav Error:", e); }
+    }
+    
+    var listingsContainer = document.getElementById('listingsContainer');
+    var searchInput = document.getElementById('searchInput');
+    var modeFilter = document.getElementById('modeFilter');
+    var categoryFilter = document.getElementById('categoryFilter');
+    var sortFilter = document.getElementById('sortFilter');
+    
+    var allItems = [];
+    var currentFilter = 'all';
+    var currentCategory = 'all';
+    var currentSort = 'newest';
+    var searchQuery = '';
+    var currentUserId = null;
+    var userFavorites = {};
+    var blockedUserIds = [];
+
+    function checkVerification() {
+        if(!sb) return;
+        sb.auth.getUser().then(function(res) {
+            if (!res.data.user) return;
+            sb.from('profiles').select('is_verified, is_student_verified').eq('id', res.data.user.id).single().then(function(pRes) {
+                var profile = pRes.data;
+                var isVerified = profile && (profile.is_verified || profile.is_student_verified);
+                if (!isVerified) {
+                    document.getElementById('verifyOverlay').classList.add('active');
+                    window.scrollTo(0, 0);
+                    document.body.style.overflow = 'hidden';
+                }
+            });
+        });
+    }
+
+    function loadCurrentUser() {
+        if(!sb) return;
+        sb.auth.getUser().then(function(res) {
+            if (res.data.user) {
+                currentUserId = res.data.user.id;
+                loadUserFavorites();
+                loadBlockedUsers();
+            }
+        });
+    }
+
+    function loadBlockedUsers() {
+        if (!currentUserId) return;
+        sb.from('blocked_users').select('blocked_id').eq('blocker_id', currentUserId)
+            .then(function(res) {
+                if (res.data) {
+                    blockedUserIds = res.data.map(function(b) { return b.blocked_id; });
+                    if (allItems.length > 0) renderListings(applyFilters(allItems));
+                }
+            });
+    }
+    
+    function loadUserFavorites() {
+        if (!currentUserId) return;
+        sb.from('favorites').select('listing_id').eq('user_id', currentUserId)
+            .then(function(res) {
+                if (res.data) {
+                    userFavorites = {};
+                    res.data.forEach(function(item) { userFavorites[item.listing_id] = true; });
+                    if (allItems.length > 0) renderListings(applyFilters(allItems));
+                }
+            });
+    }
+    
+    async function toggleFavorite(listingId, btnElement) {
+        if (!currentUserId) { navigateTo('login.html'); return; }
+
+        var isFavorited = userFavorites[listingId];
+        var icon = btnElement.querySelector('svg');
+
+        if (isFavorited) {
+            delete userFavorites[listingId];
+            btnElement.classList.remove('favorited');
+            icon.setAttribute('fill', 'none');
+            icon.setAttribute('stroke', 'currentColor');
+            sb.from('favorites').delete().eq('user_id', currentUserId).eq('listing_id', listingId).then();
+        } else {
+            userFavorites[listingId] = true;
+            btnElement.classList.add('favorited');
+            icon.setAttribute('fill', '#ef4444');
+            icon.setAttribute('stroke', '#ef4444');
+            await sb.from('favorites').insert({ user_id: currentUserId, listing_id: listingId });
+
+            // Send notification to listing owner
+            try {
+                var listing = allItems.find(function(item) { return item.id === listingId; });
+                if (listing && listing.owner_id && listing.owner_id !== currentUserId && window.NotificationHelpers) {
+                    var profileRes = await sb.from('profiles').select('username, full_name').eq('id', currentUserId).single();
+                    var faverName = profileRes.data ? (profileRes.data.full_name || profileRes.data.username || 'Jemand') : 'Jemand';
+                    NotificationHelpers.notifyFavorite(listing.owner_id, faverName, listing.title, listingId);
+                }
+            } catch(e) { console.log('Notification error:', e); }
+        }
+    }
+    
+    function escHtml(t) { return t ? String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
+
+    function renderItemCard(item) {
+        var imageUrl = null;
+        var isSearchListing = item.listing_mode === 'search';
+
+        if (item.listing_photos && item.listing_photos.length > 0) {
+            var path = item.listing_photos[0].storage_path;
+            var urlData = sb.storage.from('listing-images').getPublicUrl(path);
+            if (urlData && urlData.data) imageUrl = urlData.data.publicUrl;
+        }
+
+        var priceStr = 'VB';
+        if (item.listing_mode === 'search') {
+            if (item.price_range_max) priceStr = 'Bis ' + formatPrice(item.price_range_max);
+            else if (item.price_range_min) priceStr = 'Ab ' + formatPrice(item.price_range_min);
+        } else {
+            if (item.price) priceStr = formatPrice(item.price);
+        }
+
+    function formatPrice(value) {
+        if (!value) return 'VB';
+        return Number(value).toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+        var listingMode = item.listing_mode || 'offer';
+        var modeBadgeText = listingMode === 'search' ? 'Gesucht' : 'Verkauf';
+        var isFavorited = userFavorites[item.id];
+
+        // Placeholder für Gesuche ohne Bild
+        var imageHtml = '';
+        if (isSearchListing && !imageUrl) {
+            imageHtml = `
+                <div class="card-image-container" style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); display: flex; align-items: center; justify-content: center;">
+                    <div style="text-align: center; color: #92400E;">
+                        <div style="font-size: 1.8rem;">🔍</div>
+                        <div style="font-size: 0.65rem; font-weight: 600; margin-top: 0.2rem;">SUCHE</div>
+                    </div>
+                    <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
+                </div>`;
+        } else if (!imageUrl) {
+            imageHtml = `
+                <div class="card-image-container" style="background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); display: flex; align-items: center; justify-content: center;">
+                    <div style="text-align: center; color: #059669;">
+                        <div style="font-size: 1.8rem; margin-top: -8px;">🏠</div>
+                        <div style="font-size: 0.6rem; font-weight: 600; margin-top: 2px; color: #6ee7b7;">Kein Bild</div>
+                    </div>
+                    <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
+                </div>`;
+        } else {
+            imageHtml = `
+                <div class="card-image-container">
+                    <img src="${imageUrl}" alt="${item.title}" onerror="this.parentElement.innerHTML='<div style=\\'background:linear-gradient(135deg,#ECFDF5,#D1FAE5);width:100%;height:100%;display:flex;align-items:center;justify-content:center;\\'><div style=\\'text-align:center;color:#059669;\\'>🏠<br><span style=\\'font-size:0.6rem;font-weight:600;color:#6ee7b7;\\'>Kein Bild</span></div></div>'">
+                    <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
+                </div>`;
+        }
+
+        return `
+            <div class="item-card" onclick="navigateTo('listing-details.html?id=${item.id}')">
+                ${imageHtml}
+                <div class="card-content">
+                    <div class="card-header">
+                        <h3 class="card-title">${escHtml(item.title)}</h3>
+                        <span class="card-price">${priceStr}</span>
+                    </div>
+                    <div class="card-location">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        ${escHtml(item.city) || 'Unbekannt'}
+                    </div>
+                    <div class="card-footer">
+                        <span>${item.category ? item.category.split(' ')[0] : ''}</span>
+                        <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" data-id="${item.id}" onclick="event.stopPropagation(); toggleFavorite('${item.id}', this);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${isFavorited ? '#ef4444' : 'none'}" stroke="${isFavorited ? '#ef4444' : '#9ca3af'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    function renderListings(items) {
+        listingsContainer.innerHTML = '';
+        if (items && items.length > 0) {
+            items.forEach(function(l) { listingsContainer.innerHTML += renderItemCard(l); });
+        } else {
+            listingsContainer.innerHTML = `
+                <div class="empty-state-container">
+                    <svg class="empty-state-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                    <h3>Keine Artikel gefunden</h3>
+                    <p>Passe deine Filter an oder starte eine neue Suche.</p>
+                </div>`;
+        }
+    }
+    
+    function applyFilters(list) {
+        var filtered = list.slice();
+
+        // Blockierte User ausfiltern
+        if (blockedUserIds.length > 0) {
+            filtered = filtered.filter(function(l) {
+                return blockedUserIds.indexOf(l.owner_id) === -1;
+            });
+        }
+
+        if (currentFilter !== 'all') {
+            filtered = filtered.filter(function(l) { return (l.listing_mode || 'offer') === currentFilter; });
+        }
+
+        if (currentCategory !== 'all') {
+            filtered = filtered.filter(function(l) { return l.category === currentCategory; });
+        }
+
+        if (searchQuery) {
+            var q = searchQuery.toLowerCase();
+            filtered = filtered.filter(function(l) {
+                return (l.title && l.title.toLowerCase().includes(q)) ||
+                       (l.city && l.city.toLowerCase().includes(q));
+            });
+        }
+
+        if (currentSort === 'price-asc') {
+            filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
+        } else if (currentSort === 'price-desc') {
+            filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
+        } else {
+            filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        }
+
+        return filtered;
+    }
+    
+    function loadItems() {
+        if(!sb) return;
+
+        sb.from('listings')
+            .select('id, title, city, price, price_range_min, price_range_max, listing_mode, category, created_at, owner_id, listing_photos(storage_path)')
+            .eq('type', 'gegenstand')
+            .eq('is_active', true)
+            .order('created_at', { ascending: false })
+            .then(function(res) {
+                if (res.error) {
+                    listingsContainer.innerHTML = '<p style="text-align:center;padding:2rem;color:red;">Ladefehler</p>';
+                    return;
+                }
+                allItems = res.data || [];
+                renderListings(applyFilters(allItems));
+            });
+    }
+    
+    modeFilter.addEventListener('click', function(e) {
+        if (e.target.tagName !== 'BUTTON') return;
+        modeFilter.querySelector('.active').classList.remove('active');
+        e.target.classList.add('active');
+        currentFilter = e.target.getAttribute('data-filter');
+        renderListings(applyFilters(allItems));
+    });
+
+    categoryFilter.addEventListener('click', function(e) {
+        if (e.target.tagName !== 'BUTTON') return;
+        categoryFilter.querySelector('.active').classList.remove('active');
+        e.target.classList.add('active');
+        currentCategory = e.target.getAttribute('data-category');
+        renderListings(applyFilters(allItems));
+    });
+
+    sortFilter.addEventListener('click', function(e) {
+        if (e.target.tagName !== 'BUTTON') return;
+        sortFilter.querySelector('.active').classList.remove('active');
+        e.target.classList.add('active');
+        currentSort = e.target.getAttribute('data-sort');
+        renderListings(applyFilters(allItems));
+    });
+    
+    searchInput.addEventListener('input', function(e) {
+        searchQuery = e.target.value.toLowerCase();
+        renderListings(applyFilters(allItems));
+    });
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        checkVerification();
+        loadCurrentUser();
+        loadItems();
+    });
+</script>
+</body>
+</html>

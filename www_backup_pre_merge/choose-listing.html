@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Kategorie wählen - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Spezifische Styles für diese Seite */
+        .category-header {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .selection-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .selection-card:hover, .selection-card:active {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        /* Icon Box Styles */
+        .icon-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+            font-size: 1.5rem;
+        }
+
+        /* Theme Variants */
+        .theme-housing .icon-box { background: #EEF2FF; } /* Blau */
+        .theme-market .icon-box { background: #ECFDF5; }  /* Grün */
+
+        .content h3 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .content p {
+            margin: 0;
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        .arrow-icon {
+            margin-left: auto;
+            color: #D1D5DB;
+            width: 24px;
+            height: 24px;
+        }
+
+        .disabled-link {
+            opacity: 0.6;
+            pointer-events: none;
+            filter: grayscale(0.8);
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <h1>Erstellen</h1>
+        <div style="width: 40px;"></div> <!-- Platzhalter für Balance -->
+    </header>
+
+    <main class="app-content" id="mainContent">
+
+        <!-- Section: Wohnen -->
+        <div class="category-header">
+            <span>🏠 Wohnen & WG</span>
+        </div>
+
+        <a href="wohnung.html?mode=offer" class="selection-card theme-housing link-item">
+            <div class="icon-box">🔑</div>
+            <div class="content">
+                <h3>Vermieten</h3>
+                <p>Zimmer oder Wohnung anbieten</p>
+            </div>
+            <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+
+        <a href="wohnung.html?mode=search" class="selection-card theme-housing link-item">
+            <div class="icon-box">🔍</div>
+            <div class="content">
+                <h3>Suche</h3>
+                <p>WG oder Wohnung finden</p>
+            </div>
+            <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+
+        <a href="wohnung.html?mode=swap" class="selection-card theme-housing link-item">
+            <div class="icon-box">🔄</div>
+            <div class="content">
+                <h3>Tauschen</h3>
+                <p>Wohnung temporär tauschen</p>
+            </div>
+            <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+
+        <!-- Section: Marktplatz -->
+        <div class="category-header" style="margin-top: 2rem;">
+            <span>🛍️ Marktplatz</span>
+        </div>
+
+        <a href="gegenstand.html?mode=offer" class="selection-card theme-market link-item">
+            <div class="icon-box">💰</div>
+            <div class="content">
+                <h3>Verkaufen</h3>
+                <p>Mach deine Sachen zu Geld</p>
+            </div>
+            <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+
+        <a href="gegenstand.html?mode=search" class="selection-card theme-market link-item">
+            <div class="icon-box">🙋‍♂️</div>
+            <div class="content">
+                <h3>Suche</h3>
+                <p>Wonach suchst du?</p>
+            </div>
+            <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+
+    </main>
+
+    <!-- Footer Navigation (optional, falls gewünscht) -->
+    <div id="app-footer-nav"></div>
+</div>
+
+<!-- Lade-Reihenfolge ist entscheidend! -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<!-- Erst config.js laden, da hier die URL und KEY definiert sind -->
+<script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="navigation.js"></script>
+<script src="notificationBell.js"></script>
+<script src="verifyGate.js"></script>
+<script>
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    var _t = (typeof Room8i18n !== 'undefined') ? Room8i18n.t : function(k) { return k; };
+    verifyGate({ blur: ['#mainContent'], message: _t('verify_create_message') });
+</script>
+</body>
+</html>

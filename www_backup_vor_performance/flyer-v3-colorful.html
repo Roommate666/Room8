@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room8 Flyer - Variante 3 (Bold Colorful)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        @page { size: A4 portrait; margin: 0; }
+        html, body {
+            width: 210mm; height: 297mm;
+            font-family: 'Inter', sans-serif;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        body { background: #e2e8f0; display: flex; justify-content: center; padding: 0; }
+
+        .flyer {
+            width: 210mm; height: 297mm;
+            position: relative; overflow: hidden;
+            display: flex; flex-direction: column;
+            /* 4-quadrant background like the logo */
+            background:
+                linear-gradient(135deg, #6366f1 0%, #818cf8 25%, #3b82f6 25%, #60a5fa 50%, #22c55e 50%, #4ade80 75%, #f97316 75%, #fbbf24 100%);
+        }
+
+        /* Dark overlay for readability */
+        .overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(170deg, rgba(15,23,42,0.88) 0%, rgba(30,27,75,0.92) 50%, rgba(15,23,42,0.85) 100%);
+            z-index: 0;
+        }
+
+        /* Decorative color strips on edges */
+        .strip-left {
+            position: absolute; left: 0; top: 0; bottom: 0; width: 4mm; z-index: 2;
+            background: linear-gradient(180deg, #6366f1, #3b82f6, #22c55e, #f97316);
+        }
+        .strip-right {
+            position: absolute; right: 0; top: 0; bottom: 0; width: 4mm; z-index: 2;
+            background: linear-gradient(180deg, #f97316, #22c55e, #3b82f6, #6366f1);
+        }
+
+        /* Header */
+        .header { padding: 12mm 14mm 5mm; position: relative; z-index: 1; text-align: center; }
+        .logo-img {
+            width: 30mm; height: 30mm; border-radius: 7mm;
+            box-shadow: 0 4mm 15mm rgba(0,0,0,0.4), 0 0 0 1mm rgba(255,255,255,0.1);
+            margin-bottom: 4mm;
+        }
+        .app-name {
+            font-size: 18mm; font-weight: 900; letter-spacing: -0.5mm;
+            background: linear-gradient(90deg, #60a5fa, #4ade80, #fbbf24);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .tagline { font-size: 5mm; font-weight: 700; color: rgba(255,255,255,0.7); letter-spacing: 2mm; text-transform: uppercase; margin-top: 2mm; }
+
+        /* Headline */
+        .headline { padding: 4mm 14mm 4mm; position: relative; z-index: 1; text-align: center; }
+        .headline-de { font-size: 8mm; font-weight: 800; color: #fff; line-height: 1.3; }
+        .headline-de span {
+            background: linear-gradient(90deg, #60a5fa, #4ade80);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .headline-en { font-size: 4mm; color: rgba(255,255,255,0.45); margin-top: 2mm; font-style: italic; }
+
+        /* Features - horizontal list style */
+        .features { padding: 4mm 10mm; position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; gap: 3mm; }
+        .feature-row {
+            display: flex; align-items: center; gap: 4mm;
+            background: rgba(255,255,255,0.06);
+            border: 0.3mm solid rgba(255,255,255,0.08);
+            border-radius: 4mm; padding: 4mm 5mm;
+            position: relative; overflow: hidden;
+        }
+        .feature-row::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 1.5mm;
+        }
+        .feature-row:nth-child(1)::before { background: #3b82f6; }
+        .feature-row:nth-child(2)::before { background: #22c55e; }
+        .feature-row:nth-child(3)::before { background: #8b5cf6; }
+        .feature-row:nth-child(4)::before { background: #f97316; }
+
+        .feature-emoji { font-size: 10mm; flex-shrink: 0; }
+        .feature-content { flex: 1; }
+        .feature-de { font-size: 4.5mm; font-weight: 700; color: #fff; margin-bottom: 0.5mm; }
+        .feature-en { font-size: 3.2mm; color: rgba(255,255,255,0.5); }
+        .feature-sub { font-size: 3mm; color: rgba(255,255,255,0.55); margin-top: 1mm; line-height: 1.3; }
+
+        /* Stats / Social proof */
+        .stats { padding: 2mm 10mm 3mm; position: relative; z-index: 1; }
+        .stats-row { display: flex; justify-content: center; gap: 10mm; }
+        .stat { text-align: center; }
+        .stat-number {
+            font-size: 7mm; font-weight: 900;
+            background: linear-gradient(135deg, #60a5fa, #4ade80);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-label { font-size: 3mm; color: rgba(255,255,255,0.5); font-weight: 600; margin-top: 0.5mm; }
+
+        /* Exclusive */
+        .exclusive { padding: 2mm 10mm; position: relative; z-index: 1; text-align: center; }
+        .exclusive-bar {
+            display: inline-flex; align-items: center; gap: 2mm;
+            background: linear-gradient(90deg, rgba(34,197,94,0.15), rgba(59,130,246,0.15));
+            border: 0.3mm solid rgba(34,197,94,0.25);
+            border-radius: 10mm; padding: 2.5mm 6mm;
+        }
+        .exclusive-bar .ex-icon { font-size: 4mm; }
+        .exclusive-bar .ex-text { font-size: 3.3mm; font-weight: 700; color: #4ade80; }
+
+        /* CTA */
+        .cta { padding: 4mm 10mm; position: relative; z-index: 1; }
+        .cta-box {
+            background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05));
+            border: 0.5mm solid rgba(255,255,255,0.15);
+            border-radius: 6mm; padding: 5mm 6mm;
+            display: flex; align-items: center; gap: 5mm;
+        }
+        .qr-area {
+            width: 30mm; height: 30mm; background: #fff;
+            border-radius: 4mm; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .qr-area .qr-icon { font-size: 12mm; color: #1e1b4b; }
+        .qr-area .qr-text { font-size: 2.3mm; color: #64748b; font-weight: 600; }
+        .cta-right { flex: 1; }
+        .cta-de { font-size: 6mm; font-weight: 800; color: #fff; margin-bottom: 1mm; }
+        .cta-en { font-size: 3.5mm; color: rgba(255,255,255,0.5); margin-bottom: 3mm; }
+        .stores { display: flex; gap: 3mm; }
+        .store-btn {
+            font-size: 3mm; font-weight: 700; padding: 2.5mm 4mm;
+            border-radius: 2.5mm; display: flex; align-items: center; gap: 1.5mm;
+        }
+        .store-btn.play { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
+        .store-btn.apple { background: #fff; color: #0f172a; }
+        .store-btn .s-icon { font-size: 3.5mm; }
+
+        /* Footer */
+        .footer { padding: 3mm 10mm 6mm; position: relative; z-index: 1; text-align: center; }
+        .footer-url {
+            font-size: 5mm; font-weight: 800;
+            background: linear-gradient(90deg, #60a5fa, #4ade80);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1mm;
+        }
+        .footer-social { font-size: 2.8mm; color: rgba(255,255,255,0.4); }
+        .footer-social span { margin: 0 1.5mm; }
+
+        @media print {
+            body { padding: 0; background: none; }
+            .print-hint { display: none; }
+        }
+        .print-hint {
+            position: fixed; bottom: 3mm; left: 50%; transform: translateX(-50%);
+            background: #1e293b; color: #94a3b8; font-size: 11px;
+            padding: 6px 14px; border-radius: 6px; z-index: 100;
+        }
+    </style>
+</head>
+<body>
+<div class="flyer">
+    <div class="overlay"></div>
+    <div class="strip-left"></div>
+    <div class="strip-right"></div>
+
+    <div class="header">
+        <img src="logo.png" alt="Room8" class="logo-img">
+        <div class="app-name">Room8</div>
+        <div class="tagline">Dein Campus. Dein Deal.</div>
+    </div>
+
+    <div class="headline">
+        <div class="headline-de">Alles was du als Student brauchst —<br><span>in einer App.</span></div>
+        <div class="headline-en">Everything you need as a student — in one app.</div>
+    </div>
+
+    <div class="features">
+        <div class="feature-row">
+            <span class="feature-emoji">🏠</span>
+            <div class="feature-content">
+                <div class="feature-de">WG-Suche / Find Housing</div>
+                <div class="feature-sub">Finde dein Zimmer oder deine WG direkt von Studenten. <em>Find rooms shared by students.</em></div>
+            </div>
+        </div>
+        <div class="feature-row">
+            <span class="feature-emoji">🛒</span>
+            <div class="feature-content">
+                <div class="feature-de">Marktplatz / Marketplace</div>
+                <div class="feature-sub">Kaufe & verkaufe Möbel, Bücher, Elektronik & mehr. <em>Buy & sell furniture, books & more.</em></div>
+            </div>
+        </div>
+        <div class="feature-row">
+            <span class="feature-emoji">💼</span>
+            <div class="feature-content">
+                <div class="feature-de">Studentenjobs / Student Jobs</div>
+                <div class="feature-sub">Werkstudent, Minijob oder Praktikum — alles hier. <em>Working student, part-time or internship.</em></div>
+            </div>
+        </div>
+        <div class="feature-row">
+            <span class="feature-emoji">🎫</span>
+            <div class="feature-content">
+                <div class="feature-de">Coupons & Rabatte / Deals</div>
+                <div class="feature-sub">Exklusive Angebote von lokalen Partnern. <em>Exclusive offers from local partners.</em></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div class="stats-row">
+            <div class="stat"><div class="stat-number">100%</div><div class="stat-label">Kostenlos / Free</div></div>
+            <div class="stat"><div class="stat-number">🔒</div><div class="stat-label">Verifiziert / Verified</div></div>
+            <div class="stat"><div class="stat-number">🎓</div><div class="stat-label">Nur Studenten / Students Only</div></div>
+        </div>
+    </div>
+
+    <div class="exclusive">
+        <div class="exclusive-bar">
+            <span class="ex-icon">✨</span>
+            <span class="ex-text">Registriere dich mit deiner Uni-E-Mail — Register with your university email</span>
+        </div>
+    </div>
+
+    <div class="cta">
+        <div class="cta-box">
+            <div class="qr-area">
+                <span class="qr-icon">⬚</span>
+                <span class="qr-text">QR-Code hier</span>
+            </div>
+            <div class="cta-right">
+                <div class="cta-de">Jetzt kostenlos downloaden!</div>
+                <div class="cta-en">Download now — it's free!</div>
+                <div class="stores">
+                    <div class="store-btn play"><span class="s-icon">▶</span> Google Play</div>
+                    <div class="store-btn apple"><span class="s-icon"></span> App Store</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-url">www.room8.club</div>
+        <div class="footer-social"><span>@room8.app</span> <span>·</span> <span>Instagram</span> <span>·</span> <span>TikTok</span></div>
+    </div>
+</div>
+<div class="print-hint">Variante 3: Bold Colorful — Strg+P zum Drucken (Hintergrundgrafiken aktivieren!)</div>
+</body>
+</html>

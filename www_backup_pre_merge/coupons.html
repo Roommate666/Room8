@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Coupons - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .app-container { --primary-color: #F59E0B; --primary-dark: #D97706; background-color: #f3f4f6; padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px); }
+        
+        /* HEADER - Luftiger */
+        .app-header {
+            display: grid;
+            grid-template-columns: 40px 1fr 40px;
+            align-items: center;
+            padding: calc(1.5rem + env(safe-area-inset-top)) 1.5rem 1.5rem 1.5rem;
+            background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%);
+            color: white; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.25);
+            margin-bottom: 1.25rem;
+        }
+        
+        .back-btn {
+            color: white; text-decoration: none;
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        .app-header h1 {
+            color: white; margin: 0; font-size: 1.5rem; font-weight: 800;
+            text-align: center;
+            letter-spacing: -0.02em;
+        }
+
+        .example-banner {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+            border: 1px solid #F59E0B;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            margin: 0 1.5rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.85rem;
+            color: #92400E;
+        }
+        
+        .example-banner-icon { font-size: 1.25rem; }
+        .example-banner-text { flex: 1; }
+        .example-banner-text strong { display: block; font-size: 0.9rem; }
+
+        .partner-banner { background: white; border-radius: 12px; padding: 1rem; margin: 0 1.5rem 1.5rem; border: 1px solid #E5E7EB; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; }
+        .partner-banner h3 { margin: 0 0 0.5rem 0; font-size: 1rem; color: var(--text-main); }
+        .partner-banner p { margin: 0 0 0.75rem 0; font-size: 0.85rem; color: var(--text-muted); }
+        .partner-email { display: inline-block; background: #FFF7ED; color: #EA580C; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-size: 0.9rem; }
+        
+        .filter-section { padding: 0 1.5rem 1rem; }
+        .filter-bar { display: flex; gap: 0.6rem; overflow-x: auto; padding-bottom: 0.5rem; scrollbar-width: none; }
+        .filter-bar::-webkit-scrollbar { display: none; }
+        .filter-btn { padding: 0.5rem 1rem; border-radius: 999px; border: 1px solid rgba(0,0,0,0.05); background-color: white; color: #4b5563; font-size: 0.85rem; white-space: nowrap; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+        .filter-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+        
+        .coupon-list { padding: 0 1.5rem; display: flex; flex-direction: column; gap: 1rem; max-width: 800px; margin: 0 auto; }
+        
+        .coupon-card { 
+            background: white; 
+            border-radius: 16px; 
+            overflow: hidden; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
+            transition: all 0.2s; 
+            position: relative;
+            cursor: pointer;
+        }
+        .coupon-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+        
+        .coupon-image { 
+            height: 160px; 
+            width: 100%; 
+            background-color: #FED7AA; 
+            background-size: cover; 
+            background-position: center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .coupon-image-emoji {
+            font-size: 4rem;
+            opacity: 0.3;
+        }
+        
+        .example-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .discount-badge {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%);
+            color: white;
+            font-weight: 800;
+            padding: 0.5rem 0.85rem;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        }
+
+        .discount-badge.green {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .discount-badge.red {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+        
+        .coupon-content { padding: 1.25rem 1rem 1rem; }
+        
+        .partner-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .partner-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: #F3F4F6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .partner-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        
+        .partner-info { flex: 1; min-width: 0; }
+        .partner-name { font-weight: 700; font-size: 1rem; color: var(--text-main); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .partner-location { font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.25rem; }
+        
+        .coupon-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin: 0 0 0.5rem 0; }
+        .coupon-desc { font-size: 0.85rem; color: #6B7280; margin-bottom: 0.75rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
+        
+        .partner-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .detail-tag {
+            background: #F3F4F6;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: #4B5563;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .detail-tag a {
+            color: #3B82F6;
+            text-decoration: none;
+        }
+        
+        .coupon-footer { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-top: 1px dashed #E5E7EB; 
+            padding-top: 0.75rem; 
+        }
+        
+        .valid-until { font-size: 0.8rem; color: var(--text-muted); }
+        
+        .redeem-btn { 
+            background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%); 
+            color: white; 
+            border: none; 
+            padding: 0.6rem 1.25rem; 
+            border-radius: 10px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+        
+        .code-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 1.5rem; }
+        .code-box { background: white; border-radius: 20px; padding: 2rem; text-align: center; width: 100%; max-width: 400px; position: relative; }
+        .code-display { background: #F3F4F6; border: 2px dashed #D1D5DB; padding: 1rem; border-radius: 12px; font-family: monospace; font-size: 1.5rem; font-weight: 700; color: #374151; margin: 1.5rem 0; letter-spacing: 2px; }
+        .copy-btn { background: #111827; color: white; border: none; padding: 0.75rem 2rem; border-radius: 99px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; }
+        
+        .loading-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <h1>Studentenrabatte</h1>
+        <div style="width: 40px;"></div>
+    </header>
+    
+    <div class="example-banner" id="exampleBanner">
+        <span class="example-banner-icon">💡</span>
+        <div class="example-banner-text">
+            <strong>So könnte Ihr Coupon aussehen!</strong>
+            Erreichen Sie tausende Studenten.
+        </div>
+    </div>
+
+    <!-- SHOWCASE COUPON - Beispiel für Partner -->
+    <div class="showcase-coupon" style="margin: 0 1.5rem 1.5rem;">
+        <div class="coupon-card" style="cursor: default;">
+            <div class="coupon-image" style="background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%);">
+                <span class="coupon-image-emoji">☕</span>
+                <span class="example-badge">Beispiel</span>
+                <span class="discount-badge green">2 für 1</span>
+            </div>
+            <div class="coupon-content">
+                <div class="partner-header">
+                    <div class="partner-logo">☕</div>
+                    <div class="partner-info">
+                        <h4 class="partner-name">Campus Café</h4>
+                        <div class="partner-location">📍 München, Leopoldstraße 15</div>
+                    </div>
+                </div>
+                <div class="coupon-title">2 für 1 Kaffee</div>
+                <div class="coupon-desc">Kauf einen Kaffee, erhalte den zweiten gratis! Gilt für alle Heißgetränke. Einfach Studentenausweis zeigen.</div>
+                <div class="partner-details">
+                    <span class="detail-tag">🕐 Mo-Fr: 8-18 Uhr</span>
+                    <span class="detail-tag">📸 @campuscafe</span>
+                </div>
+                <div class="coupon-footer">
+                    <span class="valid-until">Gültig bis 31.12.2026</span>
+                    <button class="redeem-btn" onclick="Room8UI.info('Dies ist ein Beispiel-Coupon für Partner.')">Code: COFFEE24</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="partner-banner">
+        <h3>Dein Deal hier?</h3>
+        <p>Erreiche tausende Studenten in deiner Stadt.</p>
+        <a href="mailto:admin@room8.club" class="partner-email">Partner werden</a>
+    </div>
+    
+    <div class="filter-section">
+        <div class="filter-bar" id="couponFilter">
+            <button class="filter-btn active" data-cat="all">Alle</button>
+            <button class="filter-btn" data-cat="food">Essen & Trinken</button>
+            <button class="filter-btn" data-cat="tech">Technik</button>
+            <button class="filter-btn" data-cat="fashion">Mode</button>
+            <button class="filter-btn" data-cat="leisure">Freizeit</button>
+        </div>
+    </div>
+    
+    <main style="flex:1;">
+        <div class="coupon-list" id="couponContainer"></div>
+    </main>
+    
+    <div id="app-footer-nav"></div>
+</div>
+
+<div id="codeModal" class="code-modal">
+    <div class="code-box">
+        <button onclick="closeModal()" style="position:absolute; top:1rem; right:1rem; background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+        <h3 style="margin-top:0;">Dein Rabattcode</h3>
+        <p style="color:#6B7280; font-size:0.9rem;">Zeige diesen Code an der Kasse oder nutze ihn online.</p>
+        <div class="code-display" id="modalCode">CODE123</div>
+        <button class="copy-btn" onclick="copyCode()">Code kopieren</button>
+        <div id="copyFeedback" style="color:#10B981; font-size:0.85rem; margin-top:0.5rem; opacity:0; transition:opacity 0.3s;">Kopiert!</div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="navigation.js"></script>
+<script src="room8-utils.js"></script>
+<script src="notificationBell.js"></script>
+<script>
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // XSS Protection
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function navigateTo(url) {
+        try { window.location.href = url; } catch(e) { console.warn(e); }
+    }
+
+    // BEISPIEL DATEN
+    var exampleCoupons = [
+        { 
+            id: 'example1', 
+            isExample: true,
+            business_name: 'Campus Café', 
+            title: '2 für 1 Kaffee', 
+            description: 'Kauf einen Kaffee, erhalte den zweiten gratis! Gilt für alle Heißgetränke.',
+            category: 'food', 
+            discount_value: '2 für 1', 
+            badgeType: 'green',
+            discount_code: 'COFFEE24', 
+            city: 'München',
+            address: 'Leopoldstraße 15',
+            opening_hours: 'Mo-Fr: 8-18 Uhr',
+            valid_until: '2025-03-31',
+            logo: '☕',
+            bgGradient: 'linear-gradient(135deg, #D97706 0%, #F59E0B 50%, #FBBF24 100%)'
+        },
+        { 
+            id: 'example2', 
+            isExample: true,
+            business_name: 'TechStore', 
+            title: '15% auf Laptops', 
+            description: 'Studentenrabatt auf alle Laptops und Tablets. Studentenausweis erforderlich.',
+            category: 'tech', 
+            discount_value: '-15%', 
+            badgeType: 'red',
+            discount_code: 'STUDYTECH', 
+            city: 'Berlin',
+            address: 'Friedrichstraße 100',
+            website: 'www.techstore.de',
+            valid_until: '2025-06-30',
+            logo: '💻',
+            bgGradient: 'linear-gradient(135deg, #1E40AF 0%, #3B82F6 50%, #60A5FA 100%)'
+        },
+        { 
+            id: 'example3', 
+            isExample: true,
+            business_name: 'Fit & Fun', 
+            title: 'Gratis Probetraining', 
+            description: 'Einen Tag lang kostenlos trainieren. Inkl. Getränke und Handtuch.',
+            category: 'leisure', 
+            discount_value: 'GRATIS', 
+            badgeType: 'blue',
+            discount_code: 'FITFREE', 
+            city: 'Hamburg',
+            address: 'Reeperbahn 50',
+            opening_hours: 'Mo-So: 6-23 Uhr',
+            instagram: '@fitundfun',
+            valid_until: '2025-12-31',
+            logo: '💪',
+            bgGradient: 'linear-gradient(135deg, #059669 0%, #10B981 50%, #34D399 100%)'
+        },
+        { 
+            id: 'example4', 
+            isExample: true,
+            business_name: 'Urban Styles', 
+            title: '10€ Gutschein', 
+            description: 'Ab einem Einkaufswert von 50€. Nicht kombinierbar mit anderen Aktionen.',
+            category: 'fashion', 
+            discount_value: '-10€', 
+            badgeType: 'red',
+            discount_code: 'STYLE10', 
+            city: 'Köln',
+            address: 'Schildergasse 25',
+            website: 'www.urbanstyles.de',
+            valid_until: '2025-02-28',
+            logo: '👕',
+            bgGradient: 'linear-gradient(135deg, #BE185D 0%, #EC4899 50%, #F472B6 100%)'
+        }
+    ];
+
+    var allCoupons = [];
+    var container = document.getElementById('couponContainer');
+    var filterBtns = document.querySelectorAll('.filter-btn');
+    var currentCat = 'all';
+
+    // Coupons laden
+    async function loadCoupons() {
+        try {
+            // Versuche echte Coupons zu laden
+            var result = await sb
+                .from('coupons')
+                .select('*')
+                .eq('status', 'active')
+                .order('created_at', { ascending: false });
+
+            console.log("Coupons geladen:", result);
+
+            // Falls Fehler, probiere ohne status filter
+            if (result.error) {
+                console.log("Fehler mit status filter, probiere ohne...");
+                result = await sb.from('coupons').select('*').order('created_at', { ascending: false });
+                console.log("Ohne Filter:", result);
+            }
+
+            if (!result.error && result.data && result.data.length > 0) {
+                // Echte Coupons gefunden
+                console.log("Anzahl Coupons:", result.data.length);
+                allCoupons = result.data;
+            } else {
+                // Keine echten Coupons
+                console.log("Keine echten Coupons gefunden, Fehler:", result.error);
+                allCoupons = [];
+            }
+        } catch (err) {
+            console.error("Coupons laden fehlgeschlagen:", err);
+            allCoupons = [];
+        }
+
+        renderCoupons();
+    }
+
+    function renderCoupons() {
+        container.innerHTML = '';
+        var filtered = allCoupons.filter(function(c) { 
+            return currentCat === 'all' || c.category === currentCat; 
+        });
+        
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="loading-state">Keine Coupons in dieser Kategorie</div>';
+            return;
+        }
+        
+        filtered.forEach(function(c) {
+            var card = document.createElement('div');
+            card.className = 'coupon-card';
+            card.onclick = function() { openModal(c.discount_code); };
+            
+            var badgeClass = c.badgeType === 'green' ? 'green' : (c.badgeType === 'blue' ? 'blue' : '');
+            var validDate = c.valid_until ? new Date(c.valid_until).toLocaleDateString('de-DE') : 'Unbegrenzt';
+            
+            // Partner Details
+            var detailsHtml = '';
+            if (c.opening_hours || c.website || c.instagram) {
+                detailsHtml = '<div class="partner-details">';
+                if (c.opening_hours) detailsHtml += '<span class="detail-tag">🕐 ' + c.opening_hours + '</span>';
+                if (c.website) detailsHtml += '<span class="detail-tag">🌐 ' + c.website + '</span>';
+                if (c.instagram) detailsHtml += '<span class="detail-tag">📸 ' + c.instagram + '</span>';
+                detailsHtml += '</div>';
+            }
+            
+            // Hintergrund
+            var bgStyle = c.imageUrl ? 'background-image: url(' + c.imageUrl + ');' : (c.bgGradient || 'background: #FED7AA;');
+            if (c.bgGradient && !c.imageUrl) bgStyle = 'background: ' + c.bgGradient + ';';
+            
+            // Emoji für Beispiele
+            var emojiHtml = c.isExample ? '<span class="coupon-image-emoji">' + c.logo + '</span>' : '';
+            
+            // Logo
+            var logoHtml = c.logoUrl ? '<img src="' + c.logoUrl + '" alt="Logo">' : (c.logo || '🏪');
+            
+            card.innerHTML = 
+                '<div class="coupon-image" style="' + bgStyle + '">' +
+                    emojiHtml +
+                    (c.isExample ? '<span class="example-badge">Beispiel</span>' : '') +
+                    '<span class="discount-badge ' + badgeClass + '">' + c.discount_value + '</span>' +
+                '</div>' +
+                '<div class="coupon-content">' +
+                    '<div class="partner-header">' +
+                        '<div class="partner-logo">' + logoHtml + '</div>' +
+                        '<div class="partner-info">' +
+                            '<h4 class="partner-name">' + escapeHtml(c.business_name) + '</h4>' +
+                            '<div class="partner-location">📍 ' + escapeHtml(c.city) + (c.address ? ', ' + escapeHtml(c.address) : '') + '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="coupon-title">' + escapeHtml(c.title) + '</div>' +
+                    '<div class="coupon-desc">' + escapeHtml(c.description) + '</div>' +
+                    detailsHtml +
+                    '<div class="coupon-footer">' +
+                        '<span class="valid-until">Gültig bis ' + validDate + '</span>' +
+                        '<button class="redeem-btn" onclick="event.stopPropagation(); openModal(\'' + c.discount_code + '\')">Einlösen</button>' +
+                    '</div>' +
+                '</div>';
+            
+            container.appendChild(card);
+        });
+    }
+
+    var modal = document.getElementById('codeModal');
+    var codeDisplay = document.getElementById('modalCode');
+    
+    window.openModal = function(code) {
+        codeDisplay.textContent = code;
+        modal.style.display = 'flex';
+    };
+    
+    window.closeModal = function() {
+        modal.style.display = 'none';
+        document.getElementById('copyFeedback').style.opacity = '0';
+    };
+    
+    window.copyCode = function() {
+        navigator.clipboard.writeText(codeDisplay.textContent);
+        document.getElementById('copyFeedback').style.opacity = '1';
+    };
+    
+    modal.addEventListener('click', function(e) { if(e.target === modal) closeModal(); });
+
+    filterBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            filterBtns.forEach(function(b) { b.classList.remove('active'); });
+            this.classList.add('active');
+            currentCat = this.getAttribute('data-cat');
+            renderCoupons();
+        });
+    });
+
+    // Start - nur echte Coupons laden
+    allCoupons = [];
+    loadCoupons();
+</script>
+</body>
+</html>

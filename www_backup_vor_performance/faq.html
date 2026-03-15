@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title data-i18n="faq_page_title">Hilfe & FAQ - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Search container adjust for app-header */
+
+        /* Search Bar */
+        .search-container {
+            margin-top: 0;
+            padding: 0.75rem 1rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .faq-search input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 1rem;
+            border: none;
+            border-radius: 16px;
+            font-size: 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .faq-search input:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+
+        /* Quick Links Grid */
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 Spalten mobil */
+            gap: 0.75rem;
+            padding: 1.5rem;
+        }
+
+        .quick-link {
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .quick-link:active { transform: scale(0.98); background: #F9FAFB; }
+
+        .quick-link-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .quick-link-text { font-size: 0.85rem; font-weight: 600; }
+
+        /* FAQ Content */
+        .faq-content { padding: 0 1.5rem 4rem; max-width: 800px; margin: 0 auto; }
+        
+        .faq-category { margin-bottom: 2rem; }
+        
+        .faq-category-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Modern Accordion */
+        .faq-item {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 0.8rem;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .faq-question {
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            background: white;
+            transition: background 0.2s;
+        }
+        
+        .faq-question:active { background: #F9FAFB; }
+        
+        .faq-question.active {
+            color: var(--primary-color);
+            background: #F9FAFB;
+        }
+        
+        .faq-arrow {
+            transition: transform 0.3s;
+            color: #9CA3AF;
+            font-size: 0.8rem;
+        }
+        .faq-question.active .faq-arrow { transform: rotate(180deg); color: var(--primary-color); }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background: #F9FAFB;
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+        
+        .faq-answer-inner {
+            padding: 1rem 1.25rem 1.5rem;
+            border-top: 1px solid #F3F4F6;
+        }
+        
+        .faq-item.active .faq-answer { max-height: 500px; } /* Open state handled via JS toggling class on item */
+
+        /* Highlight Boxes inside Answers */
+        .highlight-box {
+            background: #ECFDF5;
+            border-left: 3px solid #10B981;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+            color: #065F46;
+            font-size: 0.9rem;
+        }
+        
+        .warning-box {
+            background: #FFFBEB;
+            border-left: 3px solid #F59E0B;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+            color: #92400E;
+            font-size: 0.9rem;
+        }
+
+        /* Contact Form */
+        .contact-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            margin-top: 3rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .contact-section h2 { text-align: center; margin: 0 0 0.5rem; font-size: 1.4rem; }
+        .contact-section > p { text-align: center; color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem; }
+
+        .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.4rem; display: block; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 0.8rem; border: 1px solid #E5E7EB; border-radius: 10px;
+            font-size: 0.95rem; background: #F9FAFB; transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--primary-color); background: white;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 1rem;
+        }
+
+        .no-results {
+            text-align: center; padding: 3rem 1rem; color: var(--text-muted); display: none;
+        }
+        .no-results.show { display: block; }
+    </style>
+</head>
+<body>
+
+<div class="app-container" style="background: #F3F4F6;">
+    
+    <!-- Modern Header -->
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <h1 data-i18n="faq_title">Hilfe & Support</h1>
+        <div style="width:40px;"></div>
+    </header>
+
+    <!-- Search -->
+    <div class="search-container">
+        <div class="faq-search">
+            <input type="text" id="faqSearch" data-i18n-placeholder="faq_search_placeholder" placeholder="Suche nach Themen...">
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="quick-links">
+        <a href="nutzungsbedingungen.html#mustervertraege" class="quick-link">
+            <span class="quick-link-icon">📄</span>
+            <span class="quick-link-text" data-i18n="faq_quick_templates">Musterverträge</span>
+        </a>
+        <a href="verify-options.html" class="quick-link">
+            <span class="quick-link-icon">🎓</span>
+            <span class="quick-link-text">Verifizierung</span>
+        </a>
+        <a href="nutzungsbedingungen.html" class="quick-link">
+            <span class="quick-link-icon">⚖️</span>
+            <span class="quick-link-text">Rechtliches</span>
+        </a>
+        <a href="#kontakt" class="quick-link">
+            <span class="quick-link-icon">✉️</span>
+            <span class="quick-link-text" data-i18n="faq_quick_contact">Kontakt</span>
+        </a>
+    </div>
+
+    <main class="faq-content">
+        
+        <div class="no-results" id="noResults">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🤔</div>
+            <p data-i18n="faq_no_results">Keine Ergebnisse gefunden.</p>
+        </div>
+
+        <div id="faqContainer">
+            
+            <!-- Category: Allgemein -->
+            <div class="faq-category">
+                <div class="faq-category-title">
+                    <span>🏠</span> <span data-i18n="faq_cat_general">Allgemein</span>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span data-i18n="faq_q1">Was ist Room8?</span>
+                        <span class="faq-arrow">▼</span>
+                    </div>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p data-i18n="faq_a1_intro">Room8 ist die exklusive Plattform von Studenten für Studenten. Hier kannst du:</p>
+                        <ul style="padding-left: 1.2rem; margin-top: 0.5rem;">
+                            <li>Wohnungen & WG-Zimmer finden oder anbieten</li>
+                            <li>Gegenstände (Möbel, Technik) verkaufen</li>
+                            <li>Coole Studentenjobs finden</li>
+                            <li>Exklusive Rabatte (Coupons) nutzen</li>
+                        </ul>
+                    </div></div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span data-i18n="faq_q2">Ist Room8 kostenlos?</span>
+                        <span class="faq-arrow">▼</span>
+                    </div>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <div class="highlight-box">
+                            <strong>✔ Ja, 100% kostenlos!</strong>
+                        </div>
+                        <p>Keine Gebühren für Inserate, keine Provisionen. Wir finanzieren uns über Partner-Angebote (Jobs & Coupons).</p>
+                    </div></div>
+                </div>
+            </div>
+
+            <!-- Category: Verifizierung -->
+            <div class="faq-category">
+                <div class="faq-category-title">
+                    <span>🛡️</span> <span data-i18n="faq_cat_verification">Sicherheit & Verifizierung</span>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span data-i18n="faq_q4">Warum verifizieren?</span>
+                        <span class="faq-arrow">▼</span>
+                    </div>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p>Die Verifizierung schafft Vertrauen. Nur verifizierte Nutzer (mit blauem Haken) können:</p>
+                        <ul style="padding-left: 1.2rem;">
+                            <li>Den vollen Namen anderer sehen</li>
+                            <li>Adressen von Wohnungen einsehen</li>
+                            <li>Als besonders vertrauenswürdig gelten</li>
+                        </ul>
+                    </div></div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span data-i18n="faq_q9">Wie erkenne ich Betrug?</span>
+                        <span class="faq-arrow">▼</span>
+                    </div>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <div class="warning-box">
+                            <strong>🚨 Achtung bei:</strong>
+                        </div>
+                        <ul style="padding-left: 1.2rem;">
+                            <li>Aufforderungen zur Vorab-Überweisung (Western Union etc.)</li>
+                            <li>Vermieter, die angeblich im Ausland sind</li>
+                            <li>Kommunikation nur außerhalb der App</li>
+                        </ul>
+                        <p>Melde verdächtige Inserate sofort über den "Melden"-Button.</p>
+                    </div></div>
+                </div>
+            </div>
+
+            <!-- Category: Wohnen -->
+            <div class="faq-category">
+                <div class="faq-category-title">
+                    <span>🔑</span> <span data-i18n="faq_cat_housing">Wohnen</span>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span data-i18n="faq_q8">Mietvertrag notwendig?</span>
+                        <span class="faq-arrow">▼</span>
+                    </div>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p><strong>Absolut.</strong> Auch bei Untermiete oder WG-Zimmern solltest du immer einen schriftlichen Vertrag haben.</p>
+                        <p>Nutze dafür einfach unsere <a href="nutzungsbedingungen.html#mustervertraege" style="color:var(--primary-color); font-weight:600;">kostenlosen Musterverträge</a>.</p>
+                    </div></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Contact Section -->
+        <div class="contact-section" id="kontakt">
+            <h2>📬 Noch Fragen?</h2>
+            <p>Unser Team antwortet in der Regel innerhalb von 24h.</p>
+            
+            <div class="contact-form" id="contactForm">
+                <div class="form-group">
+                    <label for="contactName">Dein Name</label>
+                    <input type="text" id="contactName" placeholder="Max Mustermann">
+                </div>
+                <div class="form-group">
+                    <label for="contactEmail">Deine E-Mail</label>
+                    <input type="email" id="contactEmail" placeholder="max@email.de">
+                </div>
+                <div class="form-group">
+                    <label for="contactCategory">Thema</label>
+                    <select id="contactCategory">
+                        <option value="">Bitte wählen...</option>
+                        <option value="frage">Allgemeine Frage</option>
+                        <option value="tech">Technisches Problem</option>
+                        <option value="report">Meldung / Sicherheit</option>
+                        <option value="business">Partner / Business</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="contactMessage">Nachricht</label>
+                    <textarea id="contactMessage" rows="4" placeholder="Wie können wir helfen?"></textarea>
+                </div>
+                
+                <button type="button" class="submit-btn" id="submitBtn" onclick="submitContactForm()">Nachricht senden</button>
+            </div>
+
+            <div class="form-success" id="formSuccess" style="display:none; text-align:center; padding:2rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+                <h3 style="color:#10B981;">Gesendet!</h3>
+                <p>Wir melden uns bald bei dir.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="app-footer-nav"></div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="session-cache.js"></script>
+<script src="room8-ui.js"></script>
+<script src="navigation.js"></script>
+<script src="translations.js"></script>
+<script>
+    // Supabase Client
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // FAQ Toggle Logic
+    function toggleFaq(header) {
+        const item = header.parentElement;
+        const isActive = item.classList.contains('active');
+
+        // Alle schließen
+        document.querySelectorAll('.faq-item').forEach(el => {
+            el.classList.remove('active');
+            el.querySelector('.faq-question').classList.remove('active');
+        });
+
+        // Geklicktes öffnen
+        if (!isActive) {
+            item.classList.add('active');
+            header.classList.add('active');
+        }
+    }
+
+    // Search Logic
+    document.getElementById('faqSearch').addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase().trim();
+        const items = document.querySelectorAll('.faq-item');
+        let hasResults = false;
+
+        items.forEach(item => {
+            const question = item.querySelector('.faq-question').innerText.toLowerCase();
+            const answer = item.querySelector('.faq-answer').innerText.toLowerCase();
+
+            if (question.includes(query) || answer.includes(query)) {
+                item.style.display = "block";
+                hasResults = true;
+            } else {
+                item.style.display = "none";
+            }
+        });
+
+        // Kategorien ausblenden wenn leer
+        document.querySelectorAll('.faq-category').forEach(cat => {
+            const visibleItems = cat.querySelectorAll('.faq-item[style="display: block;"]');
+            cat.style.display = (visibleItems.length > 0 || query === '') ? 'block' : 'none';
+        });
+
+        document.getElementById('noResults').className = hasResults ? 'no-results' : 'no-results show';
+    });
+
+    // Contact Form Logic - Mit Supabase Speicherung
+    async function submitContactForm() {
+        const name = document.getElementById('contactName').value.trim();
+        const email = document.getElementById('contactEmail').value.trim();
+        const category = document.getElementById('contactCategory').value;
+        const msg = document.getElementById('contactMessage').value.trim();
+
+        if (!name || !email || !msg) {
+            Room8UI.warning("Bitte alle Felder ausfüllen.");
+            return;
+        }
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerText = "Sende...";
+
+        try {
+            // In Supabase speichern
+            const { error } = await sb
+                .from('contact_messages')
+                .insert({
+                    name: name,
+                    email: email,
+                    category: category || 'allgemein',
+                    message: msg,
+                    created_at: new Date().toISOString(),
+                    is_read: false
+                });
+
+            if (error) {
+                console.error('Supabase error:', error);
+                // Fallback: Mailto öffnen
+                const subject = encodeURIComponent('Room8 Support: ' + (category || 'Anfrage'));
+                const body = encodeURIComponent('Name: ' + name + '\nEmail: ' + email + '\n\nNachricht:\n' + msg);
+                window.location.href = 'mailto:help@room8.club?subject=' + subject + '&body=' + body;
+                return;
+            }
+
+            // Erfolg anzeigen
+            document.getElementById('contactForm').style.display = 'none';
+            document.getElementById('formSuccess').style.display = 'block';
+            Room8UI.success("Nachricht gesendet!");
+
+        } catch (err) {
+            console.error('Error:', err);
+            btn.disabled = false;
+            btn.innerText = "Nachricht senden";
+
+            // Fallback: Mailto öffnen
+            const subject = encodeURIComponent('Room8 Support: ' + (category || 'Anfrage'));
+            const body = encodeURIComponent('Name: ' + name + '\nEmail: ' + email + '\n\nNachricht:\n' + msg);
+            window.location.href = 'mailto:help@room8.club?subject=' + subject + '&body=' + body;
+        }
+    }
+</script>
+<script src="notificationBell.js"></script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room8 Flyer - Variante 2 (Clean White)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        @page { size: A4 portrait; margin: 0; }
+        html, body {
+            width: 210mm; height: 297mm;
+            font-family: 'Inter', sans-serif;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        body { background: #e2e8f0; display: flex; justify-content: center; padding: 0; }
+
+        .flyer {
+            width: 210mm; height: 297mm;
+            background: #ffffff;
+            position: relative; overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+
+        /* Top colorful banner */
+        .top-banner {
+            height: 8mm;
+            background: linear-gradient(90deg, #3b82f6, #22c55e, #fbbf24, #f97316, #8b5cf6);
+        }
+
+        /* Subtle background shapes */
+        .bg-shape { position: absolute; border-radius: 50%; opacity: 0.06; pointer-events: none; }
+        .bg-shape-1 { width: 150mm; height: 150mm; background: #3b82f6; top: -40mm; right: -40mm; }
+        .bg-shape-2 { width: 120mm; height: 120mm; background: #22c55e; bottom: -30mm; left: -30mm; }
+
+        /* Header */
+        .header { padding: 10mm 14mm 6mm; position: relative; z-index: 1; text-align: center; }
+        .logo-row { display: flex; align-items: center; justify-content: center; gap: 4mm; margin-bottom: 4mm; }
+        .logo-img { width: 22mm; height: 22mm; border-radius: 5mm; box-shadow: 0 2mm 8mm rgba(0,0,0,0.1); }
+        .app-name { font-size: 14mm; font-weight: 900; color: #1e293b; letter-spacing: -0.5mm; }
+        .tagline {
+            font-size: 4.5mm; font-weight: 700; letter-spacing: 1.2mm;
+            text-transform: uppercase; color: #3b82f6; margin-bottom: 5mm;
+        }
+        .headline-de { font-size: 9mm; font-weight: 800; color: #0f172a; line-height: 1.2; margin-bottom: 2mm; }
+        .headline-en { font-size: 4.5mm; font-weight: 500; color: #94a3b8; font-style: italic; }
+
+        /* Divider */
+        .divider {
+            margin: 3mm 14mm; height: 0.4mm;
+            background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+        }
+
+        /* Features */
+        .features { padding: 3mm 12mm; position: relative; z-index: 1; flex: 1; }
+        .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+        .feature-card {
+            border: 0.4mm solid #e2e8f0; border-radius: 5mm;
+            padding: 5mm; text-align: center;
+            background: #fff; position: relative;
+        }
+        .feature-card:hover { box-shadow: 0 2mm 8mm rgba(0,0,0,0.06); }
+
+        .feature-icon-circle {
+            width: 14mm; height: 14mm; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 3mm; font-size: 7mm;
+        }
+        .feature-card:nth-child(1) .feature-icon-circle { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+        .feature-card:nth-child(2) .feature-icon-circle { background: linear-gradient(135deg, #dcfce7, #bbf7d0); }
+        .feature-card:nth-child(3) .feature-icon-circle { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
+        .feature-card:nth-child(4) .feature-icon-circle { background: linear-gradient(135deg, #ffedd5, #fed7aa); }
+
+        .feature-title-de { font-size: 4.5mm; font-weight: 700; color: #0f172a; margin-bottom: 1mm; }
+        .feature-title-en { font-size: 3.2mm; font-weight: 500; color: #94a3b8; margin-bottom: 2mm; }
+        .feature-desc { font-size: 3mm; color: #64748b; line-height: 1.45; }
+
+        /* Benefits */
+        .benefits { padding: 3mm 12mm 2mm; position: relative; z-index: 1; }
+        .benefits-row { display: flex; justify-content: center; gap: 8mm; }
+        .benefit { display: flex; align-items: center; gap: 2mm; }
+        .benefit-icon { font-size: 4.5mm; }
+        .benefit-text { font-size: 3.3mm; color: #334155; font-weight: 600; }
+
+        /* Exclusive */
+        .exclusive { padding: 3mm 12mm; position: relative; z-index: 1; text-align: center; }
+        .exclusive-badge {
+            display: inline-flex; align-items: center; gap: 2mm;
+            background: linear-gradient(135deg, #f0f9ff, #ecfdf5);
+            border: 0.4mm solid #bae6fd;
+            border-radius: 10mm; padding: 2.5mm 6mm;
+        }
+        .exclusive-badge .badge-icon { font-size: 4.5mm; }
+        .exclusive-badge .badge-de { font-size: 3.3mm; font-weight: 700; color: #0369a1; }
+        .exclusive-badge .badge-en { font-size: 2.8mm; color: #7dd3fc; }
+
+        /* CTA */
+        .cta { padding: 4mm 12mm; position: relative; z-index: 1; }
+        .cta-box {
+            background: linear-gradient(135deg, #1e3a5f, #1e1b4b);
+            border-radius: 6mm; padding: 6mm 7mm;
+            display: flex; align-items: center; gap: 6mm;
+            color: #fff;
+        }
+        .qr-area {
+            width: 30mm; height: 30mm; background: #fff;
+            border-radius: 3mm; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .qr-area .qr-icon { font-size: 13mm; color: #1e1b4b; }
+        .qr-area .qr-text { font-size: 2.3mm; color: #64748b; font-weight: 600; margin-top: 0.5mm; }
+        .cta-right { flex: 1; }
+        .cta-de { font-size: 5.5mm; font-weight: 800; margin-bottom: 1.5mm; }
+        .cta-en { font-size: 3.5mm; opacity: 0.6; margin-bottom: 3mm; }
+        .stores { display: flex; gap: 3mm; }
+        .store-btn {
+            background: #fff; color: #0f172a; font-size: 3mm; font-weight: 700;
+            padding: 2mm 4mm; border-radius: 2mm; display: flex; align-items: center; gap: 1.5mm;
+        }
+        .store-btn .s-icon { font-size: 3.5mm; }
+
+        /* Footer */
+        .footer { padding: 3mm 12mm 5mm; position: relative; z-index: 1; text-align: center; }
+        .footer-url { font-size: 4.5mm; font-weight: 700; color: #3b82f6; margin-bottom: 1mm; }
+        .footer-social { font-size: 2.8mm; color: #94a3b8; }
+        .footer-social span { margin: 0 1.5mm; }
+
+        /* Bottom banner */
+        .bottom-banner {
+            height: 5mm;
+            background: linear-gradient(90deg, #3b82f6, #22c55e, #fbbf24, #f97316, #8b5cf6);
+        }
+
+        @media print {
+            body { padding: 0; background: none; }
+            .print-hint { display: none; }
+        }
+        .print-hint {
+            position: fixed; bottom: 3mm; left: 50%; transform: translateX(-50%);
+            background: #1e293b; color: #94a3b8; font-size: 11px;
+            padding: 6px 14px; border-radius: 6px; z-index: 100;
+        }
+    </style>
+</head>
+<body>
+<div class="flyer">
+    <div class="bg-shape bg-shape-1"></div>
+    <div class="bg-shape bg-shape-2"></div>
+    <div class="top-banner"></div>
+
+    <div class="header">
+        <div class="logo-row">
+            <img src="logo.png" alt="Room8" class="logo-img">
+            <span class="app-name">Room8</span>
+        </div>
+        <div class="tagline">Dein Campus. Dein Deal.</div>
+        <div class="headline-de">Die App von Studenten,<br>für Studenten.</div>
+        <div class="headline-en">The app by students, for students.</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="features">
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon-circle">🏠</div>
+                <div class="feature-title-de">WG-Suche</div>
+                <div class="feature-title-en">Find Housing</div>
+                <div class="feature-desc">Finde dein Zimmer oder deine WG in deiner Unistadt.<br><em>Find your room in your uni city.</em></div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon-circle">🛒</div>
+                <div class="feature-title-de">Marktplatz</div>
+                <div class="feature-title-en">Marketplace</div>
+                <div class="feature-desc">Kaufe & verkaufe gebrauchte Sachen.<br><em>Buy & sell used items with students.</em></div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon-circle">💼</div>
+                <div class="feature-title-de">Studentenjobs</div>
+                <div class="feature-title-en">Student Jobs</div>
+                <div class="feature-desc">Entdecke lokale Jobs & Werkstudentenstellen.<br><em>Discover local jobs & positions.</em></div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon-circle">🎫</div>
+                <div class="feature-title-de">Coupons & Rabatte</div>
+                <div class="feature-title-en">Coupons & Deals</div>
+                <div class="feature-desc">Exklusive Rabatte von lokalen Partnern.<br><em>Exclusive deals from local partners.</em></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="benefits">
+        <div class="benefits-row">
+            <div class="benefit"><span class="benefit-icon">✅</span><span class="benefit-text">100% Kostenlos / Free</span></div>
+            <div class="benefit"><span class="benefit-icon">🔒</span><span class="benefit-text">Verifiziert / Verified</span></div>
+            <div class="benefit"><span class="benefit-icon">🛡️</span><span class="benefit-text">Sicher & Privat / Safe</span></div>
+        </div>
+    </div>
+
+    <div class="exclusive">
+        <div class="exclusive-badge">
+            <span class="badge-icon">🎓</span>
+            <span class="badge-de">Exklusiv für Studenten mit Uni-E-Mail</span>
+            <span class="badge-en"> · Students only</span>
+        </div>
+    </div>
+
+    <div class="cta">
+        <div class="cta-box">
+            <div class="qr-area">
+                <span class="qr-icon">⬚</span>
+                <span class="qr-text">QR-Code hier</span>
+            </div>
+            <div class="cta-right">
+                <div class="cta-de">Jetzt herunterladen!</div>
+                <div class="cta-en">Download now for free!</div>
+                <div class="stores">
+                    <div class="store-btn"><span class="s-icon">▶</span> Google Play</div>
+                    <div class="store-btn"><span class="s-icon"></span> App Store</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-url">www.room8.club</div>
+        <div class="footer-social"><span>@room8.app</span> <span>·</span> <span>Instagram</span> <span>·</span> <span>TikTok</span></div>
+    </div>
+
+    <div class="bottom-banner"></div>
+</div>
+<div class="print-hint">Variante 2: Clean White — Strg+P zum Drucken (Hintergrundgrafiken aktivieren!)</div>
+</body>
+</html>

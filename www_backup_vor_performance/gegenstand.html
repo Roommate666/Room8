@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Inserat erstellen - Room8</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Header - Grün mit weißer Schrift */
+        .app-header {
+            display: grid;
+            grid-template-columns: 40px 1fr 40px;
+            align-items: center;
+            padding: calc(1.5rem + env(safe-area-inset-top)) 1.5rem 1.5rem 1.5rem;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
+            margin-bottom: 1.25rem;
+        }
+        .app-header h1 {
+            color: white !important;
+            -webkit-text-fill-color: white !important;
+            background: none !important;
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 800;
+            text-align: center;
+        }
+        .back-arrow {
+            color: white !important;
+            background: rgba(255,255,255,0.2) !important;
+            border: none !important;
+        }
+
+        /* === Spezifische Styles für Upload & Formular === */
+
+        /* Upload Bereich */
+        .upload-area {
+            background-color: #F9FAFB;
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 1rem;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: #F2F2F0;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Bilder Vorschau Gitter */
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background: #fff;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        
+        .remove-btn:hover {
+            background: #EF4444;
+        }
+
+        /* Modus-Schalter (Verkaufen / Suche) */
+        .mode-switch {
+            display: flex;
+            background: #F3F4F6;
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .mode-option {
+            flex: 1;
+            text-align: center;
+            padding: 0.6rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .mode-option.active {
+            background: white;
+            color: var(--text-main);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-weight: 600;
+        }
+        
+        .section-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .helper-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <h1 id="pageTitle">Verkaufen</h1>
+        <div style="width: 40px;"></div>
+    </header>
+
+    <main class="app-content">
+        
+        <!-- Modus Auswahl -->
+        <div class="mode-switch">
+            <div class="mode-option active" id="mode-offer" onclick="setMode('offer')">Verkaufen</div>
+            <div class="mode-option" id="mode-search" onclick="setMode('search')">Suche</div>
+        </div>
+
+        <form id="createForm">
+            <!-- Bilder Upload -->
+            <div class="form-group" id="imageSection">
+                <label class="section-title">Fotos (Max. 5)</label>
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <span class="upload-icon">📷</span>
+                    <div style="font-size: 0.9rem; color: var(--text-muted);">Tippen zum Auswählen</div>
+                </div>
+                <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" onchange="handleFiles(this.files)">
+                <div class="preview-grid" id="previewGrid"></div>
+                <div id="photoCounter" style="text-align: center; font-size: 0.8rem; color: var(--text-light); margin-top: -1rem; margin-bottom: 1rem;">0 / 5 Fotos</div>
+            </div>
+
+            <!-- Titel -->
+            <div class="form-group">
+                <label for="title">Titel</label>
+                <input type="text" id="title" required placeholder="Was möchtest du anbieten?">
+            </div>
+
+            <!-- Preis -->
+            <div class="form-group" id="price-group">
+                <label for="price">Preis (€)</label>
+                <input type="number" id="price" required placeholder="0.00" step="0.01">
+            </div>
+            
+            <!-- Preisbereich (nur für Suche) -->
+            <div class="form-group hidden" id="price-range-group">
+                <label>Preisvorstellung (€)</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" id="price_min" placeholder="Min" step="0.01">
+                    <input type="number" id="price_max" placeholder="Max" step="0.01">
+                </div>
+            </div>
+
+            <!-- Kategorie -->
+            <div class="form-group">
+                <label for="category" id="label-category">Kategorie</label>
+                <select id="category" required>
+                    <option value="" disabled selected>Bitte wählen</option>
+                    <option value="Furniture & Home">Möbel & Wohnen</option>
+                    <option value="Electronics & Tech">Elektronik</option>
+                    <option value="Books & Study">Bücher & Studium</option>
+                    <option value="Clothing & Fashion">Kleidung</option>
+                    <option value="Sports & Outdoor">Sport & Freizeit</option>
+                    <option value="Kitchen & Appliances">Küche</option>
+                    <option value="Bikes & Transport">Fahrrad & Transport</option>
+                    <option value="Music & Instruments">Musik</option>
+                    <option value="Others">Sonstiges</option>
+                </select>
+            </div>
+
+            <!-- Zustand -->
+            <div class="form-group" id="condition-group">
+                <label for="condition" id="label-condition">Zustand</label>
+                <select id="condition" required>
+                    <option value="" disabled selected>Bitte wählen</option>
+                    <option value="New">Neu</option>
+                    <option value="Like New">Wie neu</option>
+                    <option value="Good">Gut</option>
+                    <option value="Fair">Ok</option>
+                    <option value="Poor">Gebraucht</option>
+                </select>
+                <span class="helper-text hidden" id="condition-helper">Welcher Zustand ist für dich noch akzeptabel?</span>
+            </div>
+
+            <!-- Stadt -->
+            <div class="form-group">
+                <label for="city">Stadt</label>
+                <input type="text" id="city" required placeholder="Wo befindet sich der Artikel?" list="citySuggestions">
+                <datalist id="citySuggestions"></datalist>
+            </div>
+
+            <!-- Beschreibung -->
+            <div class="form-group">
+                <label for="description">Beschreibung</label>
+                <textarea id="description" rows="5" required placeholder="Beschreibe den Artikel genauer..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">Veröffentlichen</button>
+        </form>
+
+    </main>
+</div>
+
+<!-- Scripts -->
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
+<script src="room8-ui.js"></script>
+<script src="cities.js"></script>
+<script src="notificationHelpers.js"></script>
+
+<script>
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // 3. Stadt-Vorschläge laden
+    if (typeof populateCityDatalist === 'function') {
+        populateCityDatalist('citySuggestions');
+    }
+
+    // Variablen
+    var selectedFiles = [];
+    var currentMode = 'offer';
+    var editListingId = null;
+    var existingPhotos = [];
+
+    // URL Parameter checken (z.B. ?mode=search oder ?id=123)
+    var urlParams = new URLSearchParams(window.location.search);
+    var modeParam = urlParams.get('mode');
+    var idParam = urlParams.get('id');
+
+    if (idParam) {
+        editListingId = idParam;
+        loadListingForEdit(idParam);
+    } else if (modeParam) {
+        setMode(modeParam);
+    }
+
+    // Listing laden für Bearbeitung
+    async function loadListingForEdit(listingId) {
+        try {
+            var result = await sb.from('listings').select('*').eq('id', listingId).single();
+            if (result.error) throw result.error;
+
+            var listing = result.data;
+
+            // Titel anpassen
+            document.getElementById('pageTitle').textContent = 'Inserat bearbeiten';
+            document.getElementById('submitBtn').textContent = 'Änderungen speichern';
+
+            // Modus setzen
+            if (listing.listing_mode) {
+                setMode(listing.listing_mode);
+            }
+
+            // Felder füllen
+            document.getElementById('title').value = listing.title || '';
+            document.getElementById('price').value = listing.price || '';
+            document.getElementById('price_min').value = listing.price_range_min || '';
+            document.getElementById('price_max').value = listing.price_range_max || '';
+            document.getElementById('category').value = listing.category || '';
+            document.getElementById('condition').value = listing.condition || '';
+            document.getElementById('city').value = listing.city || '';
+            document.getElementById('description').value = listing.description || '';
+
+            // Existierende Bilder laden
+            var photosResult = await sb.from('listing_photos').select('*').eq('listing_id', listingId).order('display_order');
+            if (photosResult.data && photosResult.data.length > 0) {
+                existingPhotos = photosResult.data;
+                var grid = document.getElementById('previewGrid');
+
+                for (var i = 0; i < photosResult.data.length; i++) {
+                    var photo = photosResult.data[i];
+                    var publicUrl = sb.storage.from('listing-images').getPublicUrl(photo.storage_path).data.publicUrl;
+
+                    var div = document.createElement('div');
+                    div.className = 'preview-item';
+                    div.innerHTML = '<img src="' + publicUrl + '">';
+                    grid.appendChild(div);
+                }
+                updateCounter();
+            }
+
+        } catch (err) {
+            console.error('Fehler beim Laden:', err);
+            Room8UI.error('Fehler beim Laden des Inserats: ' + err.message);
+        }
+    }
+
+    function setMode(mode) {
+        currentMode = mode;
+        // UI Umschalten
+        document.getElementById('mode-offer').className = mode === 'offer' ? 'mode-option active' : 'mode-option';
+        document.getElementById('mode-search').className = mode === 'search' ? 'mode-option active' : 'mode-option';
+
+        var pageTitle = document.getElementById('pageTitle');
+        var submitBtn = document.getElementById('submitBtn');
+        var priceGroup = document.getElementById('price-group');
+        var priceRangeGroup = document.getElementById('price-range-group');
+        var priceInput = document.getElementById('price');
+        var imageSection = document.getElementById('imageSection');
+        var conditionSelect = document.getElementById('condition');
+        var conditionLabel = document.getElementById('label-condition');
+        var conditionHelper = document.getElementById('condition-helper');
+        var categoryLabel = document.getElementById('label-category');
+        var titleInput = document.getElementById('title');
+        var cityInput = document.getElementById('city');
+        var descInput = document.getElementById('description');
+
+        if (mode === 'search') {
+            pageTitle.textContent = 'Gesuch aufgeben';
+            submitBtn.textContent = 'Gesuch veröffentlichen';
+            priceGroup.classList.add('hidden');
+            priceRangeGroup.classList.remove('hidden');
+            priceInput.required = false;
+            imageSection.classList.add('hidden');
+            conditionSelect.required = false;
+
+            // Labels für Gesuch anpassen
+            conditionLabel.textContent = 'Mindest-Zustand';
+            conditionHelper.classList.remove('hidden');
+            categoryLabel.textContent = 'In welcher Kategorie?';
+
+            // Placeholders für Gesuch anpassen
+            titleInput.placeholder = 'Was suchst du?';
+            cityInput.placeholder = 'Wo suchst du?';
+            descInput.placeholder = 'Beschreibe genauer was du suchst...';
+        } else {
+            pageTitle.textContent = 'Verkaufen';
+            submitBtn.textContent = 'Veröffentlichen';
+            priceGroup.classList.remove('hidden');
+            priceRangeGroup.classList.add('hidden');
+            priceInput.required = true;
+            imageSection.classList.remove('hidden');
+            conditionSelect.required = true;
+
+            // Labels für Angebot
+            conditionLabel.textContent = 'Zustand';
+            conditionHelper.classList.add('hidden');
+            categoryLabel.textContent = 'Kategorie';
+
+            // Placeholders für Angebot
+            titleInput.placeholder = 'Was möchtest du anbieten?';
+            cityInput.placeholder = 'Wo befindet sich der Artikel?';
+            descInput.placeholder = 'Beschreibe den Artikel genauer...';
+        }
+    }
+
+    // Datei Handling
+    function handleFiles(files) {
+        var grid = document.getElementById('previewGrid');
+        
+        for (var i = 0; i < files.length; i++) {
+            if (selectedFiles.length >= 5) break; // Max 5
+            
+            var file = files[i];
+            selectedFiles.push(file);
+
+            // Vorschau Element bauen
+            var div = document.createElement('div');
+            div.className = 'preview-item';
+            
+            var img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            
+            var btn = document.createElement('button');
+            btn.className = 'remove-btn';
+            btn.innerHTML = '×';
+            // Wir nutzen Closure, um den Index zu merken
+            btn.onclick = (function(index, element) {
+                return function(e) { 
+                    e.preventDefault(); 
+                    removeFile(index, element); 
+                };
+            })(selectedFiles.length - 1, div);
+
+            div.appendChild(img);
+            div.appendChild(btn);
+            grid.appendChild(div);
+        }
+        updateCounter();
+    }
+
+    function removeFile(index, element) {
+        element.remove();
+        selectedFiles[index] = null; // Als gelöscht markieren
+        updateCounter();
+    }
+
+    function updateCounter() {
+        var activeCount = selectedFiles.filter(f => f !== null).length + existingPhotos.length;
+        document.getElementById('photoCounter').textContent = activeCount + ' / 5 Fotos';
+
+        // Upload Button ausblenden wenn voll
+        var uploadArea = document.querySelector('.upload-area');
+        if (activeCount >= 5) {
+            uploadArea.style.display = 'none';
+        } else {
+            uploadArea.style.display = 'block';
+        }
+    }
+
+    // Formular Absenden
+    document.getElementById('createForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        var btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        var originalText = btn.textContent;
+        btn.textContent = "Wird gespeichert...";
+
+        try {
+            // 1. Auth Check
+            var { data: { user } } = await sb.auth.getUser();
+            if (!user) {
+                Room8UI.warning("Bitte erst einloggen.");
+                setTimeout(function() { window.location.href = 'login.html'; }, 1500);
+                return;
+            }
+
+            // 2. Daten sammeln
+            var title = document.getElementById('title').value;
+            var category = document.getElementById('category').value;
+            var condition = document.getElementById('condition').value;
+            var city = document.getElementById('city').value;
+            var description = document.getElementById('description').value;
+            
+            var price = null;
+            var priceMin = null;
+            var priceMax = null;
+
+            if (currentMode === 'offer') {
+                price = document.getElementById('price').value;
+            } else {
+                priceMin = document.getElementById('price_min').value || null;
+                priceMax = document.getElementById('price_max').value || null;
+            }
+
+            // 3. Listing in DB erstellen oder aktualisieren
+            var listingData = {
+                type: 'gegenstand',
+                title: title,
+                price: price,
+                price_range_min: priceMin,
+                price_range_max: priceMax,
+                category: category,
+                condition: condition,
+                city: city,
+                description: description,
+                listing_mode: currentMode,
+                is_active: true
+            };
+
+            var listing;
+            if (editListingId) {
+                // UPDATE
+                var updateResult = await sb.from('listings').update(listingData).eq('id', editListingId).select().single();
+                if (updateResult.error) throw updateResult.error;
+                listing = updateResult.data;
+            } else {
+                // INSERT
+                listingData.owner_id = user.id;
+                var insertResult = await sb.from('listings').insert(listingData).select().single();
+                if (insertResult.error) throw insertResult.error;
+                listing = insertResult.data;
+            }
+
+            // 4. Bilder hochladen (nur neue)
+            var activeFiles = selectedFiles.filter(f => f !== null);
+
+            if (activeFiles.length > 0) {
+                btn.textContent = "Lade Bilder hoch...";
+                var startIndex = existingPhotos.length;
+
+                for (var i = 0; i < activeFiles.length; i++) {
+                    var file = activeFiles[i];
+                    var fileExt = file.name.split('.').pop();
+                    var fileName = `${listing.id}_${startIndex + i}.${fileExt}`;
+
+                    var uploadResult = await sb.storage.from('listing-images').upload(fileName, file);
+
+                    if (uploadResult.error) {
+                        console.error("Bild Upload Fehler:", uploadResult.error);
+                    } else {
+                        await sb.from('listing_photos').insert({
+                            listing_id: listing.id,
+                            storage_path: fileName,
+                            display_order: startIndex + i
+                        });
+                    }
+                }
+            }
+
+            // Erfolg!
+            Room8UI.success(editListingId ? "Änderungen gespeichert!" : "Erfolgreich erstellt!");
+
+            // Suchaufträge-Treffer: Prüfe ob das neue Inserat zu gespeicherten Suchen passt
+            if (!editListingId && listing.city && window.NotificationHelpers) {
+                try {
+                    var searchQuery = sb
+                        .from('saved_searches')
+                        .select('*')
+                        .eq('search_type', 'gegenstand')
+                        .eq('is_active', true)
+                        .ilike('city', listing.city)
+                        .neq('user_id', user.id);
+
+                    var searchRes = await searchQuery;
+
+                    if (searchRes.data && searchRes.data.length > 0) {
+                        var notifiedUsers = {};
+                        for (var s of searchRes.data) {
+                            if (notifiedUsers[s.user_id]) continue;
+
+                            // Preis-Check (wenn gesetzt)
+                            if (s.min_price && listing.price && listing.price < s.min_price) continue;
+                            if (s.max_price && listing.price && listing.price > s.max_price) continue;
+
+                            // Kategorie-Check (wenn gesetzt)
+                            if (s.category && listing.category && s.category !== listing.category) continue;
+
+                            // Einstellung prüfen
+                            var sSettingsRes = await sb
+                                .from('notification_settings')
+                                .select('saved_search_match')
+                                .eq('user_id', s.user_id)
+                                .single();
+
+                            var sNotify = !sSettingsRes.data || sSettingsRes.data.saved_search_match !== false;
+
+                            if (sNotify) {
+                                await NotificationHelpers.createNotification(
+                                    s.user_id,
+                                    'saved_search_match',
+                                    '\uD83D\uDD14 Neuer Treffer f\u00FCr deine Suche',
+                                    listing.title + ' in ' + listing.city,
+                                    'listing-details.html?id=' + listing.id,
+                                    listing.id
+                                );
+                                notifiedUsers[s.user_id] = true;
+                            }
+                        }
+                    }
+                } catch (searchErr) {
+                    console.log('Saved search notification error:', searchErr);
+                }
+            }
+
+            setTimeout(function() { window.location.href = "gegenstaende.html"; }, 1500);
+
+        } catch (err) {
+            console.error(err);
+            Room8UI.error("Fehler: " + err.message);
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+    });
+</script>
+<script src="notificationBell.js"></script>
+</body>
+</html>
