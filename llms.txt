@@ -1,0 +1,25 @@
+# Room8
+
+> Die exklusive Plattform von Studenten, fuer Studenten. Dein Campus. Dein Deal.
+
+Room8 ist eine App fuer Studenten in Deutschland. Sie verbindet Studierende fuer WG-Suche, Gegenstaende-Marktplatz, Jobs und Campus-Coupons.
+
+## Funktionen
+
+- WG-Suche: Wohnungen und Zimmer finden oder inserieren
+- Marktplatz: Gebrauchte Gegenstaende kaufen und verkaufen
+- Jobs: Studentenjobs und Werkstudentenstellen
+- Coupons: Rabatte bei lokalen Partnern
+- Chat: Direktnachrichten zwischen Nutzern
+- Verifizierung: Nur echte Studenten mit Uni-Mail
+
+## Verfuegbar auf
+
+- Web: https://room8.club
+- Android: Google Play Store
+- iOS: Apple App Store (geplant)
+
+## Kontakt
+
+- Website: https://room8.club
+- E-Mail: yusuf@yumita.net

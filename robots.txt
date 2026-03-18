@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard.html
+Disallow: /chat.html
+Disallow: /nachrichten.html
+Disallow: /settings.html
+Disallow: /profile.html
+Disallow: /admin.html
+Disallow: /upload.html
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+Sitemap: https://room8.club/sitemap.xml
