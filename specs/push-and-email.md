@@ -89,6 +89,32 @@ await logNotification(supabase, {
 
 **Admin-UI:** `admin.html` → Tab "📡 Push Health" zeigt 24h/7d/30d-Stats + Top-Fehler + letzte 50 Sends.
 
+### 4b. Sentry Capture in Edge Functions (PFLICHT)
+
+Bei `fcm_error`, `resend_failed`, `exception` ZUSAETZLICH zur DB-Log-Zeile auch nach Sentry capturen via:
+
+```ts
+import { captureException } from "../_shared/sentry.ts"
+
+captureException(err, {
+  function: 'send-push',          // Tag
+  user_id: userId,                 // Sentry user.id (DSGVO: keine email)
+  tags: { channel: 'push', status: 'fcm_error', error_code: '...' },
+  extra: { http_status, fcm_response },
+}).catch(() => {})
+```
+
+**Best-effort:** `.catch(() => {})` damit Sentry-Outage den Send-Pfad nie blockt.
+
+**Setup:**
+- Supabase Secret `SENTRY_DSN` muss gesetzt sein (`npx supabase secrets set SENTRY_DSN=...`)
+- Optional `SENTRY_ENV` (default `production`)
+- Helper liegt unter `supabase/functions/_shared/sentry.ts`
+- KEIN npm-Dependency — direkter POST an Sentry-Envelope-Endpoint
+- PII-Filter via `scrubPII()` strippt Email/Bearer/access_token/refresh_token aus Strings
+
+**Sentry-Project:** `room8-web` @ `yumita.sentry.io` (DE-Region)
+
 ### 5. notifications-Tabelle für In-App
 
 ```sql
@@ -139,5 +165,7 @@ UPDATE events SET status='cancelled' WHERE id=<test-id>;
 | `LEFT(title, 40) + '...'` Title-Truncate | FCM iOS bricht bei ~50 Zeichen ab |
 | `Europe/Berlin` Timezone in `to_char` | Deutsche User wollen lokale Zeit |
 | `logNotification()` try/catch in Edge Functions | Logging darf Send nicht blockieren |
+| `captureException(...).catch(() => {})` Pattern | Sentry-Outage darf Send nicht blockieren |
+| `_shared/sentry.ts` PII-Scrubber `scrubPII()` | DSGVO — Email/Tokens niemals an Sentry leaken |
 | CHECK-Constraint `notification_logs.status IN (...)` | Frontend-Badges + Filter erwarten exakt diese Werte |
 | `get_notification_health` als `security definer` + Admin-Check | RPC ist `to authenticated` granted, ohne Check könnte jeder User Stats lesen |

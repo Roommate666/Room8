@@ -9,6 +9,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.47.14"
+import { captureException } from "../_shared/sentry.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -144,6 +145,16 @@ serve(async (req) => {
         title: subject,
         metadata: { to, http_status: resendRes.status },
       })
+      captureException(resendData.message || 'Resend non-2xx', {
+        function: 'send-email',
+        user_id: userId,
+        tags: {
+          channel: 'email',
+          status: 'resend_failed',
+          error_code: resendData.name || String(resendRes.status),
+        },
+        extra: { http_status: resendRes.status, resend_response: resendData },
+      }).catch(() => {})
       return new Response(
         JSON.stringify({ success: false, error: resendData.message || 'resend_failed', details: resendData }),
         { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
@@ -171,6 +182,11 @@ serve(async (req) => {
       title: subject,
       metadata: { to },
     })
+    captureException(error as Error, {
+      function: 'send-email',
+      user_id: userId,
+      tags: { channel: 'email', status: 'exception' },
+    }).catch(() => {})
     return new Response(
       JSON.stringify({ success: false, error: (error as Error).message || 'unknown' }),
       { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }

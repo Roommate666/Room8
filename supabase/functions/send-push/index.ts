@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.47.14"
+import { captureException } from "../_shared/sentry.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -211,6 +212,13 @@ serve(async (req) => {
         title,
         metadata: { http_status: fcmRes.status, data: dataPayload },
       })
+      // Sentry capture (best-effort, non-blocking)
+      captureException(fcmResult.error?.message || 'FCM non-2xx', {
+        function: 'send-push',
+        user_id: userId,
+        tags: { channel: 'push', status: 'fcm_error', error_code: String(errCode) },
+        extra: { http_status: fcmRes.status, fcm_response: fcmResult },
+      }).catch(() => {})
       return new Response(
         JSON.stringify({ success: false, error: fcmResult.error?.message || 'FCM error' }),
         { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
@@ -238,6 +246,11 @@ serve(async (req) => {
       error_msg: (error as Error).message,
       title,
     })
+    captureException(error as Error, {
+      function: 'send-push',
+      user_id: userId,
+      tags: { channel: 'push', status: 'exception' },
+    }).catch(() => {})
     return new Response(
       JSON.stringify({ success: false, error: (error as Error).message }),
       { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
