@@ -81,6 +81,9 @@ check "navigation.js: events nav-tab"               "$BASE/navigation.js"     "a
 check "admin.html: Antraege-Tab"                    "$BASE/admin.html"        "tab-eventrequests"
 check "admin.html: Events-Tab"                      "$BASE/admin.html"        "tab-events"
 check "admin.html: toggleEventCreator"              "$BASE/admin.html"        "toggleEventCreator"
+check "admin.html: Push-Health Tab"                 "$BASE/admin.html"        "tab-pushhealth"
+check "admin.html: loadPushHealth Fn"               "$BASE/admin.html"        "window.loadPushHealth"
+check "admin.html: get_notification_health RPC"     "$BASE/admin.html"        "get_notification_health"
 check "index.html: splashVideo"                     "$BASE/index.html"        "splashVideo"
 
 echo ""

@@ -16,6 +16,7 @@
 | `supabase/migrations/20260219031000_chat_push_trigger.sql` | Pattern-Vorlage für Chat-Push |
 | `supabase/migrations/20260428000003_event_push_notifications.sql` | Event-Push Trigger |
 | `supabase/migrations/20260428000012_email_notifications.sql` | Email-Helper + Override Functions |
+| `supabase/migrations/20260428000013_notification_logs.sql` | Health-Logging-Tabelle + Health-RPCs + Cleanup-Cron |
 
 ## Required Secrets in Supabase
 
@@ -59,7 +60,36 @@ PERFORM net.http_post(
 
 Im EXCEPTION-Block fangen, nicht propagieren — sonst bricht der ganze DB-Trigger ab und User-Action fühlt sich kaputt an.
 
-### 4. notifications-Tabelle für In-App
+### 4. Logging in `notification_logs` (PFLICHT)
+
+Beide Edge Functions (`send-push`, `send-email`) MÜSSEN nach jedem Versuch eine Zeile in `public.notification_logs` schreiben — auch im Fehlerfall.
+
+```ts
+await logNotification(supabase, {
+  user_id, status, error_code, error_msg, provider_id, title, metadata
+})
+```
+
+**Status-Werte (CHECK Constraint):**
+- `success` — Send erfolgreich
+- `no_token` — User hat keinen FCM-Token (push-only)
+- `invalid_email` — Recipient failed Regex (email-only)
+- `fcm_error` — FCM API gab non-2xx zurück
+- `resend_failed` — Resend API gab non-2xx zurück
+- `exception` — Try-Catch Fallback
+
+**Best-effort:** Insert-Fehler werden geschluckt (`try/catch` in `logNotification`). Logging darf den Send-Pfad nie blockieren.
+
+**Health-RPCs für Admin:**
+- `get_notification_health(hours int)` → channel × success-rate
+- `get_notification_failures(hours int)` → top fail-reasons
+- Beide `security definer`, prüfen `profiles.is_admin = true`
+
+**Cleanup:** pg_cron `cleanup-notification-logs` läuft nightly um 3 Uhr UTC, löscht Logs > 30 Tage.
+
+**Admin-UI:** `admin.html` → Tab "📡 Push Health" zeigt 24h/7d/30d-Stats + Top-Fehler + letzte 50 Sends.
+
+### 5. notifications-Tabelle für In-App
 
 ```sql
 INSERT INTO public.notifications (user_id, type, title, message, link, is_read)
@@ -108,3 +138,6 @@ UPDATE events SET status='cancelled' WHERE id=<test-id>;
 | `NEW.organizer_id IS NULL OR user_id != NEW.organizer_id` Filter | Organizer soll keine Push für eigenes Event |
 | `LEFT(title, 40) + '...'` Title-Truncate | FCM iOS bricht bei ~50 Zeichen ab |
 | `Europe/Berlin` Timezone in `to_char` | Deutsche User wollen lokale Zeit |
+| `logNotification()` try/catch in Edge Functions | Logging darf Send nicht blockieren |
+| CHECK-Constraint `notification_logs.status IN (...)` | Frontend-Badges + Filter erwarten exakt diese Werte |
+| `get_notification_health` als `security definer` + Admin-Check | RPC ist `to authenticated` granted, ohne Check könnte jeder User Stats lesen |

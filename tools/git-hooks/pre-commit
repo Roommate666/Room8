@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# Room8 Pre-Commit Hook
+# Verhindert Commits mit:
+# 1. Echten Umlauten in JS/TS/Python/CSS Code-Files (User-Regel: nur ae/oe/ue/ss)
+# 2. Sync-Drift zwischen root *.html und www/*.html (CLAUDE.md Pflicht)
+#
+# UI-Texte (HTML-Content) und MD-Files sind ausgenommen.
+# Bypass mit `git commit --no-verify` (nur in Notfall).
+
+set -e
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+ROOT="$(git rev-parse --show-toplevel)"
+STAGED=$(git diff --cached --name-only --diff-filter=ACM)
+FAIL=0
+
+if [ -z "$STAGED" ]; then
+    exit 0
+fi
+
+# ============================================
+# 1. Umlaut-Check in Code-Files (NICHT in HTML/MD)
+# ============================================
+CODE_FILES=$(echo "$STAGED" | grep -E '\.(js|ts|tsx|jsx|py|sh|css|json)$' || true)
+if [ -n "$CODE_FILES" ]; then
+    while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        [ ! -f "$ROOT/$file" ] && continue
+        # nur HINZUGEFUEGTE Zeilen (+) pruefen, nicht entfernte (-)
+        OFFENDERS=$(git diff --cached "$file" | grep -E '^\+' | grep -E '[äöüÄÖÜß]' || true)
+        if [ -n "$OFFENDERS" ]; then
+            echo -e "${RED}FAIL${NC} Umlaut in Code-File: $file"
+            echo "$OFFENDERS" | head -3 | sed 's/^/      /'
+            FAIL=1
+        fi
+    done <<< "$CODE_FILES"
+fi
+
+# ============================================
+# 2. Sync-Drift zwischen Root und www/
+# ============================================
+ROOT_HTML=$(echo "$STAGED" | grep -E '^[^/]+\.html$' || true)
+if [ -n "$ROOT_HTML" ]; then
+    while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        WWW_FILE="www/$file"
+        if [ -f "$ROOT/$WWW_FILE" ]; then
+            if ! diff -q "$ROOT/$file" "$ROOT/$WWW_FILE" > /dev/null 2>&1; then
+                echo -e "${YELLOW}WARN${NC} $file und www/$file unterscheiden sich!"
+                echo -e "      Sync mit: ${GREEN}cp $file www/$file${NC}"
+                FAIL=1
+            fi
+        fi
+    done <<< "$ROOT_HTML"
+fi
+
+# ============================================
+# Resultat
+# ============================================
+if [ "$FAIL" -eq 1 ]; then
+    echo ""
+    echo -e "${RED}Pre-Commit blockiert.${NC} Bypass mit ${YELLOW}--no-verify${NC} (nicht empfohlen)."
+    exit 1
+fi
+
+echo -e "${GREEN}Pre-Commit OK${NC}"

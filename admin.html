@@ -305,6 +305,9 @@
         <button class="admin-tab" onclick="switchTab('messages')">
             📬 Kontakt <span class="tab-badge" id="badgeMessages" style="display:none">0</span>
         </button>
+        <button class="admin-tab" onclick="switchTab('pushhealth')">
+            📡 Push Health
+        </button>
     </div>
 
     <!-- 1. REPORTS SECTION -->
@@ -436,6 +439,27 @@
         </div>
         <div id="messagesList" class="data-list">
             <div class="loading-state">Lade Nachrichten...</div>
+        </div>
+    </div>
+
+    <!-- 8. PUSH HEALTH SECTION -->
+    <div id="tab-pushhealth" class="admin-section">
+        <div style="margin-bottom:1rem; display:flex; gap:0.5rem; flex-wrap: wrap; align-items:center;">
+            <button class="filter-btn active" onclick="filterPushHealth(24, this)">Letzte 24h</button>
+            <button class="filter-btn" onclick="filterPushHealth(168, this)">Letzte 7 Tage</button>
+            <button class="filter-btn" onclick="filterPushHealth(720, this)">Letzte 30 Tage</button>
+            <button onclick="loadPushHealth(currentPushHealthHours)" style="margin-left:auto; padding:0.5rem 0.875rem; background:#0EA5E9; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">🔄 Refresh</button>
+        </div>
+        <div id="pushHealthSummary" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:0.75rem; margin-bottom:1.25rem;">
+            <div class="loading-state">Lade Health-Stats...</div>
+        </div>
+        <h3 style="margin: 1rem 0 0.5rem; font-size: 1rem; color:#374151;">Top-Fehlergruende</h3>
+        <div id="pushHealthFailures" class="data-list">
+            <div class="loading-state">Lade Fehler...</div>
+        </div>
+        <h3 style="margin: 1.5rem 0 0.5rem; font-size: 1rem; color:#374151;">Letzte 50 Sends</h3>
+        <div id="pushHealthRecent" class="data-list">
+            <div class="loading-state">Lade Logs...</div>
         </div>
     </div>
 
@@ -1725,6 +1749,7 @@
         // Lazy-Load Events wenn Tab geoeffnet
         if (tab === 'events') loadEventsAdmin('reported');
         if (tab === 'eventrequests') loadEventRequests('pending');
+        if (tab === 'pushhealth') loadPushHealth(currentPushHealthHours);
     }
 
     // ============================================
@@ -1956,6 +1981,143 @@
         await sb.from('event_reports').delete().eq('event_id', eventId);
         if (window.Room8) Room8.showToast('Reports geloescht', 'success');
         loadEventsAdmin(currentEventFilter);
+    };
+
+    // ============================================
+    // PUSH HEALTH (notification_logs Monitoring)
+    // ============================================
+    var currentPushHealthHours = 24;
+
+    window.filterPushHealth = (hours, btn) => {
+        currentPushHealthHours = hours;
+        document.querySelectorAll('#tab-pushhealth .filter-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        loadPushHealth(hours);
+    };
+
+    function escapeHtml(str) {
+        if (str == null) return '';
+        return String(str)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function statusBadge(status) {
+        const map = {
+            success:        { color: '#10B981', bg: '#D1FAE5', label: '✅ success' },
+            no_token:       { color: '#6B7280', bg: '#F3F4F6', label: '⚪ no_token' },
+            invalid_email:  { color: '#F59E0B', bg: '#FEF3C7', label: '⚠️ invalid_email' },
+            fcm_error:      { color: '#EF4444', bg: '#FEE2E2', label: '🔴 fcm_error' },
+            resend_failed:  { color: '#EF4444', bg: '#FEE2E2', label: '🔴 resend_failed' },
+            exception:      { color: '#7C2D12', bg: '#FEE2E2', label: '💥 exception' }
+        };
+        const s = map[status] || { color:'#374151', bg:'#F3F4F6', label: status };
+        return `<span style="display:inline-block; padding:2px 8px; border-radius:6px; background:${s.bg}; color:${s.color}; font-size:0.8rem; font-weight:600;">${escapeHtml(s.label)}</span>`;
+    }
+
+    function channelIcon(ch) {
+        return ch === 'push' ? '📱' : ch === 'email' ? '📧' : '❔';
+    }
+
+    function fmtTime(iso) {
+        try { return new Date(iso).toLocaleString('de-DE', { hour12: false }); }
+        catch (e) { return iso; }
+    }
+
+    window.loadPushHealth = async (hours) => {
+        const summaryEl  = document.getElementById('pushHealthSummary');
+        const failuresEl = document.getElementById('pushHealthFailures');
+        const recentEl   = document.getElementById('pushHealthRecent');
+
+        summaryEl.innerHTML  = '<div class="loading-state">Lade Health-Stats...</div>';
+        failuresEl.innerHTML = '<div class="loading-state">Lade Fehler...</div>';
+        recentEl.innerHTML   = '<div class="loading-state">Lade Logs...</div>';
+
+        // 1. Health-Summary via RPC
+        const { data: health, error: healthErr } = await sb.rpc('get_notification_health', { hours });
+        if (healthErr) {
+            summaryEl.innerHTML = `<div class="empty-state">Fehler: ${escapeHtml(healthErr.message)}</div>`;
+        } else if (!health || health.length === 0) {
+            summaryEl.innerHTML = `<div class="empty-state">Keine Sends in den letzten ${hours}h</div>`;
+        } else {
+            const cards = ['push', 'email'].map(ch => {
+                const row = health.find(r => r.channel === ch);
+                if (!row) {
+                    return `<div style="padding:1rem; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:12px;">
+                        <div style="font-size:0.85rem; color:#6B7280; margin-bottom:0.5rem;">${channelIcon(ch)} ${ch.toUpperCase()}</div>
+                        <div style="font-size:1.5rem; font-weight:700; color:#9CA3AF;">— keine Sends —</div>
+                    </div>`;
+                }
+                const rate = parseFloat(row.success_rate || 0);
+                const rateColor = rate >= 95 ? '#10B981' : rate >= 80 ? '#F59E0B' : '#EF4444';
+                return `<div style="padding:1rem; background:white; border:1px solid #E5E7EB; border-radius:12px;">
+                    <div style="font-size:0.85rem; color:#6B7280; margin-bottom:0.5rem;">${channelIcon(ch)} ${ch.toUpperCase()}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; gap:0.5rem;">
+                        <div>
+                            <div style="font-size:1.75rem; font-weight:700; color:${rateColor};">${rate}%</div>
+                            <div style="font-size:0.8rem; color:#6B7280;">Success-Rate</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:0.95rem; font-weight:600; color:#111827;">${row.success} / ${row.total}</div>
+                            <div style="font-size:0.8rem; color:#EF4444;">${row.failed} fehlgeschlagen</div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            summaryEl.innerHTML = cards;
+        }
+
+        // 2. Top-Fehlergruende via RPC
+        const { data: failures, error: failErr } = await sb.rpc('get_notification_failures', { hours });
+        if (failErr) {
+            failuresEl.innerHTML = `<div class="empty-state">Fehler: ${escapeHtml(failErr.message)}</div>`;
+        } else if (!failures || failures.length === 0) {
+            failuresEl.innerHTML = `<div class="empty-state" style="color:#10B981;">✅ Keine Fehler in den letzten ${hours}h</div>`;
+        } else {
+            failuresEl.innerHTML = failures.map(f => `
+                <div style="padding:0.875rem 1rem; background:white; border:1px solid #E5E7EB; border-left:4px solid #EF4444; border-radius:8px; margin-bottom:0.5rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <span>${channelIcon(f.channel)}</span>
+                            ${statusBadge(f.status)}
+                            ${f.error_code ? `<code style="background:#F3F4F6; padding:2px 6px; border-radius:4px; font-size:0.8rem;">${escapeHtml(f.error_code)}</code>` : ''}
+                        </div>
+                        <div style="font-weight:700; color:#EF4444;">${f.cnt}x</div>
+                    </div>
+                    ${f.last_msg ? `<div style="margin-top:0.5rem; font-size:0.85rem; color:#6B7280; word-break:break-word;">${escapeHtml(f.last_msg)}</div>` : ''}
+                    <div style="margin-top:0.25rem; font-size:0.75rem; color:#9CA3AF;">Zuletzt: ${fmtTime(f.last_seen)}</div>
+                </div>
+            `).join('');
+        }
+
+        // 3. Letzte 50 Sends (direkt aus notification_logs)
+        const sinceIso = new Date(Date.now() - hours * 3600 * 1000).toISOString();
+        const { data: recent, error: recentErr } = await sb
+            .from('notification_logs')
+            .select('id, channel, status, error_code, error_msg, title, created_at, user_id')
+            .gte('created_at', sinceIso)
+            .order('created_at', { ascending: false })
+            .limit(50);
+
+        if (recentErr) {
+            recentEl.innerHTML = `<div class="empty-state">Fehler: ${escapeHtml(recentErr.message)}</div>`;
+        } else if (!recent || recent.length === 0) {
+            recentEl.innerHTML = `<div class="empty-state">Keine Logs in den letzten ${hours}h</div>`;
+        } else {
+            recentEl.innerHTML = recent.map(r => `
+                <div style="padding:0.625rem 0.875rem; background:white; border:1px solid #E5E7EB; border-radius:8px; margin-bottom:0.375rem; font-size:0.875rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <span>${channelIcon(r.channel)}</span>
+                            ${statusBadge(r.status)}
+                            ${r.title ? `<span style="color:#374151; font-weight:500;">${escapeHtml(r.title)}</span>` : ''}
+                        </div>
+                        <div style="font-size:0.75rem; color:#9CA3AF;">${fmtTime(r.created_at)}</div>
+                    </div>
+                    ${r.error_msg ? `<div style="margin-top:0.25rem; font-size:0.78rem; color:#EF4444; word-break:break-word;">${escapeHtml(r.error_msg)}</div>` : ''}
+                </div>
+            `).join('');
+        }
     };
 
     checkAdmin();

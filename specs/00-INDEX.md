@@ -14,7 +14,7 @@
 | Auth + Verifizierung | [auth-and-verify.md](auth-and-verify.md) | login.html, register.html, verify-options.html, verify-uni-email.html |
 | Events-System | [events-system.md](events-system.md) | events.html, event-detail.html, event-create.html, supabase/migrations/2026042800000{0,1,2,3,4,5,7}*.sql |
 | Permission-System | [permissions-system.md](permissions-system.md) | profiles.can_create_events Spalte, supabase/migrations/2026042800000{8,9,10,11}*.sql |
-| Push + Email | [push-and-email.md](push-and-email.md) | supabase/functions/send-push, send-email, notify_event_change, send_user_email |
+| Push + Email | [push-and-email.md](push-and-email.md) | supabase/functions/send-push, send-email, notify_event_change, send_user_email, notification_logs (Health-Monitoring) |
 | Image-Pipeline | [image-pipeline.md](image-pipeline.md) | room8-utils.js (compressImage, getOptimizedImageUrl), sw.js |
 
 ## Wann eine NEUE Spec schreiben

@@ -18,6 +18,13 @@ Uebersicht: `specs/00-INDEX.md` — IMMER zuerst lesen wenn Aenderungen geplant 
 
 **Smoke-Tests:** Nach Deploy: `bash tests/smoke.sh` — bricht bei Regression sofort ab.
 
+**CI-Watchdogs (GitHub Actions):**
+- `.github/workflows/smoke.yml` — laeuft alle 6h gegen Live, bei push auf main
+- `.github/workflows/health-check.yml` — taeglich 6 Uhr UTC, prueft notification_logs Success-Rate (>= 90%)
+- Setup: `SUPABASE_SERVICE_ROLE_KEY` als Repo-Secret hinterlegen
+
+**Git-Hooks:** Lokal aktivieren mit `bash tools/install-hooks.sh` (pre-commit blockt Umlaute in Code + Sync-Drift root↔www).
+
 ## Sprache & Arbeitsweise
 - Auf Deutsch antworten, Code-Kommentare Deutsch (ae/oe/ue statt Umlaute)
 - Kein Framework - reines HTML/CSS/JS mit Capacitor

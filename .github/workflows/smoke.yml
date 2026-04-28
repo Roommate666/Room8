@@ -1,0 +1,31 @@
+name: Smoke Tests
+
+# Watchdog gegen room8.club LIVE.
+# Laeuft bei push auf main (Post-Deploy-Sanity) und stuendlich per Cron.
+# Failt der Job, ist auf der Live-Seite eine Regression.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # alle 6h: 0 6 12 18 Uhr UTC
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    name: room8.club Live Smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run smoke.sh
+        run: bash tests/smoke.sh
+
+      - name: Summary on failure
+        if: failure()
+        run: |
+          echo "::error title=Smoke Tests Failed::room8.club hat Regression(en). Pruefe Vercel Deploy + DB Migrations."

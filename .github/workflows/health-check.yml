@@ -1,0 +1,102 @@
+name: Push/Email Health Check
+
+# Taeglicher Health-Watch fuer notification_logs.
+# Failt wenn Success-Rate < SUCCESS_THRESHOLD oder Edge Functions im Sterben sind.
+# Reads via Supabase REST + service_role_key (Repo-Secret).
+
+on:
+  schedule:
+    # taeglich 8 Uhr lokal Berlin = 6 Uhr UTC im Sommer / 7 Uhr UTC im Winter
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      hours:
+        description: 'Stundenfenster (default 24)'
+        required: false
+        default: '24'
+
+env:
+  SUPABASE_URL: 'https://tvnvmogaqmduzcycmvby.supabase.co'
+  SUCCESS_THRESHOLD: 90  # Prozent — drunter failt der Job
+
+jobs:
+  health:
+    name: notification_logs 24h Health
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Sanity check secret
+        run: |
+          if [ -z "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" ]; then
+            echo "::error::SUPABASE_SERVICE_ROLE_KEY secret fehlt im Repo. Settings -> Secrets -> Actions"
+            exit 1
+          fi
+
+      - name: Query get_notification_health RPC
+        id: health
+        env:
+          SRK: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          HOURS: ${{ github.event.inputs.hours || '24' }}
+        run: |
+          set -euo pipefail
+          # Service-Role-Key bypassed RLS und kann RPC-Function direkt aufrufen.
+          # Wir muessen aber auth.uid() faken, da get_notification_health is_admin checkt.
+          # Trick: SRK macht Queries als 'service_role' — wir nutzen direkten Tabellen-Select stattdessen.
+
+          curl -sf -X POST "$SUPABASE_URL/rest/v1/rpc/get_notification_health" \
+            -H "apikey: $SRK" \
+            -H "Authorization: Bearer $SRK" \
+            -H "Content-Type: application/json" \
+            -d "{\"hours\": $HOURS}" \
+            -o health.json || true
+
+          # Fallback: direkt aus Tabelle aggregieren (SRK bypasst RLS)
+          curl -sf "$SUPABASE_URL/rest/v1/notification_logs?select=channel,status&created_at=gte.$(date -u -d "-${HOURS} hours" +%Y-%m-%dT%H:%M:%SZ)" \
+            -H "apikey: $SRK" \
+            -H "Authorization: Bearer $SRK" \
+            -o raw.json
+
+          echo "raw_count=$(jq length raw.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Aggregate + Threshold-Check
+        env:
+          THRESHOLD: ${{ env.SUCCESS_THRESHOLD }}
+        run: |
+          set -euo pipefail
+          TOTAL=$(jq 'length' raw.json)
+          echo "Total Sends: $TOTAL"
+
+          if [ "$TOTAL" -eq 0 ]; then
+            echo "::warning::Keine Sends in den letzten 24h. Entweder ist alles ruhig oder Pipeline ist tot."
+            exit 0
+          fi
+
+          # Pro Channel aggregieren
+          jq -r 'group_by(.channel)[] |
+            { channel: .[0].channel,
+              total: length,
+              success: ([.[] | select(.status=="success")] | length) }
+            | "\(.channel)\t\(.success)/\(.total)\t\((.success * 100 / .total) | floor)%"' raw.json
+
+          # Fail-Check
+          FAIL=0
+          while IFS=$'\t' read -r channel _ rate; do
+            num=${rate%\%}
+            if [ "$num" -lt "$THRESHOLD" ]; then
+              echo "::error title=$channel below threshold::$channel Success-Rate $rate (Threshold ${THRESHOLD}%)"
+              FAIL=1
+            fi
+          done < <(jq -r 'group_by(.channel)[] |
+            "\(.[0].channel)\t\(length)\t\(([.[] | select(.status=="success")] | length * 100 / length | floor)%)"' raw.json)
+
+          # Top-Fails listen
+          echo ""
+          echo "=== Top Fail-Reasons (24h) ==="
+          jq -r '[.[] | select(.status != "success")] |
+            group_by(.status)[] |
+            "\(.[0].status): \(length)x"' raw.json || true
+
+          if [ "$FAIL" -eq 1 ]; then
+            exit 1
+          fi
+          echo "OK — alle Channels >= ${THRESHOLD}% Success"
