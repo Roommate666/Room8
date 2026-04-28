@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Admin Panel - Room8</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">    <title>Admin Panel - Room8</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -296,6 +296,12 @@
         <button class="admin-tab" onclick="switchTab('coupons')">
             🎟️ Coupons
         </button>
+        <button class="admin-tab" onclick="switchTab('events')">
+            📅 Events <span class="tab-badge" id="badgeEvents" style="display:none">0</span>
+        </button>
+        <button class="admin-tab" onclick="switchTab('eventrequests')">
+            🔓 Anträge <span class="tab-badge" id="badgeEventRequests" style="display:none">0</span>
+        </button>
         <button class="admin-tab" onclick="switchTab('messages')">
             📬 Kontakt <span class="tab-badge" id="badgeMessages" style="display:none">0</span>
         </button>
@@ -392,6 +398,32 @@
         </div>
         <div id="couponsList" class="data-list">
             <div class="loading-state">Lade Coupons...</div>
+        </div>
+    </div>
+
+    <!-- EVENTS SECTION (gemeldete + alle Events) -->
+    <div id="tab-events" class="admin-section">
+        <div style="margin-bottom:1rem; display:flex; gap:0.5rem; flex-wrap: wrap;">
+            <button class="filter-btn active" onclick="filterEvents('reported', this)">⚠️ Gemeldet (>=3 Reports)</button>
+            <button class="filter-btn" onclick="filterEvents('hidden', this)">🚫 Auto-Hidden (draft)</button>
+            <button class="filter-btn" onclick="filterEvents('active', this)">🟢 Aktiv</button>
+            <button class="filter-btn" onclick="filterEvents('all', this)">Alle</button>
+        </div>
+        <div id="eventsList" class="data-list">
+            <div class="loading-state">Lade Events...</div>
+        </div>
+    </div>
+
+    <!-- EVENT-CREATOR ANTRÄGE SECTION -->
+    <div id="tab-eventrequests" class="admin-section">
+        <div style="margin-bottom:1rem; display:flex; gap:0.5rem; flex-wrap: wrap;">
+            <button class="filter-btn active" onclick="filterEventRequests('pending', this)">⏳ Offen</button>
+            <button class="filter-btn" onclick="filterEventRequests('approved', this)">✅ Genehmigt</button>
+            <button class="filter-btn" onclick="filterEventRequests('rejected', this)">❌ Abgelehnt</button>
+            <button class="filter-btn" onclick="filterEventRequests('all', this)">Alle</button>
+        </div>
+        <div id="eventRequestsList" class="data-list">
+            <div class="loading-state">Lade Anträge...</div>
         </div>
     </div>
 
@@ -939,26 +971,57 @@
     // --- USERS ---
     async function loadUsers() {
         const container = document.getElementById('usersList');
-        const search = document.getElementById('userSearch').value.toLowerCase();
-        
-        let query = sb.from('profiles').select('*').order('created_at', { ascending: false }).limit(20);
-        
-        const { data: users } = await query;
-        
-        // Client-Side Filter (einfacher für Demo)
-        const filtered = users.filter(u => 
-            (u.email && u.email.toLowerCase().includes(search)) || 
-            (u.full_name && u.full_name.toLowerCase().includes(search))
-        );
+        const search = document.getElementById('userSearch').value.trim();
 
-        container.innerHTML = filtered.map(u => {
-            const status = u.is_banned ? '🚫 Gesperrt' : (u.is_verified ? '✅ Verifiziert' : 'Standard');
+        // Server-side Search via ilike (statt client-filter auf 20er-Slice)
+        let query = sb.from('profiles')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(100);
+
+        if (search) {
+            // OR-Suche auf email, full_name, username
+            query = query.or('email.ilike.%' + search + '%,full_name.ilike.%' + search + '%,username.ilike.%' + search + '%');
+        }
+
+        const { data: users, error } = await query;
+        if (error) {
+            container.innerHTML = '<div class="loading-state">Fehler: ' + escapeHtml(error.message) + '</div>';
+            return;
+        }
+        if (!users || users.length === 0) {
+            container.innerHTML = '<div class="empty-state">Keine User gefunden</div>';
+            return;
+        }
+
+        container.innerHTML = users.map(u => {
             const created = new Date(u.created_at).toLocaleDateString('de-DE');
+
+            // Status-Badges
+            const badges = [];
+            if (u.is_admin) badges.push('<span style="background:#1F2937;color:white;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.7rem;font-weight:700;">👑 Admin</span>');
+            if (u.is_banned) badges.push('<span style="background:#FEE2E2;color:#991B1B;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.7rem;font-weight:600;">🚫 Gesperrt</span>');
+            if (u.is_verified || u.is_student_verified) badges.push('<span style="background:#DCFCE7;color:#166534;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.7rem;font-weight:600;">✅ Verifiziert</span>');
+            if (u.trusted_organizer) badges.push('<span style="background:linear-gradient(135deg,#14B8A6,#0F766E);color:white;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.7rem;font-weight:700;">⭐ Trusted</span>');
+            if (u.can_create_events) badges.push('<span style="background:#CCFBF1;color:#0F766E;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.7rem;font-weight:600;">📅 Event-Creator</span>');
+
+            // Permission-Buttons (nur fuer nicht-banned User)
+            let permBtns = '';
+            if (!u.is_banned && !u.is_admin) {
+                permBtns = u.can_create_events
+                    ? '<button class="btn-mini" style="background:#FEE2E2;color:#991B1B;" onclick="toggleEventCreator(\'' + u.id + '\', false)">📅 Event-Erlaubnis entziehen</button>'
+                    : '<button class="btn-mini" style="background:#CCFBF1;color:#0F766E;" onclick="toggleEventCreator(\'' + u.id + '\', true)">📅 Event-Erlaubnis geben</button>';
+
+                permBtns += u.trusted_organizer
+                    ? '<button class="btn-mini" style="background:#FEE2E2;color:#991B1B;" onclick="toggleTrusted(\'' + u.id + '\', false)">⭐ Trusted entziehen</button>'
+                    : '<button class="btn-mini" style="background:linear-gradient(135deg,#14B8A6,#0F766E);color:white;" onclick="toggleTrusted(\'' + u.id + '\', true)">⭐ Als Trusted markieren</button>';
+            }
+
             return `
                 <div class="admin-card">
                     <div class="card-header">
                         <div class="card-title">👤 ${escapeHtml(u.full_name || u.username || 'Kein Name')}</div>
-                        <span>${status}</span>
+                        <div style="display:flex;gap:0.3rem;flex-wrap:wrap;justify-content:flex-end;">${badges.join('')}</div>
                     </div>
                     <div class="info-grid">
                         <div class="info-item"><label>E-Mail</label><span>${escapeHtml(u.email)}</span></div>
@@ -966,9 +1029,10 @@
                         <div class="info-item"><label>Registriert</label><span>${created}</span></div>
                         <div class="info-item"><label>ID</label><span style="font-size:0.7rem">${u.id.substring(0,8)}...</span></div>
                     </div>
-                    <div class="action-bar">
+                    <div class="action-bar" style="flex-wrap:wrap;gap:0.4rem;">
                         <a href="mailto:${escapeHtml(u.email)}?subject=Room8%20-%20Nachricht%20vom%20Admin" class="btn-mini" style="background:#10B981;color:white;">✉️ E-Mail</a>
                         <a href="public-profile.html?id=${u.id}" target="_blank" class="btn-mini btn-blue">👤 Profil</a>
+                        ${permBtns}
                         ${u.is_banned
                             ? `<button class="btn-mini btn-green" onclick="unbanUser('${u.id}')">Entsperren</button>`
                             : `<button class="btn-mini btn-red" onclick="banUser('${u.id}')">Sperren</button>`
@@ -978,6 +1042,53 @@
             `;
         }).join('');
     }
+
+    // Event-Creator Toggle (nutzt RPC mit System-Bypass)
+    window.toggleEventCreator = async (userId, grant) => {
+        const action = grant ? 'freischalten' : 'die Erlaubnis entziehen';
+        if (!confirm('Diesem User Events erstellen ' + action + '?')) return;
+
+        // Direkter UPDATE via Service-Role-Pattern: nutze RPC dafuer
+        // (admin_set_can_create_events) - existiert noch nicht, also direkt updaten
+        // Workaround: nutze admin_set_trusted_organizer Logic, oder Direct-Update mit System-Bypass
+        const { error } = await sb.rpc('admin_set_event_creator', {
+            target_user_id: userId,
+            can_create: grant
+        });
+
+        if (error) {
+            // Fallback: Direct UPDATE (RLS erlaubt admin durch admin_all Policy)
+            const { error: updErr } = await sb.from('profiles')
+                .update({ can_create_events: grant })
+                .eq('id', userId);
+            if (updErr) {
+                console.error(updErr);
+                if (window.Room8) Room8.showToast('Fehler: ' + updErr.message, 'error');
+                return;
+            }
+        }
+        if (window.Room8) Room8.showToast(grant ? 'Erlaubnis erteilt' : 'Erlaubnis entzogen', 'success');
+        loadUsers();
+    };
+
+    // Trusted-Organizer Toggle (nutzt existierende RPC)
+    window.toggleTrusted = async (userId, grant) => {
+        const action = grant ? 'als Trusted Organizer markieren' : 'Trusted-Status entziehen';
+        if (!confirm('Diesen User ' + action + '?')) return;
+
+        const { data, error } = await sb.rpc('admin_set_trusted_organizer', {
+            target_user_id: userId,
+            is_trusted: grant
+        });
+
+        if (error) {
+            console.error(error);
+            if (window.Room8) Room8.showToast('Fehler: ' + error.message, 'error');
+            return;
+        }
+        if (window.Room8) Room8.showToast(grant ? 'Als Trusted markiert' : 'Trusted-Status entzogen', 'success');
+        loadUsers();
+    };
 
     document.getElementById('userSearch').addEventListener('input', loadUsers);
 
@@ -1607,11 +1718,245 @@
     window.switchTab = (tab) => {
         document.querySelectorAll('.admin-section').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.admin-tab').forEach(el => el.classList.remove('active'));
-        
+
         document.getElementById(`tab-${tab}`).classList.add('active');
-        // Button highlighten (einfach über text match, oder sauberer mit ids)
         event.target.classList.add('active');
+
+        // Lazy-Load Events wenn Tab geoeffnet
+        if (tab === 'events') loadEventsAdmin('reported');
+        if (tab === 'eventrequests') loadEventRequests('pending');
     }
+
+    // ============================================
+    // EVENT-CREATOR ANTRÄGE (Admin-Queue)
+    // ============================================
+    var currentRequestFilter = 'pending';
+
+    window.filterEventRequests = (filter, btn) => {
+        currentRequestFilter = filter;
+        document.querySelectorAll('#tab-eventrequests .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadEventRequests(filter);
+    };
+
+    var ORG_TYPE_LABELS = {
+        asta: 'AStA / Studierendenvertretung',
+        university: 'Universität / Hochschule',
+        student_association: 'Studentischer Verein',
+        partner: 'Partner / Sponsor',
+        private: 'Privat',
+        other: 'Sonstiges'
+    };
+
+    async function loadEventRequests(filter) {
+        var listEl = document.getElementById('eventRequestsList');
+        listEl.innerHTML = '<div class="loading-state">Lade Anträge...</div>';
+
+        var query = sb.from('event_creator_requests').select('*');
+        if (filter !== 'all') query = query.eq('status', filter);
+        var res = await query.order('created_at', { ascending: false }).limit(100);
+
+        if (res.error || !res.data || res.data.length === 0) {
+            listEl.innerHTML = '<div class="empty-state">Keine Anträge</div>';
+            return;
+        }
+
+        // Profile-Daten der Antragsteller mit-laden
+        var userIds = [...new Set(res.data.map(r => r.user_id))];
+        var profilesRes = await sb.from('profiles').select('id, username, full_name, is_verified, is_student_verified').in('id', userIds);
+        var profilesMap = {};
+        (profilesRes.data || []).forEach(p => { profilesMap[p.id] = p; });
+
+        listEl.innerHTML = res.data.map(req => {
+            var profile = profilesMap[req.user_id] || {};
+            var displayName = profile.full_name || profile.username || req.user_id;
+            var verifiedBadge = (profile.is_verified || profile.is_student_verified)
+                ? '<span style="background:#DCFCE7;color:#166534;padding:0.15rem 0.4rem;border-radius:999px;font-size:0.7rem;font-weight:600;margin-left:0.4rem;">verifiziert</span>'
+                : '<span style="background:#FEE2E2;color:#991B1B;padding:0.15rem 0.4rem;border-radius:999px;font-size:0.7rem;font-weight:600;margin-left:0.4rem;">NICHT verifiziert</span>';
+
+            var statusBadge = req.status === 'pending'
+                ? '<span style="background:#FEF3C7;color:#92400E;padding:0.2rem 0.5rem;border-radius:999px;font-size:0.75rem;font-weight:600;">⏳ Offen</span>'
+                : req.status === 'approved'
+                ? '<span style="background:#DCFCE7;color:#166534;padding:0.2rem 0.5rem;border-radius:999px;font-size:0.75rem;font-weight:600;">✅ Genehmigt</span>'
+                : req.status === 'rejected'
+                ? '<span style="background:#FEE2E2;color:#991B1B;padding:0.2rem 0.5rem;border-radius:999px;font-size:0.75rem;font-weight:600;">❌ Abgelehnt</span>'
+                : '<span style="background:#F3F4F6;color:#6B7280;padding:0.2rem 0.5rem;border-radius:999px;font-size:0.75rem;font-weight:600;">Storniert</span>';
+
+            var actions = '';
+            if (req.status === 'pending') {
+                actions = '<div style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;">' +
+                    '<button class="btn-small btn-success" onclick="approveRequest(\'' + req.id + '\')">✅ Genehmigen</button>' +
+                    '<button class="btn-small btn-danger" onclick="rejectRequest(\'' + req.id + '\')">❌ Ablehnen</button>' +
+                    '</div>';
+            } else if (req.status === 'rejected' && req.rejection_reason) {
+                actions = '<div style="margin-top:0.5rem;font-size:0.8rem;color:#991B1B;">Ablehnungsgrund: ' + Room8.escapeHtml(req.rejection_reason) + '</div>';
+            }
+
+            return '<div class="data-item">' +
+                '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.75rem;flex-wrap:wrap;">' +
+                    '<div style="flex:1;min-width:200px;">' +
+                        '<div style="font-weight:700;font-size:1rem;margin-bottom:0.2rem;">' + Room8.escapeHtml(req.organization_name) + '</div>' +
+                        '<div style="color:#6B7280;font-size:0.85rem;">' + (ORG_TYPE_LABELS[req.organization_type] || req.organization_type) + '</div>' +
+                        '<div style="color:#9CA3AF;font-size:0.8rem;margin-top:0.25rem;">Von: ' + Room8.escapeHtml(displayName) + verifiedBadge + '</div>' +
+                        '<div style="color:#9CA3AF;font-size:0.75rem;">Eingereicht: ' + new Date(req.created_at).toLocaleString('de-DE') + '</div>' +
+                    '</div>' +
+                    '<div>' + statusBadge + '</div>' +
+                '</div>' +
+                '<div style="margin-top:0.75rem;padding:0.75rem;background:#F9FAFB;border-radius:8px;font-size:0.9rem;color:#374151;line-height:1.4;">' +
+                    '<strong>Begründung:</strong><br>' + Room8.escapeHtml(req.reason) +
+                '</div>' +
+                actions +
+            '</div>';
+        }).join('');
+    }
+
+    window.approveRequest = async (requestId) => {
+        if (!confirm('Antrag genehmigen? User wird sofort freigeschaltet und kann Events erstellen.')) return;
+        var res = await sb.rpc('admin_review_event_creator_request', {
+            request_id_input: requestId,
+            new_status: 'approved'
+        });
+        if (res.error) {
+            console.error(res.error);
+            if (window.Room8) Room8.showToast('Fehler: ' + res.error.message, 'error');
+            return;
+        }
+        if (res.data && res.data.success === false) {
+            if (window.Room8) Room8.showToast('Fehler: ' + res.data.error, 'error');
+            return;
+        }
+        if (window.Room8) Room8.showToast('Antrag genehmigt', 'success');
+        loadEventRequests(currentRequestFilter);
+    };
+
+    window.rejectRequest = async (requestId) => {
+        var reason = prompt('Grund für Ablehnung (wird dem User angezeigt):', '');
+        if (reason === null) return;
+        var res = await sb.rpc('admin_review_event_creator_request', {
+            request_id_input: requestId,
+            new_status: 'rejected',
+            rejection_reason_input: reason || null
+        });
+        if (res.error) {
+            console.error(res.error);
+            if (window.Room8) Room8.showToast('Fehler: ' + res.error.message, 'error');
+            return;
+        }
+        if (window.Room8) Room8.showToast('Antrag abgelehnt', 'success');
+        loadEventRequests(currentRequestFilter);
+    };
+
+    // Pending-Badge bei Page-Load berechnen
+    (async () => {
+        try {
+            var pendRes = await sb.from('event_creator_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending');
+            if (pendRes.count > 0) {
+                var badge = document.getElementById('badgeEventRequests');
+                badge.textContent = pendRes.count;
+                badge.style.display = 'inline-block';
+            }
+        } catch(e) {}
+    })();
+
+    // ============================================
+    // EVENTS ADMIN (Reports + Auto-Hidden Queue)
+    // ============================================
+    var currentEventFilter = 'reported';
+
+    window.filterEvents = (filter, btn) => {
+        currentEventFilter = filter;
+        document.querySelectorAll('#tab-events .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadEventsAdmin(filter);
+    };
+
+    async function loadEventsAdmin(filter) {
+        var listEl = document.getElementById('eventsList');
+        listEl.innerHTML = '<div class="loading-state">Lade Events...</div>';
+
+        var query = sb.from('events').select('*, event_reports(id, reason, details, reporter_id, created_at)');
+
+        if (filter === 'reported') {
+            // Events mit >= 1 Report
+            var reported = await sb.from('event_reports').select('event_id');
+            if (reported.error || !reported.data || reported.data.length === 0) {
+                listEl.innerHTML = '<div class="empty-state">Keine gemeldeten Events</div>';
+                return;
+            }
+            var eventIds = [...new Set(reported.data.map(r => r.event_id))];
+            query = query.in('id', eventIds);
+        } else if (filter === 'hidden') {
+            query = query.eq('status', 'draft');
+        } else if (filter === 'active') {
+            query = query.eq('status', 'active');
+        }
+
+        var res = await query.order('created_at', { ascending: false }).limit(100);
+
+        if (res.error || !res.data || res.data.length === 0) {
+            listEl.innerHTML = '<div class="empty-state">Keine Events</div>';
+            return;
+        }
+
+        listEl.innerHTML = res.data.map(ev => {
+            var reportCount = (ev.event_reports || []).length;
+            var reportSummary = reportCount > 0
+                ? '<div style="background:#FEE2E2;color:#991B1B;padding:0.5rem;border-radius:8px;margin-top:0.5rem;font-size:0.85rem;">' +
+                    '<strong>' + reportCount + ' Report' + (reportCount > 1 ? 's' : '') + ':</strong> ' +
+                    (ev.event_reports || []).map(r => Room8.escapeHtml(r.reason)).join(', ') +
+                    '</div>'
+                : '';
+
+            var statusBadge = ev.status === 'draft'
+                ? '<span style="background:#FEF3C7;color:#92400E;padding:0.2rem 0.5rem;border-radius:999px;font-size:0.75rem;font-weight:600;">Auto-Hidden</span>'
+                : ev.status === 'cancelled'
+                ? '<span style="background:#FEE2E2;color:#991B1B;padding:0.2rem 0.5rem;border-radius:999px;font-size:0.75rem;font-weight:600;">Cancelled</span>'
+                : '<span style="background:#DCFCE7;color:#166534;padding:0.2rem 0.5rem;border-radius:999px;font-size:0.75rem;font-weight:600;">Active</span>';
+
+            return '<div class="data-item" style="border-left:3px solid ' + (reportCount >= 3 ? '#EF4444' : '#E5E7EB') + ';">' +
+                '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.75rem;flex-wrap:wrap;">' +
+                    '<div style="flex:1;min-width:200px;">' +
+                        '<div style="font-weight:700;font-size:1rem;margin-bottom:0.2rem;">' + Room8.escapeHtml(ev.title) + '</div>' +
+                        '<div style="color:#6B7280;font-size:0.85rem;">' + new Date(ev.start_at).toLocaleString('de-DE') + ' · ' + Room8.escapeHtml(ev.city || '') + '</div>' +
+                        '<div style="color:#6B7280;font-size:0.8rem;margin-top:0.25rem;">Organizer: ' + Room8.escapeHtml(ev.organizer_name || ev.organizer_id || '?') + '</div>' +
+                    '</div>' +
+                    '<div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">' +
+                        statusBadge +
+                    '</div>' +
+                '</div>' +
+                reportSummary +
+                '<div style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;">' +
+                    (ev.status === 'draft' ? '<button class="btn-small btn-success" onclick="approveEvent(\'' + ev.id + '\')">Wieder freigeben</button>' : '') +
+                    (ev.status !== 'cancelled' ? '<button class="btn-small btn-danger" onclick="cancelEventAdmin(\'' + ev.id + '\')">Absagen</button>' : '') +
+                    '<button class="btn-small" onclick="window.open(\'event-detail.html?id=' + ev.id + '\', \'_blank\')">Ansehen</button>' +
+                    (reportCount > 0 ? '<button class="btn-small" onclick="dismissReports(\'' + ev.id + '\')">Reports loeschen</button>' : '') +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    window.approveEvent = async (eventId) => {
+        if (!confirm('Event wieder freigeben? (status -> active, Reports werden geloescht)')) return;
+        // System-Bypass via SQL direkt geht nicht, also als Admin (RLS-Bypass via events_admin_all)
+        await sb.from('events').update({ status: 'active' }).eq('id', eventId);
+        await sb.from('event_reports').delete().eq('event_id', eventId);
+        if (window.Room8) Room8.showToast('Event freigegeben', 'success');
+        loadEventsAdmin(currentEventFilter);
+    };
+
+    window.cancelEventAdmin = async (eventId) => {
+        if (!confirm('Event absagen? Going-User bekommen automatisch eine Push-Notification.')) return;
+        await sb.from('events').update({ status: 'cancelled' }).eq('id', eventId);
+        if (window.Room8) Room8.showToast('Event abgesagt', 'success');
+        loadEventsAdmin(currentEventFilter);
+    };
+
+    window.dismissReports = async (eventId) => {
+        if (!confirm('Alle Reports fuer dieses Event loeschen?')) return;
+        await sb.from('event_reports').delete().eq('event_id', eventId);
+        if (window.Room8) Room8.showToast('Reports geloescht', 'success');
+        loadEventsAdmin(currentEventFilter);
+    };
 
     checkAdmin();
 </script>

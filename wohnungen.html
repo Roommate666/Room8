@@ -2,17 +2,28 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Wohnungen - Room8</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="description" content="Finde WG-Zimmer und Studentenwohnungen in deiner Stadt. Room8 - die Plattform von Studenten, fuer Studenten.">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
     <style>
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
+
         .app-container {
             --primary-color: #3b82f6;
             --primary-dark: #1e40af;
             background-color: #f3f4f6;
             padding-bottom: calc(450px + env(safe-area-inset-bottom, 20px));
         }
-        
+
         /* HEADER FIX - Luftiger */
         .app-header {
             display: grid;
@@ -23,34 +34,35 @@
             color: white; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;
             box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25);
             margin-bottom: 1.25rem;
+            animation: blurFadeIn 0.5s ease-out both;
         }
-        
+
         .back-btn {
             color: white; text-decoration: none;
             display: flex; align-items: center; justify-content: center;
             font-size: 1.5rem;
         }
-        
+
         .app-header h1 {
             color: white; margin: 0; font-size: 1.5rem; font-weight: 800;
             text-align: center;
             letter-spacing: -0.02em;
         }
-        
+
         /* Rest wie gehabt */
-        .search-section { padding: 0 1.5rem 1rem; background-color: transparent; }
+        .search-section { padding: 0 1.5rem 1rem; background-color: transparent; animation: blurFadeIn 0.5s 0.1s ease-out both; }
         .search-bar { position: relative; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 999px; }
-        .search-bar input { width: 100%; padding: 0.9rem 1rem 0.9rem 3rem; border-radius: 999px; border: 1px solid white; font-size: 1rem; background: white; transition: all 0.2s; }
-        .search-bar input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+        .search-bar input { width: 100%; padding: 0.9rem 1rem 0.9rem 3rem; border-radius: 999px; border: 1px solid rgba(0,0,0,0.04); font-size: 1rem; background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: all 0.2s; }
+        .search-bar input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); background: white; }
         .search-icon { position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; }
-        
+
         .filter-container { display: flex; flex-direction: column; gap: 1rem; }
         .filter-bar { display: flex; gap: 0.6rem; overflow-x: auto; padding-bottom: 0.5rem; scrollbar-width: none; }
         .filter-bar::-webkit-scrollbar { display: none; }
-        .filter-btn { padding: 0.5rem 1.2rem; border-radius: 999px; border: 1px solid rgba(0,0,0,0.05); background-color: white; color: #4b5563; font-size: 0.9rem; white-space: nowrap; cursor: pointer; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.03); transition: all 0.2s; }
+        .filter-btn { padding: 0.5rem 1.2rem; border-radius: 999px; border: 1px solid rgba(0,0,0,0.05); background-color: rgba(255,255,255,0.88); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: #4b5563; font-size: 0.9rem; white-space: nowrap; cursor: pointer; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.03); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
         .filter-btn:hover { transform: translateY(-1px); }
-        .filter-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
-        
+        .filter-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); backdrop-filter: none; }
+
         .listings-grid {
             padding: 0 1rem;
             display: flex;
@@ -58,14 +70,17 @@
             gap: 0.75rem;
             max-width: 600px;
             margin: 0 auto;
+            animation: blurFadeIn 0.5s 0.2s ease-out both;
         }
 
+        /* Pattern: Magic UI MagicCard / Glasmorphismus */
         .housing-card {
-            background: white;
-            border-radius: 16px;
+            background: rgba(255,255,255,0.92);
+            border-radius: 18px;
             overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            transition: transform 0.2s;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(0,0,0,0.04);
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
             text-decoration: none;
             color: var(--text-color);
             display: flex;
@@ -74,7 +89,7 @@
             cursor: pointer;
             height: 120px;
         }
-        .housing-card:hover { transform: translateY(-3px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+        .housing-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8); }
 
         .card-image-container {
             position: relative;
@@ -93,21 +108,38 @@
             object-fit: cover;
         }
         
+        /* Pattern: Kibo UI Pill + Status - Pill-Form mit Dot-Indikator */
         .listing-mode-badge {
             position: absolute;
             top: 8px;
             left: 8px;
-            padding: 0.2rem 0.5rem;
-            border-radius: 8px;
+            padding: 0.2rem 0.55rem 0.2rem 0.45rem;
+            border-radius: 999px;
             font-size: 0.6rem;
             font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.03em;
             z-index: 5;
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
-        .listing-mode-badge.offer { background: rgba(255,255,255,0.9); color: #059669; }
-        .listing-mode-badge.search { background: rgba(255,255,255,0.9); color: #d97706; }
-        .listing-mode-badge.swap { background: rgba(255,255,255,0.9); color: #3b82f6; }
+        /* Dot-Indikator */
+        .listing-mode-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .listing-mode-badge.offer { background: rgba(236,253,245,0.92); color: #065f46; border: 1px solid rgba(5,150,105,0.15); }
+        .listing-mode-badge.offer::before { background: #10b981; box-shadow: 0 0 4px rgba(16,185,129,0.5); }
+        .listing-mode-badge.search { background: rgba(255,251,235,0.92); color: #92400e; border: 1px solid rgba(217,119,6,0.15); }
+        .listing-mode-badge.search::before { background: #f59e0b; box-shadow: 0 0 4px rgba(245,158,11,0.5); }
+        .listing-mode-badge.swap { background: rgba(239,246,255,0.92); color: #1e40af; border: 1px solid rgba(59,130,246,0.15); }
+        .listing-mode-badge.swap::before { background: #3b82f6; box-shadow: 0 0 4px rgba(59,130,246,0.5); }
 
         .favorite-btn {
             position: absolute;
@@ -164,7 +196,7 @@
             white-space: nowrap;
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             padding: 0.3rem 0.6rem;
-            border-radius: 12px;
+            border-radius: 999px;
             box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
         }
 
@@ -188,15 +220,16 @@
         }
         .stat-item { display: flex; align-items: center; gap: 4px; }
         
-        .fab { position: fixed; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, #3B82F6, #2563EB); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4); cursor: pointer; text-decoration: none; color: white; z-index: 10000; }
+        .fab { position: fixed; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, #3B82F6, #2563EB); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4); cursor: pointer; text-decoration: none; color: white; z-index: 10000; transition: transform 0.2s, box-shadow 0.2s; }
+        .fab:active { transform: scale(0.92); }
 
-        /* === MATCHING SCORE BADGE (im Footer) === */
+        /* === MATCHING SCORE BADGE - Kibo UI Pill === */
         .match-badge {
             display: inline-flex;
             align-items: center;
             gap: 3px;
             padding: 0.2rem 0.5rem;
-            border-radius: 6px;
+            border-radius: 999px;
             font-size: 0.7rem;
             font-weight: 700;
         }
@@ -216,40 +249,44 @@
             color: #6B7280;
         }
 
-        /* === INFO BANNER für Matching === */
+        /* === INFO BANNER fuer Matching - Glasmorphismus === */
         .match-info-banner {
-            background: linear-gradient(135deg, #F2F2F0 0%, #EBEBEB 100%);
-            border: 1px solid #EBEBEB;
-            border-radius: 12px;
+            background: rgba(239,246,255,0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(59,130,246,0.1);
+            border-radius: 14px;
             padding: 0.75rem 1rem;
             margin: 0 1.5rem 1rem;
             display: flex;
             align-items: center;
             gap: 0.75rem;
             font-size: 0.85rem;
-            color: #1A1A2E;
+            color: #1e40af;
+            box-shadow: 0 2px 8px rgba(59,130,246,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
+            animation: blurFadeIn 0.5s 0.15s ease-out both;
         }
-        
+
         .match-info-banner.hidden { display: none; }
-        
+
         .match-info-icon { font-size: 1.25rem; }
-        
+
         .match-info-text { flex: 1; }
-        
+
         .match-info-link {
-            color: #1A1A2E;
-            font-weight: 600;
+            color: #3b82f6;
+            font-weight: 700;
             text-decoration: none;
             white-space: nowrap;
         }
-        /* Verification Overlay */
+        /* Verification Overlay - Glasmorphismus */
         .verify-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             z-index: 9999;
             justify-content: center;
             align-items: center;
@@ -257,26 +294,36 @@
         }
         .verify-overlay.active { display: flex; }
         .verify-overlay-box {
-            background: white;
-            border-radius: 20px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
             padding: 2.5rem 2rem;
             text-align: center;
             max-width: 360px;
             width: 100%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(0,0,0,0.04);
+            animation: blurFadeIn 0.4s ease-out both;
         }
         .verify-overlay-box .icon { font-size: 3rem; margin-bottom: 1rem; }
-        .verify-overlay-box h2 { font-size: 1.3rem; margin-bottom: 0.5rem; color: #1f2937; }
+        .verify-overlay-box h2 { font-size: 1.3rem; margin-bottom: 0.5rem; color: #1f2937; font-weight: 800; letter-spacing: -0.02em; }
         .verify-overlay-box p { color: #6b7280; font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; }
         .verify-overlay-box a {
             display: inline-block;
             background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
             padding: 0.85rem 2rem;
-            border-radius: 12px;
+            border-radius: 999px;
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .verify-overlay-box a:active { transform: scale(0.97); }
+
+        /* Barrierefreiheit */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
     </style>
 </head>
@@ -325,16 +372,16 @@
     
     <main style="flex:1;">
         <div class="listings-grid" id="listingsContainer">
-            <div style="grid-column:1/-1; text-align:center; padding:3rem; color:#9ca3af;">
-                Lade Wohnungen...
-            </div>
+            <div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-content"><div class="skeleton-line long"></div><div class="skeleton-line short"></div><div class="skeleton-line price"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-content"><div class="skeleton-line long"></div><div class="skeleton-line short"></div><div class="skeleton-line price"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-content"><div class="skeleton-line long"></div><div class="skeleton-line short"></div><div class="skeleton-line price"></div></div></div>
         </div>
     </main>
     
     <div id="app-footer-nav"></div>
 </div>
 
-<a href="wohnung.html?mode=offer" class="fab" title="Neues Inserat">
+<a href="wohnung.html?mode=offer" class="fab" id="addListingFab" title="Neues Inserat" style="display:none;">
     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
 </a>
 
@@ -373,6 +420,10 @@
         if (!isVerified) {
             document.getElementById('verifyOverlay').classList.add('active');
             window.scrollTo(0, 0);
+        } else {
+            // FAB nur fuer verifizierte User sichtbar
+            var fab = document.getElementById('addListingFab');
+            if (fab) fab.style.display = 'flex';
         }
     }
 
@@ -542,9 +593,12 @@
         var isSearchListing = listing.listing_mode === 'search';
 
         if (listing.listing_photos && listing.listing_photos.length > 0) {
-            var path = listing.listing_photos[0].storage_path;
-            var urlData = sb.storage.from('listing-images').getPublicUrl(path);
-            if (urlData && urlData.data) imageUrl = urlData.data.publicUrl;
+            // Optimierte Bild-URL ueber Supabase Image Transform (280x210 fuer Retina, q70)
+            imageUrl = window.Room8 ? Room8.getOptimizedImageUrl('listing-images', listing.listing_photos[0].storage_path, { width: 280, height: 210, quality: 70 }) : null;
+            if (!imageUrl) {
+                var urlData = sb.storage.from('listing-images').getPublicUrl(listing.listing_photos[0].storage_path);
+                if (urlData && urlData.data) imageUrl = urlData.data.publicUrl;
+            }
         }
         
         var priceStr = 'VB';
@@ -598,7 +652,7 @@
         } else {
             imageHtml = `
                 <div class="card-image-container">
-                    <img src="${imageUrl}" alt="${listing.title}" onerror="this.parentElement.innerHTML='<div style=\\'background:#EBEBEB;width:100%;height:100%;display:flex;align-items:center;justify-content:center;\\'><div style=\\'text-align:center;color:#929292;\\'>🏠<br><span style=\\'font-size:0.6rem;font-weight:600;color:#929292;\\'>Kein Bild</span></div></div>'">
+                    <img src="${imageUrl}" alt="${escHtml(listing.title)}" width="280" height="210" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='<div style=\\'background:#EBEBEB;width:100%;height:100%;display:flex;align-items:center;justify-content:center;\\'><div style=\\'text-align:center;color:#929292;\\'>🏠<br><span style=\\'font-size:0.6rem;font-weight:600;color:#929292;\\'>Kein Bild</span></div></div>'">
                     <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
                 </div>`;
         }
@@ -639,7 +693,9 @@
         }
         
         if (listings && listings.length > 0) {
-            listings.forEach(function(l) { listingsContainer.innerHTML += renderHousingCard(l); });
+            var html = '';
+            listings.forEach(function(l) { html += renderHousingCard(l); });
+            listingsContainer.innerHTML = html;
         } else {
             listingsContainer.innerHTML = `
                 <div class="empty-state-container">

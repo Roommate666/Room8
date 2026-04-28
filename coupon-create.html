@@ -2,8 +2,12 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Coupon erstellen - Admin</title>
-    <link rel="stylesheet" href="style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">    <title>Coupon erstellen - Admin</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
     <style>
         .app-container { --primary-color: #111827; }
         .app-header { background: linear-gradient(135deg, #111827 0%, #1F2937 100%); color: white; }
@@ -208,13 +212,27 @@
                 <input type="tel" id="phone" placeholder="+49 123 456789">
             </div>
 
+            <button type="button" class="submit-btn" id="previewBtn" style="background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%); box-shadow: 0 4px 15px rgba(245,158,11,0.3); margin-top: 1.5rem;" onclick="showPreview()">Vorschau anzeigen</button>
             <button type="submit" class="submit-btn" id="submitBtn">Coupon Veröffentlichen</button>
         </form>
     </main>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<!-- VORSCHAU MODAL -->
+<div id="previewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99999; overflow-y:auto; backdrop-filter:blur(4px);">
+    <div style="padding: 1rem; max-width: 500px; margin: 2rem auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h3 style="margin:0; color:white; font-size:1.1rem;">Vorschau</h3>
+            <button onclick="closePreview()" style="background:rgba(255,255,255,0.2); border:none; width:36px; height:36px; border-radius:50%; color:white; font-size:1.3rem; cursor:pointer;">&times;</button>
+        </div>
+        <div id="previewContent"></div>
+    </div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script>
     // Supabase Client - Direkte Initialisierung
@@ -243,7 +261,7 @@
             const reader = new FileReader();
             reader.onload = function(event) {
                 document.getElementById('previewContainer').innerHTML = `
-                    <img src="${event.target.result}" style="max-width:200px; max-height:150px; border-radius:12px; margin-bottom:0.5rem; object-fit:cover;">
+                    <img src="${event.target.result}" alt="Coupon-Bild Vorschau" style="max-width:200px; max-height:150px; border-radius:12px; margin-bottom:0.5rem; object-fit:cover;">
                     <div style="color:#10B981; font-weight:600;">✅ ${file.name}</div>
                 `;
             };
@@ -259,12 +277,104 @@
             const reader = new FileReader();
             reader.onload = function(event) {
                 document.getElementById('logoPreview').innerHTML = `
-                    <img src="${event.target.result}" style="max-width:80px; max-height:80px; border-radius:12px; margin-bottom:0.5rem;">
+                    <img src="${event.target.result}" alt="Logo Vorschau" style="max-width:80px; max-height:80px; border-radius:12px; margin-bottom:0.5rem;">
                     <div style="color:#10B981; font-weight:600;">✅ ${file.name}</div>
                 `;
             };
             reader.readAsDataURL(file);
         }
+    });
+
+    // === VORSCHAU ===
+    function escapeHtml(text) {
+        if (!text) return '';
+        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    window.showPreview = function() {
+        var title = document.getElementById('title').value || 'Deal-Titel';
+        var discount = document.getElementById('discountValue').value || '--%';
+        var code = (document.getElementById('code').value || 'CODE').toUpperCase();
+        var category = document.getElementById('category').value;
+        var desc = document.getElementById('description').value || 'Beschreibung des Deals...';
+        var validUntil = document.getElementById('validUntil').value;
+        var businessName = document.getElementById('businessName').value || 'Firmenname';
+        var city = document.getElementById('city').value || 'Stadt';
+        var zipCode = document.getElementById('zipCode').value;
+        var address = document.getElementById('address').value;
+        var website = document.getElementById('website').value;
+        var instagram = document.getElementById('instagram').value;
+        var openingHours = document.getElementById('openingHours').value;
+
+        var validText = validUntil ? new Date(validUntil).toLocaleDateString('de-DE') : 'Unbegrenzt';
+        var locationText = city + (address ? ', ' + address : '');
+
+        // Bild-Vorschau
+        var imgPreview = '';
+        var imgFile = document.getElementById('imgInput').files[0];
+        if (imgFile) {
+            var imgEl = document.querySelector('#previewContainer img');
+            if (imgEl) imgPreview = imgEl.src;
+        }
+        var bgStyle = imgPreview
+            ? 'background-image:url(' + imgPreview + '); background-size:cover; background-position:center;'
+            : 'background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%);';
+
+        // Logo-Vorschau
+        var logoHtml = '🏪';
+        var logoFile = document.getElementById('logoInput').files[0];
+        if (logoFile) {
+            var logoEl = document.querySelector('#logoPreview img');
+            if (logoEl) logoHtml = '<img src="' + logoEl.src + '" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">';
+        }
+
+        // Category Emoji
+        var catEmojis = { food: '🍕', tech: '💻', fashion: '👕', leisure: '🎮', beauty: '💅', education: '📚' };
+        var catEmoji = catEmojis[category] || '🎟️';
+
+        // Partner Details
+        var detailsHtml = '';
+        if (openingHours || website || instagram) {
+            detailsHtml = '<div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">';
+            if (openingHours) detailsHtml += '<span style="background:#F3F4F6;padding:0.25rem 0.5rem;border-radius:6px;font-size:0.75rem;color:#4B5563;">🕐 ' + escapeHtml(openingHours) + '</span>';
+            if (website) detailsHtml += '<span style="background:#F3F4F6;padding:0.25rem 0.5rem;border-radius:6px;font-size:0.75rem;color:#4B5563;">🌐 ' + escapeHtml(website) + '</span>';
+            if (instagram) detailsHtml += '<span style="background:#F3F4F6;padding:0.25rem 0.5rem;border-radius:6px;font-size:0.75rem;color:#4B5563;">📸 ' + escapeHtml(instagram) + '</span>';
+            detailsHtml += '</div>';
+        }
+
+        document.getElementById('previewContent').innerHTML =
+            '<div style="background:white;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.2);">' +
+                '<div style="height:160px;position:relative;' + bgStyle + '">' +
+                    (!imgPreview ? '<span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:3rem;opacity:0.3;">' + catEmoji + '</span>' : '') +
+                    '<span style="position:absolute;bottom:12px;left:12px;background:linear-gradient(135deg,#F59E0B 0%,#EA580C 100%);color:white;font-weight:800;padding:0.5rem 0.85rem;border-radius:10px;font-size:0.95rem;box-shadow:0 4px 12px rgba(245,158,11,0.4);">' + escapeHtml(discount) + '</span>' +
+                '</div>' +
+                '<div style="padding:1.25rem 1rem 1rem;">' +
+                    '<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">' +
+                        '<div style="width:44px;height:44px;border-radius:10px;background:#F3F4F6;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">' + logoHtml + '</div>' +
+                        '<div style="flex:1;min-width:0;">' +
+                            '<h4 style="font-weight:700;font-size:1rem;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(businessName) + '</h4>' +
+                            '<div style="font-size:0.8rem;color:#9CA3AF;">📍 ' + escapeHtml(locationText) + '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div style="font-size:1.1rem;font-weight:700;margin:0 0 0.5rem 0;">' + escapeHtml(title) + '</div>' +
+                    '<div style="font-size:0.85rem;color:#6B7280;margin-bottom:0.75rem;line-height:1.4;">' + escapeHtml(desc) + '</div>' +
+                    detailsHtml +
+                    '<div style="display:flex;justify-content:space-between;align-items:center;border-top:1px dashed #E5E7EB;padding-top:0.75rem;">' +
+                        '<span style="font-size:0.8rem;color:#9CA3AF;">Gültig bis ' + validText + '</span>' +
+                        '<span style="background:linear-gradient(135deg,#F59E0B 0%,#EA580C 100%);color:white;border:none;padding:0.6rem 1.25rem;border-radius:10px;font-weight:600;font-size:0.9rem;">Code: ' + escapeHtml(code) + '</span>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+
+        document.getElementById('previewModal').style.display = 'block';
+    };
+
+    window.closePreview = function() {
+        document.getElementById('previewModal').style.display = 'none';
+    };
+
+    document.getElementById('previewModal').addEventListener('click', function(e) {
+        if (e.target === document.getElementById('previewModal')) closePreview();
     });
 
     document.getElementById('createCouponForm').addEventListener('submit', async (e) => {
@@ -293,26 +403,57 @@
             const { data: coupon, error } = await sb.from('coupons').insert(data).select().single();
             if (error) throw error;
 
-            // Hauptbild hochladen
+            // Hauptbild hochladen (mit Browser-Compression)
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
-                const path = `coupons/${coupon.id}_img.${file.name.split('.').pop()}`;
-                await sb.storage.from('listing-images').upload(path, file);
+                const compressed = (window.Room8 && Room8.compressImage) ? await Room8.compressImage(file) : file;
+                const path = `coupons/${coupon.id}_img.jpg`;
+                await sb.storage.from('listing-images').upload(path, compressed);
                 await sb.from('coupon_photos').insert({ coupon_id: coupon.id, storage_path: path, photo_type: 'cover' });
             }
-            
-            // Logo hochladen
+
+            // Logo hochladen (mit Browser-Compression, kleiner maxDim)
             if (logoInput.files.length > 0) {
                 const file = logoInput.files[0];
-                const path = `coupons/${coupon.id}_logo.${file.name.split('.').pop()}`;
-                await sb.storage.from('listing-images').upload(path, file);
+                const compressed = (window.Room8 && Room8.compressImage) ? await Room8.compressImage(file, { maxDim: 400, quality: 0.85 }) : file;
+                const path = `coupons/${coupon.id}_logo.jpg`;
+                await sb.storage.from('listing-images').upload(path, compressed);
                 await sb.from('coupon_photos').insert({ coupon_id: coupon.id, storage_path: path, photo_type: 'logo' });
             }
 
             Room8UI.success("Coupon erfolgreich erstellt!");
+
+            // Benachrichtige User die diese Stadt in ihren Notification-Settings eingestellt haben
+            if (coupon.city && window.NotificationHelpers) {
+                try {
+                    var citySettingsRes = await sb
+                        .from('notification_settings')
+                        .select('user_id, new_coupon_city')
+                        .ilike('notification_city', coupon.city);
+
+                    if (citySettingsRes.data && citySettingsRes.data.length > 0) {
+                        for (var u of citySettingsRes.data) {
+                            if (u.user_id === user.id) continue;
+                            if (u.new_coupon_city === false) continue;
+
+                            await NotificationHelpers.createNotification(
+                                u.user_id,
+                                'new_coupon_city',
+                                '\uD83C\uDF9F\uFE0F Neuer Coupon in ' + coupon.city,
+                                coupon.title,
+                                'coupon-detail.html?id=' + coupon.id,
+                                coupon.id
+                            );
+                        }
+                    }
+                } catch (notifyErr) {
+                    console.log('Coupon city notification error:', notifyErr);
+                }
+            }
+
             setTimeout(function() { navigateTo("admin.html"); }, 1500);
         } catch (err) {
-            Room8UI.error("Coupon konnte nicht erstellt werden. Bitte versuche es erneut.");
+            Room8UI.error("Fehler: " + err.message);
             btn.disabled = false;
             btn.textContent = 'Coupon Veröffentlichen';
         }
@@ -321,6 +462,7 @@
     // Admin Check beim Laden
     checkAdmin();
 </script>
+<script src="notificationHelpers.js"></script>
 <script src="notificationBell.js"></script>
 </body>
 </html>

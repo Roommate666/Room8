@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <title>Event - Room8</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .app-container { background-color: #f3f4f6; padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
+
+        .detail-hero { position: relative; width: 100%; aspect-ratio: 16 / 9; background: linear-gradient(135deg, #CCFBF1 0%, #5EEAD4 100%); overflow: hidden; }
+        .detail-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .detail-back {
+            position: absolute; top: calc(1rem + env(safe-area-inset-top)); left: 1rem;
+            background: rgba(255,255,255,0.95); border-radius: 50%;
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            color: #111827; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .detail-share {
+            position: absolute; top: calc(1rem + env(safe-area-inset-top)); right: 1rem;
+            background: rgba(255,255,255,0.95); border-radius: 50%;
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            color: #111827; border: none; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .detail-content { padding: 1.25rem; background: white; margin-top: -16px; border-radius: 24px 24px 0 0; position: relative; z-index: 2; }
+
+        .badge-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+        .badge { font-size: 0.7rem; font-weight: 700; padding: 0.3rem 0.65rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.03em; }
+        .badge-cat { background: #CCFBF1; color: #0F766E; }
+        .badge-official { background: linear-gradient(135deg, #14B8A6, #0F766E); color: white; }
+        .badge-past { background: #F3F4F6; color: #6B7280; }
+
+        .event-title { font-size: 1.6rem; font-weight: 800; color: #111827; margin: 0 0 0.5rem; line-height: 1.25; }
+        .event-organizer-line { color: #6B7280; font-size: 0.9rem; margin-bottom: 1rem; }
+
+        .meta-grid { display: flex; flex-direction: column; gap: 0.75rem; padding: 1rem; background: #F9FAFB; border-radius: 12px; margin-bottom: 1rem; }
+        .meta-row { display: flex; align-items: flex-start; gap: 0.75rem; }
+        .meta-icon { font-size: 1.25rem; flex-shrink: 0; width: 24px; }
+        .meta-content { flex: 1; }
+        .meta-label { font-size: 0.75rem; color: #6B7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+        .meta-value { color: #111827; font-size: 0.95rem; font-weight: 500; }
+
+        .description-section { margin-bottom: 1.5rem; }
+        .description-section h3 { font-size: 1rem; font-weight: 700; color: #111827; margin: 0 0 0.5rem; }
+        .description-text { color: #374151; font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; }
+
+        .interest-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; border-top: 1px solid #E5E7EB;
+            padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom));
+            display: flex; gap: 0.75rem; z-index: 50;
+        }
+        .btn-primary {
+            flex: 1; padding: 0.85rem; border-radius: 12px;
+            background: linear-gradient(135deg, #14B8A6, #0F766E); color: white;
+            font-size: 1rem; font-weight: 700; border: none; cursor: pointer;
+        }
+        .btn-primary.going { background: #DCFCE7; color: #166534; }
+        .btn-secondary {
+            padding: 0.85rem 1.25rem; border-radius: 12px;
+            background: white; color: #374151; border: 1px solid #E5E7EB;
+            font-size: 1rem; font-weight: 600; cursor: pointer;
+        }
+
+        .going-count { color: #6B7280; font-size: 0.85rem; margin-bottom: 0.5rem; }
+
+        .external-link {
+            display: inline-block; margin-top: 0.5rem;
+            color: #0F766E; text-decoration: none; font-size: 0.9rem; font-weight: 600;
+        }
+
+        .loading { text-align: center; padding: 4rem 1rem; color: #9CA3AF; }
+
+        /* Report Button + Modal */
+        .report-link {
+            display: inline-block; margin-top: 1rem; padding: 0.5rem 0;
+            color: #9CA3AF; font-size: 0.85rem; text-decoration: none;
+            background: none; border: none; cursor: pointer;
+        }
+        .report-link:hover { color: #EF4444; }
+
+        .report-modal-bg {
+            position: fixed; inset: 0; background: rgba(17,24,39,0.6);
+            display: none; align-items: center; justify-content: center;
+            z-index: 200; padding: 1rem;
+        }
+        .report-modal-bg.active { display: flex; }
+        .report-modal {
+            background: white; border-radius: 16px; padding: 1.5rem;
+            max-width: 420px; width: 100%; max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+        }
+        .report-modal h3 { margin: 0 0 0.5rem; font-size: 1.1rem; font-weight: 700; color: #111827; }
+        .report-modal p { margin: 0 0 1rem; color: #6B7280; font-size: 0.9rem; }
+        .report-options { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+        .report-option {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.65rem 0.75rem; border: 1px solid #E5E7EB; border-radius: 10px;
+            cursor: pointer; transition: all 0.15s; font-size: 0.9rem; color: #374151;
+        }
+        .report-option:hover { border-color: #14B8A6; background: #F0FDFA; }
+        .report-option input { margin: 0; }
+        .report-option.checked { border-color: #14B8A6; background: #F0FDFA; color: #0F766E; font-weight: 600; }
+        .report-details {
+            width: 100%; padding: 0.65rem 0.75rem; border: 1px solid #E5E7EB; border-radius: 10px;
+            font-size: 0.9rem; font-family: inherit; min-height: 70px; resize: vertical;
+        }
+        .report-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        .report-actions .btn {
+            flex: 1; padding: 0.7rem; border-radius: 10px;
+            font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none;
+        }
+        .report-actions .btn-cancel { background: #F3F4F6; color: #374151; }
+        .report-actions .btn-submit { background: #EF4444; color: white; }
+        .report-actions .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div id="loadingState" class="loading">
+        <div style="font-size:2rem;">⏳</div>
+        <p>Lade Event...</p>
+    </div>
+
+    <div id="eventContent" style="display:none;">
+        <div class="detail-hero" id="eventHero">
+            <a href="events.html" class="detail-back" aria-label="Zurück">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </a>
+            <button class="detail-share" onclick="shareEvent()" aria-label="Teilen">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            </button>
+        </div>
+
+        <div class="detail-content">
+            <div class="badge-row" id="badgeRow"></div>
+            <h1 class="event-title" id="eventTitle"></h1>
+            <div class="event-organizer-line" id="eventOrganizer"></div>
+
+            <div class="meta-grid" id="metaGrid"></div>
+
+            <div class="description-section">
+                <h3>Beschreibung</h3>
+                <div class="description-text" id="eventDescription"></div>
+                <a id="externalLink" class="external-link" target="_blank" rel="noopener" style="display:none;">→ Mehr Infos</a>
+            </div>
+
+            <div class="going-count" id="goingCount"></div>
+
+            <button id="reportLink" class="report-link" onclick="openReportModal()" style="display:none;">
+                ⚠️ Event melden
+            </button>
+        </div>
+    </div>
+
+    <div id="reportModalBg" class="report-modal-bg" onclick="if(event.target===this) closeReportModal()">
+        <div class="report-modal">
+            <h3>Event melden</h3>
+            <p>Was stimmt mit diesem Event nicht? Wir pruefen jede Meldung.</p>
+
+            <div class="report-options" id="reportOptions">
+                <label class="report-option"><input type="radio" name="reason" value="spam"><span>Spam / Werbung</span></label>
+                <label class="report-option"><input type="radio" name="reason" value="illegal"><span>Illegale Inhalte (Drogen, Waffen)</span></label>
+                <label class="report-option"><input type="radio" name="reason" value="hate"><span>Hass / Diskriminierung</span></label>
+                <label class="report-option"><input type="radio" name="reason" value="fake"><span>Fake / Existiert nicht</span></label>
+                <label class="report-option"><input type="radio" name="reason" value="duplicate"><span>Doppelt</span></label>
+                <label class="report-option"><input type="radio" name="reason" value="other"><span>Anderer Grund</span></label>
+            </div>
+
+            <textarea id="reportDetails" class="report-details" placeholder="Optional: Details (max 500 Zeichen)" maxlength="500"></textarea>
+
+            <div class="report-actions">
+                <button class="btn btn-cancel" onclick="closeReportModal()">Abbrechen</button>
+                <button id="reportSubmitBtn" class="btn btn-submit" onclick="submitReport()" disabled>Melden</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="interestBar" class="interest-bar" style="display:none;">
+        <button id="goingBtn" class="btn-primary" onclick="toggleGoing()">Ich gehe hin</button>
+        <button class="btn-secondary" onclick="navigateTo('events.html')">Zurück</button>
+    </div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="navigation.js"></script>
+<script src="room8-utils.js"></script>
+<script>
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    function escapeHtml(t) { if (t === null || t === undefined) return ''; return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function navigateTo(url) { try { window.location.href = url; } catch(e) {} }
+
+    var CATEGORY_LABELS = { party:'Party', lecture:'Vortrag', workshop:'Workshop', sport:'Sport', culture:'Kultur', networking:'Networking', food:'Essen', other:'Event' };
+
+    var eventId = new URLSearchParams(window.location.search).get('id');
+    var currentEvent = null;
+    var currentUserId = null;
+    var userIsGoing = false;
+
+    if (!eventId) {
+        document.getElementById('loadingState').innerHTML = '<p>Kein Event ausgewählt.</p>';
+    } else {
+        loadEvent();
+    }
+
+    async function loadEvent() {
+        try {
+            var userRes = await sb.auth.getUser();
+            currentUserId = userRes.data.user ? userRes.data.user.id : null;
+
+            var result = await sb.from('events').select('*').eq('id', eventId).single();
+            if (result.error || !result.data) {
+                document.getElementById('loadingState').innerHTML = '<p>Event nicht gefunden.</p>';
+                return;
+            }
+            currentEvent = result.data;
+
+            // Check ob User schon "going" markiert hat
+            if (currentUserId) {
+                var interestRes = await sb.from('event_interests')
+                    .select('status')
+                    .eq('event_id', eventId)
+                    .eq('user_id', currentUserId)
+                    .maybeSingle();
+                userIsGoing = interestRes.data && interestRes.data.status === 'going';
+            }
+
+            // View-Counter via RPC (atomar + SECURITY DEFINER, umgeht RLS)
+            sb.rpc('increment_event_view', { event_id_input: eventId }).then(function(){}, function(){});
+
+            renderEvent();
+        } catch (e) {
+            console.error('Event laden:', e);
+            document.getElementById('loadingState').innerHTML = '<p>Fehler beim Laden.</p>';
+        }
+    }
+
+    function renderEvent() {
+        var ev = currentEvent;
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('eventContent').style.display = 'block';
+        document.getElementById('interestBar').style.display = 'flex';
+
+        // Hero-Bild
+        var hero = document.getElementById('eventHero');
+        if (ev.cover_image_path) {
+            var url = window.Room8 ? Room8.getOptimizedImageUrl('event-images', ev.cover_image_path, { width: 1200, quality: 80 }) : null;
+            if (url) {
+                var img = document.createElement('img');
+                img.src = url;
+                img.alt = ev.title;
+                img.width = 1200; img.height = 675;
+                img.loading = 'eager';
+                img.decoding = 'async';
+                hero.insertBefore(img, hero.firstChild);
+            }
+        }
+
+        // Badges
+        var badges = '<span class="badge badge-cat">' + (CATEGORY_LABELS[ev.category] || 'Event') + '</span>';
+        if (ev.is_official) badges += '<span class="badge badge-official">Offiziell</span>';
+        var startDate = new Date(ev.start_at);
+        if (startDate < new Date()) badges += '<span class="badge badge-past">Vergangen</span>';
+        document.getElementById('badgeRow').innerHTML = badges;
+
+        // Titel + Organizer
+        document.getElementById('eventTitle').textContent = ev.title;
+        document.getElementById('eventOrganizer').textContent = ev.organizer_name ? 'von ' + ev.organizer_name : '';
+
+        // Meta-Grid
+        var meta = '';
+        meta += metaRow('🕒', 'Wann', formatFullDate(ev.start_at, ev.end_at));
+        if (ev.location || ev.address || ev.city) {
+            var locText = [ev.location, ev.address, ev.city].filter(Boolean).join(', ');
+            meta += metaRow('📍', 'Wo', locText);
+        }
+        if (ev.price !== null && ev.price !== undefined) {
+            meta += metaRow('💶', 'Preis', ev.price > 0 ? Number(ev.price).toLocaleString('de-DE', { style:'currency', currency:'EUR' }) : 'Kostenlos');
+        }
+        if (ev.max_participants) {
+            meta += metaRow('👥', 'Plätze', ev.max_participants + ' max.');
+        }
+        document.getElementById('metaGrid').innerHTML = meta;
+
+        // Beschreibung
+        document.getElementById('eventDescription').textContent = ev.description || 'Keine Beschreibung.';
+
+        // External Link (sanitize gegen javascript:/data: URLs)
+        // AI-LOCK: sanitizeUrl + https-Regex ist XSS-Schutz. Spec: events-system.md
+        if (ev.external_url) {
+            var safeUrl = window.Room8 ? Room8.sanitizeUrl(ev.external_url) : '';
+            // Zusaetzlich: nur http/https erlauben
+            if (safeUrl && /^https?:\/\//i.test(safeUrl)) {
+                var link = document.getElementById('externalLink');
+                link.href = safeUrl;
+                link.style.display = 'inline-block';
+            }
+        }
+
+        // Going Count
+        document.getElementById('goingCount').textContent = (ev.interest_count || 0) > 0
+            ? '👥 ' + ev.interest_count + (ev.interest_count === 1 ? ' Person geht hin' : ' Leute gehen hin')
+            : '';
+
+        // Going Button State
+        updateGoingButton();
+
+        // Report-Link anzeigen (wenn User eingeloggt + nicht eigenes Event)
+        showReportLink();
+    }
+
+    function metaRow(icon, label, value) {
+        return '<div class="meta-row">' +
+            '<span class="meta-icon">' + icon + '</span>' +
+            '<div class="meta-content">' +
+                '<div class="meta-label">' + label + '</div>' +
+                '<div class="meta-value">' + escapeHtml(value) + '</div>' +
+            '</div>' +
+        '</div>';
+    }
+
+    function formatFullDate(startIso, endIso) {
+        var s = new Date(startIso);
+        var dateStr = s.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+        var timeStr = s.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+        var result = dateStr + ', ' + timeStr;
+        if (endIso) {
+            var e = new Date(endIso);
+            var endTime = e.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+            result += ' - ' + endTime + ' Uhr';
+        } else {
+            result += ' Uhr';
+        }
+        return result;
+    }
+
+    function updateGoingButton() {
+        var btn = document.getElementById('goingBtn');
+        if (userIsGoing) {
+            btn.textContent = '✓ Du gehst hin';
+            btn.classList.add('going');
+        } else {
+            btn.textContent = 'Ich gehe hin';
+            btn.classList.remove('going');
+        }
+    }
+
+    async function toggleGoing() {
+        if (!currentUserId) {
+            navigateTo('login.html?redirect=' + encodeURIComponent(window.location.href));
+            return;
+        }
+
+        var btn = document.getElementById('goingBtn');
+        btn.disabled = true;
+
+        try {
+            if (userIsGoing) {
+                await sb.from('event_interests').delete()
+                    .eq('event_id', eventId).eq('user_id', currentUserId);
+                userIsGoing = false;
+                if (currentEvent.interest_count > 0) currentEvent.interest_count -= 1;
+            } else {
+                await sb.from('event_interests').upsert({
+                    event_id: eventId,
+                    user_id: currentUserId,
+                    status: 'going'
+                }, { onConflict: 'event_id,user_id' });
+                userIsGoing = true;
+                currentEvent.interest_count = (currentEvent.interest_count || 0) + 1;
+            }
+            updateGoingButton();
+            document.getElementById('goingCount').textContent = currentEvent.interest_count > 0
+                ? '👥 ' + currentEvent.interest_count + (currentEvent.interest_count === 1 ? ' Person geht hin' : ' Leute gehen hin')
+                : '';
+        } catch (e) {
+            console.error('Going toggle:', e);
+            if (window.Room8) Room8.showToast('Fehler. Bitte erneut versuchen.', 'error');
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    function shareEvent() {
+        var url = window.location.href;
+        var title = currentEvent ? currentEvent.title : 'Room8 Event';
+        if (navigator.share) {
+            navigator.share({ title: title, url: url }).catch(function(){});
+        } else {
+            navigator.clipboard.writeText(url);
+            if (window.Room8) Room8.showToast('Link kopiert', 'success');
+        }
+    }
+
+    // ============================================
+    // REPORT-FUNKTION
+    // ============================================
+    function showReportLink() {
+        // Report-Link nur zeigen wenn eingeloggt UND nicht eigenes Event
+        if (currentUserId && currentEvent && currentEvent.organizer_id !== currentUserId) {
+            document.getElementById('reportLink').style.display = 'inline-block';
+        }
+    }
+
+    function openReportModal() {
+        document.getElementById('reportModalBg').classList.add('active');
+    }
+
+    function closeReportModal() {
+        document.getElementById('reportModalBg').classList.remove('active');
+        document.querySelectorAll('input[name="reason"]').forEach(function(r) { r.checked = false; });
+        document.querySelectorAll('.report-option').forEach(function(o) { o.classList.remove('checked'); });
+        document.getElementById('reportDetails').value = '';
+        document.getElementById('reportSubmitBtn').disabled = true;
+    }
+
+    // Radio-Klick = Visual-State + Submit aktivieren
+    document.getElementById('reportOptions').addEventListener('change', function(e) {
+        if (e.target.name === 'reason') {
+            document.querySelectorAll('.report-option').forEach(function(o) { o.classList.remove('checked'); });
+            e.target.closest('.report-option').classList.add('checked');
+            document.getElementById('reportSubmitBtn').disabled = false;
+        }
+    });
+
+    async function submitReport() {
+        var btn = document.getElementById('reportSubmitBtn');
+        var checked = document.querySelector('input[name="reason"]:checked');
+        if (!checked) return;
+
+        if (!currentUserId) {
+            navigateTo('login.html?redirect=' + encodeURIComponent(window.location.href));
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Senden...';
+
+        try {
+            var details = document.getElementById('reportDetails').value.trim();
+            var rpcRes = await sb.rpc('report_event', {
+                event_id_input: eventId,
+                reason_input: checked.value,
+                details_input: details || null
+            });
+
+            if (rpcRes.error) {
+                console.error('Report Fehler:', rpcRes.error);
+                if (window.Room8) Room8.showToast('Fehler beim Melden', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Melden';
+                return;
+            }
+
+            // RPC liefert {success, error?} zurueck
+            var result = rpcRes.data;
+            if (result && result.success === false) {
+                var msg = 'Fehler';
+                if (result.error === 'already_reported') msg = 'Du hast dieses Event bereits gemeldet';
+                else if (result.error === 'cant_report_own') msg = 'Du kannst dein eigenes Event nicht melden';
+                else if (result.error === 'event_not_found') msg = 'Event nicht gefunden';
+                else if (result.error === 'not_authenticated') msg = 'Bitte einloggen';
+                if (window.Room8) Room8.showToast(msg, 'error');
+                btn.disabled = false;
+                btn.textContent = 'Melden';
+                return;
+            }
+
+            if (window.Room8) Room8.showToast('Danke - Meldung eingegangen', 'success');
+            closeReportModal();
+            // Report-Link verstecken (User hat schon gemeldet)
+            document.getElementById('reportLink').style.display = 'none';
+
+        } catch (e) {
+            console.error('Report Submit:', e);
+            if (window.Room8) Room8.showToast('Fehler beim Melden', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Melden';
+        }
+    }
+</script>
+
+</body>
+</html>

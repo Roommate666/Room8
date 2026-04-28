@@ -2,7 +2,9 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Coupons - Room8</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <title>Coupons - Room8</title>
+    <meta name="description" content="Spare mit exklusiven Studenten-Coupons und Rabatten. Angebote von lokalen Partnern auf Room8.">
     <link rel="stylesheet" href="style.css">
     <style>
         .app-container { --primary-color: #F59E0B; --primary-dark: #D97706; background-color: #f3f4f6; padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px); }
@@ -392,29 +394,38 @@
     var filterBtns = document.querySelectorAll('.filter-btn');
     var currentCat = 'all';
 
-    // Coupons laden
+    // Coupons laden (mit JOIN auf coupon_photos fuer Bilder)
     async function loadCoupons() {
         try {
-            // Versuche echte Coupons zu laden
             var result = await sb
                 .from('coupons')
-                .select('*')
+                .select('*, coupon_photos(storage_path, photo_type)')
                 .eq('status', 'active')
                 .order('created_at', { ascending: false });
 
             console.log("Coupons geladen:", result);
 
-            // Falls Fehler, probiere ohne status filter
             if (result.error) {
                 console.log("Fehler mit status filter, probiere ohne...");
-                result = await sb.from('coupons').select('*').order('created_at', { ascending: false });
+                result = await sb.from('coupons').select('*, coupon_photos(storage_path, photo_type)').order('created_at', { ascending: false });
                 console.log("Ohne Filter:", result);
             }
 
             if (!result.error && result.data && result.data.length > 0) {
-                // Echte Coupons gefunden
                 console.log("Anzahl Coupons:", result.data.length);
-                allCoupons = result.data;
+                allCoupons = result.data.map(function(c) {
+                    if (c.coupon_photos && c.coupon_photos.length > 0) {
+                        c.coupon_photos.forEach(function(p) {
+                            if (p.photo_type === 'cover' && !c.imageUrl) {
+                                c.imageUrl = window.Room8 ? Room8.getOptimizedImageUrl('coupon-images', p.storage_path, { width: 600, height: 400, quality: 75 }) : null;
+                            }
+                            if (p.photo_type === 'logo' && !c.logoUrl) {
+                                c.logoUrl = window.Room8 ? Room8.getOptimizedImageUrl('coupon-images', p.storage_path, { width: 100, height: 100, quality: 75 }) : null;
+                            }
+                        });
+                    }
+                    return c;
+                });
             } else {
                 // Keine echten Coupons
                 console.log("Keine echten Coupons gefunden, Fehler:", result.error);
@@ -465,7 +476,7 @@
             var emojiHtml = c.isExample ? '<span class="coupon-image-emoji">' + c.logo + '</span>' : '';
             
             // Logo
-            var logoHtml = c.logoUrl ? '<img src="' + c.logoUrl + '" alt="Logo">' : (c.logo || '🏪');
+            var logoHtml = c.logoUrl ? '<img src="' + c.logoUrl + '" alt="Logo" width="40" height="40" loading="lazy" decoding="async">' : (c.logo || '🏪');
             
             card.innerHTML = 
                 '<div class="coupon-image" style="' + bgStyle + '">' +

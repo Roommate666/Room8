@@ -13,6 +13,7 @@
     "@capacitor/android": "^7.4.4",
     "@capacitor/cli": "^7.4.4",
     "@capacitor/core": "^7.4.4",
+    "@capacitor/ios": "^7.6.2",
     "@capacitor/push-notifications": "^7.0.4",
     "jsonwebtoken": "^9.0.3",
     "puppeteer": "^24.37.3"

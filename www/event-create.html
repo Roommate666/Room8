@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <title>Event erstellen - Room8</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .app-container { background-color: #f3f4f6; padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+        .app-header {
+            display: grid; grid-template-columns: 40px 1fr 40px;
+            align-items: center;
+            padding: calc(1.5rem + env(safe-area-inset-top)) 1.5rem 1.5rem;
+            background: linear-gradient(135deg, #14B8A6 0%, #0F766E 100%);
+            color: white; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;
+            box-shadow: 0 4px 20px rgba(20,184,166,0.25);
+            margin-bottom: 1.25rem;
+        }
+        .back-btn { color: white; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+        .app-header h1 { color: white; margin: 0; font-size: 1.4rem; font-weight: 800; text-align: center; }
+
+        .form-container { padding: 0 1.25rem; }
+        .form-section { background: white; border-radius: 16px; padding: 1.25rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+
+        .form-group { margin-bottom: 1rem; }
+        .form-group:last-child { margin-bottom: 0; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.4rem; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 0.75rem; border: 1px solid #E5E7EB; border-radius: 10px;
+            font-size: 1rem; font-family: inherit; background: white;
+            -webkit-appearance: none; appearance: none;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none; border-color: #14B8A6; box-shadow: 0 0 0 3px rgba(20,184,166,0.15);
+        }
+        .form-group textarea { min-height: 120px; resize: vertical; }
+        .form-group .hint { font-size: 0.75rem; color: #9CA3AF; margin-top: 0.25rem; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+        .image-upload-zone {
+            border: 2px dashed #D1D5DB; border-radius: 12px; padding: 2rem 1rem;
+            text-align: center; cursor: pointer; background: #F9FAFB;
+            transition: all 0.2s;
+        }
+        .image-upload-zone:hover { border-color: #14B8A6; background: #F0FDFA; }
+        .image-upload-zone .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .image-upload-zone .text { color: #6B7280; font-size: 0.9rem; }
+        .image-preview { max-width: 100%; border-radius: 12px; margin-top: 0.75rem; max-height: 240px; object-fit: cover; display: block; }
+
+        .submit-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; border-top: 1px solid #E5E7EB;
+            padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom));
+            display: flex; gap: 0.75rem; z-index: 50;
+        }
+        .btn-primary {
+            flex: 1; padding: 0.85rem; border-radius: 12px;
+            background: linear-gradient(135deg, #14B8A6, #0F766E); color: white;
+            font-size: 1rem; font-weight: 700; border: none; cursor: pointer;
+        }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-secondary {
+            padding: 0.85rem 1.25rem; border-radius: 12px;
+            background: white; color: #374151; border: 1px solid #E5E7EB;
+            font-size: 1rem; font-weight: 600; cursor: pointer;
+        }
+
+        /* Verification Overlay - Glasmorphismus (Pattern wie Marktplatz/Wohnungen) */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
+        .verify-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        .verify-overlay.active { display: flex; }
+        .verify-overlay-box {
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            max-width: 360px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(0,0,0,0.04);
+            animation: blurFadeIn 0.4s ease-out both;
+        }
+        .verify-overlay-box .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .verify-overlay-box h2 { font-size: 1.3rem; margin-bottom: 0.5rem; color: #1f2937; font-weight: 800; letter-spacing: -0.02em; }
+        .verify-overlay-box p { color: #6b7280; font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; }
+        .verify-overlay-box a {
+            display: inline-block;
+            background: linear-gradient(135deg, #14B8A6, #0F766E);
+            color: white;
+            padding: 0.85rem 2rem;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(20,184,166,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .verify-overlay-box a:active { transform: scale(0.97); }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Verification Overlay (Pattern wie Marktplatz/Wohnungen) -->
+    <div class="verify-overlay" id="verifyOverlay">
+        <div class="verify-overlay-box">
+            <div class="icon">🔒</div>
+            <h2>Verifizierung erforderlich</h2>
+            <p>Um Events zu erstellen, musst du zuerst deinen Studentenstatus verifizieren.</p>
+            <a href="verify-options.html">Jetzt verifizieren</a>
+        </div>
+    </div>
+
+    <!-- Permission Overlay: User ist verifiziert aber hat noch keine Event-Erlaubnis -->
+    <div class="verify-overlay" id="permissionOverlay">
+        <div class="verify-overlay-box" style="max-width: 460px;">
+            <div class="icon">📅</div>
+            <h2 id="permissionHeadline">Erlaubnis beantragen</h2>
+            <p id="permissionDescription">Events können nur von freigeschalteten Veranstaltern erstellt werden (z.B. AStA, Vereine, Hochschul-Accounts). Stell einen Antrag und wir prüfen ihn.</p>
+
+            <!-- Pending-State -->
+            <div id="permissionPending" style="display:none; text-align:left; background:#FEF3C7; border:1px solid #FCD34D; border-radius:12px; padding:1rem; margin-bottom:1rem;">
+                <div style="font-weight:700; color:#92400E; margin-bottom:0.4rem;">⏳ Antrag wird geprüft</div>
+                <div style="color:#78350F; font-size:0.85rem;">Wir melden uns bei dir, sobald der Antrag bearbeitet ist. Du bekommst eine Benachrichtigung.</div>
+            </div>
+
+            <!-- Antrag-Form -->
+            <form id="permissionForm" style="text-align:left;">
+                <div style="margin-bottom:0.75rem;">
+                    <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Organisation / Verein</label>
+                    <input type="text" id="reqOrgName" required maxlength="200" placeholder="z.B. AStA Uni Augsburg, Studentencafé XYZ"
+                        style="width:100%; padding:0.65rem; border:1px solid #E5E7EB; border-radius:10px; font-size:0.95rem; -webkit-appearance:none;">
+                </div>
+                <div style="margin-bottom:0.75rem;">
+                    <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Art der Organisation</label>
+                    <select id="reqOrgType" required style="width:100%; padding:0.65rem; border:1px solid #E5E7EB; border-radius:10px; font-size:0.95rem; background:white; -webkit-appearance:none;">
+                        <option value="">-- Bitte wählen --</option>
+                        <option value="asta">AStA / Studierendenvertretung</option>
+                        <option value="university">Universität / Hochschule</option>
+                        <option value="student_association">Studentischer Verein</option>
+                        <option value="partner">Partner / Sponsor</option>
+                        <option value="private">Privat (Party, Treffen)</option>
+                        <option value="other">Sonstiges</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:1rem;">
+                    <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Begründung</label>
+                    <textarea id="reqReason" required maxlength="1000" minlength="10" placeholder="Was möchtest du veröffentlichen? Wer steht dahinter?"
+                        style="width:100%; padding:0.65rem; border:1px solid #E5E7EB; border-radius:10px; font-size:0.95rem; min-height:80px; resize:vertical; font-family:inherit;"></textarea>
+                </div>
+                <button type="submit" id="reqSubmitBtn"
+                    style="width:100%; padding:0.85rem; background:linear-gradient(135deg,#14B8A6,#0F766E); color:white; border:none; border-radius:12px; font-weight:700; font-size:0.95rem; cursor:pointer;">
+                    Antrag absenden
+                </button>
+                <a href="events.html" style="display:block; text-align:center; margin-top:0.75rem; color:#6B7280; text-decoration:none; font-size:0.85rem;">Zurück</a>
+            </form>
+        </div>
+    </div>
+
+    <header class="app-header">
+        <a href="events.html" class="back-btn" aria-label="Zurück">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </a>
+        <h1>Event erstellen</h1>
+        <div></div>
+    </header>
+
+    <form id="eventForm" class="form-container" style="display:none;">
+        <div class="form-section">
+            <div class="form-group">
+                <label for="title">Titel *</label>
+                <input type="text" id="title" required maxlength="100" placeholder="z.B. Sommerfest am Lechufer">
+            </div>
+
+            <div class="form-group">
+                <label for="category">Kategorie *</label>
+                <select id="category" required>
+                    <option value="">-- Bitte wählen --</option>
+                    <option value="party">🎉 Party</option>
+                    <option value="lecture">📚 Vortrag</option>
+                    <option value="workshop">🛠️ Workshop</option>
+                    <option value="sport">⚽ Sport</option>
+                    <option value="culture">🎭 Kultur</option>
+                    <option value="networking">🤝 Networking</option>
+                    <option value="food">🍕 Essen & Trinken</option>
+                    <option value="other">📌 Sonstiges</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Beschreibung *</label>
+                <textarea id="description" required maxlength="2000" placeholder="Was passiert? Wer ist eingeladen? Gibt es Drinks/Snacks?"></textarea>
+                <div class="hint"><span id="descCount">0</span> / 2000 Zeichen</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 style="margin-top:0; font-size:1rem; font-weight:700;">Wann</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="startDate">Datum *</label>
+                    <input type="date" id="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="startTime">Uhrzeit *</label>
+                    <input type="time" id="startTime" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="endDate">Ende (optional)</label>
+                    <input type="date" id="endDate">
+                </div>
+                <div class="form-group">
+                    <label for="endTime">Uhrzeit</label>
+                    <input type="time" id="endTime">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 style="margin-top:0; font-size:1rem; font-weight:700;">Wo</h3>
+            <div class="form-group">
+                <label for="location">Veranstaltungsort *</label>
+                <input type="text" id="location" required maxlength="100" placeholder="z.B. Hörsaal A, Mensa, AStA-Café">
+            </div>
+            <div class="form-group">
+                <label for="address">Adresse (optional)</label>
+                <input type="text" id="address" maxlength="150" placeholder="Universitätsstr. 2">
+            </div>
+            <div class="form-group">
+                <label for="city">Stadt *</label>
+                <input type="text" id="city" required maxlength="80" placeholder="Augsburg">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 style="margin-top:0; font-size:1rem; font-weight:700;">Details (optional)</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="price">Preis (EUR)</label>
+                    <input type="number" id="price" min="0" step="0.50" placeholder="0 = kostenlos">
+                </div>
+                <div class="form-group">
+                    <label for="maxParticipants">Max. Plätze</label>
+                    <input type="number" id="maxParticipants" min="1" placeholder="leer = unbegrenzt">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="organizerName">Veranstalter-Name</label>
+                <input type="text" id="organizerName" maxlength="100" placeholder="z.B. AStA Uni Augsburg">
+                <div class="hint">Wird auf der Event-Seite angezeigt</div>
+            </div>
+            <div class="form-group">
+                <label for="externalUrl">Externer Link (optional)</label>
+                <input type="url" id="externalUrl" placeholder="https://eventbrite.com/...">
+                <div class="hint">Tickets, Eventbrite, Uni-Website etc.</div>
+            </div>
+        </div>
+
+        <div class="form-section" id="trustedSection" style="display:none;">
+            <h3 style="margin-top:0; font-size:1rem; font-weight:700;">Verifizierter Veranstalter</h3>
+            <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; padding:0.65rem; border:1px solid #14B8A6; border-radius:10px; background:#F0FDFA;">
+                <input type="checkbox" id="isOfficial">
+                <span style="font-size:0.9rem; color:#0F766E; font-weight:600;">Als offizielles Event markieren (Badge "Offiziell")</span>
+            </label>
+            <div class="hint" style="margin-top:0.5rem;">Du bist als Trusted Organizer freigeschaltet. Nutze diese Markierung nur für offizielle Events deiner Organisation.</div>
+        </div>
+
+        <div class="form-section">
+            <h3 style="margin-top:0; font-size:1rem; font-weight:700;">Cover-Bild</h3>
+            <div class="image-upload-zone" id="uploadZone" onclick="document.getElementById('coverImage').click();">
+                <div class="icon">🖼️</div>
+                <div class="text">Bild auswählen (optional)</div>
+                <div class="hint" style="margin-top:0.25rem;">Empfohlen: 1200x675 (16:9), max 5 MB</div>
+            </div>
+            <input type="file" id="coverImage" accept="image/*" style="display:none;">
+            <img id="imagePreview" class="image-preview" style="display:none;">
+        </div>
+    </form>
+
+    <div id="submitBar" class="submit-bar" style="display:none;">
+        <button class="btn-secondary" onclick="navigateTo('events.html')">Abbrechen</button>
+        <button id="submitBtn" class="btn-primary" onclick="submitEvent()">Event erstellen</button>
+    </div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="navigation.js"></script>
+<script src="room8-utils.js"></script>
+<script>
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    function navigateTo(url) { try { window.location.href = url; } catch(e) {} }
+
+    var currentUserId = null;
+    var coverFile = null;
+
+    init();
+
+    async function init() {
+        var userRes = await sb.auth.getUser();
+        if (!userRes.data.user) {
+            navigateTo('login.html?redirect=' + encodeURIComponent('event-create.html'));
+            return;
+        }
+        currentUserId = userRes.data.user.id;
+
+        // Pruefen ob User verifiziert + freigeschaltet
+        var profileRes = await sb.from('profiles')
+            .select('is_verified, is_student_verified, full_name, username, trusted_organizer, can_create_events')
+            .eq('id', currentUserId).single();
+
+        var isVerified = profileRes.data && (profileRes.data.is_verified || profileRes.data.is_student_verified);
+        var isTrusted = profileRes.data && profileRes.data.trusted_organizer === true;
+        var canCreate = profileRes.data && profileRes.data.can_create_events === true;
+
+        if (!isVerified) {
+            document.getElementById('verifyOverlay').classList.add('active');
+            window.scrollTo(0, 0);
+            document.body.style.overflow = 'hidden';
+            return;
+        }
+
+        if (!canCreate) {
+            // Verifiziert, aber keine Event-Erlaubnis -> Antrag-Overlay
+            await showPermissionOverlay();
+            return;
+        }
+
+        // Trusted-Section nur fuer Trusted-Organizer
+        if (isTrusted) {
+            document.getElementById('trustedSection').style.display = 'block';
+            window.__userIsTrusted = true;
+        }
+
+        document.getElementById('eventForm').style.display = 'block';
+        document.getElementById('submitBar').style.display = 'flex';
+
+        // Default Organizer-Name vorausfuellen
+        if (profileRes.data) {
+            document.getElementById('organizerName').value = profileRes.data.full_name || profileRes.data.username || '';
+        }
+
+        // Default Datum: heute
+        var today = new Date();
+        document.getElementById('startDate').value = today.toISOString().split('T')[0];
+
+        // Description Counter
+        document.getElementById('description').addEventListener('input', function(e) {
+            document.getElementById('descCount').textContent = e.target.value.length;
+        });
+
+        // Image Preview
+        document.getElementById('coverImage').addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) {
+                if (window.Room8) Room8.showToast('Bild zu groß (max 5 MB)', 'error');
+                e.target.value = '';
+                return;
+            }
+            // AI-LOCK: SVG-Block ist Pflicht (XSS-Risiko ueber storage). Spec: image-pipeline.md
+            // Allowlist: nur sichere Bild-Formate. SVG ist verboten (XSS-Risiko).
+            var ALLOWED_EXT = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+            var ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+            var ext = (file.name.split('.').pop() || '').toLowerCase();
+            if (ALLOWED_EXT.indexOf(ext) === -1 || ALLOWED_MIME.indexOf(file.type) === -1) {
+                if (window.Room8) Room8.showToast('Nur JPG, PNG, WebP, GIF erlaubt', 'error');
+                e.target.value = '';
+                return;
+            }
+            coverFile = file;
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+                var preview = document.getElementById('imagePreview');
+                preview.src = ev.target.result;
+                preview.style.display = 'block';
+                document.getElementById('uploadZone').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    async function submitEvent() {
+        var btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Wird erstellt...';
+
+        try {
+            // Validierung
+            var title = document.getElementById('title').value.trim();
+            var category = document.getElementById('category').value;
+            var description = document.getElementById('description').value.trim();
+            var startDate = document.getElementById('startDate').value;
+            var startTime = document.getElementById('startTime').value;
+            var location = document.getElementById('location').value.trim();
+            var city = document.getElementById('city').value.trim();
+
+            if (!title || !category || !description || !startDate || !startTime || !location || !city) {
+                if (window.Room8) Room8.showToast('Bitte alle Pflichtfelder ausfüllen', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Event erstellen';
+                return;
+            }
+
+            var startAt = new Date(startDate + 'T' + startTime);
+            if (startAt < new Date()) {
+                if (window.Room8) Room8.showToast('Startzeit muss in der Zukunft liegen', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Event erstellen';
+                return;
+            }
+
+            var endAt = null;
+            var endDate = document.getElementById('endDate').value;
+            var endTime = document.getElementById('endTime').value;
+            if (endDate && endTime) {
+                var endDateObj = new Date(endDate + 'T' + endTime);
+                if (endDateObj <= startAt) {
+                    if (window.Room8) Room8.showToast('Endzeit muss nach Startzeit liegen', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Event erstellen';
+                    return;
+                }
+                endAt = endDateObj.toISOString();
+            }
+
+            var priceVal = document.getElementById('price').value;
+            var maxParticipants = document.getElementById('maxParticipants').value;
+            var externalUrl = document.getElementById('externalUrl').value.trim();
+            var organizerName = document.getElementById('organizerName').value.trim();
+            var address = document.getElementById('address').value.trim();
+
+            // Bild komprimieren + hochladen
+            var coverImagePath = null;
+            if (coverFile) {
+                // Browser-side Compression: 1600px Kante, JPEG q82
+                // iPhone 5 MB -> ~300-500 KB, schneller Upload + weniger Storage-Kosten
+                var fileToUpload = coverFile;
+                if (window.Room8 && Room8.compressImage) {
+                    btn.textContent = 'Komprimiere Bild...';
+                    fileToUpload = await Room8.compressImage(coverFile, { maxDim: 1600, quality: 0.82 });
+                }
+                btn.textContent = 'Lade Bild hoch...';
+                var fileName = currentUserId + '/' + Date.now() + '.jpg';
+                var uploadRes = await sb.storage.from('event-images').upload(fileName, fileToUpload, {
+                    cacheControl: '3600', upsert: false
+                });
+                if (uploadRes.error) {
+                    console.error('Upload Fehler:', uploadRes.error);
+                    if (window.Room8) Room8.showToast('Bild-Upload fehlgeschlagen', 'error');
+                } else {
+                    coverImagePath = fileName;
+                }
+                btn.textContent = 'Wird erstellt...';
+            }
+
+            // Trusted-Organizer Felder (Server-Trigger erzwingt Schutz, das hier ist nur UI)
+            var isOfficialChecked = document.getElementById('isOfficial') && document.getElementById('isOfficial').checked;
+            var organizerType = 'student';
+            // Trusted-User koennen ueber UI hochstufen, sonst zwingt Trigger zurueck
+            if (window.__userIsTrusted === true) {
+                organizerType = 'partner';
+            }
+
+            // Event in DB einfuegen
+            var insertRes = await sb.from('events').insert({
+                title: title,
+                category: category,
+                description: description,
+                start_at: startAt.toISOString(),
+                end_at: endAt,
+                location: location,
+                address: address || null,
+                city: city,
+                price: priceVal ? parseFloat(priceVal) : null,
+                max_participants: maxParticipants ? parseInt(maxParticipants) : null,
+                external_url: externalUrl || null,
+                organizer_name: organizerName || null,
+                organizer_id: currentUserId,
+                organizer_type: organizerType,
+                cover_image_path: coverImagePath,
+                is_official: isOfficialChecked === true,
+                status: 'active'
+            }).select().single();
+
+            if (insertRes.error) {
+                console.error('Insert Fehler:', insertRes.error);
+                if (window.Room8) Room8.showToast('Fehler: ' + (insertRes.error.message || 'Unbekannt'), 'error');
+                btn.disabled = false;
+                btn.textContent = 'Event erstellen';
+                return;
+            }
+
+            if (window.Room8) Room8.showToast('Event erstellt!', 'success');
+            setTimeout(function() {
+                navigateTo('event-detail.html?id=' + insertRes.data.id);
+            }, 800);
+
+        } catch (e) {
+            console.error('Submit:', e);
+            if (window.Room8) Room8.showToast('Fehler beim Erstellen', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Event erstellen';
+        }
+    }
+
+    // ============================================
+    // PERMISSION-OVERLAY (Antrag stellen)
+    // ============================================
+    async function showPermissionOverlay() {
+        // Pruefen ob User schon einen pending Request hat
+        var reqRes = await sb.from('event_creator_requests')
+            .select('id, status, organization_name, created_at')
+            .eq('user_id', currentUserId)
+            .eq('status', 'pending')
+            .maybeSingle();
+
+        var overlay = document.getElementById('permissionOverlay');
+        var pendingBox = document.getElementById('permissionPending');
+        var form = document.getElementById('permissionForm');
+        var headline = document.getElementById('permissionHeadline');
+        var description = document.getElementById('permissionDescription');
+
+        if (reqRes.data) {
+            // Pending Request existiert -> Form ausblenden, Pending-Box zeigen
+            headline.textContent = 'Antrag in Bearbeitung';
+            description.textContent = 'Wir prüfen gerade deine Anfrage für "' + reqRes.data.organization_name + '".';
+            pendingBox.style.display = 'block';
+            form.style.display = 'none';
+        } else {
+            pendingBox.style.display = 'none';
+            form.style.display = 'block';
+        }
+
+        overlay.classList.add('active');
+        window.scrollTo(0, 0);
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Antrag absenden
+    document.getElementById('permissionForm').addEventListener('submit', async function(ev) {
+        ev.preventDefault();
+        var btn = document.getElementById('reqSubmitBtn');
+        var orgName = document.getElementById('reqOrgName').value.trim();
+        var orgType = document.getElementById('reqOrgType').value;
+        var reason = document.getElementById('reqReason').value.trim();
+
+        if (!orgName || !orgType || reason.length < 10) {
+            if (window.Room8) Room8.showToast('Bitte alle Felder ausfüllen (Begründung min. 10 Zeichen)', 'error');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Wird gesendet...';
+
+        try {
+            var res = await sb.rpc('request_event_creator_permission', {
+                organization_name_input: orgName,
+                organization_type_input: orgType,
+                reason_input: reason
+            });
+
+            if (res.error) {
+                console.error('Antrag Fehler:', res.error);
+                if (window.Room8) Room8.showToast('Fehler: ' + (res.error.message || 'Unbekannt'), 'error');
+                btn.disabled = false;
+                btn.textContent = 'Antrag absenden';
+                return;
+            }
+
+            var result = res.data;
+            if (result && result.success === false) {
+                var msg = 'Fehler';
+                if (result.error === 'already_approved') msg = 'Du bist bereits freigeschaltet';
+                else if (result.error === 'already_pending') msg = 'Du hast bereits einen offenen Antrag';
+                else if (result.error === 'invalid_reason') msg = 'Begründung zu kurz oder zu lang';
+                else if (result.error === 'invalid_organization_name') msg = 'Organisationsname ungültig';
+                else if (result.error === 'not_authenticated') msg = 'Bitte einloggen';
+                if (window.Room8) Room8.showToast(msg, 'error');
+                btn.disabled = false;
+                btn.textContent = 'Antrag absenden';
+                return;
+            }
+
+            if (window.Room8) Room8.showToast('Antrag eingereicht — wir melden uns', 'success');
+            // UI auf "Pending" umstellen
+            document.getElementById('permissionHeadline').textContent = 'Antrag eingereicht';
+            document.getElementById('permissionDescription').textContent = 'Vielen Dank! Wir prüfen deinen Antrag und melden uns per Benachrichtigung.';
+            document.getElementById('permissionPending').style.display = 'block';
+            document.getElementById('permissionForm').style.display = 'none';
+        } catch (e) {
+            console.error('Antrag Submit:', e);
+            if (window.Room8) Room8.showToast('Fehler beim Senden', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Antrag absenden';
+        }
+    });
+</script>
+
+</body>
+</html>

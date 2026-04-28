@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <title>Events - Room8</title>
+    <meta name="description" content="Uni-Events, Partys, Workshops und Networking für Studenten auf Room8.">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .app-container { --primary-color: #14B8A6; --primary-dark: #0F766E; background-color: #f3f4f6; padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px); }
+
+        .app-header {
+            display: grid;
+            grid-template-columns: 40px 1fr 40px;
+            align-items: center;
+            padding: calc(1.5rem + env(safe-area-inset-top)) 1.5rem 1.5rem 1.5rem;
+            background: linear-gradient(135deg, #14B8A6 0%, #0F766E 100%);
+            color: white; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;
+            box-shadow: 0 4px 20px rgba(20, 184, 166, 0.25);
+            margin-bottom: 1.25rem;
+        }
+        .back-btn { color: white; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+        .app-header h1 { color: white; margin: 0; font-size: 1.5rem; font-weight: 800; text-align: center; letter-spacing: -0.02em; }
+
+        .filter-section { padding: 0 1.25rem 1rem; }
+        .filter-bar { display: flex; gap: 0.5rem; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 0.25rem; }
+        .filter-bar::-webkit-scrollbar { display: none; }
+        .filter-btn {
+            padding: 0.5rem 1rem; border-radius: 999px; border: 1px solid #E5E7EB;
+            background: white; color: #374151; font-size: 0.85rem; font-weight: 600;
+            white-space: nowrap; cursor: pointer; transition: all 0.2s;
+        }
+        .filter-btn.active { background: #14B8A6; color: white; border-color: #14B8A6; }
+
+        .events-list { display: flex; flex-direction: column; gap: 1rem; padding: 0 1.25rem; }
+
+        .event-card {
+            background: white; border-radius: 16px; overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            display: flex; flex-direction: column;
+        }
+        .event-card:active { transform: scale(0.98); }
+
+        .event-image-wrap {
+            position: relative; width: 100%; aspect-ratio: 16 / 9;
+            background: linear-gradient(135deg, #CCFBF1 0%, #5EEAD4 100%);
+            overflow: hidden;
+        }
+        .event-image-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .event-image-placeholder {
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            font-size: 3rem; color: #0F766E;
+        }
+        .event-date-badge {
+            position: absolute; top: 12px; left: 12px;
+            background: white; border-radius: 12px; padding: 0.5rem 0.75rem;
+            text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            min-width: 56px;
+        }
+        .event-date-badge .day { font-size: 1.25rem; font-weight: 800; color: #0F766E; line-height: 1; }
+        .event-date-badge .month { font-size: 0.65rem; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+
+        .event-official-badge {
+            position: absolute; top: 12px; right: 12px;
+            background: linear-gradient(135deg, #14B8A6, #0F766E); color: white;
+            font-size: 0.7rem; font-weight: 700; padding: 0.3rem 0.6rem;
+            border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        .event-body { padding: 1rem 1.25rem 1.25rem; }
+        .event-category-tag {
+            display: inline-block; font-size: 0.7rem; font-weight: 700;
+            color: #0F766E; background: #CCFBF1;
+            padding: 0.2rem 0.6rem; border-radius: 999px; margin-bottom: 0.5rem;
+            text-transform: uppercase; letter-spacing: 0.03em;
+        }
+        .event-title { margin: 0 0 0.4rem 0; font-size: 1.05rem; font-weight: 700; color: #111827; line-height: 1.3; }
+        .event-meta { display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 0.8rem; color: #6B7280; margin-bottom: 0.5rem; }
+        .event-meta-item { display: inline-flex; align-items: center; gap: 0.25rem; }
+        .event-organizer { font-size: 0.75rem; color: #9CA3AF; }
+        .event-stats { display: flex; gap: 0.75rem; margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px solid #F3F4F6; font-size: 0.75rem; color: #6B7280; }
+
+        .empty-state { text-align: center; padding: 3rem 1.5rem; color: #9CA3AF; }
+        .empty-state .icon { font-size: 3rem; margin-bottom: 0.75rem; }
+
+        .fab {
+            position: fixed; bottom: calc(90px + env(safe-area-inset-bottom)); right: 1.25rem;
+            width: 56px; height: 56px; border-radius: 50%;
+            background: linear-gradient(135deg, #14B8A6, #0F766E);
+            color: white; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 6px 16px rgba(20,184,166,0.35); cursor: pointer;
+            border: none; z-index: 100;
+        }
+
+        .partner-banner {
+            margin: 1rem 1.25rem; padding: 1.25rem;
+            background: linear-gradient(135deg, #ECFEFF 0%, #CFFAFE 100%);
+            border-radius: 16px; text-align: center;
+            border: 1px solid rgba(20,184,166,0.15);
+        }
+        .partner-banner h3 { margin: 0 0 0.4rem; font-size: 1rem; color: #0F766E; }
+        .partner-banner p { margin: 0 0 0.75rem; color: #047857; font-size: 0.85rem; }
+        .partner-banner .btn { display: inline-block; padding: 0.5rem 1rem; background: #14B8A6; color: white; border-radius: 999px; text-decoration: none; font-size: 0.85rem; font-weight: 600; }
+
+        .skeleton {
+            background: linear-gradient(90deg, #F3F4F6 0%, #E5E7EB 50%, #F3F4F6 100%);
+            background-size: 200% 100%; animation: skeletonShimmer 1.4s infinite;
+            border-radius: 12px;
+        }
+        @keyframes skeletonShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header class="app-header">
+        <a href="dashboard.html" class="back-btn" aria-label="Zurück">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </a>
+        <h1 data-i18n="events_title">Events</h1>
+        <a href="event-create.html" id="headerCreateBtn" class="back-btn" aria-label="Event erstellen" style="display:none;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </a>
+    </header>
+
+    <div class="filter-section">
+        <div class="filter-bar" id="eventFilter">
+            <button class="filter-btn active" data-cat="all">Alle</button>
+            <button class="filter-btn" data-cat="party">Party</button>
+            <button class="filter-btn" data-cat="lecture">Vortrag</button>
+            <button class="filter-btn" data-cat="workshop">Workshop</button>
+            <button class="filter-btn" data-cat="sport">Sport</button>
+            <button class="filter-btn" data-cat="culture">Kultur</button>
+            <button class="filter-btn" data-cat="networking">Networking</button>
+            <button class="filter-btn" data-cat="food">Essen</button>
+        </div>
+    </div>
+
+    <main style="flex:1;">
+        <div class="events-list" id="eventsContainer">
+            <div class="event-card" style="height:280px;">
+                <div class="skeleton" style="width:100%;height:160px;border-radius:16px 16px 0 0;"></div>
+                <div style="padding:1rem;">
+                    <div class="skeleton" style="width:60%;height:18px;margin-bottom:8px;"></div>
+                    <div class="skeleton" style="width:90%;height:14px;"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="app-footer-nav"></div>
+
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
+<script src="navigation.js"></script>
+<script src="room8-utils.js"></script>
+<script src="notificationBell.js"></script>
+<script>
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function navigateTo(url) { try { window.location.href = url; } catch(e) {} }
+
+    var allEvents = [];
+    var currentCat = 'all';
+    var container = document.getElementById('eventsContainer');
+
+    var CATEGORY_LABELS = {
+        party: 'Party', lecture: 'Vortrag', workshop: 'Workshop',
+        sport: 'Sport', culture: 'Kultur', networking: 'Networking',
+        food: 'Essen', other: 'Sonstiges'
+    };
+    var MONTHS_DE = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+
+    async function loadEvents() {
+        try {
+            var nowIso = new Date().toISOString();
+            var result = await sb
+                .from('events')
+                .select('*')
+                .eq('status', 'active')
+                .gte('start_at', nowIso)
+                .order('start_at', { ascending: true })
+                .limit(100);
+
+            if (result.error) {
+                console.error('Events laden Fehler:', result.error);
+                allEvents = [];
+            } else {
+                allEvents = result.data || [];
+            }
+        } catch (e) {
+            console.error('Events laden:', e);
+            allEvents = [];
+        }
+        renderEvents();
+    }
+
+    function formatEventDate(iso) {
+        if (!iso) return { day: '?', month: '', full: '' };
+        var d = new Date(iso);
+        return {
+            day: d.getDate(),
+            month: MONTHS_DE[d.getMonth()],
+            full: d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })
+                + ' ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr'
+        };
+    }
+
+    function renderEvents() {
+        var filtered = currentCat === 'all'
+            ? allEvents
+            : allEvents.filter(function(e) { return e.category === currentCat; });
+
+        if (filtered.length === 0) {
+            container.innerHTML =
+                '<div class="empty-state">' +
+                    '<div class="icon">📅</div>' +
+                    '<h3>Noch keine Events</h3>' +
+                    '<p>Sei der Erste und erstelle ein Event!</p>' +
+                '</div>';
+            return;
+        }
+
+        container.innerHTML = filtered.map(function(ev) {
+            var date = formatEventDate(ev.start_at);
+            var imageUrl = null;
+            if (ev.cover_image_path) {
+                imageUrl = window.Room8 ? Room8.getOptimizedImageUrl('event-images', ev.cover_image_path, { width: 600, height: 340, quality: 75 }) : null;
+            }
+            var imageHtml = imageUrl
+                ? '<img src="' + imageUrl + '" alt="' + escapeHtml(ev.title) + '" width="600" height="340" loading="lazy" decoding="async">'
+                : '<div class="event-image-placeholder">📅</div>';
+
+            var officialBadge = ev.is_official ? '<span class="event-official-badge">Offiziell</span>' : '';
+            var catLabel = CATEGORY_LABELS[ev.category] || 'Event';
+            var location = ev.location || ev.city || '';
+            var organizer = ev.organizer_name || '';
+
+            var goingCount = ev.interest_count || 0;
+            var goingText = goingCount === 1 ? '1 Person geht hin' : goingCount + ' Leute gehen hin';
+
+            return (
+                '<div class="event-card" onclick="navigateTo(\'event-detail.html?id=' + ev.id + '\')">' +
+                    '<div class="event-image-wrap">' +
+                        imageHtml +
+                        '<div class="event-date-badge">' +
+                            '<div class="day">' + date.day + '</div>' +
+                            '<div class="month">' + date.month + '</div>' +
+                        '</div>' +
+                        officialBadge +
+                    '</div>' +
+                    '<div class="event-body">' +
+                        '<span class="event-category-tag">' + catLabel + '</span>' +
+                        '<h3 class="event-title">' + escapeHtml(ev.title) + '</h3>' +
+                        '<div class="event-meta">' +
+                            '<span class="event-meta-item">🕒 ' + escapeHtml(date.full) + '</span>' +
+                            (location ? '<span class="event-meta-item">📍 ' + escapeHtml(location) + '</span>' : '') +
+                        '</div>' +
+                        (organizer ? '<div class="event-organizer">von ' + escapeHtml(organizer) + '</div>' : '') +
+                        (goingCount > 0 ? '<div class="event-stats">👥 ' + goingText + '</div>' : '') +
+                    '</div>' +
+                '</div>'
+            );
+        }).join('');
+    }
+
+    // Filter Click Handler
+    document.getElementById('eventFilter').addEventListener('click', function(e) {
+        if (!e.target.classList.contains('filter-btn')) return;
+        document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+        e.target.classList.add('active');
+        currentCat = e.target.getAttribute('data-cat');
+        renderEvents();
+    });
+
+    // Permission-Check: Plus-Icon im Header NUR wenn User vom Admin freigeschaltet
+    async function setupPermissionUI() {
+        var headerBtn = document.getElementById('headerCreateBtn');
+        if (headerBtn) headerBtn.style.display = 'none';
+
+        var userRes = await sb.auth.getUser();
+        if (!userRes.data.user) return;
+
+        var profileRes = await sb.from('profiles')
+            .select('can_create_events')
+            .eq('id', userRes.data.user.id).single();
+        var canCreate = profileRes.data && profileRes.data.can_create_events === true;
+
+        if (canCreate && headerBtn) {
+            headerBtn.style.display = 'flex';
+        }
+    }
+
+    loadEvents();
+    setupPermissionUI();
+</script>
+
+</body>
+</html>

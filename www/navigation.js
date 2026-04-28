@@ -46,6 +46,7 @@
         if (filename === 'job-detail.html') return 'jobs';
         if (filename === 'coupon-detail.html') return 'coupons';
         if (filename === 'detail.html') return 'marketplace';
+        if (filename === 'event-detail.html' || filename === 'event-create.html') return 'events';
 
         var pageMap = {
             'dashboard.html': 'home',
@@ -59,6 +60,9 @@
             'coupons.html': 'coupons',
             'coupon-create.html': 'coupons',
             'coupon-detail.html': 'coupons',
+            'events.html': 'events',
+            'event-create.html': 'events',
+            'event-detail.html': 'events',
             'nachrichten.html': 'messages',
             'chat.html': 'messages',
             'profile.html': 'profile',
@@ -81,7 +85,8 @@
             tag: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>',
             message: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>',
             user: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>',
-            plus: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'
+            plus: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
+            calendar: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>'
         };
         return icons[iconName] || icons.grid;
     }
@@ -110,6 +115,7 @@
             { id: 'home', href: 'dashboard.html', icon: 'grid', label: _t('nav_tab_home') },
             { id: 'housing', href: 'wohnungen.html', icon: 'home', label: _t('nav_tab_housing') },
             { id: 'marketplace', href: 'gegenstaende.html', icon: 'shopping', label: _t('nav_tab_market') },
+            { id: 'events', href: 'events.html', icon: 'calendar', label: _t('nav_tab_events') || 'Events' },
             { id: 'jobs', href: 'jobs.html', icon: 'briefcase', label: _t('nav_tab_jobs') },
             { id: 'coupons', href: 'coupons.html', icon: 'tag', label: _t('nav_tab_coupons') },
             { id: 'messages', href: 'nachrichten.html', icon: 'message', label: _t('nav_tab_chat') }
@@ -132,6 +138,8 @@
                     activeClass = 'active-jobs';
                 } else if (item.id === 'coupons') {
                     activeClass = 'active-coupons';
+                } else if (item.id === 'events') {
+                    activeClass = 'active-events';
                 } else if (item.id === 'messages') {
                     activeClass = 'active-messages';
                 } else {
@@ -253,12 +261,20 @@
                 justify-content: center;
                 text-decoration: none;
                 color: #6b7280;
-                padding: 6px 8px;
+                padding: 6px 4px;
                 border-radius: 12px;
                 transition: all 0.2s ease;
-                min-width: 48px;
+                min-width: 0;
                 flex: 1;
                 gap: 2px;
+                font-size: 0.65rem;
+            }
+            .bottom-nav-label {
+                font-size: 0.62rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 100%;
             }
 
             .bottom-nav-item:active {
@@ -313,6 +329,16 @@
                 background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
                 color: white;
                 box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+            }
+
+            /* Events - Teal */
+            .bottom-nav-item.active-events {
+                color: #0F766E;
+            }
+            .bottom-nav-item.active-events .bottom-nav-icon {
+                background: linear-gradient(135deg, #14B8A6 0%, #0F766E 100%);
+                color: white;
+                box-shadow: 0 2px 8px rgba(20, 184, 166, 0.4);
             }
 
             /* Chat/Nachrichten - Rot */

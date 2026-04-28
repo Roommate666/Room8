@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Details - Room8</title>
     <link rel="stylesheet" href="style.css">
     <style>
@@ -1484,15 +1484,21 @@
             wrapper.innerHTML = ''; // Remove placeholder
 
             photos.forEach((p, index) => {
-                const { data } = sb.storage.from('listing-images').getPublicUrl(p.storage_path);
-                if (data) {
-                    // Slide add
+                // Slide-Bild: 900px optimiert (WebP, q80) - schnelles Laden
+                // Fullscreen-Bild: 1600px (in data-fullsrc, wird erst bei Klick geladen)
+                const slideUrl = window.Room8 ? Room8.getOptimizedImageUrl('listing-images', p.storage_path, { width: 900, quality: 80 }) : null;
+                const fullUrl = window.Room8 ? Room8.getOptimizedImageUrl('listing-images', p.storage_path, { width: 1600, quality: 85 }) : null;
+                const fallback = sb.storage.from('listing-images').getPublicUrl(p.storage_path);
+                const finalSlideUrl = slideUrl || (fallback && fallback.data ? fallback.data.publicUrl : null);
+                const finalFullUrl = fullUrl || finalSlideUrl;
+
+                if (finalSlideUrl) {
                     const slide = document.createElement('div');
                     slide.className = 'slide';
-                    slide.innerHTML = `<img src="${data.publicUrl}" loading="lazy" onclick="openFullscreen(${index})" style="cursor:pointer;">`;
+                    const loadingAttr = index === 0 ? 'eager' : 'lazy';
+                    slide.innerHTML = `<img src="${finalSlideUrl}" data-fullsrc="${finalFullUrl}" loading="${loadingAttr}" decoding="async" onclick="openFullscreen(${index})" style="cursor:pointer;">`;
                     wrapper.appendChild(slide);
 
-                    // Dot add
                     const dot = document.createElement('div');
                     dot.className = 'dot' + (index === 0 ? ' active' : '');
                     dots.appendChild(dot);
@@ -1522,7 +1528,9 @@
         slides.forEach(function(img, i) {
             var slide = document.createElement('div');
             slide.className = 'fullscreen-slide';
-            slide.innerHTML = '<img src="' + img.src + '">';
+            // Hoehere Aufloesung in Fullscreen (data-fullsrc statt src)
+            var fullSrc = img.getAttribute('data-fullsrc') || img.src;
+            slide.innerHTML = '<img src="' + fullSrc + '" decoding="async">';
             wrapper.appendChild(slide);
 
             var dot = document.createElement('div');

@@ -1,5 +1,23 @@
 # Room8 App - Studenten-Plattform
 
+## STABILITAETS-REGEL (PFLICHT, NIEMALS BRECHEN)
+
+**VOR JEDER Aenderung an einem dieser Bereiche:** zugehoerige Spec-Datei lesen.
+
+| Bereich | Spec |
+|---|---|
+| Permission-System (`can_create_events`, `trusted_organizer`) | `specs/permissions-system.md` |
+| Events-Tabellen, -Trigger, -RPCs | `specs/events-system.md` |
+| Push-Notifications + Email-Pipeline | `specs/push-and-email.md` |
+| Image-Compression + Transform + SW-Cache | `specs/image-pipeline.md` |
+| Auth + Verifizierungs-Flow | `specs/auth-and-verify.md` |
+
+Uebersicht: `specs/00-INDEX.md` — IMMER zuerst lesen wenn Aenderungen geplant sind.
+
+**AI-LOCK Comments im Code:** Stellen mit `// AI-LOCK:` oder `-- AI-LOCK:` duerfen NUR mit explizitem User-OK geaendert werden. Bei Aenderung an gelockter Stelle: Spec lesen, User fragen, dann erst editieren.
+
+**Smoke-Tests:** Nach Deploy: `bash tests/smoke.sh` — bricht bei Regression sofort ab.
+
 ## Sprache & Arbeitsweise
 - Auf Deutsch antworten, Code-Kommentare Deutsch (ae/oe/ue statt Umlaute)
 - Kein Framework - reines HTML/CSS/JS mit Capacitor
@@ -33,9 +51,13 @@
 - android/app/src/main/java/club/room8/app/BadgePlugin.java - App Badge
 
 ## Supabase Edge Functions
-- send-push/ - FCM Push Notifications senden
+- send-push/ - FCM Push Notifications senden (deployed mit --no-verify-jwt)
 - send-notification/ - In-App Notifications
 - get-signed-url/ - Storage URLs generieren
+- send-email/ - Resend Email-Wrapper (deployed mit --no-verify-jwt)
+
+## Aktuelle Migrations-Zaehler (Stand 28.04.2026)
+20260428000000-12 sind alle deployed. Naechste Migration als 20260428000013_*.sql benennen.
 
 ## Build-Befehle
 ```bash

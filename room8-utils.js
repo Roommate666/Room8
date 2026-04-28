@@ -414,6 +414,178 @@ var Room8 = (function() {
     }
 
     // ============================================
+    // IMAGE OPTIMIZATION
+    // ============================================
+
+    /**
+     * Liefert eine Supabase Storage URL mit Server-seitiger Bild-Transformation.
+     * Reduziert Datenvolumen massiv (Originalbilder oft 3-5 MB -> 30-80 KB).
+     *
+     * @param {string} bucket - Storage Bucket Name (z.B. 'listing-images')
+     * @param {string} path - Pfad im Bucket
+     * @param {object} opts - { width, height, quality, resize }
+     * @returns {string|null} Optimierte Public URL
+     */
+    function getOptimizedImageUrl(bucket, path, opts) {
+        if (!bucket || !path) return null;
+        var sb = getSupabase();
+        if (!sb) return null;
+
+        opts = opts || {};
+        var transform = {
+            width: opts.width || 400,
+            quality: opts.quality || 70,
+            resize: opts.resize || 'cover'
+        };
+        if (opts.height) transform.height = opts.height;
+
+        try {
+            var result = sb.storage.from(bucket).getPublicUrl(path, { transform: transform });
+            if (result && result.data && result.data.publicUrl) {
+                return result.data.publicUrl;
+            }
+        } catch (e) {
+            // Fallback ohne Transform falls Plan kein Image-Render unterstuetzt
+        }
+
+        try {
+            var fallback = sb.storage.from(bucket).getPublicUrl(path);
+            return fallback && fallback.data ? fallback.data.publicUrl : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    /**
+     * Convenience-Helper fuer Listing-Cards (kleine Vorschau).
+     */
+    function getCardImageUrl(path) {
+        return getOptimizedImageUrl('listing-images', path, { width: 400, height: 300, quality: 70 });
+    }
+
+    /**
+     * Convenience-Helper fuer Detail-Seiten (groessere Anzeige).
+     */
+    function getDetailImageUrl(path) {
+        return getOptimizedImageUrl('listing-images', path, { width: 900, quality: 80 });
+    }
+
+    /**
+     * Convenience-Helper fuer Avatare/Profile.
+     */
+    function getAvatarUrl(bucket, path) {
+        return getOptimizedImageUrl(bucket || 'avatars', path, { width: 120, height: 120, quality: 75 });
+    }
+
+    /**
+     * Komprimiert ein Image-File browser-side bevor es zu Supabase hochgeladen wird.
+     * iPhone-Fotos sind typischerweise 3-5 MB und enthalten viel mehr Pixel als
+     * fuer eine App noetig. Compress reduziert auf max 1600px Kante + JPEG q80.
+     *
+     * @param {File} file - Image-File aus <input type="file">
+     * @param {object} opts - { maxDim, quality, mimeType }
+     * @returns {Promise<File>} Komprimierte File (oder Original falls nicht komprimierbar)
+     */
+    function compressImage(file, opts) {
+        opts = opts || {};
+        var maxDim = opts.maxDim || 1600;
+        var quality = opts.quality || 0.82;
+        var outputMime = opts.mimeType || 'image/jpeg';
+
+        return new Promise(function(resolve) {
+            // Nicht-Bilder unveraendert zurueckgeben
+            if (!file || !file.type || !file.type.startsWith('image/')) {
+                return resolve(file);
+            }
+            // SVG nicht komprimieren (Vector + XSS-Risiko)
+            if (file.type === 'image/svg+xml') {
+                return resolve(file);
+            }
+            // Wenn Datei schon klein genug: nichts tun
+            if (file.size < 200 * 1024) {
+                return resolve(file);
+            }
+
+            var reader = new FileReader();
+            reader.onerror = function() { resolve(file); };
+            reader.onload = function(e) {
+                var img = new Image();
+                img.onerror = function() { resolve(file); };
+                img.onload = function() {
+                    try {
+                        var w = img.width;
+                        var h = img.height;
+
+                        // Skalieren wenn groesser als maxDim
+                        if (w > maxDim || h > maxDim) {
+                            if (w > h) {
+                                h = Math.round(h * (maxDim / w));
+                                w = maxDim;
+                            } else {
+                                w = Math.round(w * (maxDim / h));
+                                h = maxDim;
+                            }
+                        }
+
+                        var canvas = document.createElement('canvas');
+                        canvas.width = w;
+                        canvas.height = h;
+                        var ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(0, 0, w, h); // weisser Hintergrund (verhindert PNG-Transparenz-Fehler bei JPEG)
+                        ctx.drawImage(img, 0, 0, w, h);
+
+                        canvas.toBlob(function(blob) {
+                            if (!blob) { return resolve(file); }
+                            // Wenn Compression schlechter macht (selten bei Screenshots): Original nehmen
+                            if (blob.size >= file.size) {
+                                return resolve(file);
+                            }
+                            var newName = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+                            var compressed = new File([blob], newName, {
+                                type: outputMime,
+                                lastModified: Date.now()
+                            });
+                            resolve(compressed);
+                        }, outputMime, quality);
+                    } catch (err) {
+                        console.warn('compressImage error:', err);
+                        resolve(file);
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    /**
+     * Liefert HTML fuer ein optimiertes Bild mit Lazy Loading + Skeleton.
+     * Verhindert Layout-Shift (CLS) durch width/height + aspect-ratio.
+     *
+     * @param {string} url - Bild-URL (oder null)
+     * @param {string} alt - Alt-Text
+     * @param {object} opts - { width, height, className, fallback }
+     * @returns {string} HTML-String
+     */
+    function renderImage(url, alt, opts) {
+        opts = opts || {};
+        var width = opts.width || 400;
+        var height = opts.height || 300;
+        var className = opts.className || '';
+        var fallback = opts.fallback || 'no-image.svg';
+        var safeAlt = escapeHtml(alt || '');
+        var src = url || fallback;
+
+        return '<img src="' + escapeHtml(src) + '" ' +
+               'alt="' + safeAlt + '" ' +
+               'width="' + width + '" height="' + height + '" ' +
+               'loading="lazy" decoding="async" ' +
+               (className ? 'class="' + escapeHtml(className) + '" ' : '') +
+               'onerror="this.onerror=null;this.src=\'' + fallback + '\';">';
+    }
+
+    // ============================================
     // STORAGE UTILITIES
     // ============================================
 
@@ -471,6 +643,14 @@ var Room8 = (function() {
         // Error handling
         getErrorMessage: getErrorMessage,
         showToast: showToast,
+
+        // Image optimization
+        getOptimizedImageUrl: getOptimizedImageUrl,
+        getCardImageUrl: getCardImageUrl,
+        getDetailImageUrl: getDetailImageUrl,
+        getAvatarUrl: getAvatarUrl,
+        renderImage: renderImage,
+        compressImage: compressImage,
 
         // Storage
         getLang: getLang,

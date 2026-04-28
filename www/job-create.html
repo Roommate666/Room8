@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Job erstellen - Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">    <title>Job erstellen - Admin</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -323,8 +323,9 @@
 
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
-                const path = `jobs/${job.id}_logo.${file.name.split('.').pop()}`;
-                await sb.storage.from('listing-images').upload(path, file);
+                const compressed = (window.Room8 && Room8.compressImage) ? await Room8.compressImage(file, { maxDim: 600, quality: 0.85 }) : file;
+                const path = `jobs/${job.id}_logo.jpg`;
+                await sb.storage.from('listing-images').upload(path, compressed);
                 await sb.from('listing_photos').insert({ listing_id: job.id, storage_path: path });
             }
 

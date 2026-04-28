@@ -2,11 +2,22 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Inserat erstellen - Room8</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
     <style>
-        /* Header - Grün mit weißer Schrift */
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
+        .app-content { animation: blurFadeIn 0.5s ease-out both; }
+
+        /* Header - Gruen mit weisser Schrift */
         .app-header {
             display: grid;
             grid-template-columns: 40px 1fr 40px;
@@ -103,12 +114,14 @@
             background: #EF4444;
         }
 
-        /* Modus-Schalter (Verkaufen / Suche) */
+        /* Glasmorphismus Mode Switch */
         .mode-switch {
             display: flex;
-            background: #F3F4F6;
+            background: rgba(243,244,246,0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             padding: 4px;
-            border-radius: 12px;
+            border-radius: 14px;
             margin-bottom: 1.5rem;
         }
 
@@ -119,16 +132,16 @@
             font-size: 0.9rem;
             font-weight: 500;
             cursor: pointer;
-            border-radius: 8px;
+            border-radius: 10px;
             color: var(--text-muted);
-            transition: all 0.2s;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .mode-option.active {
             background: white;
             color: var(--text-main);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            font-weight: 700;
         }
         
         .section-title {
@@ -148,6 +161,10 @@
 
         .hidden {
             display: none !important;
+        }
+        /* Barrierefreiheit */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
     </style>
 </head>
@@ -528,10 +545,11 @@
 
                 for (var i = 0; i < activeFiles.length; i++) {
                     var file = activeFiles[i];
-                    var fileExt = file.name.split('.').pop();
-                    var fileName = `${listing.id}_${startIndex + i}.${fileExt}`;
+                    // Browser-side Compression (1600px max, JPEG q82)
+                    var fileToUpload = (window.Room8 && Room8.compressImage) ? await Room8.compressImage(file) : file;
+                    var fileName = `${listing.id}_${startIndex + i}.jpg`;
 
-                    var uploadResult = await sb.storage.from('listing-images').upload(fileName, file);
+                    var uploadResult = await sb.storage.from('listing-images').upload(fileName, fileToUpload);
 
                     if (uploadResult.error) {
                         console.error("Bild Upload Fehler:", uploadResult.error);

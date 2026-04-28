@@ -2,8 +2,9 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Wohnungen - Room8</title>
+    <meta name="description" content="Finde WG-Zimmer und Studentenwohnungen in deiner Stadt. Room8 - die Plattform von Studenten, fuer Studenten.">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -380,7 +381,7 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<a href="wohnung.html?mode=offer" class="fab" title="Neues Inserat">
+<a href="wohnung.html?mode=offer" class="fab" id="addListingFab" title="Neues Inserat" style="display:none;">
     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
 </a>
 
@@ -419,6 +420,10 @@
         if (!isVerified) {
             document.getElementById('verifyOverlay').classList.add('active');
             window.scrollTo(0, 0);
+        } else {
+            // FAB nur fuer verifizierte User sichtbar
+            var fab = document.getElementById('addListingFab');
+            if (fab) fab.style.display = 'flex';
         }
     }
 
@@ -588,9 +593,12 @@
         var isSearchListing = listing.listing_mode === 'search';
 
         if (listing.listing_photos && listing.listing_photos.length > 0) {
-            var path = listing.listing_photos[0].storage_path;
-            var urlData = sb.storage.from('listing-images').getPublicUrl(path);
-            if (urlData && urlData.data) imageUrl = urlData.data.publicUrl;
+            // Optimierte Bild-URL ueber Supabase Image Transform (280x210 fuer Retina, q70)
+            imageUrl = window.Room8 ? Room8.getOptimizedImageUrl('listing-images', listing.listing_photos[0].storage_path, { width: 280, height: 210, quality: 70 }) : null;
+            if (!imageUrl) {
+                var urlData = sb.storage.from('listing-images').getPublicUrl(listing.listing_photos[0].storage_path);
+                if (urlData && urlData.data) imageUrl = urlData.data.publicUrl;
+            }
         }
         
         var priceStr = 'VB';
@@ -644,7 +652,7 @@
         } else {
             imageHtml = `
                 <div class="card-image-container">
-                    <img src="${imageUrl}" alt="${listing.title}" loading="lazy" onerror="this.parentElement.innerHTML='<div style=\\'background:#EBEBEB;width:100%;height:100%;display:flex;align-items:center;justify-content:center;\\'><div style=\\'text-align:center;color:#929292;\\'>🏠<br><span style=\\'font-size:0.6rem;font-weight:600;color:#929292;\\'>Kein Bild</span></div></div>'">
+                    <img src="${imageUrl}" alt="${escHtml(listing.title)}" width="280" height="210" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='<div style=\\'background:#EBEBEB;width:100%;height:100%;display:flex;align-items:center;justify-content:center;\\'><div style=\\'text-align:center;color:#929292;\\'>🏠<br><span style=\\'font-size:0.6rem;font-weight:600;color:#929292;\\'>Kein Bild</span></div></div>'">
                     <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
                 </div>`;
         }

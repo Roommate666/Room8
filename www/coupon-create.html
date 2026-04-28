@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Coupon erstellen - Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">    <title>Coupon erstellen - Admin</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -261,7 +261,7 @@
             const reader = new FileReader();
             reader.onload = function(event) {
                 document.getElementById('previewContainer').innerHTML = `
-                    <img src="${event.target.result}" style="max-width:200px; max-height:150px; border-radius:12px; margin-bottom:0.5rem; object-fit:cover;">
+                    <img src="${event.target.result}" alt="Coupon-Bild Vorschau" style="max-width:200px; max-height:150px; border-radius:12px; margin-bottom:0.5rem; object-fit:cover;">
                     <div style="color:#10B981; font-weight:600;">✅ ${file.name}</div>
                 `;
             };
@@ -277,7 +277,7 @@
             const reader = new FileReader();
             reader.onload = function(event) {
                 document.getElementById('logoPreview').innerHTML = `
-                    <img src="${event.target.result}" style="max-width:80px; max-height:80px; border-radius:12px; margin-bottom:0.5rem;">
+                    <img src="${event.target.result}" alt="Logo Vorschau" style="max-width:80px; max-height:80px; border-radius:12px; margin-bottom:0.5rem;">
                     <div style="color:#10B981; font-weight:600;">✅ ${file.name}</div>
                 `;
             };
@@ -403,19 +403,21 @@
             const { data: coupon, error } = await sb.from('coupons').insert(data).select().single();
             if (error) throw error;
 
-            // Hauptbild hochladen
+            // Hauptbild hochladen (mit Browser-Compression)
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
-                const path = `coupons/${coupon.id}_img.${file.name.split('.').pop()}`;
-                await sb.storage.from('listing-images').upload(path, file);
+                const compressed = (window.Room8 && Room8.compressImage) ? await Room8.compressImage(file) : file;
+                const path = `coupons/${coupon.id}_img.jpg`;
+                await sb.storage.from('listing-images').upload(path, compressed);
                 await sb.from('coupon_photos').insert({ coupon_id: coupon.id, storage_path: path, photo_type: 'cover' });
             }
-            
-            // Logo hochladen
+
+            // Logo hochladen (mit Browser-Compression, kleiner maxDim)
             if (logoInput.files.length > 0) {
                 const file = logoInput.files[0];
-                const path = `coupons/${coupon.id}_logo.${file.name.split('.').pop()}`;
-                await sb.storage.from('listing-images').upload(path, file);
+                const compressed = (window.Room8 && Room8.compressImage) ? await Room8.compressImage(file, { maxDim: 400, quality: 0.85 }) : file;
+                const path = `coupons/${coupon.id}_logo.jpg`;
+                await sb.storage.from('listing-images').upload(path, compressed);
                 await sb.from('coupon_photos').insert({ coupon_id: coupon.id, storage_path: path, photo_type: 'logo' });
             }
 

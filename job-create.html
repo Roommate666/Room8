@@ -2,8 +2,12 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>Job erstellen - Admin</title>
-    <link rel="stylesheet" href="style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">    <title>Job erstellen - Admin</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
     <style>
         .app-header { background: #111827; color: white; }
     </style>
@@ -119,13 +123,27 @@
                 <label for="isDemo" style="margin:0;">Als Demo markieren</label>
             </div>
 
+            <button type="button" class="submit-btn" style="background:linear-gradient(135deg,#8B5CF6 0%,#6D28D9 100%); box-shadow:0 4px 15px rgba(139,92,246,0.3); margin-top:1.5rem;" onclick="showJobPreview()">Vorschau anzeigen</button>
             <button type="submit" class="submit-btn" style="background:#111827;">Job Veröffentlichen</button>
         </form>
     </main>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<!-- VORSCHAU MODAL -->
+<div id="previewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99999; overflow-y:auto; backdrop-filter:blur(4px);">
+    <div style="padding: 1rem; max-width: 500px; margin: 2rem auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h3 style="margin:0; color:white; font-size:1.1rem;">Vorschau</h3>
+            <button onclick="closeJobPreview()" style="background:rgba(255,255,255,0.2); border:none; width:36px; height:36px; border-radius:50%; color:white; font-size:1.3rem; cursor:pointer;">&times;</button>
+        </div>
+        <div id="previewJobContent"></div>
+    </div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script>
     // Supabase Client - Direkte Initialisierung
@@ -159,6 +177,115 @@
     });
 
     function textToArray(text) { return text.split('\n').filter(line => line.trim() !== ''); }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    window.showJobPreview = function() {
+        var title = document.getElementById('title').value || 'Job-Titel';
+        var company = document.getElementById('company').value || 'Firmenname';
+        var website = document.getElementById('website').value;
+        var location = document.getElementById('location').value || 'Remote';
+        var companySize = document.getElementById('companySize').value;
+        var jobType = document.getElementById('jobType').value;
+        var contractDuration = document.getElementById('contractDuration').value;
+        var salaryAmount = document.getElementById('salaryAmount').value;
+        var salaryType = document.getElementById('salaryType').value;
+        var minHours = document.getElementById('minHours').value;
+        var maxHours = document.getElementById('maxHours').value;
+        var description = document.getElementById('description').value || 'Beschreibung...';
+        var requirements = textToArray(document.getElementById('requirements').value);
+        var benefits = textToArray(document.getElementById('benefits').value);
+
+        // Labels
+        var jobTypeLabels = { werkstudent: 'Werkstudent', minijob: 'Minijob', praktikum: 'Praktikum', festanstellung: 'Festanstellung' };
+        var sizeLabels = { startup: 'Startup', mittelstand: 'Mittelstand', konzern: 'Konzern' };
+        var durationLabels = { unbefristet: 'Unbefristet', befristet: 'Befristet' };
+
+        var salaryText = salaryAmount ? (salaryAmount + ' €' + (salaryType === 'per_month' ? ' / Monat' : ' / Std')) : 'Verhandlung';
+        var hoursText = minHours ? (minHours + (maxHours ? '-' + maxHours : '') + 'h / Woche') : '-';
+
+        // Logo
+        var logoHtml = company.charAt(0).toUpperCase();
+        var logoFile = document.getElementById('logoInput').files[0];
+        if (logoFile) {
+            var logoEl = document.querySelector('#previewContainer img');
+            if (logoEl) logoHtml = '<img src="' + logoEl.src + '" style="width:100%;height:100%;object-fit:cover;border-radius:16px;">';
+        }
+
+        // Requirements list
+        var reqHtml = '';
+        if (requirements.length > 0) {
+            reqHtml = '<div style="margin-top:1rem;"><h4 style="margin:0 0 0.5rem 0;font-size:0.9rem;">✅ Anforderungen</h4><ul style="margin:0;padding-left:1.25rem;color:#4B5563;font-size:0.85rem;line-height:1.6;">';
+            requirements.forEach(function(r) { reqHtml += '<li>' + escapeHtml(r) + '</li>'; });
+            reqHtml += '</ul></div>';
+        }
+
+        // Benefits list
+        var benHtml = '';
+        if (benefits.length > 0) {
+            benHtml = '<div style="margin-top:1rem;"><h4 style="margin:0 0 0.5rem 0;font-size:0.9rem;">🎁 Benefits</h4><ul style="margin:0;padding-left:1.25rem;color:#4B5563;font-size:0.85rem;line-height:1.6;">';
+            benefits.forEach(function(b) { benHtml += '<li>' + escapeHtml(b) + '</li>'; });
+            benHtml += '</ul></div>';
+        }
+
+        document.getElementById('previewJobContent').innerHTML =
+            // Card-Vorschau (wie in jobs.html Liste)
+            '<div style="background:white;border-radius:16px;padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);display:flex;gap:1rem;align-items:center;margin-bottom:1rem;">' +
+                '<div style="width:60px;height:60px;border-radius:12px;background:#F3F4F6;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;font-weight:700;color:#9CA3AF;">' + logoHtml + '</div>' +
+                '<div style="flex:1;min-width:0;">' +
+                    '<div style="font-size:1rem;font-weight:700;color:#111827;">' + escapeHtml(title) + '</div>' +
+                    '<div style="font-size:0.85rem;color:#9CA3AF;margin-bottom:0.5rem;">' + escapeHtml(company) + ' &bull; ' + escapeHtml(location) + '</div>' +
+                    '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.5rem;">' +
+                        '<span style="font-size:0.7rem;padding:2px 8px;border-radius:6px;background:#F3F4F6;color:#6B7280;font-weight:500;">' + (jobTypeLabels[jobType] || jobType) + '</span>' +
+                        '<span style="font-size:0.7rem;padding:2px 8px;border-radius:6px;background:#F3F4F6;color:#6B7280;font-weight:500;">🕐 ' + hoursText + '</span>' +
+                    '</div>' +
+                    '<div style="font-size:0.9rem;font-weight:700;color:#8B5CF6;">' + salaryText + '</div>' +
+                '</div>' +
+            '</div>' +
+            // Detail-Vorschau (wie in job-detail.html)
+            '<div style="background:white;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.2);">' +
+                '<div style="background:linear-gradient(135deg,#8B5CF6 0%,#6D28D9 100%);padding:1.5rem;color:white;">' +
+                    '<div style="display:flex;align-items:center;gap:1rem;">' +
+                        '<div style="width:64px;height:64px;border-radius:16px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;font-weight:700;">' + logoHtml + '</div>' +
+                        '<div>' +
+                            '<div style="font-size:1.2rem;font-weight:700;">' + escapeHtml(title) + '</div>' +
+                            '<div style="opacity:0.9;font-size:0.9rem;">' + escapeHtml(company) + '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #F3F4F6;">' +
+                    '<div style="padding:0.75rem 1rem;text-align:center;border-right:1px solid #F3F4F6;"><div style="font-size:0.7rem;color:#9CA3AF;text-transform:uppercase;">Gehalt</div><div style="font-weight:700;font-size:0.9rem;color:#8B5CF6;">' + salaryText + '</div></div>' +
+                    '<div style="padding:0.75rem 1rem;text-align:center;"><div style="font-size:0.7rem;color:#9CA3AF;text-transform:uppercase;">Typ</div><div style="font-weight:700;font-size:0.9rem;">' + (jobTypeLabels[jobType] || jobType) + '</div></div>' +
+                '</div>' +
+                '<div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #F3F4F6;">' +
+                    '<div style="padding:0.75rem 1rem;text-align:center;border-right:1px solid #F3F4F6;"><div style="font-size:0.7rem;color:#9CA3AF;text-transform:uppercase;">Standort</div><div style="font-weight:700;font-size:0.9rem;">' + escapeHtml(location) + '</div></div>' +
+                    '<div style="padding:0.75rem 1rem;text-align:center;"><div style="font-size:0.7rem;color:#9CA3AF;text-transform:uppercase;">Stunden</div><div style="font-weight:700;font-size:0.9rem;">' + hoursText + '</div></div>' +
+                '</div>' +
+                '<div style="padding:1.25rem;">' +
+                    '<h4 style="margin:0 0 0.5rem 0;font-size:0.9rem;">📝 Beschreibung</h4>' +
+                    '<p style="font-size:0.85rem;color:#4B5563;line-height:1.6;margin:0;white-space:pre-line;">' + escapeHtml(description) + '</p>' +
+                    reqHtml +
+                    benHtml +
+                    '<div style="margin-top:1.5rem;">' +
+                        '<button disabled style="width:100%;padding:1rem;background:linear-gradient(135deg,#8B5CF6 0%,#6D28D9 100%);color:white;border:none;border-radius:12px;font-size:1rem;font-weight:700;opacity:0.6;">Jetzt bewerben</button>' +
+                        '<div style="text-align:center;font-size:0.75rem;color:#9CA3AF;margin-top:0.5rem;">(Vorschau - Button in Veröffentlichung aktiv)</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+
+        document.getElementById('previewModal').style.display = 'block';
+    };
+
+    window.closeJobPreview = function() {
+        document.getElementById('previewModal').style.display = 'none';
+    };
+
+    document.getElementById('previewModal').addEventListener('click', function(e) {
+        if (e.target === document.getElementById('previewModal')) closeJobPreview();
+    });
 
     document.getElementById('createJobForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -196,21 +323,52 @@
 
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
-                const path = `jobs/${job.id}_logo.${file.name.split('.').pop()}`;
-                await sb.storage.from('listing-images').upload(path, file);
+                const compressed = (window.Room8 && Room8.compressImage) ? await Room8.compressImage(file, { maxDim: 600, quality: 0.85 }) : file;
+                const path = `jobs/${job.id}_logo.jpg`;
+                await sb.storage.from('listing-images').upload(path, compressed);
                 await sb.from('listing_photos').insert({ listing_id: job.id, storage_path: path });
             }
 
             Room8UI.success("Job erstellt!");
+
+            // Benachrichtige User die diese Stadt in ihren Notification-Settings eingestellt haben
+            if (job.city && window.NotificationHelpers) {
+                try {
+                    var citySettingsRes = await sb
+                        .from('notification_settings')
+                        .select('user_id, new_job_city')
+                        .ilike('notification_city', job.city);
+
+                    if (citySettingsRes.data && citySettingsRes.data.length > 0) {
+                        for (var u of citySettingsRes.data) {
+                            if (u.user_id === user.id) continue;
+                            if (u.new_job_city === false) continue;
+
+                            await NotificationHelpers.createNotification(
+                                u.user_id,
+                                'new_job_city',
+                                '\uD83D\uDCBC Neuer Job in ' + job.city,
+                                job.title,
+                                'job-detail.html?id=' + job.id,
+                                job.id
+                            );
+                        }
+                    }
+                } catch (notifyErr) {
+                    console.log('Job city notification error:', notifyErr);
+                }
+            }
+
             setTimeout(function() { navigateTo("admin-panel.html"); }, 1500);
         } catch (err) {
-            Room8UI.error("Job konnte nicht erstellt werden. Bitte versuche es erneut.");
+            Room8UI.error("Fehler: " + err.message);
             btn.disabled = false;
         }
     });
 
     checkAdmin();
 </script>
+<script src="notificationHelpers.js"></script>
 <script src="notificationBell.js"></script>
 </body>
 </html>

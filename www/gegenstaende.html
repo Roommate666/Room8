@@ -2,8 +2,9 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Marktplatz - Room8</title>
+    <meta name="description" content="Kaufe und verkaufe gebrauchte Sachen auf dem Room8 Marktplatz. Von Studenten, fuer Studenten.">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -332,7 +333,7 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<a href="gegenstand.html?mode=offer" class="fab" title="Neues Inserat" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4) !important;">
+<a href="gegenstand.html?mode=offer" class="fab" id="addListingFab" title="Neues Inserat" style="display:none; background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4) !important;">
     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
 </a>
 
@@ -358,6 +359,8 @@
     var sortFilter = document.getElementById('sortFilter');
     
     var allItems = [];
+    var displayLimit = 30;
+    var DISPLAY_INCREMENT = 30;
     var currentFilter = 'all';
     var currentCategory = 'all';
     var currentSort = 'newest';
@@ -377,6 +380,9 @@
                     document.getElementById('verifyOverlay').classList.add('active');
                     window.scrollTo(0, 0);
                     document.body.style.overflow = 'hidden';
+                } else {
+                    var fab = document.getElementById('addListingFab');
+                    if (fab) fab.style.display = 'flex';
                 }
             });
         });
@@ -454,9 +460,14 @@
         var isSearchListing = item.listing_mode === 'search';
 
         if (item.listing_photos && item.listing_photos.length > 0) {
-            var path = item.listing_photos[0].storage_path;
-            var urlData = sb.storage.from('listing-images').getPublicUrl(path);
-            if (urlData && urlData.data) imageUrl = urlData.data.publicUrl;
+            // Optimierte Bild-URL ueber Supabase Image Transform.
+            // Marktplatz-Cards sind 110px breit -> 240px reicht fuer Retina (2x).
+            // Reduziert Datenvolumen drastisch (Originalbilder oft 3-5 MB -> ~20 KB).
+            imageUrl = window.Room8 ? Room8.getOptimizedImageUrl('listing-images', item.listing_photos[0].storage_path, { width: 240, height: 240, quality: 70 }) : null;
+            if (!imageUrl) {
+                var urlData = sb.storage.from('listing-images').getPublicUrl(item.listing_photos[0].storage_path);
+                if (urlData && urlData.data) imageUrl = urlData.data.publicUrl;
+            }
         }
 
         var priceStr = 'VB';
@@ -499,7 +510,7 @@
         } else {
             imageHtml = `
                 <div class="card-image-container">
-                    <img src="${imageUrl}" alt="${item.title}" loading="lazy" onerror="this.parentElement.innerHTML='<div style=\\'background:linear-gradient(135deg,#ECFDF5,#D1FAE5);width:100%;height:100%;display:flex;align-items:center;justify-content:center;\\'><div style=\\'text-align:center;color:#059669;\\'>🏠<br><span style=\\'font-size:0.6rem;font-weight:600;color:#6ee7b7;\\'>Kein Bild</span></div></div>'">
+                    <img src="${imageUrl}" alt="${escHtml(item.title)}" width="400" height="300" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='<div style=\\'background:linear-gradient(135deg,#ECFDF5,#D1FAE5);width:100%;height:100%;display:flex;align-items:center;justify-content:center;\\'><div style=\\'text-align:center;color:#059669;\\'>🏠<br><span style=\\'font-size:0.6rem;font-weight:600;color:#6ee7b7;\\'>Kein Bild</span></div></div>'">
                     <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
                 </div>`;
         }
@@ -530,9 +541,34 @@
     function renderListings(items) {
         listingsContainer.innerHTML = '';
         if (items && items.length > 0) {
+            // Pagination: nur die ersten displayLimit-Items rendern
+            var visible = items.slice(0, displayLimit);
             var html = '';
-            items.forEach(function(l) { html += renderItemCard(l); });
+            visible.forEach(function(l) { html += renderItemCard(l); });
+
+            // Load-More Button wenn weitere Items da
+            if (items.length > displayLimit) {
+                var remaining = items.length - displayLimit;
+                html += '<button id="loadMoreBtn" style="grid-column:1/-1;margin:1.5rem auto;padding:0.85rem 2rem;background:#1A1A2E;color:white;border:none;border-radius:999px;font-weight:600;cursor:pointer;font-size:0.95rem;">' +
+                    'Mehr anzeigen (' + remaining + ' weitere)' +
+                    '</button>';
+            }
             listingsContainer.innerHTML = html;
+
+            var loadBtn = document.getElementById('loadMoreBtn');
+            if (loadBtn) {
+                loadBtn.addEventListener('click', function() {
+                    displayLimit += DISPLAY_INCREMENT;
+                    renderListings(items);
+                    // Scrollen zum neuen Bereich
+                    setTimeout(function() {
+                        var allCards = listingsContainer.querySelectorAll('.item-card');
+                        if (allCards.length > displayLimit - DISPLAY_INCREMENT) {
+                            allCards[displayLimit - DISPLAY_INCREMENT].scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }, 50);
+                });
+            }
         } else {
             listingsContainer.innerHTML = `
                 <div class="empty-state-container">
@@ -542,6 +578,9 @@
                 </div>`;
         }
     }
+
+    // Reset displayLimit bei Filter-Aenderung
+    function resetPagination() { displayLimit = 30; }
     
     function applyFilters(list) {
         var filtered = list.slice();
@@ -603,6 +642,7 @@
         modeFilter.querySelector('.active').classList.remove('active');
         e.target.classList.add('active');
         currentFilter = e.target.getAttribute('data-filter');
+        resetPagination();
         renderListings(applyFilters(allItems));
     });
 
@@ -611,6 +651,7 @@
         categoryFilter.querySelector('.active').classList.remove('active');
         e.target.classList.add('active');
         currentCategory = e.target.getAttribute('data-category');
+        resetPagination();
         renderListings(applyFilters(allItems));
     });
 
@@ -619,13 +660,17 @@
         sortFilter.querySelector('.active').classList.remove('active');
         e.target.classList.add('active');
         currentSort = e.target.getAttribute('data-sort');
+        resetPagination();
         renderListings(applyFilters(allItems));
     });
     
     searchInput.addEventListener('input', function(e) {
         searchQuery = e.target.value.toLowerCase();
+        resetPagination();
         renderListings(applyFilters(allItems));
     });
+
+    // Initial load wird auch limitiert sein dank renderListings + displayLimit
     
     document.addEventListener('DOMContentLoaded', function() {
         checkVerification();

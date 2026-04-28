@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Wohnung inserieren - Room8</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -1583,10 +1583,11 @@
                 var startIndex = existingPhotos.length;
                 for (let i = 0; i < selectedFiles.length; i++) {
                     const file = selectedFiles[i];
-                    const ext = file.name.split('.').pop();
-                    const path = `${listing.id}_${startIndex + i}.${ext}`;
+                    // Browser-side Compression (1600px max, JPEG q82) - iPhone 5 MB -> ~500 KB
+                    const fileToUpload = (window.Room8 && Room8.compressImage) ? await Room8.compressImage(file) : file;
+                    const path = `${listing.id}_${startIndex + i}.jpg`;
 
-                    var uploadResult = await sb.storage.from('listing-images').upload(path, file);
+                    var uploadResult = await sb.storage.from('listing-images').upload(path, fileToUpload);
                     if (uploadResult.error) {
                         console.error("Bild Upload Fehler:", uploadResult.error);
                         continue; // Nächstes Bild versuchen

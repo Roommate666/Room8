@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Inserat erstellen - Room8</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -545,10 +545,11 @@
 
                 for (var i = 0; i < activeFiles.length; i++) {
                     var file = activeFiles[i];
-                    var fileExt = file.name.split('.').pop();
-                    var fileName = `${listing.id}_${startIndex + i}.${fileExt}`;
+                    // Browser-side Compression (1600px max, JPEG q82)
+                    var fileToUpload = (window.Room8 && Room8.compressImage) ? await Room8.compressImage(file) : file;
+                    var fileName = `${listing.id}_${startIndex + i}.jpg`;
 
-                    var uploadResult = await sb.storage.from('listing-images').upload(fileName, file);
+                    var uploadResult = await sb.storage.from('listing-images').upload(fileName, fileToUpload);
 
                     if (uploadResult.error) {
                         console.error("Bild Upload Fehler:", uploadResult.error);

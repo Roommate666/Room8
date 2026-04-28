@@ -5,6 +5,11 @@
   "server": {
     "androidScheme": "https"
   },
+  "ios": {
+    "allowsLinkPreview": false,
+    "preferredContentMode": "mobile",
+    "limitsNavigationsToAppBoundDomains": false
+  },
   "plugins": {
     "PushNotifications": {
       "presentationOptions": ["badge", "sound", "alert"]

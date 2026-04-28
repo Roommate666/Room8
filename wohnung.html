@@ -2,11 +2,22 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Wohnung inserieren - Room8</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
     <style>
-        /* Header - Blau mit weißer Schrift */
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
+        .app-content { animation: blurFadeIn 0.5s ease-out both; }
+
+        /* Header - Blau mit weisser Schrift */
         .app-header {
             display: grid;
             grid-template-columns: 40px 1fr 40px;
@@ -33,12 +44,14 @@
             border: none !important;
         }
 
-        /* Spezifische Styles für dieses Formular */
+        /* Glasmorphismus Mode Switch */
         .mode-switch {
             display: flex;
-            background: #F3F4F6;
+            background: rgba(243,244,246,0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             padding: 4px;
-            border-radius: 12px;
+            border-radius: 14px;
             margin-bottom: 1.5rem;
         }
 
@@ -87,15 +100,15 @@
         }
 
         .checkbox-card {
-            background: #fff;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(0,0,0,0.04);
+            border-radius: 12px;
             padding: 0.75rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             margin-bottom: 0.5rem;
         }
 
@@ -244,14 +257,15 @@
             gap: 0.5rem;
         }
 
+        /* Kibo UI Pill Tags */
         .tag-item {
             background: #F3F4F6;
             border: 1px solid var(--border-color);
-            border-radius: 20px;
+            border-radius: 999px;
             padding: 0.4rem 0.8rem;
             font-size: 0.8rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .tag-item:hover, .tag-item.selected {
@@ -291,6 +305,10 @@
         .date-grid .form-group {
             margin: 0;
             min-width: 0; /* Verhindert Overflow */
+        }
+        /* Barrierefreiheit */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
     </style>
 </head>
@@ -1565,10 +1583,11 @@
                 var startIndex = existingPhotos.length;
                 for (let i = 0; i < selectedFiles.length; i++) {
                     const file = selectedFiles[i];
-                    const ext = file.name.split('.').pop();
-                    const path = `${listing.id}_${startIndex + i}.${ext}`;
+                    // Browser-side Compression (1600px max, JPEG q82) - iPhone 5 MB -> ~500 KB
+                    const fileToUpload = (window.Room8 && Room8.compressImage) ? await Room8.compressImage(file) : file;
+                    const path = `${listing.id}_${startIndex + i}.jpg`;
 
-                    var uploadResult = await sb.storage.from('listing-images').upload(path, file);
+                    var uploadResult = await sb.storage.from('listing-images').upload(path, fileToUpload);
                     if (uploadResult.error) {
                         console.error("Bild Upload Fehler:", uploadResult.error);
                         continue; // Nächstes Bild versuchen

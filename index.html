@@ -2,52 +2,9 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>Room8 - Die Studenten-Plattform</title>
   <meta name="description" content="Room8 ist die exklusive Plattform von Studenten, für Studenten. WG-Suche, Marktplatz, Jobs und Coupons - alles an einem Ort.">
-  <meta name="keywords" content="Studenten WG, WG-Suche, Studentenwohnung, Mitbewohner finden, Campus Marktplatz, Studenten Jobs, Room8">
-
-  <!-- Open Graph -->
-  <meta property="og:title" content="Room8 - Die Studenten-Plattform">
-  <meta property="og:description" content="WG-Suche, Marktplatz, Jobs und Coupons - die exklusive Plattform von Studenten, für Studenten.">
-  <meta property="og:image" content="https://room8.club/logo_512.png">
-  <meta property="og:url" content="https://room8.club">
-  <meta property="og:type" content="website">
-  <meta property="og:locale" content="de_DE">
-  <meta property="og:site_name" content="Room8">
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Room8 - Die Studenten-Plattform">
-  <meta name="twitter:description" content="WG-Suche, Marktplatz, Jobs und Coupons für Studenten.">
-  <meta name="twitter:image" content="https://room8.club/logo_512.png">
-
-  <!-- Canonical -->
-  <link rel="canonical" href="https://room8.club">
-
-  <!-- Schema.org -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "Room8",
-    "description": "Die exklusive Plattform von Studenten, für Studenten. WG-Suche, Marktplatz, Jobs und Coupons.",
-    "url": "https://room8.club",
-    "applicationCategory": "SocialNetworkingApplication",
-    "operatingSystem": "Web, Android, iOS",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "EUR"
-    },
-    "creator": {
-      "@type": "Organization",
-      "name": "Room8",
-      "url": "https://room8.club"
-    }
-  }
-  </script>
-
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -478,50 +435,86 @@
 </head>
 <body>
 
-  <!-- Animated Splash Overlay -->
+  <!-- Video-Splash (Intro) -->
   <div id="splashOverlay" style="
     position: fixed; inset: 0; z-index: 9999;
-    background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), filter 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #000;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   ">
-    <div style="
-      width: 80px; height: 80px; border-radius: 22px;
-      background: rgba(255,255,255,0.15); backdrop-filter: blur(20px);
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2);
-      animation: splashIconIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-    ">
-      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-      </svg>
-    </div>
-    <div style="
-      margin-top: 1.25rem; color: white; font-size: 1.6rem; font-weight: 800;
-      letter-spacing: -0.03em;
-      animation: splashTextIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
-    ">Room8</div>
-    <div style="
-      margin-top: 0.4rem; color: rgba(255,255,255,0.6); font-size: 0.85rem; font-weight: 500;
-      animation: splashTextIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.35s both;
-    ">Dein Campus. Dein Deal.</div>
+    <video id="splashVideo"
+      autoplay
+      muted
+      playsinline
+      webkit-playsinline="true"
+      x5-playsinline="true"
+      preload="auto"
+      disablepictureinpicture
+      style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;">
+      <source src="intro.mp4" type="video/mp4">
+    </video>
   </div>
-  <style>
-    @keyframes splashIconIn {
-      from { opacity: 0; transform: scale(0.5); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    @keyframes splashTextIn {
-      from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
-      to { opacity: 1; filter: blur(0); transform: translateY(0); }
-    }
-  </style>
   <script>
-    setTimeout(function() {
-      var s = document.getElementById('splashOverlay');
-      if (s) { s.style.opacity = '0'; s.style.filter = 'blur(8px)'; setTimeout(function() { s.remove(); }, 500); }
-    }, 1600);
+    (function() {
+      var splash = document.getElementById('splashOverlay');
+      var video = document.getElementById('splashVideo');
+      var dismissed = false;
+      var playStarted = false;
+
+      function hideSplash() {
+        if (dismissed || !splash) return;
+        dismissed = true;
+        splash.style.opacity = '0';
+        setTimeout(function() { if (splash && splash.parentNode) splash.remove(); }, 500);
+      }
+
+      if (!video) {
+        setTimeout(hideSplash, 1600);
+        return;
+      }
+
+      // iOS WKWebView Sicherheit: Properties zusaetzlich zu HTML-Attributen setzen
+      try {
+        video.muted = true;
+        video.defaultMuted = true;
+        video.playsInline = true;
+        video.setAttribute('muted', 'true');
+      } catch (e) {}
+
+      video.addEventListener('ended', hideSplash);
+      video.addEventListener('playing', function() { playStarted = true; });
+      video.addEventListener('error', function() {
+        console.warn('[splash] video error, dismissing');
+        setTimeout(hideSplash, 400);
+      });
+
+      // Notbremse: spaetestens nach 6s weg
+      setTimeout(hideSplash, 6000);
+
+      // Falls play() scheitert (kein User-Gesture, blockiert), nach 1s dismiss
+      // Aber: wenn Video erfolgreich startet, laeuft es bis 'ended' durch
+      function startPlay() {
+        var p;
+        try { p = video.play(); } catch (e) { p = null; }
+        if (p && typeof p.then === 'function') {
+          p.then(function() {
+            playStarted = true;
+          }).catch(function(err) {
+            console.warn('[splash] autoplay blocked', err);
+            // Nach kurzer Wartezeit dismissen damit User nicht haengen bleibt
+            setTimeout(function() { if (!playStarted) hideSplash(); }, 1000);
+          });
+        }
+      }
+
+      if (video.readyState >= 2) {
+        startPlay();
+      } else {
+        video.addEventListener('loadeddata', startPlay, { once: true });
+        // Falls loadeddata nie kommt (Network-Issue), nach 1.5s probieren
+        setTimeout(startPlay, 1500);
+      }
+    })();
   </script>
 
   <!-- Navbar -->
@@ -541,7 +534,6 @@
     </div>
   </nav>
 
-  <main>
   <!-- Hero: Problem-first -->
   <section class="lp-hero">
     <div class="lp-hero-content">
@@ -933,8 +925,6 @@
       </div>
     </div>
   </section>
-
-  </main>
 
   <!-- Footer -->
   <footer class="lp-footer">
