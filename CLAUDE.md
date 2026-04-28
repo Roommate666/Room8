@@ -25,6 +25,14 @@ Uebersicht: `specs/00-INDEX.md` — IMMER zuerst lesen wenn Aenderungen geplant 
 
 **Git-Hooks:** Lokal aktivieren mit `bash tools/install-hooks.sh` (pre-commit blockt Umlaute in Code + Sync-Drift root↔www).
 
+**Sentry Error Monitoring (Project: room8-web @ yumita.sentry.io):**
+- `sentry-init.js` im Repo-Root (+ www/) wird in alle HTML-Pages via `<script src="sentry-init.js">` direkt nach `<head>` geladen
+- Beim Hinzufuegen neuer HTML-Pages: `<script src="sentry-init.js"></script>` als ALLERERSTE Zeile im `<head>` — sonst werden frueh-Errors nicht captured
+- Konfig in sentry-init.js: `tracesSampleRate: 0`, `replaysSessionSampleRate: 0` (Free-Tier 5k Errors/Monat schonen, kein Tracing)
+- PII-Filter via `beforeSend`: Email/access_token/refresh_token werden gestrippt
+- Manuelles Reporting aus App-Code: `window.Room8Sentry.captureException(err)` oder `captureMessage(msg)`
+- DSN ist im Loader-Script eingebettet — bei Rotation sentry-init.js Loader-URL anpassen
+
 ## Sprache & Arbeitsweise
 - Auf Deutsch antworten, Code-Kommentare Deutsch (ae/oe/ue statt Umlaute)
 - Kein Framework - reines HTML/CSS/JS mit Capacitor

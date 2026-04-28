@@ -41,20 +41,61 @@ fi
 
 # ============================================
 # 2. Sync-Drift zwischen Root und www/
+# Erlaubt: Wenn beide Seiten gestaged sind ODER Drift schon vor diesem
+#          Commit existierte (HEAD vs HEAD vergleichen).
+# Faengt:  Wenn nur EINE Seite jetzt gestaged ist und die andere
+#          dadurch out-of-sync waere (relativ zum HEAD).
 # ============================================
-ROOT_HTML=$(echo "$STAGED" | grep -E '^[^/]+\.html$' || true)
-if [ -n "$ROOT_HTML" ]; then
-    while IFS= read -r file; do
-        [ -z "$file" ] && continue
-        WWW_FILE="www/$file"
-        if [ -f "$ROOT/$WWW_FILE" ]; then
-            if ! diff -q "$ROOT/$file" "$ROOT/$WWW_FILE" > /dev/null 2>&1; then
-                echo -e "${YELLOW}WARN${NC} $file und www/$file unterscheiden sich!"
-                echo -e "      Sync mit: ${GREEN}cp $file www/$file${NC}"
+HAS_STAGED() { echo "$STAGED" | grep -qE "^$1$"; }
+
+ROOT_NAMES=$(echo "$STAGED" | grep -E '^[^/]+\.html$' | sort -u || true)
+WWW_NAMES=$(echo "$STAGED" | grep -E '^www/[^/]+\.html$' | sed 's|^www/||' | sort -u || true)
+ALL_NAMES=$(printf "%s\n%s\n" "$ROOT_NAMES" "$WWW_NAMES" | grep -v '^$' | sort -u)
+
+if [ -n "$ALL_NAMES" ]; then
+    while IFS= read -r name; do
+        [ -z "$name" ] && continue
+        ROOT_F="$name"; WWW_F="www/$name"
+        [ ! -f "$ROOT/$ROOT_F" ] && continue
+        [ ! -f "$ROOT/$WWW_F" ] && continue
+
+        ROOT_STAGED=0; WWW_STAGED=0
+        HAS_STAGED "$ROOT_F" && ROOT_STAGED=1
+        HAS_STAGED "$WWW_F" && WWW_STAGED=1
+
+        # Beide gestaged = bewusste Aenderung → OK
+        if [ "$ROOT_STAGED" -eq 1 ] && [ "$WWW_STAGED" -eq 1 ]; then
+            continue
+        fi
+
+        # War der Drift schon im HEAD? Dann ist es kein neues Problem.
+        if git rev-parse --verify HEAD >/dev/null 2>&1; then
+            if ! git diff HEAD -- "$ROOT_F" "$WWW_F" --quiet 2>/dev/null; then
+                # Working-tree weicht vom HEAD ab — pruefen ob HEAD-Versionen identisch sind
+                HEAD_DIFF=$(git diff HEAD:"$ROOT_F" HEAD:"$WWW_F" 2>/dev/null | head -1 || true)
+                if [ -n "$HEAD_DIFF" ]; then
+                    # Bestand schon im HEAD — kein neuer Drift
+                    continue
+                fi
+            else
+                # Nichts geaendert seit HEAD an diesen Files
+                continue
+            fi
+        fi
+
+        # Eine Seite jetzt gestaged → andere muss synchron sein
+        if ! diff -q "$ROOT/$ROOT_F" "$ROOT/$WWW_F" > /dev/null 2>&1; then
+            if [ "$ROOT_STAGED" -eq 1 ]; then
+                echo -e "${YELLOW}WARN${NC} $name gestaged, aber www/$name driftet!"
+                echo -e "      Sync mit: ${GREEN}cp $name www/$name && git add www/$name${NC}"
+                FAIL=1
+            else
+                echo -e "${YELLOW}WARN${NC} www/$name gestaged, aber $name driftet!"
+                echo -e "      Sync mit: ${GREEN}cp www/$name $name && git add $name${NC}"
                 FAIL=1
             fi
         fi
-    done <<< "$ROOT_HTML"
+    done <<< "$ALL_NAMES"
 fi
 
 # ============================================

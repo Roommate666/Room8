@@ -84,6 +84,14 @@ check "admin.html: toggleEventCreator"              "$BASE/admin.html"        "t
 check "admin.html: Push-Health Tab"                 "$BASE/admin.html"        "tab-pushhealth"
 check "admin.html: loadPushHealth Fn"               "$BASE/admin.html"        "window.loadPushHealth"
 check "admin.html: get_notification_health RPC"     "$BASE/admin.html"        "get_notification_health"
+
+# 3. Sentry-Integration (Error Monitoring)
+http_check "sentry-init.js erreichbar"              "$BASE/sentry-init.js"    "200"
+check "sentry-init.js: Loader-URL"                  "$BASE/sentry-init.js"    "js-de.sentry-cdn.com"
+check "sentry-init.js: PII-Filter beforeSend"       "$BASE/sentry-init.js"    "beforeSend"
+check "index.html: Sentry-Tag im head"              "$BASE/index.html"        "sentry-init.js"
+check "admin.html: Sentry-Tag im head"              "$BASE/admin.html"        "sentry-init.js"
+check "events.html: Sentry-Tag im head"             "$BASE/events.html"       "sentry-init.js"
 check "index.html: splashVideo"                     "$BASE/index.html"        "splashVideo"
 
 echo ""
