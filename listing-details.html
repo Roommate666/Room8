@@ -1043,7 +1043,7 @@
                 'shower': '\uD83D\uDEBF ' + tr('detail_shower'),
                 'bathtub': '\uD83D\uDEC1 ' + tr('detail_bathtub'),
                 'towel_heater': '\uD83D\uDD25 ' + tr('detail_heating'),
-                'window': '\uD83E\uDE9F Window'
+                'window': '\uD83E\uDE9F Fenster'
             });
 
             // === KÜCHEN DETAILS ===
@@ -1051,9 +1051,9 @@
                 'stove': '\uD83D\uDD25 ' + tr('detail_stove'),
                 'oven': '\u2668\uFE0F ' + tr('detail_oven'),
                 'fridge': '\u2744\uFE0F ' + tr('detail_fridge'),
-                'freezer': '\uD83E\uDDCA Freezer',
+                'freezer': '\uD83E\uDDCA Gefrierfach',
                 'dishwasher': '\uD83C\uDF7D\uFE0F ' + tr('detail_dishwasher'),
-                'microwave': '\uD83D\uDCFB Microwave'
+                'microwave': '\uD83D\uDCFB Mikrowelle'
             });
 
             // === WG DETAILS ===
@@ -1068,28 +1068,28 @@
                 'elevator': '\uD83D\uDED7 ' + tr('detail_elevator'),
                 'parking': '\uD83D\uDE97 ' + tr('detail_parking'),
                 'cellar': '\uD83D\uDCE6 ' + tr('detail_cellar'),
-                'pets_allowed': '\uD83D\uDC3E Pets',
-                'barrier_free': '\u267F Barrier-free',
+                'pets_allowed': '\uD83D\uDC3E Haustiere erlaubt',
+                'barrier_free': '\u267F Barrierefrei',
                 'washing_machine': '\uD83E\uDDFA ' + tr('detail_washing_machine'),
                 'dryer': '\uD83D\uDCA8 ' + tr('detail_dryer'),
-                'storage_room': '\uD83D\uDEAA Storage',
-                'attic': '\uD83C\uDFE0 Attic',
-                'bike_room': '\uD83D\uDEB2 Bike room',
-                'air_conditioning': '\u2744\uFE0F AC',
-                'floor_heating': '\uD83D\uDD25 Floor heating',
-                'shutters': '\uD83E\uDE9F Shutters'
+                'storage_room': '\uD83D\uDEAA Abstellraum',
+                'attic': '\uD83C\uDFE0 Dachboden',
+                'bike_room': '\uD83D\uDEB2 Fahrradraum',
+                'air_conditioning': '\u2744\uFE0F Klimaanlage',
+                'floor_heating': '\uD83D\uDD25 Fußbodenheizung',
+                'shutters': '\uD83E\uDE9F Rolläden'
             });
             
             // === MÖBLIERUNG (erweitert) ===
             renderTags('furnitureSection', 'furnitureList', l.furniture_data, {
-                'bed': '\uD83D\uDECF\uFE0F Bed',
-                'desk': '\uD83D\uDDA5\uFE0F Desk',
-                'wardrobe': '\uD83D\uDEAA Wardrobe',
-                'kitchen': '\uD83C\uDF73 Kitchen',
+                'bed': '\uD83D\uDECF\uFE0F Bett',
+                'desk': '\uD83D\uDDA5\uFE0F Schreibtisch',
+                'wardrobe': '\uD83D\uDEAA Kleiderschrank',
+                'kitchen': '\uD83C\uDF73 Küche',
                 'tv': '\uD83D\uDCFA TV',
                 'sofa': '\uD83D\uDECB\uFE0F Sofa',
-                'chair': '\uD83E\uDE91 Chair',
-                'shelf': '\uD83D\uDCDA Shelf'
+                'chair': '\uD83E\uDE91 Stuhl',
+                'shelf': '\uD83D\uDCDA Regal'
             });
 
             // === NEBENKOSTEN ===
@@ -1124,11 +1124,11 @@
                 'Others': tr('marketplace_cat_others')
             };
             var conditionLabels = {
-                'New': 'New',
-                'Like New': 'Like New',
-                'Good': 'Good',
-                'Fair': 'Fair',
-                'Poor': 'Poor'
+                'New': 'Neu',
+                'Like New': 'Wie neu',
+                'Good': 'Gut',
+                'Fair': 'Akzeptabel',
+                'Poor': 'Mit Mängeln'
             };
             addAttr(tr('detail_category'), categoryLabels[l.category] || humanize(l.category));
             addAttr(tr('detail_condition'), conditionLabels[l.condition] || humanize(l.condition));
@@ -1159,8 +1159,8 @@
         const roomTypeLabels = {
             'private': tr('detail_room_private'),
             'shared': tr('detail_room_shared'),
-            'none': 'None',
-            'in_bath': 'In Bath',
+            'none': 'Keiner',
+            'in_bath': 'Im Bad',
             'separate': tr('detail_separate')
         };
 
@@ -1374,12 +1374,12 @@
         };
 
         const typeLabels = {
-            'any': '\uD83C\uDFE0 Any',
+            'any': '\uD83C\uDFE0 Egal',
             'students': '\uD83C\uDF93 ' + tr('detail_students_wg'),
             'working': '\uD83D\uDCBC ' + tr('detail_workers_wg'),
             'mixed': '\uD83D\uDD00 ' + tr('detail_mixed'),
-            'purpose': '\uD83C\uDFAF Purpose WG',
-            'community': '\u2764\uFE0F Community WG'
+            'purpose': '\uD83C\uDFAF Zweck-WG',
+            'community': '\u2764\uFE0F Gemeinschafts-WG'
         };
 
         if (prefs.pref_gender && genderLabels[prefs.pref_gender]) {
