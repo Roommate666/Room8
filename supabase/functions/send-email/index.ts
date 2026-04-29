@@ -82,6 +82,11 @@ serve(async (req) => {
     const text = parsed.text
     const replyTo = parsed.replyTo
     userId = parsed.userId ?? null
+    // Optional Custom-Tagging fuer Admin-Alerts Rate-Limit
+    const dataPayload = parsed.data ?? null
+    const adminAlertType = (dataPayload && typeof dataPayload === 'object' && typeof dataPayload.admin_alert_type === 'string')
+      ? dataPayload.admin_alert_type
+      : null
 
     if (!to || !subject || (!html && !text)) {
       await logNotification(supabase, {
@@ -166,7 +171,10 @@ serve(async (req) => {
       status: 'success',
       provider_id: resendData.id ?? null,
       title: subject,
-      metadata: { to },
+      metadata: {
+        to,
+        ...(adminAlertType ? { admin_alert_type: adminAlertType } : {}),
+      },
     })
 
     return new Response(

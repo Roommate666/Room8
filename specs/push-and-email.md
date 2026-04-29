@@ -19,6 +19,7 @@
 | `supabase/migrations/20260428000013_notification_logs.sql` | Health-Logging-Tabelle + Health-RPCs + Cleanup-Cron |
 | `supabase/migrations/20260428000014_notification_routing.sql` | notification_settings Tabelle + should_notify() + notify_user_push() + 5 City-Trigger |
 | `supabase/migrations/20260428000015_push_safeguards.sql` | Quiet Hours + Rate-Limit + Dedup + In-App-Sync fuer City-Triggers |
+| `supabase/migrations/20260428000016_admin_alerts.sql` | send_admin_alert() + 6 Trigger fuer Reports/Registrations/Verif/Partner/EventReq/Contact |
 
 ## Required Secrets in Supabase
 
@@ -87,7 +88,25 @@ PERFORM public.notify_user_push(
 
 **channel_key-Pflicht:** Jeder `notify_user_push`-Call schreibt automatisch `channel_key` ins data-Payload — Edge Function `send-push` extrahiert es und schreibt `notification_logs.metadata.channel_key` + `notification_logs.ref_id`. Sonst funktionieren Rate-Limit + Dedup nicht.
 
-### 2d. City-Match-Trigger (LISTINGS / JOBS / COUPONS / EVENTS)
+### 2d. Admin-Email-Alerts
+
+`send_admin_alert(subject, body_html, cta_url?, subject_type?)` schickt Email an alle `profiles.is_admin = true`. Subject bekommt `[Room8 Admin] ` Prefix.
+
+**Rate-Limit:** max 10 Mails pro `subject_type` pro Stunde — verhindert Mass-Spam wenn Bot 1000 Reports schickt.
+
+**Trigger-Map:**
+| Tabelle | subject_type | Inhalt |
+|---|---|---|
+| `reports` | `report` | Reporter-Name, Reason, Reported-Type/-ID |
+| `profiles` (INSERT) | `registration` | Username, Name, Email, Stadt, User-ID |
+| `verifications` | `verification` | User + Hinweis (Trigger nur wenn Tabelle existiert) |
+| `partner_submissions` | `partner_submission` | Generischer Hinweis |
+| `event_creator_requests` | `event_request` | User + Organisation |
+| `contact_messages` | `contact_message` | Name, Email, Kategorie, Nachricht |
+
+**send-email Edge Function:** Liest optional `data.admin_alert_type` aus Request-Body und schreibt es in `notification_logs.metadata.admin_alert_type` — sonst greift Rate-Limit nicht.
+
+### 2e. City-Match-Trigger (LISTINGS / JOBS / COUPONS / EVENTS)
 
 Bei jedem INSERT in `listings`, `jobs`, `coupons`, `events` feuert ein Trigger der Push an alle User in derselben Stadt sendet (sofern Toggle an).
 
@@ -232,5 +251,8 @@ UPDATE events SET status='cancelled' WHERE id=<test-id>;
 | Rate-Limit 5/h pro `(user, channel)` | Verhindert Spam bei Mass-Insert (50 Coupons → max 5 Pushes) |
 | ref_id Format `<table>:<uuid>` | Eindeutiger Dedup-Key, listing-Match gegen saved-search-Match |
 | send-push extrahiert `channel_key` + `ref_id` aus data | Sonst greifen Rate-Limit + Dedup nicht (Top-Level-Felder in notification_logs) |
+| `send_admin_alert()` als einziger Weg fuer Admin-Mails | Sonst kein Rate-Limit, einzelne Trigger koennen Inbox fluten |
+| send-email extrahiert `data.admin_alert_type` | Sonst greift `send_admin_alert` Rate-Limit nicht |
+| Admin-Trigger im EXCEPTION-Block | Wenn Mail-Send abkackt, soll User-Action (Report etc.) trotzdem durchgehen |
 | CHECK-Constraint `notification_logs.status IN (...)` | Frontend-Badges + Filter erwarten exakt diese Werte |
 | `get_notification_health` als `security definer` + Admin-Check | RPC ist `to authenticated` granted, ohne Check könnte jeder User Stats lesen |
