@@ -1985,7 +1985,7 @@
     };
 
     window.dismissReports = async (eventId) => {
-        if (!confirm('Alle Reports fuer dieses Event loeschen?')) return;
+        if (!confirm('Alle Reports für dieses Event löschen?')) return;
         await sb.from('event_reports').delete().eq('event_id', eventId);
         if (window.Room8) Room8.showToast('Reports gelöscht', 'success');
         loadEventsAdmin(currentEventFilter);
