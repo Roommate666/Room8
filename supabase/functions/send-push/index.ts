@@ -229,11 +229,48 @@ serve(async (req) => {
     if (!fcmRes.ok) {
       console.error('FCM error:', fcmResult)
       const errCode = fcmResult.error?.status || fcmResult.error?.code || 'fcm_unknown'
+      const errMsg = fcmResult.error?.message || ''
+
+      // FCM-Token ist tot wenn:
+      // - status UNREGISTERED (User hat App deinstalliert)
+      // - status NOT_FOUND (Token existiert nicht mehr)
+      // - INVALID_ARGUMENT mit Hinweis auf "registration token"
+      const isDeadToken =
+        errCode === 'UNREGISTERED' ||
+        errCode === 'NOT_FOUND' ||
+        (errCode === 'INVALID_ARGUMENT' && /registration|token/i.test(errMsg))
+
+      if (isDeadToken) {
+        // Token loeschen — verhindert dass jeder Future-Push gegen denselben toten Token sendet
+        try {
+          await supabase.from('profiles').update({ fcm_token: null }).eq('id', userId)
+        } catch (e) {
+          console.error('Failed to null fcm_token:', e)
+        }
+        await logNotification(supabase, {
+          user_id: userId,
+          status: 'token_cleaned',
+          error_code: String(errCode),
+          error_msg: errMsg.slice(0, 500),
+          title,
+          ref_id: meta.ref_id,
+          metadata: {
+            http_status: fcmRes.status,
+            ...(meta.channel_key ? { channel_key: meta.channel_key } : {}),
+          },
+        })
+        return new Response(
+          JSON.stringify({ success: false, reason: 'token_cleaned', error_code: errCode }),
+          { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        )
+      }
+
+      // Anderer FCM-Error (Quota, Service-Outage, etc.)
       await logNotification(supabase, {
         user_id: userId,
         status: 'fcm_error',
         error_code: String(errCode),
-        error_msg: fcmResult.error?.message || JSON.stringify(fcmResult).slice(0, 500),
+        error_msg: errMsg.slice(0, 500) || JSON.stringify(fcmResult).slice(0, 500),
         title,
         ref_id: meta.ref_id,
         metadata: {
@@ -243,14 +280,14 @@ serve(async (req) => {
         },
       })
       // Sentry capture (best-effort, non-blocking)
-      captureException(fcmResult.error?.message || 'FCM non-2xx', {
+      captureException(errMsg || 'FCM non-2xx', {
         function: 'send-push',
         user_id: userId,
         tags: { channel: 'push', status: 'fcm_error', error_code: String(errCode) },
         extra: { http_status: fcmRes.status, fcm_response: fcmResult },
       }).catch(() => {})
       return new Response(
-        JSON.stringify({ success: false, error: fcmResult.error?.message || 'FCM error' }),
+        JSON.stringify({ success: false, error: errMsg || 'FCM error' }),
         { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       )
     }

@@ -102,6 +102,12 @@ check "settings: saved_search_match Toggle"         "$BASE/notification-settings
 check "settings: Quiet Hours Toggle"                "$BASE/notification-settings.html"  "quiet_hours_enabled"
 check "settings: Quiet Hours Start Time"            "$BASE/notification-settings.html"  "quiet_hours_start"
 check "settings: Quiet Hours End Time"              "$BASE/notification-settings.html"  "quiet_hours_end"
+
+# 5. Admin Push-Health Erweiterungen
+check "admin: pushHealthSkips Container"            "$BASE/admin.html"        "pushHealthSkips"
+check "admin: get_skip_stats RPC"                   "$BASE/admin.html"        "get_skip_stats"
+check "admin: get_token_cleanup_count RPC"          "$BASE/admin.html"        "get_token_cleanup_count"
+check "admin: skipReasonLabels"                     "$BASE/admin.html"        "skipReasonLabels"
 check "index.html: splashVideo"                     "$BASE/index.html"        "splashVideo"
 
 echo ""
