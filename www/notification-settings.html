@@ -221,6 +221,21 @@
                 </div>
             </div>
 
+            <!-- 5b. Admin-Only: Extra Mail-Empfaenger -->
+            <div class="settings-section" id="admin-extra-emails-section" style="display:none; border:2px solid #FCD34D; background:#FFFBEB;">
+                <div class="section-header">📧 Admin Extra-Mailadressen</div>
+                <div class="setting-item" style="display:block;">
+                    <p style="font-size:0.85rem; color:#92400E; margin-bottom:0.75rem;">
+                        Zusaetzliche Adressen fuer Admin-Alerts (Reports, Registrierungen, etc.).
+                        Eine pro Zeile. Nuetzlich wenn dein Login-Provider (z.B. iCloud) Mails blockt.
+                    </p>
+                    <textarea id="extra_email_recipients"
+                              placeholder="info@ayaservice.de&#10;backup@example.com"
+                              rows="4"
+                              style="width:100%; padding:0.625rem 0.75rem; border:1px solid #E5E7EB; border-radius:8px; font-family:inherit; font-size:0.9rem; resize:vertical;"></textarea>
+                </div>
+            </div>
+
             <!-- 6. Ruhezeiten -->
             <div class="settings-section">
                 <div class="section-header">🌙 Ruhezeiten</div>
@@ -326,7 +341,25 @@
                 const e = document.getElementById('quiet_hours_end');
                 if (e) e.value = settings.quiet_hours_end.slice(0, 5);
             }
+            // Admin-only: Extra Mail-Empfaenger
+            if (Array.isArray(settings.extra_email_recipients)) {
+                const ta = document.getElementById('extra_email_recipients');
+                if (ta) ta.value = settings.extra_email_recipients.join('\n');
+            }
         }
+
+        // Admin-Section nur zeigen wenn User is_admin
+        try {
+            const adminCheck = await sb
+                .from('profiles')
+                .select('is_admin')
+                .eq('id', user.id)
+                .single();
+            if (adminCheck.data && adminCheck.data.is_admin) {
+                const sec = document.getElementById('admin-extra-emails-section');
+                if (sec) sec.style.display = '';
+            }
+        } catch (e) { /* silent */ }
     }
 
     // PUSH MASTER SWITCH LOGIC
@@ -382,6 +415,16 @@
             quiet_hours_end: document.getElementById('quiet_hours_end').value || '08:00',
             updated_at: new Date().toISOString()
         };
+
+        // Admin-only: Extra Mail-Empfaenger (Textarea, eine pro Zeile)
+        const extraTa = document.getElementById('extra_email_recipients');
+        if (extraTa && extraTa.value !== undefined) {
+            const emails = extraTa.value
+                .split('\n')
+                .map(s => s.trim())
+                .filter(s => s.length > 0 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s));
+            newSettings.extra_email_recipients = emails;
+        }
 
         const { error } = await sb
             .from('notification_settings')
