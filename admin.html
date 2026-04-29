@@ -458,7 +458,7 @@
         <div id="pushHealthSkips" class="data-list">
             <div class="loading-state">Lade Skips...</div>
         </div>
-        <h3 style="margin: 1.5rem 0 0.5rem; font-size: 1rem; color:#374151;">Top-Fehlergruende</h3>
+        <h3 style="margin: 1.5rem 0 0.5rem; font-size: 1rem; color:#374151;">Top-Fehlergründe</h3>
         <div id="pushHealthFailures" class="data-list">
             <div class="loading-state">Lade Fehler...</div>
         </div>
@@ -1969,7 +1969,7 @@
     }
 
     window.approveEvent = async (eventId) => {
-        if (!confirm('Event wieder freigeben? (status -> active, Reports werden geloescht)')) return;
+        if (!confirm('Event wieder freigeben? (status -> active, Reports werden gelöscht)')) return;
         // System-Bypass via SQL direkt geht nicht, also als Admin (RLS-Bypass via events_admin_all)
         await sb.from('events').update({ status: 'active' }).eq('id', eventId);
         await sb.from('event_reports').delete().eq('event_id', eventId);
@@ -1987,7 +1987,7 @@
     window.dismissReports = async (eventId) => {
         if (!confirm('Alle Reports fuer dieses Event loeschen?')) return;
         await sb.from('event_reports').delete().eq('event_id', eventId);
-        if (window.Room8) Room8.showToast('Reports geloescht', 'success');
+        if (window.Room8) Room8.showToast('Reports gelöscht', 'success');
         loadEventsAdmin(currentEventFilter);
     };
 
@@ -2112,15 +2112,15 @@
             try {
                 const { data: tcCount, error: tcErr } = await sb.rpc('get_token_cleanup_count', { hours: 168 });
                 if (tcErr) {
-                    tokenEl.textContent = 'Token-Cleanup-Stats nicht verfuegbar.';
+                    tokenEl.textContent = 'Token-Cleanup-Stats nicht verfügbar.';
                 } else {
                     const n = tcCount || 0;
                     tokenEl.innerHTML = n > 0
-                        ? `🧹 <b>${n}</b> tote FCM-Token wurden in den letzten 7 Tagen automatisch geloescht (User die App deinstalliert haben).`
+                        ? `🧹 <b>${n}</b> tote FCM-Token wurden in den letzten 7 Tagen automatisch gelöscht (User die App deinstalliert haben).`
                         : `✅ Keine toten FCM-Token in den letzten 7 Tagen.`;
                 }
             } catch (e) {
-                tokenEl.textContent = 'Token-Cleanup-Stats nicht verfuegbar.';
+                tokenEl.textContent = 'Token-Cleanup-Stats nicht verfügbar.';
             }
         }
 
