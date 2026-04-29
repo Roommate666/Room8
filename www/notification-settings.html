@@ -284,9 +284,14 @@
                 </div>
             </div>
 
+            <!-- Inline Save-Button (Fallback für iOS wo position:fixed unsichtbar bleibt) -->
+            <div style="margin-top: 1.5rem; padding: 0 0 6rem 0;">
+                <button id="saveBtnInline" class="save-btn" style="width:100%;">Einstellungen speichern</button>
+            </div>
+
         </div>
     </main>
-    
+
     <div class="save-bar">
         <button id="saveBtn" class="save-btn">Einstellungen speichern</button>
     </div>
@@ -393,11 +398,13 @@
         }
     });
 
-    // SPEICHERN BUTTON
-    document.getElementById('saveBtn').addEventListener('click', async function() {
-        const btn = document.getElementById('saveBtn');
+    // SPEICHERN BUTTON (fixed bottom + inline fallback fuer iOS)
+    async function handleSaveClick(e) {
+        const btn = e.currentTarget;
+        const btn2 = document.getElementById(btn.id === 'saveBtn' ? 'saveBtnInline' : 'saveBtn');
         btn.textContent = "Speichere...";
         btn.disabled = true;
+        if (btn2) { btn2.textContent = "Speichere..."; btn2.disabled = true; }
 
         const newSettings = {
             user_id: currentUser.id,
@@ -430,19 +437,29 @@
             .from('notification_settings')
             .upsert(newSettings, { onConflict: 'user_id' });
 
+        const setBoth = (text, bg, disabled) => {
+            [btn, btn2].forEach(b => {
+                if (!b) return;
+                b.textContent = text;
+                if (bg) b.style.background = bg;
+                b.disabled = disabled;
+            });
+        };
+
         if (error) {
             Room8UI.error("Einstellungen konnten nicht gespeichert werden. Bitte versuche es erneut.");
+            setBoth("Einstellungen speichern", null, false);
         } else {
-            // Button Feedback
-            btn.textContent = "Gespeichert! ✓";
-            btn.style.background = "#10B981";
+            setBoth("Gespeichert! ✓", "#10B981", true);
             setTimeout(() => {
-                btn.textContent = "Einstellungen speichern";
-                btn.style.background = "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)";
-                btn.disabled = false;
+                setBoth("Einstellungen speichern", "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)", false);
             }, 2000);
         }
-    });
+    }
+
+    document.getElementById('saveBtn').addEventListener('click', handleSaveClick);
+    const saveBtnInline = document.getElementById('saveBtnInline');
+    if (saveBtnInline) saveBtnInline.addEventListener('click', handleSaveClick);
 
     document.addEventListener('DOMContentLoaded', loadSettings);
 </script>
