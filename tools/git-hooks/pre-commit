@@ -25,10 +25,16 @@ fi
 # 1. Umlaut-Check in Code-Files (NICHT in HTML/MD)
 # ============================================
 CODE_FILES=$(echo "$STAGED" | grep -E '\.(js|ts|tsx|jsx|py|sh|css|json)$' || true)
+# Whitelist: Files die echte UI-Strings enthalten und Umlaute brauchen
+UMLAUT_OK_REGEX='(^|/)translations\.js$|(^|/)i18n\.(js|ts)$'
 if [ -n "$CODE_FILES" ]; then
     while IFS= read -r file; do
         [ -z "$file" ] && continue
         [ ! -f "$ROOT/$file" ] && continue
+        # Whitelist: i18n / translations Files duerfen Umlaute haben (sind UI-Strings)
+        if echo "$file" | grep -qE "$UMLAUT_OK_REGEX"; then
+            continue
+        fi
         # nur HINZUGEFUEGTE Zeilen (+) pruefen, nicht entfernte (-)
         OFFENDERS=$(git diff --cached "$file" | grep -E '^\+' | grep -E '[äöüÄÖÜß]' || true)
         if [ -n "$OFFENDERS" ]; then
