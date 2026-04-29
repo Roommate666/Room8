@@ -9,6 +9,10 @@ const corsHeaders = {
 
 // Best-effort Logging in notification_logs.
 // Schluckt Fehler — Logging darf NIE den eigentlichen Send-Pfad blockieren.
+//
+// PFLICHT-FELDER fuer Rate-Limit + Dedup (siehe specs/push-and-email.md):
+//   metadata.channel_key  → is_rate_limited() filtert pro Channel
+//   row.ref_id            → is_duplicate_push() dedupliziert pro Item
 async function logNotification(
   supabase: SupabaseClient,
   row: {
@@ -18,6 +22,7 @@ async function logNotification(
     error_msg?: string | null,
     provider_id?: string | null,
     title?: string | null,
+    ref_id?: string | null,
     metadata?: Record<string, unknown> | null,
   }
 ): Promise<void> {
@@ -30,10 +35,26 @@ async function logNotification(
       error_msg: row.error_msg ? String(row.error_msg).slice(0, 500) : null,
       provider_id: row.provider_id ?? null,
       title: row.title ? String(row.title).slice(0, 200) : null,
+      ref_id: row.ref_id ?? null,
       metadata: row.metadata ?? null,
     })
   } catch (e) {
     console.error('notification_logs insert failed (non-fatal):', e)
+  }
+}
+
+// Aus dem data-Payload Top-Level-Felder extrahieren die wir fuer Rate-Limit /
+// Dedup brauchen. Migration 20260428000015 schreibt sie via notify_user_push.
+function extractMeta(dataPayload: Record<string, unknown> | null): {
+  channel_key: string | null,
+  ref_id: string | null,
+} {
+  if (!dataPayload || typeof dataPayload !== 'object') {
+    return { channel_key: null, ref_id: null }
+  }
+  return {
+    channel_key: typeof dataPayload.channel_key === 'string' ? dataPayload.channel_key : null,
+    ref_id:      typeof dataPayload.ref_id === 'string'      ? dataPayload.ref_id      : null,
   }
 }
 
@@ -135,12 +156,16 @@ serve(async (req) => {
       .eq('id', userId)
       .single()
 
+    const meta = extractMeta(dataPayload)
+
     if (profileError || !profile?.fcm_token) {
       await logNotification(supabase, {
         user_id: userId,
         status: 'no_token',
         error_msg: profileError?.message ?? 'profile or fcm_token missing',
         title,
+        ref_id: meta.ref_id,
+        metadata: meta.channel_key ? { channel_key: meta.channel_key } : null,
       })
       return new Response(
         JSON.stringify({ success: false, reason: 'no_token' }),
@@ -210,7 +235,12 @@ serve(async (req) => {
         error_code: String(errCode),
         error_msg: fcmResult.error?.message || JSON.stringify(fcmResult).slice(0, 500),
         title,
-        metadata: { http_status: fcmRes.status, data: dataPayload },
+        ref_id: meta.ref_id,
+        metadata: {
+          http_status: fcmRes.status,
+          ...(meta.channel_key ? { channel_key: meta.channel_key } : {}),
+          data: dataPayload,
+        },
       })
       // Sentry capture (best-effort, non-blocking)
       captureException(fcmResult.error?.message || 'FCM non-2xx', {
@@ -230,7 +260,11 @@ serve(async (req) => {
       status: 'success',
       provider_id: fcmResult.name ?? null,
       title,
-      metadata: dataPayload ? { data: dataPayload } : null,
+      ref_id: meta.ref_id,
+      metadata: {
+        ...(meta.channel_key ? { channel_key: meta.channel_key } : {}),
+        ...(dataPayload ? { data: dataPayload } : {}),
+      },
     })
 
     return new Response(
@@ -240,11 +274,14 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error:', error)
+    const meta = extractMeta(dataPayload)
     await logNotification(supabase, {
       user_id: userId,
       status: 'exception',
       error_msg: (error as Error).message,
       title,
+      ref_id: meta.ref_id,
+      metadata: meta.channel_key ? { channel_key: meta.channel_key } : null,
     })
     captureException(error as Error, {
       function: 'send-push',

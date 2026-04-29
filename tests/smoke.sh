@@ -99,6 +99,9 @@ check "settings: new_job_city Toggle"               "$BASE/notification-settings
 check "settings: new_coupon_city Toggle"            "$BASE/notification-settings.html"  "new_coupon_city"
 check "settings: chat_message Toggle"               "$BASE/notification-settings.html"  "chat_message"
 check "settings: saved_search_match Toggle"         "$BASE/notification-settings.html"  "saved_search_match"
+check "settings: Quiet Hours Toggle"                "$BASE/notification-settings.html"  "quiet_hours_enabled"
+check "settings: Quiet Hours Start Time"            "$BASE/notification-settings.html"  "quiet_hours_start"
+check "settings: Quiet Hours End Time"              "$BASE/notification-settings.html"  "quiet_hours_end"
 check "index.html: splashVideo"                     "$BASE/index.html"        "splashVideo"
 
 echo ""

@@ -18,6 +18,7 @@
 | `supabase/migrations/20260428000012_email_notifications.sql` | Email-Helper + Override Functions |
 | `supabase/migrations/20260428000013_notification_logs.sql` | Health-Logging-Tabelle + Health-RPCs + Cleanup-Cron |
 | `supabase/migrations/20260428000014_notification_routing.sql` | notification_settings Tabelle + should_notify() + notify_user_push() + 5 City-Trigger |
+| `supabase/migrations/20260428000015_push_safeguards.sql` | Quiet Hours + Rate-Limit + Dedup + In-App-Sync fuer City-Triggers |
 
 ## Required Secrets in Supabase
 
@@ -67,7 +68,26 @@ PERFORM public.notify_user_push(
 
 **should_notify() default ist TRUE** wenn der User keinen `notification_settings`-Eintrag hat. Erst nach aktivem Deaktivieren wird FALSE. Das ist DSGVO-OK weil User explizit Push-Permission im OS gibt.
 
-### 2c. City-Match-Trigger (LISTINGS / JOBS / COUPONS / EVENTS)
+### 2c. Push-Safeguards (Quiet Hours / Rate-Limit / Dedup)
+
+**should_notify()** prueft (in dieser Reihenfolge):
+
+1. **Toggle** in `notification_settings` (z.B. `new_event_city = true`)
+2. **Quiet Hours** — wenn aktiviert und aktuelle Zeit im Window: kein Push
+   - default 22:00–08:00 in `Europe/Berlin`
+   - Wrap-around-Logik (start > end → ueber Mitternacht)
+   - **Ausnahme: `chat_message`** — 1:1 Konversation, immer durchgelassen
+3. **Rate-Limit** — max 5 Push pro `(user, channel)` pro Stunde
+   - liest `notification_logs.metadata.channel_key`
+   - **Ausnahme: `chat_message`** — keine Drosselung
+4. **Dedup** (in `notify_user_push`, nicht should_notify) — gleiche `ref_id` in 60 Min: skip
+   - verhindert dass `saved_search_match` + `new_listing_city` beide pushen fuer dasselbe Listing
+
+**ref_id-Konvention:** `<table>:<uuid>` z.B. `event:abc-123`, `listing:xyz-789`.
+
+**channel_key-Pflicht:** Jeder `notify_user_push`-Call schreibt automatisch `channel_key` ins data-Payload — Edge Function `send-push` extrahiert es und schreibt `notification_logs.metadata.channel_key` + `notification_logs.ref_id`. Sonst funktionieren Rate-Limit + Dedup nicht.
+
+### 2d. City-Match-Trigger (LISTINGS / JOBS / COUPONS / EVENTS)
 
 Bei jedem INSERT in `listings`, `jobs`, `coupons`, `events` feuert ein Trigger der Push an alle User in derselben Stadt sendet (sofern Toggle an).
 
@@ -208,5 +228,9 @@ UPDATE events SET status='cancelled' WHERE id=<test-id>;
 | `should_notify()` default TRUE | Neue User kriegen Push, Opt-Out ist explizit |
 | Owner-Exclusion in City-Triggern | Owner kriegt nicht "Neuer Job in X" wenn er den Job selbst gepostet hat |
 | Case-insensitive EXACT city-match (`=` nicht `LIKE %`) | "Ulm" soll nicht "Ulmbach" matchen |
+| Quiet Hours bypass NUR fuer `chat_message` | 1:1-Chat ist Echtzeit-Erwartung, alles andere kann warten |
+| Rate-Limit 5/h pro `(user, channel)` | Verhindert Spam bei Mass-Insert (50 Coupons → max 5 Pushes) |
+| ref_id Format `<table>:<uuid>` | Eindeutiger Dedup-Key, listing-Match gegen saved-search-Match |
+| send-push extrahiert `channel_key` + `ref_id` aus data | Sonst greifen Rate-Limit + Dedup nicht (Top-Level-Felder in notification_logs) |
 | CHECK-Constraint `notification_logs.status IN (...)` | Frontend-Badges + Filter erwarten exakt diese Werte |
 | `get_notification_health` als `security definer` + Admin-Check | RPC ist `to authenticated` granted, ohne Check könnte jeder User Stats lesen |

@@ -221,6 +221,38 @@
                 </div>
             </div>
 
+            <!-- 6. Ruhezeiten -->
+            <div class="settings-section">
+                <div class="section-header">🌙 Ruhezeiten</div>
+
+                <div class="setting-item">
+                    <div class="setting-text">
+                        <h4>Nicht stören</h4>
+                        <p>In diesem Zeitraum bekommst du KEINE Push-Benachrichtigungen (außer Chat-Nachrichten)</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="quiet_hours_enabled" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item" style="display:flex; gap:1rem; align-items:center;">
+                    <div class="setting-text" style="flex:1;">
+                        <h4>Von</h4>
+                    </div>
+                    <input type="time" id="quiet_hours_start" value="22:00"
+                           style="padding:0.5rem 0.75rem; border:1px solid #E5E7EB; border-radius:8px; font-size:1rem;">
+                </div>
+
+                <div class="setting-item" style="display:flex; gap:1rem; align-items:center;">
+                    <div class="setting-text" style="flex:1;">
+                        <h4>Bis</h4>
+                    </div>
+                    <input type="time" id="quiet_hours_end" value="08:00"
+                           style="padding:0.5rem 0.75rem; border:1px solid #E5E7EB; border-radius:8px; font-size:1rem;">
+                </div>
+            </div>
+
             <!-- 5. Gespeicherte Suchen -->
             <div class="settings-section">
                 <div class="section-header">🔍 Suchaufträge</div>
@@ -280,11 +312,20 @@
 
         if (settings) {
             // Checkboxen setzen
-            const ids = ['chat_message', 'review', 'favorite', 'interest', 'new_listing_city', 'new_job_city', 'new_coupon_city', 'new_event_city', 'saved_search_match'];
+            const ids = ['chat_message', 'review', 'favorite', 'interest', 'new_listing_city', 'new_job_city', 'new_coupon_city', 'new_event_city', 'saved_search_match', 'quiet_hours_enabled'];
             ids.forEach(id => {
                 const el = document.getElementById(id);
                 if (el && settings[id] !== undefined) el.checked = settings[id];
             });
+            // Quiet Hours Time-Inputs (HH:MM Strings)
+            if (settings.quiet_hours_start) {
+                const s = document.getElementById('quiet_hours_start');
+                if (s) s.value = settings.quiet_hours_start.slice(0, 5);
+            }
+            if (settings.quiet_hours_end) {
+                const e = document.getElementById('quiet_hours_end');
+                if (e) e.value = settings.quiet_hours_end.slice(0, 5);
+            }
         }
     }
 
@@ -336,6 +377,9 @@
             new_coupon_city: document.getElementById('new_coupon_city').checked,
             new_event_city: document.getElementById('new_event_city').checked,
             saved_search_match: document.getElementById('saved_search_match').checked,
+            quiet_hours_enabled: document.getElementById('quiet_hours_enabled').checked,
+            quiet_hours_start: document.getElementById('quiet_hours_start').value || '22:00',
+            quiet_hours_end: document.getElementById('quiet_hours_end').value || '08:00',
             updated_at: new Date().toISOString()
         };
 
