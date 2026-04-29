@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Wohnungen - Room8</title>
-    <meta name="description" content="Finde WG-Zimmer und Studentenwohnungen in deiner Stadt. Room8 - die Plattform von Studenten, fuer Studenten.">
+    <meta name="description" content="Finde WG-Zimmer und Studentenwohnungen in deiner Stadt. Room8 - die Plattform von Studenten, für Studenten.">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -670,13 +670,11 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                         ${escHtml(listing.city) || 'Unbekannt'}
                     </div>
-                    <div class="card-footer">
-                        ${matchBadgeHtml}
-                        <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" data-id="${listing.id}" onclick="event.stopPropagation(); toggleFavorite('${listing.id}', this);" style="position: static; width: 28px; height: 28px;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${isFavorited ? '#ef4444' : 'none'}" stroke="${isFavorited ? '#ef4444' : '#9ca3af'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                        </button>
-                    </div>
+                    ${matchBadgeHtml ? `<div class="card-footer">${matchBadgeHtml}</div>` : ''}
                 </div>
+                <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" data-id="${listing.id}" onclick="event.stopPropagation(); toggleFavorite('${listing.id}', this);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${isFavorited ? '#ef4444' : 'none'}" stroke="${isFavorited ? '#ef4444' : '#9ca3af'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                </button>
             </div>
         `;
     }

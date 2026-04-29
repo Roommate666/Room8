@@ -1962,7 +1962,7 @@
                     (ev.status === 'draft' ? '<button class="btn-small btn-success" onclick="approveEvent(\'' + ev.id + '\')">Wieder freigeben</button>' : '') +
                     (ev.status !== 'cancelled' ? '<button class="btn-small btn-danger" onclick="cancelEventAdmin(\'' + ev.id + '\')">Absagen</button>' : '') +
                     '<button class="btn-small" onclick="window.open(\'event-detail.html?id=' + ev.id + '\', \'_blank\')">Ansehen</button>' +
-                    (reportCount > 0 ? '<button class="btn-small" onclick="dismissReports(\'' + ev.id + '\')">Reports loeschen</button>' : '') +
+                    (reportCount > 0 ? '<button class="btn-small" onclick="dismissReports(\'' + ev.id + '\')">Reports löschen</button>' : '') +
                 '</div>' +
             '</div>';
         }).join('');
