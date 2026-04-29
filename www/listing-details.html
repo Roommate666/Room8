@@ -5,18 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Details - Room8</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">
     <style>
-        /* Pattern: Magic UI BlurFade */
-        @keyframes blurFadeIn {
-            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
-            to { opacity: 1; filter: blur(0); transform: translateY(0); }
-        }
-
         /* === HERO IMAGE SLIDER === */
         .image-slider {
             height: 300px;
@@ -154,43 +144,40 @@
         /* === CONTENT === */
         .detail-content {
             padding: 1.5rem;
-            padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px);
+            padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px); /* Platz für Sticky Footer */
             background: white;
-            border-radius: 24px 24px 0 0;
+            border-radius: 20px 20px 0 0;
             margin-top: -20px;
             position: relative;
             z-index: 5;
-            animation: blurFadeIn 0.5s 0.1s ease-out both;
         }
 
         .header-section { margin-bottom: 1.5rem; }
         
         .listing-title {
             font-size: 1.5rem;
-            font-weight: 800;
+            font-weight: 700;
             color: var(--text-main);
             margin: 0 0 0.5rem 0;
             line-height: 1.2;
-            letter-spacing: -0.02em;
         }
 
         .listing-price {
             font-size: 1.25rem;
-            color: var(--primary-color);
+            color: #2563EB;
             font-weight: 700;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        /* Kibo UI Pill */
         .price-badge {
             background: #ECFDF5;
             color: #065F46;
             font-size: 0.8rem;
             padding: 0.2rem 0.6rem;
-            border-radius: 999px;
-            font-weight: 700;
+            border-radius: 6px;
+            font-weight: 600;
         }
 
         .location-row {
@@ -202,19 +189,15 @@
             margin-top: 0.5rem;
         }
 
-        /* ATTRIBUTES GRID - Glasmorphismus */
+        /* ATTRIBUTES GRID */
         .attributes-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
             margin: 1.5rem 0;
             padding: 1rem;
-            background: rgba(249,250,251,0.88);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 16px;
-            border: 1px solid rgba(0,0,0,0.04);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+            background: #F9FAFB;
+            border-radius: 12px;
         }
 
         .attr-item {
@@ -253,12 +236,11 @@
             gap: 0.5rem;
         }
 
-        /* Kibo UI Pill */
         .feature-tag {
             background: white;
             border: 1px solid var(--border-color);
             padding: 0.4rem 0.8rem;
-            border-radius: 999px;
+            border-radius: 8px;
             font-size: 0.85rem;
             color: var(--text-main);
             display: flex;
@@ -273,9 +255,9 @@
         }
 
         .feature-tag.info {
-            background: #EFF6FF;
-            border-color: #3B82F6;
-            color: #2563EB;
+            background: #F2F2F0;
+            border-color: #E8604C;
+            color: #D4503E;
         }
 
         /* ROOMS INFO BOX */
@@ -413,23 +395,20 @@
             color: #78350F;
         }
 
-        /* OWNER PROFILE - Glasmorphismus */
+        /* OWNER PROFILE */
         .owner-card {
             display: flex;
             align-items: center;
             margin-top: 2rem;
             padding: 1rem;
-            border: 1px solid rgba(0,0,0,0.04);
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            background: rgba(249,250,251,0.88);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer; /* Zeigt Klickbarkeit an */
+            transition: background-color 0.2s;
         }
-
+        
         .owner-card:active {
             background-color: #F3F4F6;
-            transform: scale(0.98);
         }
 
         .owner-avatar {
@@ -474,24 +453,21 @@
             transform: scale(1.02);
         }
 
-        /* STICKY FOOTER ACTION BAR - Glasmorphismus */
+        /* STICKY FOOTER ACTION BAR */
         .action-bar {
             position: fixed;
             bottom: calc(100px + env(safe-area-inset-bottom, 0px));
             left: 16px;
             right: 16px;
             width: auto;
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            background: white;
             padding: 0.75rem 1rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.8);
-            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             display: flex;
             gap: 0.75rem;
             z-index: 10000;
             box-sizing: border-box;
-            border-radius: 18px;
+            border-radius: 16px;
         }
 
         /* Content Padding damit Action-Bar nichts verdeckt */
@@ -502,15 +478,15 @@
         .btn-fav {
             width: 48px;
             height: 48px;
-            border-radius: 14px;
-            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
             background: white;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             color: #d1d5db;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s;
             flex-shrink: 0;
         }
         .btn-fav.active {
@@ -525,15 +501,14 @@
             background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
             color: white;
             border: none;
-            border-radius: 999px;
-            font-weight: 700;
+            border-radius: 12px;
+            font-weight: 600;
             font-size: 0.95rem;
             cursor: pointer;
             box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .btn-contact:active {
@@ -575,11 +550,6 @@
         }
         .btn-report-small:hover {
             background: #FDE68A;
-        }
-
-        /* Barrierefreiheit */
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
     </style>
 </head>
@@ -1526,7 +1496,6 @@
                 if (finalSlideUrl) {
                     const slide = document.createElement('div');
                     slide.className = 'slide';
-                    // Erstes Bild: eager (LCP-relevant), Rest: lazy
                     const loadingAttr = index === 0 ? 'eager' : 'lazy';
                     slide.innerHTML = `<img src="${finalSlideUrl}" data-fullsrc="${finalFullUrl}" loading="${loadingAttr}" decoding="async" onclick="openFullscreen(${index})" style="cursor:pointer;">`;
                     wrapper.appendChild(slide);
