@@ -17,6 +17,7 @@
 | `supabase/migrations/20260428000003_event_push_notifications.sql` | Event-Push Trigger |
 | `supabase/migrations/20260428000012_email_notifications.sql` | Email-Helper + Override Functions |
 | `supabase/migrations/20260428000013_notification_logs.sql` | Health-Logging-Tabelle + Health-RPCs + Cleanup-Cron |
+| `supabase/migrations/20260428000014_notification_routing.sql` | notification_settings Tabelle + should_notify() + notify_user_push() + 5 City-Trigger |
 
 ## Required Secrets in Supabase
 
@@ -47,6 +48,42 @@ PERFORM public.send_user_email(target_user_id, subject, html);
 ```
 
 Nutzt `email_template(headline, body_html, cta_text?, cta_url?)` für einheitliches Branding. Holt `auth.users.email`. Bei NULL-Email: silent skip.
+
+### 2b. notify_user_push() ist der EINZIGE Push-Send-Weg aus Triggern (PFLICHT)
+
+**Niemals** direkt `pg_net.http_post` zu `send-push` aus einem neuen Trigger schicken. Stattdessen IMMER:
+
+```sql
+PERFORM public.notify_user_push(
+    p_user_id   := <recipient>,
+    p_channel   := '<chat_message|saved_search_match|new_listing_city|new_job_city|new_coupon_city|new_event_city|...>',
+    p_title     := 'Push-Titel',
+    p_body      := 'Push-Body',
+    p_data      := jsonb_build_object('url', '<deeplink>', ...)
+);
+```
+
+`notify_user_push` ruft intern `should_notify(user_id, channel)` auf — wenn der User den Toggle deaktiviert hat, wird KEIN Push gesendet. So bleibt das User-Opt-Out wirksam.
+
+**should_notify() default ist TRUE** wenn der User keinen `notification_settings`-Eintrag hat. Erst nach aktivem Deaktivieren wird FALSE. Das ist DSGVO-OK weil User explizit Push-Permission im OS gibt.
+
+### 2c. City-Match-Trigger (LISTINGS / JOBS / COUPONS / EVENTS)
+
+Bei jedem INSERT in `listings`, `jobs`, `coupons`, `events` feuert ein Trigger der Push an alle User in derselben Stadt sendet (sofern Toggle an).
+
+**City-Quellen:**
+| Tabelle | Spalte | Owner-Spalte |
+|---|---|---|
+| listings | `city` | `owner_id` |
+| jobs | `location` | `owner_id` |
+| coupons | `city` | `user_id` |
+| events | `city` | `organizer_id` |
+
+**Match-Logik:** `lower(profiles.city) = lower(NEW.city)` — case-insensitive Exact-Match. Kein partial-match (sonst wuerde "Berlin" auf "Berlin-Mitte" matchen).
+
+**Owner-Exclusion:** Owner kriegt keinen Push fuer eigenes Inserat.
+
+**Status-Filter:** Events nur wenn `status = 'active'` (drafts triggern keinen Push).
 
 ### 3. pg_net.http_post Pattern
 
@@ -167,5 +204,9 @@ UPDATE events SET status='cancelled' WHERE id=<test-id>;
 | `logNotification()` try/catch in Edge Functions | Logging darf Send nicht blockieren |
 | `captureException(...).catch(() => {})` Pattern | Sentry-Outage darf Send nicht blockieren |
 | `_shared/sentry.ts` PII-Scrubber `scrubPII()` | DSGVO — Email/Tokens niemals an Sentry leaken |
+| `notify_user_push()` als einziger Push-Send-Weg | Sonst werden Toggle-Praeferenzen umgangen → DSGVO + Vertrauensbruch |
+| `should_notify()` default TRUE | Neue User kriegen Push, Opt-Out ist explizit |
+| Owner-Exclusion in City-Triggern | Owner kriegt nicht "Neuer Job in X" wenn er den Job selbst gepostet hat |
+| Case-insensitive EXACT city-match (`=` nicht `LIKE %`) | "Ulm" soll nicht "Ulmbach" matchen |
 | CHECK-Constraint `notification_logs.status IN (...)` | Frontend-Badges + Filter erwarten exakt diese Werte |
 | `get_notification_health` als `security definer` + Admin-Check | RPC ist `to authenticated` granted, ohne Check könnte jeder User Stats lesen |

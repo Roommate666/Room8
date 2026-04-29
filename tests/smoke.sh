@@ -92,6 +92,13 @@ check "sentry-init.js: PII-Filter beforeSend"       "$BASE/sentry-init.js"    "b
 check "index.html: Sentry-Tag im head"              "$BASE/index.html"        "sentry-init.js"
 check "admin.html: Sentry-Tag im head"              "$BASE/admin.html"        "sentry-init.js"
 check "events.html: Sentry-Tag im head"             "$BASE/events.html"       "sentry-init.js"
+
+# 4. Notification-Routing (notification_settings Toggles)
+check "settings: new_event_city Toggle"             "$BASE/notification-settings.html"  "new_event_city"
+check "settings: new_job_city Toggle"               "$BASE/notification-settings.html"  "new_job_city"
+check "settings: new_coupon_city Toggle"            "$BASE/notification-settings.html"  "new_coupon_city"
+check "settings: chat_message Toggle"               "$BASE/notification-settings.html"  "chat_message"
+check "settings: saved_search_match Toggle"         "$BASE/notification-settings.html"  "saved_search_match"
 check "index.html: splashVideo"                     "$BASE/index.html"        "splashVideo"
 
 echo ""

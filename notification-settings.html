@@ -208,6 +208,17 @@
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
+
+                <div class="setting-item">
+                    <div class="setting-text">
+                        <h4>Neue Events</h4>
+                        <p>Partys, Workshops, Vorträge in deiner Stadt</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="new_event_city" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
             </div>
 
             <!-- 5. Gespeicherte Suchen -->
@@ -269,7 +280,7 @@
 
         if (settings) {
             // Checkboxen setzen
-            const ids = ['chat_message', 'review', 'favorite', 'interest', 'new_listing_city', 'new_job_city', 'new_coupon_city', 'saved_search_match'];
+            const ids = ['chat_message', 'review', 'favorite', 'interest', 'new_listing_city', 'new_job_city', 'new_coupon_city', 'new_event_city', 'saved_search_match'];
             ids.forEach(id => {
                 const el = document.getElementById(id);
                 if (el && settings[id] !== undefined) el.checked = settings[id];
@@ -323,6 +334,7 @@
             new_listing_city: document.getElementById('new_listing_city').checked,
             new_job_city: document.getElementById('new_job_city').checked,
             new_coupon_city: document.getElementById('new_coupon_city').checked,
+            new_event_city: document.getElementById('new_event_city').checked,
             saved_search_match: document.getElementById('saved_search_match').checked,
             updated_at: new Date().toISOString()
         };
