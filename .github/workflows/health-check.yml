@@ -18,6 +18,7 @@ on:
 env:
   SUPABASE_URL: 'https://tvnvmogaqmduzcycmvby.supabase.co'
   SUCCESS_THRESHOLD: 90  # Prozent — drunter failt der Job
+  MIN_SAMPLE_SIZE: 5     # Channels mit weniger Sends werden ignoriert (Noise-Schutz)
 
 jobs:
   health:
@@ -61,6 +62,7 @@ jobs:
       - name: Aggregate + Threshold-Check
         env:
           THRESHOLD: ${{ env.SUCCESS_THRESHOLD }}
+          MIN_SAMPLE: ${{ env.MIN_SAMPLE_SIZE }}
         run: |
           set -euo pipefail
           TOTAL=$(jq 'length' raw.json)
@@ -79,20 +81,26 @@ jobs:
             | "\(.channel)\t\(.success)/\(.total)\t\((.success * 100 / .total) | floor)%"' raw.json
 
           # Fail-Check — gleiche jq Struktur wie oben (funktioniert),
-          # plus pipefail damit jq-Errors nicht swallowed werden
+          # plus pipefail damit jq-Errors nicht swallowed werden.
+          # MIN_SAMPLE schuetzt vor Fehlalarm bei zu kleiner Stichprobe
+          # (z.B. 1 alter Test-Push tot vs. 0 echten Sends in 24h).
           FAIL=0
           set -o pipefail
-          while IFS=$'\t' read -r channel rate; do
+          while IFS=$'\t' read -r channel total rate; do
             if [ -z "$channel" ]; then continue; fi
+            if [ "$total" -lt "$MIN_SAMPLE" ]; then
+              echo "::notice::$channel hatte nur $total Sends in 24h (< MIN_SAMPLE=$MIN_SAMPLE) — Threshold-Check skipped"
+              continue
+            fi
             if [ "$rate" -lt "$THRESHOLD" ]; then
-              echo "::error title=$channel below threshold::$channel Success-Rate ${rate}%% (Threshold ${THRESHOLD}%)"
+              echo "::error title=$channel below threshold::$channel Success-Rate ${rate}% (Threshold ${THRESHOLD}%, n=$total)"
               FAIL=1
             fi
           done < <(jq -r 'group_by(.channel)[] |
             { channel: .[0].channel,
               total: length,
               success: ([.[] | select(.status=="success")] | length) }
-            | "\(.channel)\t\((.success * 100 / .total) | floor)"' raw.json)
+            | "\(.channel)\t\(.total)\t\((.success * 100 / .total) | floor)"' raw.json)
 
           # Top-Fails listen
           echo ""
