@@ -48,3 +48,17 @@ Beim Edit dieser Stellen MUSS die zugehörige Spec gelesen werden.
 ```bash
 bash ~/Dev/roommate_full_updated/tests/smoke.sh
 ```
+
+## CI-Watchdogs (GitHub Actions)
+
+Drei Workflows in `.github/workflows/`:
+
+| Workflow | Trigger | Was |
+|---|---|---|
+| `smoke.yml` | push to main + alle 6h | tests/smoke.sh gegen Live |
+| `health-check.yml` | täglich 06:00 UTC | notification_logs Success-Rate <90% wirft fail (mit MIN_SAMPLE_SIZE=5 Schutz gegen kleine Stichproben) |
+| `email-watchdog.yml` | täglich 06:30 UTC | aktiver Test: ruft `daily_health_check` RPC, prüft 30s später ob success-Log existiert. Bei Fail: Pipeline ist tot → GitHub mailt Repo-Owner direkt (NICHT über Resend, deshalb robust auch wenn die Email-Pipeline weg ist) |
+
+**Setup:** `SUPABASE_SERVICE_ROLE_KEY` als Repo-Secret unter Settings → Secrets → Actions.
+
+**Postmortem 30.04.2026:** send_admin_alert war 5h still tot wegen JOIN-Bug in Migration 18. Trigger-Functions hatten `exception when others then raise warning` → kein Log → blind. Fix: `log_trigger_exception()` Helper (Mig 30) loggt jetzt jede Trigger-Exception in notification_logs als status='exception'. Die 3 Watchdogs würden den Bruch heute in <24h erkennen.

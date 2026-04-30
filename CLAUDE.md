@@ -20,7 +20,8 @@ Uebersicht: `specs/00-INDEX.md` — IMMER zuerst lesen wenn Aenderungen geplant 
 
 **CI-Watchdogs (GitHub Actions):**
 - `.github/workflows/smoke.yml` — laeuft alle 6h gegen Live, bei push auf main
-- `.github/workflows/health-check.yml` — taeglich 6 Uhr UTC, prueft notification_logs Success-Rate (>= 90%)
+- `.github/workflows/health-check.yml` — taeglich 06:00 UTC, prueft notification_logs Success-Rate (>= 90%, mit MIN_SAMPLE=5 gegen Fehlalarm)
+- `.github/workflows/email-watchdog.yml` — taeglich 06:30 UTC, aktiver Test: feuert daily_health_check RPC, prueft 30s spaeter ob success-Log existiert. Bei Fail: Pipeline tot → GitHub mailt direkt
 - Setup: `SUPABASE_SERVICE_ROLE_KEY` als Repo-Secret hinterlegen
 
 **Git-Hooks:** Lokal aktivieren mit `bash tools/install-hooks.sh` (pre-commit blockt Umlaute in Code + Sync-Drift root↔www).
