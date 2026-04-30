@@ -78,16 +78,21 @@ jobs:
               success: ([.[] | select(.status=="success")] | length) }
             | "\(.channel)\t\(.success)/\(.total)\t\((.success * 100 / .total) | floor)%"' raw.json
 
-          # Fail-Check
+          # Fail-Check — gleiche jq Struktur wie oben (funktioniert),
+          # plus pipefail damit jq-Errors nicht swallowed werden
           FAIL=0
-          while IFS=$'\t' read -r channel _ rate; do
-            num=${rate%\%}
-            if [ "$num" -lt "$THRESHOLD" ]; then
-              echo "::error title=$channel below threshold::$channel Success-Rate $rate (Threshold ${THRESHOLD}%)"
+          set -o pipefail
+          while IFS=$'\t' read -r channel rate; do
+            if [ -z "$channel" ]; then continue; fi
+            if [ "$rate" -lt "$THRESHOLD" ]; then
+              echo "::error title=$channel below threshold::$channel Success-Rate ${rate}%% (Threshold ${THRESHOLD}%)"
               FAIL=1
             fi
           done < <(jq -r 'group_by(.channel)[] |
-            "\(.[0].channel)\t\(length)\t\(([.[] | select(.status=="success")] | length * 100 / length | floor)%)"' raw.json)
+            { channel: .[0].channel,
+              total: length,
+              success: ([.[] | select(.status=="success")] | length) }
+            | "\(.channel)\t\((.success * 100 / .total) | floor)"' raw.json)
 
           # Top-Fails listen
           echo ""
