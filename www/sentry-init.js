@@ -15,6 +15,20 @@
 (function () {
     'use strict';
 
+    // Room8Sentry sofort definieren (auch vor SDK-Load) damit Aufrufer
+    // nie auf "undefined" laufen. Sentry-Loader queued Calls intern.
+    window.Room8Sentry = window.Room8Sentry || {
+        captureException: function (err, ctx) {
+            try { if (window.Sentry && window.Sentry.captureException) window.Sentry.captureException(err, ctx); } catch (e) {}
+        },
+        captureMessage: function (msg, ctx) {
+            try { if (window.Sentry && window.Sentry.captureMessage) window.Sentry.captureMessage(msg, ctx); } catch (e) {}
+        },
+        setTag: function (k, v) {
+            try { if (window.Sentry && window.Sentry.setTag) window.Sentry.setTag(k, v); } catch (e) {}
+        },
+    };
+
     // Custom Init-Config — wird vom Loader vor Sentry.init() aufgerufen
     window.sentryOnLoad = function () {
         if (!window.Sentry) return;

@@ -1,0 +1,85 @@
+name: Email Watchdog (active)
+
+# Aktiver Watchdog gegen send_admin_alert Bugs.
+# Ruft daily_health_check RPC, wartet, prueft ob success-Log entstand.
+# Bei Fail: Workflow schlaegt fehl → GitHub schickt Mail an Repo-Owner DIREKT
+# (nicht ueber Resend, deshalb auch wenn Resend/Email-Pipeline tot ist).
+#
+# Trigger: send_admin_alert Bug (z.B. JOIN-Fehler) wuerde im send_admin_alert
+# eine Exception werfen. Defensive Logging schreibt sie in notification_logs
+# als status='exception'. Wir zaehlen success-Logs in den letzten 10 Min:
+# wenn 0 → Pipeline tot → fail.
+
+on:
+  schedule:
+    # taeglich 08:30 lokal Berlin = 06:30 UTC im Sommer / 07:30 UTC im Winter
+    - cron: '30 6 * * *'
+  workflow_dispatch:  # manuell ausloesbar via GitHub UI
+
+env:
+  SUPABASE_URL: 'https://tvnvmogaqmduzcycmvby.supabase.co'
+
+jobs:
+  watchdog:
+    name: Active Email Health-Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Sanity check secret
+        run: |
+          if [ -z "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" ]; then
+            echo "::error::SUPABASE_SERVICE_ROLE_KEY secret fehlt im Repo. Settings -> Secrets -> Actions"
+            exit 1
+          fi
+
+      - name: Trigger daily_health_check RPC
+        env:
+          SRK: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          RESP=$(curl -sf -X POST "$SUPABASE_URL/rest/v1/rpc/daily_health_check" \
+            -H "apikey: $SRK" \
+            -H "Authorization: Bearer $SRK" \
+            -H "Content-Type: application/json" \
+            -d '{}')
+          echo "RPC Response: $RESP"
+          if [ -z "$RESP" ]; then
+            echo "::error::daily_health_check RPC lieferte leere Response — RPC nicht erreichbar"
+            exit 1
+          fi
+
+      - name: Wait for pipeline propagation
+        run: sleep 30
+
+      - name: Verify success log entry
+        env:
+          SRK: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          # check_daily_health_log returns table mit success_count/exception_count
+          RESP=$(curl -sf -X POST "$SUPABASE_URL/rest/v1/rpc/check_daily_health_log" \
+            -H "apikey: $SRK" \
+            -H "Authorization: Bearer $SRK" \
+            -H "Content-Type: application/json" \
+            -d '{"p_minutes": 10}')
+
+          echo "Watchdog Response: $RESP"
+
+          SUCCESS=$(echo "$RESP" | jq -r '.[0].success_count // 0')
+          EXCEPTION=$(echo "$RESP" | jq -r '.[0].exception_count // 0')
+          LAST_STATUS=$(echo "$RESP" | jq -r '.[0].last_status // "none"')
+          LAST_ERR=$(echo "$RESP" | jq -r '.[0].last_error_msg // ""')
+
+          echo "Success: $SUCCESS, Exception: $EXCEPTION, Last: $LAST_STATUS"
+
+          if [ "$EXCEPTION" -gt 0 ]; then
+            echo "::error title=Email Pipeline broken::send_admin_alert wirft Exception. Last error: $LAST_ERR"
+            exit 1
+          fi
+
+          if [ "$SUCCESS" -lt 1 ]; then
+            echo "::error title=Email Pipeline silent::Kein success-Log mit subject_type=daily_health_check in den letzten 10 Min. Pipeline vermutlich tot."
+            exit 1
+          fi
+
+          echo "✅ Email-Pipeline lebt — $SUCCESS success log(s) in letzten 10 Min."

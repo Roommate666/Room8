@@ -106,6 +106,12 @@ PERFORM public.notify_user_push(
 
 **send-email Edge Function:** Liest optional `data.admin_alert_type` aus Request-Body und schreibt es in `notification_logs.metadata.admin_alert_type` — sonst greift Rate-Limit nicht.
 
+**Empfaenger-Aufloesung (PFLICHT-CTE-Pattern):** `send_admin_alert` sammelt Recipients aus 2 Quellen: `auth.users.email` aller `is_admin` Profile + `notification_settings.extra_email_recipients` text[] der gleichen Profile. CTE-Variable `admin_ids` enthaelt **nur** `id` (NICHT `user_id`). Beim JOIN gegen `notification_settings` deshalb `a.id = ns.user_id` benutzen — `a.user_id` existiert nicht und wirft "column a.user_id does not exist" zur Runtime, was Trigger-Catches schlucken. Migration `20260428000028` ist die korrekte Version.
+
+**Defensive Trigger-Logging (PFLICHT):** Alle `alert_admin_*` Trigger-Functions MUESSEN ihren `exception when others then` Handler an `public.log_trigger_exception(trigger_name, sqlerrm)` koppeln. Sonst gehen Bugs in `send_admin_alert` (oder den Triggern selbst) komplett unter — Insert laeuft durch, kein Mail, kein Log, blind. Mit dem Helper landen Bugs als `status='exception'` Eintrag im Push Health Tab + Health-Check Workflow.
+
+**RLS auf `contact_messages`:** Anon-Submits via Form gehen NICHT direkt per `.insert()` — PostgREST setzt `Prefer: return=representation` was einen SELECT-after-INSERT triggert. SELECT ist Admin-only → 42501. Stattdessen `submit_contact_message(name, email, category, message)` RPC nutzen (security definer, anon-callable). Migration `20260428000025`.
+
 ### 2e. City-Match-Trigger (LISTINGS / JOBS / COUPONS / EVENTS)
 
 Bei jedem INSERT in `listings`, `jobs`, `coupons`, `events` feuert ein Trigger der Push an alle User in derselben Stadt sendet (sofern Toggle an).
@@ -230,6 +236,9 @@ UPDATE events SET status='cancelled' WHERE id=<test-id>;
 | Push kommt nicht an | profiles.fcm_token NULL | User hat App nicht geöffnet → kein Token registriert |
 | Mail im Spam | DKIM/SPF fehlen | DNS-Records prüfen |
 | Mehrfach-Push | Trigger feuert pro UPDATE-Statement | Single-UPDATE im Frontend nutzen |
+| Admin-Mail kommt nicht an + KEIN Log | Trigger-Function wirft Exception, swallowed sie still (`raise warning; return NEW`) | `log_trigger_exception()` im Catch nutzen — Migration 20260428000030 |
+| Cross-Domain Spam-Filter (Resend → Zoho/iCloud) | FROM-Domain != Recipient-Domain → Provider-Spam-Score hoch trotz DKIM | Recipient-Mailbox auf gleicher Domain wie FROM bevorzugen, oder `noreply@<recipient-domain>` Setup |
+| anon Form-Insert wirft 42501 trotz Policy | PostgREST `Prefer: return=representation` triggert SELECT-after-INSERT | RPC mit security definer (z.B. `submit_contact_message`) statt direktem `.insert()` |
 
 ## Was nicht angefasst werden darf
 
@@ -254,5 +263,7 @@ UPDATE events SET status='cancelled' WHERE id=<test-id>;
 | `send_admin_alert()` als einziger Weg fuer Admin-Mails | Sonst kein Rate-Limit, einzelne Trigger koennen Inbox fluten |
 | send-email extrahiert `data.admin_alert_type` | Sonst greift `send_admin_alert` Rate-Limit nicht |
 | Admin-Trigger im EXCEPTION-Block | Wenn Mail-Send abkackt, soll User-Action (Report etc.) trotzdem durchgehen |
+| `log_trigger_exception()` Aufruf im Catch jedes alert_admin_* Triggers | Sonst sind Bugs in send_admin_alert komplett unsichtbar (siehe 30.04.2026 Postmortem) |
+| `send_admin_alert` JOIN `a.id = ns.user_id` (NICHT `a.user_id`) | admin_ids CTE hat nur `id`-Spalte → Runtime-Crash, swallowed |
 | CHECK-Constraint `notification_logs.status IN (...)` | Frontend-Badges + Filter erwarten exakt diese Werte |
 | `get_notification_health` als `security definer` + Admin-Check | RPC ist `to authenticated` granted, ohne Check könnte jeder User Stats lesen |

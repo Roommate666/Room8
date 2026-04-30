@@ -490,17 +490,13 @@
         btn.innerText = "Sende...";
 
         try {
-            // In Supabase speichern
-            const { error } = await sb
-                .from('contact_messages')
-                .insert({
-                    name: name,
-                    email: email,
-                    category: category || 'allgemein',
-                    message: msg,
-                    created_at: new Date().toISOString(),
-                    is_read: false
-                });
+            // RPC umgeht RLS-Probleme bei anon Submits (security definer)
+            const { error } = await sb.rpc('submit_contact_message', {
+                p_name: name,
+                p_email: email,
+                p_category: category || 'allgemein',
+                p_message: msg
+            });
 
             if (error) {
                 console.error('Supabase error:', error);

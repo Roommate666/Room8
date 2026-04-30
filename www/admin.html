@@ -450,6 +450,7 @@
             <button class="filter-btn" onclick="filterPushHealth(168, this)">Letzte 7 Tage</button>
             <button class="filter-btn" onclick="filterPushHealth(720, this)">Letzte 30 Tage</button>
             <button onclick="loadPushHealth(currentPushHealthHours)" style="margin-left:auto; padding:0.5rem 0.875rem; background:#0EA5E9; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">🔄 Refresh</button>
+            <button onclick="testSentry()" style="padding:0.5rem 0.875rem; background:#7C3AED; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">🧪 Sentry Test</button>
         </div>
         <div id="pushHealthSummary" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:0.75rem; margin-bottom:1.25rem;">
             <div class="loading-state">Lade Health-Stats...</div>
@@ -2001,6 +2002,30 @@
         document.querySelectorAll('#tab-pushhealth .filter-btn').forEach(b => b.classList.remove('active'));
         if (btn) btn.classList.add('active');
         loadPushHealth(hours);
+    };
+
+    window.testSentry = () => {
+        const ts = new Date().toISOString();
+        const sdkLoaded = !!(window.Sentry && window.Sentry.captureMessage);
+        const stubReady = !!window.Room8Sentry;
+
+        if (!stubReady && !sdkLoaded) {
+            alert('Sentry NICHT geladen.\nMoeglich blockt AdBlocker/Brave Sentry-CDN.\nCheck DevTools → Network → Filter "sentry"');
+            return;
+        }
+
+        try {
+            if (sdkLoaded) {
+                window.Sentry.captureMessage('admin-test-message ' + ts, { level: 'warning' });
+                window.Sentry.captureException(new Error('admin-test-exception ' + ts));
+            } else {
+                window.Room8Sentry.captureMessage('admin-test-message ' + ts, { level: 'warning' });
+                window.Room8Sentry.captureException(new Error('admin-test-exception ' + ts));
+            }
+            alert('OK — 2 Events an Sentry gesendet.\n\nSDK geladen: ' + (sdkLoaded ? 'JA' : 'NEIN (Queue)') + '\nTimestamp: ' + ts + '\n\nJetzt im Sentry-Dashboard pruefen:\nhttps://yumita.sentry.io → Project room8-web → Issues');
+        } catch (e) {
+            alert('Fehler beim Sentry-Test: ' + e.message);
+        }
     };
 
     function escapeHtml(str) {
