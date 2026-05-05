@@ -108,7 +108,20 @@ check "admin: pushHealthSkips Container"            "$BASE/admin.html"        "p
 check "admin: get_skip_stats RPC"                   "$BASE/admin.html"        "get_skip_stats"
 check "admin: get_token_cleanup_count RPC"          "$BASE/admin.html"        "get_token_cleanup_count"
 check "admin: skipReasonLabels"                     "$BASE/admin.html"        "skipReasonLabels"
-check "index.html: splashVideo"                     "$BASE/index.html"        "splashVideo"
+check "index.html: splashOverlay"                   "$BASE/index.html"        "splashOverlay"
+
+# 6. Coupon-Redemption-System (Phase 1-4)
+http_check "partner-scan.html"                      "$BASE/partner-scan.html" "200"
+check "partner-scan: html5-qrcode lib geladen"      "$BASE/partner-scan.html" "html5-qrcode"
+check "partner-scan: redeem_coupon RPC"             "$BASE/partner-scan.html" "redeem_coupon"
+check "partner-scan: QR-Regex"                      "$BASE/partner-scan.html" "room8:redeem"
+check "partner-scan: NOT_PARTNER Mapping"           "$BASE/partner-scan.html" "NOT_PARTNER"
+check "coupon-detail: openRedeemQR Funktion"        "$BASE/coupon-detail.html" "openRedeemQR"
+check "coupon-detail: QRCode lib"                   "$BASE/coupon-detail.html" "qrcode.min.js"
+check "coupon-detail: usage_limit_per_user check"   "$BASE/coupon-detail.html" "usage_limit_per_user"
+check "partner-dashboard: scanBanner CTA"           "$BASE/partner-dashboard.html" "scanBanner"
+check "partner-dashboard: v_partner_redemptions"    "$BASE/partner-dashboard.html" "v_partner_redemptions_today"
+check "partner-dashboard: pd-item-scan Link"        "$BASE/partner-dashboard.html" "pd-item-scan"
 
 echo ""
 echo "========================================"
