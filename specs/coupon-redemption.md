@@ -73,14 +73,42 @@ redeem_coupon(p_coupon_id uuid, p_user_id uuid) returns jsonb
 - Pro Coupon-Karte: "QR scannen"-Button → `partner-scan.html?coupon=<id>`
 - Header-Counter: heute X eingeloest (View `v_partner_redemptions_today`)
 
+## Realtime (LIVE seit 06.05.)
+- `coupon_redemptions` ist in `supabase_realtime` publication (Mig 4)
+- coupon-detail.html oeffnet beim QR-Modal-Open eine Realtime-Subscription auf `coupon_redemptions` mit Filter `user_id=eq.<own>`
+- Beim INSERT-Event (Partner-Scan): Frontend switcht Modal-View von "QR + warte"-Card auf gruene Erfolgs-Card mit verification_code, coupon_title, timestamp
+- Cleanup beim Modal-Close: `sb.removeChannel()`
+- RLS schuetzt — User sieht nur eigene Redemptions per Realtime
+- Vibration `[60,40,80]` als haptisches Feedback wenn unterstuetzt
+
+## Camera-Permission (Android)
+- AndroidManifest.xml: `android.permission.CAMERA` deklariert
+- `uses-feature android.hardware.camera` mit `required="false"` (App startet auch ohne Kamera)
+- Frontend triggert Permission via `getUserMedia({video:{facingMode:'environment'}})` als Probe vor html5-qrcode-Start
+- Bei `NotAllowedError`/`PermissionDeniedError`: User bekommt Anleitung "Einstellungen → Apps → Room8 → Berechtigungen → Kamera"
+- Scanner startet NICHT auto, sondern erst beim User-Tap auf "📷 Kamera starten"-Button (System-Dialog erfordert User-Gesture)
+
+## Lib-Dateien (lokal)
+- `www/lib/qrcode.min.js` — qrcodejs 1.0.0 (User-QR-Generation)
+- `www/lib/html5-qrcode.min.js` — html5-qrcode 2.3.8 (Partner-Scanner)
+- Beide in `sw.js` STATIC_ASSETS (Offline-Cache, v32)
+- Capacitor WebView (file://) blockt fremde CDN-Skripte → Lib lokal Pflicht
+
+## Security-Audit (06.05.)
+- ANON kann `coupon_redemptions` nicht lesen (RLS verifiziert: leeres Array)
+- ANON kann `coupons` nicht via PostgREST mutieren (RLS verifiziert: PATCH/DELETE silent gefiltert)
+- `redeem_coupon` RPC bei `auth.uid()=null` → `NOT_AUTHENTICATED`
+- Echter JWT-Test bestanden (T2-T6 mit redbull-Account)
+
 ## Phase-2 TODO (nicht jetzt)
 - Signed Tokens (HMAC mit Vault-Secret + TTL 5min) im QR-Payload
 - Edge Function `sign-coupon-token` zum Token-Erzeugen
 - RPC erweitern um Token-Validierung
 - → Erst wenn Pilotphase laeuft und Missbrauch beobachtet wird
 
-## Migration
-`20260505000003_coupon_redemption_system.sql`
+## Migrations
+- `20260505000003_coupon_redemption_system.sql` — Hauptmigration
+- `20260505000004_realtime_coupon_redemptions.sql` — Realtime publication
 
 ## AI-LOCK
 - `redeem_coupon` RPC: NICHT ohne User-OK aendern (Pilotkunden-Blocker, Race-Conditions)

@@ -1327,7 +1327,54 @@ const translations = {
 
  coupons_empty_title: 'Keine aktiven Coupons',
 
- coupons_empty_text: 'Bald finden Sie hier spannende Angebote von verifizierten Unternehmen!'
+ coupons_empty_text: 'Bald finden Sie hier spannende Angebote von verifizierten Unternehmen!',
+
+ // Coupon-Einloese-System (v2.1.4+)
+ coupon_redeem_btn: 'QR-Code zum Einlösen anzeigen',
+ coupon_redeem_login: 'Zum Einlösen einloggen',
+ coupon_already_redeemed: 'Bereits eingelöst',
+ coupon_modal_title: 'Vor Ort einlösen',
+ coupon_modal_sub: 'Lass den Partner den QR-Code scannen.',
+ coupon_modal_limit_1x: 'Pro Konto nur <strong>1× einlösbar</strong>.',
+ coupon_modal_waiting: 'Warte auf Partner-Scan…',
+ coupon_modal_close: 'Schließen',
+ coupon_success_title: 'Erfolgreich eingelöst!',
+ coupon_success_sub: 'Der Partner hat deinen Coupon bestätigt.',
+ coupon_success_code_label: 'Bestätigungs-Code',
+ coupon_success_done: 'Fertig',
+ coupon_already_alert: 'Du hast diesen Coupon bereits eingelöst.',
+ coupon_label_coupon: 'Coupon:',
+ coupon_online_code_hint: 'Online-Code · tippen zum Kopieren',
+
+ // Partner-Scanner (v2.1.5+)
+ scan_page_title: 'Coupon scannen',
+ scan_tab_qr: 'QR scannen',
+ scan_tab_manual: 'Manuell eingeben',
+ scan_camera_heading: 'Kamera',
+ scan_start_btn: '📷 Kamera starten',
+ scan_perm_hint: 'Beim ersten Mal fragt das System nach Kamera-Erlaubnis.',
+ scan_idle_status: "Tippe auf „Kamera starten“ um den QR-Code des Gastes zu scannen.",
+ scan_active_status: 'Halte den QR-Code des Gastes vor die Kamera.',
+ scan_manual_heading: 'Manuelle Eingabe',
+ scan_manual_submit: 'Coupon einlösen',
+ scan_invalid_qr: 'Kein gültiger Room8-QR. Versuche es erneut.',
+ scan_uuid_required: 'Beide Felder müssen UUIDs sein.',
+ scan_perm_denied: 'Kamera-Zugriff verweigert. Bitte in den Geräte-Einstellungen erlauben: Einstellungen → Apps → Room8 → Berechtigungen → Kamera.',
+ scan_no_camera: 'Keine passende Kamera gefunden. Nutze „Manuell eingeben“.',
+ scan_camera_busy: 'Kamera ist gerade von einer anderen App belegt. Schließe andere Kamera-Apps.',
+ scan_camera_unavailable: 'Kamera nicht verfügbar.',
+ scan_network_error: 'Netzwerkfehler. Bitte erneut versuchen.',
+ scan_success_title: 'Eingelöst',
+ scan_verification_label: 'Bestätigungs-Code:',
+ scan_next_btn: 'Nächsten scannen',
+
+ // Partner-Dashboard Scan-Banner (v2.1.4+)
+ pd_scan_banner_title: 'Coupon einlösen',
+ pd_scan_banner_sub: 'QR-Code des Gastes scannen',
+ pd_scan_today: '{n} heute',
+ pd_action_scan: 'Scannen',
+ pd_item_scan: '📷 Scannen',
+ pd_stat_apply_clicks: 'Bewerber-Klicks'
 
  },
 
@@ -2654,7 +2701,54 @@ const translations = {
 
  coupons_empty_title: 'No active coupons',
 
- coupons_empty_text: 'Soon you will find exciting offers from verified businesses here!'
+ coupons_empty_text: 'Soon you will find exciting offers from verified businesses here!',
+
+ // Coupon-Redemption (v2.1.4+)
+ coupon_redeem_btn: 'Show redemption QR',
+ coupon_redeem_login: 'Log in to redeem',
+ coupon_already_redeemed: 'Already redeemed',
+ coupon_modal_title: 'Redeem in-store',
+ coupon_modal_sub: 'Let the partner scan the QR code.',
+ coupon_modal_limit_1x: 'Only <strong>1 redemption per account</strong>.',
+ coupon_modal_waiting: 'Waiting for partner scan…',
+ coupon_modal_close: 'Close',
+ coupon_success_title: 'Successfully redeemed!',
+ coupon_success_sub: 'The partner confirmed your coupon.',
+ coupon_success_code_label: 'Verification code',
+ coupon_success_done: 'Done',
+ coupon_already_alert: 'You already redeemed this coupon.',
+ coupon_label_coupon: 'Coupon:',
+ coupon_online_code_hint: 'Online code · tap to copy',
+
+ // Partner-Scanner (v2.1.5+)
+ scan_page_title: 'Scan coupon',
+ scan_tab_qr: 'Scan QR',
+ scan_tab_manual: 'Manual entry',
+ scan_camera_heading: 'Camera',
+ scan_start_btn: '📷 Start camera',
+ scan_perm_hint: 'On first use the system will ask for camera permission.',
+ scan_idle_status: 'Tap "Start camera" to scan the guest\'s QR code.',
+ scan_active_status: "Hold the guest's QR code in front of the camera.",
+ scan_manual_heading: 'Manual entry',
+ scan_manual_submit: 'Redeem coupon',
+ scan_invalid_qr: 'Not a valid Room8 QR. Try again.',
+ scan_uuid_required: 'Both fields must be UUIDs.',
+ scan_perm_denied: 'Camera access denied. Please allow it in device settings: Settings → Apps → Room8 → Permissions → Camera.',
+ scan_no_camera: 'No matching camera found. Use "Manual entry".',
+ scan_camera_busy: 'Camera is in use by another app. Close other camera apps.',
+ scan_camera_unavailable: 'Camera unavailable.',
+ scan_network_error: 'Network error. Please try again.',
+ scan_success_title: 'Redeemed',
+ scan_verification_label: 'Verification code:',
+ scan_next_btn: 'Scan next',
+
+ // Partner-Dashboard Scan-Banner (v2.1.4+)
+ pd_scan_banner_title: 'Redeem coupon',
+ pd_scan_banner_sub: "Scan guest's QR code",
+ pd_scan_today: '{n} today',
+ pd_action_scan: 'Scan',
+ pd_item_scan: '📷 Scan',
+ pd_stat_apply_clicks: 'Apply clicks'
 
  }
 

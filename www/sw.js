@@ -3,7 +3,7 @@
 // Network First Strategie für schnellere Seitenwechsel
 // ==========================================
 
-var CACHE_NAME = 'room8-v31';
+var CACHE_NAME = 'room8-v32';
 var IMAGE_CACHE = 'room8-images-v1';
 
 // Statische Assets die gecacht werden sollen
@@ -19,7 +19,9 @@ var STATIC_ASSETS = [
     'room8-utils.js',
     'cities.js',
     'translations.js',
-    'lib/supabase.min.js'
+    'lib/supabase.min.js',
+    'lib/qrcode.min.js',
+    'lib/html5-qrcode.min.js'
 ];
 
 // Install: Statische Assets vorladen
