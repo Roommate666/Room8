@@ -15,7 +15,29 @@
         .pd-greeting p { color: #6B7280; font-size: 0.85rem; margin: 0.25rem 0 0; }
         .pd-logout { background: transparent; border: 1px solid #E5E7EB; padding: 0.5rem 0.85rem; border-radius: 999px; color: #374151; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
 
-        .pd-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.5rem; }
+        .pd-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+        .pd-scan-banner {
+            display: flex; align-items: center; gap: 0.85rem;
+            background: linear-gradient(135deg, #1A1A2E 0%, #2D2D5F 100%);
+            color: white; border-radius: 1rem; padding: 1rem 1.1rem;
+            margin-bottom: 1rem; text-decoration: none;
+            box-shadow: 0 6px 20px rgba(26,26,46,0.25);
+        }
+        .pd-scan-banner:active { transform: scale(0.98); }
+        .pd-scan-banner .pd-scan-icon { font-size: 1.6rem; }
+        .pd-scan-banner .pd-scan-text { flex: 1; }
+        .pd-scan-banner .pd-scan-text strong { display: block; font-size: 0.95rem; }
+        .pd-scan-banner .pd-scan-text span { display: block; font-size: 0.75rem; opacity: 0.75; margin-top: 0.15rem; }
+        .pd-scan-banner .pd-scan-today {
+            background: rgba(255,255,255,0.15); border-radius: 999px;
+            padding: 0.3rem 0.8rem; font-size: 0.85rem; font-weight: 700;
+        }
+        .pd-item-scan {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            background: #1A1A2E; color: white; text-decoration: none;
+            padding: 0.4rem 0.7rem; border-radius: 999px;
+            font-size: 0.75rem; font-weight: 700; margin-top: 0.5rem;
+        }
         .pd-action-card { background: white; border-radius: 1rem; padding: 1rem; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.05); text-decoration: none; color: inherit; transition: transform 0.2s; }
         .pd-action-card:active { transform: scale(0.97); }
         .pd-action-card .icon { font-size: 1.6rem; margin-bottom: 0.4rem; }
@@ -67,6 +89,16 @@
         <button class="pd-logout" onclick="logout()">Abmelden</button>
     </div>
 
+    <!-- Scan-Banner (nur fuer Partner mit Coupons-Permission) -->
+    <a id="scanBanner" href="partner-scan.html" class="pd-scan-banner" data-perm="partner_can_coupons" style="display:none;">
+        <div class="pd-scan-icon">📷</div>
+        <div class="pd-scan-text">
+            <strong>Coupon einlösen</strong>
+            <span>QR-Code des Gastes scannen</span>
+        </div>
+        <div class="pd-scan-today" id="scanTodayCount">0 heute</div>
+    </a>
+
     <!-- Quick Actions (gefiltert nach Permissions) -->
     <div class="pd-actions" id="quickActions">
         <a href="partner-job.html" class="pd-action-card" data-perm="partner_can_jobs">
@@ -80,6 +112,10 @@
         <a href="partner-event.html" class="pd-action-card" data-perm="partner_can_events">
             <div class="icon">🎉</div>
             <div class="label">Event einreichen</div>
+        </a>
+        <a href="partner-scan.html" class="pd-action-card" data-perm="partner_can_coupons">
+            <div class="icon">📷</div>
+            <div class="label">Scannen</div>
         </a>
     </div>
 
@@ -150,17 +186,34 @@
         document.getElementById('greetingName').textContent = 'Hi, ' + (profile.partner_business_name || profile.full_name || profile.username || 'Partner');
         document.getElementById('greetingSub').textContent = profile.is_admin ? 'Admin-Ansicht' : 'Partner-Ansicht';
 
-        // Quick-Actions filtern: nur die Permissions zeigen die der Partner hat (Admin sieht alles)
-        if (!profile.is_admin) {
-            document.querySelectorAll('#quickActions [data-perm]').forEach(function(card) {
-                var perm = card.getAttribute('data-perm');
-                if (!profile[perm]) card.style.display = 'none';
-            });
-        }
+        // Quick-Actions + Scan-Banner filtern: nur Permissions zeigen die der Partner hat (Admin sieht alles)
+        document.querySelectorAll('[data-perm]').forEach(function(el) {
+            var perm = el.getAttribute('data-perm');
+            if (profile.is_admin || profile[perm]) {
+                if (el.id === 'scanBanner') el.style.display = 'flex';
+                // pd-action-cards bleiben mit ihrem default display (grid item)
+            } else {
+                el.style.display = 'none';
+            }
+        });
 
-        await loadSubmissions(user.id);
-        await loadActive(user.id);
+        await Promise.all([
+            loadSubmissions(user.id),
+            loadActive(user.id),
+            loadScanStats(user.id)
+        ]);
     })();
+
+    async function loadScanStats(userId) {
+        // Heute-Counter aus v_partner_redemptions_today (nur eigene Coupons via auth.uid())
+        try {
+            var res = await sb.from('v_partner_redemptions_today').select('redeemed_today');
+            if (res.data && res.data.length) {
+                var sum = res.data.reduce(function(acc, r) { return acc + (r.redeemed_today || 0); }, 0);
+                document.getElementById('scanTodayCount').textContent = sum + ' heute';
+            }
+        } catch (e) { /* View existiert ggf. noch nicht in alten Stages — kein Hard-Fail */ }
+    }
 
     async function loadSubmissions(userId) {
         var listEl = document.getElementById('submissionsList');
@@ -222,7 +275,8 @@
             items.push({
                 icon: '🎟️', title: c.title || c.business_name, city: c.city, id: c.id,
                 type: 'coupon',
-                stats: [{ icon: '🎫', value: redLabel, label: 'Code-Klicks' }]
+                stats: [{ icon: '🎫', value: redLabel, label: 'Eingelöst' }],
+                scanLink: 'partner-scan.html?coupon=' + c.id
             });
         });
         // Events — view_count + interest_count direkt aus Tabelle
@@ -261,11 +315,15 @@
                     '</span>';
                 }).join('') + '</div>';
             }
+            var scanHtml = it.scanLink
+                ? '<a href="' + it.scanLink + '" class="pd-item-scan">📷 Scannen</a>'
+                : '';
             return '<div class="pd-item">' +
                 '<div class="meta">' +
                     '<div class="title">' + it.icon + ' ' + Room8.escapeHtml(it.title || '-') + '</div>' +
                     '<div class="sub">' + Room8.escapeHtml(it.city || '') + '</div>' +
                     statsHtml +
+                    scanHtml +
                 '</div>' +
                 '<div class="status status-active">🟢 Live</div>' +
             '</div>';
