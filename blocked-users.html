@@ -148,6 +148,7 @@
 <script src="translations.js"></script>
 <script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
+<script src="room8-utils.js"></script>
 <script src="navigation.js"></script>
 <script>
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -160,9 +161,9 @@
             return;
         }
 
-        // Blockierte User laden (ohne Join)
+        // Blockierte User laden — seit Mig 20260504000009 heisst die Tabelle 'user_blocks'.
         var { data: blocked, error } = await sb
-            .from('blocked_users')
+            .from('user_blocks')
             .select('id, blocked_id, created_at')
             .eq('blocker_id', user.id)
             .order('created_at', { ascending: false });
@@ -210,15 +211,16 @@
                     <p class="blocked-name">${escapeHtml(name)}</p>
                     <p class="blocked-date">Blockiert am ${date}</p>
                 </div>
-                <button class="unblock-btn" data-id="${item.id}" data-name="${escapeHtml(name)}">Entsperren</button>
+                <button class="unblock-btn" data-blocked-id="${item.blocked_id}" data-name="${escapeHtml(name)}">Entsperren</button>
             `;
             container.appendChild(div);
         });
 
-        // Entsperren-Buttons
+        // Entsperren-Buttons — RLS sperrt direkten DELETE auf user_blocks,
+        // deshalb ueber Room8.trust.unblock RPC.
         container.querySelectorAll('.unblock-btn').forEach(function(btn) {
             btn.addEventListener('click', async function() {
-                var id = this.dataset.id;
+                var blockedId = this.dataset.blockedId;
                 var name = this.dataset.name;
 
                 if (!confirm(`Möchtest du "${name}" wirklich entsperren? Du wirst wieder Nachrichten und Inserate von diesem Nutzer sehen.`)) {
@@ -228,13 +230,10 @@
                 this.disabled = true;
                 this.textContent = '...';
 
-                var { error } = await sb
-                    .from('blocked_users')
-                    .delete()
-                    .eq('id', id);
-
-                if (error) {
-                    Room8UI.error('Fehler beim Entsperren');
+                try {
+                    await Room8.trust.unblock(blockedId);
+                } catch (err) {
+                    Room8UI.error('Fehler beim Entsperren: ' + (err.message || err));
                     this.disabled = false;
                     this.textContent = 'Entsperren';
                     return;

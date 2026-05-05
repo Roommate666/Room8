@@ -422,7 +422,8 @@
 
     function loadBlockedUsers() {
         if (!currentUserId) return;
-        sb.from('blocked_users').select('blocked_id').eq('blocker_id', currentUserId)
+        // Tabelle seit Mig 20260504000009 'user_blocks'
+        sb.from('user_blocks').select('blocked_id').eq('blocker_id', currentUserId)
             .then(function(res) {
                 if (res.data) {
                     blockedUserIds = res.data.map(function(b) { return b.blocked_id; });

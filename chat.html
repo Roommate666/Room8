@@ -479,10 +479,6 @@
             </div>
         </div>
 
-        <button id="chatMoreBtn" type="button" class="header-bell" title="Mehr" aria-label="Mehr Optionen" style="background:none;border:none;cursor:pointer;display:none;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
-        </button>
-
         <a href="notifications.html" class="header-bell" id="notificationBell">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
             <span class="notif-badge" id="notifBadge" style="display:none;"></span>
@@ -624,14 +620,38 @@
             }
             document.getElementById('headerProfileLink').onclick = () => navigateTo('public-profile.html?id=' + id);
 
-            // Trust-Menue (Block / Report) aktivieren
-            const moreBtn = document.getElementById('chatMoreBtn');
-            if (moreBtn && window.Room8 && window.Room8.trust) {
-                moreBtn.style.display = 'flex';
-                moreBtn.onclick = () => openChatTrustMenu(id, name);
-            }
+            // Trust-Menue (Block / Report) aktivieren — als floating Button
+            // links neben der Notification-Glocke (die ist fixed top:12 right:16)
+            mountChatMoreFab(id, name);
         }
     }
+
+    // Floating Action Button fuer Trust-Menue. notificationBell.js versteckt
+    // alle .header-bell mit display:none!important, deshalb eigener Container.
+    function mountChatMoreFab(partnerId, partnerName) {
+        if (!window.Room8 || !window.Room8.trust) return;
+        var existing = document.getElementById('chatMoreFab');
+        if (existing) existing.remove();
+        var btn = document.createElement('button');
+        btn.id = 'chatMoreFab';
+        btn.type = 'button';
+        btn.title = 'Mehr Optionen';
+        btn.setAttribute('aria-label', 'Mehr Optionen');
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>';
+        btn.style.cssText =
+            'position:fixed;top:calc(12px + env(safe-area-inset-top, 0px));right:64px;z-index:9998;' +
+            'width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.95);' +
+            'border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;' +
+            'box-shadow:0 2px 8px rgba(0,0,0,0.15);color:#374151;';
+        btn.onclick = function() { openChatTrustMenu(partnerId, partnerName); };
+        document.body.appendChild(btn);
+    }
+
+    // Beim Verlassen aufraeumen
+    window.addEventListener('pagehide', function() {
+        var fab = document.getElementById('chatMoreFab');
+        if (fab) fab.remove();
+    });
 
     // Action-Sheet beim "..." Klick im Chat-Header.
     // Zeigt: Profil / Melden / Blockieren. Auf Block leiten wir zurueck zur Inbox.

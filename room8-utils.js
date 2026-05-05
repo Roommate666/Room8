@@ -86,7 +86,16 @@ var Room8 = (function() {
     function getSupabase() {
         if (_supabase) return _supabase;
 
-        // Check for global config
+        // PRIORITAET: existierender Page-Client wiederverwenden — er traegt
+        // die Auth-Session vom angemeldeten User. Sonst entstehen zwei
+        // GoTrueClient-Instanzen ("Multiple GoTrueClient instances detected")
+        // und unsere RPCs liefen anonym -> "permission denied" beim Melden/Blocken.
+        if (window.sb && typeof window.sb.from === 'function') {
+            _supabase = window.sb;
+            return _supabase;
+        }
+
+        // Fallback: eigenen Client bauen (Pages ohne window.sb)
         var url = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://tvnvmogaqmduzcycmvby.supabase.co';
         var key = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVZZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw';
 

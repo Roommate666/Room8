@@ -463,8 +463,8 @@
                     }
                 });
 
-            // Blockierte User laden
-            sb.from('blocked_users')
+            // Blockierte User laden — Tabelle ist seit Mig 20260504000009 'user_blocks'
+            sb.from('user_blocks')
                 .select('blocked_id')
                 .eq('blocker_id', currentUserId)
                 .then(function(res) {
