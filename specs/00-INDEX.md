@@ -16,6 +16,7 @@
 | Permission-System | [permissions-system.md](permissions-system.md) | profiles.can_create_events Spalte, supabase/migrations/2026042800000{8,9,10,11}*.sql |
 | Push + Email | [push-and-email.md](push-and-email.md) | supabase/functions/send-push, send-email, notify_event_change, send_user_email, notification_logs (Health-Monitoring) |
 | Image-Pipeline | [image-pipeline.md](image-pipeline.md) | room8-utils.js (compressImage, getOptimizedImageUrl), sw.js |
+| Coupon-Einlösung | [coupon-redemption.md](coupon-redemption.md) | coupon-detail.html, partner-scan.html, partner-dashboard.html, supabase/migrations/20260505000003_coupon_redemption_system.sql |
 
 ## Wann eine NEUE Spec schreiben
 
