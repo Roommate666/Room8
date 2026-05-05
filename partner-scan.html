@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <script src="sentry-init.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <title>Coupon scannen - Room8</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/html5-qrcode@2.3.10/html5-qrcode.min.js"></script>
+    <style>
+        body { background: linear-gradient(160deg, #EFF6FF 0%, #F7F7F5 60%, #FFE7DE 100%); min-height: 100vh; }
+        .ps-wrap { max-width: 520px; margin: 0 auto; padding: calc(1rem + env(safe-area-inset-top, 0px)) 1rem 5rem; }
+        .ps-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+        .ps-back { background: transparent; border: 1px solid #E5E7EB; width: 36px; height: 36px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #374151; text-decoration: none; }
+        .ps-title { font-size: 1.25rem; font-weight: 800; color: #1A1A2E; margin: 0; }
+
+        .ps-card { background: white; border-radius: 1.25rem; padding: 1.25rem; box-shadow: 0 4px 16px rgba(0,0,0,0.05); margin-bottom: 1rem; }
+        .ps-card h2 { font-size: 1rem; font-weight: 700; margin: 0 0 0.75rem; color: #1A1A2E; }
+
+        #qrReader { width: 100%; max-width: 100%; border-radius: 12px; overflow: hidden; }
+        #qrReader video { border-radius: 12px; }
+
+        .ps-status { padding: 0.85rem 1rem; border-radius: 12px; margin: 0.75rem 0; font-size: 0.9rem; font-weight: 600; display: none; }
+        .ps-status.show { display: block; }
+        .ps-status.success { background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0; }
+        .ps-status.error { background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; }
+        .ps-status.info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+
+        .ps-toggle { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+        .ps-toggle button {
+            flex: 1; background: white; border: 1px solid #E5E7EB; padding: 0.65rem 0.5rem;
+            border-radius: 12px; font-weight: 600; color: #6B7280; cursor: pointer; font-size: 0.85rem;
+        }
+        .ps-toggle button.active { background: #1A1A2E; color: white; border-color: #1A1A2E; }
+
+        .ps-manual { display: none; }
+        .ps-manual.show { display: block; }
+        .ps-manual label { display: block; font-size: 0.8rem; color: #6B7280; margin: 0.5rem 0 0.25rem; font-weight: 600; }
+        .ps-manual input { width: 100%; padding: 0.75rem 0.85rem; border: 1px solid #E5E7EB; border-radius: 10px; font-size: 0.95rem; font-family: monospace; box-sizing: border-box; }
+        .ps-manual button.primary {
+            width: 100%; margin-top: 1rem; background: linear-gradient(135deg, #EA580C 0%, #DC2626 100%);
+            color: white; border: none; padding: 0.9rem; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 1rem;
+        }
+        .ps-manual button.primary[disabled] { background: #9CA3AF; cursor: not-allowed; }
+
+        .ps-result-card { background: white; border-radius: 1.25rem; padding: 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.08); margin: 1rem 0; text-align: center; display: none; }
+        .ps-result-card.show { display: block; }
+        .ps-result-card.success { border: 2px solid #10B981; }
+        .ps-result-card.error { border: 2px solid #EF4444; }
+        .ps-result-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .ps-result-title { font-size: 1.1rem; font-weight: 800; margin: 0 0 0.25rem; color: #1A1A2E; }
+        .ps-result-sub { font-size: 0.9rem; color: #6B7280; margin: 0; }
+        .ps-result-code {
+            background: #F3F4F6; border: 2px dashed #D1D5DB; padding: 1rem;
+            border-radius: 12px; font-family: monospace; font-size: 1.6rem; font-weight: 700;
+            letter-spacing: 3px; margin: 1rem 0;
+        }
+        .ps-result-meta { font-size: 0.85rem; color: #4B5563; margin: 0.4rem 0; }
+        .ps-result-meta strong { color: #111827; }
+
+        .ps-rescan {
+            background: #1A1A2E; color: white; border: none;
+            padding: 0.85rem 1.5rem; border-radius: 12px;
+            font-weight: 700; cursor: pointer; margin-top: 1rem; width: 100%; font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="ps-wrap">
+    <div class="ps-header">
+        <a href="partner-dashboard.html" class="ps-back" aria-label="Zurück">&#8592;</a>
+        <h1 class="ps-title">Coupon scannen</h1>
+    </div>
+
+    <div class="ps-toggle" role="tablist">
+        <button id="tabScan" class="active" onclick="switchTab('scan')">QR scannen</button>
+        <button id="tabManual" onclick="switchTab('manual')">Manuell eingeben</button>
+    </div>
+
+    <div id="paneScan" class="ps-card">
+        <h2>Kamera</h2>
+        <div id="qrReader"></div>
+        <div id="scanStatus" class="ps-status info">Halte den QR-Code des Gastes vor die Kamera.</div>
+    </div>
+
+    <div id="paneManual" class="ps-card ps-manual">
+        <h2>Manuelle Eingabe</h2>
+        <label for="manualCoupon">Coupon-ID</label>
+        <input id="manualCoupon" type="text" placeholder="00000000-0000-0000-0000-000000000000" autocomplete="off">
+        <label for="manualUser">User-ID</label>
+        <input id="manualUser" type="text" placeholder="00000000-0000-0000-0000-000000000000" autocomplete="off">
+        <button id="manualSubmit" class="primary" onclick="submitManual()">Coupon einlösen</button>
+    </div>
+
+    <div id="resultCard" class="ps-result-card">
+        <div class="ps-result-icon" id="resultIcon">✅</div>
+        <h3 class="ps-result-title" id="resultTitle">Eingelöst</h3>
+        <p class="ps-result-sub" id="resultSub"></p>
+        <div class="ps-result-code" id="resultCode" style="display:none;"></div>
+        <p class="ps-result-meta" id="resultMeta1"></p>
+        <p class="ps-result-meta" id="resultMeta2"></p>
+        <button class="ps-rescan" onclick="resetAndRescan()">Nächsten scannen</button>
+    </div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="room8-ui.js"></script>
+<script>
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let html5QrCode = null;
+    let isProcessing = false;
+    const QR_REGEX = /^room8:redeem:([0-9a-f-]{36}):([0-9a-f-]{36})$/i;
+
+    async function ensurePartner() {
+        const { data: sess } = await sb.auth.getSession();
+        if (!sess || !sess.session) {
+            window.location.href = 'login.html?next=partner-scan.html';
+            return false;
+        }
+        return true;
+    }
+
+    function switchTab(which) {
+        document.getElementById('tabScan').classList.toggle('active', which === 'scan');
+        document.getElementById('tabManual').classList.toggle('active', which === 'manual');
+        document.getElementById('paneScan').style.display = which === 'scan' ? 'block' : 'none';
+        document.getElementById('paneManual').classList.toggle('show', which === 'manual');
+        if (which === 'scan') startScanner();
+        else stopScanner();
+    }
+
+    async function startScanner() {
+        if (html5QrCode) return;
+        try {
+            html5QrCode = new Html5Qrcode('qrReader');
+            await html5QrCode.start(
+                { facingMode: 'environment' },
+                { fps: 10, qrbox: { width: 240, height: 240 } },
+                onScanSuccess,
+                () => {}
+            );
+            setStatus('Halte den QR-Code des Gastes vor die Kamera.', 'info');
+        } catch (e) {
+            setStatus('Kamera nicht verfügbar. Nutze "Manuell eingeben".', 'error');
+            console.warn('QR-Scanner Start:', e);
+            if (window.Room8Sentry) window.Room8Sentry.captureException(e);
+        }
+    }
+
+    async function stopScanner() {
+        if (!html5QrCode) return;
+        try { await html5QrCode.stop(); await html5QrCode.clear(); } catch (e) {}
+        html5QrCode = null;
+    }
+
+    function onScanSuccess(decodedText) {
+        if (isProcessing) return;
+        const m = decodedText.match(QR_REGEX);
+        if (!m) {
+            setStatus('Kein gültiger Room8-QR. Versuche es erneut.', 'error');
+            return;
+        }
+        isProcessing = true;
+        stopScanner();
+        redeem(m[1], m[2]);
+    }
+
+    async function submitManual() {
+        const couponId = document.getElementById('manualCoupon').value.trim();
+        const userId = document.getElementById('manualUser').value.trim();
+        const uuidRe = /^[0-9a-f-]{36}$/i;
+        if (!uuidRe.test(couponId) || !uuidRe.test(userId)) {
+            setStatus('Beide Felder müssen UUIDs sein.', 'error');
+            return;
+        }
+        document.getElementById('manualSubmit').disabled = true;
+        await redeem(couponId, userId);
+        document.getElementById('manualSubmit').disabled = false;
+    }
+
+    async function redeem(couponId, userId) {
+        try {
+            const { data, error } = await sb.rpc('redeem_coupon', {
+                p_coupon_id: couponId,
+                p_user_id: userId
+            });
+            if (error) {
+                showResult(false, mapError(error.message), null, null, null);
+                if (window.Room8Sentry) window.Room8Sentry.captureMessage('redeem_coupon error: ' + error.message);
+                return;
+            }
+            if (!data || !data.ok) {
+                showResult(false, mapError(data && data.error), null, null, null);
+                return;
+            }
+            showResult(true, 'Erfolgreich eingelöst', data.verification_code, data.coupon_title, data.business_name + ' · ' + data.discount_value);
+        } catch (e) {
+            showResult(false, 'Netzwerkfehler. Bitte erneut versuchen.', null, null, null);
+            if (window.Room8Sentry) window.Room8Sentry.captureException(e);
+        } finally {
+            isProcessing = false;
+        }
+    }
+
+    function mapError(code) {
+        switch (code) {
+            case 'NOT_AUTHENTICATED': return 'Bitte erneut einloggen.';
+            case 'COUPON_NOT_FOUND':  return 'Coupon nicht gefunden.';
+            case 'NOT_PARTNER':       return 'Dieser Coupon gehört nicht zu deinem Konto.';
+            case 'COUPON_INACTIVE':   return 'Coupon ist deaktiviert.';
+            case 'COUPON_EXPIRED':    return 'Coupon ist abgelaufen.';
+            case 'COUPON_MAX_REACHED':return 'Maximale Einlösungen erreicht.';
+            case 'ALREADY_REDEEMED':  return 'Dieser User hat den Coupon bereits eingelöst.';
+            case 'COUPON_LIMIT_REACHED': return 'Limit pro User erreicht.';
+            default: return 'Fehler: ' + (code || 'unbekannt');
+        }
+    }
+
+    function showResult(ok, title, code, couponTitle, sub) {
+        const card = document.getElementById('resultCard');
+        card.className = 'ps-result-card show ' + (ok ? 'success' : 'error');
+        document.getElementById('resultIcon').textContent = ok ? '✅' : '⚠️';
+        document.getElementById('resultTitle').textContent = title;
+        document.getElementById('resultSub').textContent = ok ? 'Bestätigungs-Code:' : '';
+        const codeEl = document.getElementById('resultCode');
+        if (ok && code) { codeEl.textContent = code; codeEl.style.display = 'block'; } else { codeEl.style.display = 'none'; }
+        document.getElementById('resultMeta1').innerHTML = couponTitle ? 'Coupon: <strong>' + couponTitle + '</strong>' : '';
+        document.getElementById('resultMeta2').textContent = sub || '';
+        document.getElementById('paneScan').style.display = 'none';
+        document.getElementById('paneManual').classList.remove('show');
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function resetAndRescan() {
+        document.getElementById('resultCard').classList.remove('show');
+        document.getElementById('manualCoupon').value = '';
+        document.getElementById('manualUser').value = '';
+        switchTab('scan');
+    }
+
+    function setStatus(text, type) {
+        const el = document.getElementById('scanStatus');
+        el.textContent = text;
+        el.className = 'ps-status show ' + type;
+    }
+
+    (async function init() {
+        if (!(await ensurePartner())) return;
+        startScanner();
+    })();
+</script>
+<script src="notificationBell.js"></script>
+</body>
+</html>
