@@ -9,6 +9,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         /* Pattern: Magic UI BlurFade */
         @keyframes blurFadeIn {
@@ -45,6 +46,57 @@
             transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .code-box:active { transform: scale(0.97); }
+        /* Redeem-Button (Primary CTA) */
+        .redeem-btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #EA580C 0%, #DC2626 100%);
+            color: #fff;
+            border: none;
+            padding: 1.1rem 1.5rem;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 1.5rem 0 0.75rem;
+            box-shadow: 0 4px 14px rgba(234,88,12,0.35);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .redeem-btn:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(234,88,12,0.25); }
+        .redeem-btn[disabled] { background: #9CA3AF; cursor: not-allowed; box-shadow: none; }
+        .redeemed-badge {
+            background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0;
+            border-radius: 12px; padding: 0.75rem 1rem; margin: 1.5rem 0 0.5rem;
+            font-weight: 600; font-size: 0.95rem;
+        }
+        /* QR-Modal */
+        .qr-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            display: none; align-items: center; justify-content: center;
+            z-index: 1000; padding: 1rem;
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+        }
+        .qr-overlay.open { display: flex; animation: blurFadeIn 0.3s ease-out both; }
+        .qr-card {
+            background: #fff; border-radius: 24px; padding: 2rem 1.5rem;
+            max-width: 360px; width: 100%; text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+        }
+        .qr-card h3 { margin: 0 0 0.5rem; font-size: 1.2rem; }
+        .qr-card .sub { color: #6B7280; font-size: 0.9rem; margin-bottom: 1.25rem; }
+        .qr-canvas {
+            display: inline-block; padding: 16px; background: #fff;
+            border: 4px solid #F3F4F6; border-radius: 16px;
+            margin: 0.5rem 0 1rem;
+        }
+        .qr-canvas img, .qr-canvas canvas { display: block; }
+        .qr-meta { font-size: 0.85rem; color: #4B5563; margin: 0.5rem 0; }
+        .qr-meta strong { color: #111827; }
+        .qr-close {
+            background: #F3F4F6; color: #111827; border: none;
+            padding: 0.85rem 1.5rem; border-radius: 12px;
+            font-weight: 600; cursor: pointer; margin-top: 1rem; width: 100%;
+        }
         /* Barrierefreiheit */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
@@ -67,12 +119,27 @@
         <div class="discount-big" id="discountValue"></div>
         <p id="description" style="color:#4B5563; line-height:1.6;"></p>
         
+        <button id="redeemBtn" class="redeem-btn" onclick="openRedeemQR()">QR-Code zum Einlösen anzeigen</button>
+        <div id="redeemedBadge" class="redeemed-badge" style="display:none;">Bereits eingelöst</div>
+
         <div class="code-box" onclick="copyCode()">
             <span id="couponCode">CODE</span>
-            <div style="font-size:0.8rem; font-weight:400; color:#9CA3AF; margin-top:0.5rem; letter-spacing:0;">Tippen zum Kopieren</div>
+            <div style="font-size:0.8rem; font-weight:400; color:#9CA3AF; margin-top:0.5rem; letter-spacing:0;">Online-Code · tippen zum Kopieren</div>
         </div>
-        
+
         <p style="font-size:0.8rem; color:#9CA3AF;">Gültig bis: <span id="validDate">-</span></p>
+    </div>
+</div>
+
+<!-- QR-Einlöse-Modal -->
+<div id="qrOverlay" class="qr-overlay" onclick="closeRedeemQR(event)">
+    <div class="qr-card" onclick="event.stopPropagation()">
+        <h3>Vor Ort einlösen</h3>
+        <p class="sub">Lass den Partner den QR-Code scannen.</p>
+        <div class="qr-canvas" id="qrCanvas"></div>
+        <p class="qr-meta">Coupon: <strong id="qrCouponTitle">—</strong></p>
+        <p class="qr-meta" id="qrLimitInfo" style="display:none;">Pro Konto nur <strong>1× einlösbar</strong>.</p>
+        <button class="qr-close" onclick="closeRedeemQR()">Schließen</button>
     </div>
 </div>
 
@@ -86,38 +153,92 @@
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const id = new URLSearchParams(window.location.search).get('id');
+    let coupon = null;
+    let userId = null;
+    let alreadyRedeemed = false;
 
     async function load() {
         if(!id) return;
-        const { data: coupon } = await sb.from('coupons').select('*, coupon_photos(storage_path)').eq('id', id).single();
-        
-        if(coupon) {
-            document.getElementById('companyName').textContent = coupon.business_name;
-            document.getElementById('dealTitle').textContent = coupon.title;
-            document.getElementById('discountValue').textContent = coupon.discount_value;
-            document.getElementById('description').textContent = coupon.description;
-            document.getElementById('couponCode').textContent = coupon.discount_code;
-            if(coupon.valid_until) document.getElementById('validDate').textContent = new Date(coupon.valid_until).toLocaleDateString('de-DE');
 
-            if (coupon.coupon_photos && coupon.coupon_photos.length > 0) {
-                const { data } = sb.storage.from('listing-images').getPublicUrl(coupon.coupon_photos[0].storage_path);
-                document.getElementById('heroImg').src = data.publicUrl;
+        // Auth-State holen (fuer Redeem-Button)
+        const { data: sess } = await sb.auth.getSession();
+        userId = sess && sess.session && sess.session.user ? sess.session.user.id : null;
+
+        const { data: c } = await sb.from('coupons').select('*, coupon_photos(storage_path)').eq('id', id).single();
+        coupon = c;
+        if(!coupon) return;
+
+        document.getElementById('companyName').textContent = coupon.business_name || '';
+        document.getElementById('dealTitle').textContent = coupon.title || '';
+        document.getElementById('discountValue').textContent = coupon.discount_value || '';
+        document.getElementById('description').textContent = coupon.description || '';
+        document.getElementById('couponCode').textContent = coupon.discount_code || '';
+        if(coupon.valid_until) document.getElementById('validDate').textContent = new Date(coupon.valid_until).toLocaleDateString('de-DE');
+
+        if (coupon.coupon_photos && coupon.coupon_photos.length > 0) {
+            const { data } = sb.storage.from('listing-images').getPublicUrl(coupon.coupon_photos[0].storage_path);
+            document.getElementById('heroImg').src = data.publicUrl;
+        }
+
+        // Redeem-Button-Status: schon eingeloest?
+        const btn = document.getElementById('redeemBtn');
+        const badge = document.getElementById('redeemedBadge');
+        if (!userId) {
+            btn.textContent = 'Zum Einlösen einloggen';
+            btn.onclick = function() { window.location.href = 'login.html'; };
+            return;
+        }
+        if (coupon.usage_limit_per_user) {
+            const { count } = await sb.from('coupon_redemptions')
+                .select('id', { count: 'exact', head: true })
+                .eq('coupon_id', id).eq('user_id', userId);
+            if ((count || 0) >= coupon.usage_limit_per_user) {
+                alreadyRedeemed = true;
+                btn.style.display = 'none';
+                badge.style.display = 'block';
             }
         }
+    }
+
+    function openRedeemQR() {
+        if (!coupon || !userId) return;
+        if (alreadyRedeemed) {
+            Room8UI.error('Du hast diesen Coupon bereits eingelöst.');
+            return;
+        }
+        // QR-Payload: room8:redeem:<coupon_id>:<user_id>
+        const payload = 'room8:redeem:' + coupon.id + ':' + userId;
+        const canvas = document.getElementById('qrCanvas');
+        canvas.innerHTML = '';
+        new QRCode(canvas, {
+            text: payload,
+            width: 220,
+            height: 220,
+            colorDark: '#111827',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+        });
+        document.getElementById('qrCouponTitle').textContent = coupon.title || '—';
+        document.getElementById('qrLimitInfo').style.display = coupon.usage_limit_per_user === 1 ? 'block' : 'none';
+        document.getElementById('qrOverlay').classList.add('open');
+    }
+
+    function closeRedeemQR(ev) {
+        if (ev && ev.target && !ev.target.classList.contains('qr-overlay') && ev.currentTarget !== ev.target) {
+            // Klick auf Inhalt → nicht schliessen
+            if (ev.target.closest('.qr-card') && !ev.target.classList.contains('qr-close')) return;
+        }
+        document.getElementById('qrOverlay').classList.remove('open');
     }
 
     function copyCode() {
         const code = document.getElementById('couponCode').textContent;
         navigator.clipboard.writeText(code);
-        Room8UI.success("Code kopiert: " + code);
-        // Counter fuer Partner-Dashboard hochzaehlen — bestehende RPC schreibt
-        // in coupon_redemptions Tabelle + erhoeht coupons.current_redemptions.
-        // Async, fire-and-forget — soll User-Flow nicht blocken.
-        if (id) {
-            sb.rpc('increment_coupon_redemptions', { p_coupon_id: id })
-              .then(function() {}, function(e) { console.warn('coupon-track:', e); });
-        }
+        Room8UI.success('Code kopiert: ' + code);
+        // Hinweis: increment_coupon_redemptions wird NICHT mehr aufgerufen.
+        // Zaehler wird ausschliesslich von redeem_coupon RPC gesetzt (Partner-Scan).
     }
+
     load();
 </script>
 <script src="notificationBell.js"></script>
