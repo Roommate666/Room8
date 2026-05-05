@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <script src="sentry-init.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <title>Event einreichen - Room8 Partner</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
+        body { background: linear-gradient(135deg, #14B8A6 0%, #6366F1 100%); min-height: 100vh; }
+        .partner-container { max-width: 700px; margin: 0 auto; padding: 1rem 1rem 3rem; }
+        .partner-header { text-align: center; padding: 2rem 0; color: white; }
+        .partner-logo { width: 72px; height: 72px; border-radius: 18px; margin: 0 auto 1rem; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+        .partner-header h1 { font-size: 1.75rem; font-weight: 800; margin-bottom: 0.4rem; }
+        .partner-header p { font-size: 0.95rem; opacity: 0.9; }
+        .form-card { background: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 12px 40px rgba(0,0,0,0.18); animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .info-box { background: #ECFEFF; border: 1px solid #67E8F9; border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 1.25rem; font-size: 0.9rem; color: #155E75; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.4rem; }
+        .form-group label .required { color: #EF4444; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 0.75rem 0.85rem; border: 1.5px solid #E5E7EB; border-radius: 12px;
+            font-size: 0.95rem; font-family: inherit; box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: #14B8A6; box-shadow: 0 0 0 4px rgba(20,184,166,0.12);
+        }
+        .form-group textarea { min-height: 100px; resize: vertical; }
+        .form-group small { display: block; margin-top: 0.3rem; color: #9CA3AF; font-size: 0.75rem; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        @media (max-width: 480px) { .row { grid-template-columns: 1fr; } }
+        .section-title { font-size: 1rem; font-weight: 700; color: #1A1A2E; margin: 1.5rem 0 0.75rem; padding-bottom: 0.4rem; border-bottom: 2px solid #F3F4F6; }
+        .submit-btn {
+            width: 100%; padding: 1rem; background: linear-gradient(135deg, #14B8A6 0%, #6366F1 100%);
+            color: white; border: none; border-radius: 999px; font-size: 1rem; font-weight: 700;
+            cursor: pointer; margin-top: 0.5rem; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(20,184,166,0.35); }
+        .submit-btn:disabled { background: #9CA3AF; cursor: not-allowed; transform: none; }
+        .success-message { display: none; text-align: center; padding: 2rem; }
+        .success-message .success-icon { font-size: 3rem; margin-bottom: 1rem; }
+        .success-message h2 { color: #14B8A6; margin-bottom: 0.5rem; }
+        .back-link { display: block; text-align: center; margin-top: 1.5rem; color: white; opacity: 0.85; text-decoration: none; font-size: 0.9rem; }
+        .back-link:hover { opacity: 1; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="partner-container">
+    <div class="partner-header">
+        <div class="partner-logo">🎉</div>
+        <h1>Event einreichen</h1>
+        <p>Erreiche Studenten in deiner Stadt mit deinem Event</p>
+    </div>
+
+    <div class="form-card">
+        <div class="info-box">
+            🎓 Wir prüfen jeden Antrag persönlich. Du bekommst eine Bestätigung per Email sobald dein Event live ist.
+        </div>
+
+        <form id="eventForm">
+
+            <div class="section-title">🎤 Veranstalter</div>
+
+            <div class="form-group">
+                <label>Veranstalter-Typ <span class="required">*</span></label>
+                <select id="organizerType" required>
+                    <option value="">Bitte wählen</option>
+                    <option value="asta">AStA / Studierendenvertretung</option>
+                    <option value="university">Universität / Hochschule</option>
+                    <option value="student_association">Studentischer Verein</option>
+                    <option value="partner">Bar / Club / Gewerblicher Veranstalter</option>
+                    <option value="agency">Agentur / Promoter</option>
+                    <option value="other">Sonstiges</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Veranstalter- / Organisations-Name <span class="required">*</span></label>
+                <input type="text" id="organizerName" required maxlength="200" placeholder="z.B. AStA Uni Augsburg, Bar Centrale">
+            </div>
+
+            <div class="form-group">
+                <label>Kontakt-Email <span class="required">*</span></label>
+                <input type="email" id="contactEmail" required placeholder="kontakt@beispiel.de">
+                <small>Für Bestätigung und Rückfragen</small>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>Telefon <span class="required">*</span></label>
+                    <input type="tel" id="phone" required placeholder="+49 123 4567890">
+                </div>
+                <div class="form-group">
+                    <label>Webseite / Instagram</label>
+                    <input type="url" id="website" placeholder="https://... oder @handle">
+                </div>
+            </div>
+
+            <div class="section-title">📅 Event-Details</div>
+
+            <div class="form-group">
+                <label>Event-Titel <span class="required">*</span></label>
+                <input type="text" id="title" required maxlength="200" placeholder="z.B. Studentenparty im Centrale">
+            </div>
+
+            <div class="form-group">
+                <label style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>Beschreibung <span class="required">*</span></span>
+                    <button type="button" id="polishBtn" style="background:linear-gradient(135deg,#8B5CF6,#6366F1); color:white; border:none; padding:0.35rem 0.75rem; border-radius:999px; font-size:0.75rem; font-weight:700; cursor:pointer;">🪄 Mit AI verbessern</button>
+                </label>
+                <textarea id="description" required minlength="50" maxlength="2000" placeholder="Was, wann, wer wird angesprochen, was erwartet die Gaeste — Stichpunkte reichen, AI macht daraus fluessigen Text"></textarea>
+                <small>Mindestens 50 Zeichen</small>
+            </div>
+
+            <div class="form-group">
+                <label>Standort / Adresse <span class="required">*</span></label>
+                <input type="text" id="address" required placeholder="Strasse, PLZ, Stadt">
+            </div>
+
+            <div class="form-group">
+                <label>Stadt <span class="required">*</span></label>
+                <input type="text" id="city" required placeholder="z.B. Augsburg">
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>Start-Datum + Uhrzeit <span class="required">*</span></label>
+                    <input type="datetime-local" id="startAt" required>
+                </div>
+                <div class="form-group">
+                    <label>End-Datum (optional)</label>
+                    <input type="datetime-local" id="endAt">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Erwartete Teilnehmerzahl</label>
+                <input type="text" id="discountValue" placeholder="z.B. 50, 200, &gt;500">
+            </div>
+
+            <div class="form-group">
+                <label>Veranstalter-Logo <span class="required">*</span></label>
+                <input type="file" id="logoImage" accept="image/*" required>
+                <small>Logo deiner Organisation / Bar / Vereins (quadratisch, max 5 MB).</small>
+                <div id="logoPreview" style="margin-top:0.5rem; display:none;"><img id="logoPreviewImg" style="max-width:120px; max-height:120px; border-radius:8px;"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Cover-Bild (Event-Hero) <span class="required">*</span></label>
+                <input type="file" id="coverImage" accept="image/*" required>
+                <small>Foto vom Event / Location / Promo-Grafik (16:9, max 5 MB). Wird als Hero-Bild gezeigt.</small>
+                <div id="coverPreview" style="margin-top:0.5rem; display:none;"><img id="coverPreviewImg" style="max-width:100%; max-height:200px; border-radius:8px;"></div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">🎉 Event einreichen</button>
+        </form>
+
+        <div class="success-message" id="successMessage">
+            <div class="success-icon">🎉</div>
+            <h2>Vielen Dank!</h2>
+            <p>Dein Antrag wurde eingereicht und wird in Kürze geprüft. Du bekommst eine Email sobald wir uns gemeldet haben.</p>
+        </div>
+    </div>
+
+    <a href="javascript:void(0)" class="back-link" onclick="goBack()">← Zurück</a>
+
+    <script>
+        function goBack() {
+            // In-App: zurueck zum Partner-Dashboard wenn eingeloggt, sonst Landing
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'partner-dashboard.html';
+            }
+        }
+    </script>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="image-validator.js"></script>
+<script>
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // AI Polish-Button
+    document.getElementById('polishBtn').addEventListener('click', async function() {
+        var btn = this;
+        var ta = document.getElementById('description');
+        var orig = ta.value.trim();
+        if (orig.length < 5) { alert('Schreib erst ein paar Stichpunkte.'); return; }
+        var oldText = btn.innerHTML;
+        btn.innerHTML = '⏳ Verbessere...'; btn.disabled = true;
+        try {
+            var orgName = document.getElementById('organizerName').value || '';
+            var orgType = document.getElementById('organizerType').value || '';
+            var resp = await fetch(SUPABASE_URL + '/functions/v1/polish-text', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+                body: JSON.stringify({ text: orig, type: 'event', context: 'Veranstalter: ' + orgName + ' (' + orgType + ')' })
+            });
+            var j = await resp.json();
+            if (j.polished) {
+                if (confirm('AI-Vorschlag uebernehmen?\n\n' + j.polished)) ta.value = j.polished;
+            } else {
+                alert('Fehler: ' + (j.error || 'Unbekannt'));
+            }
+        } catch (e) { alert('Fehler: ' + e.message); }
+        finally { btn.innerHTML = oldText; btn.disabled = false; }
+    });
+
+    function setupImagePreview(inputId, previewId, imgId) {
+        document.getElementById(inputId).addEventListener('change', function(e) {
+            var f = e.target.files[0];
+            if (f && f.size > 5 * 1024 * 1024) { alert('Bild zu gross (max 5 MB)'); this.value=''; return; }
+            if (f) {
+                var r = new FileReader();
+                r.onload = function(ev) {
+                    document.getElementById(imgId).src = ev.target.result;
+                    document.getElementById(previewId).style.display = 'block';
+                };
+                r.readAsDataURL(f);
+            }
+        });
+    }
+    setupImagePreview('logoImage', 'logoPreview', 'logoPreviewImg');
+    setupImagePreview('coverImage', 'coverPreview', 'coverPreviewImg');
+
+    async function uploadImage(file, prefix, aspect) {
+        var blob = await Room8ImageValidator.validateAndCropImage(file, {
+            aspect: aspect,
+            maxWidth: aspect === 'square' ? 800 : 1920,
+            quality: 0.85
+        });
+        var ext = blob.type === 'image/png' ? 'png' : 'jpg';
+        var path = 'partner-uploads/' + prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,8) + '.' + ext;
+        var up = await sb.storage.from('event-images').upload(path, blob, { contentType: blob.type, upsert: false });
+        if (up.error) throw up.error;
+        return path;
+    }
+
+    document.getElementById('eventForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Wird gesendet...';
+
+        try {
+            var logoFile = document.getElementById('logoImage').files[0];
+            var coverFile = document.getElementById('coverImage').files[0];
+            if (!logoFile) throw new Error('Bitte Veranstalter-Logo hochladen.');
+            if (!coverFile) throw new Error('Bitte Cover-Bild hochladen.');
+
+            var logoPath = await uploadImage(logoFile, 'event_logo', 'square');
+            var coverPath = await uploadImage(coverFile, 'event_cover', '16:9');
+
+            var startAt = document.getElementById('startAt').value;
+            var endAt = document.getElementById('endAt').value || null;
+            if (!startAt) throw new Error('Bitte Start-Datum + Uhrzeit angeben.');
+
+            var attendees = document.getElementById('discountValue').value || '';
+            var fullDescription = document.getElementById('description').value;
+            if (attendees) fullDescription += '\n\nErwartete Teilnehmer: ' + attendees;
+
+            var data = {
+                submission_type: 'event',
+                status: 'pending',
+                business_name: document.getElementById('organizerName').value,
+                category: document.getElementById('organizerType').value,
+                contact_email: document.getElementById('contactEmail').value,
+                title: document.getElementById('title').value,
+                description: fullDescription,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                website: document.getElementById('website').value || null,
+                phone: document.getElementById('phone').value,
+                start_at: new Date(startAt).toISOString(),
+                end_at: endAt ? new Date(endAt).toISOString() : null,
+                logo_image_path: logoPath,
+                cover_image_path: coverPath,
+                discount_value: attendees || null,
+                submitted_at: new Date().toISOString()
+            };
+
+            var res = await sb.from('partner_submissions').insert(data);
+            if (res.error) throw res.error;
+
+            document.getElementById('eventForm').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
+        } catch (err) {
+            console.error(err);
+            alert('Fehler: ' + (err.message || 'Bitte später erneut versuchen.'));
+            btn.disabled = false;
+            btn.textContent = '🎉 Event einreichen';
+        }
+    });
+</script>
+
+</body>
+</html>

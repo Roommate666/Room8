@@ -11,12 +11,18 @@ install! 'cocoapods', :disable_input_output_paths => true
 def capacitor_pods
   pod 'Capacitor', :path => '../../node_modules/@capacitor/ios'
   pod 'CapacitorCordova', :path => '../../node_modules/@capacitor/ios'
+  pod 'CapacitorCommunityAppleSignIn', :path => '../../node_modules/@capacitor-community/apple-sign-in'
   pod 'CapacitorPushNotifications', :path => '../../node_modules/@capacitor/push-notifications'
+  pod 'CodetrixStudioCapacitorGoogleAuth', :path => '../../node_modules/@codetrix-studio/capacitor-google-auth'
 end
 
 target 'App' do
   capacitor_pods
-  # Add your Pods here
+  # Firebase Messaging fuer FCM-Token auf iOS.
+  # @capacitor/push-notifications gibt nur APNs-Token; send-push Edge Function
+  # erwartet aber FCM-Token. Firebase Messaging mappt APNs → FCM und
+  # liefert den FCM-Token via MessagingDelegate (siehe AppDelegate.swift).
+  pod 'Firebase/Messaging'
 end
 
 post_install do |installer|

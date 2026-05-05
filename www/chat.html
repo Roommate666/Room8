@@ -479,6 +479,10 @@
             </div>
         </div>
 
+        <button id="chatMoreBtn" type="button" class="header-bell" title="Mehr" aria-label="Mehr Optionen" style="background:none;border:none;cursor:pointer;display:none;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+        </button>
+
         <a href="notifications.html" class="header-bell" id="notificationBell">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
             <span class="notif-badge" id="notifBadge" style="display:none;"></span>
@@ -582,8 +586,29 @@
             // Sofort als gelesen markieren (currentUser + targetUserId sind jetzt sicher gesetzt)
             markMessagesAsRead();
             markChatNotificationsAsRead();
+
+            // N2: Chat-Presence registrieren — verhindert Push-Banner waehrend man
+            // gerade in genau diesem Chat ist. Migration 20260504000008.
+            if (listingId) {
+                try { await sb.rpc('set_chat_presence', { p_listing_id: listingId }); }
+                catch (e) { console.warn('set_chat_presence failed:', e); }
+            }
         }
     }
+
+    // N2: Wenn Tab/App in den Hintergrund geht ODER Page verlassen wird,
+    // Presence loeschen damit Push wieder kommt.
+    function clearChatPresence() {
+        try { sb.rpc('clear_chat_presence'); } catch (_) {}
+    }
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') clearChatPresence();
+        else if (document.visibilityState === 'visible' && listingId) {
+            try { sb.rpc('set_chat_presence', { p_listing_id: listingId }); } catch (_) {}
+        }
+    });
+    window.addEventListener('pagehide', clearChatPresence);
+    window.addEventListener('beforeunload', clearChatPresence);
 
     async function loadPartnerProfile(id) {
         const { data: profile } = await sb.from('profiles').select('username, full_name, avatar_url').eq('id', id).single();
@@ -598,7 +623,85 @@
                 avatarEl.textContent = name.charAt(0).toUpperCase();
             }
             document.getElementById('headerProfileLink').onclick = () => navigateTo('public-profile.html?id=' + id);
+
+            // Trust-Menue (Block / Report) aktivieren
+            const moreBtn = document.getElementById('chatMoreBtn');
+            if (moreBtn && window.Room8 && window.Room8.trust) {
+                moreBtn.style.display = 'flex';
+                moreBtn.onclick = () => openChatTrustMenu(id, name);
+            }
         }
+    }
+
+    // Action-Sheet beim "..." Klick im Chat-Header.
+    // Zeigt: Profil / Melden / Blockieren. Auf Block leiten wir zurueck zur Inbox.
+    function openChatTrustMenu(partnerId, partnerName) {
+        const lang = (window.Room8 && Room8.getLang && Room8.getLang() === 'en') ? 'en' : 'de';
+        const T = (de, en) => lang === 'en' ? en : de;
+
+        const overlay = document.createElement('div');
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-label', T('Aktionen fuer ' + (partnerName || 'Nutzer'), 'Actions for ' + (partnerName || 'user')));
+        overlay.style.cssText =
+            'position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.45);z-index:10010;' +
+            'display:flex;align-items:flex-end;justify-content:center;';
+        const sheet = document.createElement('div');
+        sheet.style.cssText =
+            'background:#fff;width:100%;max-width:440px;border-radius:16px 16px 0 0;' +
+            'padding:8px 0 16px;box-shadow:0 -8px 24px rgba(0,0,0,0.15);' +
+            'animation:r8SheetIn .18s ease-out;';
+
+        const close = () => {
+            document.removeEventListener('keydown', onKey);
+            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        };
+        const onKey = (e) => { if (e.key === 'Escape') close(); };
+        document.addEventListener('keydown', onKey);
+        overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+
+        const mkBtn = (label, danger, handler) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.textContent = label;
+            b.style.cssText =
+                'display:block;width:100%;padding:14px 20px;border:none;background:transparent;' +
+                'text-align:left;font-size:15px;cursor:pointer;border-bottom:1px solid #f3f4f6;' +
+                (danger ? 'color:#EF4444;font-weight:600;' : 'color:#111;');
+            b.onclick = handler;
+            return b;
+        };
+
+        sheet.appendChild(mkBtn(T('Profil ansehen', 'View profile'), false, () => {
+            close();
+            navigateTo('public-profile.html?id=' + partnerId);
+        }));
+        sheet.appendChild(mkBtn(T('Melden', 'Report'), false, async () => {
+            close();
+            try {
+                await Room8.trust.openReportSheet('user', partnerId);
+            } catch (e) {
+                console.error('Report-Sheet error:', e);
+                Room8.showToast(T('Fehler beim Oeffnen', 'Could not open'), 'error');
+            }
+        }));
+        sheet.appendChild(mkBtn(T('Blockieren', 'Block'), true, async () => {
+            close();
+            try {
+                const ok = await Room8.trust.confirmAndBlock(partnerId, partnerName);
+                if (ok) navigateTo('nachrichten.html?_=' + Date.now());
+            } catch (e) {
+                console.error('Block-Confirm error:', e);
+                Room8.showToast(T('Fehler beim Blockieren', 'Block failed'), 'error');
+            }
+        }));
+        const cancel = mkBtn(T('Abbrechen', 'Cancel'), false, close);
+        cancel.style.borderBottom = 'none';
+        cancel.style.color = '#666';
+        sheet.appendChild(cancel);
+
+        overlay.appendChild(sheet);
+        document.body.appendChild(overlay);
     }
 
     async function loadListingContext(id) {
@@ -925,17 +1028,21 @@
 
     function escapeHtml(text) {
         if (!text) return '';
-        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        return String(text)
+            .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
     // URL Sicherheits-Check (gegen XSS via javascript: oder data: URLs)
+    // Plus: encodeURI gegen Apostroph/Anfuehrungszeichen-Injection in HTML-Attributen
     function sanitizeImageUrl(url) {
         if (!url) return '';
         const lower = url.toLowerCase().trim();
         if (lower.startsWith('javascript:') || lower.startsWith('data:text') || lower.startsWith('vbscript:')) {
             return '';
         }
-        return escapeHtml(url);
+        // encodeURI erhaelt valide URL-Zeichen, escaped aber " ' < > etc.
+        try { return encodeURI(url); } catch (_) { return ''; }
     }
 
     const tx = document.getElementById('messageInput');

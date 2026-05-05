@@ -174,8 +174,10 @@ var Room8 = (function() {
 
         var sb = getSupabase();
         try {
+            // Tabelle heisst seit Mig 20260504000009 'user_blocks'
+            // (vorher 'blocked_users' — die Tabelle gab es nie, Helper war stillschweigend tot)
             var result = await sb
-                .from('blocked_users')
+                .from('user_blocks')
                 .select('blocked_id')
                 .eq('blocker_id', user.id);
 
@@ -432,12 +434,19 @@ var Room8 = (function() {
         if (!sb) return null;
 
         opts = opts || {};
+        // DPR-Aware: Auf Retina-Geraeten (iPhone DPR=3) liefern wir N×width Pixel,
+        // damit das Browser-Downscaling sauber wird. Cap bei 4x sonst riesige Files.
+        var dpr = (typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1;
+        var dprCapped = Math.min(Math.max(dpr, 1), 3);
+        var baseWidth = opts.width || 400;
+        var actualWidth = opts.skipDpr ? baseWidth : Math.round(baseWidth * dprCapped);
+
         var transform = {
-            width: opts.width || 400,
+            width: actualWidth,
             quality: opts.quality || 70,
             resize: opts.resize || 'cover'
         };
-        if (opts.height) transform.height = opts.height;
+        if (opts.height) transform.height = opts.skipDpr ? opts.height : Math.round(opts.height * dprCapped);
 
         try {
             var result = sb.storage.from(bucket).getPublicUrl(path, { transform: transform });
@@ -608,6 +617,269 @@ var Room8 = (function() {
     }
 
     // ============================================
+    // TRUST-LAYER (Block + Report)
+    // ============================================
+    // Backend: Migration 20260504000009 — RPCs block_user / unblock_user /
+    // is_blocked_between / report_content. Anti-Trolling Rate-Limit 5/h, 30/d.
+
+    var TRUST_REPORT_REASONS = [
+        { key: 'spam',          de: 'Spam / Werbung',                en: 'Spam / Advertising' },
+        { key: 'harassment',    de: 'Belaestigung / Hass',           en: 'Harassment / Hate' },
+        { key: 'inappropriate', de: 'Anstoessiger Inhalt',           en: 'Inappropriate content' },
+        { key: 'fraud',         de: 'Betrug / Scam',                 en: 'Fraud / Scam' },
+        { key: 'fake',          de: 'Fake-Profil / Fake-Inserat',    en: 'Fake profile / Fake listing' },
+        { key: 'other',         de: 'Sonstiges',                     en: 'Other' }
+    ];
+
+    function _trustT(de, en) {
+        return getLang() === 'en' ? en : de;
+    }
+
+    /**
+     * Block a user. Backend bidirectional via is_blocked_between.
+     * @param {string} blockedId
+     * @param {string} [reason]
+     */
+    async function blockUser(blockedId, reason) {
+        var sb = getSupabase();
+        if (!sb) throw new Error('Supabase not initialized');
+        var res = await sb.rpc('block_user', {
+            p_blocked_id: blockedId,
+            p_reason: reason || null
+        });
+        if (res.error) throw res.error;
+        clearBlockedUsersCache();
+        return res.data;
+    }
+
+    /**
+     * Remove a block.
+     * @param {string} blockedId
+     */
+    async function unblockUser(blockedId) {
+        var sb = getSupabase();
+        if (!sb) throw new Error('Supabase not initialized');
+        var res = await sb.rpc('unblock_user', { p_blocked_id: blockedId });
+        if (res.error) throw res.error;
+        clearBlockedUsersCache();
+        return true;
+    }
+
+    /**
+     * Report content (user/listing/message).
+     * @param {string} targetType - 'user' | 'listing' | 'message' | 'job' | 'coupon' | 'event' | 'item'
+     * @param {string} targetId
+     * @param {string} reasonKey - one of TRUST_REPORT_REASONS.key
+     * @param {string} [message] - optional details
+     */
+    async function reportContent(targetType, targetId, reasonKey, message) {
+        var sb = getSupabase();
+        if (!sb) throw new Error('Supabase not initialized');
+        var res = await sb.rpc('report_content', {
+            p_target_type: String(targetType),
+            p_target_id: String(targetId),
+            p_reason: String(reasonKey || 'other'),
+            p_message: message || null
+        });
+        if (res.error) throw res.error;
+        return res.data;
+    }
+
+    /**
+     * Build a generic centered modal with overlay. Returns {modal, close}.
+     * Caller appends content to modal (the inner card).
+     */
+    function _trustOpenModal() {
+        var overlay = document.createElement('div');
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.style.cssText =
+            'position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.55);z-index:10010;' +
+            'display:flex;align-items:center;justify-content:center;padding:16px;' +
+            'animation:r8FadeIn .15s ease-out;';
+
+        var card = document.createElement('div');
+        card.style.cssText =
+            'background:#fff;color:#111;border-radius:14px;max-width:420px;width:100%;' +
+            'box-shadow:0 20px 50px rgba(0,0,0,0.25);padding:20px 20px 16px;' +
+            'font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;';
+        overlay.appendChild(card);
+
+        function close() {
+            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+            document.removeEventListener('keydown', onKey);
+        }
+        function onKey(e) { if (e.key === 'Escape') close(); }
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) close();
+        });
+        document.addEventListener('keydown', onKey);
+        document.body.appendChild(overlay);
+
+        return { modal: card, close: close };
+    }
+
+    /**
+     * Open Block-confirmation modal. Resolves true if blocked.
+     * @param {string} blockedId
+     * @param {string} [displayName]
+     */
+    function confirmAndBlock(blockedId, displayName) {
+        return new Promise(function(resolve) {
+            var dialog = _trustOpenModal();
+            var fallback = _trustT('diesen Nutzer', 'this user');
+            var name = (displayName && String(displayName).trim()) || fallback;
+
+            var h = document.createElement('h3');
+            h.textContent = _trustT('Nutzer blockieren?', 'Block user?');
+            h.style.cssText = 'margin:0 0 8px;font-size:18px;';
+
+            // Name als separater textNode — keine String-Concat ins Markup,
+            // damit auch bei spaeterem Refactor auf innerHTML kein XSS entsteht.
+            var p = document.createElement('p');
+            p.style.cssText = 'margin:0 0 16px;font-size:14px;line-height:1.45;color:#444;';
+            var nameSpan = document.createElement('strong');
+            nameSpan.textContent = name;
+            if (getLang() === 'en') {
+                p.appendChild(document.createTextNode('You will no longer see listings, messages or the profile of '));
+                p.appendChild(nameSpan);
+                p.appendChild(document.createTextNode('. This person will also no longer see yours.'));
+            } else {
+                p.appendChild(document.createTextNode('Du siehst keine Inserate, Nachrichten oder Profile von '));
+                p.appendChild(nameSpan);
+                p.appendChild(document.createTextNode(' mehr. Diese Person sieht deine Inserate ebenfalls nicht mehr.'));
+            }
+
+            var actions = document.createElement('div');
+            actions.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;';
+
+            var cancel = document.createElement('button');
+            cancel.type = 'button';
+            cancel.textContent = _trustT('Abbrechen', 'Cancel');
+            cancel.style.cssText = 'padding:10px 16px;border:1px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;font-size:14px;';
+            cancel.onclick = function() { dialog.close(); resolve(false); };
+
+            var confirm = document.createElement('button');
+            confirm.type = 'button';
+            confirm.textContent = _trustT('Blockieren', 'Block');
+            confirm.style.cssText = 'padding:10px 16px;border:none;background:#EF4444;color:#fff;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;';
+            confirm.onclick = async function() {
+                confirm.disabled = true;
+                confirm.textContent = '...';
+                try {
+                    await blockUser(blockedId);
+                    dialog.close();
+                    showToast(_trustT('Nutzer blockiert', 'User blocked'), 'success');
+                    resolve(true);
+                } catch (e) {
+                    confirm.disabled = false;
+                    confirm.textContent = _trustT('Blockieren', 'Block');
+                    showToast(getErrorMessage(e) || _trustT('Fehler beim Blockieren', 'Block failed'), 'error');
+                }
+            };
+
+            actions.appendChild(cancel);
+            actions.appendChild(confirm);
+            dialog.modal.appendChild(h);
+            dialog.modal.appendChild(p);
+            dialog.modal.appendChild(actions);
+        });
+    }
+
+    /**
+     * Open Report-modal. Resolves true if report submitted.
+     * @param {string} targetType
+     * @param {string} targetId
+     */
+    function openReportSheet(targetType, targetId) {
+        return new Promise(function(resolve) {
+            var dialog = _trustOpenModal();
+            var lang = getLang();
+
+            var h = document.createElement('h3');
+            h.textContent = _trustT('Inhalt melden', 'Report content');
+            h.style.cssText = 'margin:0 0 6px;font-size:18px;';
+
+            var sub = document.createElement('p');
+            sub.textContent = _trustT('Bitte waehle einen Grund. Unser Team prueft die Meldung.', 'Please choose a reason. Our team will review the report.');
+            sub.style.cssText = 'margin:0 0 14px;font-size:13px;color:#666;line-height:1.45;';
+
+            var radioWrap = document.createElement('div');
+            radioWrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-bottom:12px;';
+            var selected = null;
+
+            TRUST_REPORT_REASONS.forEach(function(r, i) {
+                var label = document.createElement('label');
+                label.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;';
+                var input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'r8-trust-reason';
+                input.value = r.key;
+                input.style.cssText = 'margin:0;';
+                input.onchange = function() {
+                    selected = r.key;
+                    submit.disabled = false;
+                    Array.prototype.forEach.call(radioWrap.querySelectorAll('label'), function(l) {
+                        l.style.background = '#fff';
+                        l.style.borderColor = '#e5e7eb';
+                    });
+                    label.style.background = '#EFF6FF';
+                    label.style.borderColor = '#3B82F6';
+                };
+                var span = document.createElement('span');
+                span.textContent = lang === 'en' ? r.en : r.de;
+                label.appendChild(input);
+                label.appendChild(span);
+                radioWrap.appendChild(label);
+                if (i === 0) input.focus();
+            });
+
+            var details = document.createElement('textarea');
+            details.placeholder = _trustT('Optional: Details (max. 500 Zeichen)', 'Optional: details (max 500 chars)');
+            details.maxLength = 500;
+            details.style.cssText = 'width:100%;min-height:70px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;resize:vertical;font-family:inherit;box-sizing:border-box;margin-bottom:14px;';
+
+            var actions = document.createElement('div');
+            actions.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;';
+
+            var cancel = document.createElement('button');
+            cancel.type = 'button';
+            cancel.textContent = _trustT('Abbrechen', 'Cancel');
+            cancel.style.cssText = 'padding:10px 16px;border:1px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;font-size:14px;';
+            cancel.onclick = function() { dialog.close(); resolve(false); };
+
+            var submit = document.createElement('button');
+            submit.type = 'button';
+            submit.disabled = true;
+            submit.textContent = _trustT('Senden', 'Submit');
+            submit.style.cssText = 'padding:10px 16px;border:none;background:#3B82F6;color:#fff;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;';
+            submit.onclick = async function() {
+                if (!selected) return;
+                submit.disabled = true;
+                submit.textContent = '...';
+                try {
+                    await reportContent(targetType, targetId, selected, details.value);
+                    dialog.close();
+                    showToast(_trustT('Meldung gesendet — Danke!', 'Report submitted — thanks!'), 'success');
+                    resolve(true);
+                } catch (e) {
+                    submit.disabled = false;
+                    submit.textContent = _trustT('Senden', 'Submit');
+                    showToast(getErrorMessage(e) || _trustT('Fehler beim Senden', 'Submit failed'), 'error');
+                }
+            };
+
+            actions.appendChild(cancel);
+            actions.appendChild(submit);
+            dialog.modal.appendChild(h);
+            dialog.modal.appendChild(sub);
+            dialog.modal.appendChild(radioWrap);
+            dialog.modal.appendChild(details);
+            dialog.modal.appendChild(actions);
+        });
+    }
+
+    // ============================================
     // PUBLIC API
     // ============================================
 
@@ -630,6 +902,16 @@ var Room8 = (function() {
         clearBlockedUsersCache: clearBlockedUsersCache,
         isUserBlocked: isUserBlocked,
         filterBlockedUsers: filterBlockedUsers,
+
+        // Trust-Layer (Block + Report)
+        trust: {
+            block: blockUser,
+            unblock: unblockUser,
+            confirmAndBlock: confirmAndBlock,
+            report: reportContent,
+            openReportSheet: openReportSheet,
+            REPORT_REASONS: TRUST_REPORT_REASONS
+        },
 
         // Formatting
         formatPrice: formatPrice,

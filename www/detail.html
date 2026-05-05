@@ -5,17 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Details - Room8</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">
     <style>
-        /* Pattern: Magic UI BlurFade */
-        @keyframes blurFadeIn {
-            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
-            to { opacity: 1; filter: blur(0); transform: translateY(0); }
-        }
         #listing-detail-container { padding: 0; }
         
         .image-gallery-container {
@@ -43,28 +34,28 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: none;
-            width: 40px;
-            height: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #e5e7eb;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 10;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-
-        .gallery-nav:active {
-            transform: translateY(-50%) scale(0.9);
+        
+        .gallery-nav:hover {
+            background: #ffffff;
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-
-        .gallery-nav.prev { left: 12px; }
-        .gallery-nav.next { right: 12px; }
+        
+        .gallery-nav.prev { left: 10px; }
+        .gallery-nav.next { right: 10px; }
         
         .gallery-nav svg {
             width: 20px;
@@ -73,37 +64,31 @@
             stroke-width: 2.5;
         }
         
-        /* Gallery Dots - Pattern: Kibo UI Status-Dot + Magic UI ShineBorder Glow */
         .gallery-dots {
             position: absolute;
-            bottom: 16px;
+            bottom: 15px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 6px;
+            gap: 8px;
             z-index: 10;
-            background: rgba(0,0,0,0.25);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            padding: 5px 10px;
-            border-radius: 999px;
         }
-
+        
         .gallery-dot {
-            width: 7px;
-            height: 7px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.45);
+            background: #d1d5db;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: none;
+            transition: all 0.2s;
+            border: 1px solid #e5e7eb;
         }
-
+        
         .gallery-dot.active {
-            background: #ffffff;
-            width: 22px;
+            background: #10b981;
+            width: 24px;
             border-radius: 4px;
-            box-shadow: 0 0 6px rgba(255,255,255,0.5);
+            border-color: #10b981;
         }
         
         .blurred-image {
@@ -111,24 +96,19 @@
             pointer-events: none;
         }
         
-        /* Glasmorphismus Privacy Overlay */
         .privacy-overlay {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             padding: 2rem;
-            border-radius: 20px;
+            border-radius: 12px;
             text-align: center;
             max-width: 90%;
             width: 400px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8);
-            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
             z-index: 20;
-            animation: blurFadeIn 0.4s ease-out both;
         }
         
         .privacy-overlay svg {
@@ -150,17 +130,15 @@
             line-height: 1.5;
         }
         
-        /* Kibo UI Pill */
         .privacy-overlay .submit-btn {
             display: inline-block;
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            background-color: #3b82f6;
             color: white;
             padding: 0.75rem 1.5rem;
-            border-radius: 999px;
+            border-radius: 8px;
             text-decoration: none;
-            font-weight: 700;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            font-weight: 600;
+            transition: all 0.2s;
         }
         
         .privacy-overlay .submit-btn:hover {
@@ -173,73 +151,50 @@
             font-style: italic;
         }
         
-        /* Pattern: Kibo UI Pill + Status (groessere Variante fuer Detail) */
         .listing-mode-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 0.5rem 1rem 0.5rem 0.85rem;
-            border-radius: 999px;
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 1rem;
         }
-        .listing-mode-badge::before {
-            content: '';
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
         .listing-mode-badge.offer {
-            background: rgba(236,253,245,0.95);
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
             color: #065f46;
-            border: 1px solid rgba(5,150,105,0.2);
         }
-        .listing-mode-badge.offer::before { background: #10b981; box-shadow: 0 0 6px rgba(16,185,129,0.5); }
         .listing-mode-badge.search {
-            background: rgba(255,251,235,0.95);
+            background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
             color: #92400e;
-            border: 1px solid rgba(217,119,6,0.2);
         }
-        .listing-mode-badge.search::before { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,0.5); }
         .listing-mode-badge.swap {
-            background: rgba(239,246,255,0.95);
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
             color: #1e40af;
-            border: 1px solid rgba(59,130,246,0.2);
         }
-        .listing-mode-badge.swap::before { background: #3b82f6; box-shadow: 0 0 6px rgba(59,130,246,0.5); }
         
         .detail-content {
             padding: 1.5rem;
-            animation: blurFadeIn 0.5s ease-out both;
         }
         
-        /* Kibo UI Pill Price */
         .price-tag {
             display: inline-block;
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             padding: 0.75rem 1.25rem;
-            border-radius: 999px;
+            border-radius: 8px;
             font-size: 1.3rem;
             font-weight: 700;
             margin: 1rem 0;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
         }
         
-        /* Glasmorphismus Specs */
         .detail-specs {
-            background: rgba(249,250,251,0.88);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
             padding: 1rem;
             margin: 1.5rem 0;
-            border: 1px solid rgba(0,0,0,0.04);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
         }
         
         .spec-item {
@@ -260,16 +215,11 @@
             font-weight: 600;
         }
         
-        /* Glasmorphismus Seller Info */
         .seller-info {
-            background: rgba(249,250,251,0.88);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
             padding: 1rem;
             margin-top: 2rem;
-            border: 1px solid rgba(0,0,0,0.04);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
         }
         
         .seller-info h4 {
@@ -299,16 +249,13 @@
             color: #1f2937;
         }
         
-        /* Glasmorphismus Action Bar */
         .detail-action-bar-container {
             position: fixed;
-            bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+            bottom: 80px;
             left: 0;
             right: 0;
             padding: 1rem;
-            background: linear-gradient(to top, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 80%, rgba(255,255,255,0) 100%);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.95) 80%, rgba(255,255,255,0) 100%);
             z-index: 100;
         }
         
@@ -317,39 +264,28 @@
             background: #dbeafe;
             color: #1e40af;
             padding: 0.375rem 0.875rem;
-            border-radius: 999px;
+            border-radius: 16px;
             font-size: 0.85rem;
             font-weight: 600;
             margin-bottom: 0.5rem;
-        }
-        /* Barrierefreiheit */
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
     </style>
 </head>
 <body>
 <div class="app-container">
     <header class="app-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <a href="#" onclick="event.preventDefault(); window.history.back();" class="back-arrow" style="text-decoration:none; color:inherit; display:flex; align-items:center;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <a href="#" onclick="event.preventDefault(); window.history.back();" class="back-arrow" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="m15 18-6-6 6-6"/>
             </svg>
+            <span data-i18n="general_back">Zurück</span>
         </a>
-        <!-- Glocke wird von notificationBell.js eingefügt -->
+        <button id="reportListingBtn" style="display: none; background: #fee2e2; color: #ef4444; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; align-items: center; justify-content: center; transition: all 0.2s;">&#9888;</button>
     </header>
     
     <main class="app-content" style="padding-bottom: 160px;">
         <div id="listing-detail-container">
-            <div style="animation: skeletonShimmer 1.5s ease-in-out infinite;">
-                <div style="width:100%;height:50vh;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:skeletonShimmer 1.5s ease-in-out infinite;"></div>
-                <div style="padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem;">
-                    <div style="width:40%;height:1.5rem;background:#f0f0f0;border-radius:8px;"></div>
-                    <div style="width:70%;height:1.2rem;background:#f0f0f0;border-radius:8px;"></div>
-                    <div style="width:55%;height:1rem;background:#f0f0f0;border-radius:8px;"></div>
-                    <div style="width:100%;height:6rem;background:#f0f0f0;border-radius:8px;margin-top:0.5rem;"></div>
-                </div>
-            </div>
+            <p style="text-align:center; padding: 2rem; color:#6b7280;" data-i18n="detail_loading">Lade Details...</p>
         </div>
         <div id="action-bar-container"></div>
     </main>
@@ -358,9 +294,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-<script src="lib/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
-<script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script src="room8-utils.js"></script>
 <script>
@@ -603,7 +538,7 @@
                     photos.forEach(function(photo, index) {
                         var urlData = sb.storage.from('listing-images').getPublicUrl(photo.storage_path);
                         var blurClass = shouldBlur ? ' blurred-image' : '';
-                        imageHTML += '<img src="' + urlData.data.publicUrl + '" alt="Foto ' + (index + 1) + '" loading="lazy" class="gallery-image' + blurClass + '" onerror="this.src=\'placeholder.png\';">';
+                        imageHTML += '<img src="' + urlData.data.publicUrl + '" alt="Foto ' + (index + 1) + '" class="gallery-image' + blurClass + '" onerror="this.src=\'placeholder.png\';">';
                         dotsHTML += '<div class="gallery-dot' + (index === 0 ? ' active' : '') + '" data-index="' + index + '"></div>';
                     });
                     
@@ -906,7 +841,7 @@
             })
             .catch(function(error) {
                 console.error('Fehler beim Laden:', error);
-                detailContainer.innerHTML = '<p style="text-align:center; padding: 2rem; color:red;"><b>Fehler:</b> ' + error.message + '</p>';
+                detailContainer.innerHTML = '<p style="text-align:center; padding: 2rem; color:red;">Inserat konnte nicht geladen werden. Bitte versuche es erneut.</p>';
             });
     }
     
@@ -1059,13 +994,12 @@
             reportSubmitBtn.disabled = true;
             reportSubmitBtn.textContent = 'Wird gesendet...';
 
-            return sb.from('reports').insert({
-                reporter_id: user.id,
-                reported_type: 'listing',
-                reported_id: currentReportListingId,
-                reason: reason,
-                description: description || null,
-                status: 'open'
+            // RPC report_content erzwingt Anti-Trolling Rate-Limit (5/h, 30/d).
+            return sb.rpc('report_content', {
+                p_target_type: 'listing',
+                p_target_id: String(currentReportListingId),
+                p_reason: reason,
+                p_message: description || null
             });
         }).then(function(result) {
             if (result && result.error) throw result.error;
@@ -1078,7 +1012,7 @@
             } else if (err.code === '42501') {
                 Room8UI.warning('Keine Berechtigung. Bist du eingeloggt?');
             } else {
-                Room8UI.error('Fehler beim Senden der Meldung: ' + (err.message || 'Unbekannter Fehler'));
+                Room8UI.error('Meldung konnte nicht gesendet werden. Bitte versuche es erneut.');
             }
         }).finally(function() {
             reportSubmitBtn.disabled = false;

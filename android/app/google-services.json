@@ -1,26 +1,51 @@
 {
   "project_info": {
-    "project_number": "652614538564",
-    "project_id": "room8-d1867",
-    "storage_bucket": "room8-d1867.firebasestorage.app"
+    "project_number": "193353507606",
+    "project_id": "room8-18fc9",
+    "storage_bucket": "room8-18fc9.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:652614538564:android:9cc8ae4d82f14c7e1b7311",
+        "mobilesdk_app_id": "1:193353507606:android:abaf18576a06a27a652637",
         "android_client_info": {
           "package_name": "club.room8.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "193353507606-ip8983vrfmirp94lbat33ie0drtrthak.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "club.room8.app",
+            "certificate_hash": "bc752502177e9525c9fa18ed945ca2c0bd592b47"
+          }
+        },
+        {
+          "client_id": "193353507606-qjq74nuka2a15qbankvfshqaqukhaead.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyBaSuyjrNZCYKk_TUPdFo0L5r6nOR6zb6g"
+          "current_key": "AIzaSyCVHAyBWfdghF2h1XjdA0ic93-dO-eMTn8"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "193353507606-qjq74nuka2a15qbankvfshqaqukhaead.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "193353507606-sqa3763hp6mp67l7lv38puohmdjocovn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "club.room8.app"
+              }
+            }
+          ]
         }
       }
     }

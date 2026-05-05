@@ -134,19 +134,41 @@
         .listing-mode-badge.search::before { background: #f59e0b; box-shadow: 0 0 4px rgba(245,158,11,0.5); }
 
         .favorite-btn {
-            background: rgba(255, 255, 255, 0.9);
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.95);
             border: none;
             border-radius: 50%;
-            width: 28px;
-            height: 28px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 10;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
         }
         .favorite-btn svg { width: 16px; height: 16px; }
         .favorite-btn.favorited svg { fill: #ef4444; stroke: #ef4444; }
+
+        .category-badge-overlay {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #374151;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            z-index: 10;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+            white-space: nowrap;
+            max-width: calc(100% - 16px);
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         .card-content {
             padding: 0.75rem;
@@ -210,7 +232,7 @@
         .empty-state-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 1.5rem; text-align: center; width: 100%; }
         .empty-state-icon { width: 80px; height: 80px; color: #d1d5db; margin-bottom: 1rem; }
         
-        .fab { position: fixed; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); cursor: pointer; text-decoration: none; color: white; z-index: 10000; transition: transform 0.2s, box-shadow 0.2s; }
+        .fab { position: fixed; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); cursor: pointer; text-decoration: none; color: white; z-index: 10000; transition: transform 0.2s, box-shadow 0.2s; }
         .fab:active { transform: scale(0.92); }
 
         /* Verification Overlay - Glasmorphismus */
@@ -486,6 +508,21 @@
         var modeBadgeText = listingMode === 'search' ? 'Gesucht' : 'Verkauf';
         var isFavorited = userFavorites[item.id];
 
+        // Kategorie auf Deutsch
+        var categoryMap = {
+            'Furniture & Home': 'Möbel',
+            'Electronics & Tech': 'Elektronik',
+            'Books & Study': 'Bücher',
+            'Clothing & Fashion': 'Kleidung',
+            'Kitchen & Appliances': 'Küche',
+            'Sports & Outdoor': 'Sport',
+            'Bikes & Transport': 'Fahrrad',
+            'Music & Instruments': 'Musik',
+            'Others': 'Sonstiges'
+        };
+        var catLabel = categoryMap[item.category] || item.category || 'Sonstiges';
+        var categoryBadgeHtml = `<span class="category-badge-overlay">${escHtml(catLabel)}</span>`;
+
         // Placeholder für Gesuche ohne Bild
         var imageHtml = '';
         if (isSearchListing && !imageUrl) {
@@ -496,6 +533,7 @@
                         <div style="font-size: 0.65rem; font-weight: 600; margin-top: 0.2rem;">SUCHE</div>
                     </div>
                     <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
+                    ${categoryBadgeHtml}
                 </div>`;
         } else if (!imageUrl) {
             imageHtml = `
@@ -505,12 +543,14 @@
                         <div style="font-size: 0.6rem; font-weight: 600; margin-top: 2px; color: #6ee7b7;">Kein Bild</div>
                     </div>
                     <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
+                    ${categoryBadgeHtml}
                 </div>`;
         } else {
             imageHtml = `
                 <div class="card-image-container">
                     <img src="${imageUrl}" alt="${escHtml(item.title)}" width="400" height="300" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='<div style=\\'background:linear-gradient(135deg,#ECFDF5,#D1FAE5);width:100%;height:100%;display:flex;align-items:center;justify-content:center;\\'><div style=\\'text-align:center;color:#059669;\\'>🏠<br><span style=\\'font-size:0.6rem;font-weight:600;color:#6ee7b7;\\'>Kein Bild</span></div></div>'">
                     <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
+                    ${categoryBadgeHtml}
                 </div>`;
         }
 
@@ -526,13 +566,10 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                         ${escHtml(item.city) || 'Unbekannt'}
                     </div>
-                    <div class="card-footer">
-                        <span>${item.category ? item.category.split(' ')[0] : ''}</span>
-                        <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" data-id="${item.id}" onclick="event.stopPropagation(); toggleFavorite('${item.id}', this);">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${isFavorited ? '#ef4444' : 'none'}" stroke="${isFavorited ? '#ef4444' : '#9ca3af'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                        </button>
-                    </div>
                 </div>
+                <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" data-id="${item.id}" onclick="event.stopPropagation(); toggleFavorite('${item.id}', this);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${isFavorited ? '#ef4444' : 'none'}" stroke="${isFavorited ? '#ef4444' : '#9ca3af'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                </button>
             </div>
         `;
     }
@@ -625,6 +662,7 @@
             .select('id, title, city, price, price_range_min, price_range_max, listing_mode, category, created_at, owner_id, listing_photos(storage_path)')
             .eq('type', 'gegenstand')
             .eq('is_active', true)
+            .eq('is_test', false)
             .order('created_at', { ascending: false })
             .then(function(res) {
                 if (res.error) {

@@ -142,9 +142,9 @@
 
         .favorite-btn {
             position: absolute;
-            top: 8px;
+            bottom: 8px;
             right: 8px;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             border: none;
             border-radius: 50%;
             width: 30px;
@@ -154,9 +154,28 @@
             justify-content: center;
             cursor: pointer;
             z-index: 10;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
         }
         .favorite-btn svg { width: 16px; height: 16px; }
         .favorite-btn.favorited svg { fill: #ef4444; stroke: #ef4444; }
+
+        .category-badge-overlay {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #374151;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            z-index: 10;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+            white-space: nowrap;
+            max-width: calc(100% - 50px);
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         .card-content {
             padding: 0.75rem;
@@ -616,6 +635,18 @@
         var listingMode = listing.listing_mode || 'offer';
         var modeBadgeText = listingMode === 'search' ? 'Gesucht' : (listingMode === 'swap' ? 'Tausch' : 'Angebot');
         var isFavorited = userFavorites[listing.id];
+
+        // Wohnungs-Typ auf Deutsch
+        var roomTypeMap = {
+            'wg_room': 'WG-Zimmer', 'wg': 'WG-Zimmer',
+            'apartment': 'Apartment', 'entire_apartment': 'Apartment',
+            'studio': 'Studio',
+            'house': 'Haus',
+            'shared': 'Mitbewohner', 'mitbewohner': 'Mitbewohner'
+        };
+        var typeLabel = roomTypeMap[(listing.room_type || '').toLowerCase()] ||
+                        roomTypeMap[(listing.type || '').toLowerCase()] ||
+                        'Wohnung';
         
         // NEU: Match Score berechnen (nur für Angebote, nicht für Gesuche)
         var matchBadgeHtml = '';
@@ -630,6 +661,8 @@
         
         // Placeholder für Gesuche ohne Bild
         var imageHtml = '';
+        var categoryBadgeHtml = `<span class="category-badge-overlay">${typeLabel}</span>`;
+
         if (isSearchListing && !imageUrl) {
             imageHtml = `
                 <div class="card-image-container" style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); display: flex; align-items: center; justify-content: center;">
@@ -638,6 +671,7 @@
                         <div style="font-size: 0.7rem; font-weight: 600; margin-top: 0.25rem;">SUCHE</div>
                     </div>
                     <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
+                    ${categoryBadgeHtml}
                 </div>`;
         } else if (!imageUrl) {
             imageHtml = `
@@ -647,12 +681,14 @@
                         <div style="font-size: 0.6rem; font-weight: 600; margin-top: 2px; color: #929292;">Kein Bild</div>
                     </div>
                     <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
+                    ${categoryBadgeHtml}
                 </div>`;
         } else {
             imageHtml = `
                 <div class="card-image-container">
                     <img src="${imageUrl}" alt="${escHtml(listing.title)}" width="280" height="210" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='<div style=\\'background:#EBEBEB;width:100%;height:100%;display:flex;align-items:center;justify-content:center;\\'><div style=\\'text-align:center;color:#929292;\\'>🏠<br><span style=\\'font-size:0.6rem;font-weight:600;color:#929292;\\'>Kein Bild</span></div></div>'">
                     <span class="listing-mode-badge ${listingMode}">${modeBadgeText}</span>
+                    ${categoryBadgeHtml}
                 </div>`;
         }
 
@@ -731,6 +767,7 @@
             .select('id, title, city, monthly_rent, price, price_range_min, price_range_max, listing_mode, room_type, available_from, view_count, created_at, owner_id, listing_photos(storage_path)')
             .eq('type', 'wohnung')
             .eq('is_active', true)
+            .eq('is_test', false)
             .order('created_at', { ascending: false })
             .then(function(res) {
                 if (res.error) {

@@ -131,7 +131,7 @@
                 .from('enrollment-certificates')
                 .getPublicUrl(path);
 
-              return supabase
+              return sb
                 .from('profiles')
                 .update({ enrollment_certificate_url: urlData.data.publicUrl })
                 .eq('id', user.id);

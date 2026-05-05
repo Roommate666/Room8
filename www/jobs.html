@@ -462,12 +462,6 @@
         </div>
     </div>
     
-    <!-- Partner Banner -->
-    <div class="partner-banner">
-        <h3>Für Unternehmen</h3>
-        <p>Sie möchten hier eine Stelle ausschreiben? Kontaktieren Sie uns direkt für eine Partnerschaft.</p>
-        <a href="mailto:admin@room8.club" class="partner-email">admin@room8.club</a>
-    </div>
     
     <div class="search-section">
         <div class="search-bar">
@@ -496,6 +490,7 @@
 <script src="config.js"></script>
 <script src="translations.js"></script>
 <script src="session-cache.js"></script>
+<script src="room8-utils.js"></script>
 <script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
@@ -555,35 +550,40 @@
         }
     ];
     
+    var esc = (Room8 && Room8.escapeHtml) ? Room8.escapeHtml : function(s) {
+        return (s == null ? '' : String(s)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    };
+
     function renderJobCard(job) {
         var logoContent = '';
         if (job.listing_photos && job.listing_photos.length > 0) {
             var path = job.listing_photos[0].storage_path;
             var urlData = sb.storage.from('listing-images').getPublicUrl(path);
-            if (urlData.data) logoContent = '<img src="' + urlData.data.publicUrl + '" class="job-logo" loading="lazy" style="object-fit:cover;">';
+            if (urlData.data) logoContent = '<img src="' + encodeURI(urlData.data.publicUrl) + '" class="job-logo" loading="lazy" style="object-fit:cover;">';
         } else if (job.logo) {
-            logoContent = '<div class="job-logo">' + job.logo + '</div>';
+            logoContent = '<div class="job-logo">' + esc(job.logo) + '</div>';
         } else {
-            logoContent = '<div class="job-logo">' + (job.company_name || 'J').charAt(0).toUpperCase() + '</div>';
+            logoContent = '<div class="job-logo">' + esc((job.company_name || 'J').charAt(0).toUpperCase()) + '</div>';
         }
-        
+
         var salary = job.salary_amount ? (job.salary_amount + ' €') : 'Verhandlung';
-        if(job.salary_type === 'per_month') salary += ' / Monat'; 
+        if(job.salary_type === 'per_month') salary += ' / Monat';
         else if(job.salary_type === 'per_hour') salary += ' / Std';
-        
+
         var jobTypeLabels = { 'werkstudent': 'Werkstudent', 'minijob': 'Minijob', 'praktikum': 'Praktikum', 'teilzeit': 'Teilzeit', 'vollzeit': 'Vollzeit' };
         var jobType = jobTypeLabels[job.job_type] || (job.job_type ? job.job_type.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }) : 'Job');
         var badge = job.is_demo ? '<span class="example-badge">BEISPIEL</span>' : '';
-        var clickAction = job.is_demo ? 'onclick="Room8UI.info(\'Dies ist ein Beispiel-Inserat.\')"' : 'onclick="navigateTo(\'job-detail.html?id=' + job.id + '\')"';
+        var safeId = encodeURIComponent(job.id || '');
+        var clickAction = job.is_demo ? 'onclick="Room8UI.info(\'Dies ist ein Beispiel-Inserat.\')"' : 'onclick="navigateTo(\'job-detail.html?id=' + esc(safeId) + '\')"';
 
         return '<div class="job-card" ' + clickAction + '>' +
                 badge +
                 logoContent +
                 '<div class="job-content">' +
-                    '<div class="job-title">' + job.title + '</div>' +
-                    '<div class="job-company">' + (job.company_name || 'Privat') + ' • ' + (job.city || 'Remote') + '</div>' +
-                    '<div class="job-tags"><span class="job-tag">' + jobType + '</span><span class="job-tag">🕐 ' + (job.min_hours_per_week || 10) + 'h</span></div>' +
-                    '<div class="job-salary">' + salary + '</div>' +
+                    '<div class="job-title">' + esc(job.title) + '</div>' +
+                    '<div class="job-company">' + esc(job.company_name || 'Privat') + ' • ' + esc(job.city || 'Remote') + '</div>' +
+                    '<div class="job-tags"><span class="job-tag">' + esc(jobType) + '</span><span class="job-tag">🕐 ' + esc(job.min_hours_per_week || 10) + 'h</span></div>' +
+                    '<div class="job-salary">' + esc(salary) + '</div>' +
                 '</div>' +
             '</div>';
     }
@@ -617,6 +617,7 @@
             .select('*, listing_photos(storage_path)')
             .eq('type', 'job')
             .eq('is_active', true)
+            .eq('is_test', false)
             .order('created_at', { ascending: false })
             .then(function(res) {
                 console.log("Jobs geladen:", res);

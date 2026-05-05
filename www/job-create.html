@@ -149,7 +149,6 @@
 <script>
     // Supabase Client - Direkte Initialisierung
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const ADMIN_EMAIL = 'albayrak_yusuf@icloud.com';
 
     function navigateTo(url) {
         try { window.location.href = url; } catch(e) { console.warn("Nav Error:", e); }
@@ -157,7 +156,9 @@
 
     async function checkAdmin() {
         const { data: { user } } = await sb.auth.getUser();
-        if (!user || user.email !== ADMIN_EMAIL) { navigateTo('dashboard.html'); }
+        if (!user) { navigateTo('login.html'); return null; }
+        const { data: profile, error } = await sb.from('profiles').select('is_admin').eq('id', user.id).maybeSingle();
+        if (error || !profile || profile.is_admin !== true) { navigateTo('dashboard.html'); return null; }
         return user;
     }
 
@@ -291,6 +292,7 @@
     document.getElementById('createJobForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const user = await checkAdmin();
+        if (!user) return;
         const btn = e.target.querySelector('button');
         btn.textContent = 'Speichere...'; btn.disabled = true;
 

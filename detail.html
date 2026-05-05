@@ -994,13 +994,12 @@
             reportSubmitBtn.disabled = true;
             reportSubmitBtn.textContent = 'Wird gesendet...';
 
-            return sb.from('reports').insert({
-                reporter_id: user.id,
-                reported_type: 'listing',
-                reported_id: currentReportListingId,
-                reason: reason,
-                description: description || null,
-                status: 'open'
+            // RPC report_content erzwingt Anti-Trolling Rate-Limit (5/h, 30/d).
+            return sb.rpc('report_content', {
+                p_target_type: 'listing',
+                p_target_id: String(currentReportListingId),
+                p_reason: reason,
+                p_message: description || null
             });
         }).then(function(result) {
             if (result && result.error) throw result.error;

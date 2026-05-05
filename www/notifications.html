@@ -97,12 +97,17 @@
             font-size: 1.1rem;
         }
 
-        /* Icon Farben */
-        .type-chat { background: #EFF6FF; color: #3B82F6; }
-        .type-review { background: #FFFBEB; color: #F59E0B; }
-        .type-favorite { background: #FEF2F2; color: #EF4444; }
-        .type-search { background: #F0FDF4; color: #16A34A; }
-        .type-info { background: #F3F4F6; color: #6B7280; }
+        /* Icon Farben — fuer ALLE Notification-Typen farbig */
+        .type-chat { background: linear-gradient(135deg, #DBEAFE, #BFDBFE); color: #1E40AF; }
+        .type-review { background: linear-gradient(135deg, #FEF3C7, #FDE68A); color: #92400E; }
+        .type-favorite { background: linear-gradient(135deg, #FEE2E2, #FECACA); color: #991B1B; }
+        .type-search { background: linear-gradient(135deg, #DCFCE7, #BBF7D0); color: #166534; }
+        .type-listing { background: linear-gradient(135deg, #DBEAFE, #93C5FD); color: #1E40AF; }
+        .type-job { background: linear-gradient(135deg, #DBEAFE, #BFDBFE); color: #2563EB; }
+        .type-coupon { background: linear-gradient(135deg, #FED7AA, #FDBA74); color: #9A3412; }
+        .type-event { background: linear-gradient(135deg, #CCFBF1, #99F6E4); color: #115E59; }
+        .type-interest { background: linear-gradient(135deg, #FCE7F3, #FBCFE8); color: #9D174D; }
+        .type-info { background: linear-gradient(135deg, #DBEAFE, #BFDBFE); color: #1E40AF; }
 
         .notif-content { flex: 1; min-width: 0; }
 
@@ -278,24 +283,29 @@
     function createNotificationItem(n) {
         const item = document.createElement('div');
         item.className = `notification-item ${n.is_read ? '' : 'unread'}`;
-        
-        // Icon & Style bestimmen
-        let icon = 'ℹ️';
-        let typeClass = 'type-info';
-        
-        if (n.type === 'chat_message') { icon = '💬'; typeClass = 'type-chat'; }
-        else if (n.type === 'review') { icon = '⭐'; typeClass = 'type-review'; }
-        else if (n.type === 'favorite') { icon = '❤️'; typeClass = 'type-favorite'; }
-        else if (n.type === 'search_match') { icon = '🔔'; typeClass = 'type-search'; }
 
-        // Zeit formatieren (z.B. "vor 5 Min")
+        // Icon + Color je nach Type
+        const typeMap = {
+            'chat_message':       { icon: '💬', cls: 'type-chat' },
+            'review':             { icon: '⭐', cls: 'type-review' },
+            'favorite':           { icon: '❤️', cls: 'type-favorite' },
+            'interest':           { icon: '🔥', cls: 'type-interest' },
+            'search_match':       { icon: '🔍', cls: 'type-search' },
+            'saved_search_match': { icon: '🔍', cls: 'type-search' },
+            'new_listing_city':   { icon: '🏠', cls: 'type-listing' },
+            'new_job_city':       { icon: '💼', cls: 'type-job' },
+            'new_coupon_city':    { icon: '🎟️', cls: 'type-coupon' },
+            'new_event_city':     { icon: '🎉', cls: 'type-event' }
+        };
+        const meta = typeMap[n.type] || { icon: '🔔', cls: 'type-info' };
+
         const timeStr = timeAgo(n.created_at);
 
         item.innerHTML = `
-            <div class="notif-icon ${typeClass}">${icon}</div>
+            <div class="notif-icon ${meta.cls}">${meta.icon}</div>
             <div class="notif-content">
-                <div class="notif-title">${escapeHtml(n.title)}</div>
-                <p class="notif-message">${escapeHtml(n.message)}</p>
+                <div class="notif-title">${escapeHtml(n.title || 'Mitteilung')}</div>
+                <p class="notif-message">${escapeHtml(n.message || '')}</p>
                 <div class="notif-time">${timeStr}</div>
             </div>
         `;
@@ -307,6 +317,9 @@
                 item.classList.remove('unread');
                 await sb.from('notifications').update({ is_read: true }).eq('id', n.id);
                 n.is_read = true;
+                // Badges sofort refreshen (Bell + iOS App-Icon)
+                if (window.NotificationBell && window.NotificationBell.refresh) window.NotificationBell.refresh();
+                if (window.updateAppBadge) window.updateAppBadge();
             }
 
             // 2. Navigate - mit Fallback für Review-Notifications
@@ -337,6 +350,9 @@
             // Lokal alle auf gelesen setzen
             allNotifications.forEach(n => n.is_read = true);
             renderNotifications();
+            // Badges sofort refreshen (Bell + iOS App-Icon)
+            if (window.NotificationBell && window.NotificationBell.refresh) window.NotificationBell.refresh();
+            if (window.updateAppBadge) window.updateAppBadge();
         }
     }
 

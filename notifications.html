@@ -5,63 +5,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Benachrichtigungen - Room8</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
     <style>
-        /* Spezifische Styles für Benachrichtigungen */
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0px); transform: translateY(0); }
+        }
+
         .notifications-list {
             padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px);
         }
 
+        /* Pattern: Kibo UI Pill fuer Filter-Tabs */
         .filter-tabs {
             display: flex;
-            gap: 0.5rem;
-            padding: 1rem 1rem 0.5rem 1rem;
+            gap: 0.4rem;
+            padding: 0.75rem 1rem;
             background: #fff;
             overflow-x: auto;
-            border-bottom: 1px solid var(--border-color);
-            scrollbar-width: none; /* Firefox */
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            scrollbar-width: none;
         }
         .filter-tabs::-webkit-scrollbar { display: none; }
 
         .filter-tab {
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            background: #F9FAFB;
+            padding: 0.4rem 0.85rem;
+            border-radius: 999px;
+            border: 1.5px solid rgba(0,0,0,0.06);
+            background: white;
             color: var(--text-muted);
-            font-size: 0.8rem;
-            font-weight: 500;
+            font-size: 0.78rem;
+            font-weight: 600;
             white-space: nowrap;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .filter-tab.active {
-            background: var(--primary-color);
+            background: #3B82F6;
             color: white;
-            border-color: var(--primary-color);
-            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+            border-color: #3B82F6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
         }
 
+        /* Pattern: Magic UI MagicCard / Glasmorphismus */
         .notification-item {
-            background: white;
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.92);
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
             display: flex;
-            gap: 1rem;
+            gap: 0.85rem;
             align-items: flex-start;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
         }
 
         .notification-item:active {
-            background: #F3F4F6;
+            background: #FAFAFA;
         }
 
         .notification-item.unread {
-            background: #EFF6FF; /* Hellblau */
+            background: rgba(239,246,255,0.7);
         }
+        /* Unread-Dot blau mit Glow */
         .notification-item.unread::after {
             content: '';
             position: absolute;
@@ -69,39 +81,46 @@
             right: 1rem;
             width: 8px;
             height: 8px;
-            background: #EF4444;
+            background: #3B82F6;
             border-radius: 50%;
+            box-shadow: 0 0 6px rgba(59,130,246,0.5);
         }
 
         .notif-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
 
-        /* Icon Farben */
-        .type-chat { background: #F2F2F0; color: #3B82F6; }
-        .type-review { background: #FFFBEB; color: #F59E0B; }
-        .type-favorite { background: #FEF2F2; color: #EF4444; }
-        .type-search { background: #F0FDF4; color: #16A34A; }
-        .type-info { background: #F3F4F6; color: #6B7280; }
+        /* Icon Farben — fuer ALLE Notification-Typen farbig */
+        .type-chat { background: linear-gradient(135deg, #DBEAFE, #BFDBFE); color: #1E40AF; }
+        .type-review { background: linear-gradient(135deg, #FEF3C7, #FDE68A); color: #92400E; }
+        .type-favorite { background: linear-gradient(135deg, #FEE2E2, #FECACA); color: #991B1B; }
+        .type-search { background: linear-gradient(135deg, #DCFCE7, #BBF7D0); color: #166534; }
+        .type-listing { background: linear-gradient(135deg, #DBEAFE, #93C5FD); color: #1E40AF; }
+        .type-job { background: linear-gradient(135deg, #DBEAFE, #BFDBFE); color: #2563EB; }
+        .type-coupon { background: linear-gradient(135deg, #FED7AA, #FDBA74); color: #9A3412; }
+        .type-event { background: linear-gradient(135deg, #CCFBF1, #99F6E4); color: #115E59; }
+        .type-interest { background: linear-gradient(135deg, #FCE7F3, #FBCFE8); color: #9D174D; }
+        .type-info { background: linear-gradient(135deg, #DBEAFE, #BFDBFE); color: #1E40AF; }
 
         .notif-content { flex: 1; min-width: 0; }
-        
+
         .notif-title {
-            font-weight: 600;
-            font-size: 0.95rem;
-            margin: 0 0 0.25rem 0;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin: 0 0 0.15rem 0;
             color: var(--text-main);
+            letter-spacing: -0.01em;
         }
 
         .notif-message {
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             color: var(--text-muted);
             line-height: 1.4;
             margin: 0;
@@ -113,9 +132,9 @@
         }
 
         .notif-time {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-light);
-            margin-top: 0.5rem;
+            margin-top: 0.35rem;
         }
 
         .empty-state {
@@ -126,17 +145,22 @@
             padding: 4rem 1.5rem;
             text-align: center;
             color: var(--text-muted);
+            animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
         }
-        .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+        .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
 
         .mark-read-btn {
             background: none;
             border: none;
-            color: var(--primary-color);
-            font-size: 0.85rem;
-            font-weight: 600;
+            color: #3B82F6;
+            font-size: 0.82rem;
+            font-weight: 700;
             cursor: pointer;
             padding: 0.5rem;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .empty-state { animation: none; opacity: 1; }
         }
     </style>
 </head>
@@ -162,7 +186,11 @@
 
     <main class="app-content" style="padding: 0;">
         <div class="notifications-list" id="notifList">
-            <div style="padding: 2rem; text-align: center; color: var(--text-muted);">Lade...</div>
+            <div style="padding: 0;">
+                <div style="display:flex;gap:0.85rem;align-items:flex-start;padding:0.85rem 1rem;border-bottom:1px solid rgba(0,0,0,0.04);"><div class="skeleton" style="width:38px;height:38px;border-radius:12px;flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="width:50%;height:13px;margin-bottom:6px;border-radius:6px;"></div><div class="skeleton" style="width:80%;height:11px;margin-bottom:6px;border-radius:6px;"></div><div class="skeleton" style="width:25%;height:10px;border-radius:6px;"></div></div></div>
+                <div style="display:flex;gap:0.85rem;align-items:flex-start;padding:0.85rem 1rem;border-bottom:1px solid rgba(0,0,0,0.04);"><div class="skeleton" style="width:38px;height:38px;border-radius:12px;flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="width:40%;height:13px;margin-bottom:6px;border-radius:6px;"></div><div class="skeleton" style="width:65%;height:11px;margin-bottom:6px;border-radius:6px;"></div><div class="skeleton" style="width:30%;height:10px;border-radius:6px;"></div></div></div>
+                <div style="display:flex;gap:0.85rem;align-items:flex-start;padding:0.85rem 1rem;"><div class="skeleton" style="width:38px;height:38px;border-radius:12px;flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="width:55%;height:13px;margin-bottom:6px;border-radius:6px;"></div><div class="skeleton" style="width:70%;height:11px;margin-bottom:6px;border-radius:6px;"></div><div class="skeleton" style="width:20%;height:10px;border-radius:6px;"></div></div></div>
+            </div>
         </div>
     </main>
 
@@ -173,6 +201,7 @@
 <script src="config.js"></script>
 <script src="translations.js"></script>
 <script src="session-cache.js"></script>
+<script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <!-- No notificationBell.js on this page - we're already on notifications -->
 <script>
@@ -254,24 +283,29 @@
     function createNotificationItem(n) {
         const item = document.createElement('div');
         item.className = `notification-item ${n.is_read ? '' : 'unread'}`;
-        
-        // Icon & Style bestimmen
-        let icon = 'ℹ️';
-        let typeClass = 'type-info';
-        
-        if (n.type === 'chat_message') { icon = '💬'; typeClass = 'type-chat'; }
-        else if (n.type === 'review') { icon = '⭐'; typeClass = 'type-review'; }
-        else if (n.type === 'favorite') { icon = '❤️'; typeClass = 'type-favorite'; }
-        else if (n.type === 'search_match') { icon = '🔔'; typeClass = 'type-search'; }
 
-        // Zeit formatieren (z.B. "vor 5 Min")
+        // Icon + Color je nach Type
+        const typeMap = {
+            'chat_message':       { icon: '💬', cls: 'type-chat' },
+            'review':             { icon: '⭐', cls: 'type-review' },
+            'favorite':           { icon: '❤️', cls: 'type-favorite' },
+            'interest':           { icon: '🔥', cls: 'type-interest' },
+            'search_match':       { icon: '🔍', cls: 'type-search' },
+            'saved_search_match': { icon: '🔍', cls: 'type-search' },
+            'new_listing_city':   { icon: '🏠', cls: 'type-listing' },
+            'new_job_city':       { icon: '💼', cls: 'type-job' },
+            'new_coupon_city':    { icon: '🎟️', cls: 'type-coupon' },
+            'new_event_city':     { icon: '🎉', cls: 'type-event' }
+        };
+        const meta = typeMap[n.type] || { icon: '🔔', cls: 'type-info' };
+
         const timeStr = timeAgo(n.created_at);
 
         item.innerHTML = `
-            <div class="notif-icon ${typeClass}">${icon}</div>
+            <div class="notif-icon ${meta.cls}">${meta.icon}</div>
             <div class="notif-content">
-                <div class="notif-title">${escapeHtml(n.title)}</div>
-                <p class="notif-message">${escapeHtml(n.message)}</p>
+                <div class="notif-title">${escapeHtml(n.title || 'Mitteilung')}</div>
+                <p class="notif-message">${escapeHtml(n.message || '')}</p>
                 <div class="notif-time">${timeStr}</div>
             </div>
         `;
@@ -283,6 +317,9 @@
                 item.classList.remove('unread');
                 await sb.from('notifications').update({ is_read: true }).eq('id', n.id);
                 n.is_read = true;
+                // Badges sofort refreshen (Bell + iOS App-Icon)
+                if (window.NotificationBell && window.NotificationBell.refresh) window.NotificationBell.refresh();
+                if (window.updateAppBadge) window.updateAppBadge();
             }
 
             // 2. Navigate - mit Fallback für Review-Notifications
@@ -313,6 +350,9 @@
             // Lokal alle auf gelesen setzen
             allNotifications.forEach(n => n.is_read = true);
             renderNotifications();
+            // Badges sofort refreshen (Bell + iOS App-Icon)
+            if (window.NotificationBell && window.NotificationBell.refresh) window.NotificationBell.refresh();
+            if (window.updateAppBadge) window.updateAppBadge();
         }
     }
 

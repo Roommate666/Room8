@@ -319,9 +319,6 @@
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
 <script>
-    // DEINE ADMIN E-MAIL
-    var ADMIN_EMAIL = 'albayrak_yusuf@icloud.com';
-
     // Init
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -344,21 +341,19 @@
             return;
         }
 
-        // ============================================
-        // ADMIN CHECK - Zeigt Admin-Bereich nur für dich
-        // ============================================
-        if (user.email === ADMIN_EMAIL) {
-            document.getElementById('adminSection').classList.add('visible');
-        }
-
-        // Profil laden
+        // Profil laden (inklusive is_admin fuer Admin-Bereich)
         var profileResult = await sb
             .from('profiles')
-            .select('username, email, full_name, avatar_url')
+            .select('username, email, full_name, avatar_url, is_admin')
             .eq('id', user.id)
             .single();
 
         var profile = profileResult.data;
+
+        // ADMIN CHECK via profiles.is_admin (NICHT Email-String)
+        if (profile && profile.is_admin === true) {
+            document.getElementById('adminSection').classList.add('visible');
+        }
 
         if (profile) {
             var displayName = profile.full_name || profile.username || 'Benutzer';

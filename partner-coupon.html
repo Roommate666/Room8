@@ -5,8 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Coupon einreichen - Room8 Partner</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
     <style>
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
         body {
             background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
             min-height: 100vh;
@@ -21,10 +30,13 @@
             text-align: center;
             color: white;
             padding: 2rem 1rem;
+            animation: blurFadeIn 0.5s ease-out both;
         }
         .partner-header h1 {
             font-size: 1.8rem;
             margin: 0 0 0.5rem 0;
+            font-weight: 800;
+            letter-spacing: -0.02em;
         }
         .partner-header p {
             opacity: 0.9;
@@ -34,11 +46,14 @@
             font-size: 3rem;
             margin-bottom: 1rem;
         }
+        /* Glasmorphismus Card */
         .form-card {
-            background: white;
-            border-radius: 20px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
             padding: 2rem;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(255,255,255,0.3);
+            animation: blurFadeIn 0.5s 0.15s ease-out both;
         }
         .section-title {
             font-size: 1.1rem;
@@ -96,23 +111,26 @@
         @media (max-width: 500px) {
             .row { grid-template-columns: 1fr; }
         }
+        /* Kibo UI Pill */
         .submit-btn {
             width: 100%;
             padding: 1rem;
             background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
             color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 999px;
             font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
             margin-top: 1.5rem;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
         }
         .submit-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(245, 158, 11, 0.4);
         }
+        .submit-btn:active { transform: scale(0.97); }
         .submit-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -158,6 +176,10 @@
         .discount-preview .label {
             font-size: 0.85rem;
             color: #92400E;
+        }
+        /* Barrierefreiheit */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
     </style>
 </head>
@@ -233,8 +255,11 @@
             </div>
 
             <div class="form-group">
-                <label>Beschreibung <span class="required">*</span></label>
-                <textarea id="description" required placeholder="Beschreibe das Angebot genauer..."></textarea>
+                <label style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>Beschreibung <span class="required">*</span></span>
+                    <button type="button" id="polishBtn" style="background:linear-gradient(135deg,#8B5CF6,#6366F1); color:white; border:none; padding:0.35rem 0.75rem; border-radius:999px; font-size:0.75rem; font-weight:700; cursor:pointer;">🪄 Mit AI verbessern</button>
+                </label>
+                <textarea id="description" required placeholder="Beschreibe das Angebot — Stichpunkte reichen, AI macht daraus fluessigen Text"></textarea>
             </div>
 
             <div class="form-group">
@@ -289,6 +314,20 @@
                 </div>
             </div>
 
+            <div class="form-group">
+                <label>Logo <span class="required">*</span></label>
+                <input type="file" id="logoImage" accept="image/*" required>
+                <small>Dein Geschaefts-Logo. Wird automatisch auf quadratisch gecroppt — leg's mittig im Bild aus. Max 5 MB.</small>
+                <div id="logoPreview" style="margin-top:0.5rem; display:none;"><img id="logoPreviewImg" style="max-width:120px; max-height:120px; border-radius:8px;"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Cover-Bild <span class="required">*</span></label>
+                <input type="file" id="coverImage" accept="image/*" required>
+                <small>Foto vom Geschaeft / Produkt. Wird automatisch auf 16:9 gecroppt — leg das Wichtigste mittig. Max 5 MB.</small>
+                <div id="coverPreview" style="margin-top:0.5rem; display:none;"><img id="coverPreviewImg" style="max-width:100%; max-height:200px; border-radius:8px;"></div>
+            </div>
+
             <button type="submit" class="submit-btn" id="submitBtn">🎟️ Coupon einreichen</button>
         </form>
 
@@ -300,10 +339,77 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
+<script src="room8-ui.js"></script>
+<script src="image-validator.js"></script>
 <script>
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // AI Polish-Button
+    document.getElementById('polishBtn').addEventListener('click', async function() {
+        var btn = this;
+        var ta = document.getElementById('description');
+        var orig = ta.value.trim();
+        if (orig.length < 5) { alert('Schreib erst ein paar Stichpunkte oder Saetze.'); return; }
+        if (orig.length > 2000) { alert('Text zu lang (max 2000 Zeichen).'); return; }
+        var oldText = btn.innerHTML;
+        btn.innerHTML = '⏳ Verbessere...'; btn.disabled = true;
+        try {
+            var businessName = document.getElementById('businessName').value || '';
+            var category = document.getElementById('category').value || '';
+            var resp = await fetch(SUPABASE_URL + '/functions/v1/polish-text', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+                body: JSON.stringify({ text: orig, type: 'coupon', context: 'Geschaeft: ' + businessName + ', Kategorie: ' + category })
+            });
+            var j = await resp.json();
+            if (j.polished) {
+                if (confirm('AI-Vorschlag uebernehmen?\n\n' + j.polished)) {
+                    ta.value = j.polished;
+                }
+            } else {
+                alert('Fehler: ' + (j.error || 'Unbekannt'));
+            }
+        } catch (e) {
+            alert('Fehler: ' + e.message);
+        } finally {
+            btn.innerHTML = oldText; btn.disabled = false;
+        }
+    });
+
+    function setupImagePreview(inputId, previewId, imgId) {
+        document.getElementById(inputId).addEventListener('change', function(e) {
+            var f = e.target.files[0];
+            if (f && f.size > 5 * 1024 * 1024) { alert('Bild zu gross (max 5 MB)'); this.value=''; return; }
+            if (f) {
+                var r = new FileReader();
+                r.onload = function(ev) {
+                    document.getElementById(imgId).src = ev.target.result;
+                    document.getElementById(previewId).style.display = 'block';
+                };
+                r.readAsDataURL(f);
+            }
+        });
+    }
+    setupImagePreview('logoImage', 'logoPreview', 'logoPreviewImg');
+    setupImagePreview('coverImage', 'coverPreview', 'coverPreviewImg');
+
+    async function uploadImage(file, prefix, aspect) {
+        // Validate + Auto-Crop auf gewuenschtes Aspect-Ratio
+        var blob = await Room8ImageValidator.validateAndCropImage(file, {
+            aspect: aspect,
+            maxWidth: aspect === 'square' ? 800 : 1920,
+            quality: 0.85
+        });
+        var ext = blob.type === 'image/png' ? 'png' : 'jpg';
+        var path = 'partner-uploads/' + prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,8) + '.' + ext;
+        var up = await sb.storage.from('event-images').upload(path, blob, { contentType: blob.type, upsert: false });
+        if (up.error) throw up.error;
+        return path;
+    }
 
     document.getElementById('couponForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -312,6 +418,13 @@
         btn.textContent = 'Wird gesendet...';
 
         try {
+            var logoFile = document.getElementById('logoImage').files[0];
+            var coverFile = document.getElementById('coverImage').files[0];
+            if (!logoFile) throw new Error('Bitte ein Logo hochladen.');
+            if (!coverFile) throw new Error('Bitte ein Cover-Bild hochladen.');
+            var logoPath = await uploadImage(logoFile, 'coupon_logo', 'square');
+            var coverPath = await uploadImage(coverFile, 'coupon_cover', '16:9');
+
             const data = {
                 submission_type: 'coupon',
                 status: 'pending',
@@ -331,6 +444,8 @@
                 website: document.getElementById('website').value || null,
                 phone: document.getElementById('phone').value || null,
                 opening_hours: document.getElementById('openingHours').value || null,
+                logo_image_path: logoPath,
+                cover_image_path: coverPath,
                 submitted_at: new Date().toISOString()
             };
 
@@ -342,7 +457,7 @@
 
         } catch (err) {
             console.error(err);
-            Room8UI.error('Einreichung fehlgeschlagen. Bitte versuche es erneut.');
+            Room8UI.error('Fehler beim Einreichen: ' + err.message);
             btn.disabled = false;
             btn.textContent = '🎟️ Coupon einreichen';
         }

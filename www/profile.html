@@ -205,6 +205,9 @@
 
 <div class="app-container">
     <header class="app-header" style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+        <a href="javascript:void(0)" onclick="goBackFromProfile()" id="profileBackBtn" style="display:flex; align-items:center; justify-content:center; width:36px; height:36px; background:white; border-radius:50%; color:#3B82F6; text-decoration:none; box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
         <h1 data-i18n="profile_title" style="margin: 0; flex-shrink: 0; font-size: 1.25rem; color: #3B82F6;">Mein Profil</h1>
         <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
             <!-- Notification Bell -->
@@ -243,6 +246,21 @@
             <div class="profile-actions">
                 <a href="edit-profile.html" class="profile-btn" data-i18n="profile_edit">Profil bearbeiten</a>
                 <a href="#" id="public-profile-link-text" class="profile-btn secondary" data-i18n="profile_public">Öffentliches Profil</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODE-SWITCHER (nur fuer Partner-User sichtbar) -->
+    <div id="modeSwitcher" style="display:none; padding: 1rem 1.5rem; background:white; border-bottom:1px solid var(--border-color);">
+        <div style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border-radius:12px; padding: 1rem; border:2px solid #BFDBFE;">
+            <div style="font-size:0.75rem; font-weight:700; color:#1D4ED8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.6rem;">Konto-Ansicht wechseln</div>
+            <div style="display:flex; gap:0.5rem;">
+                <a href="partner-dashboard.html" style="flex:1; text-align:center; padding:0.7rem; background:#3B82F6; color:white; border-radius:10px; text-decoration:none; font-weight:600; font-size:0.85rem; box-shadow:0 2px 8px rgba(59,130,246,0.3);">
+                    🏪 Partner-Ansicht
+                </a>
+                <a href="dashboard.html" style="flex:1; text-align:center; padding:0.7rem; background:white; color:#3B82F6; border-radius:10px; text-decoration:none; font-weight:600; font-size:0.85rem; border:1.5px solid #3B82F6;">
+                    🎓 Studenten-Ansicht
+                </a>
             </div>
         </div>
     </div>
@@ -431,32 +449,83 @@
         if (listing.listing_mode === 'search') { placeholderIcon = '🔍'; placeholderLabel = 'Suchinserat'; }
 
         var editPage = listing.type === 'wohnung' ? 'wohnung.html' : 'gegenstand.html';
-        var editUrl = editPage + '?id=' + listing.id;
 
-        var imageHtml = imageUrl
-            ? `<img src="${imageUrl}" alt="${escapeHtml(listing.title)}" onerror="this.outerHTML='<div style=\\'height:160px;display:flex;align-items:center;justify-content:center;background:#EBEBEB;\\'><div style=\\'text-align:center;color:#929292;\\'><div style=\\'font-size:2rem;\\'>${placeholderIcon}</div><div style=\\'font-size:0.7rem;font-weight:600;color:#929292;\\'>${placeholderLabel}</div></div></div>'">`
-            : `<div style="height:160px;display:flex;align-items:center;justify-content:center;background:#EBEBEB;"><div style="text-align:center;color:#929292;"><div style="font-size:2rem;">${placeholderIcon}</div><div style="font-size:0.7rem;font-weight:600;color:#929292;">${placeholderLabel}</div></div></div>`;
+        // B9-Fix: Card per createElement bauen statt verschachtelter onerror-Strings.
+        // URL-Sanitize gegen javascript:/data: + Apostroph-Injection.
+        function safeImg(url) {
+            if (!url) return '';
+            var lower = String(url).toLowerCase().trim();
+            if (lower.indexOf('javascript:') === 0 || lower.indexOf('data:text') === 0
+                || lower.indexOf('vbscript:') === 0) return '';
+            try { return encodeURI(url); } catch (_) { return ''; }
+        }
 
-        card.innerHTML = `
-            <a href="javascript:void(0)" onclick="navigateTo('detail.html?id=${listing.id}')" class="card-image-link">
-                ${imageHtml}
-            </a>
-            <div class="card-content">
-                <h4>${escapeHtml(listing.title)}</h4>
-                <p class="card-meta">${escapeHtml(listing.city) || 'N/A'} - ${escapeHtml(listing.type)}</p>
-                <div class="card-actions">
-                    <button class="btn-small btn-edit" onclick="navigateTo('${editUrl}')">Bearbeiten</button>
-                    <button class="btn-small btn-delete">Löschen</button>
-                </div>
-            </div>`;
-        
-        card.querySelector('.btn-delete').addEventListener('click', function(e) {
-            e.stopPropagation();
-            var id = card.dataset.listingId;
-            console.log("Delete button clicked, ID from data-attr:", id);
-            openDeleteModal(id, card);
+        function buildPlaceholder() {
+            var ph = document.createElement('div');
+            ph.style.cssText = 'height:160px;display:flex;align-items:center;justify-content:center;background:#EBEBEB;';
+            var inner = document.createElement('div');
+            inner.style.cssText = 'text-align:center;color:#929292;';
+            var icon = document.createElement('div');
+            icon.style.cssText = 'font-size:2rem;';
+            icon.textContent = placeholderIcon;
+            var label = document.createElement('div');
+            label.style.cssText = 'font-size:0.7rem;font-weight:600;color:#929292;';
+            label.textContent = placeholderLabel;
+            inner.appendChild(icon); inner.appendChild(label);
+            ph.appendChild(inner);
+            return ph;
+        }
+
+        var imageLink = document.createElement('a');
+        imageLink.href = 'javascript:void(0)';
+        imageLink.className = 'card-image-link';
+        imageLink.addEventListener('click', function() {
+            navigateTo('detail.html?id=' + encodeURIComponent(String(listing.id)));
         });
-        
+
+        if (imageUrl) {
+            var img = document.createElement('img');
+            img.src = safeImg(imageUrl);
+            img.alt = listing.title || '';
+            img.addEventListener('error', function() {
+                img.replaceWith(buildPlaceholder());
+            });
+            imageLink.appendChild(img);
+        } else {
+            imageLink.appendChild(buildPlaceholder());
+        }
+
+        var content = document.createElement('div');
+        content.className = 'card-content';
+        var h4 = document.createElement('h4');
+        h4.textContent = listing.title || '';
+        var meta = document.createElement('p');
+        meta.className = 'card-meta';
+        meta.textContent = (listing.city || 'N/A') + ' - ' + (listing.type || '');
+        var actions = document.createElement('div');
+        actions.className = 'card-actions';
+        var editBtn = document.createElement('button');
+        editBtn.className = 'btn-small btn-edit';
+        editBtn.textContent = 'Bearbeiten';
+        editBtn.addEventListener('click', function() {
+            navigateTo(editPage + '?id=' + encodeURIComponent(String(listing.id)));
+        });
+        var deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn-small btn-delete';
+        deleteBtn.textContent = 'Löschen';
+        deleteBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openDeleteModal(card.dataset.listingId, card);
+        });
+        actions.appendChild(editBtn);
+        actions.appendChild(deleteBtn);
+        content.appendChild(h4);
+        content.appendChild(meta);
+        content.appendChild(actions);
+
+        card.appendChild(imageLink);
+        card.appendChild(content);
+
         return card;
     }
 
@@ -570,6 +639,35 @@
     }
 
     document.addEventListener('DOMContentLoaded', initProfile);
+</script>
+<script>
+    // Back-Button: history.back wenn moeglich, sonst zum richtigen Dashboard
+    function goBackFromProfile() {
+        var params = new URLSearchParams(window.location.search);
+        var fromPartner = params.get('from') === 'partner';
+        if (fromPartner) {
+            window.location.href = 'partner-dashboard.html';
+            return;
+        }
+        if (window.history && window.history.length > 1) {
+            window.history.back();
+        } else {
+            window.location.href = 'dashboard.html';
+        }
+    }
+
+    // Mode-Switcher (Partner <-> Student) sichtbar machen wenn user is_partner
+    (function() {
+        if (typeof sb === 'undefined') return;
+        sb.auth.getUser().then(function(res) {
+            if (!res || !res.data || !res.data.user) return;
+            return sb.from('profiles').select('is_partner').eq('id', res.data.user.id).maybeSingle();
+        }).then(function(r) {
+            if (!r || !r.data || !r.data.is_partner) return;
+            var box = document.getElementById('modeSwitcher');
+            if (box) box.style.display = 'block';
+        }).catch(function() {});
+    })();
 </script>
 </body>
 </html>

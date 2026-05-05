@@ -3,20 +3,38 @@ apply plugin: 'com.android.application'
 android {
     namespace "club.room8.app"
     compileSdk rootProject.ext.compileSdkVersion
-    signingConfigs {
-        release {
-            storeFile file('C:\\Dev\\keys\\room8-release.jks')
-            storePassword 'Albayrak8Para$'
-            keyAlias 'room8'
-            keyPassword 'Albayrak8Para$'
+
+    // Release-Keystore: Windows-Pfad fuer Yusufs Win-Rechner ODER Mac-Pfad
+    // ODER Env-Variable. Block wird uebersprungen wenn Keystore nicht da ist
+    // — Debug-Builds funktionieren auch ohne.
+    def keystorePath = System.getenv("ROOM8_KEYSTORE") ?: "${System.getProperty('user.home')}/keys/room8-release.jks"
+    def keystoreFile = file(keystorePath)
+    def hasReleaseKeystore = keystoreFile.exists()
+    if (hasReleaseKeystore) {
+        // Passwoerter aus ~/.gradle/gradle.properties (user-scoped) ODER env vars.
+        // NICHT mehr im Repo gehardcodet.
+        def storePwd = project.findProperty('ROOM8_STORE_PASSWORD') ?: System.getenv('ROOM8_STORE_PASSWORD')
+        def keyPwd = project.findProperty('ROOM8_KEY_PASSWORD') ?: System.getenv('ROOM8_KEY_PASSWORD')
+        if (storePwd && keyPwd) {
+            signingConfigs {
+                release {
+                    storeFile keystoreFile
+                    storePassword storePwd
+                    keyAlias 'room8'
+                    keyPassword keyPwd
+                }
+            }
+        } else {
+            logger.warn("Release-Keystore vorhanden aber ROOM8_STORE_PASSWORD/ROOM8_KEY_PASSWORD fehlen. Build wird unsigned.")
         }
     }
+
     defaultConfig {
         applicationId "club.room8.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 36
-        versionName "2.1.0"
+        versionCode 37
+        versionName "2.1.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -26,7 +44,9 @@ android {
     }
     buildTypes {
         release {
-            signingConfig signingConfigs.release
+            if (signingConfigs.findByName('release') != null) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

@@ -157,7 +157,7 @@
 
     async function checkAdmin() {
         const { data: { user } } = await sb.auth.getUser();
-        if (!user || user.email !== ADMIN_EMAIL) { navigateTo('dashboard.html'); }
+        if (!user || user.email !== ADMIN_EMAIL) { navigateTo('dashboard.html'); return null; }
         return user;
     }
 
@@ -291,6 +291,7 @@
     document.getElementById('createJobForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const user = await checkAdmin();
+        if (!user) return;
         const btn = e.target.querySelector('button');
         btn.textContent = 'Speichere...'; btn.disabled = true;
 

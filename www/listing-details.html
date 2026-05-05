@@ -1688,22 +1688,33 @@
             btn.disabled = true;
             btn.textContent = tr('detail_report_sending');
             var desc = document.getElementById('reportDescription').value.trim();
-            var reason = selectedReportReason + (desc ? ' - ' + desc : '');
-            sb.from('reports').insert({
-                reporter_id: currentUserId,
-                reported_type: 'listing',
-                reported_id: listingId,
-                reason: reason,
-                status: 'open'
+            // RPC report_content erzwingt Anti-Trolling Rate-Limit (5/h, 30/d).
+            // Reason-Label kommt als 'reason', User-Kommentar als 'message'.
+            sb.rpc('report_content', {
+                p_target_type: 'listing',
+                p_target_id: String(listingId),
+                p_reason: selectedReportReason,
+                p_message: desc || null
             }).then(function(result) {
                 if (result.error) {
-                    Room8UI.error(tr('detail_report_sent_error'));
+                    var msg = result.error.message || '';
+                    if (msg.indexOf('Zu viele') !== -1 || msg.indexOf('Tageslimit') !== -1) {
+                        Room8UI.warning(msg);
+                    } else {
+                        Room8UI.error(tr('detail_report_sent_error'));
+                    }
                     btn.disabled = false;
                     btn.textContent = tr('detail_report_submit');
                 } else {
                     Room8UI.success(tr('detail_report_sent_success'));
                     closeReportModal();
                 }
+            }).catch(function(err) {
+                // Netzwerk-Fehler darf den Button nicht dauerhaft disabled lassen.
+                console.error('report_content RPC failed:', err);
+                Room8UI.error(tr('detail_report_sent_error'));
+                btn.disabled = false;
+                btn.textContent = tr('detail_report_submit');
             });
         });
     })();

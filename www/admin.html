@@ -451,6 +451,8 @@
             <button class="filter-btn" onclick="filterPushHealth(720, this)">Letzte 30 Tage</button>
             <button onclick="loadPushHealth(currentPushHealthHours)" style="margin-left:auto; padding:0.5rem 0.875rem; background:#0EA5E9; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">🔄 Refresh</button>
             <button onclick="testSentry()" style="padding:0.5rem 0.875rem; background:#7C3AED; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">🧪 Sentry Test</button>
+            <button onclick="testPush()" style="padding:0.5rem 0.875rem; background:#10B981; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">🔔 Push Test</button>
+            <button onclick="myFcmStatus()" style="padding:0.5rem 0.875rem; background:#F59E0B; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">📱 Token Status</button>
         </div>
         <div id="pushHealthSummary" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:0.75rem; margin-bottom:1.25rem;">
             <div class="loading-state">Lade Health-Stats...</div>
@@ -484,8 +486,6 @@
     // Supabase Client - Direkte Initialisierung
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const ADMIN_EMAIL = 'albayrak_yusuf@icloud.com';
-
     // Helper: XSS Protection
     function escapeHtml(text) {
         if (text === null || text === undefined) return '';
@@ -497,11 +497,24 @@
         try { window.location.href = url; } catch(e) { console.warn(e); }
     }
 
-    // 2. Auth Check
+    // 2. Auth Check — checkt profiles.is_admin (NICHT Email-String, weil
+    //    DB-RLS auch is_admin nutzt und Email kann sich aendern)
     async function checkAdmin() {
         const { data: { user } } = await sb.auth.getUser();
-        
-        if (!user || user.email !== ADMIN_EMAIL) {
+
+        if (!user) {
+            Room8UI.error("Nicht eingeloggt!");
+            setTimeout(function() { navigateTo('login.html'); }, 1500);
+            return;
+        }
+
+        const { data: profile, error } = await sb
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        if (error || !profile || profile.is_admin !== true) {
             Room8UI.error("Zugriff verweigert!");
             setTimeout(function() { navigateTo('dashboard.html'); }, 1500);
             return;
@@ -853,8 +866,33 @@
 
         container.innerHTML = filtered.map(s => {
             const isJob = s.submission_type === 'job';
-            const icon = isJob ? '💼' : '🎟️';
+            const isEvent = s.submission_type === 'event';
+            const icon = isJob ? '💼' : (isEvent ? '🎉' : '🎟️');
+            const typeLabel = isJob ? 'Job' : (isEvent ? 'Event' : 'Coupon');
             const date = new Date(s.submitted_at).toLocaleDateString('de-DE');
+
+            // Bild-URLs aus Storage
+            const logoUrl = s.logo_image_path
+                ? sb.storage.from('event-images').getPublicUrl(s.logo_image_path).data.publicUrl
+                : null;
+            const coverUrl = s.cover_image_path
+                ? sb.storage.from('event-images').getPublicUrl(s.cover_image_path).data.publicUrl
+                : null;
+
+            // Bild-Section (nur wenn Bilder vorhanden)
+            let imagesHtml = '';
+            if (logoUrl || coverUrl) {
+                imagesHtml = `<div style="display:flex; gap:0.75rem; margin:0.5rem 0; flex-wrap:wrap;">`;
+                if (logoUrl) {
+                    imagesHtml += `<div style="flex:0 0 auto;"><div style="font-size:0.7rem; color:#6b7280; margin-bottom:0.25rem;">LOGO</div><a href="${logoUrl}" target="_blank"><img src="${logoUrl}" style="width:80px; height:80px; border-radius:12px; object-fit:cover; border:1px solid #E5E7EB;"></a></div>`;
+                }
+                if (coverUrl) {
+                    imagesHtml += `<div style="flex:1 1 200px; min-width:200px;"><div style="font-size:0.7rem; color:#6b7280; margin-bottom:0.25rem;">COVER</div><a href="${coverUrl}" target="_blank"><img src="${coverUrl}" style="width:100%; max-height:140px; border-radius:12px; object-fit:cover; border:1px solid #E5E7EB;"></a></div>`;
+                }
+                imagesHtml += `</div>`;
+            } else {
+                imagesHtml = `<div style="background:#FEE2E2; color:#991B1B; padding:0.5rem 0.75rem; border-radius:8px; font-size:0.85rem; margin:0.5rem 0;">⚠️ Keine Bilder eingereicht</div>`;
+            }
 
             // Details basierend auf Typ
             let detailsHtml = '';
@@ -864,6 +902,13 @@
                     <div class="info-item"><label>Typ</label><span>${escapeHtml(s.job_type)}</span></div>
                     <div class="info-item"><label>Standort</label><span>${escapeHtml(s.location || s.city)}</span></div>
                     <div class="info-item"><label>Gehalt</label><span>${escapeHtml(s.salary) || '-'}</span></div>
+                `;
+            } else if (isEvent) {
+                detailsHtml = `
+                    <div class="info-item"><label>Veranstalter</label><span>${escapeHtml(s.business_name)}</span></div>
+                    <div class="info-item"><label>Typ</label><span>${escapeHtml(s.category)}</span></div>
+                    <div class="info-item"><label>Stadt</label><span>${escapeHtml(s.city)}</span></div>
+                    <div class="info-item"><label>Start</label><span>${s.start_at ? new Date(s.start_at).toLocaleString('de-DE') : '-'}</span></div>
                 `;
             } else {
                 detailsHtml = `
@@ -878,8 +923,9 @@
                 <div class="admin-card">
                     <div class="card-header">
                         <div class="card-title">${icon} ${escapeHtml(s.title)}</div>
-                        <span class="status-badge status-pending">${isJob ? 'Job' : 'Coupon'}</span>
+                        <span class="status-badge status-pending">${typeLabel}</span>
                     </div>
+                    ${imagesHtml}
                     <div class="info-grid">
                         ${detailsHtml}
                         <div class="info-item"><label>Kontakt</label><span>${escapeHtml(s.contact_email)}</span></div>
@@ -887,7 +933,7 @@
                     </div>
                     <div style="background:#F9FAFB; padding:1rem; border-radius:8px; margin:0.5rem 0;">
                         <label style="font-size:0.75rem; color:#6b7280; display:block; margin-bottom:0.5rem;">BESCHREIBUNG</label>
-                        <p style="margin:0; color:#374151; font-size:0.9rem;">${escapeHtml(s.description) || 'Keine Beschreibung'}</p>
+                        <p style="margin:0; color:#374151; font-size:0.9rem; white-space:pre-wrap;">${escapeHtml(s.description) || 'Keine Beschreibung'}</p>
                     </div>
                     <div class="action-bar">
                         <a href="mailto:${escapeHtml(s.contact_email)}?subject=Room8%20Partner%20-%20Ihre%20Einreichung" class="btn-mini" style="background:#10B981;color:white;">✉️ Kontaktieren</a>
@@ -907,18 +953,30 @@
     };
 
     window.approveSubmission = async (id, type) => {
-        if (!confirm("Einreichung übernehmen und veröffentlichen?")) return;
+        if (!confirm("Einreichung übernehmen und veröffentlichen? Studenten in der Stadt bekommen Push.")) return;
 
         const submission = allSubmissions.find(s => s.id === id);
         if (!submission) return;
 
         try {
-            const { data: { user } } = await sb.auth.getUser();
+            const { data: { user: adminUser } } = await sb.auth.getUser();
+
+            // Partner-User-ID anhand contact_email auflösen, fallback auf Admin
+            let ownerId = adminUser.id;
+            if (submission.contact_email) {
+                const lookupRes = await sb.from('profiles').select('id').eq('email', submission.contact_email).maybeSingle();
+                if (lookupRes.data && lookupRes.data.id) ownerId = lookupRes.data.id;
+            }
 
             if (type === 'job') {
-                // Job in listings erstellen
+                // Logo: nutze company_logo_url (existiert auf listings)
+                let logoUrl = null;
+                if (submission.logo_image_path) {
+                    const lUrl = sb.storage.from('event-images').getPublicUrl(submission.logo_image_path);
+                    if (lUrl && lUrl.data) logoUrl = lUrl.data.publicUrl;
+                }
                 const jobData = {
-                    owner_id: user.id,
+                    owner_id: ownerId,
                     type: 'job',
                     title: submission.title || 'Unbenannter Job',
                     description: submission.description || '',
@@ -927,6 +985,7 @@
                     company_name: submission.company_name || 'Unbekannt',
                     company_website: submission.company_website || null,
                     company_size: submission.company_size || null,
+                    company_logo_url: logoUrl,
                     job_type: submission.job_type || 'werkstudent',
                     contract_duration: submission.contract_duration || null,
                     salary_amount: submission.salary ? parseFloat(submission.salary) : null,
@@ -937,49 +996,105 @@
                     application_url: submission.application_url || null,
                     is_active: true
                 };
+                const jobInsert = await sb.from('listings').insert(jobData).select('id').single();
+                if (jobInsert.error) throw jobInsert.error;
 
-                const { error: jobError } = await sb.from('listings').insert(jobData);
-                if (jobError) throw jobError;
+                // Cover-Bild als listing_photos (mit photo_type='cover')
+                if (submission.cover_image_path) {
+                    await sb.from('listing_photos').insert({
+                        listing_id: jobInsert.data.id,
+                        storage_path: submission.cover_image_path,
+                        display_order: 0,
+                        photo_type: 'cover'
+                    });
+                }
 
             } else if (type === 'coupon') {
-                // Coupon erstellen
+                let validUntil = submission.valid_until;
+                if (!validUntil) {
+                    const d = new Date(); d.setDate(d.getDate() + 90);
+                    validUntil = d.toISOString().slice(0,10);
+                }
                 const couponData = {
-                    user_id: user.id,
-                    business_name: submission.business_name,
-                    title: submission.title,
-                    category: submission.category,
-                    discount_value: submission.discount_value,
-                    discount_code: (submission.business_name || 'ROOM8').substring(0, 6).toUpperCase() + Math.floor(Math.random() * 100),
-                    valid_until: submission.valid_until,
-                    description: submission.description,
-                    city: submission.city,
-                    partner_data: {
-                        address: submission.address,
-                        zip_code: submission.zip,
-                        website: submission.website,
-                        phone: submission.phone,
-                        opening_hours: submission.opening_hours
-                    },
+                    user_id: ownerId,
+                    partner_user_id: ownerId !== adminUser.id ? ownerId : null,
+                    business_name: submission.business_name || 'Partner',
+                    title: submission.title || 'Studenten-Rabatt',
+                    category: submission.category || 'food',
+                    discount_value: submission.discount_value || '10%',
+                    discount_code: (submission.business_name || 'ROOM8').replace(/\s/g,'').substring(0, 6).toUpperCase() + Math.floor(Math.random() * 100),
+                    valid_until: validUntil,
+                    description: submission.description || '',
+                    city: submission.city || '-',
+                    address: submission.address || null,
+                    zip_code: submission.zip || null,
+                    website: submission.website || null,
+                    phone: submission.phone || null,
+                    opening_hours: submission.opening_hours || null,
                     status: 'active'
                 };
+                const couponInsert = await sb.from('coupons').insert(couponData).select('id').single();
+                if (couponInsert.error) throw couponInsert.error;
 
-                const { error: couponError } = await sb.from('coupons').insert(couponData);
-                if (couponError) throw couponError;
+                // Logo + Cover-Bild als coupon_photos (mit photo_type)
+                const photos = [];
+                if (submission.logo_image_path) {
+                    photos.push({ coupon_id: couponInsert.data.id, storage_path: submission.logo_image_path, display_order: 0, photo_type: 'logo' });
+                }
+                if (submission.cover_image_path) {
+                    photos.push({ coupon_id: couponInsert.data.id, storage_path: submission.cover_image_path, display_order: 1, photo_type: 'cover' });
+                }
+                if (photos.length > 0) {
+                    await sb.from('coupon_photos').insert(photos);
+                }
+
+            } else if (type === 'event') {
+                // 1. Strukturiertes start_at aus Submission
+                let startAt = submission.start_at;
+                let endAt = submission.end_at;
+                // Fallback: free-text terms/valid_from parsen (DD.MM.YYYY)
+                if (!startAt && (submission.terms || submission.valid_from)) {
+                    const txt = submission.terms || submission.valid_from || '';
+                    const match = txt.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+                    if (match) startAt = `${match[3]}-${String(match[2]).padStart(2,'0')}-${String(match[1]).padStart(2,'0')}T19:00:00Z`;
+                }
+                if (!startAt) {
+                    const d = new Date(); d.setDate(d.getDate() + 14); d.setHours(19,0,0,0);
+                    startAt = d.toISOString();
+                }
+                const eventData = {
+                    organizer_id: ownerId,
+                    organizer_name: submission.business_name || 'Partner',
+                    organizer_type: 'partner',
+                    title: submission.title || 'Event',
+                    description: submission.description || '',
+                    address: submission.address || null,
+                    city: submission.city || '-',
+                    start_at: startAt,
+                    end_at: endAt || null,
+                    category: ['party','lecture','workshop','sport','culture','networking','food','other'].includes(submission.category) ? submission.category : 'other',
+                    status: 'active',
+                    external_url: submission.website || null,
+                    cover_image_path: submission.cover_image_path || null,
+                    logo_image_path: submission.logo_image_path || null
+                };
+                const { error: evError } = await sb.from('events').insert(eventData);
+                if (evError) throw evError;
             }
 
-            // Submission als approved markieren
             await sb.from('partner_submissions').update({
                 status: 'approved',
                 reviewed_at: new Date().toISOString(),
-                reviewed_by: user.id
+                reviewed_by: adminUser.id
             }).eq('id', id);
 
-            Room8UI.success("Erfolgreich übernommen!");
+            Room8UI.success("Erfolgreich übernommen — ist jetzt live in der App!");
             loadSubmissions();
             loadStats();
 
         } catch (err) {
-            Room8UI.error("Fehler: " + err.message);
+            console.error(err);
+            Room8UI.error("Fehler: " + (err.message || JSON.stringify(err)));
         }
     };
 
@@ -1037,6 +1152,7 @@
             if (u.is_verified || u.is_student_verified) badges.push('<span style="background:#DCFCE7;color:#166534;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.7rem;font-weight:600;">✅ Verifiziert</span>');
             if (u.trusted_organizer) badges.push('<span style="background:linear-gradient(135deg,#14B8A6,#0F766E);color:white;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.7rem;font-weight:700;">⭐ Trusted</span>');
             if (u.can_create_events) badges.push('<span style="background:#CCFBF1;color:#0F766E;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.7rem;font-weight:600;">📅 Event-Creator</span>');
+            if (u.is_partner) badges.push('<span style="background:linear-gradient(135deg,#3B82F6,#2563EB);color:white;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.7rem;font-weight:700;">💼 Partner</span>');
 
             // Permission-Buttons (nur fuer nicht-banned User)
             let permBtns = '';
@@ -1048,6 +1164,17 @@
                 permBtns += u.trusted_organizer
                     ? '<button class="btn-mini" style="background:#FEE2E2;color:#991B1B;" onclick="toggleTrusted(\'' + u.id + '\', false)">⭐ Trusted entziehen</button>'
                     : '<button class="btn-mini" style="background:linear-gradient(135deg,#14B8A6,#0F766E);color:white;" onclick="toggleTrusted(\'' + u.id + '\', true)">⭐ Als Trusted markieren</button>';
+
+                permBtns += u.is_partner
+                    ? '<button class="btn-mini" style="background:#FEE2E2;color:#991B1B;" onclick="togglePartner(\'' + u.id + '\', false)">💼 Partner entziehen</button>'
+                    : '<button class="btn-mini" style="background:linear-gradient(135deg,#3B82F6,#2563EB);color:white;" onclick="togglePartner(\'' + u.id + '\', true)">💼 Als Partner markieren</button>';
+
+                // Sub-Permissions wenn is_partner=true
+                if (u.is_partner) {
+                    permBtns += '<button class="btn-mini" style="background:' + (u.partner_can_jobs ? '#DCFCE7;color:#166534' : '#F3F4F6;color:#9CA3AF') + ';" onclick="togglePartnerSub(\'' + u.id + '\', \'partner_can_jobs\', ' + (!u.partner_can_jobs) + ')">' + (u.partner_can_jobs ? '✓' : '✗') + ' Jobs</button>';
+                    permBtns += '<button class="btn-mini" style="background:' + (u.partner_can_coupons ? '#DCFCE7;color:#166534' : '#F3F4F6;color:#9CA3AF') + ';" onclick="togglePartnerSub(\'' + u.id + '\', \'partner_can_coupons\', ' + (!u.partner_can_coupons) + ')">' + (u.partner_can_coupons ? '✓' : '✗') + ' Coupons</button>';
+                    permBtns += '<button class="btn-mini" style="background:' + (u.partner_can_events ? '#DCFCE7;color:#166534' : '#F3F4F6;color:#9CA3AF') + ';" onclick="togglePartnerSub(\'' + u.id + '\', \'partner_can_events\', ' + (!u.partner_can_events) + ')">' + (u.partner_can_events ? '✓' : '✗') + ' Events</button>';
+                }
             }
 
             return `
@@ -1099,6 +1226,34 @@
                 if (window.Room8) Room8.showToast('Fehler: ' + updErr.message, 'error');
                 return;
             }
+        }
+        if (window.Room8) Room8.showToast(grant ? 'Erlaubnis erteilt' : 'Erlaubnis entzogen', 'success');
+        loadUsers();
+    };
+
+    // Partner-Toggle (Direct Update, RLS erlaubt fuer Admins)
+    window.togglePartner = async (userId, grant) => {
+        const action = grant ? 'als Partner markieren' : 'Partner-Status entziehen';
+        if (!confirm('Diesen User ' + action + '?')) return;
+        const { error } = await sb.from('profiles').update({ is_partner: grant }).eq('id', userId);
+        if (error) {
+            console.error(error);
+            if (window.Room8) Room8.showToast('Fehler: ' + error.message, 'error');
+            return;
+        }
+        if (window.Room8) Room8.showToast(grant ? 'Als Partner markiert' : 'Partner-Status entzogen', 'success');
+        loadUsers();
+    };
+
+    // Sub-Permissions Toggle (Jobs / Coupons / Events einzeln)
+    window.togglePartnerSub = async (userId, field, grant) => {
+        const update = {};
+        update[field] = grant;
+        const { error } = await sb.from('profiles').update(update).eq('id', userId);
+        if (error) {
+            console.error(error);
+            if (window.Room8) Room8.showToast('Fehler: ' + error.message, 'error');
+            return;
         }
         if (window.Room8) Room8.showToast(grant ? 'Erlaubnis erteilt' : 'Erlaubnis entzogen', 'success');
         loadUsers();
@@ -1797,9 +1952,18 @@
 
         // Profile-Daten der Antragsteller mit-laden
         var userIds = [...new Set(res.data.map(r => r.user_id))];
-        var profilesRes = await sb.from('profiles').select('id, username, full_name, is_verified, is_student_verified').in('id', userIds);
+        var profilesRes = await sb.from('profiles').select('id, username, full_name, is_verified, is_student_verified, uni_email_verified, avatar_url, bio, created_at, email, edu_email, university, instagram_handle').in('id', userIds);
         var profilesMap = {};
         (profilesRes.data || []).forEach(p => { profilesMap[p.id] = p; });
+
+        // Trust-Scores parallel laden
+        var trustScores = {};
+        await Promise.all(res.data.map(async function(req) {
+            try {
+                var s = await sb.rpc('calc_event_request_trust_score', { p_request_id: req.id });
+                if (!s.error) trustScores[req.id] = s.data;
+            } catch (e) {}
+        }));
 
         listEl.innerHTML = res.data.map(req => {
             var profile = profilesMap[req.user_id] || {};
@@ -1826,19 +1990,97 @@
                 actions = '<div style="margin-top:0.5rem;font-size:0.8rem;color:#991B1B;">Ablehnungsgrund: ' + Room8.escapeHtml(req.rejection_reason) + '</div>';
             }
 
+            // Trust-Score (0-100)
+            var trust = trustScores[req.id] || 0;
+            var trustColor = trust >= 70 ? '#10B981' : trust >= 40 ? '#F59E0B' : '#EF4444';
+            var trustBadge = '<span style="background:' + trustColor + ';color:white;padding:0.25rem 0.6rem;border-radius:999px;font-size:0.75rem;font-weight:700;">Trust ' + trust + '</span>';
+
+            // Avatar
+            var avatarHtml = profile.avatar_url
+                ? '<img src="' + Room8.escapeHtml(profile.avatar_url) + '" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid #E5E7EB;">'
+                : '<div style="width:48px;height:48px;border-radius:50%;background:#E5E7EB;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#6B7280;">👤</div>';
+
+            // Phone clickable + WhatsApp
+            var phoneLine = '';
+            if (req.phone) {
+                var rawPhone = req.phone.replace(/[^+0-9]/g, '');
+                var waPhone = rawPhone.startsWith('+') ? rawPhone.substring(1) : rawPhone;
+                phoneLine =
+                    '<a href="tel:' + Room8.escapeHtml(rawPhone) + '" style="color:#3B82F6;text-decoration:none;font-weight:600;">📞 ' + Room8.escapeHtml(req.phone) + '</a>' +
+                    ' &nbsp; ' +
+                    '<a href="https://wa.me/' + Room8.escapeHtml(waPhone) + '?text=Hi%20' + encodeURIComponent(displayName) + '%2C%20bezgl.%20deinem%20Event-Antrag%20bei%20Room8..." target="_blank" rel="noopener" style="color:#25D366;text-decoration:none;font-weight:600;">💬 WhatsApp</a>';
+            }
+
+            // Email clickable
+            var emailLine = '';
+            var userEmail = profile.email || profile.edu_email;
+            if (userEmail) {
+                emailLine = '<a href="mailto:' + Room8.escapeHtml(userEmail) + '?subject=Room8%20Event-Antrag" style="color:#3B82F6;text-decoration:underline;">✉️ ' + Room8.escapeHtml(userEmail) + '</a>';
+                if (profile.uni_email_verified && profile.edu_email) {
+                    emailLine += ' <span style="background:#DCFCE7;color:#166534;padding:0.1rem 0.4rem;border-radius:999px;font-size:0.7rem;font-weight:600;">Hochschul-Mail verifiziert</span>';
+                }
+            }
+
+            // Social-Proof Link
+            var proofLink = '';
+            if (req.social_proof_url) {
+                var url = req.social_proof_url;
+                var displayUrl = url;
+                if (req.social_proof_type === 'instagram' && !url.startsWith('http')) {
+                    var handle = url.replace(/^@/, '');
+                    url = 'https://instagram.com/' + handle;
+                    displayUrl = '@' + handle;
+                } else if (req.social_proof_type === 'website' && !url.startsWith('http')) {
+                    url = 'https://' + url;
+                } else if (req.social_proof_type === 'linkedin' && !url.startsWith('http')) {
+                    url = 'https://linkedin.com/in/' + url.replace(/^\//, '');
+                }
+                var typeIcon = {instagram:'📷', website:'🌐', linkedin:'💼', uni_email:'🎓', other:'🔗'}[req.social_proof_type] || '🔗';
+                proofLink = typeIcon + ' <a href="' + Room8.escapeHtml(url) + '" target="_blank" rel="noopener" style="color:#3B82F6;text-decoration:underline;font-weight:600;">' + Room8.escapeHtml(displayUrl) + '</a>';
+            }
+
+            // Profil-Link (oeffentliches Profil)
+            var profileLink = '<a href="public-profile.html?id=' + Room8.escapeHtml(req.user_id) + '" target="_blank" rel="noopener" style="color:#3B82F6;text-decoration:underline;">👁️ Profil ansehen</a>';
+
+            // Hochschule (mit aus profile.university kombiniert falls vorhanden)
+            var uniInfo = req.university_name || profile.university || null;
+
+            // Business-Adresse als Google-Maps-Link
+            var addrLink = '';
+            if (req.business_address) {
+                addrLink = '<a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(req.business_address) + '" target="_blank" rel="noopener" style="color:#3B82F6;text-decoration:underline;">📍 ' + Room8.escapeHtml(req.business_address) + '</a>';
+            }
+
+            // Konto-Alter
+            var ageDays = profile.created_at ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / 86400000) : 0;
+
+            var contactDetails = '';
+            if (emailLine) contactDetails += '<div>' + emailLine + '</div>';
+            if (phoneLine) contactDetails += '<div>' + phoneLine + '</div>';
+            if (proofLink) contactDetails += '<div><strong style="color:#1E40AF;">Nachweis:</strong> ' + proofLink + '</div>';
+            if (uniInfo) contactDetails += '<div><strong style="color:#1E40AF;">Hochschule:</strong> ' + Room8.escapeHtml(uniInfo) + '</div>';
+            if (addrLink) contactDetails += '<div><strong style="color:#1E40AF;">Adresse:</strong> ' + addrLink + '</div>';
+            contactDetails += '<div><strong style="color:#1E40AF;">Konto-Alter:</strong> ' + ageDays + ' Tage</div>';
+            contactDetails += '<div>' + profileLink + '</div>';
+
             return '<div class="data-item">' +
                 '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.75rem;flex-wrap:wrap;">' +
-                    '<div style="flex:1;min-width:200px;">' +
-                        '<div style="font-weight:700;font-size:1rem;margin-bottom:0.2rem;">' + Room8.escapeHtml(req.organization_name) + '</div>' +
-                        '<div style="color:#6B7280;font-size:0.85rem;">' + (ORG_TYPE_LABELS[req.organization_type] || req.organization_type) + '</div>' +
-                        '<div style="color:#9CA3AF;font-size:0.8rem;margin-top:0.25rem;">Von: ' + Room8.escapeHtml(displayName) + verifiedBadge + '</div>' +
-                        '<div style="color:#9CA3AF;font-size:0.75rem;">Eingereicht: ' + new Date(req.created_at).toLocaleString('de-DE') + '</div>' +
+                    '<div style="flex:1;min-width:200px;display:flex;gap:0.75rem;align-items:flex-start;">' +
+                        avatarHtml +
+                        '<div style="flex:1;">' +
+                            '<div style="font-weight:700;font-size:1rem;margin-bottom:0.2rem;">' + Room8.escapeHtml(req.organization_name) + ' ' + trustBadge + '</div>' +
+                            '<div style="color:#6B7280;font-size:0.85rem;">' + (ORG_TYPE_LABELS[req.organization_type] || req.organization_type) + '</div>' +
+                            '<div style="color:#9CA3AF;font-size:0.8rem;margin-top:0.25rem;">Von: ' + Room8.escapeHtml(displayName) + verifiedBadge + '</div>' +
+                            '<div style="color:#9CA3AF;font-size:0.75rem;">Eingereicht: ' + new Date(req.created_at).toLocaleString('de-DE') + '</div>' +
+                        '</div>' +
                     '</div>' +
                     '<div>' + statusBadge + '</div>' +
                 '</div>' +
+                (contactDetails ? '<div style="margin-top:0.6rem;padding:0.6rem;background:#F0F9FF;border:1px solid #BFDBFE;border-radius:8px;font-size:0.85rem;color:#1E40AF;line-height:1.8;">' + contactDetails + '</div>' : '') +
                 '<div style="margin-top:0.75rem;padding:0.75rem;background:#F9FAFB;border-radius:8px;font-size:0.9rem;color:#374151;line-height:1.4;">' +
-                    '<strong>Begründung:</strong><br>' + Room8.escapeHtml(req.reason) +
+                    '<strong>Was sie planen:</strong><br>' + Room8.escapeHtml(req.reason) +
                 '</div>' +
+                (profile.bio ? '<div style="margin-top:0.5rem;padding:0.5rem;background:#FEFCE8;border-radius:8px;font-size:0.8rem;color:#713F12;"><strong>Bio aus Profil:</strong> ' + Room8.escapeHtml(profile.bio) + '</div>' : '') +
                 actions +
             '</div>';
         }).join('');
@@ -2002,6 +2244,46 @@
         document.querySelectorAll('#tab-pushhealth .filter-btn').forEach(b => b.classList.remove('active'));
         if (btn) btn.classList.add('active');
         loadPushHealth(hours);
+    };
+
+    // Sentry Test-Button: feuert ein Message + ein Exception, beides sollte im Sentry-Dashboard auftauchen
+    window.myFcmStatus = async () => {
+        try {
+            const { data: stat } = await sb.rpc('my_fcm_status');
+            const { data: errs } = await sb.rpc('my_last_push_error');
+            const r = (stat && stat[0]) || {};
+            let txt = [
+                'Token registriert: ' + (r.has_token ? 'JA' : 'NEIN'),
+                'Token-Laenge: ' + (r.token_length || 0),
+                'Token-Prefix: ' + (r.token_prefix || '(leer)'),
+                '',
+                '=== Letzte 5 Push-Versuche ==='
+            ];
+            (errs || []).forEach((e, i) => {
+                txt.push((i+1) + '. [' + e.status + '] ' + (e.error_code || '') +
+                    '\n   ' + (e.error_msg || '(no msg)').substring(0, 250) +
+                    '\n   ' + e.created_at);
+            });
+            if (!errs || !errs.length) txt.push('(keine Push-Versuche)');
+            alert(txt.join('\n'));
+        } catch (e) { alert('Exception: ' + e.message); }
+    };
+
+    window.testPush = async () => {
+        try {
+            const { data, error } = await sb.rpc('admin_test_push', {
+                p_title: '🔔 Test Push',
+                p_body: 'FCM funktioniert! Wenn du das auf deinem Handy siehst, geht alles.'
+            });
+            if (error) {
+                alert('RPC-Fehler:\n' + error.message);
+                return;
+            }
+            const msg = String(data || '');
+            alert('Push gefeuert!\n\n' + msg + '\n\nPruefe:\n1. Handy/Web-Notif sollte in <30s kommen\n2. Push Health Tab refresh — Eintrag mit success/no_token/fcm_error\n3. Bei "no_token": Native App auf iPhone/Android starten + Push-Permission geben');
+        } catch (e) {
+            alert('Test-Push Exception: ' + e.message);
+        }
     };
 
     window.testSentry = () => {

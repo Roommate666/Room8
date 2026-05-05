@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <script src="sentry-init.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>Profil vervollständigen - Room8</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { background: linear-gradient(160deg, #EFF6FF 0%, #F7F7F5 60%, #FFE7DE 100%); min-height: 100vh; }
+    .cp-wrap {
+      max-width: 480px; margin: 0 auto; padding: calc(2rem + env(safe-area-inset-top, 0px)) 1.25rem 2rem;
+    }
+    .cp-card {
+      background: #fff; border-radius: 1.25rem; padding: 1.75rem 1.5rem;
+      box-shadow: 0 10px 40px rgba(59,130,246,0.08), 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .cp-logo { width: 64px; height: 64px; border-radius: 16px; margin: 0 auto 1rem; display: block; box-shadow: 0 4px 16px rgba(59,130,246,0.2); }
+    .cp-title { text-align: center; font-size: 1.4rem; font-weight: 800; color: #1A1A2E; margin-bottom: 0.4rem; letter-spacing: -0.02em; }
+    .cp-sub { text-align: center; color: #64748B; font-size: 0.95rem; margin-bottom: 1.75rem; line-height: 1.4; }
+    .cp-field { margin-bottom: 1.1rem; }
+    .cp-label { display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.4rem; }
+    .cp-input {
+      width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid #E5E7EB;
+      font-size: 1rem; transition: border-color 0.2s, box-shadow 0.2s;
+      box-sizing: border-box;
+    }
+    .cp-input:focus { outline: none; border-color: #3B82F6; box-shadow: 0 0 0 4px rgba(59,130,246,0.12); }
+    .cp-hint { font-size: 0.78rem; color: #94A3B8; margin-top: 0.3rem; }
+    .cp-error { font-size: 0.8rem; color: #EF4444; margin-top: 0.3rem; min-height: 1em; }
+    .cp-username-wrap { position: relative; }
+    .cp-username-prefix { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #94A3B8; font-weight: 600; pointer-events: none; font-size: 1rem; line-height: 1; }
+    .cp-username-input { padding-left: 2.4rem; }
+    .cp-status { font-size: 0.78rem; margin-top: 0.3rem; min-height: 1em; }
+    .cp-status.ok { color: #10B981; }
+    .cp-status.bad { color: #EF4444; }
+    .cp-status.checking { color: #94A3B8; }
+    .cp-btn {
+      width: 100%; padding: 0.95rem 1.5rem; margin-top: 0.5rem;
+      background: linear-gradient(135deg, #3B82F6, #2563EB); color: #fff;
+      border: none; border-radius: 999px; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+      box-shadow: 0 4px 20px rgba(59,130,246,0.35);
+    }
+    .cp-btn:active { transform: scale(0.98); }
+    .cp-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .cp-skip { display: block; text-align: center; color: #94A3B8; text-decoration: none; font-size: 0.85rem; margin-top: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="cp-wrap">
+    <div class="cp-card">
+      <img src="splash-logo.jpg" alt="Room8" class="cp-logo">
+      <h1 class="cp-title">Willkommen bei Room8 👋</h1>
+      <p class="cp-sub">Komplettiere kurz dein Profil — das sehen andere Studenten von dir.</p>
+
+      <form id="cpForm">
+        <div class="cp-field">
+          <label class="cp-label" for="full_name">Voller Name</label>
+          <input class="cp-input" type="text" id="full_name" name="full_name" autocomplete="name" required maxlength="80" placeholder="z.B. Max Mustermann">
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="username">Benutzername</label>
+          <div class="cp-username-wrap">
+            <span class="cp-username-prefix">@</span>
+            <input class="cp-input cp-username-input" type="text" id="username" name="username" autocomplete="off" required minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]{3,20}" placeholder="dein_handle">
+          </div>
+          <div class="cp-hint">3-20 Zeichen. Nur Buchstaben, Zahlen und _</div>
+          <div class="cp-status" id="usernameStatus"></div>
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="city">Stadt / Unistadt</label>
+          <input class="cp-input" type="text" id="city" name="city" autocomplete="address-level2" required maxlength="60" placeholder="z.B. München">
+        </div>
+
+        <button type="submit" class="cp-btn" id="cpSubmit">Profil speichern</button>
+        <div class="cp-error" id="cpError"></div>
+      </form>
+    </div>
+  </div>
+
+  <script src="lib/supabase.min.js"></script>
+  <script src="config.js"></script>
+  <script>
+    (async function () {
+      var sb = window.sb || (window.supabase && window.supabase.createClient
+        ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
+        : null);
+      if (!sb) {
+        console.error('[complete-profile] Supabase-Client nicht verfuegbar');
+        document.getElementById('cpError').textContent = 'Verbindungsfehler. Bitte App neu starten.';
+        return;
+      }
+      window.sb = sb;
+      var $ = function (id) { return document.getElementById(id); };
+
+      // Auth-Check
+      var sessRes = await sb.auth.getSession();
+      if (!sessRes.data.session) { window.location.href = 'login.html'; return; }
+      var user = sessRes.data.session.user;
+
+      // Pre-fill aus oauth_prefill (gesetzt von social-auth.js) ODER user_metadata
+      var pre = {};
+      try { pre = JSON.parse(sessionStorage.getItem('oauth_prefill') || '{}'); } catch (e) {}
+      var meta = user.user_metadata || {};
+      $('full_name').value = pre.full_name || meta.full_name || meta.name || '';
+
+      // Bestehende Profile-Daten laden falls schon teilweise da
+      try {
+        var existing = await sb.from('profiles').select('username, full_name, city').eq('id', user.id).maybeSingle();
+        if (existing.data) {
+          if (existing.data.full_name && !$('full_name').value) $('full_name').value = existing.data.full_name;
+          if (existing.data.city) $('city').value = existing.data.city;
+          if (existing.data.username && !/^user[_-]?[0-9a-f]{4,}/i.test(existing.data.username)) {
+            $('username').value = existing.data.username;
+          }
+        }
+      } catch (e) {}
+
+      // Username Live-Check
+      var checkTimer = null;
+      var statusEl = $('usernameStatus');
+      var lastChecked = '';
+      var lastAvailable = false;
+
+      async function checkUsername() {
+        var v = $('username').value.trim();
+        if (!v || v.length < 3 || !/^[a-zA-Z0-9_]+$/.test(v)) { statusEl.textContent = ''; statusEl.className = 'cp-status'; return; }
+        statusEl.textContent = 'Prüfe Verfügbarkeit...'; statusEl.className = 'cp-status checking';
+        var resp = await sb.from('profiles').select('id').eq('username', v).neq('id', user.id).maybeSingle();
+        lastChecked = v;
+        if (resp.data) { statusEl.textContent = '✗ Schon vergeben'; statusEl.className = 'cp-status bad'; lastAvailable = false; }
+        else { statusEl.textContent = '✓ Verfügbar'; statusEl.className = 'cp-status ok'; lastAvailable = true; }
+      }
+      $('username').addEventListener('input', function () {
+        clearTimeout(checkTimer);
+        checkTimer = setTimeout(checkUsername, 350);
+      });
+
+      // Submit
+      $('cpForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var btn = $('cpSubmit');
+        var errEl = $('cpError');
+        errEl.textContent = '';
+        var fullName = $('full_name').value.trim();
+        var username = $('username').value.trim();
+        var city = $('city').value.trim();
+
+        if (!fullName || fullName.length < 2) { errEl.textContent = 'Bitte vollen Namen eingeben.'; return; }
+        if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) { errEl.textContent = 'Benutzername: 3-20 Zeichen, nur Buchstaben/Zahlen/_'; return; }
+        if (!city || city.length < 2) { errEl.textContent = 'Bitte deine Stadt eingeben.'; return; }
+
+        btn.disabled = true; btn.textContent = 'Speichere...';
+
+        try {
+          // Falls username noch nicht gecheckt -> nochmal pruefen
+          if (lastChecked !== username) await checkUsername();
+          if (!lastAvailable) { btn.disabled = false; btn.textContent = 'Profil speichern'; errEl.textContent = 'Benutzername schon vergeben.'; return; }
+
+          var payload = {
+            id: user.id,
+            username: username,
+            full_name: fullName,
+            city: city,
+            updated_at: new Date().toISOString()
+          };
+
+          console.log('[complete-profile] Upsert payload:', payload);
+
+          // Erst Update versuchen (Profil existiert wahrscheinlich schon durch Trigger)
+          var upd = await sb.from('profiles').update({
+            username: username,
+            full_name: fullName,
+            city: city,
+            updated_at: new Date().toISOString()
+          }).eq('id', user.id).select();
+
+          console.log('[complete-profile] Update result:', upd);
+
+          if (upd.error) {
+            // Falls Update wegen "no row" fehlschlaegt -> Insert
+            console.warn('[complete-profile] Update failed, trying insert:', upd.error);
+            var ins = await sb.from('profiles').insert(payload).select();
+            console.log('[complete-profile] Insert result:', ins);
+            if (ins.error) {
+              errEl.textContent = 'Fehler: ' + (ins.error.message || JSON.stringify(ins.error));
+              btn.disabled = false; btn.textContent = 'Profil speichern';
+              return;
+            }
+          } else if (!upd.data || upd.data.length === 0) {
+            // Update lief, aber keine Zeile betroffen -> Insert
+            console.warn('[complete-profile] Update returned no rows, trying insert');
+            var ins2 = await sb.from('profiles').insert(payload).select();
+            console.log('[complete-profile] Insert result:', ins2);
+            if (ins2.error) {
+              errEl.textContent = 'Fehler: ' + (ins2.error.message || JSON.stringify(ins2.error));
+              btn.disabled = false; btn.textContent = 'Profil speichern';
+              return;
+            }
+          }
+
+          try { sessionStorage.removeItem('oauth_prefill'); } catch (e) {}
+          console.log('[complete-profile] Saved, redirecting to dashboard');
+          window.location.replace('dashboard.html');
+        } catch (err) {
+          console.error('[complete-profile] Submit error:', err);
+          errEl.textContent = 'Unerwarteter Fehler: ' + (err && err.message ? err.message : String(err));
+          btn.disabled = false; btn.textContent = 'Profil speichern';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

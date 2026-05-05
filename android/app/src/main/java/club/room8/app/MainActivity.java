@@ -2,6 +2,8 @@ package club.room8.app;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,6 +16,45 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
         createNotificationChannel();
         handlePushUrl(getIntent());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        dispatchPendingFcmToken();
+    }
+
+    /**
+     * Hardware-Back: WebView-History.back() statt App schliessen.
+     * Capacitor 7 hat keinen built-in Handler dafuer.
+     */
+    @Override
+    public void onBackPressed() {
+        if (getBridge() != null && getBridge().getWebView() != null
+                && getBridge().getWebView().canGoBack()) {
+            getBridge().getWebView().goBack();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    /**
+     * Falls Room8MessagingService.onNewToken() einen Token gespeichert hat,
+     * dispatch ihn an die WebView als 'fcmToken' CustomEvent.
+     * Pendant zu iOS AppDelegate dispatch.
+     */
+    private void dispatchPendingFcmToken() {
+        SharedPreferences prefs = getSharedPreferences("room8_push", Context.MODE_PRIVATE);
+        String token = prefs.getString("pending_fcm_token", null);
+        if (token == null || token.isEmpty()) return;
+        new android.os.Handler().postDelayed(() -> {
+            if (getBridge() != null && getBridge().getWebView() != null) {
+                String escaped = token.replace("\\", "\\\\").replace("'", "\\'");
+                String js = "window.dispatchEvent(new CustomEvent('fcmToken', { detail: '" + escaped + "' }))";
+                getBridge().getWebView().evaluateJavascript(js, null);
+                prefs.edit().remove("pending_fcm_token").apply();
+            }
+        }, 2000);
     }
 
     @Override

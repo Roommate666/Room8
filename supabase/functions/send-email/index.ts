@@ -10,10 +10,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.47.14"
 import { captureException } from "../_shared/sentry.ts"
+import { verifyInternalSecret } from "../_shared/auth.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
 }
 
 const FROM_ADDRESS = 'Room8 <noreply@room8.club>'
@@ -50,6 +51,15 @@ async function logNotification(
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
+  }
+
+  // Server-to-Server-Auth: nur DB-Trigger / interne Aufrufer mit Secret duerfen senden.
+  const authCheck = verifyInternalSecret(req)
+  if (!authCheck.ok) {
+    return new Response(
+      JSON.stringify(authCheck.body),
+      { status: authCheck.status, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+    )
   }
 
   const supabase = createClient(

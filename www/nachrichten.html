@@ -437,13 +437,14 @@
 
         list.forEach(convo => {
             const dateStr = convo.lastDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
-            const avatarStyle = convo.partnerAvatar 
-                ? `background-image: url('${convo.partnerAvatar}');` 
+            const safeAvatar = sanitizeUrl(convo.partnerAvatar);
+            const avatarStyle = safeAvatar
+                ? `background-image: url(&quot;${safeAvatar}&quot;);`
                 : '';
             const avatarContent = convo.partnerAvatar ? '' : convo.partnerName.charAt(0).toUpperCase();
 
-            // Link zum Chat
-            const link = `chat.html?user=${convo.partnerId}&listing=${convo.listingId || ''}`;
+            // Link zum Chat — IDs encoded gegen Quote-Injection
+            const link = `chat.html?user=${encodeURIComponent(convo.partnerId)}&listing=${encodeURIComponent(convo.listingId || '')}`;
 
             const item = document.createElement('div');
             item.innerHTML = `
@@ -498,7 +499,21 @@
 
     function escapeHtml(text) {
         if (!text) return '';
-        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        return String(text)
+            .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    // URL-Sanitizing fuer background-image: blockt javascript:, data:text, vbscript:
+    // und encoded gefaehrliche Zeichen (Apostroph, doppelte Quotes) damit
+    // CSS-Injection per avatar_url unmoeglich wird.
+    function sanitizeUrl(url) {
+        if (!url) return '';
+        var lower = String(url).toLowerCase().trim();
+        if (lower.indexOf('javascript:') === 0
+            || lower.indexOf('data:text') === 0
+            || lower.indexOf('vbscript:') === 0) return '';
+        try { return encodeURI(url); } catch (_) { return ''; }
     }
 
     // Suche (Client-Side Filter)

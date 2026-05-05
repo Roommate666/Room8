@@ -13,3 +13,10 @@ supabase/config.toml
 room8-d1867-firebase-adminsdk-fbsvc-454157b46d.json
 
 .env*.local
+
+# alte Firebase-Konfigs — sollen nie wieder committed werden
+google-services.json.OLD*
+google-services.json.bak*
+
+# Supabase CLI Cache
+supabase/.temp/

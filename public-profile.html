@@ -481,11 +481,14 @@
             if (isBlocked) {
                 document.querySelector('.app-container').style.display = 'none';
                 document.getElementById('blockedOverlay').style.display = 'flex';
-                // Entsperren-Button
+                // Entsperren-Button (RPC statt direkt DELETE auf nicht-existierende Tabelle)
                 document.getElementById('unblockFromOverlay').addEventListener('click', async function() {
-                    await sb.from('blocked_users').delete().eq('blocker_id', currentUser.id).eq('blocked_id', userId);
-                    if (window.Room8) Room8.clearBlockedUsersCache();
-                    location.reload();
+                    try {
+                        await Room8.trust.unblock(userId);
+                        location.reload();
+                    } catch (e) {
+                        Room8UI.error('Fehler beim Entsperren: ' + (e.message || e));
+                    }
                 });
                 return;
             }
@@ -498,32 +501,26 @@
     }
 
     async function checkBlockStatus() {
-        if (!currentUser || currentUser.id === userId) return;
+        if (!currentUser || currentUser.id === userId || !window.Room8) return;
 
-        // Prüfen ob User bereits blockiert ist
-        var { data } = await sb
-            .from('blocked_users')
-            .select('id')
-            .eq('blocker_id', currentUser.id)
-            .eq('blocked_id', userId)
-            .single();
-
-        if (data) {
-            // User ist bereits blockiert - Button zu "Entsperren" ändern
+        // Tabelle heisst seit Mig 20260504000009 'user_blocks' — Helper kapselt das.
+        var blocked = await Room8.isUserBlocked(userId);
+        if (blocked) {
             var blockBtn = document.getElementById('blockBtn');
             blockBtn.textContent = '✓ Entsperren';
             blockBtn.style.background = '#D1FAE5';
             blockBtn.style.color = '#059669';
             blockBtn.style.borderColor = '#6EE7B7';
             blockBtn.dataset.blocked = 'true';
-            blockBtn.dataset.blockId = data.id;
         }
     }
 
     async function loadUserProfile() {
+        // Whitelist nur sichere Spalten — KEIN '*', sonst leaken email/fcm_token/is_admin
+        // an jeden eingeloggten User.
         const { data: profile, error } = await sb
             .from('profiles')
-            .select('*')
+            .select('id, username, full_name, avatar_url, created_at, is_verified, is_student_verified, bio, city, university, study_field, semester, age, languages, interests')
             .eq('id', userId)
             .single();
 
@@ -601,34 +598,15 @@
             navigateTo(`chat.html?user=${userId}`);
         };
 
-        document.getElementById('reportBtn').onclick = () => {
+        document.getElementById('reportBtn').onclick = async () => {
             if (!currentUser) return Room8UI.warning("Bitte einloggen.");
             if (currentUser.id === userId) {
                 return Room8UI.warning("Du kannst dich nicht selbst melden.");
             }
-            // Vordefinierte Melde-Gründe
-            const reasons = [
-                "Fake-Profil / Identitätsbetrug",
-                "Belästigung / Beleidigung",
-                "Spam / Werbung",
-                "Unangemessene Inhalte",
-                "Betrugsversuch",
-                "Sonstiges"
-            ];
-            const reasonList = reasons.map((r, i) => `${i + 1}. ${r}`).join('\n');
-            const choice = prompt(`Warum möchtest du diesen Nutzer melden?\n\n${reasonList}\n\nGib die Nummer ein (1-6):`);
-            if (choice) {
-                const idx = parseInt(choice) - 1;
-                const reason = (idx >= 0 && idx < reasons.length) ? reasons[idx] : choice;
-                sb.from('reports').insert({
-                    reporter_id: currentUser.id,
-                    reported_type: 'user',
-                    reported_id: userId,
-                    reason: reason,
-                    status: 'open'
-                }).then(() => Room8UI.success("Gemeldet. Danke für deine Hilfe!"));
-            }
+            // RPC report_content macht Anti-Trolling Rate-Limit (5/h, 30/d)
+            await Room8.trust.openReportSheet('user', userId);
         };
+
         document.getElementById('blockBtn').onclick = async () => {
             if (!currentUser) return Room8UI.warning('Bitte einloggen');
             if (currentUser.id === userId) {
@@ -636,53 +614,37 @@
             }
 
             var blockBtn = document.getElementById('blockBtn');
+            if (blockBtn.disabled) return;
             var isBlocked = blockBtn.dataset.blocked === 'true';
+            blockBtn.disabled = true;
 
-            if (isBlocked) {
-                // ENTSPERREN
-                if (confirm('Möchtest du diesen Nutzer entsperren?')) {
-                    var { error } = await sb.from('blocked_users')
-                        .delete()
-                        .eq('blocker_id', currentUser.id)
-                        .eq('blocked_id', userId);
-
-                    if (error) {
-                        Room8UI.error('Fehler beim Entsperren: ' + error.message);
-                        return;
+            try {
+                if (isBlocked) {
+                    if (!confirm('Möchtest du diesen Nutzer entsperren?')) return;
+                    try {
+                        await Room8.trust.unblock(userId);
+                        Room8UI.success('Nutzer wurde entsperrt.');
+                        blockBtn.textContent = '🚫 Blockieren';
+                        blockBtn.style.background = '#FEE2E2';
+                        blockBtn.style.color = '#DC2626';
+                        blockBtn.style.borderColor = '#FCA5A5';
+                        blockBtn.dataset.blocked = 'false';
+                    } catch (err) {
+                        Room8UI.error('Fehler beim Entsperren: ' + (err.message || err));
                     }
-
-                    Room8UI.success('Nutzer wurde entsperrt.');
-                    blockBtn.textContent = '🚫 Blockieren';
-                    blockBtn.style.background = '#FEE2E2';
-                    blockBtn.style.color = '#DC2626';
-                    blockBtn.style.borderColor = '#FCA5A5';
-                    blockBtn.dataset.blocked = 'false';
-                }
-            } else {
-                // BLOCKIEREN
-                if (confirm('Möchtest du diesen Nutzer wirklich blockieren? Du wirst keine Nachrichten oder Inserate von diesem Nutzer mehr sehen.')) {
-                    var { error } = await sb.from('blocked_users').insert({
-                        blocker_id: currentUser.id,
-                        blocked_id: userId
-                    });
-
-                    if (error) {
-                        console.error('Block error:', error);
-                        if (error.code === '23505') {
-                            Room8UI.warning('Nutzer ist bereits blockiert.');
-                        } else {
-                            Room8UI.error('Fehler beim Blockieren: ' + error.message);
-                        }
-                        return;
+                } else {
+                    var profileName = document.getElementById('profileName').textContent || 'diesen Nutzer';
+                    var ok = await Room8.trust.confirmAndBlock(userId, profileName);
+                    if (ok) {
+                        blockBtn.textContent = '✓ Entsperren';
+                        blockBtn.style.background = '#D1FAE5';
+                        blockBtn.style.color = '#059669';
+                        blockBtn.style.borderColor = '#6EE7B7';
+                        blockBtn.dataset.blocked = 'true';
                     }
-
-                    Room8UI.success('Nutzer wurde blockiert.');
-                    blockBtn.textContent = '✓ Entsperren';
-                    blockBtn.style.background = '#D1FAE5';
-                    blockBtn.style.color = '#059669';
-                    blockBtn.style.borderColor = '#6EE7B7';
-                    blockBtn.dataset.blocked = 'true';
                 }
+            } finally {
+                blockBtn.disabled = false;
             }
         };
 

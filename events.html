@@ -142,6 +142,7 @@
         </div>
     </div>
 
+
     <main style="flex:1;">
         <div class="events-list" id="eventsContainer">
             <div class="event-card" style="height:280px;">
@@ -192,6 +193,7 @@
                 .from('events')
                 .select('*')
                 .eq('status', 'active')
+                .eq('is_test', false)
                 .gte('start_at', nowIso)
                 .order('start_at', { ascending: true })
                 .limit(100);
@@ -298,9 +300,9 @@
         var profileRes = await sb.from('profiles')
             .select('can_create_events')
             .eq('id', userRes.data.user.id).single();
-        var canCreate = profileRes.data && profileRes.data.can_create_events === true;
-
-        if (canCreate && headerBtn) {
+        // Plus-Button immer fuer eingeloggte User zeigen — event-create.html
+        // entscheidet dann selbst (Form vs. Antrag-Overlay vs. Verify-Overlay).
+        if (headerBtn) {
             headerBtn.style.display = 'flex';
         }
     }

@@ -29,6 +29,30 @@ public class Room8MessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "Room8FCM";
 
+    /**
+     * Wird gerufen wenn FCM einen neuen Token issued (App-Install oder Token-Rotation).
+     * Wir speichern in SharedPreferences damit MainActivity ihn an die WebView dispatch'd.
+     * Pendant zu iOS AppDelegate.didReceiveRegistrationToken.
+     */
+    @Override
+    public void onNewToken(String token) {
+        super.onNewToken(token);
+        Log.d(TAG, "onNewToken: " + (token != null ? token.substring(0, Math.min(20, token.length())) + "..." : "null"));
+        if (token == null || token.isEmpty()) return;
+        try {
+            getSharedPreferences("room8_push", Context.MODE_PRIVATE)
+                .edit()
+                .putString("pending_fcm_token", token)
+                .apply();
+            // Capacitor Plugin Listener triggern via Broadcast
+            Intent intent = new Intent("club.room8.app.FCM_TOKEN");
+            intent.putExtra("token", token);
+            sendBroadcast(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "onNewToken save failed: " + e.getMessage());
+        }
+    }
+
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Log.d(TAG, "onMessageReceived called! Data size: " + remoteMessage.getData().size()
@@ -103,13 +127,15 @@ public class Room8MessagingService extends FirebaseMessagingService {
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "room8_default")
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "room8_v2")
             .setSmallIcon(R.drawable.ic_notification)
             .setLargeIcon(largeIcon)
             .setContentTitle(title != null ? title : "Room8")
             .setContentText(body != null ? body : "")
             .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .setColor(0xFFE8604C)
@@ -200,19 +226,30 @@ public class Room8MessagingService extends FirebaseMessagingService {
 
     private void createChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            if (manager == null) return;
+
+            // Alten Channel "room8_default" loeschen — sonst behaelt MIUI die alte
+            // IMPORTANCE_HIGH + mLockscreenVisibility=-1000 Settings cached und
+            // unsere Aenderungen wirken nicht. Channel-ID rotieren ist Standard-Pattern.
+            try {
+                manager.deleteNotificationChannel("room8_default");
+            } catch (Exception ignored) {}
+
             NotificationChannel channel = new NotificationChannel(
-                "room8_default",
+                "room8_v2",
                 "Room8 Benachrichtigungen",
-                NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_MAX
             );
             channel.setDescription("Benachrichtigungen von Room8");
             channel.enableVibration(true);
+            channel.enableLights(true);
             channel.setShowBadge(true);
+            // Kritisch fuer MIUI/Xiaomi: Lockscreen-Sichtbarkeit explizit auf PUBLIC
+            // sonst erbt der Channel mLockscreenVisibility=-1000 = versteckt.
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
 
-            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            if (manager != null) {
-                manager.createNotificationChannel(channel);
-            }
+            manager.createNotificationChannel(channel);
         }
     }
 }

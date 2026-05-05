@@ -255,8 +255,11 @@
             </div>
 
             <div class="form-group">
-                <label>Beschreibung <span class="required">*</span></label>
-                <textarea id="description" required placeholder="Beschreibe das Angebot genauer..."></textarea>
+                <label style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>Beschreibung <span class="required">*</span></span>
+                    <button type="button" id="polishBtn" style="background:linear-gradient(135deg,#8B5CF6,#6366F1); color:white; border:none; padding:0.35rem 0.75rem; border-radius:999px; font-size:0.75rem; font-weight:700; cursor:pointer;">🪄 Mit AI verbessern</button>
+                </label>
+                <textarea id="description" required placeholder="Beschreibe das Angebot — Stichpunkte reichen, AI macht daraus fluessigen Text"></textarea>
             </div>
 
             <div class="form-group">
@@ -311,6 +314,20 @@
                 </div>
             </div>
 
+            <div class="form-group">
+                <label>Logo <span class="required">*</span></label>
+                <input type="file" id="logoImage" accept="image/*" required>
+                <small>Dein Geschaefts-Logo. Wird automatisch auf quadratisch gecroppt — leg's mittig im Bild aus. Max 5 MB.</small>
+                <div id="logoPreview" style="margin-top:0.5rem; display:none;"><img id="logoPreviewImg" style="max-width:120px; max-height:120px; border-radius:8px;"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Cover-Bild <span class="required">*</span></label>
+                <input type="file" id="coverImage" accept="image/*" required>
+                <small>Foto vom Geschaeft / Produkt. Wird automatisch auf 16:9 gecroppt — leg das Wichtigste mittig. Max 5 MB.</small>
+                <div id="coverPreview" style="margin-top:0.5rem; display:none;"><img id="coverPreviewImg" style="max-width:100%; max-height:200px; border-radius:8px;"></div>
+            </div>
+
             <button type="submit" class="submit-btn" id="submitBtn">🎟️ Coupon einreichen</button>
         </form>
 
@@ -327,8 +344,72 @@
 <script src="translations.js"></script>
 <script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
+<script src="image-validator.js"></script>
 <script>
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // AI Polish-Button
+    document.getElementById('polishBtn').addEventListener('click', async function() {
+        var btn = this;
+        var ta = document.getElementById('description');
+        var orig = ta.value.trim();
+        if (orig.length < 5) { alert('Schreib erst ein paar Stichpunkte oder Saetze.'); return; }
+        if (orig.length > 2000) { alert('Text zu lang (max 2000 Zeichen).'); return; }
+        var oldText = btn.innerHTML;
+        btn.innerHTML = '⏳ Verbessere...'; btn.disabled = true;
+        try {
+            var businessName = document.getElementById('businessName').value || '';
+            var category = document.getElementById('category').value || '';
+            var resp = await fetch(SUPABASE_URL + '/functions/v1/polish-text', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+                body: JSON.stringify({ text: orig, type: 'coupon', context: 'Geschaeft: ' + businessName + ', Kategorie: ' + category })
+            });
+            var j = await resp.json();
+            if (j.polished) {
+                if (confirm('AI-Vorschlag uebernehmen?\n\n' + j.polished)) {
+                    ta.value = j.polished;
+                }
+            } else {
+                alert('Fehler: ' + (j.error || 'Unbekannt'));
+            }
+        } catch (e) {
+            alert('Fehler: ' + e.message);
+        } finally {
+            btn.innerHTML = oldText; btn.disabled = false;
+        }
+    });
+
+    function setupImagePreview(inputId, previewId, imgId) {
+        document.getElementById(inputId).addEventListener('change', function(e) {
+            var f = e.target.files[0];
+            if (f && f.size > 5 * 1024 * 1024) { alert('Bild zu gross (max 5 MB)'); this.value=''; return; }
+            if (f) {
+                var r = new FileReader();
+                r.onload = function(ev) {
+                    document.getElementById(imgId).src = ev.target.result;
+                    document.getElementById(previewId).style.display = 'block';
+                };
+                r.readAsDataURL(f);
+            }
+        });
+    }
+    setupImagePreview('logoImage', 'logoPreview', 'logoPreviewImg');
+    setupImagePreview('coverImage', 'coverPreview', 'coverPreviewImg');
+
+    async function uploadImage(file, prefix, aspect) {
+        // Validate + Auto-Crop auf gewuenschtes Aspect-Ratio
+        var blob = await Room8ImageValidator.validateAndCropImage(file, {
+            aspect: aspect,
+            maxWidth: aspect === 'square' ? 800 : 1920,
+            quality: 0.85
+        });
+        var ext = blob.type === 'image/png' ? 'png' : 'jpg';
+        var path = 'partner-uploads/' + prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,8) + '.' + ext;
+        var up = await sb.storage.from('event-images').upload(path, blob, { contentType: blob.type, upsert: false });
+        if (up.error) throw up.error;
+        return path;
+    }
 
     document.getElementById('couponForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -337,6 +418,13 @@
         btn.textContent = 'Wird gesendet...';
 
         try {
+            var logoFile = document.getElementById('logoImage').files[0];
+            var coverFile = document.getElementById('coverImage').files[0];
+            if (!logoFile) throw new Error('Bitte ein Logo hochladen.');
+            if (!coverFile) throw new Error('Bitte ein Cover-Bild hochladen.');
+            var logoPath = await uploadImage(logoFile, 'coupon_logo', 'square');
+            var coverPath = await uploadImage(coverFile, 'coupon_cover', '16:9');
+
             const data = {
                 submission_type: 'coupon',
                 status: 'pending',
@@ -356,6 +444,8 @@
                 website: document.getElementById('website').value || null,
                 phone: document.getElementById('phone').value || null,
                 opening_hours: document.getElementById('openingHours').value || null,
+                logo_image_path: logoPath,
+                cover_image_path: coverPath,
                 submitted_at: new Date().toISOString()
             };
 

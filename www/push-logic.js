@@ -10,6 +10,9 @@
         return window.sb || null;
     }
 
+    // Debug-Trace No-Op (kann fuer Debugging reaktiviert werden)
+    function debugTrace(_step, _msg, _extra) { /* no-op */ }
+
     var PushService = {
 
         isNativeApp: function() {
@@ -28,32 +31,38 @@
         _initialized: false,
 
         init: async function() {
-            if (PushService._initialized) return true;
+            if (PushService._initialized) { debugTrace('S0_already_init', 'init already done'); return true; }
             console.log('Push init - isNative:', PushService.isNativeApp());
+            debugTrace('S1_init_start', 'isNative=' + PushService.isNativeApp());
 
             if (!PushService.isNativeApp()) {
                 console.log('Push: Browser-Modus, Push deaktiviert.');
+                debugTrace('S1b_not_native', 'browser mode, abort');
                 return false;
             }
 
             try {
                 var PushNotifications = window.Capacitor.Plugins.PushNotifications;
                 if (!PushNotifications) {
-                    console.warn('Push: PushNotifications Plugin nicht verfügbar');
+                    console.warn('Push: PushNotifications Plugin nicht verfuegbar');
+                    debugTrace('S2_no_plugin', 'PushNotifications plugin nicht verfuegbar');
                     return false;
                 }
+                debugTrace('S2_plugin_ok', 'plugin verfuegbar');
 
                 await PushNotifications.removeAllListeners();
 
                 // Registration erfolg (FCM/APNs Token)
                 PushNotifications.addListener('registration', function(token) {
                     console.log('Push: Token erhalten:', token.value);
+                    debugTrace('S4_registration_event', 'tokenLen=' + (token.value ? token.value.length : 0), { preview: token.value ? token.value.substring(0, 30) : null });
                     PushService.saveTokenToSupabase(token.value);
                 });
 
                 // Fehler
                 PushNotifications.addListener('registrationError', function(error) {
                     console.error('Push: Registrierungs-Fehler:', JSON.stringify(error));
+                    debugTrace('S4err_registration_error', 'registration failed', error);
                 });
 
                 // Nachricht empfangen (App im Vordergrund)
@@ -78,12 +87,27 @@
                     }
                 });
 
-                PushNotifications.register();
+                // Wichtig: erst checkPermissions, ggf. requestPermissions, DANN register
+                var perm = await PushNotifications.checkPermissions();
+                debugTrace('S3a_checkPermissions', 'receive=' + perm.receive);
+                if (perm.receive !== 'granted') {
+                    var req = await PushNotifications.requestPermissions();
+                    debugTrace('S3b_requestPermissions', 'receive=' + req.receive);
+                    if (req.receive !== 'granted') {
+                        debugTrace('S3_perm_denied', 'abort register');
+                        return false;
+                    }
+                }
+
+                debugTrace('S3_calling_register', 'PushNotifications.register()');
+                await PushNotifications.register();
+                debugTrace('S3_register_returned', 'register awaited');
                 PushService._initialized = true;
                 console.log('Push: Initialisierung abgeschlossen');
                 return true;
             } catch (e) {
                 console.error('Push init Fehler:', e);
+                debugTrace('S_init_exception', e && e.message ? e.message : String(e));
                 return false;
             }
         },
@@ -92,7 +116,7 @@
             console.log('Push requestPermission called');
 
             if (!PushService.isNativeApp()) {
-                console.warn('Push nur in nativer App verfügbar');
+                console.warn('Push nur in nativer App verfuegbar');
                 return false;
             }
 
@@ -121,10 +145,18 @@
         saveTokenToSupabase: async function(token) {
             console.log('💾 Speichere FCM Token in Supabase...');
 
+            // FCM-Tokens enthalten immer ":APA91b" (oder ":APx" bei Web).
+            // APNs-Hex-Tokens (64 Zeichen, nur 0-9a-f) sind KEINE FCM-Tokens
+            // und wuerden FCM dazu bringen den Token zu invalidieren.
+            if (!token || token.indexOf(':') < 0) {
+                console.warn('Push: Token sieht nicht wie FCM aus (kein Doppelpunkt), skip save:', token ? token.substring(0, 30) : 'empty');
+                return;
+            }
+
             var sb = getSupabaseClient();
             if (!sb) {
-                console.error('Push: Supabase Client nicht verfügbar');
-                // Retry nach 3 Sekunden
+                console.error('Push: Supabase Client nicht verfuegbar');
+                debugTrace('S6err_no_sb', 'window.sb null, retry');
                 setTimeout(function() {
                     PushService.saveTokenToSupabase(token);
                 }, 3000);
@@ -136,33 +168,41 @@
                 var user = response.data ? response.data.user : null;
                 if (!user) {
                     console.warn('Push: Kein User eingeloggt, retry in 3s...');
+                    debugTrace('S6err_no_user', 'auth.getUser empty, retry');
                     setTimeout(function() {
                         PushService.saveTokenToSupabase(token);
                     }, 3000);
                     return;
                 }
 
-                // Erst Token bei ALLEN anderen Usern löschen (gleiches Gerät, anderer Account)
-                await sb
-                    .from('profiles')
-                    .update({ fcm_token: null })
-                    .eq('fcm_token', token)
-                    .neq('id', user.id);
+                // SECURITY DEFINER RPC mit Multi-Device-Support (Migration 20260504000007).
+                // Schreibt in fcm_tokens-Tabelle (eine Zeile pro Device) + Legacy-
+                // profiles.fcm_token. Platform-Detection via Capacitor falls verfuegbar.
+                var platform = 'unknown';
+                try {
+                    if (window.Capacitor && window.Capacitor.getPlatform) {
+                        platform = window.Capacitor.getPlatform(); // 'android' | 'ios' | 'web'
+                    } else if (/Android/i.test(navigator.userAgent)) {
+                        platform = 'android';
+                    } else if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                        platform = 'ios';
+                    } else {
+                        platform = 'web';
+                    }
+                } catch (_) { platform = 'unknown'; }
 
-                // Dann beim aktuellen User setzen
-                var result = await sb
-                    .from('profiles')
-                    .update({ fcm_token: token })
-                    .eq('id', user.id);
+                var result = await sb.rpc('register_fcm_token', { p_token: token, p_platform: platform });
 
                 if (result.error) {
                     console.error('Push: Token speichern fehlgeschlagen:', result.error);
+                    debugTrace('S6err_update_failed', result.error.message || JSON.stringify(result.error));
                 } else {
-                    console.log('✅ FCM Token gespeichert, alte Zuordnungen bereinigt.');
-                    localStorage.setItem('push_token', token);
+                    console.log('✅ FCM Token registriert via RPC.');
+                    debugTrace('S7_save_ok', 'OK uid=' + user.id.substring(0, 8));
                 }
             } catch (e) {
                 console.error('Push: saveToken Fehler:', e);
+                debugTrace('S6_exception', e && e.message ? e.message : String(e));
             }
         },
 
@@ -196,8 +236,8 @@
                 }
                 // Fallback: Native Bridge via webkit messageHandler
                 if (window.webkit && window.webkit.messageHandlers) {
-                    // Badge über iOS native setzen (wird von AppDelegate beim nächsten Aufruf gesetzt)
-                    console.log('Badge count für native:', count);
+                    // Badge ueber iOS native setzen (wird von AppDelegate beim naechsten Aufruf gesetzt)
+                    console.log('Badge count fuer native:', count);
                 }
                 console.log('Badge count:', count);
             } catch (e) {
@@ -207,27 +247,31 @@
 
         // Auto-Initialisierung — auf nativen Apps IMMER init (Token muss gespeichert werden)
         autoInit: function() {
-            if (PushService.isNativeApp() || localStorage.getItem('push_enabled') === 'true') {
+            var native = PushService.isNativeApp();
+            var enabled = localStorage.getItem('push_enabled') === 'true';
+            debugTrace('S0_autoInit', 'native=' + native + ' enabled=' + enabled);
+            if (native || enabled) {
                 PushService.init();
             }
         }
     };
 
-    // Global verfügbar machen
+    // Global verfuegbar machen
     window.PushService = PushService;
     window.updateAppBadge = function() { PushService.updateAppBadge(); };
 
-    // FCM Token Listener - bei JEDEM Event speichern (wichtig für Account-Wechsel)
+    // FCM Token Listener - bei JEDEM Event speichern (wichtig fuer Account-Wechsel)
     window.addEventListener('fcmToken', async function(e) {
         var token = e.detail;
         console.log('📱 FCM Token Event empfangen:', token ? token.substring(0, 20) + '...' : 'leer');
+        debugTrace('S5_fcmToken_event', 'tokenLen=' + (token ? token.length : 0), { preview: token ? token.substring(0, 30) : null });
         if (token) {
             await PushService.saveTokenToSupabase(token);
         }
     });
 
     // Token-Refresh wird bereits vom fcmToken Event-Handler abgedeckt.
-    // Kein Re-Save aus localStorage nötig (verhindert Dual-Account-Bug).
+    // Kein Re-Save aus localStorage noetig (verhindert Dual-Account-Bug).
 
     // Auto-Init wenn Push schon erlaubt
     if (document.readyState === 'loading') {

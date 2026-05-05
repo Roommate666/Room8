@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <script src="sentry-init.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <title>Partner-Dashboard - Room8</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: linear-gradient(160deg, #EFF6FF 0%, #F7F7F5 60%, #FFE7DE 100%); min-height: 100vh; }
+        .pd-wrap { max-width: 720px; margin: 0 auto; padding: calc(1.25rem + env(safe-area-inset-top, 0px)) 1.25rem 8rem; }
+        .pd-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .pd-greeting h1 { font-size: 1.4rem; font-weight: 800; color: #1A1A2E; margin: 0; }
+        .pd-greeting p { color: #6B7280; font-size: 0.85rem; margin: 0.25rem 0 0; }
+        .pd-logout { background: transparent; border: 1px solid #E5E7EB; padding: 0.5rem 0.85rem; border-radius: 999px; color: #374151; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+
+        .pd-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.5rem; }
+        .pd-action-card { background: white; border-radius: 1rem; padding: 1rem; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.05); text-decoration: none; color: inherit; transition: transform 0.2s; }
+        .pd-action-card:active { transform: scale(0.97); }
+        .pd-action-card .icon { font-size: 1.6rem; margin-bottom: 0.4rem; }
+        .pd-action-card .label { font-weight: 700; font-size: 0.85rem; color: #1A1A2E; }
+        @media (max-width: 480px) { .pd-action-card .label { font-size: 0.78rem; } }
+
+        .pd-section { background: white; border-radius: 1rem; padding: 1.25rem; margin-bottom: 1rem; box-shadow: 0 4px 16px rgba(0,0,0,0.05); }
+        .pd-section h2 { font-size: 1rem; font-weight: 700; color: #1A1A2E; margin: 0 0 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+        .pd-section h2 .count { background: #EFF6FF; color: #2563EB; padding: 0.15rem 0.55rem; border-radius: 999px; font-size: 0.75rem; }
+
+        .pd-item { padding: 0.75rem; background: #F9FAFB; border: 1px solid #F3F4F6; border-radius: 12px; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; }
+        .pd-item .meta { flex: 1; }
+        .pd-item .meta .title { font-weight: 700; font-size: 0.95rem; color: #1A1A2E; }
+        .pd-item .meta .sub { font-size: 0.78rem; color: #6B7280; margin-top: 0.2rem; }
+        .pd-item .status { font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.55rem; border-radius: 999px; white-space: nowrap; }
+        .status-active { background: #DCFCE7; color: #166534; }
+        .status-pending { background: #FEF3C7; color: #92400E; }
+        .status-rejected { background: #FEE2E2; color: #991B1B; }
+        .status-inactive { background: #F3F4F6; color: #6B7280; }
+
+        .pd-empty { text-align: center; color: #9CA3AF; font-size: 0.85rem; padding: 1rem; }
+
+        .pd-cta-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; border-top: 1px solid #E5E7EB;
+            padding: 0.85rem 1.25rem calc(0.85rem + env(safe-area-inset-bottom));
+            display: flex; gap: 0.5rem; justify-content: space-around;
+            z-index: 100;
+        }
+        .pd-cta-bar a {
+            flex: 1; text-align: center; padding: 0.6rem 0.4rem; text-decoration: none;
+            color: #6B7280; font-size: 0.75rem; font-weight: 600;
+        }
+        .pd-cta-bar a .icon { display: block; font-size: 1.2rem; margin-bottom: 0.15rem; }
+        .pd-cta-bar a.active { color: #3B82F6; }
+    </style>
+</head>
+<body>
+
+<div class="pd-wrap">
+    <div class="pd-header">
+        <div class="pd-greeting">
+            <h1 id="greetingName">Partner-Dashboard</h1>
+            <p id="greetingSub">Verwalte deine Inserate</p>
+        </div>
+        <button class="pd-logout" onclick="logout()">Abmelden</button>
+    </div>
+
+    <!-- Quick Actions (gefiltert nach Permissions) -->
+    <div class="pd-actions" id="quickActions">
+        <a href="partner-job.html" class="pd-action-card" data-perm="partner_can_jobs">
+            <div class="icon">💼</div>
+            <div class="label">Job einreichen</div>
+        </a>
+        <a href="partner-coupon.html" class="pd-action-card" data-perm="partner_can_coupons">
+            <div class="icon">🎟️</div>
+            <div class="label">Coupon einreichen</div>
+        </a>
+        <a href="partner-event.html" class="pd-action-card" data-perm="partner_can_events">
+            <div class="icon">🎉</div>
+            <div class="label">Event einreichen</div>
+        </a>
+    </div>
+
+    <!-- Meine Submissions (eingereicht, noch in Pruefung) -->
+    <div class="pd-section">
+        <h2>📥 Eingereicht <span class="count" id="cntPending">0</span></h2>
+        <div id="submissionsList"><div class="pd-empty">Lädt...</div></div>
+    </div>
+
+    <!-- Live Inhalte (genehmigt + active) -->
+    <div class="pd-section">
+        <h2>🟢 Live in der App <span class="count" id="cntActive">0</span></h2>
+        <div id="activeList"><div class="pd-empty">Lädt...</div></div>
+    </div>
+
+    <!-- Stats später erweiterbar -->
+    <div class="pd-section" style="background:linear-gradient(135deg,#EFF6FF,#ECFEFF);">
+        <h2>📊 Erreichbarkeit</h2>
+        <p style="color:#1E40AF; font-size:0.85rem; margin:0;">Sobald deine Anzeige live ist, schicken wir Push-Notifications an Studenten in deiner Stadt.</p>
+    </div>
+</div>
+
+<div class="pd-cta-bar">
+    <a href="partner-dashboard.html" class="active"><span class="icon">🏠</span>Dashboard</a>
+    <a href="partner-job.html"><span class="icon">➕</span>Neues Inserat</a>
+    <a href="profile.html?from=partner"><span class="icon">👤</span>Profil</a>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="room8-utils.js"></script>
+<script src="room8-ui.js"></script>
+<script>
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    (async function init() {
+        var sessRes = await sb.auth.getSession();
+        if (!sessRes.data.session) {
+            window.location.href = 'login.html';
+            return;
+        }
+        var user = sessRes.data.session.user;
+
+        // Profil laden + Rolle pruefen
+        var profileRes = await sb.from('profiles').select('username, full_name, is_partner, partner_business_name, is_admin, partner_can_jobs, partner_can_coupons, partner_can_events').eq('id', user.id).maybeSingle();
+        var profile = profileRes.data || {};
+
+        // Wenn nicht Partner und nicht Admin -> normales Dashboard
+        if (!profile.is_partner && !profile.is_admin) {
+            window.location.replace('dashboard.html');
+            return;
+        }
+
+        document.getElementById('greetingName').textContent = 'Hi, ' + (profile.partner_business_name || profile.full_name || profile.username || 'Partner');
+        document.getElementById('greetingSub').textContent = profile.is_admin ? 'Admin-Ansicht' : 'Partner-Ansicht';
+
+        // Quick-Actions filtern: nur die Permissions zeigen die der Partner hat (Admin sieht alles)
+        if (!profile.is_admin) {
+            document.querySelectorAll('#quickActions [data-perm]').forEach(function(card) {
+                var perm = card.getAttribute('data-perm');
+                if (!profile[perm]) card.style.display = 'none';
+            });
+        }
+
+        await loadSubmissions(user.id);
+        await loadActive(user.id);
+    })();
+
+    async function loadSubmissions(userId) {
+        var listEl = document.getElementById('submissionsList');
+        // partner_submissions sucht nach contact_email vom user
+        var u = await sb.auth.getUser();
+        var email = u.data.user.email;
+        var res = await sb.from('partner_submissions')
+            .select('id, submission_type, title, business_name, city, status, submitted_at')
+            .eq('contact_email', email)
+            .order('submitted_at', { ascending: false })
+            .limit(10);
+        if (res.error || !res.data || res.data.length === 0) {
+            listEl.innerHTML = '<div class="pd-empty">Keine offenen Anträge</div>';
+            document.getElementById('cntPending').textContent = '0';
+            return;
+        }
+        var pending = res.data.filter(function(r) { return r.status === 'pending'; });
+        document.getElementById('cntPending').textContent = pending.length;
+
+        listEl.innerHTML = res.data.map(function(s) {
+            var icon = s.submission_type === 'job' ? '💼' : (s.submission_type === 'coupon' ? '🎟️' : '🎉');
+            var statusClass = 'status-' + (s.status === 'approved' ? 'active' : (s.status === 'rejected' ? 'rejected' : 'pending'));
+            var statusLabel = s.status === 'approved' ? '✅ Genehmigt' : (s.status === 'rejected' ? '❌ Abgelehnt' : '⏳ In Prüfung');
+            var dt = new Date(s.submitted_at).toLocaleDateString('de-DE');
+            return '<div class="pd-item">' +
+                '<div class="meta">' +
+                    '<div class="title">' + icon + ' ' + Room8.escapeHtml(s.title || s.business_name || '-') + '</div>' +
+                    '<div class="sub">' + Room8.escapeHtml(s.city || '') + ' · ' + dt + '</div>' +
+                '</div>' +
+                '<div class="status ' + statusClass + '">' + statusLabel + '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    async function loadActive(userId) {
+        var listEl = document.getElementById('activeList');
+        var items = [];
+
+        // Listings (jobs, gegenstand, wohnung) wo owner = user
+        var listRes = await sb.from('listings').select('id, type, title, city, is_active').eq('owner_id', userId).eq('is_active', true).limit(20);
+        (listRes.data || []).forEach(function(l) {
+            var icon = l.type === 'job' ? '💼' : (l.type === 'wohnung' ? '🏠' : '📦');
+            items.push({ icon: icon, title: l.title, city: l.city, status: 'active', id: l.id, type: 'listing-' + l.type });
+        });
+        // Coupons
+        var coupRes = await sb.from('coupons').select('id, title, business_name, city, status').eq('user_id', userId).eq('status', 'active').limit(20);
+        (coupRes.data || []).forEach(function(c) {
+            items.push({ icon: '🎟️', title: c.title || c.business_name, city: c.city, status: 'active', id: c.id, type: 'coupon' });
+        });
+        // Events
+        var evRes = await sb.from('events').select('id, title, city, status').eq('organizer_id', userId).eq('status', 'active').limit(20);
+        (evRes.data || []).forEach(function(e) {
+            items.push({ icon: '🎉', title: e.title, city: e.city, status: 'active', id: e.id, type: 'event' });
+        });
+
+        document.getElementById('cntActive').textContent = items.length;
+        if (items.length === 0) {
+            listEl.innerHTML = '<div class="pd-empty">Noch keine Live-Inhalte</div>';
+            return;
+        }
+        listEl.innerHTML = items.map(function(it) {
+            return '<div class="pd-item">' +
+                '<div class="meta">' +
+                    '<div class="title">' + it.icon + ' ' + Room8.escapeHtml(it.title || '-') + '</div>' +
+                    '<div class="sub">' + Room8.escapeHtml(it.city || '') + '</div>' +
+                '</div>' +
+                '<div class="status status-active">🟢 Live</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    async function logout() {
+        await sb.auth.signOut();
+        window.location.href = 'login.html';
+    }
+</script>
+
+</body>
+</html>

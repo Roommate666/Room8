@@ -92,6 +92,15 @@ adb install -r android/app/build/outputs/apk/debug/app-debug.apk
 
 # Supabase Migration
 npx supabase db push
+
+# Edge Function Deploy — IMMER --no-verify-jwt!
+# send-push, send-email, get-signed-url werden von DB-Triggern via pg_net.http_post
+# aufgerufen. pg_net schickt nur x-internal-secret Header, KEIN Authorization Bearer.
+# Ohne --no-verify-jwt blockt die Supabase Gateway den Call mit 401
+# UNAUTHORIZED_NO_AUTH_HEADER und die ganze Push/Mail-Pipeline ist tot.
+npx supabase functions deploy send-push --no-verify-jwt
+npx supabase functions deploy send-email --no-verify-jwt
+npx supabase functions deploy get-signed-url --no-verify-jwt
 ```
 
 ## Features (Seiten)

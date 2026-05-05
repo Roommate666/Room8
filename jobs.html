@@ -6,11 +6,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Jobs - Room8</title>
     <meta name="description" content="Entdecke Studentenjobs in deiner Nähe. Nebenjobs, Werkstudentenstellen und mehr auf Room8.">
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
     <style>
         .app-container { --primary-color: #8B5CF6; --primary-dark: #7C3AED; background-color: #f3f4f6; padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px); }
-        
-        /* HEADER - Luftiger */
+
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0px); transform: translateY(0); }
+        }
+
+        /* HEADER */
         .app-header {
             display: grid;
             grid-template-columns: 40px 1fr 40px;
@@ -21,23 +31,25 @@
             box-shadow: 0 4px 20px rgba(139, 92, 246, 0.25);
             margin-bottom: 1.25rem;
         }
-        
+
         .back-btn {
             color: white; text-decoration: none;
             display: flex; align-items: center; justify-content: center;
         }
-        
+
         .app-header h1 {
             color: white; margin: 0; font-size: 1.5rem; font-weight: 800;
             text-align: center;
             letter-spacing: -0.02em;
         }
-        
-        /* Example Banner */
+
+        /* Example Banner - Pattern: Glasmorphismus */
         .example-banner {
-            background: #F7F7F5;
-            border: 1px solid #EBEBEB;
-            border-radius: 12px;
+            background: rgba(245,243,255,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(139,92,246,0.12);
+            border-radius: 14px;
             padding: 0.75rem 1rem;
             margin: 0 1.5rem 1rem;
             display: flex;
@@ -45,28 +57,42 @@
             gap: 0.75rem;
             font-size: 0.85rem;
             color: #5B21B6;
+            animation: blurFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
         }
-        
+
         .example-banner-icon { font-size: 1.25rem; }
         .example-banner-text { flex: 1; }
         .example-banner-text strong { display: block; font-size: 0.9rem; }
-        
-        /* Partner Banner */
+
+        /* Partner Banner - Pattern: Magic UI MagicCard */
         .partner-banner {
-            background: white; border-radius: 12px; padding: 1rem; margin: 0 1.5rem 1.5rem;
-            border: 1px solid #E5E7EB; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px; padding: 1.25rem; margin: 0 1.5rem 1.5rem;
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
+            text-align: center;
+            animation: blurFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
         }
-        .partner-banner h3 { margin: 0 0 0.5rem 0; font-size: 1rem; color: var(--text-main); }
+        .partner-banner h3 { margin: 0 0 0.5rem 0; font-size: 1rem; color: var(--text-main); font-weight: 700; }
         .partner-banner p { margin: 0 0 0.75rem 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; }
-        .partner-email { display: inline-block; background: #F3F4F6; color: var(--primary-color); font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-size: 0.9rem; }
-        
-        /* ============================================
-           SHOWCASE JOB - Ausgeklapptes Beispiel
-           ============================================ */
+        .partner-email {
+            display: inline-block; background: rgba(139,92,246,0.08); color: #7C3AED;
+            font-weight: 600; padding: 0.5rem 1.25rem; border-radius: 999px;
+            text-decoration: none; font-size: 0.9rem;
+            border: 1px solid rgba(139,92,246,0.15);
+            transition: transform 0.2s;
+        }
+        .partner-email:active { transform: scale(0.97); }
+
+        /* SHOWCASE JOB */
         .showcase-section {
             margin: 0 1.5rem 1.5rem;
+            animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
         }
-        
+
+        /* Pattern: Kibo UI Pill fuer Label */
         .showcase-label {
             display: inline-flex;
             align-items: center;
@@ -75,88 +101,91 @@
             color: white;
             font-size: 0.75rem;
             font-weight: 700;
-            padding: 0.4rem 0.75rem;
-            border-radius: 8px 8px 0 0;
+            padding: 0.4rem 0.85rem;
+            border-radius: 999px 999px 0 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        
+
         .showcase-card {
             background: white;
-            border-radius: 0 16px 16px 16px;
+            border-radius: 0 20px 20px 20px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.15);
-            border: 2px solid #8B5CF6;
+            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.12);
+            border: 1.5px solid rgba(139,92,246,0.2);
         }
-        
+
         .showcase-hero {
-            background: #F7F7F5;
+            background: linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 100%);
             padding: 1.5rem;
             display: flex;
             gap: 1rem;
             align-items: center;
         }
-        
+
         .showcase-logo {
-            width: 70px;
-            height: 70px;
-            border-radius: 14px;
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
             background: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-size: 1.75rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
             flex-shrink: 0;
         }
-        
+
         .showcase-header-info { flex: 1; }
-        .showcase-title { font-size: 1.2rem; font-weight: 700; color: #1F2937; margin: 0 0 0.25rem 0; }
-        .showcase-company { font-size: 0.9rem; color: #6B7280; margin-bottom: 0.5rem; }
-        .showcase-salary { 
-            display: inline-block;
+        .showcase-title { font-size: 1.15rem; font-weight: 800; color: #1F2937; margin: 0 0 0.25rem 0; letter-spacing: -0.01em; }
+        .showcase-company { font-size: 0.85rem; color: #6B7280; margin-bottom: 0.5rem; }
+        /* Pattern: Kibo UI Pill */
+        .showcase-salary {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
             background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
             color: white;
             font-weight: 700;
-            padding: 0.3rem 0.6rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
+            padding: 0.3rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
         }
-        
+
         .showcase-info-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             border-bottom: 1px solid #F3F4F6;
         }
-        
+
         .showcase-info-item {
-            padding: 1rem;
+            padding: 0.85rem 0.5rem;
             text-align: center;
             border-right: 1px solid #F3F4F6;
         }
-        
+
         .showcase-info-item:last-child { border-right: none; }
-        
+
         .showcase-info-label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: #9CA3AF;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.2rem;
         }
-        
+
         .showcase-info-value {
-            font-weight: 600;
-            font-size: 0.85rem;
+            font-weight: 700;
+            font-size: 0.8rem;
             color: #374151;
         }
-        
+
         .showcase-content {
             padding: 1.25rem;
         }
-        
+
         .showcase-section-title {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
             color: #1F2937;
             margin: 0 0 0.75rem 0;
@@ -164,115 +193,183 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         .showcase-section-title span {
             font-size: 1.1rem;
         }
-        
+
         .showcase-description {
             color: #4B5563;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             line-height: 1.6;
             margin-bottom: 1.25rem;
         }
-        
+
         .showcase-list {
             list-style: none;
             padding: 0;
             margin: 0 0 1.25rem 0;
         }
-        
+
         .showcase-list li {
             padding: 0.5rem 0;
             padding-left: 1.75rem;
             position: relative;
             color: #4B5563;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             border-bottom: 1px solid #F9FAFB;
         }
-        
+
         .showcase-list li:last-child { border-bottom: none; }
-        
+
         .showcase-list li::before {
-            content: '✓';
+            content: '';
             position: absolute;
-            left: 0;
-            color: #10B981;
-            font-weight: 700;
+            left: 0; top: 0.75rem;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #10B981;
+            box-shadow: 0 0 4px rgba(16,185,129,0.5);
         }
-        
+
         .showcase-list.benefits li::before {
-            content: '★';
-            color: #F59E0B;
+            background: #F59E0B;
+            box-shadow: 0 0 4px rgba(245,158,11,0.5);
         }
-        
+
+        /* Pattern: Magic UI ShimmerButton */
         .showcase-apply-btn {
             width: 100%;
-            padding: 1rem;
+            padding: 0.9rem;
             background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
             color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 999px;
             font-size: 1rem;
             font-weight: 700;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s;
         }
-        
+        .showcase-apply-btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmerSlide 3s ease-in-out infinite;
+        }
+        @keyframes shimmerSlide {
+            0%, 100% { left: -100%; }
+            50% { left: 100%; }
+        }
+        .showcase-apply-btn:active { transform: scale(0.98); }
+
         .showcase-footer {
-            background: #F9FAFB;
-            padding: 1rem 1.25rem;
+            background: #FAFAFB;
+            padding: 0.85rem 1.25rem;
             display: flex;
             align-items: center;
             gap: 0.75rem;
             font-size: 0.8rem;
             color: #6B7280;
         }
-        
+
         .showcase-footer-icon { font-size: 1.25rem; }
-        
+
         /* Search & Filter */
         .search-section { padding: 0 1.5rem 1rem; }
-        .search-bar { position: relative; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 999px; }
-        .search-bar input { width: 100%; padding: 0.9rem 1rem 0.9rem 3rem; border-radius: 999px; border: 1px solid white; font-size: 1rem; background: white; }
-        .search-bar input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1); }
+        .search-bar { position: relative; margin-bottom: 1rem; border-radius: 999px; }
+        .search-bar input {
+            width: 100%; padding: 0.85rem 1rem 0.85rem 3rem; border-radius: 999px;
+            border: 1.5px solid #E5E7EB; font-size: 0.95rem; background: white;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .search-bar input:focus { outline: none; border-color: #8B5CF6; box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.08); }
         .search-icon { position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; }
-        
-        .filter-bar { display: flex; gap: 0.6rem; overflow-x: auto; padding-bottom: 0.5rem; scrollbar-width: none; }
+
+        /* Pattern: Kibo UI Pill fuer Filter */
+        .filter-bar { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; scrollbar-width: none; }
         .filter-bar::-webkit-scrollbar { display: none; }
-        .filter-btn { padding: 0.5rem 1.2rem; border-radius: 999px; border: 1px solid rgba(0,0,0,0.05); background-color: white; color: #4b5563; font-size: 0.9rem; white-space: nowrap; cursor: pointer; font-weight: 600; transition: all 0.2s; }
-        .filter-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
-        
+        .filter-btn {
+            padding: 0.45rem 1rem; border-radius: 999px; border: 1.5px solid rgba(0,0,0,0.06);
+            background-color: white; color: #4b5563; font-size: 0.85rem;
+            white-space: nowrap; cursor: pointer; font-weight: 600;
+            transition: all 0.2s;
+        }
+        .filter-btn.active { background: #8B5CF6; color: white; border-color: #8B5CF6; box-shadow: 0 4px 12px rgba(139,92,246,0.25); }
+
         .section-title {
             padding: 0 1.5rem;
             margin-bottom: 1rem;
             font-size: 1rem;
             font-weight: 700;
             color: #374151;
+            letter-spacing: -0.01em;
         }
-        
-        .jobs-list { padding: 0 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
-        
-        /* Job Card */
-        .job-card { background: white; border-radius: 16px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid transparent; transition: all 0.2s; cursor: pointer; display: flex; gap: 1rem; align-items: center; position: relative; }
-        .job-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
-        
-        .example-badge { position: absolute; top: 0.5rem; right: 0.5rem; background: #FEF3C7; color: #D97706; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; }
-        
-        .job-logo { width: 60px; height: 60px; border-radius: 12px; background: #F3F4F6; color: #9CA3AF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.5rem; flex-shrink: 0; }
-        
+
+        .jobs-list { padding: 0 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
+
+        /* Job Card - Pattern: MagicCard Glasmorphismus */
+        .job-card {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 18px; padding: 1rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            border: 1px solid rgba(255,255,255,0.6);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer; display: flex; gap: 1rem; align-items: center; position: relative;
+            animation: blurFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+        .job-card:active { transform: scale(0.98); box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+
+        /* Pattern: Kibo UI Pill fuer Badge */
+        .example-badge {
+            position: absolute; top: 0.6rem; right: 0.6rem;
+            background: rgba(254,243,199,0.9); color: #D97706;
+            font-size: 0.6rem; padding: 3px 8px; border-radius: 999px;
+            font-weight: 700; text-transform: uppercase;
+            border: 1px solid rgba(217,119,6,0.15);
+        }
+
+        .job-logo {
+            width: 56px; height: 56px; border-radius: 14px;
+            background: linear-gradient(135deg, #F3E8FF, #EDE9FE);
+            color: #7C3AED;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1.4rem; flex-shrink: 0;
+        }
+
         .job-content { flex: 1; min-width: 0; }
-        .job-title { font-size: 1rem; font-weight: 700; margin: 0 0 0.2rem 0; color: var(--text-main); }
-        .job-company { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; }
-        .job-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
-        .job-tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 6px; background: #F3F4F6; color: var(--text-muted); font-weight: 500; }
-        .job-salary { font-size: 0.9rem; font-weight: 700; color: var(--primary-color); }
-        
+        .job-title { font-size: 0.95rem; font-weight: 700; margin: 0 0 0.15rem 0; color: var(--text-main); letter-spacing: -0.01em; }
+        .job-company { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.4rem; }
+        .job-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
+        /* Pattern: Kibo UI Pill + Status Dot */
+        .job-tag {
+            font-size: 0.7rem; padding: 3px 8px; border-radius: 999px;
+            background: rgba(139,92,246,0.06); color: #6D28D9;
+            font-weight: 600; border: 1px solid rgba(139,92,246,0.1);
+        }
+        .job-salary {
+            font-size: 0.9rem; font-weight: 800;
+            background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         @media (max-width: 500px) {
             .showcase-info-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
             .showcase-info-item:nth-child(2) { border-right: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .example-banner, .partner-banner, .showcase-section, .job-card { animation: none; opacity: 1; }
+            .showcase-apply-btn::after { animation: none; }
         }
     </style>
 </head>
@@ -365,12 +462,6 @@
         </div>
     </div>
     
-    <!-- Partner Banner -->
-    <div class="partner-banner">
-        <h3>Für Unternehmen</h3>
-        <p>Sie möchten hier eine Stelle ausschreiben? Kontaktieren Sie uns direkt für eine Partnerschaft.</p>
-        <a href="mailto:admin@room8.club" class="partner-email">admin@room8.club</a>
-    </div>
     
     <div class="search-section">
         <div class="search-bar">
@@ -399,6 +490,7 @@
 <script src="config.js"></script>
 <script src="translations.js"></script>
 <script src="session-cache.js"></script>
+<script src="room8-utils.js"></script>
 <script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
@@ -458,35 +550,40 @@
         }
     ];
     
+    var esc = (Room8 && Room8.escapeHtml) ? Room8.escapeHtml : function(s) {
+        return (s == null ? '' : String(s)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    };
+
     function renderJobCard(job) {
         var logoContent = '';
         if (job.listing_photos && job.listing_photos.length > 0) {
             var path = job.listing_photos[0].storage_path;
             var urlData = sb.storage.from('listing-images').getPublicUrl(path);
-            if (urlData.data) logoContent = '<img src="' + urlData.data.publicUrl + '" class="job-logo" style="object-fit:cover;">';
+            if (urlData.data) logoContent = '<img src="' + encodeURI(urlData.data.publicUrl) + '" class="job-logo" loading="lazy" style="object-fit:cover;">';
         } else if (job.logo) {
-            logoContent = '<div class="job-logo">' + job.logo + '</div>';
+            logoContent = '<div class="job-logo">' + esc(job.logo) + '</div>';
         } else {
-            logoContent = '<div class="job-logo">' + (job.company_name || 'J').charAt(0).toUpperCase() + '</div>';
+            logoContent = '<div class="job-logo">' + esc((job.company_name || 'J').charAt(0).toUpperCase()) + '</div>';
         }
-        
+
         var salary = job.salary_amount ? (job.salary_amount + ' €') : 'Verhandlung';
-        if(job.salary_type === 'per_month') salary += ' / Monat'; 
+        if(job.salary_type === 'per_month') salary += ' / Monat';
         else if(job.salary_type === 'per_hour') salary += ' / Std';
-        
+
         var jobTypeLabels = { 'werkstudent': 'Werkstudent', 'minijob': 'Minijob', 'praktikum': 'Praktikum', 'teilzeit': 'Teilzeit', 'vollzeit': 'Vollzeit' };
         var jobType = jobTypeLabels[job.job_type] || (job.job_type ? job.job_type.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }) : 'Job');
         var badge = job.is_demo ? '<span class="example-badge">BEISPIEL</span>' : '';
-        var clickAction = job.is_demo ? 'onclick="Room8UI.info(\'Dies ist ein Beispiel-Inserat.\')"' : 'onclick="navigateTo(\'job-detail.html?id=' + job.id + '\')"';
+        var safeId = encodeURIComponent(job.id || '');
+        var clickAction = job.is_demo ? 'onclick="Room8UI.info(\'Dies ist ein Beispiel-Inserat.\')"' : 'onclick="navigateTo(\'job-detail.html?id=' + esc(safeId) + '\')"';
 
         return '<div class="job-card" ' + clickAction + '>' +
                 badge +
                 logoContent +
                 '<div class="job-content">' +
-                    '<div class="job-title">' + job.title + '</div>' +
-                    '<div class="job-company">' + (job.company_name || 'Privat') + ' • ' + (job.city || 'Remote') + '</div>' +
-                    '<div class="job-tags"><span class="job-tag">' + jobType + '</span><span class="job-tag">🕐 ' + (job.min_hours_per_week || 10) + 'h</span></div>' +
-                    '<div class="job-salary">' + salary + '</div>' +
+                    '<div class="job-title">' + esc(job.title) + '</div>' +
+                    '<div class="job-company">' + esc(job.company_name || 'Privat') + ' • ' + esc(job.city || 'Remote') + '</div>' +
+                    '<div class="job-tags"><span class="job-tag">' + esc(jobType) + '</span><span class="job-tag">🕐 ' + esc(job.min_hours_per_week || 10) + 'h</span></div>' +
+                    '<div class="job-salary">' + esc(salary) + '</div>' +
                 '</div>' +
             '</div>';
     }
@@ -494,9 +591,11 @@
     function renderJobs(jobs) {
         jobsContainer.innerHTML = '';
         if (jobs && jobs.length > 0) {
-            jobs.forEach(function(j) { 
-                jobsContainer.innerHTML += renderJobCard(j); 
+            var html = '';
+            jobs.forEach(function(j) {
+                html += renderJobCard(j);
             });
+            jobsContainer.innerHTML = html;
         } else {
             jobsContainer.innerHTML = '<div style="text-align:center; padding:3rem; color:#9ca3af;">Keine Jobs gefunden</div>';
         }
@@ -518,6 +617,7 @@
             .select('*, listing_photos(storage_path)')
             .eq('type', 'job')
             .eq('is_active', true)
+            .eq('is_test', false)
             .order('created_at', { ascending: false })
             .then(function(res) {
                 console.log("Jobs geladen:", res);

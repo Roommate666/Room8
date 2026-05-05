@@ -1,49 +1,133 @@
 import UIKit
 import Capacitor
+import Firebase
+import FirebaseMessaging
+import WebKit
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate, UNUserNotificationCenterDelegate {
 
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Firebase init - liest GoogleService-Info.plist aus dem Bundle
+        FirebaseApp.configure()
+
+        // FCM Messaging Delegate setzen, damit didReceiveRegistrationToken
+        // unten gefeuert wird.
+        Messaging.messaging().delegate = self
+
+        // UN UserNotificationCenter delegate fuer Foreground-Push
+        UNUserNotificationCenter.current().delegate = self
+
         return true
     }
 
-    func applicationWillResignActive(_ application: UIApplication) {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-        // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
+    // APNs Token vom System bekommen → an FCM weitergeben.
+    // Capacitor PushNotifications plugin handhabt die Permission-Anfrage,
+    // aber wir muessen den raw APNs-Token in Firebase Messaging einkippen
+    // damit der FCM-Token-Mapping-Layer aktiv wird.
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        // 1. Firebase Messaging APNs-Token zuweisen (fuer FCM-Token-Mapping)
+        Messaging.messaging().apnsToken = deviceToken
+        // 2. Capacitor PushNotifications-Plugin benachrichtigen damit JS 'registration' Event feuert
+        // ABER: wir geben dem Plugin eine LEERE Data weil der "richtige" Token der FCM-Token ist (siehe unten)
+        // Es ist OK den APNs-Token zu posten - der wird in JS eh ueberschrieben sobald FCM-Token kommt.
+        NotificationCenter.default.post(
+            name: .capacitorDidRegisterForRemoteNotifications,
+            object: deviceToken
+        )
+
+        // 3. FCM-Token aktiv abfragen (bei FirebaseAppDelegateProxyEnabled=false noetig)
+        Messaging.messaging().token { [weak self] token, error in
+            if let error = error {
+                NSLog("Push: FCM token() error: %@", error.localizedDescription)
+                return
+            }
+            guard let self = self, let token = token, !token.isEmpty else {
+                NSLog("Push: FCM token() empty")
+                return
+            }
+            NSLog("Push: FCM Token (active fetch): %@", token)
+            DispatchQueue.main.async {
+                guard let webView = self.findWebView() else { return }
+                let escaped = token
+                    .replacingOccurrences(of: "\\", with: "\\\\")
+                    .replacingOccurrences(of: "'", with: "\\'")
+                let js = "window.dispatchEvent(new CustomEvent('fcmToken', { detail: '\(escaped)' }))"
+                webView.evaluateJavaScript(js, completionHandler: nil)
+            }
+        }
     }
 
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        NSLog("Push: APNs Registration failed: %@", error.localizedDescription)
+        NotificationCenter.default.post(
+            name: .capacitorDidFailToRegisterForRemoteNotifications,
+            object: error
+        )
     }
 
-    func applicationWillEnterForeground(_ application: UIApplication) {
-        // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
+    // MessagingDelegate: FCM-Token-Listener
+    // Wird aufgerufen sobald Firebase einen FCM-Token bekommt oder rotiert.
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        guard let token = fcmToken, !token.isEmpty else {
+            NSLog("Push: FCM Token empty/nil")
+            return
+        }
+        NSLog("Push: FCM Token erhalten: %@", token)
+
+        // Custom Event "fcmToken" an die WebView feuern.
+        // push-logic.js horcht via window.addEventListener('fcmToken', ...)
+        DispatchQueue.main.async {
+            guard let webView = self.findWebView() else {
+                NSLog("Push: keine WebView gefunden zum Token-Pushen")
+                return
+            }
+            // Token escapen fuer JS-String
+            let escaped = token
+                .replacingOccurrences(of: "\\", with: "\\\\")
+                .replacingOccurrences(of: "'", with: "\\'")
+            let js = "window.dispatchEvent(new CustomEvent('fcmToken', { detail: '\(escaped)' }))"
+            webView.evaluateJavaScript(js, completionHandler: nil)
+        }
     }
 
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+    // Such die Capacitor WebView aus dem View-Hierarchy
+    private func findWebView() -> WKWebView? {
+        guard let rootVC = self.window?.rootViewController else { return nil }
+        return findWebViewIn(rootVC)
     }
 
-    func applicationWillTerminate(_ application: UIApplication) {
-        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    private func findWebViewIn(_ vc: UIViewController) -> WKWebView? {
+        if let bridgeVC = vc as? CAPBridgeViewController, let wv = bridgeVC.bridge?.webView {
+            return wv
+        }
+        for child in vc.children {
+            if let wv = findWebViewIn(child) { return wv }
+        }
+        return nil
     }
+
+    // Foreground-Push: zeigen statt schlucken
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .sound, .badge, .list])
+    }
+
+    // ============== Capacitor / App-Lifecycle (unveraendert) ==============
+
+    func applicationWillResignActive(_ application: UIApplication) {}
+    func applicationDidEnterBackground(_ application: UIApplication) {}
+    func applicationWillEnterForeground(_ application: UIApplication) {}
+    func applicationDidBecomeActive(_ application: UIApplication) {}
+    func applicationWillTerminate(_ application: UIApplication) {}
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        // Called when the app was launched with a url. Feel free to add additional processing here,
-        // but if you want the App API to support tracking app url opens, make sure to keep this call
         return ApplicationDelegateProxy.shared.application(app, open: url, options: options)
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        // Called when the app was launched with an activity, including Universal Links.
-        // Feel free to add additional processing here, but if you want the App API to support
-        // tracking app url opens, make sure to keep this call
         return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
     }
-
 }
+

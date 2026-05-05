@@ -26,7 +26,7 @@ fi
 # ============================================
 CODE_FILES=$(echo "$STAGED" | grep -E '\.(js|ts|tsx|jsx|py|sh|css|json)$' || true)
 # Whitelist: Files die echte UI-Strings enthalten und Umlaute brauchen
-UMLAUT_OK_REGEX='(^|/)translations\.js$|(^|/)i18n\.(js|ts)$'
+UMLAUT_OK_REGEX='(^|/)translations\.js$|(^|/)i18n\.(js|ts)$|(^|/)polish-text/index\.ts$'
 if [ -n "$CODE_FILES" ]; then
     while IFS= read -r file; do
         [ -z "$file" ] && continue

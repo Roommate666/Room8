@@ -390,6 +390,15 @@
             </label>
           </div>
 
+          <div class="form-group" style="margin-bottom: 0.75rem; padding: 0.6rem; background: #F0F9FF; border: 1px solid #BFDBFE; border-radius: 10px;">
+            <label style="display: flex; gap: 0.5rem; align-items: flex-start; cursor: pointer;">
+              <input type="checkbox" id="isPartner" style="margin-top: 0.2rem;">
+              <span style="font-size: 0.85rem; color: #1E40AF; line-height: 1.4;">
+                <strong>Ich bin Partner</strong> (Bar, Verein, Unternehmen, Veranstalter) — gibt Zugriff aufs Partner-Dashboard zum Inserieren.
+              </span>
+            </label>
+          </div>
+
           <button type="submit" class="register-btn" id="registerBtn" data-i18n="register_btn_create">
             Konto erstellen
           </button>
@@ -465,7 +474,8 @@
           failed: 'Registrierung fehlgeschlagen: ',
           checkEmail: 'Überprüfe deine E-Mail!',
           sentTo: 'Wir haben einen Bestätigungslink an',
-          clickLink: 'gesendet. Klicke auf den Link um dein Konto zu aktivieren.'
+          clickLink: 'gesendet. Klicke auf den Link um dein Konto zu aktivieren.',
+          spamHint: 'Mail nicht im Posteingang? Schau im Spam- oder Junk-Ordner nach und markiere sie als "Kein Spam".'
         },
         en: {
           mismatch: 'Passwords do not match!',
@@ -478,7 +488,8 @@
           failed: 'Registration failed: ',
           checkEmail: 'Check your email!',
           sentTo: 'We sent a confirmation link to',
-          clickLink: 'Click the link to activate your account.'
+          clickLink: 'Click the link to activate your account.',
+          spamHint: 'No mail in your inbox? Check your spam or junk folder and mark it as "Not Spam".'
         }
       };
       var m = messages[lang] || messages.de;
@@ -502,18 +513,26 @@
       registerBtn.disabled = true;
       setMsg(m.creating, true);
 
+      var isPartnerChecked = document.getElementById('isPartner') && document.getElementById('isPartner').checked;
       sb.auth.signUp({
         email: email,
         password: password,
         options: {
           data: {
-            username: username
+            username: username,
+            is_partner: isPartnerChecked
           }
         }
       })
-      .then(function(response) {
+      .then(async function(response) {
         if (response.error) {
           throw response.error;
+        }
+        // is_partner Flag in profiles setzen wenn Checkbox angehakt
+        if (isPartnerChecked && response.data.user) {
+          try {
+            await sb.from('profiles').update({ is_partner: true }).eq('id', response.data.user.id);
+          } catch (e) { console.warn('is_partner update failed:', e); }
         }
 
         // Supabase gibt bei bereits existierender Email ein User-Objekt
@@ -539,6 +558,13 @@
         infoBox.appendChild(strong2);
         infoBox.appendChild(document.createElement('br'));
         infoBox.appendChild(document.createTextNode(m.clickLink));
+
+        // Spam-Hinweis (junge Domain → Mails landen oft initial in Junk)
+        var spamHintBox = document.createElement('div');
+        spamHintBox.style.cssText = 'margin-top:0.75rem;padding:0.75rem;background:#FEF3C7;border-left:3px solid #F59E0B;border-radius:6px;font-size:0.9rem;color:#78350F;';
+        spamHintBox.textContent = m.spamHint;
+        infoBox.appendChild(spamHintBox);
+
         msg.after(infoBox);
       })
       .catch(function(error) {
@@ -566,40 +592,30 @@
       });
     });
   </script>
+  <script src="social-auth.js"></script>
   <script>
-    // Social Login: Google (Register)
+    // Social Login: nutzt nativen Capacitor-Flow (Apple+Google) oder Web-OAuth-Fallback
     document.getElementById('googleRegBtn').addEventListener('click', async function() {
+      var btn = this;
       try {
-        this.disabled = true;
-        this.style.opacity = '0.7';
-        var { data, error } = await sb.auth.signInWithOAuth({
-          provider: 'google',
-          options: { redirectTo: window.location.origin + '/dashboard.html' }
-        });
-        if (error) throw error;
+        btn.disabled = true; btn.style.opacity = '0.7';
+        await window.signInWithGoogle();
       } catch(err) {
         console.error('Google Register Error:', err);
-        Room8UI.error('Google Anmeldung fehlgeschlagen. Bitte versuche es erneut.');
-        this.disabled = false;
-        this.style.opacity = '1';
+        if (window.Room8UI) Room8UI.error('Google Anmeldung fehlgeschlagen: ' + (err.message || ''));
+        btn.disabled = false; btn.style.opacity = '1';
       }
     });
 
-    // Social Login: Apple (Register)
     document.getElementById('appleRegBtn').addEventListener('click', async function() {
+      var btn = this;
       try {
-        this.disabled = true;
-        this.style.opacity = '0.7';
-        var { data, error } = await sb.auth.signInWithOAuth({
-          provider: 'apple',
-          options: { redirectTo: window.location.origin + '/dashboard.html' }
-        });
-        if (error) throw error;
+        btn.disabled = true; btn.style.opacity = '0.7';
+        await window.signInWithApple();
       } catch(err) {
         console.error('Apple Register Error:', err);
-        Room8UI.error('Apple Anmeldung fehlgeschlagen. Bitte versuche es erneut.');
-        this.disabled = false;
-        this.style.opacity = '1';
+        if (window.Room8UI) Room8UI.error('Apple Anmeldung fehlgeschlagen: ' + (err.message || ''));
+        btn.disabled = false; btn.style.opacity = '1';
       }
     });
   </script>

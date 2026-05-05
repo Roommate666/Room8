@@ -30,7 +30,7 @@
     .lp-nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0.875rem 1.25rem;
+      padding: calc(0.875rem + env(safe-area-inset-top, 0px)) calc(1.25rem + env(safe-area-inset-right, 0px)) 0.875rem calc(1.25rem + env(safe-area-inset-left, 0px));
       background: rgba(255,255,255,0.85);
       backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid rgba(235,235,235,0.6);
@@ -65,11 +65,24 @@
     }
     .lp-nav-link--primary:active { transform: scale(0.97); }
 
+    /* Mobile: alles kompakter, nichts abschneiden */
+    @media (max-width: 480px) {
+      .lp-nav { padding-left: calc(0.75rem + env(safe-area-inset-left, 0px));
+                padding-right: calc(0.75rem + env(safe-area-inset-right, 0px)); }
+      .lp-nav-brand { font-size: 0; gap: 0; }
+      .lp-nav-brand-icon { width: 32px !important; height: 32px !important; }
+      .lp-nav-actions { gap: 0.3rem; }
+      .lp-nav-link { padding: 0.4rem 0.6rem; font-size: 0.75rem; }
+      .lp-nav-link[href="#partner"]::before { content: "Partner"; }
+      .lp-nav-link[href="#partner"] { font-size: 0; padding-left: 0.55rem; padding-right: 0.55rem; }
+      .lp-nav-link[href="#partner"]::before { font-size: 0.75rem; font-weight: 600; }
+    }
+
     /* ===== HERO ===== */
     .lp-hero {
       min-height: 100vh; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      padding: 6rem 1.5rem 4rem; text-align: center;
+      padding: calc(6rem + env(safe-area-inset-top, 0px)) 1.5rem 4rem; text-align: center;
       position: relative; overflow: hidden;
       background: linear-gradient(180deg, #EFF6FF 0%, #F7F7F5 100%);
     }
@@ -90,15 +103,17 @@
       animation: blurFadeIn 0.7s cubic-bezier(0.4, 0, 0.2, 1) 1.6s both;
     }
     .lp-badge {
-      display: inline-flex; align-items: center; gap: 0.375rem;
-      padding: 0.375rem 0.875rem; border-radius: 999px;
-      background: rgba(59,130,246,0.08); color: #3B82F6;
-      font-size: 0.8rem; font-weight: 600; margin-bottom: 1.25rem;
-      border: 1px solid rgba(59,130,246,0.12);
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 1rem; border-radius: 999px;
+      background: linear-gradient(135deg, #3B82F6, #2563EB); color: #fff;
+      font-size: 0.8rem; font-weight: 700; margin-bottom: 1.25rem;
+      box-shadow: 0 4px 14px rgba(59,130,246,0.32);
+      letter-spacing: 0.01em;
     }
     .lp-badge-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: #3B82F6; animation: pulse 2s infinite;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #fff; box-shadow: 0 0 0 0 rgba(255,255,255,0.7);
+      animation: pulse 2s infinite;
     }
     @keyframes pulse {
       0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
@@ -243,7 +258,6 @@
     }
     .lp-problem-icon {
       flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px;
-      background: rgba(239,68,68,0.08);
       display: flex; align-items: center; justify-content: center;
     }
     .lp-problem-card h3 {
@@ -437,95 +451,78 @@
 </head>
 <body>
 
-  <!-- Video-Splash (Intro) -->
-  <div id="splashOverlay" style="
-    position: fixed; inset: 0; z-index: 9999;
-    background: #000;
-    display: flex; align-items: center; justify-content: center;
-    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  ">
-    <video id="splashVideo"
-      autoplay
-      muted
-      playsinline
-      webkit-playsinline="true"
-      x5-playsinline="true"
-      preload="auto"
-      disablepictureinpicture
-      style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;">
-      <source src="intro.mp4" type="video/mp4">
-    </video>
+  <!-- Static Logo-Splash -->
+  <style>
+    @keyframes splashLogoIn {
+      0%   { opacity: 0; transform: scale(0.85); filter: blur(8px); }
+      60%  { opacity: 1; transform: scale(1.02); filter: blur(0); }
+      100% { opacity: 1; transform: scale(1); filter: blur(0); }
+    }
+    @keyframes splashWordIn {
+      0%   { opacity: 0; transform: translateY(8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    #splashOverlay {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 1.25rem;
+      background: linear-gradient(160deg, #EFF6FF 0%, #F7F7F5 60%, #FFE7DE 100%);
+      transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    #splashOverlay img {
+      width: min(48vw, 220px); height: auto;
+      border-radius: 28px;
+      box-shadow: 0 20px 60px rgba(59,130,246,0.25), 0 8px 22px rgba(0,0,0,0.08);
+      animation: splashLogoIn 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    }
+    #splashOverlay .splash-word {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
+      font-weight: 800; font-size: 1.75rem; letter-spacing: -0.02em;
+      color: #1A1A2E; margin-bottom: -0.25rem;
+      white-space: nowrap;
+      display: inline-flex; align-items: baseline; gap: 0;
+      animation: splashWordIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.35s both;
+    }
+    #splashOverlay .splash-word span {
+      background: linear-gradient(135deg, #3B82F6 0%, #10B981 35%, #F59E0B 70%, #EC4899 100%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; color: transparent;
+      display: inline-block;
+    }
+    #splashOverlay .splash-tagline {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
+      font-weight: 600; font-size: 0.95rem; letter-spacing: 0.01em;
+      color: #64748B; text-align: center;
+      animation: splashWordIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.55s both;
+    }
+  </style>
+  <div id="splashOverlay">
+    <img src="splash-logo.jpg" alt="Room8" decoding="async">
+    <div class="splash-word">Room<span>8</span></div>
+    <div class="splash-tagline">Die App für Studenten</div>
   </div>
   <script>
     (function() {
       var splash = document.getElementById('splashOverlay');
-      var video = document.getElementById('splashVideo');
-      var dismissed = false;
-      var playStarted = false;
-
+      if (!splash) return;
       function hideSplash() {
-        if (dismissed || !splash) return;
-        dismissed = true;
         splash.style.opacity = '0';
-        setTimeout(function() { if (splash && splash.parentNode) splash.remove(); }, 500);
+        setTimeout(function() { if (splash && splash.parentNode) splash.remove(); }, 450);
       }
-
-      if (!video) {
-        setTimeout(hideSplash, 1600);
-        return;
-      }
-
-      // iOS WKWebView Sicherheit: Properties zusaetzlich zu HTML-Attributen setzen
-      try {
-        video.muted = true;
-        video.defaultMuted = true;
-        video.playsInline = true;
-        video.setAttribute('muted', 'true');
-      } catch (e) {}
-
-      video.addEventListener('ended', hideSplash);
-      video.addEventListener('playing', function() { playStarted = true; });
-      video.addEventListener('error', function() {
-        console.warn('[splash] video error, dismissing');
-        setTimeout(hideSplash, 400);
-      });
-
-      // Notbremse: spaetestens nach 6s weg
-      setTimeout(hideSplash, 6000);
-
-      // Falls play() scheitert (kein User-Gesture, blockiert), nach 1s dismiss
-      // Aber: wenn Video erfolgreich startet, laeuft es bis 'ended' durch
-      function startPlay() {
-        var p;
-        try { p = video.play(); } catch (e) { p = null; }
-        if (p && typeof p.then === 'function') {
-          p.then(function() {
-            playStarted = true;
-          }).catch(function(err) {
-            console.warn('[splash] autoplay blocked', err);
-            // Nach kurzer Wartezeit dismissen damit User nicht haengen bleibt
-            setTimeout(function() { if (!playStarted) hideSplash(); }, 1000);
-          });
-        }
-      }
-
-      if (video.readyState >= 2) {
-        startPlay();
-      } else {
-        video.addEventListener('loadeddata', startPlay, { once: true });
-        // Falls loadeddata nie kommt (Network-Issue), nach 1.5s probieren
-        setTimeout(startPlay, 1500);
-      }
+      // 1.5s Logo zeigen, dann sanft ausblenden
+      setTimeout(hideSplash, 1500);
     })();
   </script>
 
   <!-- Navbar -->
   <nav class="lp-nav" id="lpNav">
     <a href="#" class="lp-nav-brand">
-      <img src="room8-logo.png" alt="Room8" class="lp-nav-brand-icon" style="width:40px;height:40px;border-radius:10px;object-fit:cover;">
+      <img src="splash-logo.jpg" alt="Room8" class="lp-nav-brand-icon" style="width:40px;height:40px;border-radius:10px;object-fit:cover;">
       Room8
     </a>
     <div class="lp-nav-actions">
+      <a href="#partner" class="lp-nav-link lp-nav-link--ghost">Partner werden</a>
       <a href="login.html" class="lp-nav-link lp-nav-link--ghost">Anmelden</a>
       <a href="register.html" class="lp-nav-link lp-nav-link--primary">Registrieren</a>
     </div>
@@ -540,7 +537,7 @@
       </div>
       <h1>WG-Suche nervt.<br><span>Muss nicht sein.</span></h1>
       <p class="lp-hero-sub">
-        Fake-Anzeigen, überteuerte Makler, Ghosting auf WG-Gesucht und 50 Tabs offen für Möbel, Jobs und Rabatte. Kommt dir bekannt vor? Damit ist jetzt Schluss.
+        Fake-Anzeigen, überteuerte Makler, Ghosting auf WG-Gesucht und 50 Tabs offen für Möbel, Jobs, Events und Rabatte. Kommt dir bekannt vor? Damit ist jetzt Schluss.
       </p>
       <div class="lp-hero-actions">
         <a href="register.html" class="lp-btn lp-btn--primary">Kostenlos starten</a>
@@ -564,8 +561,8 @@
       </div>
       <div class="lp-problem-grid">
         <div class="lp-problem-card fade-in">
-          <div class="lp-problem-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          <div class="lp-problem-icon" style="background: rgba(59,130,246,0.1);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
           </div>
           <div>
             <h3>WG-Suche = Vollzeitjob</h3>
@@ -573,8 +570,8 @@
           </div>
         </div>
         <div class="lp-problem-card fade-in">
-          <div class="lp-problem-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+          <div class="lp-problem-icon" style="background: rgba(16,185,129,0.1);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
           </div>
           <div>
             <h3>eBay Kleinanzeigen = Zeitverschwendung</h3>
@@ -582,8 +579,8 @@
           </div>
         </div>
         <div class="lp-problem-card fade-in">
-          <div class="lp-problem-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+          <div class="lp-problem-icon" style="background: rgba(245,158,11,0.1);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
           </div>
           <div>
             <h3>Nebenjob suchen = Nadel im Heuhaufen</h3>
@@ -591,8 +588,8 @@
           </div>
         </div>
         <div class="lp-problem-card fade-in">
-          <div class="lp-problem-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <div class="lp-problem-icon" style="background: rgba(236,72,153,0.1);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EC4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
           </div>
           <div>
             <h3>Kein Vertrauen</h3>
@@ -606,14 +603,14 @@
   <!-- Solution Bridge -->
   <div class="lp-solution-bridge fade-in">
     <h2>Was wäre, wenn es einen Ort gäbe,<br>der <span>nur für Studenten</span> ist?</h2>
-    <p>Einen Ort, an dem du weißt, dass jeder verifiziert ist. Wo WG-Suche, Marktplatz, Jobs und Rabatte an einem Platz sind. Ohne Makler, ohne Fake-Accounts, ohne Stress.</p>
+    <p>Einen Ort, an dem du weißt, dass jeder verifiziert ist. Wo WG-Suche, Marktplatz, Jobs, Events und Rabatte an einem Platz sind. Ohne Makler, ohne Fake-Accounts, ohne Stress.</p>
   </div>
 
   <!-- Features -->
   <section class="lp-section" id="features">
     <div class="lp-section-header fade-in">
       <h2>Das ist Room8</h2>
-      <p>Vier Bereiche, eine App. Alles was du im Studienalltag brauchst - von Studenten, für Studenten.</p>
+      <p>Fünf Bereiche, eine App. Alles was du im Studienalltag brauchst - von Studenten, für Studenten.</p>
     </div>
     <div class="lp-features-grid">
       <div class="lp-feature-card fade-in">
@@ -646,6 +643,21 @@
         </div>
         <h3>Nebenjobs</h3>
         <p>Studentenjobs in deiner Nähe: Nachhilfe, Werkstudent, Aushilfe oder Freelance. Finde den passenden Job neben dem Studium.</p>
+      </div>
+      <div class="lp-feature-card fade-in">
+        <div class="lp-feature-icon" style="background: rgba(236,72,153,0.1);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EC4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+            <circle cx="8" cy="15" r="1.2" fill="#EC4899"></circle>
+            <circle cx="12" cy="15" r="1.2" fill="#EC4899"></circle>
+            <circle cx="16" cy="15" r="1.2" fill="#EC4899"></circle>
+          </svg>
+        </div>
+        <h3>Events</h3>
+        <p>WG-Partys, Uni-Events, Stammtische und Aktionen aus deiner Stadt - alles auf einen Blick. Sei dabei wo's passiert.</p>
       </div>
       <div class="lp-feature-card fade-in">
         <div class="lp-feature-icon" style="background: rgba(232,96,76,0.1);">
@@ -756,6 +768,20 @@
         <div>
           <h3>Jobsuchende</h3>
           <p>Nebenjob gesucht? Finde flexible Stellen die zu deinem Stundenplan passen.</p>
+        </div>
+      </div>
+      <div class="lp-target-card fade-in">
+        <div class="lp-target-icon" style="background: rgba(236,72,153,0.1);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EC4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </div>
+        <div>
+          <h3>Party- &amp; Event-Fans</h3>
+          <p>WG-Partys, Stammtische, Uni-Events. Finde was abgeht in deiner Stadt - oder veranstalte selbst.</p>
         </div>
       </div>
       <div class="lp-target-card fade-in">
@@ -923,9 +949,40 @@
     </div>
   </section>
 
+  <!-- Partner Sektion -->
+  <section class="lp-section" id="partner" style="background: linear-gradient(160deg, #F0F9FF 0%, #ECFEFF 100%); padding: 4rem 1.25rem;">
+    <div class="lp-section-header">
+      <h2>Du bist Anbieter? Werde Room8-Partner</h2>
+      <p>Erreich tausende Studenten in deiner Stadt — schnell, kostenlos, geprueft.</p>
+    </div>
+    <div style="max-width:980px; margin: 2rem auto 0; display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap:1.25rem;">
+      <a href="partner-job.html" style="text-decoration:none; background:white; border-radius:1rem; padding:1.5rem; box-shadow:0 8px 24px rgba(0,0,0,0.06); transition:transform 0.2s, box-shadow 0.2s; border:1.5px solid transparent;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#3B82F6'" onmouseout="this.style.transform='none'; this.style.borderColor='transparent'">
+        <div style="font-size:2rem; margin-bottom:0.5rem;">💼</div>
+        <h3 style="font-size:1.2rem; font-weight:800; color:#1A1A2E; margin:0 0 0.4rem;">Job inserieren</h3>
+        <p style="color:#6B7280; font-size:0.9rem; margin:0 0 1rem; line-height:1.5;">Werkstudent, Praktikum, Aushilfe — wir bringen dir motivierte Studenten.</p>
+        <span style="display:inline-block; background:linear-gradient(135deg,#3B82F6,#2563EB); color:white; padding:0.55rem 1rem; border-radius:999px; font-weight:700; font-size:0.9rem;">Job einreichen →</span>
+      </a>
+      <a href="partner-coupon.html" style="text-decoration:none; background:white; border-radius:1rem; padding:1.5rem; box-shadow:0 8px 24px rgba(0,0,0,0.06); transition:transform 0.2s, box-shadow 0.2s; border:1.5px solid transparent;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#F59E0B'" onmouseout="this.style.transform='none'; this.style.borderColor='transparent'">
+        <div style="font-size:2rem; margin-bottom:0.5rem;">🎟️</div>
+        <h3 style="font-size:1.2rem; font-weight:800; color:#1A1A2E; margin:0 0 0.4rem;">Studenten-Rabatt anbieten</h3>
+        <p style="color:#6B7280; font-size:0.9rem; margin:0 0 1rem; line-height:1.5;">Cafe, Shop, Fitness — wirb gezielt mit Coupons in der App.</p>
+        <span style="display:inline-block; background:linear-gradient(135deg,#F59E0B,#EF4444); color:white; padding:0.55rem 1rem; border-radius:999px; font-weight:700; font-size:0.9rem;">Coupon einreichen →</span>
+      </a>
+      <a href="partner-event.html" style="text-decoration:none; background:white; border-radius:1rem; padding:1.5rem; box-shadow:0 8px 24px rgba(0,0,0,0.06); transition:transform 0.2s, box-shadow 0.2s; border:1.5px solid transparent;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#14B8A6'" onmouseout="this.style.transform='none'; this.style.borderColor='transparent'">
+        <div style="font-size:2rem; margin-bottom:0.5rem;">🎉</div>
+        <h3 style="font-size:1.2rem; font-weight:800; color:#1A1A2E; margin:0 0 0.4rem;">Event veranstalten</h3>
+        <p style="color:#6B7280; font-size:0.9rem; margin:0 0 1rem; line-height:1.5;">AStA, Verein, Bar, Promoter — fuell deine Veranstaltung mit Studenten.</p>
+        <span style="display:inline-block; background:linear-gradient(135deg,#14B8A6,#6366F1); color:white; padding:0.55rem 1rem; border-radius:999px; font-weight:700; font-size:0.9rem;">Event einreichen →</span>
+      </a>
+    </div>
+  </section>
+
   <!-- Footer -->
   <footer class="lp-footer">
     <div class="lp-footer-links">
+      <a href="partner-job.html">Job-Partner</a>
+      <a href="partner-coupon.html">Coupon-Partner</a>
+      <a href="partner-event.html">Event-Partner</a>
       <a href="impressum.html">Impressum</a>
       <a href="datenschutz.html">Datenschutz</a>
       <a href="nutzungsbedingungen.html">Nutzungsbedingungen</a>
@@ -939,12 +996,17 @@
   <script src="session-cache.js"></script>
   <script src="translations.js"></script>
   <script>
-    // AUTO-REDIRECT: Wenn schon eingeloggt, direkt zum Dashboard
+    // AUTO-REDIRECT: Wenn schon eingeloggt, direkt zu passendem Dashboard
     if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
         var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        sb.auth.getUser().then(({ data }) => {
+        sb.auth.getUser().then(async ({ data }) => {
             if (data && data.user) {
-                window.location.replace('dashboard.html');
+                var p = await sb.from('profiles').select('is_partner').eq('id', data.user.id).maybeSingle();
+                if (p.data && p.data.is_partner) {
+                    window.location.replace('partner-dashboard.html');
+                } else {
+                    window.location.replace('dashboard.html');
+                }
             }
         });
     }

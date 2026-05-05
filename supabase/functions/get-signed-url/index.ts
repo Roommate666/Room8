@@ -6,9 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Admin-Email fuer Zugriffskontrolle
-const ADMIN_EMAIL = 'albayrak_yusuf@icloud.com'
-
 serve(async (req) => {
   // CORS preflight
   if (req.method === 'OPTIONS') {
@@ -42,8 +39,17 @@ serve(async (req) => {
       })
     }
 
-    // 2. Admin-Check
-    if (user.email !== ADMIN_EMAIL) {
+    // 2. Admin-Check via profiles.is_admin (NICHT Email-String, weil
+    //    Email kann sich aendern + ein zukuenftiger zweiter Admin braucht
+    //    auch Zugriff)
+    const adminCheckClient = createClient(supabaseUrl, supabaseServiceKey)
+    const { data: profile, error: profileError } = await adminCheckClient
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (profileError || !profile || profile.is_admin !== true) {
       return new Response(JSON.stringify({ error: 'Zugriff verweigert' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -59,9 +65,8 @@ serve(async (req) => {
       })
     }
 
-    // 4. Service Role Client fuer signed URL
-    const adminClient = createClient(supabaseUrl, supabaseServiceKey)
-    const { data, error } = await adminClient.storage
+    // 4. Service Role Client fuer signed URL (re-uses adminCheckClient)
+    const { data, error } = await adminCheckClient.storage
       .from(bucket)
       .createSignedUrl(path, 600) // 10 Minuten gueltig
 

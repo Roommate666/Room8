@@ -357,11 +357,6 @@
         </div>
     </div>
 
-    <div class="partner-banner">
-        <h3>Dein Deal hier?</h3>
-        <p>Erreiche tausende Studenten in deiner Stadt.</p>
-        <a href="mailto:admin@room8.club" class="partner-email">Partner werden</a>
-    </div>
     
     <div class="filter-section">
         <div class="filter-bar" id="couponFilter">
@@ -405,7 +400,7 @@
     // XSS Protection
     function escapeHtml(text) {
         if (text === null || text === undefined) return '';
-        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
 
     function navigateTo(url) {
@@ -497,6 +492,7 @@
                 .from('coupons')
                 .select('*, coupon_photos(storage_path, photo_type)')
                 .eq('status', 'active')
+                .eq('is_test', false)
                 .order('created_at', { ascending: false });
 
             console.log("Coupons geladen:", result);
@@ -559,27 +555,28 @@
             var detailsHtml = '';
             if (c.opening_hours || c.website || c.instagram) {
                 detailsHtml = '<div class="partner-details">';
-                if (c.opening_hours) detailsHtml += '<span class="detail-tag">🕐 ' + c.opening_hours + '</span>';
-                if (c.website) detailsHtml += '<span class="detail-tag">🌐 ' + c.website + '</span>';
-                if (c.instagram) detailsHtml += '<span class="detail-tag">📸 ' + c.instagram + '</span>';
+                if (c.opening_hours) detailsHtml += '<span class="detail-tag">🕐 ' + escapeHtml(c.opening_hours) + '</span>';
+                if (c.website) detailsHtml += '<span class="detail-tag">🌐 ' + escapeHtml(c.website) + '</span>';
+                if (c.instagram) detailsHtml += '<span class="detail-tag">📸 ' + escapeHtml(c.instagram) + '</span>';
                 detailsHtml += '</div>';
             }
             
-            // Hintergrund
-            var bgStyle = c.imageUrl ? 'background-image: url(' + c.imageUrl + ');' : (c.bgGradient || 'background: #FED7AA;');
+            // Hintergrund (imageUrl + bgGradient nur fuer Beispiele oder Server-controlled — escapen trotzdem)
+            var safeImage = c.imageUrl ? encodeURI(c.imageUrl) : '';
+            var bgStyle = safeImage ? 'background-image: url(\'' + safeImage + '\');' : (c.bgGradient || 'background: #FED7AA;');
             if (c.bgGradient && !c.imageUrl) bgStyle = 'background: ' + c.bgGradient + ';';
-            
-            // Emoji für Beispiele
-            var emojiHtml = c.isExample ? '<span class="coupon-image-emoji">' + c.logo + '</span>' : '';
-            
+
+            // Emoji nur fuer Beispiele (nicht user-controlled)
+            var emojiHtml = c.isExample ? '<span class="coupon-image-emoji">' + escapeHtml(c.logo) + '</span>' : '';
+
             // Logo
-            var logoHtml = c.logoUrl ? '<img src="' + c.logoUrl + '" alt="Logo" width="40" height="40" loading="lazy" decoding="async">' : (c.logo || '🏪');
+            var logoHtml = c.logoUrl ? '<img src="' + encodeURI(c.logoUrl) + '" alt="Logo" width="40" height="40" loading="lazy" decoding="async">' : escapeHtml(c.logo || '🏪');
             
-            card.innerHTML = 
+            card.innerHTML =
                 '<div class="coupon-image" style="' + bgStyle + '">' +
                     emojiHtml +
                     (c.isExample ? '<span class="example-badge">Beispiel</span>' : '') +
-                    '<span class="discount-badge ' + badgeClass + '">' + c.discount_value + '</span>' +
+                    '<span class="discount-badge ' + badgeClass + '">' + escapeHtml(c.discount_value) + '</span>' +
                 '</div>' +
                 '<div class="coupon-content">' +
                     '<div class="partner-header">' +
@@ -593,11 +590,20 @@
                     '<div class="coupon-desc">' + escapeHtml(c.description) + '</div>' +
                     detailsHtml +
                     '<div class="coupon-footer">' +
-                        '<span class="valid-until">Gültig bis ' + validDate + '</span>' +
-                        '<button class="redeem-btn" onclick="event.stopPropagation(); openModal(\'' + c.discount_code + '\')">Einlösen</button>' +
+                        '<span class="valid-until">Gültig bis ' + escapeHtml(validDate) + '</span>' +
+                        '<button class="redeem-btn" data-code="' + escapeHtml(c.discount_code) + '">Einlösen</button>' +
                     '</div>' +
                 '</div>';
-            
+
+            // Listener via JS statt onclick-Inline (verhindert JS-Injection via Apostroph in discount_code)
+            var redeemBtn = card.querySelector('.redeem-btn');
+            if (redeemBtn) {
+                redeemBtn.addEventListener('click', function(ev) {
+                    ev.stopPropagation();
+                    openModal(redeemBtn.getAttribute('data-code') || '');
+                });
+            }
+
             container.appendChild(card);
         });
     }

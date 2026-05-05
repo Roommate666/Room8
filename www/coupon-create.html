@@ -238,7 +238,6 @@
 <script>
     // Supabase Client - Direkte Initialisierung
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const ADMIN_EMAIL = 'albayrak_yusuf@icloud.com';
 
     function navigateTo(url) {
         try { window.location.href = url; } catch(e) { console.warn("Nav Error:", e); }
@@ -246,7 +245,13 @@
 
     async function checkAdmin() {
         const { data: { user } } = await sb.auth.getUser();
-        if (!user || user.email !== ADMIN_EMAIL) {
+        if (!user) {
+            Room8UI.error("Nicht eingeloggt!");
+            setTimeout(function() { navigateTo('login.html'); }, 1500);
+            return null;
+        }
+        const { data: profile, error } = await sb.from('profiles').select('is_admin').eq('id', user.id).maybeSingle();
+        if (error || !profile || profile.is_admin !== true) {
             Room8UI.error("Kein Admin-Zugriff!");
             setTimeout(function() { navigateTo('dashboard.html'); }, 1500);
             return null;

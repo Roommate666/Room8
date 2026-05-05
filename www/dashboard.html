@@ -410,14 +410,40 @@
         checkNotifications(user.id);
     }
 
-    function checkPushStatus() {
-        // Wenn noch nie erlaubt wurde, zeigen wir den Banner
+    async function checkPushStatus() {
+        var banner = document.getElementById('pushPermissionBanner');
+        var container = document.querySelector('.action-cards-container');
+
+        // Echten Permission-Status via Capacitor pruefen statt localStorage
+        try {
+            if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+                var Push = window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications;
+                if (Push) {
+                    var perm = await Push.checkPermissions();
+                    console.log('[Push] aktueller Permission-Status:', perm);
+                    if (perm.receive === 'granted') {
+                        // Bereits erlaubt - im Hintergrund initialisieren + Token speichern
+                        localStorage.setItem('push_enabled', 'true');
+                        if (banner) banner.style.display = 'none';
+                        if (typeof PushService !== 'undefined') PushService.init();
+                        return;
+                    }
+                    // 'prompt' oder 'denied' -> Banner zeigen
+                    if (banner) banner.style.display = 'block';
+                    if (container) container.style.marginTop = '0';
+                    localStorage.removeItem('push_enabled');
+                    return;
+                }
+            }
+        } catch (e) {
+            console.warn('[Push] checkPermissions fehlgeschlagen:', e);
+        }
+
+        // Web/Fallback: alte Logik mit localStorage
         if (localStorage.getItem('push_enabled') !== 'true') {
-            document.getElementById('pushPermissionBanner').style.display = 'block';
-            // Verschiebe Container nach unten, damit Banner Platz hat
-            document.querySelector('.action-cards-container').style.marginTop = '0';
+            if (banner) banner.style.display = 'block';
+            if (container) container.style.marginTop = '0';
         } else {
-            // Wenn schon erlaubt, initialisieren wir im Hintergrund
             if (typeof PushService !== 'undefined') PushService.init();
         }
     }

@@ -54,8 +54,10 @@
             position: fixed; bottom: 0; left: 0; right: 0;
             background: white; border-top: 1px solid #E5E7EB;
             padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom));
-            display: flex; gap: 0.75rem; z-index: 50;
+            display: flex; gap: 0.75rem; z-index: 10000;
         }
+        /* Bottom-Tab-Bar in Event-Form ausblenden — submit-bar uebernimmt den Platz */
+        #app-footer-nav { display: none !important; }
         .btn-primary {
             flex: 1; padding: 0.85rem; border-radius: 12px;
             background: linear-gradient(135deg, #14B8A6, #0F766E); color: white;
@@ -147,28 +149,75 @@
 
             <!-- Antrag-Form -->
             <form id="permissionForm" style="text-align:left;">
+
+                <!-- 1. Typ -->
                 <div style="margin-bottom:0.75rem;">
-                    <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Organisation / Verein</label>
-                    <input type="text" id="reqOrgName" required maxlength="200" placeholder="z.B. AStA Uni Augsburg, Studentencafé XYZ"
-                        style="width:100%; padding:0.65rem; border:1px solid #E5E7EB; border-radius:10px; font-size:0.95rem; -webkit-appearance:none;">
-                </div>
-                <div style="margin-bottom:0.75rem;">
-                    <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Art der Organisation</label>
+                    <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Wer bist du? *</label>
                     <select id="reqOrgType" required style="width:100%; padding:0.65rem; border:1px solid #E5E7EB; border-radius:10px; font-size:0.95rem; background:white; -webkit-appearance:none;">
                         <option value="">-- Bitte wählen --</option>
                         <option value="asta">AStA / Studierendenvertretung</option>
                         <option value="university">Universität / Hochschule</option>
                         <option value="student_association">Studentischer Verein</option>
-                        <option value="partner">Partner / Sponsor</option>
+                        <option value="partner">Bar / Club / Gewerblicher Veranstalter</option>
                         <option value="private">Privat (Party, Treffen)</option>
                         <option value="other">Sonstiges</option>
                     </select>
                 </div>
-                <div style="margin-bottom:1rem;">
-                    <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Begründung</label>
-                    <textarea id="reqReason" required maxlength="1000" minlength="10" placeholder="Was möchtest du veröffentlichen? Wer steht dahinter?"
-                        style="width:100%; padding:0.65rem; border:1px solid #E5E7EB; border-radius:10px; font-size:0.95rem; min-height:80px; resize:vertical; font-family:inherit;"></textarea>
+
+                <!-- 2. Organisations-Name -->
+                <div style="margin-bottom:0.75rem;">
+                    <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Organisations- / Veranstalter-Name *</label>
+                    <input type="text" id="reqOrgName" required maxlength="200" placeholder="z.B. AStA Uni Augsburg, Bar Centrale, Max Mustermann"
+                        style="width:100%; padding:0.65rem; border:1px solid #E5E7EB; border-radius:10px; font-size:0.95rem; -webkit-appearance:none;">
                 </div>
+
+                <!-- 3. Telefon -->
+                <div style="margin-bottom:0.75rem;">
+                    <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Telefonnummer *</label>
+                    <input type="tel" id="reqPhone" required maxlength="40" placeholder="+49 ..."
+                        style="width:100%; padding:0.65rem; border:1px solid #E5E7EB; border-radius:10px; font-size:0.95rem; -webkit-appearance:none;">
+                    <div style="font-size:0.75rem; color:#9CA3AF; margin-top:0.25rem;">Wird nicht oeffentlich gezeigt — nur fuer Rueckfragen.</div>
+                </div>
+
+                <!-- 4. Conditional: Hochschule (Student-Gruppen) -->
+                <div id="reqUniBlock" style="margin-bottom:0.75rem; display:none;">
+                    <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Hochschule</label>
+                    <input type="text" id="reqUniName" maxlength="120" placeholder="z.B. Universität Augsburg"
+                        style="width:100%; padding:0.65rem; border:1px solid #E5E7EB; border-radius:10px; font-size:0.95rem; -webkit-appearance:none;">
+                </div>
+
+                <!-- 5. Conditional: Business-Adresse (Bar/Gewerbe) -->
+                <div id="reqBusinessBlock" style="margin-bottom:0.75rem; display:none;">
+                    <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Geschäftsadresse *</label>
+                    <input type="text" id="reqBusinessAddr" maxlength="200" placeholder="Strasse, PLZ, Stadt"
+                        style="width:100%; padding:0.65rem; border:1px solid #E5E7EB; border-radius:10px; font-size:0.95rem; -webkit-appearance:none;">
+                </div>
+
+                <!-- 6. Social-Proof -->
+                <div style="margin-bottom:0.75rem; padding:0.75rem; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:10px;">
+                    <div style="font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.4rem;">Nachweis (mind. eines) *</div>
+                    <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+                        <select id="reqProofType" required style="flex:0 0 120px; padding:0.55rem; border:1px solid #E5E7EB; border-radius:8px; font-size:0.85rem; background:white; -webkit-appearance:none;">
+                            <option value="instagram">Instagram</option>
+                            <option value="website">Webseite</option>
+                            <option value="linkedin">LinkedIn</option>
+                            <option value="uni_email">Hochschul-Mail</option>
+                            <option value="other">Sonstiges</option>
+                        </select>
+                        <input type="text" id="reqProofUrl" required maxlength="300" placeholder="@handle ODER URL"
+                            style="flex:1; padding:0.55rem; border:1px solid #E5E7EB; border-radius:8px; font-size:0.85rem; -webkit-appearance:none;">
+                    </div>
+                    <div style="font-size:0.7rem; color:#9CA3AF;">Damit wir sehen dass du echt bist. Hochschul-Email gibt automatischen Bonus.</div>
+                </div>
+
+                <!-- 7. Begründung -->
+                <div style="margin-bottom:1rem;">
+                    <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Was für Events planst du? *</label>
+                    <textarea id="reqReason" required maxlength="1000" minlength="50" placeholder="Beschreib was du veröffentlichen möchtest, Häufigkeit, Zielgruppe... (mindestens 50 Zeichen)"
+                        style="width:100%; padding:0.65rem; border:1px solid #E5E7EB; border-radius:10px; font-size:0.95rem; min-height:90px; resize:vertical; font-family:inherit;"></textarea>
+                    <div id="reqReasonCount" style="font-size:0.7rem; color:#9CA3AF; margin-top:0.25rem; text-align:right;">0 / 50</div>
+                </div>
+
                 <button type="submit" id="reqSubmitBtn"
                     style="width:100%; padding:0.85rem; background:linear-gradient(135deg,#14B8A6,#0F766E); color:white; border:none; border-radius:12px; font-weight:700; font-size:0.95rem; cursor:pointer;">
                     Antrag absenden
@@ -330,24 +379,29 @@
 
         // Pruefen ob User verifiziert + freigeschaltet
         var profileRes = await sb.from('profiles')
-            .select('is_verified, is_student_verified, full_name, username, trusted_organizer, can_create_events')
+            .select('is_verified, is_student_verified, full_name, username, trusted_organizer, can_create_events, is_partner, is_admin')
             .eq('id', currentUserId).single();
 
         var isVerified = profileRes.data && (profileRes.data.is_verified || profileRes.data.is_student_verified);
         var isTrusted = profileRes.data && profileRes.data.trusted_organizer === true;
         var canCreate = profileRes.data && profileRes.data.can_create_events === true;
+        var isPartner = profileRes.data && profileRes.data.is_partner === true;
+        var isAdmin = profileRes.data && profileRes.data.is_admin === true;
 
-        if (!isVerified) {
-            document.getElementById('verifyOverlay').classList.add('active');
-            window.scrollTo(0, 0);
-            document.body.style.overflow = 'hidden';
-            return;
-        }
-
-        if (!canCreate) {
-            // Verifiziert, aber keine Event-Erlaubnis -> Antrag-Overlay
-            await showPermissionOverlay();
-            return;
+        // Partner und Admins duerfen direkt — keine Verify/Antrag-Pruefung
+        if (isPartner || isAdmin) {
+            // Skip Overlays, direkt zum Form
+        } else {
+            if (!isVerified) {
+                document.getElementById('verifyOverlay').classList.add('active');
+                window.scrollTo(0, 0);
+                document.body.style.overflow = 'hidden';
+                return;
+            }
+            if (!canCreate) {
+                await showPermissionOverlay();
+                return;
+            }
         }
 
         // Trusted-Section nur fuer Trusted-Organizer
@@ -561,6 +615,33 @@
         document.body.style.overflow = 'hidden';
     }
 
+    // Conditional Felder anzeigen je nach Typ
+    document.getElementById('reqOrgType').addEventListener('change', function() {
+        var t = this.value;
+        var uniBlock = document.getElementById('reqUniBlock');
+        var bizBlock = document.getElementById('reqBusinessBlock');
+        // Hochschul-Block bei studentischen Typen
+        if (t === 'asta' || t === 'university' || t === 'student_association') {
+            uniBlock.style.display = 'block';
+        } else {
+            uniBlock.style.display = 'none';
+        }
+        // Business-Adresse Pflicht bei Bar/Gewerbe
+        if (t === 'partner') {
+            bizBlock.style.display = 'block';
+        } else {
+            bizBlock.style.display = 'none';
+        }
+    });
+
+    // Reason Counter
+    document.getElementById('reqReason').addEventListener('input', function() {
+        var l = this.value.length;
+        var c = document.getElementById('reqReasonCount');
+        c.textContent = l + ' / 50';
+        c.style.color = l >= 50 ? '#10B981' : '#9CA3AF';
+    });
+
     // Antrag absenden
     document.getElementById('permissionForm').addEventListener('submit', async function(ev) {
         ev.preventDefault();
@@ -568,9 +649,30 @@
         var orgName = document.getElementById('reqOrgName').value.trim();
         var orgType = document.getElementById('reqOrgType').value;
         var reason = document.getElementById('reqReason').value.trim();
+        var phone = document.getElementById('reqPhone').value.trim();
+        var proofType = document.getElementById('reqProofType').value;
+        var proofUrl = document.getElementById('reqProofUrl').value.trim();
+        var uniName = document.getElementById('reqUniName').value.trim();
+        var bizAddr = document.getElementById('reqBusinessAddr').value.trim();
 
-        if (!orgName || !orgType || reason.length < 10) {
-            if (window.Room8) Room8.showToast('Bitte alle Felder ausfüllen (Begründung min. 10 Zeichen)', 'error');
+        if (!orgName || !orgType) {
+            if (window.Room8) Room8.showToast('Bitte Veranstalter-Typ und Name angeben', 'error');
+            return;
+        }
+        if (reason.length < 50) {
+            if (window.Room8) Room8.showToast('Beschreibung muss mind. 50 Zeichen lang sein', 'error');
+            return;
+        }
+        if (phone.length < 6) {
+            if (window.Room8) Room8.showToast('Bitte gültige Telefonnummer angeben', 'error');
+            return;
+        }
+        if (!proofType || !proofUrl) {
+            if (window.Room8) Room8.showToast('Bitte Nachweis (Instagram / Webseite / etc.) angeben', 'error');
+            return;
+        }
+        if (orgType === 'partner' && !bizAddr) {
+            if (window.Room8) Room8.showToast('Geschäftsadresse ist Pflicht bei Bar / Gewerbe', 'error');
             return;
         }
 
@@ -578,10 +680,15 @@
         btn.textContent = 'Wird gesendet...';
 
         try {
-            var res = await sb.rpc('request_event_creator_permission', {
+            var res = await sb.rpc('request_event_creator_permission_v2', {
                 organization_name_input: orgName,
                 organization_type_input: orgType,
-                reason_input: reason
+                reason_input: reason,
+                phone_input: phone,
+                social_proof_url_input: proofUrl,
+                social_proof_type_input: proofType,
+                university_name_input: uniName || null,
+                business_address_input: bizAddr || null
             });
 
             if (res.error) {
@@ -597,8 +704,13 @@
                 var msg = 'Fehler';
                 if (result.error === 'already_approved') msg = 'Du bist bereits freigeschaltet';
                 else if (result.error === 'already_pending') msg = 'Du hast bereits einen offenen Antrag';
-                else if (result.error === 'invalid_reason') msg = 'Begründung zu kurz oder zu lang';
+                else if (result.error === 'invalid_reason') msg = 'Beschreibung zu kurz (mind. 50 Zeichen)';
                 else if (result.error === 'invalid_organization_name') msg = 'Organisationsname ungültig';
+                else if (result.error === 'invalid_organization_type') msg = 'Veranstalter-Typ ungültig';
+                else if (result.error === 'invalid_phone') msg = 'Telefonnummer ungültig';
+                else if (result.error === 'invalid_social_proof') msg = 'Nachweis-URL ungültig';
+                else if (result.error === 'invalid_social_proof_type') msg = 'Nachweis-Typ ungültig';
+                else if (result.error === 'business_address_required') msg = 'Bei Bar / Gewerbe ist Geschäftsadresse Pflicht';
                 else if (result.error === 'not_authenticated') msg = 'Bitte einloggen';
                 if (window.Room8) Room8.showToast(msg, 'error');
                 btn.disabled = false;
