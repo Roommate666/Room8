@@ -255,15 +255,20 @@
 
         // Listings (jobs, gegenstand, wohnung) wo owner = user — view_count direkt
         // mitziehen, das wird in listing-details.html bei jedem Open hochgesetzt.
-        var listRes = await sb.from('listings').select('id, type, title, city, is_active, view_count').eq('owner_id', userId).eq('is_active', true).limit(20);
+        var listRes = await sb.from('listings').select('id, type, title, city, is_active, view_count, apply_clicks').eq('owner_id', userId).eq('is_active', true).limit(20);
         (listRes.data || []).forEach(function(l) {
             var icon = l.type === 'job' ? '💼' : (l.type === 'wohnung' ? '🏠' : '📦');
             var v = l.view_count || 0;
             totalViews += v;
+            var stats = [{ icon: '👁', value: v, label: 'Aufrufe' }];
+            if (l.type === 'job') {
+                var ac = l.apply_clicks || 0;
+                stats.push({ icon: '✉️', value: ac, label: 'Bewerber-Klicks' });
+            }
             items.push({
                 icon: icon, title: l.title, city: l.city, id: l.id,
                 type: 'listing-' + l.type,
-                stats: [{ icon: '👁', value: v, label: 'Aufrufe' }]
+                stats: stats
             });
         });
         // Coupons — current_redemptions (Klicks auf "Code kopieren") + max_redemptions

@@ -129,7 +129,12 @@
     async function load() {
         if (!id) return;
         const { data: job } = await sb.from('listings').select('*, listing_photos(storage_path)').eq('id', id).single();
-        
+
+        // View-Counter erhoehen (fire-and-forget, blockt User-Flow nicht)
+        if (job) {
+            sb.rpc('increment_view_count', { listing_id: id }).then(function(){}, function(){});
+        }
+
         if (job) {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('content').style.display = 'block';
@@ -162,8 +167,9 @@
                 document.getElementById('benList').innerHTML = job.benefits.map(i => `<li>${i}</li>`).join('');
             }
 
-            // Apply Button
+            // Apply Button — Klick zaehlen BEFORE oeffnen (kein await, blockt nicht)
             document.getElementById('applyBtn').onclick = () => {
+                sb.rpc('increment_listing_apply', { p_listing_id: id }).then(function(){}, function(){});
                 if (job.application_url) window.open(job.application_url, '_blank');
                 else if (job.application_email) window.location.href = `mailto:${job.application_email}`;
                 else Room8UI.info("Bitte direkt beim Anbieter melden.");
