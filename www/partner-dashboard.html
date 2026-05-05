@@ -30,6 +30,9 @@
         .pd-item .meta { flex: 1; }
         .pd-item .meta .title { font-weight: 700; font-size: 0.95rem; color: #1A1A2E; }
         .pd-item .meta .sub { font-size: 0.78rem; color: #6B7280; margin-top: 0.2rem; }
+        .pd-item .meta .stats { font-size: 0.78rem; color: #374151; margin-top: 0.4rem; display: flex; gap: 0.85rem; flex-wrap: wrap; }
+        .pd-item .meta .stats span { display: inline-flex; align-items: center; gap: 0.25rem; }
+        .pd-item .meta .stats .stat-icon { color: #6B7280; }
         .pd-item .status { font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.55rem; border-radius: 999px; white-space: nowrap; }
         .status-active { background: #DCFCE7; color: #166534; }
         .status-pending { background: #FEF3C7; color: #92400E; }
@@ -92,10 +95,24 @@
         <div id="activeList"><div class="pd-empty">Lädt...</div></div>
     </div>
 
-    <!-- Stats später erweiterbar -->
+    <!-- Stats — Gesamt-Summen (wird in loadActive() befuellt) -->
     <div class="pd-section" style="background:linear-gradient(135deg,#EFF6FF,#ECFEFF);">
-        <h2>📊 Erreichbarkeit</h2>
-        <p style="color:#1E40AF; font-size:0.85rem; margin:0;">Sobald deine Anzeige live ist, schicken wir Push-Notifications an Studenten in deiner Stadt.</p>
+        <h2>📊 Reichweite (gesamt)</h2>
+        <div id="totalStats" style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; text-align:center;">
+            <div style="background:white; padding:0.75rem 0.5rem; border-radius:12px;">
+                <div style="font-size:1.4rem; font-weight:800; color:#1E40AF;" id="totalViews">–</div>
+                <div style="font-size:0.7rem; color:#6B7280; text-transform:uppercase;">Aufrufe</div>
+            </div>
+            <div style="background:white; padding:0.75rem 0.5rem; border-radius:12px;">
+                <div style="font-size:1.4rem; font-weight:800; color:#EA580C;" id="totalRedemptions">–</div>
+                <div style="font-size:0.7rem; color:#6B7280; text-transform:uppercase;">Coupon-Codes</div>
+            </div>
+            <div style="background:white; padding:0.75rem 0.5rem; border-radius:12px;">
+                <div style="font-size:1.4rem; font-weight:800; color:#16A34A;" id="totalInterests">–</div>
+                <div style="font-size:0.7rem; color:#6B7280; text-transform:uppercase;">Interessiert</div>
+            </div>
+        </div>
+        <p style="color:#1E40AF; font-size:0.78rem; margin:0.85rem 0 0; text-align:center;">Sobald deine Anzeige live ist, schicken wir Push-Notifications an Studenten in deiner Stadt.</p>
     </div>
 </div>
 
@@ -181,23 +198,53 @@
     async function loadActive(userId) {
         var listEl = document.getElementById('activeList');
         var items = [];
+        var totalViews = 0, totalRedemptions = 0, totalInterests = 0;
 
-        // Listings (jobs, gegenstand, wohnung) wo owner = user
-        var listRes = await sb.from('listings').select('id, type, title, city, is_active').eq('owner_id', userId).eq('is_active', true).limit(20);
+        // Listings (jobs, gegenstand, wohnung) wo owner = user — view_count direkt
+        // mitziehen, das wird in listing-details.html bei jedem Open hochgesetzt.
+        var listRes = await sb.from('listings').select('id, type, title, city, is_active, view_count').eq('owner_id', userId).eq('is_active', true).limit(20);
         (listRes.data || []).forEach(function(l) {
             var icon = l.type === 'job' ? '💼' : (l.type === 'wohnung' ? '🏠' : '📦');
-            items.push({ icon: icon, title: l.title, city: l.city, status: 'active', id: l.id, type: 'listing-' + l.type });
+            var v = l.view_count || 0;
+            totalViews += v;
+            items.push({
+                icon: icon, title: l.title, city: l.city, id: l.id,
+                type: 'listing-' + l.type,
+                stats: [{ icon: '👁', value: v, label: 'Aufrufe' }]
+            });
         });
-        // Coupons
-        var coupRes = await sb.from('coupons').select('id, title, business_name, city, status').eq('user_id', userId).eq('status', 'active').limit(20);
+        // Coupons — current_redemptions (Klicks auf "Code kopieren") + max_redemptions
+        var coupRes = await sb.from('coupons').select('id, title, business_name, city, current_redemptions, max_redemptions').eq('user_id', userId).eq('status', 'active').limit(20);
         (coupRes.data || []).forEach(function(c) {
-            items.push({ icon: '🎟️', title: c.title || c.business_name, city: c.city, status: 'active', id: c.id, type: 'coupon' });
+            var r = c.current_redemptions || 0;
+            totalRedemptions += r;
+            var redLabel = r + (c.max_redemptions ? ' / ' + c.max_redemptions : '');
+            items.push({
+                icon: '🎟️', title: c.title || c.business_name, city: c.city, id: c.id,
+                type: 'coupon',
+                stats: [{ icon: '🎫', value: redLabel, label: 'Code-Klicks' }]
+            });
         });
-        // Events
-        var evRes = await sb.from('events').select('id, title, city, status').eq('organizer_id', userId).eq('status', 'active').limit(20);
+        // Events — view_count + interest_count direkt aus Tabelle
+        var evRes = await sb.from('events').select('id, title, city, status, view_count, interest_count').eq('organizer_id', userId).eq('status', 'active').limit(20);
         (evRes.data || []).forEach(function(e) {
-            items.push({ icon: '🎉', title: e.title, city: e.city, status: 'active', id: e.id, type: 'event' });
+            var ev = e.view_count || 0;
+            var ei = e.interest_count || 0;
+            totalViews += ev;
+            totalInterests += ei;
+            items.push({
+                icon: '🎉', title: e.title, city: e.city, id: e.id, type: 'event',
+                stats: [
+                    { icon: '👁', value: ev, label: 'Aufrufe' },
+                    { icon: '✋', value: ei, label: 'Interessiert' }
+                ]
+            });
         });
+
+        // Totale fuellen (Header-Stats-Block)
+        document.getElementById('totalViews').textContent = totalViews;
+        document.getElementById('totalRedemptions').textContent = totalRedemptions;
+        document.getElementById('totalInterests').textContent = totalInterests;
 
         document.getElementById('cntActive').textContent = items.length;
         if (items.length === 0) {
@@ -205,10 +252,20 @@
             return;
         }
         listEl.innerHTML = items.map(function(it) {
+            var statsHtml = '';
+            if (it.stats && it.stats.length) {
+                statsHtml = '<div class="stats">' + it.stats.map(function(s) {
+                    return '<span title="' + Room8.escapeHtml(s.label) + '">' +
+                        '<span class="stat-icon">' + s.icon + '</span>' +
+                        '<span>' + Room8.escapeHtml(String(s.value)) + '</span>' +
+                    '</span>';
+                }).join('') + '</div>';
+            }
             return '<div class="pd-item">' +
                 '<div class="meta">' +
                     '<div class="title">' + it.icon + ' ' + Room8.escapeHtml(it.title || '-') + '</div>' +
                     '<div class="sub">' + Room8.escapeHtml(it.city || '') + '</div>' +
+                    statsHtml +
                 '</div>' +
                 '<div class="status status-active">🟢 Live</div>' +
             '</div>';

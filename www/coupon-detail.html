@@ -110,6 +110,13 @@
         const code = document.getElementById('couponCode').textContent;
         navigator.clipboard.writeText(code);
         Room8UI.success("Code kopiert: " + code);
+        // Counter fuer Partner-Dashboard hochzaehlen — bestehende RPC schreibt
+        // in coupon_redemptions Tabelle + erhoeht coupons.current_redemptions.
+        // Async, fire-and-forget — soll User-Flow nicht blocken.
+        if (id) {
+            sb.rpc('increment_coupon_redemptions', { p_coupon_id: id })
+              .then(function() {}, function(e) { console.warn('coupon-track:', e); });
+        }
     }
     load();
 </script>
