@@ -81,8 +81,12 @@
 
     <div id="paneScan" class="ps-card">
         <h2>Kamera</h2>
-        <div id="qrReader"></div>
-        <div id="scanStatus" class="ps-status info">Halte den QR-Code des Gastes vor die Kamera.</div>
+        <div id="qrReader" style="min-height:80px;"></div>
+        <div id="cameraStartBox" style="text-align:center; padding:1rem 0;">
+            <button id="startCamBtn" onclick="startScanner()" style="background:linear-gradient(135deg,#EA580C 0%,#DC2626 100%); color:white; border:none; padding:1rem 1.5rem; border-radius:12px; font-size:1rem; font-weight:700; cursor:pointer; width:100%;">📷 Kamera starten</button>
+            <p style="color:#6B7280; font-size:0.85rem; margin-top:0.75rem;">Beim ersten Mal fragt das System nach Kamera-Erlaubnis.</p>
+        </div>
+        <div id="scanStatus" class="ps-status info">Tippe auf "Kamera starten" um den QR-Code des Gastes zu scannen.</div>
     </div>
 
     <div id="paneManual" class="ps-card ps-manual">
@@ -128,13 +132,19 @@
         document.getElementById('tabManual').classList.toggle('active', which === 'manual');
         document.getElementById('paneScan').style.display = which === 'scan' ? 'block' : 'none';
         document.getElementById('paneManual').classList.toggle('show', which === 'manual');
-        if (which === 'scan') startScanner();
-        else stopScanner();
+        if (which === 'manual') stopScanner();
+        // bei 'scan' NICHT auto-starten — User muss tappen (Permission-Pflicht)
     }
 
     async function startScanner() {
         if (html5QrCode) return;
+        const startBox = document.getElementById('cameraStartBox');
         try {
+            // Erst expliziter getUserMedia-Probe — triggert System-Permission-Prompt
+            const probeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            // Stream sofort wieder schliessen, html5-qrcode oeffnet eigenen
+            probeStream.getTracks().forEach(function(t) { t.stop(); });
+
             html5QrCode = new Html5Qrcode('qrReader');
             await html5QrCode.start(
                 { facingMode: 'environment' },
@@ -142,10 +152,20 @@
                 onScanSuccess,
                 () => {}
             );
+            if (startBox) startBox.style.display = 'none';
             setStatus('Halte den QR-Code des Gastes vor die Kamera.', 'info');
         } catch (e) {
-            setStatus('Kamera nicht verfügbar. Nutze "Manuell eingeben".', 'error');
-            console.warn('QR-Scanner Start:', e);
+            console.warn('QR-Scanner Start:', e && e.name, e && e.message);
+            const name = (e && e.name) || '';
+            if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+                setStatus('Kamera-Zugriff verweigert. Bitte in den Geräte-Einstellungen erlauben: Einstellungen → Apps → Room8 → Berechtigungen → Kamera.', 'error');
+            } else if (name === 'NotFoundError' || name === 'OverconstrainedError') {
+                setStatus('Keine passende Kamera gefunden. Nutze "Manuell eingeben".', 'error');
+            } else if (name === 'NotReadableError') {
+                setStatus('Kamera ist gerade von einer anderen App belegt. Schliesse andere Kamera-Apps.', 'error');
+            } else {
+                setStatus('Kamera nicht verfügbar (' + (e && e.message || 'unbekannt') + '). Nutze "Manuell eingeben".', 'error');
+            }
             if (window.Room8Sentry) window.Room8Sentry.captureException(e);
         }
     }
@@ -238,6 +258,9 @@
         document.getElementById('resultCard').classList.remove('show');
         document.getElementById('manualCoupon').value = '';
         document.getElementById('manualUser').value = '';
+        // Start-Box wieder zeigen damit User erneut tappt
+        var startBox = document.getElementById('cameraStartBox');
+        if (startBox) startBox.style.display = 'block';
         switchTab('scan');
     }
 
@@ -249,7 +272,7 @@
 
     (async function init() {
         if (!(await ensurePartner())) return;
-        startScanner();
+        // Scanner startet erst nach User-Tap (System-Permission-Prompt)
     })();
 </script>
 <script src="notificationBell.js"></script>
