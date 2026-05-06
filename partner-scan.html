@@ -112,6 +112,7 @@
 <script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
 <script src="translations.js"></script>
+<script src="room8-utils.js"></script>
 <script src="room8-ui.js"></script>
 <script>
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -249,7 +250,7 @@
         document.getElementById('resultSub').textContent = ok ? ti('scan_verification_label', 'Bestätigungs-Code:') : '';
         const codeEl = document.getElementById('resultCode');
         if (ok && code) { codeEl.textContent = code; codeEl.style.display = 'block'; } else { codeEl.style.display = 'none'; }
-        document.getElementById('resultMeta1').innerHTML = couponTitle ? 'Coupon: <strong>' + couponTitle + '</strong>' : '';
+        document.getElementById('resultMeta1').innerHTML = couponTitle ? 'Coupon: <strong>' + Room8.escapeHtml(couponTitle) + '</strong>' : '';
         document.getElementById('resultMeta2').textContent = sub || '';
         document.getElementById('paneScan').style.display = 'none';
         document.getElementById('paneManual').classList.remove('show');
