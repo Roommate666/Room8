@@ -49,7 +49,9 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
         z-index: 10000;
         align-items: center;
         justify-content: center;
@@ -59,27 +61,26 @@
         display: flex;
     }
     
+    /* Glasmorphismus Modal */
     .report-modal-content {
-        background: white;
-        border-radius: 16px;
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 20px;
         padding: 2rem;
         max-width: 500px;
         width: 90%;
         max-height: 90vh;
         overflow-y: auto;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        animation: slideIn 0.3s ease;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.8);
+        border: 1px solid rgba(0,0,0,0.04);
+        animation: blurFadeIn 0.3s ease-out both;
     }
-    
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+
+    /* Pattern: Magic UI BlurFade */
+    @keyframes blurFadeIn {
+        from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+        to { opacity: 1; filter: blur(0); transform: translateY(0); }
     }
     
     .report-modal-header {
@@ -137,9 +138,9 @@
         gap: 0.75rem;
         padding: 1rem;
         border: 2px solid #e5e7eb;
-        border-radius: 8px;
+        border-radius: 14px;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .report-reason-option:hover {
@@ -168,16 +169,17 @@
         resize: vertical;
     }
     
+    /* Kibo UI Pill */
     .report-submit-btn {
         width: 100%;
         padding: 1rem;
         background: #ef4444;
         color: white;
         border: none;
-        border-radius: 8px;
-        font-weight: 600;
+        border-radius: 999px;
+        font-weight: 700;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .report-submit-btn:hover:not(:disabled) {
@@ -265,8 +267,10 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script>
     // Supabase Client - Direkte Initialisierung

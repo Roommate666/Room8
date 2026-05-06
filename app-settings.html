@@ -4,10 +4,29 @@
     <script src="sentry-init.js"></script>
     <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">    <title>Settings â€“ Roommate</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
     <style>
-        .settings-item { display: block; width: 100%; text-align: left; padding: 1rem 1.5rem; background: none; border: none; border-bottom: 1px solid var(--border-color); font-size: 1rem; cursor: pointer; }
-        .settings-item.logout { color: #dc2626; }
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
+        .app-content { animation: blurFadeIn 0.5s ease-out both; }
+        .settings-item {
+            display: block; width: 100%; text-align: left; padding: 1rem 1.5rem;
+            background: rgba(255,255,255,0.92); border: none; border-bottom: 1px solid rgba(0,0,0,0.04);
+            font-size: 1rem; cursor: pointer; transition: background 0.2s;
+        }
+        .settings-item:active { background: rgba(243,244,246,0.88); }
+        .settings-item.logout { color: #dc2626; font-weight: 600; }
+        /* Barrierefreiheit */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
     </style>
 </head>
 <body>
@@ -21,8 +40,9 @@
     </main>
     <footer class="app-footer-nav" id="app-footer-nav"></footer>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="session-cache.js"></script>
 <script>
     // Supabase Client - Direkte Initialisierung
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

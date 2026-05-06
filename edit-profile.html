@@ -5,21 +5,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Profil bearbeiten - Room8</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
     <style>
-        .avatar-upload-container { text-align: center; margin-bottom: 2rem; }
-        .avatar-preview { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; background-color: #eee; border: 4px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; }
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0px); transform: translateY(0); }
+        }
+
+        .avatar-upload-container {
+            text-align: center; margin-bottom: 2rem;
+            animation: blurFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+        .avatar-preview {
+            width: 110px; height: 110px; border-radius: 50%; object-fit: cover;
+            background-color: #EFF6FF;
+            border: 3px solid white;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .avatar-preview:active { transform: scale(0.96); }
         #avatarFile { display: none; }
-        .verification-section { background-color: white; padding: 1.5rem; border-radius: var(--radius-md); margin-top: 2rem; border: 1px solid var(--border-color); }
-        .status-badge { font-weight: bold; padding: 0.4rem 0.8rem; border-radius: 999px; color: white; display: inline-block; font-size: 0.85rem; }
-        .status-unverified { background-color: #ef4444; }
-        .status-pending { background-color: #f59e0b; }
-        .status-verified { background-color: #10b981; }
+
+        .verification-section {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 1.5rem; border-radius: 18px; margin-top: 2rem;
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+        }
+
+        /* Pattern: Kibo UI Pill fuer Status */
+        .status-badge { font-weight: 700; padding: 0.35rem 0.85rem; border-radius: 999px; color: white; display: inline-flex; align-items: center; gap: 4px; font-size: 0.8rem; }
+        .status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .status-unverified { background: rgba(239,68,68,0.1); color: #DC2626; border: 1px solid rgba(239,68,68,0.15); }
+        .status-unverified::before { background: #EF4444; box-shadow: 0 0 4px rgba(239,68,68,0.5); }
+        .status-pending { background: rgba(245,158,11,0.1); color: #D97706; border: 1px solid rgba(245,158,11,0.15); }
+        .status-pending::before { background: #F59E0B; box-shadow: 0 0 4px rgba(245,158,11,0.5); }
+        .status-verified { background: rgba(16,185,129,0.1); color: #059669; border: 1px solid rgba(16,185,129,0.15); }
+        .status-verified::before { background: #10B981; box-shadow: 0 0 4px rgba(16,185,129,0.5); }
+
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
         @media (max-width: 600px) {
             .form-row { grid-template-columns: 1fr; }
         }
-        .section-title { font-size: 1.1rem; font-weight: 600; margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border-color); color: var(--text-color); }
+
+        .section-title {
+            font-size: 1rem; font-weight: 700; margin: 1.75rem 0 0.85rem 0;
+            padding-bottom: 0.4rem;
+            border-bottom: 1.5px solid rgba(0,0,0,0.06);
+            color: var(--text-main);
+            letter-spacing: -0.01em;
+        }
+
+        /* Formfelder verschoenern */
+        #editProfileForm .form-group input,
+        #editProfileForm .form-group select,
+        #editProfileForm .form-group textarea {
+            border-radius: 14px;
+            padding: 0.85rem 1rem;
+            border: 1.5px solid #E5E7EB;
+            font-size: 0.92rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: #FAFAFA;
+        }
+        #editProfileForm .form-group input:focus,
+        #editProfileForm .form-group select:focus,
+        #editProfileForm .form-group textarea:focus {
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.06);
+            background: white;
+        }
+        #editProfileForm .form-group label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #374151;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .avatar-upload-container { animation: none; opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -37,7 +108,7 @@
             <!-- Avatar Upload -->
             <div class="avatar-upload-container">
                 <label for="avatarFile">
-                    <img src="placeholder.png" alt="Dein Avatar" id="avatar-preview" class="avatar-preview" onerror="this.src='no-image.svg'">
+                    <img src="placeholder.png" alt="Dein Avatar" id="avatar-preview" class="avatar-preview" onerror="this.src='https://via.placeholder.com/150'">
                     <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-light);" data-i18n="edit_profile_change_photo">Klicke, um Bild zu ändern</p>
                 </label>
                 <input type="file" id="avatarFile" accept="image/*">
@@ -145,8 +216,9 @@
     <div id="app-footer-nav"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+<script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="session-cache.js"></script>
 <script src="navigation.js"></script>
 <script src="translations.js"></script>
 <script>
@@ -325,7 +397,7 @@
         } catch (error) {
             console.error(error);
             msgContainer.style.color = 'red';
-            msgContainer.textContent = 'Profil konnte nicht gespeichert werden. Bitte versuche es erneut.';
+            msgContainer.textContent = 'Fehler: ' + error.message;
             submitBtn.disabled = false;
             submitBtn.textContent = 'Änderungen speichern';
         }

@@ -5,19 +5,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>Verifizierungsstatus - Room8</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="stylesheet" href="style.css">
   <style>
+    /* Pattern: Magic UI BlurFade */
+    @keyframes blurFadeIn {
+      from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+      to { opacity: 1; filter: blur(0); transform: translateY(0); }
+    }
+
     .status-container {
       max-width: 600px;
       margin: 2rem auto;
       padding: 0 1rem;
+      animation: blurFadeIn 0.5s ease-out both;
     }
 
+    /* Pattern: Magic UI MagicCard / Glasmorphismus */
     .status-card {
-      background: white;
-      border-radius: 16px;
+      background: rgba(255,255,255,0.92);
+      border-radius: 20px;
       padding: 2rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.8);
+      border: 1px solid rgba(0,0,0,0.04);
       margin-bottom: 1.5rem;
     }
 
@@ -84,45 +97,51 @@
       margin-top: 2rem;
     }
 
+    /* Kibo UI Pill Buttons */
     .btn {
       flex: 1;
       padding: 0.875rem 1.5rem;
-      border-radius: 12px;
-      font-weight: 600;
+      border-radius: 999px;
+      font-weight: 700;
       text-decoration: none;
       text-align: center;
-      transition: all 0.2s;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       border: none;
       cursor: pointer;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
       color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
 
     .btn-secondary {
       background: white;
-      color: #667eea;
-      border: 2px solid #667eea;
+      color: #3B82F6;
+      border: 2px solid #3B82F6;
     }
 
     .btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
+    .btn:active { transform: scale(0.97); }
 
     .help-text {
-      background: #f3f4f6;
+      background: rgba(243,244,246,0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       padding: 1rem;
-      border-radius: 12px;
+      border-radius: 14px;
       margin-top: 1.5rem;
       font-size: 0.9rem;
       color: #4b5563;
+      border: 1px solid rgba(0,0,0,0.04);
     }
 
     .help-text a {
-      color: #667eea;
+      color: #3B82F6;
       text-decoration: none;
       font-weight: 600;
     }
@@ -155,6 +174,11 @@
       font-size: 0.85rem;
       color: #6b7280;
     }
+
+    /* Barrierefreiheit */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
   </style>
 </head>
 <body>
@@ -174,9 +198,9 @@
         <!-- Status Card -->
         <div class="status-card">
           <div class="status-header">
-            <div class="status-icon" id="statusIcon">...</div>
-            <h2 id="statusTitle">Status wird geladen...</h2>
-            <span class="status-badge" id="statusBadge">Laden...</span>
+            <div class="status-icon" id="statusIcon"><span class="skeleton" style="display:inline-block;width:32px;height:32px;border-radius:50%;"></span></div>
+            <h2 id="statusTitle"><span class="skeleton" style="display:inline-block;width:160px;height:18px;border-radius:8px;vertical-align:middle;"></span></h2>
+            <span class="status-badge" id="statusBadge"><span class="skeleton" style="display:inline-block;width:60px;height:14px;border-radius:999px;"></span></span>
           </div>
 
           <div id="statusDetails">
@@ -204,8 +228,11 @@
     </main>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
+  <script src="lib/supabase.min.js"></script>
   <script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
+<script src="room8-ui.js"></script>
   <script>
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     var statusIcon = document.getElementById('statusIcon');

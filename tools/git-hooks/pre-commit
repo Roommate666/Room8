@@ -105,6 +105,32 @@ if [ -n "$ALL_NAMES" ]; then
 fi
 
 # ============================================
+# 3. Working-Tree Vollscan: Verhindere ALLEN bestehenden Drift
+# Egal ob gestaged oder nicht — wenn irgendein Root<->www/ Pair driftet,
+# blockieren. So bleibt der Tree dauerhaft sauber.
+# Bypass: ROOM8_SKIP_DRIFT_SCAN=1 git commit ...
+# ============================================
+if [ "${ROOM8_SKIP_DRIFT_SCAN:-0}" != "1" ]; then
+    DRIFT_PAIRS=""
+    for rootfile in "$ROOT"/*.html; do
+        [ -f "$rootfile" ] || continue
+        base=$(basename "$rootfile")
+        wwwfile="$ROOT/www/$base"
+        [ -f "$wwwfile" ] || continue
+        if ! diff -q "$rootfile" "$wwwfile" > /dev/null 2>&1; then
+            DRIFT_PAIRS="$DRIFT_PAIRS $base"
+        fi
+    done
+    if [ -n "$DRIFT_PAIRS" ]; then
+        echo -e "${RED}FAIL${NC} Bestehender Drift Root <-> www/ in:"
+        for d in $DRIFT_PAIRS; do echo "      - $d"; done
+        echo -e "      Heile mit: ${GREEN}for f in$DRIFT_PAIRS; do cp www/\$f \$f; done${NC}"
+        echo -e "      Notfall-Bypass: ${YELLOW}ROOM8_SKIP_DRIFT_SCAN=1 git commit ...${NC}"
+        FAIL=1
+    fi
+fi
+
+# ============================================
 # Resultat
 # ============================================
 if [ "$FAIL" -eq 1 ]; then

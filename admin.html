@@ -486,8 +486,6 @@
     // Supabase Client - Direkte Initialisierung
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const ADMIN_EMAIL = 'albayrak_yusuf@icloud.com';
-
     // Helper: XSS Protection
     function escapeHtml(text) {
         if (text === null || text === undefined) return '';
@@ -499,11 +497,24 @@
         try { window.location.href = url; } catch(e) { console.warn(e); }
     }
 
-    // 2. Auth Check
+    // 2. Auth Check — checkt profiles.is_admin (NICHT Email-String, weil
+    //    DB-RLS auch is_admin nutzt und Email kann sich aendern)
     async function checkAdmin() {
         const { data: { user } } = await sb.auth.getUser();
-        
-        if (!user || user.email !== ADMIN_EMAIL) {
+
+        if (!user) {
+            Room8UI.error("Nicht eingeloggt!");
+            setTimeout(function() { navigateTo('login.html'); }, 1500);
+            return;
+        }
+
+        const { data: profile, error } = await sb
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        if (error || !profile || profile.is_admin !== true) {
             Room8UI.error("Zugriff verweigert!");
             setTimeout(function() { navigateTo('dashboard.html'); }, 1500);
             return;

@@ -6,57 +6,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title data-i18n="privacy_page_title">Datenschutz - Room8</title>
     <meta name="description" content="Datenschutzerklaerung der Room8 Studenten-Plattform. Erfahre, wie wir deine Daten schuetzen und verarbeiten.">
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
     <style>
-        /* Modern Header */
-        .legal-header-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem 1.5rem 3rem;
-            border-bottom-left-radius: 30px;
-            border-bottom-right-radius: 30px;
-            text-align: center;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(118, 75, 162, 0.2);
-            position: relative;
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
         }
-
-        .back-nav {
-            position: absolute;
-            top: 1.5rem;
-            left: 1.5rem;
-            color: white;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            font-weight: 600;
-            font-size: 0.9rem;
-            opacity: 0.9;
-            transition: opacity 0.2s;
-        }
-        .back-nav:hover { opacity: 1; }
-
-        .legal-header-bg h1 { margin: 0.5rem 0 0.25rem; font-size: 1.8rem; font-weight: 700; }
-        .legal-header-bg p { opacity: 0.9; font-size: 1rem; margin: 0; }
-
-        /* Content Layout */
         .legal-content {
             max-width: 800px;
-            margin: -2.5rem auto 0; /* Overlap Header */
-            padding: 0 1.5rem 4rem;
-            position: relative;
-            z-index: 10;
+            margin: 0 auto;
+            padding: 0 1rem 4rem;
+            animation: blurFadeIn 0.5s ease-out both;
         }
-        
+        /* Glasmorphismus */
         .content-card {
-            background: white;
+            background: rgba(255,255,255,0.92);
             border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(0,0,0,0.04);
             line-height: 1.8;
             color: #374151;
             font-size: 0.95rem;
+            margin-top: 1rem;
         }
 
         h2 {
@@ -123,17 +100,14 @@
 </head>
 <body>
 
-<div class="app-container" style="background: #F3F4F6;">
-    
-    <!-- Modern Header -->
-    <div class="legal-header-bg">
-        <a href="javascript:history.back()" class="back-nav">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="m15 18-6-6 6-6"/></svg>
-            <span data-i18n="general_back">Zurück</span>
+<div class="app-container">
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
         <h1 data-i18n="privacy_title">Datenschutz</h1>
-        <p>Wir schützen deine Daten</p>
-    </div>
+        <div style="width:40px;"></div>
+    </header>
 
     <main class="legal-content">
         <div class="content-card">
@@ -144,7 +118,7 @@
             </div>
 
             <p style="font-size: 0.85rem; color: #9ca3af; margin-bottom: 2rem;">
-                <span data-i18n="privacy_last_updated">Stand:</span> Dezember 2024
+                Stand: Februar 2026
             </p>
             
             <h2 data-i18n="privacy_responsible_title">1. Verantwortlicher</h2>
@@ -169,8 +143,15 @@
                 <li data-i18n="privacy_registration_item4">Optional: Profilbild</li>
                 <li data-i18n="privacy_registration_item5">Optional: Universität/Hochschule</li>
             </ul>
+
+            <h3>2.2 Verifizierungsdaten</h3>
+            <p>Zur Verifikation deines Studierendenstatus erheben wir:</p>
+            <ul>
+                <li>Uni-E-Mail-Adresse (zur E-Mail-Verifizierung)</li>
+                <li>Optional: Foto des Studierendenausweises (wird nach erfolgreicher Prüfung gelöscht)</li>
+            </ul>
             
-            <h3 data-i18n="privacy_listings_title">2.2 Inseratsdaten</h3>
+            <h3>2.3 Inseratsdaten</h3>
             <p data-i18n="privacy_listings_intro">Wenn du ein Inserat erstellst, speichern wir:</p>
             <ul>
                 <li data-i18n="privacy_listings_item1">Titel und Beschreibung</li>
@@ -180,18 +161,35 @@
                 <li data-i18n="privacy_listings_item5">Kontaktinformationen</li>
             </ul>
             
-            <h3 data-i18n="privacy_messages_title">2.3 Nachrichten</h3>
+            <h3>2.4 Nachrichten</h3>
             <p data-i18n="privacy_messages_text">
                 Nachrichten, die du über unsere Plattform sendest, werden verschlüsselt gespeichert, um die Kommunikation zwischen Nutzern zu ermöglichen.
             </p>
             
-            <h3 data-i18n="privacy_technical_title">2.4 Technische Daten</h3>
-            <p data-i18n="privacy_technical_intro">Bei jedem Zugriff werden automatisch erfasst:</p>
+            <h3>2.5 Technische Daten</h3>
+            <p>Bei jedem Zugriff werden automatisch erfasst:</p>
             <ul>
-                <li data-i18n="privacy_technical_item1">IP-Adresse (anonymisiert)</li>
-                <li data-i18n="privacy_technical_item2">Datum und Uhrzeit des Zugriffs</li>
-                <li data-i18n="privacy_technical_item3">Browsertyp und -version</li>
+                <li>IP-Adresse (anonymisiert)</li>
+                <li>Datum und Uhrzeit des Zugriffs</li>
+                <li>Browsertyp und -version</li>
+                <li>Gerätetyp und Betriebssystem</li>
             </ul>
+
+            <h3>2.6 Push-Benachrichtigungen</h3>
+            <p>Wenn du Push-Benachrichtigungen aktivierst, speichern wir:</p>
+            <ul>
+                <li>Einen gerätegebundenen Push-Token (FCM-Token bzw. APNs-Token)</li>
+                <li>Dieser wird ausschließlich zum Versand von Benachrichtigungen verwendet</li>
+                <li>Du kannst Push-Benachrichtigungen jederzeit in den Geräteeinstellungen deaktivieren</li>
+            </ul>
+
+            <h3>2.7 Lokale Speicherung (LocalStorage/SessionStorage)</h3>
+            <p>Die App nutzt lokale Speichertechnologien deines Browsers/Geräts:</p>
+            <ul>
+                <li><strong>SessionStorage:</strong> Temporäre Zwischenspeicherung von Sitzungsdaten (z.B. Nutzer-Cache) zur Performance-Optimierung. Wird beim Schließen der App automatisch gelöscht.</li>
+                <li><strong>LocalStorage:</strong> Speicherung von Einstellungen (z.B. Sprache, Push-Präferenzen). Bleibt bis zur manuellen Löschung erhalten.</li>
+            </ul>
+            <p>Es werden keine Tracking-Cookies verwendet.</p>
             
             <h2 data-i18n="privacy_not_title">3. Was wir NICHT tun</h2>
             <div class="highlight-box">
@@ -218,27 +216,67 @@
                 <br><a href="https://sb.com/privacy" target="_blank" style="font-size:0.9rem;">Supabase Datenschutz →</a>
             </p>
             
-            <h3 data-i18n="privacy_webhosting_title">5.2 Webhosting</h3>
+            <h3>5.2 Webhosting</h3>
             <p>
-                <span data-i18n="privacy_webhosting_text">Unsere Website wird bei Vercel Inc. gehostet.</span>
+                Unsere Website wird bei Vercel Inc. gehostet.
                 <br><a href="https://vercel.com/legal/privacy-policy" target="_blank" style="font-size:0.9rem;">Vercel Datenschutz →</a>
             </p>
-            
-            <h2 data-i18n="privacy_rights_title">6. Deine Rechte</h2>
+
+            <h3>5.3 Push-Dienste</h3>
+            <p>Für den Versand von Push-Benachrichtigungen nutzen wir:</p>
+            <ul>
+                <li><strong>Firebase Cloud Messaging (FCM)</strong> von Google Ireland Limited – für die Zustellung auf Android- und iOS-Geräten. <br><a href="https://firebase.google.com/support/privacy" target="_blank" style="font-size:0.9rem;">Firebase Datenschutz →</a></li>
+                <li><strong>Apple Push Notification Service (APNs)</strong> von Apple Inc. – für die Zustellung auf iOS-Geräten. <br><a href="https://www.apple.com/legal/privacy/" target="_blank" style="font-size:0.9rem;">Apple Datenschutz →</a></li>
+            </ul>
+
+            <h3>5.4 Datentransfer in Drittländer</h3>
+            <p>Einige unserer Dienstleister haben ihren Sitz in den USA (Google/Firebase, Vercel, Apple). Der Datentransfer erfolgt auf Grundlage von:</p>
+            <ul>
+                <li><strong>EU-US Data Privacy Framework</strong> – Google, Vercel und Apple sind unter dem Data Privacy Framework zertifiziert</li>
+                <li><strong>Standardvertragsklauseln (SCC)</strong> gemäß Art. 46 Abs. 2 lit. c DSGVO als zusätzliche Absicherung</li>
+            </ul>
+
+            <h2>6. Aufbewahrungsfristen</h2>
+            <p>Wir speichern deine Daten nur so lange, wie es für den jeweiligen Zweck erforderlich ist:</p>
+            <ul>
+                <li><strong>Kontodaten:</strong> Bis zur Löschung deines Kontos</li>
+                <li><strong>Inserate:</strong> Bis zur Löschung durch dich oder Deaktivierung des Kontos</li>
+                <li><strong>Nachrichten:</strong> Bis zur Kontolöschung durch einen der Gesprächspartner</li>
+                <li><strong>Verifizierungsdokumente:</strong> Werden nach erfolgreicher Prüfung umgehend gelöscht</li>
+                <li><strong>Technische Logs:</strong> Maximal 30 Tage</li>
+                <li><strong>Push-Token:</strong> Bis zur Deaktivierung von Push oder Kontolöschung</li>
+            </ul>
+            <p>Nach Löschung deines Kontos werden alle personenbezogenen Daten innerhalb von 30 Tagen unwiderruflich entfernt, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen.</p>
+
+            <h2>7. Deine Rechte</h2>
             <p data-i18n="privacy_rights_intro">Du hast jederzeit das Recht auf:</p>
             <ul>
                 <li><strong data-i18n="privacy_rights_access_label">Auskunft</strong> über deine gespeicherten Daten</li>
                 <li><strong data-i18n="privacy_rights_correction_label">Berichtigung</strong> falscher Daten</li>
                 <li><strong data-i18n="privacy_rights_deletion_label">Löschung</strong> deiner Daten</li>
-                <li><strong data-i18n="privacy_rights_portability_label">Datenübertragbarkeit</strong></li>
+                <li><strong>Datenübertragbarkeit</strong> (Art. 20 DSGVO)</li>
+                <li><strong>Widerspruch</strong> gegen die Verarbeitung (Art. 21 DSGVO) – Du hast das Recht, aus Gründen, die sich aus deiner besonderen Situation ergeben, jederzeit gegen die Verarbeitung deiner Daten Widerspruch einzulegen, sofern diese auf Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse) basiert.</li>
+                <li><strong>Widerruf der Einwilligung</strong> (Art. 7 Abs. 3 DSGVO) – Eine erteilte Einwilligung kannst du jederzeit widerrufen. Die Rechtmäßigkeit der bis zum Widerruf erfolgten Verarbeitung bleibt unberührt.</li>
             </ul>
-            
-            <h2 data-i18n="privacy_deletion_title">7. Kontolöschung</h2>
+
+            <h3>Beschwerderecht bei der Aufsichtsbehörde</h3>
+            <p>Du hast das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu beschweren (Art. 77 DSGVO). Die für uns zuständige Aufsichtsbehörde ist:</p>
+            <div class="contact-box">
+                <strong>Bayerisches Landesamt für Datenschutzaufsicht (BayLDA)</strong><br>
+                Promenade 18<br>
+                91522 Ansbach<br>
+                <a href="https://www.lda.bayern.de" target="_blank">www.lda.bayern.de</a>
+            </div>
+
+            <h2>8. Kontolöschung</h2>
             <p data-i18n="privacy_deletion_text">
                 Du kannst dein Konto jederzeit in den Profileinstellungen löschen. Dabei werden alle deine personenbezogenen Daten, Inserate und Nachrichten unwiderruflich entfernt.
             </p>
 
-            <h2 data-i18n="privacy_contact_title">8. Kontakt</h2>
+            <h2>9. Minderjährigenschutz</h2>
+            <p>Die App richtet sich an Personen ab 16 Jahren. Wir erheben wissentlich keine Daten von Personen unter 16 Jahren. Sollten wir Kenntnis davon erlangen, dass personenbezogene Daten von Personen unter 16 Jahren erfasst wurden, werden wir diese umgehend löschen.</p>
+
+            <h2>10. Kontakt</h2>
             <p>
                 <span data-i18n="privacy_contact_text">Bei Fragen zum Datenschutz:</span><br>
                 <a href="mailto:admin@room8.club" class="email-link">admin@room8.club</a>
@@ -249,6 +287,7 @@
 </div>
 
 <script src="config.js"></script>
+<script src="session-cache.js"></script>
 <script src="translations.js"></script>
 </body>
 </html>

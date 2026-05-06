@@ -4,95 +4,129 @@
     <script src="sentry-init.js"></script>
     <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">    <title>Kategorie wählen - Room8</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
     <style>
-        /* Spezifische Styles für diese Seite */
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0px); transform: translateY(0); }
+        }
+
         .category-header {
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: var(--text-light);
-            font-weight: 600;
-            font-size: 0.85rem;
+            color: var(--text-main);
+            font-weight: 800;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.08em;
+            animation: blurFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
         }
 
         .selection-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
+            /* Pattern: Magic UI MagicCard / Glasmorphismus */
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 18px;
+            padding: 1.15rem 1.25rem;
+            margin-bottom: 0.75rem;
             display: flex;
             align-items: center;
             text-decoration: none;
             color: var(--text-color);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border: 1px solid transparent;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(0,0,0,0.04);
             transition: all 0.2s ease;
             position: relative;
             overflow: hidden;
+            animation: blurFadeIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+        /* Stagger-Delays */
+        .selection-card:nth-child(2) { animation-delay: 0.06s; }
+        .selection-card:nth-child(3) { animation-delay: 0.12s; }
+        .selection-card:nth-child(4) { animation-delay: 0.18s; }
+        .selection-card:nth-child(5) { animation-delay: 0.24s; }
+
+        .selection-card:active {
+            transform: scale(0.98);
+            border-color: rgba(59, 130, 246, 0.15);
         }
 
-        .selection-card:hover, .selection-card:active {
-            border-color: var(--primary-color);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-        }
-
-        /* Icon Box Styles */
         .icon-box {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-right: 1rem;
             flex-shrink: 0;
-            font-size: 1.5rem;
+            font-size: 1.35rem;
         }
 
-        /* Theme Variants */
-        .theme-housing .icon-box { background: #F2F2F0; } /* Blau */
-        .theme-market .icon-box { background: #ECFDF5; }  /* Grün */
+        .theme-housing .icon-box { background: #EFF6FF; }
+        .theme-market .icon-box { background: #ECFDF5; }
 
         .content h3 {
-            margin: 0 0 0.25rem 0;
-            font-size: 1.05rem;
-            font-weight: 600;
+            margin: 0 0 0.2rem 0;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
         }
 
         .content p {
             margin: 0;
-            color: var(--text-light);
-            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            line-height: 1.35;
         }
 
         .arrow-icon {
             margin-left: auto;
             color: #D1D5DB;
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
+            transition: transform 0.2s;
+        }
+        .selection-card:active .arrow-icon {
+            transform: translateX(2px);
+            color: #3B82F6;
         }
 
         .banner-verification {
             background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
             color: white;
-            padding: 1rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-            display: none; /* Initial versteckt */
+            padding: 1rem 1.15rem;
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            display: none;
             align-items: center;
             gap: 1rem;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);
+            animation: blurFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
         }
-        
+        /* Pattern: Kibo UI Pill fuer Starten-Button */
+        .banner-verification a {
+            border-radius: 999px;
+        }
+
         .disabled-link {
-            opacity: 0.6;
+            opacity: 0.5;
             pointer-events: none;
             filter: grayscale(0.8);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .category-header, .selection-card, .banner-verification {
+                animation: none; opacity: 1;
+            }
         }
     </style>
 </head>
