@@ -93,8 +93,8 @@
     <a id="scanBanner" href="partner-scan.html" class="pd-scan-banner" data-perm="partner_can_coupons" style="display:none;">
         <div class="pd-scan-icon">📷</div>
         <div class="pd-scan-text">
-            <strong>Coupon einlösen</strong>
-            <span>QR-Code des Gastes scannen</span>
+            <strong data-i18n="pd_scan_banner_title">Coupon einlösen</strong>
+            <span data-i18n="pd_scan_banner_sub">QR-Code des Gastes scannen</span>
         </div>
         <div class="pd-scan-today" id="scanTodayCount">0 heute</div>
     </a>
@@ -115,7 +115,7 @@
         </a>
         <a href="partner-scan.html" class="pd-action-card" data-perm="partner_can_coupons">
             <div class="icon">📷</div>
-            <div class="label">Scannen</div>
+            <div class="label" data-i18n="pd_action_scan">Scannen</div>
         </a>
     </div>
 
@@ -160,10 +160,12 @@
 
 <script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
 <script src="room8-utils.js"></script>
 <script src="room8-ui.js"></script>
 <script>
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    function ti(key, fallback) { return (window.Room8i18n && Room8i18n.t(key)) || fallback; }
 
     (async function init() {
         var sessRes = await sb.auth.getSession();
@@ -210,7 +212,7 @@
             var res = await sb.from('v_partner_redemptions_today').select('redeemed_today');
             if (res.data && res.data.length) {
                 var sum = res.data.reduce(function(acc, r) { return acc + (r.redeemed_today || 0); }, 0);
-                document.getElementById('scanTodayCount').textContent = sum + ' heute';
+                document.getElementById('scanTodayCount').textContent = ti('pd_scan_today', '{n} heute').replace('{n}', sum);
             }
         } catch (e) { /* View existiert ggf. noch nicht in alten Stages — kein Hard-Fail */ }
     }
@@ -263,7 +265,7 @@
             var stats = [{ icon: '👁', value: v, label: 'Aufrufe' }];
             if (l.type === 'job') {
                 var ac = l.apply_clicks || 0;
-                stats.push({ icon: '✉️', value: ac, label: 'Bewerber-Klicks' });
+                stats.push({ icon: '✉️', value: ac, label: ti('pd_stat_apply_clicks', 'Bewerber-Klicks') });
             }
             items.push({
                 icon: icon, title: l.title, city: l.city, id: l.id,
@@ -321,7 +323,7 @@
                 }).join('') + '</div>';
             }
             var scanHtml = it.scanLink
-                ? '<a href="' + it.scanLink + '" class="pd-item-scan">📷 Scannen</a>'
+                ? '<a href="' + it.scanLink + '" class="pd-item-scan">' + Room8.escapeHtml(ti('pd_item_scan', '📷 Scannen')) + '</a>'
                 : '';
             return '<div class="pd-item">' +
                 '<div class="meta">' +

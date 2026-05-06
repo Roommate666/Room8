@@ -55,12 +55,12 @@
         <div class="discount-big" id="discountValue"></div>
         <p id="description" style="color:#4B5563; line-height:1.6;"></p>
         
-        <button id="redeemBtn" class="redeem-btn" onclick="openRedeemQR()">QR-Code zum Einlösen anzeigen</button>
-        <div id="redeemedBadge" class="redeemed-badge" style="display:none;">Bereits eingelöst</div>
+        <button id="redeemBtn" class="redeem-btn" onclick="openRedeemQR()" data-i18n="coupon_redeem_btn">QR-Code zum Einlösen anzeigen</button>
+        <div id="redeemedBadge" class="redeemed-badge" style="display:none;" data-i18n="coupon_already_redeemed">Bereits eingelöst</div>
 
         <div class="code-box" onclick="copyCode()">
             <span id="couponCode">CODE</span>
-            <div style="font-size:0.8rem; font-weight:400; color:#9CA3AF; margin-top:0.5rem; letter-spacing:0;">Online-Code · tippen zum Kopieren</div>
+            <div style="font-size:0.8rem; font-weight:400; color:#9CA3AF; margin-top:0.5rem; letter-spacing:0;" data-i18n="coupon_online_code_hint">Online-Code · tippen zum Kopieren</div>
         </div>
 
         <p style="font-size:0.8rem; color:#9CA3AF;">Gültig bis: <span id="validDate">-</span></p>
@@ -70,34 +70,35 @@
 <!-- QR-Einlöse-Modal mit Live-Status -->
 <div id="qrOverlay" class="qr-overlay" onclick="closeRedeemQR(event)">
     <div class="qr-card" id="qrViewWaiting" onclick="event.stopPropagation()">
-        <h3 style="margin:0 0 0.5rem;">Vor Ort einlösen</h3>
-        <p style="color:#6B7280; font-size:0.9rem; margin:0 0 1rem;">Lass den Partner den QR-Code scannen.</p>
+        <h3 style="margin:0 0 0.5rem;" data-i18n="coupon_modal_title">Vor Ort einlösen</h3>
+        <p style="color:#6B7280; font-size:0.9rem; margin:0 0 1rem;" data-i18n="coupon_modal_sub">Lass den Partner den QR-Code scannen.</p>
         <div class="qr-canvas" id="qrCanvas"></div>
-        <p class="qr-meta">Coupon: <strong id="qrCouponTitle">—</strong></p>
+        <p class="qr-meta"><span data-i18n="coupon_label_coupon">Coupon:</span> <strong id="qrCouponTitle">—</strong></p>
         <p class="qr-meta" id="qrLimitInfo" style="display:none;">Pro Konto nur <strong>1× einlösbar</strong>.</p>
         <p class="qr-meta" style="color:#10B981;">
             <span style="display:inline-block; width:8px; height:8px; background:#10B981; border-radius:50%; margin-right:6px; animation:pulseDot 1.4s ease-in-out infinite;"></span>
-            Warte auf Partner-Scan…
+            <span data-i18n="coupon_modal_waiting">Warte auf Partner-Scan…</span>
         </p>
-        <button class="qr-close" onclick="closeRedeemQR()">Schließen</button>
+        <button class="qr-close" onclick="closeRedeemQR()" data-i18n="coupon_modal_close">Schließen</button>
     </div>
     <div class="qr-card" id="qrViewSuccess" style="display:none; border:3px solid #10B981;" onclick="event.stopPropagation()">
         <div style="font-size:3.5rem;">✅</div>
-        <h3 style="color:#047857; margin:0 0 0.5rem;">Erfolgreich eingelöst!</h3>
-        <p style="color:#6B7280; font-size:0.9rem; margin:0 0 1rem;">Der Partner hat deinen Coupon bestätigt.</p>
+        <h3 style="color:#047857; margin:0 0 0.5rem;" data-i18n="coupon_success_title">Erfolgreich eingelöst!</h3>
+        <p style="color:#6B7280; font-size:0.9rem; margin:0 0 1rem;" data-i18n="coupon_success_sub">Der Partner hat deinen Coupon bestätigt.</p>
         <div style="background:#ECFDF5; border:2px dashed #6EE7B7; border-radius:14px; padding:1rem; margin:1rem 0;">
-            <div style="font-size:0.7rem; color:#047857; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.25rem;">Bestätigungs-Code</div>
+            <div style="font-size:0.7rem; color:#047857; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.25rem;" data-i18n="coupon_success_code_label">Bestätigungs-Code</div>
             <div id="successCode" style="font-family:monospace; font-size:1.6rem; font-weight:800; color:#065F46; letter-spacing:3px;">—</div>
         </div>
-        <p class="qr-meta">Coupon: <strong id="successCouponTitle">—</strong></p>
+        <p class="qr-meta"><span data-i18n="coupon_label_coupon">Coupon:</span> <strong id="successCouponTitle">—</strong></p>
         <p class="qr-meta" id="successTimestamp"></p>
-        <button class="qr-close" style="background:#047857; color:white;" onclick="closeRedeemQR()">Fertig</button>
+        <button class="qr-close" style="background:#047857; color:white;" onclick="closeRedeemQR()" data-i18n="coupon_success_done">Fertig</button>
     </div>
 </div>
 <style>@keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(0.7);} }</style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
 <script src="room8-ui.js"></script>
 <script>
     // Supabase Client - Direkte Initialisierung
@@ -133,7 +134,8 @@
         const btn = document.getElementById('redeemBtn');
         const badge = document.getElementById('redeemedBadge');
         if (!userId) {
-            btn.textContent = 'Zum Einlösen einloggen';
+            btn.setAttribute('data-i18n', 'coupon_redeem_login');
+            btn.textContent = (window.Room8i18n && Room8i18n.t('coupon_redeem_login')) || 'Zum Einlösen einloggen';
             btn.onclick = function() { window.location.href = 'login.html'; };
             return;
         }
@@ -154,7 +156,7 @@
     function openRedeemQR() {
         if (!coupon || !userId) return;
         if (alreadyRedeemed) {
-            Room8UI.error('Du hast diesen Coupon bereits eingelöst.');
+            Room8UI.error((window.Room8i18n && Room8i18n.t('coupon_already_alert')) || 'Du hast diesen Coupon bereits eingelöst.');
             return;
         }
         const payload = 'room8:redeem:' + coupon.id + ':' + userId;
@@ -166,7 +168,9 @@
             correctLevel: QRCode.CorrectLevel.M
         });
         document.getElementById('qrCouponTitle').textContent = coupon.title || '—';
-        document.getElementById('qrLimitInfo').style.display = coupon.usage_limit_per_user === 1 ? 'block' : 'none';
+        var limitEl = document.getElementById('qrLimitInfo');
+        limitEl.innerHTML = (window.Room8i18n && Room8i18n.t('coupon_modal_limit_1x')) || 'Pro Konto nur <strong>1× einlösbar</strong>.';
+        limitEl.style.display = coupon.usage_limit_per_user === 1 ? 'block' : 'none';
         document.getElementById('qrViewWaiting').style.display = 'block';
         document.getElementById('qrViewSuccess').style.display = 'none';
         document.getElementById('qrOverlay').classList.add('open');

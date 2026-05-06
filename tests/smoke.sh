@@ -123,6 +123,16 @@ check "partner-dashboard: scanBanner CTA"           "$BASE/partner-dashboard.htm
 check "partner-dashboard: v_partner_redemptions"    "$BASE/partner-dashboard.html" "v_partner_redemptions_today"
 check "partner-dashboard: pd-item-scan Link"        "$BASE/partner-dashboard.html" "pd-item-scan"
 
+# 7. i18n-Cleanup Coupon/Scan-Strings (translations.js + data-i18n Keys)
+check "coupon-detail: translations.js geladen"      "$BASE/coupon-detail.html" "translations.js"
+check "coupon-detail: data-i18n=coupon_redeem_btn"  "$BASE/coupon-detail.html" "data-i18n=\"coupon_redeem_btn\""
+check "coupon-detail: data-i18n=coupon_modal_title" "$BASE/coupon-detail.html" "data-i18n=\"coupon_modal_title\""
+check "partner-scan: translations.js geladen"       "$BASE/partner-scan.html" "translations.js"
+check "partner-scan: data-i18n=scan_page_title"     "$BASE/partner-scan.html" "data-i18n=\"scan_page_title\""
+check "partner-scan: ti() helper definiert"         "$BASE/partner-scan.html" "function ti\\("
+check "partner-dashboard: translations.js geladen"  "$BASE/partner-dashboard.html" "translations.js"
+check "partner-dashboard: data-i18n=pd_action_scan" "$BASE/partner-dashboard.html" "data-i18n=\"pd_action_scan\""
+
 echo ""
 echo "========================================"
 echo "Ergebnis: $PASS bestanden, $FAIL fehlgeschlagen"

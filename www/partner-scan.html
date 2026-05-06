@@ -71,31 +71,31 @@
 <div class="ps-wrap">
     <div class="ps-header">
         <a href="partner-dashboard.html" class="ps-back" aria-label="Zurück">&#8592;</a>
-        <h1 class="ps-title">Coupon scannen</h1>
+        <h1 class="ps-title" data-i18n="scan_page_title">Coupon scannen</h1>
     </div>
 
     <div class="ps-toggle" role="tablist">
-        <button id="tabScan" class="active" onclick="switchTab('scan')">QR scannen</button>
-        <button id="tabManual" onclick="switchTab('manual')">Manuell eingeben</button>
+        <button id="tabScan" class="active" onclick="switchTab('scan')" data-i18n="scan_tab_qr">QR scannen</button>
+        <button id="tabManual" onclick="switchTab('manual')" data-i18n="scan_tab_manual">Manuell eingeben</button>
     </div>
 
     <div id="paneScan" class="ps-card">
-        <h2>Kamera</h2>
+        <h2 data-i18n="scan_camera_heading">Kamera</h2>
         <div id="qrReader" style="min-height:80px;"></div>
         <div id="cameraStartBox" style="text-align:center; padding:1rem 0;">
-            <button id="startCamBtn" onclick="startScanner()" style="background:linear-gradient(135deg,#EA580C 0%,#DC2626 100%); color:white; border:none; padding:1rem 1.5rem; border-radius:12px; font-size:1rem; font-weight:700; cursor:pointer; width:100%;">📷 Kamera starten</button>
-            <p style="color:#6B7280; font-size:0.85rem; margin-top:0.75rem;">Beim ersten Mal fragt das System nach Kamera-Erlaubnis.</p>
+            <button id="startCamBtn" onclick="startScanner()" style="background:linear-gradient(135deg,#EA580C 0%,#DC2626 100%); color:white; border:none; padding:1rem 1.5rem; border-radius:12px; font-size:1rem; font-weight:700; cursor:pointer; width:100%;" data-i18n="scan_start_btn">📷 Kamera starten</button>
+            <p style="color:#6B7280; font-size:0.85rem; margin-top:0.75rem;" data-i18n="scan_perm_hint">Beim ersten Mal fragt das System nach Kamera-Erlaubnis.</p>
         </div>
-        <div id="scanStatus" class="ps-status info">Tippe auf "Kamera starten" um den QR-Code des Gastes zu scannen.</div>
+        <div id="scanStatus" class="ps-status info" data-i18n="scan_idle_status">Tippe auf "Kamera starten" um den QR-Code des Gastes zu scannen.</div>
     </div>
 
     <div id="paneManual" class="ps-card ps-manual">
-        <h2>Manuelle Eingabe</h2>
+        <h2 data-i18n="scan_manual_heading">Manuelle Eingabe</h2>
         <label for="manualCoupon">Coupon-ID</label>
         <input id="manualCoupon" type="text" placeholder="00000000-0000-0000-0000-000000000000" autocomplete="off">
         <label for="manualUser">User-ID</label>
         <input id="manualUser" type="text" placeholder="00000000-0000-0000-0000-000000000000" autocomplete="off">
-        <button id="manualSubmit" class="primary" onclick="submitManual()">Coupon einlösen</button>
+        <button id="manualSubmit" class="primary" onclick="submitManual()" data-i18n="scan_manual_submit">Coupon einlösen</button>
     </div>
 
     <div id="resultCard" class="ps-result-card">
@@ -105,18 +105,20 @@
         <div class="ps-result-code" id="resultCode" style="display:none;"></div>
         <p class="ps-result-meta" id="resultMeta1"></p>
         <p class="ps-result-meta" id="resultMeta2"></p>
-        <button class="ps-rescan" onclick="resetAndRescan()">Nächsten scannen</button>
+        <button class="ps-rescan" onclick="resetAndRescan()" data-i18n="scan_next_btn">Nächsten scannen</button>
     </div>
 </div>
 
 <script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="translations.js"></script>
 <script src="room8-ui.js"></script>
 <script>
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let html5QrCode = null;
     let isProcessing = false;
     const QR_REGEX = /^room8:redeem:([0-9a-f-]{36}):([0-9a-f-]{36})$/i;
+    function ti(key, fallback) { return (window.Room8i18n && Room8i18n.t(key)) || fallback; }
 
     async function ensurePartner() {
         const { data: sess } = await sb.auth.getSession();
@@ -153,18 +155,18 @@
                 () => {}
             );
             if (startBox) startBox.style.display = 'none';
-            setStatus('Halte den QR-Code des Gastes vor die Kamera.', 'info');
+            setStatus(ti('scan_active_status', 'Halte den QR-Code des Gastes vor die Kamera.'), 'info');
         } catch (e) {
             console.warn('QR-Scanner Start:', e && e.name, e && e.message);
             const name = (e && e.name) || '';
             if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
-                setStatus('Kamera-Zugriff verweigert. Bitte in den Geräte-Einstellungen erlauben: Einstellungen → Apps → Room8 → Berechtigungen → Kamera.', 'error');
+                setStatus(ti('scan_perm_denied', 'Kamera-Zugriff verweigert. Bitte in den Geräte-Einstellungen erlauben: Einstellungen → Apps → Room8 → Berechtigungen → Kamera.'), 'error');
             } else if (name === 'NotFoundError' || name === 'OverconstrainedError') {
-                setStatus('Keine passende Kamera gefunden. Nutze "Manuell eingeben".', 'error');
+                setStatus(ti('scan_no_camera', 'Keine passende Kamera gefunden. Nutze "Manuell eingeben".'), 'error');
             } else if (name === 'NotReadableError') {
-                setStatus('Kamera ist gerade von einer anderen App belegt. Schliesse andere Kamera-Apps.', 'error');
+                setStatus(ti('scan_camera_busy', 'Kamera ist gerade von einer anderen App belegt. Schließe andere Kamera-Apps.'), 'error');
             } else {
-                setStatus('Kamera nicht verfügbar (' + (e && e.message || 'unbekannt') + '). Nutze "Manuell eingeben".', 'error');
+                setStatus(ti('scan_camera_unavailable', 'Kamera nicht verfügbar.') + ' (' + (e && e.message || 'unbekannt') + ')', 'error');
             }
             if (window.Room8Sentry) window.Room8Sentry.captureException(e);
         }
@@ -180,7 +182,7 @@
         if (isProcessing) return;
         const m = decodedText.match(QR_REGEX);
         if (!m) {
-            setStatus('Kein gültiger Room8-QR. Versuche es erneut.', 'error');
+            setStatus(ti('scan_invalid_qr', 'Kein gültiger Room8-QR. Versuche es erneut.'), 'error');
             return;
         }
         isProcessing = true;
@@ -193,7 +195,7 @@
         const userId = document.getElementById('manualUser').value.trim();
         const uuidRe = /^[0-9a-f-]{36}$/i;
         if (!uuidRe.test(couponId) || !uuidRe.test(userId)) {
-            setStatus('Beide Felder müssen UUIDs sein.', 'error');
+            setStatus(ti('scan_uuid_required', 'Beide Felder müssen UUIDs sein.'), 'error');
             return;
         }
         document.getElementById('manualSubmit').disabled = true;
@@ -216,9 +218,9 @@
                 showResult(false, mapError(data && data.error), null, null, null);
                 return;
             }
-            showResult(true, 'Erfolgreich eingelöst', data.verification_code, data.coupon_title, data.business_name + ' · ' + data.discount_value);
+            showResult(true, ti('scan_success_title', 'Eingelöst'), data.verification_code, data.coupon_title, data.business_name + ' · ' + data.discount_value);
         } catch (e) {
-            showResult(false, 'Netzwerkfehler. Bitte erneut versuchen.', null, null, null);
+            showResult(false, ti('scan_network_error', 'Netzwerkfehler. Bitte erneut versuchen.'), null, null, null);
             if (window.Room8Sentry) window.Room8Sentry.captureException(e);
         } finally {
             isProcessing = false;
@@ -244,7 +246,7 @@
         card.className = 'ps-result-card show ' + (ok ? 'success' : 'error');
         document.getElementById('resultIcon').textContent = ok ? '✅' : '⚠️';
         document.getElementById('resultTitle').textContent = title;
-        document.getElementById('resultSub').textContent = ok ? 'Bestätigungs-Code:' : '';
+        document.getElementById('resultSub').textContent = ok ? ti('scan_verification_label', 'Bestätigungs-Code:') : '';
         const codeEl = document.getElementById('resultCode');
         if (ok && code) { codeEl.textContent = code; codeEl.style.display = 'block'; } else { codeEl.style.display = 'none'; }
         document.getElementById('resultMeta1').innerHTML = couponTitle ? 'Coupon: <strong>' + couponTitle + '</strong>' : '';
