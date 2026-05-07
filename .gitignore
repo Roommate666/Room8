@@ -20,3 +20,10 @@ google-services.json.bak*
 
 # Supabase CLI Cache
 supabase/.temp/
+
+# Apple Sign In Keys / Google Service Account Keys / sonstige Private Keys
+*.p8
+*.p12
+*.jks
+*.keystore
+AuthKey_*
