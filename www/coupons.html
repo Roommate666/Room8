@@ -523,10 +523,10 @@
                     if (c.coupon_photos && c.coupon_photos.length > 0) {
                         c.coupon_photos.forEach(function(p) {
                             if (p.photo_type === 'cover' && !c.imageUrl) {
-                                c.imageUrl = window.Room8 ? Room8.getOptimizedImageUrl('coupon-images', p.storage_path, { width: 600, height: 400, quality: 75 }) : null;
+                                c.imageUrl = window.Room8 ? Room8.getOptimizedImageUrl('listing-images', p.storage_path, { width: 600, height: 400, quality: 75 }) : null;
                             }
                             if (p.photo_type === 'logo' && !c.logoUrl) {
-                                c.logoUrl = window.Room8 ? Room8.getOptimizedImageUrl('coupon-images', p.storage_path, { width: 100, height: 100, quality: 75 }) : null;
+                                c.logoUrl = window.Room8 ? Room8.getOptimizedImageUrl('listing-images', p.storage_path, { width: 100, height: 100, quality: 75 }) : null;
                             }
                         });
                     }

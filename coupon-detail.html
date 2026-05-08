@@ -197,8 +197,12 @@
         if(coupon.valid_until) document.getElementById('validDate').textContent = new Date(coupon.valid_until).toLocaleDateString('de-DE');
 
         if (coupon.coupon_photos && coupon.coupon_photos.length > 0) {
-            const { data } = sb.storage.from('listing-images').getPublicUrl(coupon.coupon_photos[0].storage_path);
-            document.getElementById('heroImg').src = data.publicUrl;
+            var photo = coupon.coupon_photos.find(function(p){ return p.photo_type === 'cover' || p.photo_type === 'hero'; }) || coupon.coupon_photos[0];
+            var optimized = window.Room8 && Room8.getOptimizedImageUrl
+                ? Room8.getOptimizedImageUrl('listing-images', photo.storage_path, { width: 1200, quality: 80 })
+                : null;
+            var fallbackUrl = sb.storage.from('listing-images').getPublicUrl(photo.storage_path).data.publicUrl;
+            document.getElementById('heroImg').src = optimized || fallbackUrl;
         }
 
         // Redeem-Button-Status: schon eingeloest?

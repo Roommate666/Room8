@@ -169,13 +169,17 @@
             var logoPhoto = photos.find(function(p){ return p.photo_type === 'logo'; }) ||
                             photos.find(function(p){ return p.photo_type !== 'hero'; }); // fallback first non-hero
             if (heroPhoto) {
-                var heroUrl = sb.storage.from('listing-images').getPublicUrl(heroPhoto.storage_path).data.publicUrl;
+                var heroUrl = (window.Room8 && Room8.getOptimizedImageUrl)
+                    ? Room8.getOptimizedImageUrl('listing-images', heroPhoto.storage_path, { width: 1200, quality: 80 })
+                    : sb.storage.from('listing-images').getPublicUrl(heroPhoto.storage_path).data.publicUrl;
                 document.getElementById('coverImg').src = heroUrl;
                 document.getElementById('jobCover').style.display = 'block';
                 document.getElementById('jobHero').classList.add('with-cover');
             }
             if (logoPhoto) {
-                var logoUrl = sb.storage.from('listing-images').getPublicUrl(logoPhoto.storage_path).data.publicUrl;
+                var logoUrl = (window.Room8 && Room8.getOptimizedImageUrl)
+                    ? Room8.getOptimizedImageUrl('listing-images', logoPhoto.storage_path, { width: 200, height: 200, quality: 80 })
+                    : sb.storage.from('listing-images').getPublicUrl(logoPhoto.storage_path).data.publicUrl;
                 document.getElementById('logo').src = logoUrl;
             }
 
