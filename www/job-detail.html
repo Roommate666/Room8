@@ -17,8 +17,17 @@
         }
         .app-container { background: white; padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px); }
 
+        /* Optional Hero-Cover (nur wenn photo_type=hero) */
+        .job-cover { width: 100%; height: 220px; overflow: hidden; position: relative; background: #F3F4F6; }
+        .job-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .job-cover::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(255,255,255,0.85) 100%);
+            pointer-events: none;
+        }
         .job-hero { text-align: center; padding: 2rem 1.5rem; background: rgba(249,250,251,0.88); animation: blurFadeIn 0.5s ease-out both; }
-        .job-logo { width: 80px; height: 80px; border-radius: 18px; object-fit: cover; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .job-hero.with-cover { padding-top: 1rem; margin-top: -2.5rem; position: relative; z-index: 1; }
+        .job-logo { width: 80px; height: 80px; border-radius: 18px; object-fit: cover; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); background: #fff; }
         .job-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; line-height: 1.2; letter-spacing: -0.02em; }
         .job-company { color: #6B7280; font-weight: 500; }
 
@@ -79,8 +88,11 @@
     </div>
 
     <div id="content" style="display:none;">
-        <div class="job-hero">
-            <img src="placeholder.png" id="logo" class="job-logo" onerror="this.src='https://via.placeholder.com/80'">
+        <div class="job-cover" id="jobCover" style="display:none;">
+            <img id="coverImg" alt="" loading="eager" decoding="async">
+        </div>
+        <div class="job-hero" id="jobHero">
+            <img src="no-image.svg" id="logo" class="job-logo" alt="Logo">
             <h1 id="title" class="job-title"></h1>
             <div id="company" class="job-company"></div>
         </div>
@@ -128,7 +140,7 @@
 
     async function load() {
         if (!id) return;
-        const { data: job } = await sb.from('listings').select('*, listing_photos(storage_path)').eq('id', id).single();
+        const { data: job } = await sb.from('listings').select('*, listing_photos(storage_path, photo_type, display_order)').eq('id', id).single();
 
         // View-Counter erhoehen (fire-and-forget, blockt User-Flow nicht)
         if (job) {
@@ -151,10 +163,20 @@
             
             document.getElementById('desc').textContent = job.description;
 
-            // Logo
-            if (job.listing_photos && job.listing_photos.length > 0) {
-                const { data } = sb.storage.from('listing-images').getPublicUrl(job.listing_photos[0].storage_path);
-                document.getElementById('logo').src = data.publicUrl;
+            // Photos: photo_type='hero' -> Cover-Banner, photo_type='logo' (oder NULL) -> Logo
+            var photos = job.listing_photos || [];
+            var heroPhoto = photos.find(function(p){ return p.photo_type === 'hero'; });
+            var logoPhoto = photos.find(function(p){ return p.photo_type === 'logo'; }) ||
+                            photos.find(function(p){ return p.photo_type !== 'hero'; }); // fallback first non-hero
+            if (heroPhoto) {
+                var heroUrl = sb.storage.from('listing-images').getPublicUrl(heroPhoto.storage_path).data.publicUrl;
+                document.getElementById('coverImg').src = heroUrl;
+                document.getElementById('jobCover').style.display = 'block';
+                document.getElementById('jobHero').classList.add('with-cover');
+            }
+            if (logoPhoto) {
+                var logoUrl = sb.storage.from('listing-images').getPublicUrl(logoPhoto.storage_path).data.publicUrl;
+                document.getElementById('logo').src = logoUrl;
             }
 
             // Arrays

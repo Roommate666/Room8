@@ -342,6 +342,19 @@
             font-weight: 700; font-size: 1.4rem; flex-shrink: 0;
         }
 
+        /* Card mit Hero-Banner (photo_type=hero) */
+        .job-card.with-hero { flex-direction: column; align-items: stretch; padding: 0; overflow: hidden; gap: 0; }
+        .job-card-hero { width: 100%; height: 120px; background-position: center; background-size: cover; background-color: #F3F4F6; position: relative; }
+        .job-card.with-hero .job-logo {
+            position: absolute; left: 0.85rem; bottom: -22px;
+            width: 52px; height: 52px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 3px solid white; background: white;
+            object-fit: cover;
+        }
+        .job-card.with-hero .job-content { padding: 2rem 1rem 1rem 1rem; }
+        .job-card.with-hero .example-badge { z-index: 2; }
+
         .job-content { flex: 1; min-width: 0; }
         .job-title { font-size: 0.95rem; font-weight: 700; margin: 0 0 0.15rem 0; color: var(--text-main); letter-spacing: -0.01em; }
         .job-company { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.4rem; }
@@ -555,15 +568,27 @@
     };
 
     function renderJobCard(job) {
+        var photos = job.listing_photos || [];
+        var heroPhoto = photos.find(function(p){ return p.photo_type === 'hero'; });
+        var logoPhoto = photos.find(function(p){ return p.photo_type === 'logo'; }) ||
+                        photos.find(function(p){ return p.photo_type !== 'hero'; });
+
         var logoContent = '';
-        if (job.listing_photos && job.listing_photos.length > 0) {
-            var path = job.listing_photos[0].storage_path;
-            var urlData = sb.storage.from('listing-images').getPublicUrl(path);
-            if (urlData.data) logoContent = '<img src="' + encodeURI(urlData.data.publicUrl) + '" class="job-logo" loading="lazy" style="object-fit:cover;">';
+        if (logoPhoto) {
+            var logoUrl = sb.storage.from('listing-images').getPublicUrl(logoPhoto.storage_path).data.publicUrl;
+            logoContent = '<img src="' + encodeURI(logoUrl) + '" class="job-logo" loading="lazy" alt="Logo">';
         } else if (job.logo) {
             logoContent = '<div class="job-logo">' + esc(job.logo) + '</div>';
         } else {
             logoContent = '<div class="job-logo">' + esc((job.company_name || 'J').charAt(0).toUpperCase()) + '</div>';
+        }
+
+        var heroHtml = '';
+        var cardClass = 'job-card';
+        if (heroPhoto) {
+            cardClass += ' with-hero';
+            var heroUrl = sb.storage.from('listing-images').getPublicUrl(heroPhoto.storage_path).data.publicUrl;
+            heroHtml = '<div class="job-card-hero" style="background-image:url(\'' + encodeURI(heroUrl) + '\')">' + logoContent + '</div>';
         }
 
         var salary = job.salary_amount ? (job.salary_amount + ' €') : 'Verhandlung';
@@ -576,9 +601,9 @@
         var safeId = encodeURIComponent(job.id || '');
         var clickAction = job.is_demo ? 'onclick="Room8UI.info(\'Dies ist ein Beispiel-Inserat.\')"' : 'onclick="navigateTo(\'job-detail.html?id=' + esc(safeId) + '\')"';
 
-        return '<div class="job-card" ' + clickAction + '>' +
+        return '<div class="' + cardClass + '" ' + clickAction + '>' +
                 badge +
-                logoContent +
+                (heroHtml || logoContent) +
                 '<div class="job-content">' +
                     '<div class="job-title">' + esc(job.title) + '</div>' +
                     '<div class="job-company">' + esc(job.company_name || 'Privat') + ' • ' + esc(job.city || 'Remote') + '</div>' +
@@ -614,7 +639,7 @@
     function loadJobs() {
         // Versuche echte Jobs zu laden
         sb.from('listings')
-            .select('*, listing_photos(storage_path)')
+            .select('*, listing_photos(storage_path, photo_type, display_order)')
             .eq('type', 'job')
             .eq('is_active', true)
             .eq('is_test', false)
