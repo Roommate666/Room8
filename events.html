@@ -28,6 +28,14 @@
         .app-header h1 { color: white; margin: 0; font-size: 1.5rem; font-weight: 800; text-align: center; letter-spacing: -0.02em; }
 
         .filter-section { padding: 0 1.25rem 1rem; }
+        .search-bar-wrap { position: relative; margin-bottom: 0.85rem; }
+        .search-bar-wrap input {
+            width: 100%; padding: 0.85rem 1rem 0.85rem 3rem; border-radius: 999px;
+            border: 1.5px solid #E5E7EB; font-size: 0.95rem; background: white;
+            transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box;
+        }
+        .search-bar-wrap input:focus { outline: none; border-color: #14B8A6; box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.10); }
+        .search-bar-wrap .search-icon { position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; pointer-events: none; }
         .filter-bar { display: flex; gap: 0.5rem; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 0.25rem; }
         .filter-bar::-webkit-scrollbar { display: none; }
         .filter-btn {
@@ -130,6 +138,10 @@
     </header>
 
     <div class="filter-section">
+        <div class="search-bar-wrap">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+            <input type="text" id="eventSearchInput" placeholder="Event, Ort, Veranstalter …" autocomplete="off">
+        </div>
         <div class="filter-bar" id="eventFilter">
             <button class="filter-btn active" data-cat="all">Alle</button>
             <button class="filter-btn" data-cat="party">Party</button>
@@ -177,6 +189,12 @@
 
     var allEvents = [];
     var currentCat = 'all';
+    var currentSearch = '';
+    function matchesSearch(ev, q) {
+        if (!q) return true;
+        var hay = ((ev.title || '') + ' ' + (ev.location || '') + ' ' + (ev.description || '') + ' ' + (ev.city || '') + ' ' + (ev.organizer_name || '')).toLowerCase();
+        return hay.indexOf(q) !== -1;
+    }
     var container = document.getElementById('eventsContainer');
 
     var CATEGORY_LABELS = {
@@ -223,9 +241,11 @@
     }
 
     function renderEvents() {
-        var filtered = currentCat === 'all'
+        var byCat = currentCat === 'all'
             ? allEvents
             : allEvents.filter(function(e) { return e.category === currentCat; });
+
+        var filtered = byCat.filter(function(e) { return matchesSearch(e, currentSearch); });
 
         if (filtered.length === 0) {
             container.innerHTML =
@@ -289,7 +309,16 @@
         renderEvents();
     });
 
-    // Permission-Check: Plus-Icon im Header NUR wenn User vom Admin freigeschaltet
+    var eventSearchEl = document.getElementById('eventSearchInput');
+    if (eventSearchEl) {
+        eventSearchEl.addEventListener('input', function(e) {
+            currentSearch = (e.target.value || '').trim().toLowerCase();
+            renderEvents();
+        });
+    }
+
+    // Permission-Check: Plus-Icon im Header NUR fuer Partner oder Admin.
+    // Normale User sollen Events nicht erstellen koennen — nur konsumieren.
     async function setupPermissionUI() {
         var headerBtn = document.getElementById('headerCreateBtn');
         if (headerBtn) headerBtn.style.display = 'none';
@@ -298,11 +327,13 @@
         if (!userRes.data.user) return;
 
         var profileRes = await sb.from('profiles')
-            .select('can_create_events')
-            .eq('id', userRes.data.user.id).single();
-        // Plus-Button immer fuer eingeloggte User zeigen — event-create.html
-        // entscheidet dann selbst (Form vs. Antrag-Overlay vs. Verify-Overlay).
-        if (headerBtn) {
+            .select('is_partner, is_admin, partner_can_events')
+            .eq('id', userRes.data.user.id).maybeSingle();
+        var p = profileRes.data || {};
+
+        // Plus nur zeigen wenn: Admin ODER Partner mit Events-Permission
+        var canCreate = !!(p.is_admin || (p.is_partner && p.partner_can_events));
+        if (headerBtn && canCreate) {
             headerBtn.style.display = 'flex';
         }
     }

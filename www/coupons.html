@@ -88,6 +88,14 @@
 
         /* Filter - Pattern: Kibo UI Pill */
         .filter-section { padding: 0 1.5rem 1rem; }
+        .search-bar-wrap { position: relative; margin-bottom: 0.85rem; }
+        .search-bar-wrap input {
+            width: 100%; padding: 0.85rem 1rem 0.85rem 3rem; border-radius: 999px;
+            border: 1.5px solid #E5E7EB; font-size: 0.95rem; background: white;
+            transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box;
+        }
+        .search-bar-wrap input:focus { outline: none; border-color: #EA580C; box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.08); }
+        .search-bar-wrap .search-icon { position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; pointer-events: none; }
         .filter-bar { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; scrollbar-width: none; }
         .filter-bar::-webkit-scrollbar { display: none; }
         .filter-btn {
@@ -359,6 +367,10 @@
 
     
     <div class="filter-section">
+        <div class="search-bar-wrap">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+            <input type="text" id="couponSearchInput" placeholder="Restaurant, Code, Stadt …" autocomplete="off">
+        </div>
         <div class="filter-bar" id="couponFilter">
             <button class="filter-btn active" data-cat="all">Alle</button>
             <button class="filter-btn" data-cat="food">Essen & Trinken</button>
@@ -484,6 +496,7 @@
     var container = document.getElementById('couponContainer');
     var filterBtns = document.querySelectorAll('.filter-btn');
     var currentCat = 'all';
+    var currentSearch = '';
 
     // Coupons laden (mit JOIN auf coupon_photos fuer Bilder)
     async function loadCoupons() {
@@ -532,10 +545,17 @@
         renderCoupons();
     }
 
+    function matchesSearch(c, q) {
+        if (!q) return true;
+        var hay = ((c.title || '') + ' ' + (c.business_name || '') + ' ' + (c.description || '') + ' ' + (c.city || '') + ' ' + (c.discount_code || '')).toLowerCase();
+        return hay.indexOf(q) !== -1;
+    }
+
     function renderCoupons() {
         container.innerHTML = '';
-        var filtered = allCoupons.filter(function(c) { 
-            return currentCat === 'all' || c.category === currentCat; 
+        var filtered = allCoupons.filter(function(c) {
+            var catOK = (currentCat === 'all') || (c.category === currentCat);
+            return catOK && matchesSearch(c, currentSearch);
         });
         
         if (filtered.length === 0) {
@@ -639,6 +659,14 @@
     };
     
     modal.addEventListener('click', function(e) { if(e.target === modal) closeModal(); });
+
+    var searchInputEl = document.getElementById('couponSearchInput');
+    if (searchInputEl) {
+        searchInputEl.addEventListener('input', function(e) {
+            currentSearch = (e.target.value || '').trim().toLowerCase();
+            renderCoupons();
+        });
+    }
 
     filterBtns.forEach(function(btn) {
         btn.addEventListener('click', function() {
