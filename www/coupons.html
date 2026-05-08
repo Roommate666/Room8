@@ -546,7 +546,15 @@
         filtered.forEach(function(c) {
             var card = document.createElement('div');
             card.className = 'coupon-card';
-            card.onclick = function() { openModal(c.discount_code); };
+            // Echte Coupons -> Detail-Seite mit QR-Code-Einloese-Flow.
+            // Beispiel-Coupons (ohne id) -> alte "Code kopieren"-Modal als Fallback.
+            card.onclick = function() {
+                if (c.id && !c.isExample) {
+                    window.location.href = 'coupon-detail.html?id=' + encodeURIComponent(c.id);
+                } else {
+                    openModal(c.discount_code);
+                }
+            };
             
             var badgeClass = c.badgeType === 'green' ? 'green' : (c.badgeType === 'blue' ? 'blue' : '');
             var validDate = c.valid_until ? new Date(c.valid_until).toLocaleDateString('de-DE') : 'Unbegrenzt';
@@ -600,7 +608,11 @@
             if (redeemBtn) {
                 redeemBtn.addEventListener('click', function(ev) {
                     ev.stopPropagation();
-                    openModal(redeemBtn.getAttribute('data-code') || '');
+                    if (c.id && !c.isExample) {
+                        window.location.href = 'coupon-detail.html?id=' + encodeURIComponent(c.id);
+                    } else {
+                        openModal(redeemBtn.getAttribute('data-code') || '');
+                    }
                 });
             }
 
