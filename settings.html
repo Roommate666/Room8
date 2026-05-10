@@ -225,6 +225,19 @@
             </div>
         </div>
 
+        <!-- Sprache / Language -->
+        <h3 class="section-label" data-i18n="settings_language_section">Sprache</h3>
+        <div class="settings-group" style="padding: 0.85rem;">
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="lang-pill" data-lang="de" id="lang-pill-de" style="flex:1; padding:0.85rem 1rem; border-radius:999px; border:1.5px solid #E5E7EB; background:white; font-size:0.95rem; font-weight:600; color:#374151; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:0.5rem;">Deutsch</button>
+                <button class="lang-pill" data-lang="en" id="lang-pill-en" style="flex:1; padding:0.85rem 1rem; border-radius:999px; border:1.5px solid #E5E7EB; background:white; font-size:0.95rem; font-weight:600; color:#374151; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:0.5rem;">English</button>
+            </div>
+        </div>
+        <style>
+            .lang-pill.active { background: linear-gradient(135deg, #3B82F6, #2563EB) !important; color: white !important; border-color: transparent !important; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25) !important; }
+            .lang-pill:active { transform: scale(0.97); }
+        </style>
+
         <!-- App Settings -->
         <h3 class="section-label">App</h3>
         <div class="settings-group">
@@ -475,6 +488,29 @@ document.getElementById('deleteAccountBtn').addEventListener('click', async func
 });
 
     loadUser();
+
+    // Sprach-Switcher Logik
+    function refreshLangPills() {
+        var current = (window.Room8i18n && Room8i18n.getCurrentLanguage && Room8i18n.getCurrentLanguage()) || localStorage.getItem('room8_language') || 'de';
+        var de = document.getElementById('lang-pill-de');
+        var en = document.getElementById('lang-pill-en');
+        if (de) de.classList.toggle('active', current === 'de');
+        if (en) en.classList.toggle('active', current === 'en');
+    }
+    document.querySelectorAll('.lang-pill').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var lang = btn.getAttribute('data-lang');
+            if (window.Room8i18n && Room8i18n.setLanguage) {
+                Room8i18n.setLanguage(lang);
+            } else {
+                localStorage.setItem('room8_language', lang);
+            }
+            refreshLangPills();
+            setTimeout(function(){ window.location.reload(); }, 150);
+        });
+    });
+    refreshLangPills();
+    window.addEventListener('load', refreshLangPills);
 </script>
 </body>
 </html>
