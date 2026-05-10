@@ -282,12 +282,12 @@
         .search-section { padding: 0 1.5rem 1rem; }
         .search-bar { position: relative; margin-bottom: 1rem; border-radius: 999px; }
         .search-bar input {
-            width: 100%; padding: 0.85rem 1rem 0.85rem 3rem; border-radius: 999px;
+            width: 100%; padding: 0.85rem 1.25rem 0.85rem 3.5rem; border-radius: 999px;
             border: 1.5px solid #E5E7EB; font-size: 0.95rem; background: white;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box;
         }
         .search-bar input:focus { outline: none; border-color: #8B5CF6; box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.08); }
-        .search-icon { position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; }
+        .search-icon { position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; pointer-events: none; }
 
         /* Pattern: Kibo UI Pill fuer Filter */
         .filter-bar { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; scrollbar-width: none; }
