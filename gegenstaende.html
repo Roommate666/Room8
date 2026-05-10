@@ -46,11 +46,12 @@
         }
 
         /* Rest wie gehabt */
-        .search-section { padding: 0 1.5rem 1rem; background-color: transparent; animation: blurFadeIn 0.5s 0.1s ease-out both; }
-        .search-bar { position: relative; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 999px; }
-        .search-bar input { width: 100%; padding: 0.9rem 1rem 0.9rem 3rem; border-radius: 999px; border: 1px solid rgba(0,0,0,0.04); font-size: 1rem; background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: all 0.2s; }
-        .search-bar input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); background: white; }
-        .search-icon { position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; }
+        /* Search & Filter — Pattern angeglichen an coupons.html / events.html */
+        .search-section { padding: 0 1.25rem 1rem; background-color: transparent; animation: blurFadeIn 0.5s 0.1s ease-out both; }
+        .search-bar { position: relative; margin-bottom: 0.85rem; }
+        .search-bar input { width: 100%; padding: 0.85rem 1.25rem 0.85rem 3.5rem; border-radius: 999px; border: 1.5px solid #E5E7EB; font-size: 0.95rem; background: white; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; }
+        .search-bar input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
+        .search-icon { position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; pointer-events: none; z-index: 2; }
 
         .filter-container { display: flex; flex-direction: column; gap: 0.8rem; }
         .filter-label { font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; margin-left: 0.5rem; }
