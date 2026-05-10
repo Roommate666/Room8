@@ -585,6 +585,20 @@ const translations = {
 
  settings_logout_confirm: 'Möchtest du dich wirklich ausloggen?',
 
+ // Settings — Section-Labels + neue Items (Mai 2026)
+ settings_section_admin: 'Admin',
+ settings_only_you: 'Nur du',
+ settings_create_job: 'Job erstellen',
+ settings_create_coupon: 'Coupon erstellen',
+ settings_section_app: 'App',
+ settings_section_account: 'Konto',
+ settings_section_legal: 'Rechtliches',
+ settings_section_danger: 'Gefahrenzone',
+ settings_verification: 'Verifizierung',
+ settings_blocked_users: 'Blockierte Nutzer',
+ settings_terms_short: 'AGB',
+ settings_delete_account: 'Konto löschen',
+
  
 
  // Favorites
@@ -1958,6 +1972,20 @@ const translations = {
  settings_logout: 'Log out',
 
  settings_logout_confirm: 'Do you really want to log out?',
+
+ // Settings — Section labels + new items (May 2026)
+ settings_section_admin: 'Admin',
+ settings_only_you: 'Only you',
+ settings_create_job: 'Create Job',
+ settings_create_coupon: 'Create Coupon',
+ settings_section_app: 'App',
+ settings_section_account: 'Account',
+ settings_section_legal: 'Legal',
+ settings_section_danger: 'Danger Zone',
+ settings_verification: 'Verification',
+ settings_blocked_users: 'Blocked Users',
+ settings_terms_short: 'Terms',
+ settings_delete_account: 'Delete Account',
 
  
 
