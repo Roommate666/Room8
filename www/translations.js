@@ -932,6 +932,21 @@ const translations = {
  faq_form_submit: 'Nachricht senden',
  faq_form_sent: 'Gesendet!',
  faq_form_reply: 'Wir melden uns bald bei dir.',
+ faq_page_title: 'Hilfe & FAQ — Room8',
+ faq_search_placeholder: 'Suche nach Themen...',
+ faq_no_results: 'Keine Ergebnisse gefunden.',
+ faq_quick_templates: 'Musterverträge',
+ faq_quick_contact: 'Kontakt',
+ faq_cat_general: 'Allgemein',
+ faq_cat_verification: 'Sicherheit & Verifizierung',
+ faq_cat_housing: 'Wohnen',
+
+ // Upload (Wohnung-Upload Form)
+ upload_title: 'Wohnung inserieren',
+ upload_heading: 'Neues Inserat erstellen',
+ upload_label: 'Inserat-Daten',
+ upload_description: 'Fülle alle Felder aus, um dein Inserat zu erstellen.',
+ upload_button: 'Inserat veröffentlichen',
  faq_q9: 'Wie erkenne ich Betrug?',
  faq_a9: 'Achtung bei: Aufforderungen zur Vorab-Überweisung (Western Union etc.), Vermieter die angeblich im Ausland sind, Kommunikation nur außerhalb der App. Melde verdächtige Inserate sofort über den Melden-Button.',
 
@@ -2663,6 +2678,21 @@ const translations = {
  faq_form_submit: 'Send message',
  faq_form_sent: 'Sent!',
  faq_form_reply: 'We will get back to you soon.',
+ faq_page_title: 'Help & FAQ — Room8',
+ faq_search_placeholder: 'Search topics...',
+ faq_no_results: 'No results found.',
+ faq_quick_templates: 'Template Contracts',
+ faq_quick_contact: 'Contact',
+ faq_cat_general: 'General',
+ faq_cat_verification: 'Safety & Verification',
+ faq_cat_housing: 'Housing',
+
+ // Upload
+ upload_title: 'Post Apartment',
+ upload_heading: 'Create New Listing',
+ upload_label: 'Listing Details',
+ upload_description: 'Fill in all fields to create your listing.',
+ upload_button: 'Publish Listing',
  faq_q9: 'How do I recognize fraud?',
  faq_a9: 'Be careful with: requests for advance bank transfers (Western Union etc.), landlords who claim to be abroad, communication only outside the app. Report suspicious listings immediately via the Report button.',
 
@@ -3562,7 +3592,8 @@ function applyTranslations() {
 
  const translation = t(key);
 
- 
+ // Fallback: wenn key nicht gefunden (t() returnt key zurueck), HTML-Original behalten
+ if (translation === key) return;
 
  if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
 
@@ -3580,7 +3611,7 @@ function applyTranslations() {
 
  });
 
- 
+
 
  // Elemente mit data-i18n-placeholder
 
@@ -3588,7 +3619,9 @@ function applyTranslations() {
 
  const key = el.getAttribute('data-i18n-placeholder');
 
- el.placeholder = t(key);
+ const tr = t(key);
+ // Fallback: wenn key nicht gefunden, Original-Placeholder behalten
+ if (tr !== key) el.placeholder = tr;
 
  });
 
