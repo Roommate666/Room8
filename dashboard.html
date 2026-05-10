@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-page="dashboard">
 <head>
     <script src="sentry-init.js"></script>
     <meta charset="UTF-8">
@@ -456,10 +456,10 @@
                 document.querySelector('.action-cards-container').style.marginTop = '-3rem'; // Reset Layout
                 localStorage.setItem('push_enabled', 'true');
             } else {
-                Room8UI.warning("Erlaubnis verweigert. Bitte in den Einstellungen aktivieren.");
+                Room8UI.warning((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('dashboard_permission_denied'):"Erlaubnis verweigert. Bitte in den Einstellungen aktivieren.");
             }
         } else {
-            Room8UI.info("Push-Dienst nicht verfügbar (nur in der App).");
+            Room8UI.info((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('dashboard_push_unavailable'):"Push-Dienst nicht verfügbar (nur in der App).");
         }
     }
 

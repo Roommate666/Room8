@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-page="favorites">
 <head>
     <script src="sentry-init.js"></script>
     <meta charset="UTF-8">
@@ -353,7 +353,7 @@
 
         } catch (err) {
             console.error(err);
-            loading.innerHTML = 'Fehler beim Laden.';
+            loading.innerHTML = (window.Room8i18n&&Room8i18n.t)?Room8i18n.t('common_load_error'):'Fehler beim Laden.';
         }
     }
 
@@ -410,7 +410,7 @@
     }
 
     async function removeFavorite(id) {
-        if (!confirm('Aus Favoriten entfernen?')) return;
+        if (!confirm((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('favorites_remove_confirm'):'Aus Favoriten entfernen?')) return;
 
         // UI Optimistisch entfernen (fühlt sich schneller an)
         const btn = document.querySelector(`.delete-fav-btn[data-id="${id}"]`);

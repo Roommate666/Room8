@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-page="faq">
 <head>
     <script src="sentry-init.js"></script>
     <meta charset="UTF-8">
@@ -276,10 +276,10 @@
                     <div class="faq-answer"><div class="faq-answer-inner">
                         <p data-i18n="faq_a1_intro">Room8 ist die exklusive Plattform von Studenten für Studenten. Hier kannst du:</p>
                         <ul style="padding-left: 1.2rem; margin-top: 0.5rem;">
-                            <li>Wohnungen & WG-Zimmer finden oder anbieten</li>
-                            <li>Gegenstände (Möbel, Technik) verkaufen</li>
-                            <li>Coole Studentenjobs finden</li>
-                            <li>Exklusive Rabatte (Coupons) nutzen</li>
+                            <li data-i18n="faq_a1_li1">Wohnungen & WG-Zimmer finden oder anbieten</li>
+                            <li data-i18n="faq_a1_li2">Gegenstände (Möbel, Technik) verkaufen</li>
+                            <li data-i18n="faq_a1_li3">Coole Studentenjobs finden</li>
+                            <li data-i18n="faq_a1_li4">Exklusive Rabatte (Coupons) nutzen</li>
                         </ul>
                     </div></div>
                 </div>
@@ -290,10 +290,7 @@
                         <span class="faq-arrow">▼</span>
                     </div>
                     <div class="faq-answer"><div class="faq-answer-inner">
-                        <div class="highlight-box">
-                            <strong>✔ Ja, 100% kostenlos!</strong>
-                        </div>
-                        <p>Keine Gebühren für Inserate, keine Provisionen. Wir finanzieren uns über Partner-Angebote (Jobs & Coupons).</p>
+                        <p data-i18n="faq_a2">Ja, 100% kostenlos! Keine Gebühren für Inserate, keine Provisionen. Wir finanzieren uns über Partner-Angebote (Jobs & Coupons).</p>
                     </div></div>
                 </div>
             </div>
@@ -310,11 +307,11 @@
                         <span class="faq-arrow">▼</span>
                     </div>
                     <div class="faq-answer"><div class="faq-answer-inner">
-                        <p>Die Verifizierung schafft Vertrauen. Nur verifizierte Nutzer (mit blauem Haken) können:</p>
+                        <p data-i18n="faq_a4_intro">Die Verifizierung schafft Vertrauen. Nur verifizierte Nutzer (mit blauem Haken) können:</p>
                         <ul style="padding-left: 1.2rem;">
-                            <li>Den vollen Namen anderer sehen</li>
-                            <li>Adressen von Wohnungen einsehen</li>
-                            <li>Als besonders vertrauenswürdig gelten</li>
+                            <li data-i18n="faq_a4_li1">Den vollen Namen anderer sehen</li>
+                            <li data-i18n="faq_a4_li2">Adressen von Wohnungen einsehen</li>
+                            <li data-i18n="faq_a4_li3">Als besonders vertrauenswürdig gelten</li>
                         </ul>
                     </div></div>
                 </div>
@@ -325,15 +322,7 @@
                         <span class="faq-arrow">▼</span>
                     </div>
                     <div class="faq-answer"><div class="faq-answer-inner">
-                        <div class="warning-box">
-                            <strong>🚨 Achtung bei:</strong>
-                        </div>
-                        <ul style="padding-left: 1.2rem;">
-                            <li>Aufforderungen zur Vorab-Überweisung (Western Union etc.)</li>
-                            <li>Vermieter, die angeblich im Ausland sind</li>
-                            <li>Kommunikation nur außerhalb der App</li>
-                        </ul>
-                        <p>Melde verdächtige Inserate sofort über den "Melden"-Button.</p>
+                        <p data-i18n="faq_a9">Achtung bei: Aufforderungen zur Vorab-Überweisung (Western Union etc.), Vermieter die angeblich im Ausland sind, Kommunikation nur außerhalb der App. Melde verdächtige Inserate sofort über den Melden-Button.</p>
                     </div></div>
                 </div>
             </div>
@@ -350,8 +339,7 @@
                         <span class="faq-arrow">▼</span>
                     </div>
                     <div class="faq-answer"><div class="faq-answer-inner">
-                        <p><strong>Absolut.</strong> Auch bei Untermiete oder WG-Zimmern solltest du immer einen schriftlichen Vertrag haben.</p>
-                        <p>Nutze dafür einfach unsere <a href="nutzungsbedingungen.html#mustervertraege" style="color:var(--primary-color); font-weight:600;">kostenlosen Musterverträge</a>.</p>
+                        <p data-i18n="faq_a8">Absolut. Auch bei Untermiete oder WG-Zimmern solltest du immer einen schriftlichen Vertrag haben. Nutze dafür unsere kostenlosen Musterverträge.</p>
                     </div></div>
                 </div>
             </div>
@@ -365,35 +353,35 @@
             
             <div class="contact-form" id="contactForm">
                 <div class="form-group">
-                    <label for="contactName">Dein Name</label>
+                    <label for="contactName" data-i18n="faq_form_name">Dein Name</label>
                     <input type="text" id="contactName" placeholder="Max Mustermann">
                 </div>
                 <div class="form-group">
-                    <label for="contactEmail">Deine E-Mail</label>
+                    <label for="contactEmail" data-i18n="faq_form_email">Deine E-Mail</label>
                     <input type="email" id="contactEmail" placeholder="max@email.de">
                 </div>
                 <div class="form-group">
-                    <label for="contactCategory">Thema</label>
+                    <label for="contactCategory" data-i18n="faq_form_topic">Thema</label>
                     <select id="contactCategory">
-                        <option value="">Bitte wählen...</option>
-                        <option value="frage">Allgemeine Frage</option>
-                        <option value="tech">Technisches Problem</option>
-                        <option value="report">Meldung / Sicherheit</option>
-                        <option value="business">Partner / Business</option>
+                        <option value="" data-i18n="faq_form_topic_select">Bitte wählen...</option>
+                        <option value="frage" data-i18n="faq_form_topic_general">Allgemeine Frage</option>
+                        <option value="tech" data-i18n="faq_form_topic_tech">Technisches Problem</option>
+                        <option value="report" data-i18n="faq_form_topic_report">Meldung / Sicherheit</option>
+                        <option value="business" data-i18n="faq_form_topic_business">Partner / Business</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="contactMessage">Nachricht</label>
-                    <textarea id="contactMessage" rows="4" placeholder="Wie können wir helfen?"></textarea>
+                    <label for="contactMessage" data-i18n="faq_form_message">Nachricht</label>
+                    <textarea id="contactMessage" rows="4" placeholder="Wie können wir helfen?" data-i18n-placeholder="faq_form_message_placeholder"></textarea>
                 </div>
-                
-                <button type="button" class="submit-btn" id="submitBtn" onclick="submitContactForm()">Nachricht senden</button>
+
+                <button type="button" class="submit-btn" id="submitBtn" onclick="submitContactForm()" data-i18n="faq_form_submit">Nachricht senden</button>
             </div>
 
             <div class="form-success" id="formSuccess" style="display:none; text-align:center; padding:2rem;">
                 <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
-                <h3 style="color:#10B981;">Gesendet!</h3>
-                <p>Wir melden uns bald bei dir.</p>
+                <h3 style="color:#10B981;" data-i18n="faq_form_sent">Gesendet!</h3>
+                <p data-i18n="faq_form_reply">Wir melden uns bald bei dir.</p>
             </div>
         </div>
 

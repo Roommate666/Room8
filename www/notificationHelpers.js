@@ -1,7 +1,7 @@
 // ==========================================
 // NOTIFICATION HELPER FUNCTIONS - FIXED FOR ANDROID
 // ==========================================
-// Enthält ALLE Funktionen, aber ohne 'import/export', damit die App nicht abstürzt.
+// Enthaelt ALLE Funktionen, aber ohne 'import/export', damit die App nicht abstuerzt.
 
 (function() {
     'use strict';
@@ -11,7 +11,7 @@
         return window.sb || null;
     }
 
-    // Wir hängen alles an window.NotificationHelpers, damit es überall verfügbar ist
+    // Wir haengen alles an window.NotificationHelpers, damit es ueberall verfuegbar ist
     window.NotificationHelpers = {
 
         /**
@@ -48,7 +48,7 @@
          * Push-Benachrichtigung via Edge Function senden
          */
         sendPushNotification: async function(userId, title, body, url) {
-            // Versuche zuerst über den Supabase Client
+            // Versuche zuerst ueber den Supabase Client
             var sb = getSupabase();
             if (sb) {
                 try {
@@ -98,10 +98,11 @@
             if (senderId) {
                 link = 'chat.html?user=' + senderId;
             }
+            var T = function(k, fb){ return (window.Room8i18n && Room8i18n.t) ? Room8i18n.t(k) : fb; };
             return await this.createNotification(
                 recipientId,
                 'chat_message',
-                '💬 Neue Nachricht von ' + senderName,
+                T('notif_new_message', '💬 Neue Nachricht von ') + senderName,
                 preview,
                 link,
                 senderId || null
@@ -112,12 +113,13 @@
             console.log('⭐ notifyReview called for user:', userId, 'by:', reviewerName);
             var stars = '';
             for (var i = 0; i < rating; i++) stars += '⭐';
+            var T = function(k, fb){ return (window.Room8i18n && Room8i18n.t) ? Room8i18n.t(k) : fb; };
 
             return await this.createNotification(
                 userId,
                 'review',
-                '⭐ Neue Bewertung von ' + reviewerName,
-                reviewerName + ' hat dir ' + rating + ' Sterne gegeben ' + stars,
+                T('notif_new_review', '⭐ Neue Bewertung von ') + reviewerName,
+                reviewerName + T('notif_new_review_body', ' hat dir eine Bewertung hinterlassen.') + ' ' + stars,
                 'public-profile.html?id=' + userId,
                 listingId
             );
@@ -129,11 +131,12 @@
 
         notifyFavorite: async function(listingOwnerId, faverName, listingTitle, listingId) {
             console.log('❤️ notifyFavorite called for owner:', listingOwnerId, 'by:', faverName);
+            var T = function(k, fb){ return (window.Room8i18n && Room8i18n.t) ? Room8i18n.t(k) : fb; };
             return await this.createNotification(
                 listingOwnerId,
                 'favorite',
-                '❤️ ' + faverName + ' hat dein Inserat favorisiert',
-                '"' + listingTitle + '" wurde zu den Favoriten hinzugefügt',
+                '❤️ ' + faverName + T('notif_new_favorite_body', ' hat dein Inserat zu Favoriten hinzugefuegt.'),
+                '"' + listingTitle + '"',
                 listingId ? 'listing-details.html?id=' + listingId : null,
                 listingId
             );
@@ -148,7 +151,7 @@
                 var user = auth.data.user;
                 if (!user) throw new Error('Nicht eingeloggt');
 
-                // Prüfe ob bereits favorisiert
+                // Pruefe ob bereits favorisiert
                 var check = await sb
                     .from('favorites')
                     .select('id')
@@ -300,7 +303,7 @@
             if (!sb) return [];
 
             try {
-                // Supabase Join Syntax anpassen für JS
+                // Supabase Join Syntax anpassen fuer JS
                 var res = await sb
                     .from('listing_interests')
                     .select('*, interested_user:profiles!interested_user_id(id, username, avatar_url, city)')
@@ -340,7 +343,7 @@
                     is_active: true
                 };
 
-                // Filter hinzufügen
+                // Filter hinzufuegen
                 if (additionalFilters) {
                     if (additionalFilters.category) insertData.category = additionalFilters.category;
                     if (additionalFilters.condition) insertData.condition = additionalFilters.condition;

@@ -568,7 +568,8 @@
         if (targetUserId && window.Room8) {
             var isBlocked = await Room8.isUserBlocked(targetUserId);
             if (isBlocked) {
-                document.getElementById('messagesList').innerHTML = '<div style="padding:3rem;text-align:center;"><div style="font-size:2.5rem;margin-bottom:1rem;">🚫</div><h3 style="color:#1f2937;margin-bottom:0.5rem;">Nutzer blockiert</h3><p style="color:#6b7280;font-size:0.95rem;">Du kannst keine Nachrichten mit diesem Nutzer austauschen.</p><a href="javascript:history.back()" style="display:inline-block;margin-top:1rem;color:#3b82f6;font-weight:600;text-decoration:none;">← Zurück</a></div>';
+                var Tc = function(k, fb){ return (window.Room8i18n && Room8i18n.t) ? Room8i18n.t(k) : fb; };
+                document.getElementById('messagesList').innerHTML = '<div style="padding:3rem;text-align:center;"><div style="font-size:2.5rem;margin-bottom:1rem;">🚫</div><h3 style="color:#1f2937;margin-bottom:0.5rem;">' + Tc('chat_blocked_user_title','Nutzer blockiert') + '</h3><p style="color:#6b7280;font-size:0.95rem;">' + Tc('chat_blocked_user_desc','Du kannst keine Nachrichten an diesen Nutzer senden.') + '</p><a href="javascript:history.back()" style="display:inline-block;margin-top:1rem;color:#3b82f6;font-weight:600;text-decoration:none;">' + Tc('chat_back','← Zurück') + '</a></div>';
                 document.querySelector('.chat-input-area').style.display = 'none';
                 return;
             }
@@ -895,13 +896,13 @@
 
         // Nur Bilder erlauben
         if (!file.type.startsWith('image/')) {
-            Room8UI.warning('Bitte waehle ein Bild aus.');
+            Room8UI.warning((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('chat_image_required'):'Bitte wähle ein Bild aus.');
             return;
         }
 
         // Max 10MB
         if (file.size > 10 * 1024 * 1024) {
-            Room8UI.warning('Das Bild ist zu gross (max. 10MB).');
+            Room8UI.warning((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('chat_image_too_large'):'Das Bild ist zu groß (max. 10MB).');
             return;
         }
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-page="terms">
 <head>
     <script src="sentry-init.js"></script>
 <meta charset="UTF-8">
@@ -152,13 +152,23 @@ font-weight: 500;
     </header>
 
     <div class="tab-bar">
-        <div class="tab-link active" onclick="switchTab('agb')">AGB</div>
-        <div class="tab-link" onclick="switchTab('contracts')">Musterverträge</div>
+        <div class="tab-link active" onclick="switchTab('agb')" data-i18n="settings_terms_short">AGB</div>
+        <div class="tab-link" onclick="switchTab('contracts')" data-i18n="terms_templates">Musterverträge</div>
     </div>
 
 <main class="legal-content">
 <!-- AGB TAB -->
 <div id="tab-agb" class="content-card">
+<div id="legalBanner" style="display:none; background:#FEF3C7; border:1px solid #F59E0B; border-radius:12px; padding:1rem 1.25rem; margin-bottom:1.5rem; color:#78350F; font-size:0.9rem; line-height:1.5;">
+    <strong data-i18n="legal_banner_title">Rechtsverbindlich nur auf Deutsch</strong><br>
+    <span data-i18n="legal_banner_text">Diese rechtlichen Texte sind nur in der deutschen Originalfassung verbindlich.</span>
+</div>
+<script>
+    (function(){
+        var lang = (window.Room8i18n && Room8i18n.getCurrentLanguage) ? Room8i18n.getCurrentLanguage() : (localStorage.getItem('room8_language') || 'de');
+        if (lang === 'en') document.getElementById('legalBanner').style.display = 'block';
+    })();
+</script>
 <div class="info-box">
 <strong data-i18n="terms_summary_label">Zusammenfassung:</strong>
 <span data-i18n="terms_summary_text">Room8 ist eine kostenlose Vermittlungsplattform. Wir stellen den Kontakt her, sind aber kein Vertragspartner. Verträge schließt ihr direkt miteinander.</span>

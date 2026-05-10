@@ -598,19 +598,19 @@
             navigateTo(`chat.html?user=${userId}`);
         };
 
+        var T = function(k, fb){ return (window.Room8i18n && Room8i18n.t) ? Room8i18n.t(k) : fb; };
         document.getElementById('reportBtn').onclick = async () => {
-            if (!currentUser) return Room8UI.warning("Bitte einloggen.");
+            if (!currentUser) return Room8UI.warning(T('pp_login_required', "Bitte einloggen."));
             if (currentUser.id === userId) {
-                return Room8UI.warning("Du kannst dich nicht selbst melden.");
+                return Room8UI.warning(T('pp_self_report', "Du kannst dich nicht selbst melden."));
             }
-            // RPC report_content macht Anti-Trolling Rate-Limit (5/h, 30/d)
             await Room8.trust.openReportSheet('user', userId);
         };
 
         document.getElementById('blockBtn').onclick = async () => {
-            if (!currentUser) return Room8UI.warning('Bitte einloggen');
+            if (!currentUser) return Room8UI.warning(T('pp_login_required', 'Bitte einloggen.'));
             if (currentUser.id === userId) {
-                return Room8UI.warning("Du kannst dich nicht selbst blockieren.");
+                return Room8UI.warning(T('pp_self_block', "Du kannst dich nicht selbst blockieren."));
             }
 
             var blockBtn = document.getElementById('blockBtn');
@@ -620,10 +620,10 @@
 
             try {
                 if (isBlocked) {
-                    if (!confirm('Möchtest du diesen Nutzer entsperren?')) return;
+                    if (!confirm(T('pp_unblock_confirm', 'Möchtest du diesen Nutzer entsperren?'))) return;
                     try {
                         await Room8.trust.unblock(userId);
-                        Room8UI.success('Nutzer wurde entsperrt.');
+                        Room8UI.success(T('pp_user_unblocked', 'Nutzer wurde entsperrt.'));
                         blockBtn.textContent = '🚫 Blockieren';
                         blockBtn.style.background = '#FEE2E2';
                         blockBtn.style.color = '#DC2626';
@@ -765,7 +765,7 @@
     }
 
     async function deleteReview(reviewId) {
-        if (!confirm('Bewertung wirklich löschen?')) return;
+        if (!confirm(T('pp_review_delete_confirm', 'Bewertung wirklich löschen?'))) return;
 
         var el = document.getElementById('review-' + reviewId);
         if (el) el.style.opacity = '0.5';

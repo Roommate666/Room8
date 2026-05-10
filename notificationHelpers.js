@@ -1,26 +1,17 @@
 // ==========================================
 // NOTIFICATION HELPER FUNCTIONS - FIXED FOR ANDROID
 // ==========================================
-// Enthält ALLE Funktionen, aber ohne 'import/export', damit die App nicht abstürzt.
+// Enthaelt ALLE Funktionen, aber ohne 'import/export', damit die App nicht abstuerzt.
 
 (function() {
     'use strict';
 
-    // Hilfsfunktion: Supabase sicher holen
+    // Nutze globalen Supabase Client aus config.js
     function getSupabase() {
-        if (window.supabase && window.supabase.createClient && typeof SUPABASE_URL !== 'undefined') {
-            // Falls noch kein Client da ist, erstelle einen temporären
-            if (!window.sbClient) {
-                window.sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            }
-            return window.sbClient;
-        }
-        // Fallback: Versuchen, den globalen supabase zu finden
-        if (typeof supabase !== 'undefined') return supabase;
-        return null;
+        return window.sb || null;
     }
 
-    // Wir hängen alles an window.NotificationHelpers, damit es überall verfügbar ist
+    // Wir haengen alles an window.NotificationHelpers, damit es ueberall verfuegbar ist
     window.NotificationHelpers = {
 
         /**
@@ -41,20 +32,14 @@
                         link: link || null,
                         reference_id: referenceId || null,
                         is_read: false
-                    })
-                    .select()
-                    .single();
+                    });
 
                 if (result.error) throw result.error;
 
-                // Push-Benachrichtigung senden (im Hintergrund, ohne auf Antwort zu warten)
-                this.sendPushNotification(userId, title, message, link).catch(function(e) {
-                    console.log('Push send failed (optional):', e);
-                });
-
-                return result.data;
+                // Push wird vom DB-Trigger gesendet (trigger_notify_push_all)
+                return { success: true };
             } catch (error) {
-                console.error('Error creating notification:', error);
+                console.error('createNotification error:', error);
                 return null;
             }
         },
@@ -63,27 +48,42 @@
          * Push-Benachrichtigung via Edge Function senden
          */
         sendPushNotification: async function(userId, title, body, url) {
+            // Versuche zuerst ueber den Supabase Client
             var sb = getSupabase();
-            if (!sb) return { success: false };
-
+            if (sb) {
+                try {
+                    var invokeResult = await sb.functions.invoke('send-push', {
+                        body: {
+                            userId: userId,
+                            title: title,
+                            body: body || '',
+                            data: { url: url || 'notifications.html' }
+                        }
+                    });
+                    if (invokeResult.data) return invokeResult.data;
+                } catch (e) {
+                    console.error('sb.functions.invoke failed:', e);
+                }
+            }
+            // Fallback: direkter fetch
             try {
-                var result = await sb.functions.invoke('send-push', {
-                    body: {
+                var response = await fetch(SUPABASE_URL + '/functions/v1/send-push', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                        'apikey': SUPABASE_ANON_KEY
+                    },
+                    body: JSON.stringify({
                         userId: userId,
                         title: title,
-                        body: body,
+                        body: body || '',
                         data: { url: url || 'notifications.html' }
-                    }
+                    })
                 });
-
-                if (result.error) {
-                    console.log('Push invoke error:', result.error);
-                    return { success: false };
-                }
-
-                return result.data || { success: true };
+                return await response.json();
             } catch (error) {
-                console.log('Push error:', error);
+                console.error('Push fetch failed:', error);
                 return { success: false };
             }
         },
@@ -92,27 +92,34 @@
         // 1. CHAT & KOMMUNIKATION
         // ==========================================
 
-        notifyChatMessage: async function(recipientId, senderName, messagePreview) {
+        notifyChatMessage: async function(recipientId, senderName, messagePreview, senderId) {
             var preview = messagePreview.length > 100 ? messagePreview.substring(0, 100) + '...' : messagePreview;
+            var link = 'nachrichten.html';
+            if (senderId) {
+                link = 'chat.html?user=' + senderId;
+            }
+            var T = function(k, fb){ return (window.Room8i18n && Room8i18n.t) ? Room8i18n.t(k) : fb; };
             return await this.createNotification(
                 recipientId,
                 'chat_message',
-                '💬 Neue Nachricht von ' + senderName,
+                T('notif_new_message', '💬 Neue Nachricht von ') + senderName,
                 preview,
-                'nachrichten.html',
-                null
+                link,
+                senderId || null
             );
         },
 
         notifyReview: async function(userId, reviewerName, rating, listingId) {
+            console.log('⭐ notifyReview called for user:', userId, 'by:', reviewerName);
             var stars = '';
             for (var i = 0; i < rating; i++) stars += '⭐';
-            
+            var T = function(k, fb){ return (window.Room8i18n && Room8i18n.t) ? Room8i18n.t(k) : fb; };
+
             return await this.createNotification(
                 userId,
                 'review',
-                '⭐ Neue Bewertung von ' + reviewerName,
-                reviewerName + ' hat dir ' + rating + ' Sterne gegeben ' + stars,
+                T('notif_new_review', '⭐ Neue Bewertung von ') + reviewerName,
+                reviewerName + T('notif_new_review_body', ' hat dir eine Bewertung hinterlassen.') + ' ' + stars,
                 'public-profile.html?id=' + userId,
                 listingId
             );
@@ -123,17 +130,19 @@
         // ==========================================
 
         notifyFavorite: async function(listingOwnerId, faverName, listingTitle, listingId) {
+            console.log('❤️ notifyFavorite called for owner:', listingOwnerId, 'by:', faverName);
+            var T = function(k, fb){ return (window.Room8i18n && Room8i18n.t) ? Room8i18n.t(k) : fb; };
             return await this.createNotification(
                 listingOwnerId,
                 'favorite',
-                '❤️ ' + faverName + ' hat dein Inserat favorisiert',
-                '"' + listingTitle + '" wurde zu den Favoriten hinzugefügt',
+                '❤️ ' + faverName + T('notif_new_favorite_body', ' hat dein Inserat zu Favoriten hinzugefuegt.'),
+                '"' + listingTitle + '"',
                 listingId ? 'listing-details.html?id=' + listingId : null,
                 listingId
             );
         },
 
-        addFavorite: async function(favoritableType, listingId) {
+        addFavorite: async function(favoritableType, favoritableId) {
             var sb = getSupabase();
             if (!sb) return { success: false, error: 'Supabase not loaded' };
 
@@ -142,12 +151,13 @@
                 var user = auth.data.user;
                 if (!user) throw new Error('Nicht eingeloggt');
 
-                // Prüfe ob bereits favorisiert
+                // Pruefe ob bereits favorisiert
                 var check = await sb
                     .from('favorites')
                     .select('id')
                     .eq('user_id', user.id)
-                    .eq('listing_id', listingId)
+                    .eq('favoritable_type', favoritableType)
+                    .eq('favoritable_id', favoritableId)
                     .single();
 
                 if (check.data) {
@@ -158,7 +168,8 @@
                     .from('favorites')
                     .insert({
                         user_id: user.id,
-                        listing_id: listingId
+                        favoritable_type: favoritableType,
+                        favoritable_id: favoritableId
                     })
                     .select()
                     .single();
@@ -172,7 +183,7 @@
             }
         },
 
-        removeFavorite: async function(favoritableType, listingId) {
+        removeFavorite: async function(favoritableType, favoritableId) {
             var sb = getSupabase();
             if (!sb) return { success: false };
 
@@ -185,7 +196,8 @@
                     .from('favorites')
                     .delete()
                     .eq('user_id', user.id)
-                    .eq('listing_id', listingId);
+                    .eq('favoritable_type', favoritableType)
+                    .eq('favoritable_id', favoritableId);
 
                 if (res.error) throw res.error;
                 return { success: true };
@@ -196,7 +208,7 @@
             }
         },
 
-        isFavorited: async function(favoritableType, listingId) {
+        isFavorited: async function(favoritableType, favoritableId) {
             var sb = getSupabase();
             if (!sb) return false;
 
@@ -209,7 +221,8 @@
                     .from('favorites')
                     .select('id')
                     .eq('user_id', user.id)
-                    .eq('listing_id', listingId)
+                    .eq('favoritable_type', favoritableType)
+                    .eq('favoritable_id', favoritableId)
                     .single();
 
                 // PGRST116 bedeutet "kein Ergebnis", das ist kein echter Fehler hier
@@ -218,6 +231,7 @@
                 return !!res.data;
 
             } catch (error) {
+                // console.error('Error checking favorite:', error); // Optional loggen
                 return false;
             }
         },
@@ -237,7 +251,9 @@
                     .eq('user_id', user.id)
                     .order('created_at', { ascending: false });
 
-                // favorites table only has listing_id, no type filter needed
+                if (favoritableType) {
+                    query = query.eq('favoritable_type', favoritableType);
+                }
 
                 var res = await query;
                 if (res.error) throw res.error;
@@ -287,7 +303,7 @@
             if (!sb) return [];
 
             try {
-                // Supabase Join Syntax anpassen für JS
+                // Supabase Join Syntax anpassen fuer JS
                 var res = await sb
                     .from('listing_interests')
                     .select('*, interested_user:profiles!interested_user_id(id, username, avatar_url, city)')
@@ -327,7 +343,7 @@
                     is_active: true
                 };
 
-                // Filter hinzufügen
+                // Filter hinzufuegen
                 if (additionalFilters) {
                     if (additionalFilters.category) insertData.category = additionalFilters.category;
                     if (additionalFilters.condition) insertData.condition = additionalFilters.condition;

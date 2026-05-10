@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-page="settings">
 <head>
     <script src="sentry-init.js"></script>
     <meta charset="UTF-8">
@@ -383,8 +383,9 @@
         }
     }
 
+    var T = function(k, fb){ return (window.Room8i18n && Room8i18n.t) ? Room8i18n.t(k) : fb; };
     document.getElementById('logoutBtn').addEventListener('click', async function() {
-        if (confirm('Möchtest du dich wirklich abmelden?')) {
+        if (confirm(T('common_logout_confirm', 'Möchtest du dich wirklich abmelden?'))) {
             // FCM Token löschen damit keine Push an dieses Gerät gehen
             try {
                 var auth = await sb.auth.getUser();
@@ -413,13 +414,14 @@
     });
      // Konto löschen
 document.getElementById('deleteAccountBtn').addEventListener('click', async function() {
-    var confirmText = prompt('Um dein Konto zu löschen, gib "LÖSCHEN" ein:');
-    if (confirmText !== 'LÖSCHEN') {
-        Room8UI.info('Konto wurde NICHT gelöscht.');
+    var deleteWord = T('settings_delete_keyword', 'LOESCHEN');
+    var confirmText = prompt(T('settings_delete_prompt', 'Um dein Konto zu loeschen, gib LOESCHEN ein:'));
+    if (confirmText !== deleteWord && confirmText !== 'LÖSCHEN' && confirmText !== 'DELETE') {
+        Room8UI.info(T('settings_delete_invalid', 'Eingabe falsch. Konto wurde nicht geloescht.'));
         return;
     }
 
-    if (!confirm('Bist du WIRKLICH sicher? Alle deine Daten, Inserate und Nachrichten werden unwiderruflich gelöscht!')) {
+    if (!confirm(T('settings_delete_final_confirm', 'Bist du WIRKLICH sicher? Alle deine Daten werden unwiderruflich geloescht!'))) {
         return;
     }
 
@@ -428,7 +430,7 @@ document.getElementById('deleteAccountBtn').addEventListener('click', async func
         var user = result.data ? result.data.user : null;
         if (!user) return;
 
-        Room8UI.info('Lösche deine Daten...');
+        Room8UI.info(T('settings_deleting_data', 'Lösche deine Daten...'));
 
         // 1. Listing-Fotos aus Storage löschen
         try {
@@ -479,11 +481,11 @@ document.getElementById('deleteAccountBtn').addEventListener('click', async func
 
         await sb.auth.signOut();
 
-        Room8UI.success('Dein Konto wurde gelöscht. Auf Wiedersehen!');
+        Room8UI.success(T('settings_delete_success', 'Dein Konto wurde gelöscht. Auf Wiedersehen!'));
         setTimeout(function() { navigateTo('login.html'); }, 1500);
     } catch (err) {
         console.error('Fehler beim Löschen:', err);
-        Room8UI.error('Fehler beim Löschen des Kontos: ' + err.message);
+        Room8UI.error(T('common_error_prefix', 'Fehler: ') + err.message);
     }
 });
 

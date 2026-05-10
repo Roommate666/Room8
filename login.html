@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-page="login">
 <head>
     <script src="sentry-init.js"></script>
   <meta charset="UTF-8">
@@ -221,17 +221,18 @@
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
       
+      var T = function(k, fb){ return (window.Room8i18n && Room8i18n.t) ? Room8i18n.t(k) : fb; };
       if(!sb) {
-          Room8UI.error("Verbindungsfehler: Supabase konnte nicht geladen werden.");
+          Room8UI.error(T('login_connection_error', 'Verbindungsfehler. Bitte später erneut versuchen.'));
           return;
       }
 
       var email = document.getElementById('loginEmail').value.trim();
       var password = document.getElementById('loginPassword').value;
-      
+
       loginBtn.disabled = true;
       var originalText = loginBtn.textContent;
-      loginBtn.textContent = "Wird eingeloggt...";
+      loginBtn.textContent = T('login_loading', 'Wird eingeloggt...');
       
       sb.auth.signInWithPassword({ email: email, password: password })
         .then(async function(response) {
@@ -250,8 +251,8 @@
         .catch(function(err) {
           console.error("Login Error:", err);
           var msg = err.message;
-          if (msg === 'Invalid login credentials') msg = 'Falsches Passwort oder E-Mail.';
-          Room8UI.error('Login fehlgeschlagen: ' + msg);
+          if (msg === 'Invalid login credentials') msg = T('login_invalid_credentials', 'Falsches Passwort oder E-Mail.');
+          Room8UI.error(T('login_failed_prefix', 'Login fehlgeschlagen: ') + msg);
           
           loginBtn.disabled = false;
           loginBtn.textContent = originalText;
@@ -269,7 +270,7 @@
         await window.signInWithGoogle();
       } catch(err) {
         console.error('Google Login Error:', err);
-        if (window.Room8UI) Room8UI.error('Google Anmeldung fehlgeschlagen: ' + (err.message || ''));
+        if (window.Room8UI) Room8UI.error(((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('login_google_failed'):'Google-Anmeldung fehlgeschlagen') + ': ' + (err.message || ''));
         btn.disabled = false; btn.style.opacity = '1';
       }
     });
@@ -280,7 +281,7 @@
         await window.signInWithApple();
       } catch(err) {
         console.error('Apple Login Error:', err);
-        if (window.Room8UI) Room8UI.error('Apple Anmeldung fehlgeschlagen: ' + (err.message || ''));
+        if (window.Room8UI) Room8UI.error(((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('login_apple_failed'):'Apple-Anmeldung fehlgeschlagen') + ': ' + (err.message || ''));
         btn.disabled = false; btn.style.opacity = '1';
       }
     });

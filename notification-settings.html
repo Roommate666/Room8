@@ -386,7 +386,7 @@
                 const granted = await PushService.requestPermission();
                 if (!granted) {
                     e.target.checked = false; // Wieder ausschalten, wenn abgelehnt
-                    Room8UI.warning("Benachrichtigungen wurden vom System verweigert. Bitte in den Handy-Einstellungen erlauben.");
+                    Room8UI.warning((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('notif_permission_denied'):"Benachrichtigungen wurden vom System verweigert. Bitte in den Browser-Einstellungen erlauben.");
                 } else {
                     localStorage.setItem('push_enabled', 'true');
                 }
@@ -451,7 +451,7 @@
         };
 
         if (error) {
-            Room8UI.error("Einstellungen konnten nicht gespeichert werden. Bitte versuche es erneut.");
+            Room8UI.error((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('notif_save_error'):"Einstellungen konnten nicht gespeichert werden.");
             setBoth("Einstellungen speichern", null, false);
         } else {
             setBoth("Gespeichert! ✓", "#10B981", true);

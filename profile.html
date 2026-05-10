@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-page="profile">
 <head>
     <script src="sentry-init.js"></script>
     <meta charset="UTF-8">
@@ -549,7 +549,7 @@
 
     confirmDeleteBtn.onclick = async function() {
         if (!listingToDelete || listingToDelete === 'null' || listingToDelete === 'undefined') {
-            Room8UI.error("Keine gültige Inserat-ID");
+            Room8UI.error((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('profile_invalid_listing'):"Keine gültige Inserat-ID");
             closeDeleteModal();
             return;
         }
@@ -569,7 +569,7 @@
 
         if (error) {
             console.error("Delete error:", error);
-            Room8UI.error("Fehler: " + error.message);
+            Room8UI.error(((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('common_error_prefix'):"Fehler: ") + error.message);
             cardToRemove.style.opacity = '1';
         } else {
             cardToRemove.remove();

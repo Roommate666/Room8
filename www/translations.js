@@ -767,6 +767,180 @@ const translations = {
  login_subtitle: 'Logge dich ein, um fortzufahren.',
  login_forgot: 'Passwort vergessen?',
  login_or_with: 'oder direkt mit',
+ login_loading: 'Wird eingeloggt...',
+ login_invalid_credentials: 'Falsches Passwort oder E-Mail.',
+ login_failed_prefix: 'Login fehlgeschlagen: ',
+ login_google_failed: 'Google-Anmeldung fehlgeschlagen',
+ login_apple_failed: 'Apple-Anmeldung fehlgeschlagen',
+ login_connection_error: 'Verbindungsfehler. Bitte später erneut versuchen.',
+
+ // Common Errors / Confirms
+ common_error_prefix: 'Fehler: ',
+ common_save_changes: 'Änderungen speichern',
+ common_delete_confirm: 'Wirklich löschen?',
+ common_logout_confirm: 'Möchtest du dich wirklich abmelden?',
+
+ // Verify
+ verify_invalid_email: 'Bitte gib eine gültige Uni-E-Mail-Adresse ein.',
+ verify_status_approved: 'Verifiziert',
+ verify_status_pending: 'In Prüfung',
+ verify_email_sent: 'Bestätigungs-Mail wurde versendet.',
+ verify_request_submitted: 'Antrag eingereicht. Wir prüfen deine Daten.',
+ verify_already_verified: 'Du bist bereits verifiziert.',
+
+ // Notification Settings
+ notif_permission_denied: 'Benachrichtigungen wurden vom System verweigert. Bitte aktiviere sie in den Browser-Einstellungen.',
+ notif_save_error: 'Einstellungen konnten nicht gespeichert werden.',
+ notif_save_success: 'Einstellungen gespeichert.',
+
+ // Dashboard Push
+ dashboard_permission_denied: 'Erlaubnis verweigert. Bitte in den Einstellungen aktivieren.',
+
+ // Chat
+ chat_image_required: 'Bitte wähle ein Bild aus.',
+ chat_image_too_large: 'Das Bild ist zu groß (max. 10MB).',
+ chat_upload_error: 'Bild konnte nicht hochgeladen werden.',
+ chat_blocked_user_title: 'Nutzer blockiert',
+ chat_blocked_user_desc: 'Du kannst keine Nachrichten an diesen Nutzer senden.',
+ chat_back: '← Zurück',
+ chat_hide_confirm: 'Chat ausblenden? Er erscheint wieder, wenn der andere Nutzer schreibt.',
+
+ // Settings extra
+ settings_delete_prompt: 'Um dein Konto zu löschen, gib LOESCHEN ein:',
+ settings_delete_invalid: 'Eingabe falsch. Konto wurde nicht gelöscht.',
+ settings_delete_success: 'Dein Konto wurde gelöscht. Auf Wiedersehen!',
+ settings_delete_keyword: 'LÖSCHEN',
+ settings_delete_final_confirm: 'Bist du WIRKLICH sicher? Alle deine Daten werden unwiderruflich gelöscht!',
+ settings_deleting_data: 'Lösche deine Daten...',
+
+ // FAQ Form
+ faq_form_sending: 'Nachricht wird gesendet...',
+ faq_form_success: 'Vielen Dank! Wir antworten innerhalb von 24h.',
+ faq_form_error: 'Fehler beim Senden. Bitte versuch es später nochmal.',
+
+ // Coupons
+ coupons_example_info: 'Dies ist ein Beispiel-Coupon für Partner.',
+ coupon_code_copied: 'Code kopiert: ',
+
+ // Public Profile
+ pp_login_required: 'Bitte einloggen.',
+ pp_self_report: 'Du kannst dich nicht selbst melden.',
+ pp_self_block: 'Du kannst dich nicht selbst blockieren.',
+ pp_user_unblocked: 'Nutzer wurde entsperrt.',
+ pp_user_blocked: 'Nutzer wurde blockiert.',
+ pp_unblock_confirm: 'Möchtest du diesen Nutzer entsperren?',
+ pp_block_confirm: 'Möchtest du diesen Nutzer wirklich blockieren?',
+ pp_review_delete_confirm: 'Bewertung wirklich löschen?',
+ pp_review_deleted: 'Bewertung gelöscht.',
+
+ // Saved Searches
+ searches_saved: 'Suche gespeichert.',
+ searches_deleted: 'Suche gelöscht.',
+ searches_load_error: 'Fehler beim Laden.',
+ searches_reload: 'Neu laden',
+
+ // Favorites
+ favorites_remove_confirm: 'Aus Favoriten entfernen?',
+
+ // Complete Profile
+ cp_checking: 'Prüfe Verfügbarkeit...',
+ cp_available: '✓ Verfügbar',
+ cp_taken: 'Bereits vergeben',
+ cp_name_required: 'Bitte vollen Namen eingeben.',
+ cp_city_required: 'Bitte deine Stadt eingeben.',
+
+ // Edit Profile
+ edit_profile_verifying: 'Deine Verifizierung wird überprüft.',
+ edit_profile_check_status: 'Status prüfen →',
+
+ // Partner Pages (alerts → toasts)
+ partner_image_too_big: 'Das Bild ist zu groß. Max. 5MB.',
+ partner_submit_error: 'Fehler beim Speichern.',
+ partner_ai_too_short: 'Bitte gib mindestens 10 Zeichen ein.',
+ partner_ai_apply: 'KI-Vorschlag anwenden?',
+ partner_no_pending: 'Keine offenen Anträge',
+
+ // Empty States generic
+ empty_default_title: 'Nichts gefunden',
+ empty_default_message: 'Hier gibt es noch keine Einträge.',
+
+ // Reviews
+ review_missing_info: 'Fehlende Informationen für die Bewertung.',
+ review_load_error: 'Fehler beim Laden der Informationen.',
+ review_for_listing: 'Bewertung für: ',
+
+ // Notification-Bodies (Push-Texte)
+ notif_new_message: '💬 Neue Nachricht von ',
+ notif_new_message_body: 'Du hast eine neue Nachricht erhalten.',
+ notif_new_review: '⭐ Neue Bewertung von ',
+ notif_new_review_body: ' hat dir eine Bewertung hinterlassen.',
+ notif_new_favorite: '❤️ Neuer Favorit',
+ notif_new_favorite_body: ' hat dein Inserat zu Favoriten hinzugefügt.',
+
+ // Page Titles
+ page_title_dashboard: 'Room8 — Studenten-Plattform',
+ page_title_login: 'Anmelden — Room8',
+ page_title_register: 'Registrieren — Room8',
+ page_title_wohnungen: 'Wohnungen — Room8',
+ page_title_gegenstaende: 'Marktplatz — Room8',
+ page_title_jobs: 'Jobs — Room8',
+ page_title_coupons: 'Coupons — Room8',
+ page_title_events: 'Events — Room8',
+ page_title_messages: 'Nachrichten — Room8',
+ page_title_profile: 'Profil — Room8',
+ page_title_settings: 'Einstellungen — Room8',
+ page_title_favorites: 'Favoriten — Room8',
+ page_title_notifications: 'Aktivitäten — Room8',
+ page_title_faq: 'Hilfe & FAQ — Room8',
+ page_title_disclaimer: 'Disclaimer — Room8',
+ page_title_imprint: 'Impressum — Room8',
+ page_title_terms: 'AGB — Room8',
+ page_title_privacy: 'Datenschutz — Room8',
+
+ // Legal-Banner (für DE/AGB/Impressum)
+ legal_banner_title: 'Rechtsverbindlich nur auf Deutsch',
+ legal_banner_text: 'Diese rechtlichen Texte sind nur in der deutschen Originalfassung verbindlich.',
+ terms_templates: 'Musterverträge',
+
+ // FAQ Content (vollständig übersetzt)
+ faq_title: 'Hilfe & Support',
+ faq_q1: 'Was ist Room8?',
+ faq_a1_intro: 'Room8 ist die exklusive Plattform von Studenten für Studenten. Hier kannst du:',
+ faq_a1_li1: 'Wohnungen & WG-Zimmer finden oder anbieten',
+ faq_a1_li2: 'Gegenstände (Möbel, Technik) verkaufen',
+ faq_a1_li3: 'Coole Studentenjobs finden',
+ faq_a1_li4: 'Exklusive Rabatte (Coupons) nutzen',
+ faq_q2: 'Ist Room8 kostenlos?',
+ faq_a2: 'Ja, 100% kostenlos! Keine Gebühren für Inserate, keine Provisionen. Wir finanzieren uns über Partner-Angebote (Jobs & Coupons).',
+ faq_q4: 'Warum verifizieren?',
+ faq_a4_intro: 'Die Verifizierung schafft Vertrauen. Nur verifizierte Nutzer (mit blauem Haken) können:',
+ faq_a4_li1: 'Den vollen Namen anderer sehen',
+ faq_a4_li2: 'Adressen von Wohnungen einsehen',
+ faq_a4_li3: 'Als besonders vertrauenswürdig gelten',
+ faq_q8: 'Brauche ich einen Mietvertrag?',
+ faq_a8: 'Absolut. Auch bei Untermiete oder WG-Zimmern solltest du immer einen schriftlichen Vertrag haben. Nutze dafür unsere kostenlosen Musterverträge.',
+ faq_form_name: 'Dein Name',
+ faq_form_email: 'Deine E-Mail',
+ faq_form_topic: 'Thema',
+ faq_form_topic_select: 'Bitte wählen...',
+ faq_form_topic_general: 'Allgemeine Frage',
+ faq_form_topic_tech: 'Technisches Problem',
+ faq_form_topic_report: 'Meldung / Sicherheit',
+ faq_form_topic_business: 'Partner / Business',
+ faq_form_message: 'Nachricht',
+ faq_form_message_placeholder: 'Wie können wir helfen?',
+ faq_form_submit: 'Nachricht senden',
+ faq_form_sent: 'Gesendet!',
+ faq_form_reply: 'Wir melden uns bald bei dir.',
+ faq_q9: 'Wie erkenne ich Betrug?',
+ faq_a9: 'Achtung bei: Aufforderungen zur Vorab-Überweisung (Western Union etc.), Vermieter die angeblich im Ausland sind, Kommunikation nur außerhalb der App. Melde verdächtige Inserate sofort über den Melden-Button.',
+
+ // Disclaimer Content (vollständig)
+ disclaimer_title: 'Haftungsausschluss',
+ disclaimer_p1: 'Room8 ist eine reine Vermittlungsplattform. Wir bieten lediglich den technischen Rahmen, damit Studierende untereinander Wohnungen, Gegenstände, Jobs und Rabatte teilen können.',
+ disclaimer_p2: 'Sämtliche Vereinbarungen, Verträge oder Geschäfte werden direkt zwischen den Nutzern geschlossen. Room8 ist nicht Vertragspartei und übernimmt keine Verantwortung für die Erfüllung dieser Vereinbarungen.',
+ disclaimer_p3: 'Room8 steht in keiner offiziellen Verbindung zu Universitäten oder Hochschulen. Die Plattform richtet sich an Studierende, ist aber kein offizielles Angebot dieser Institutionen.',
+ disclaimer_p4: 'Jeder Nutzer ist eigenverantwortlich für seine Aktivitäten auf Room8. Bitte prüfe sorgfältig, mit wem du Kontakt aufnimmst, und nutze gesunden Menschenverstand bei jeder Transaktion.',
 
  
 
@@ -2324,6 +2498,180 @@ const translations = {
  login_subtitle: 'Log in to continue.',
  login_forgot: 'Forgot password?',
  login_or_with: 'or sign in with',
+ login_loading: 'Signing in...',
+ login_invalid_credentials: 'Wrong password or email.',
+ login_failed_prefix: 'Login failed: ',
+ login_google_failed: 'Google sign-in failed',
+ login_apple_failed: 'Apple sign-in failed',
+ login_connection_error: 'Connection error. Please try again later.',
+
+ // Common Errors / Confirms
+ common_error_prefix: 'Error: ',
+ common_save_changes: 'Save changes',
+ common_delete_confirm: 'Really delete?',
+ common_logout_confirm: 'Do you really want to log out?',
+
+ // Verify
+ verify_invalid_email: 'Please enter a valid university email.',
+ verify_status_approved: 'Verified',
+ verify_status_pending: 'Under review',
+ verify_email_sent: 'Confirmation email has been sent.',
+ verify_request_submitted: 'Request submitted. We are reviewing your data.',
+ verify_already_verified: 'You are already verified.',
+
+ // Notification Settings
+ notif_permission_denied: 'Notifications were denied by the system. Please enable them in browser settings.',
+ notif_save_error: 'Settings could not be saved.',
+ notif_save_success: 'Settings saved.',
+
+ // Dashboard Push
+ dashboard_permission_denied: 'Permission denied. Please activate in settings.',
+
+ // Chat
+ chat_image_required: 'Please select an image.',
+ chat_image_too_large: 'Image is too large (max 10MB).',
+ chat_upload_error: 'Image could not be uploaded.',
+ chat_blocked_user_title: 'User blocked',
+ chat_blocked_user_desc: 'You cannot send messages to this user.',
+ chat_back: '← Back',
+ chat_hide_confirm: 'Hide chat? It will reappear when the other user writes.',
+
+ // Settings extra
+ settings_delete_prompt: 'To delete your account, type DELETE:',
+ settings_delete_invalid: 'Wrong input. Account was not deleted.',
+ settings_delete_success: 'Your account has been deleted. Goodbye!',
+ settings_delete_keyword: 'DELETE',
+ settings_delete_final_confirm: 'Are you ABSOLUTELY sure? All your data will be permanently deleted!',
+ settings_deleting_data: 'Deleting your data...',
+
+ // FAQ Form
+ faq_form_sending: 'Sending message...',
+ faq_form_success: 'Thank you! We will reply within 24h.',
+ faq_form_error: 'Error sending. Please try again later.',
+
+ // Coupons
+ coupons_example_info: 'This is an example coupon for partners.',
+ coupon_code_copied: 'Code copied: ',
+
+ // Public Profile
+ pp_login_required: 'Please log in.',
+ pp_self_report: 'You cannot report yourself.',
+ pp_self_block: 'You cannot block yourself.',
+ pp_user_unblocked: 'User has been unblocked.',
+ pp_user_blocked: 'User has been blocked.',
+ pp_unblock_confirm: 'Unblock this user?',
+ pp_block_confirm: 'Really block this user?',
+ pp_review_delete_confirm: 'Really delete this review?',
+ pp_review_deleted: 'Review deleted.',
+
+ // Saved Searches
+ searches_saved: 'Search saved.',
+ searches_deleted: 'Search deleted.',
+ searches_load_error: 'Loading error.',
+ searches_reload: 'Reload',
+
+ // Favorites
+ favorites_remove_confirm: 'Remove from favorites?',
+
+ // Complete Profile
+ cp_checking: 'Checking availability...',
+ cp_available: '✓ Available',
+ cp_taken: 'Already taken',
+ cp_name_required: 'Please enter your full name.',
+ cp_city_required: 'Please enter your city.',
+
+ // Edit Profile
+ edit_profile_verifying: 'Your verification is being reviewed.',
+ edit_profile_check_status: 'Check status →',
+
+ // Partner Pages
+ partner_image_too_big: 'Image too large. Max 5MB.',
+ partner_submit_error: 'Error while saving.',
+ partner_ai_too_short: 'Please enter at least 10 characters.',
+ partner_ai_apply: 'Apply AI suggestion?',
+ partner_no_pending: 'No pending requests',
+
+ // Empty States generic
+ empty_default_title: 'Nothing found',
+ empty_default_message: 'No entries yet.',
+
+ // Reviews
+ review_missing_info: 'Missing information for the review.',
+ review_load_error: 'Error loading information.',
+ review_for_listing: 'Review for: ',
+
+ // Notification Bodies
+ notif_new_message: '💬 New message from ',
+ notif_new_message_body: 'You have a new message.',
+ notif_new_review: '⭐ New review from ',
+ notif_new_review_body: ' left a review for you.',
+ notif_new_favorite: '❤️ New favorite',
+ notif_new_favorite_body: ' added your listing to favorites.',
+
+ // Page Titles
+ page_title_dashboard: 'Room8 — Student Platform',
+ page_title_login: 'Sign In — Room8',
+ page_title_register: 'Sign Up — Room8',
+ page_title_wohnungen: 'Apartments — Room8',
+ page_title_gegenstaende: 'Marketplace — Room8',
+ page_title_jobs: 'Jobs — Room8',
+ page_title_coupons: 'Coupons — Room8',
+ page_title_events: 'Events — Room8',
+ page_title_messages: 'Messages — Room8',
+ page_title_profile: 'Profile — Room8',
+ page_title_settings: 'Settings — Room8',
+ page_title_favorites: 'Favorites — Room8',
+ page_title_notifications: 'Activity — Room8',
+ page_title_faq: 'Help & FAQ — Room8',
+ page_title_disclaimer: 'Disclaimer — Room8',
+ page_title_imprint: 'Legal Notice — Room8',
+ page_title_terms: 'Terms of Use — Room8',
+ page_title_privacy: 'Privacy — Room8',
+
+ // Legal-Banner
+ legal_banner_title: 'Legally binding only in German',
+ legal_banner_text: 'These legal documents are only legally binding in their German version.',
+ terms_templates: 'Template Contracts',
+
+ // FAQ Content
+ faq_title: 'Help & Support',
+ faq_q1: 'What is Room8?',
+ faq_a1_intro: 'Room8 is the exclusive platform for students by students. Here you can:',
+ faq_a1_li1: 'Find or list apartments & shared rooms',
+ faq_a1_li2: 'Sell items (furniture, electronics)',
+ faq_a1_li3: 'Find cool student jobs',
+ faq_a1_li4: 'Use exclusive discounts (coupons)',
+ faq_q2: 'Is Room8 free?',
+ faq_a2: 'Yes, 100% free! No fees for listings, no commissions. We finance ourselves through partner offers (jobs & coupons).',
+ faq_q4: 'Why verify?',
+ faq_a4_intro: 'Verification creates trust. Only verified users (with blue checkmark) can:',
+ faq_a4_li1: 'See full names of other users',
+ faq_a4_li2: 'View addresses of apartments',
+ faq_a4_li3: 'Be considered especially trustworthy',
+ faq_q8: 'Do I need a rental contract?',
+ faq_a8: 'Absolutely. Even for sublets or shared rooms you should always have a written contract. Use our free template contracts for this.',
+ faq_form_name: 'Your name',
+ faq_form_email: 'Your email',
+ faq_form_topic: 'Topic',
+ faq_form_topic_select: 'Please select...',
+ faq_form_topic_general: 'General question',
+ faq_form_topic_tech: 'Technical issue',
+ faq_form_topic_report: 'Report / Safety',
+ faq_form_topic_business: 'Partner / Business',
+ faq_form_message: 'Message',
+ faq_form_message_placeholder: 'How can we help?',
+ faq_form_submit: 'Send message',
+ faq_form_sent: 'Sent!',
+ faq_form_reply: 'We will get back to you soon.',
+ faq_q9: 'How do I recognize fraud?',
+ faq_a9: 'Be careful with: requests for advance bank transfers (Western Union etc.), landlords who claim to be abroad, communication only outside the app. Report suspicious listings immediately via the Report button.',
+
+ // Disclaimer Content
+ disclaimer_title: 'Disclaimer',
+ disclaimer_p1: 'Room8 is purely a brokerage platform. We only provide the technical framework for students to share apartments, items, jobs and discounts among each other.',
+ disclaimer_p2: 'All agreements, contracts or transactions are concluded directly between the users. Room8 is not a party to the contract and accepts no responsibility for the fulfillment of these agreements.',
+ disclaimer_p3: 'Room8 has no official connection to universities or colleges. The platform is aimed at students but is not an official offering of these institutions.',
+ disclaimer_p4: 'Each user is responsible for their own activities on Room8. Please carefully check who you contact, and use common sense in every transaction.',
 
  
 
@@ -3192,7 +3540,19 @@ function applyTranslations() {
 
  if (!currentLanguage) return;
 
- 
+
+
+ // Page-Title via data-page Attribut auf <html> automatisch setzen
+ try {
+   const pageKey = document.documentElement.getAttribute('data-page');
+   if (pageKey) {
+     const titleKey = 'page_title_' + pageKey;
+     const titleVal = t(titleKey);
+     if (titleVal && titleVal !== titleKey) {
+       document.title = titleVal;
+     }
+   }
+ } catch(_) {}
 
  // Alle Elemente mit data-i18n Attribut übersetzen
 

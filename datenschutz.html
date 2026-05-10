@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-page="privacy">
 <head>
     <script src="sentry-init.js"></script>
     <meta charset="UTF-8">
@@ -111,7 +111,17 @@
 
     <main class="legal-content">
         <div class="content-card">
-            
+            <div id="legalBanner" style="display:none; background:#FEF3C7; border:1px solid #F59E0B; border-radius:12px; padding:1rem 1.25rem; margin-bottom:1.5rem; color:#78350F; font-size:0.9rem; line-height:1.5;">
+                <strong data-i18n="legal_banner_title">Rechtsverbindlich nur auf Deutsch</strong><br>
+                <span data-i18n="legal_banner_text">Diese rechtlichen Texte sind nur in der deutschen Originalfassung verbindlich.</span>
+            </div>
+            <script>
+                (function(){
+                    var lang = (window.Room8i18n && Room8i18n.getCurrentLanguage) ? Room8i18n.getCurrentLanguage() : (localStorage.getItem('room8_language') || 'de');
+                    if (lang === 'en') document.getElementById('legalBanner').style.display = 'block';
+                })();
+            </script>
+
             <div class="info-box">
                 <strong data-i18n="privacy_summary_label">Kurzfassung:</strong>
                 <span data-i18n="privacy_summary_text">Wir sammeln nur Daten, die für den Betrieb notwendig sind. Kein Verkauf, kein Tracking. Deine Sicherheit steht an erster Stelle.</span>

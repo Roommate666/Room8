@@ -471,7 +471,7 @@
     };
 
     window.deleteSearch = async (id) => {
-        if(!confirm("Löschen?")) return;
+        if(!confirm((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('common_delete_confirm'):"Wirklich löschen?")) return;
         await sb.from('saved_searches').delete().eq('id', id);
         loadSearches();
     };
