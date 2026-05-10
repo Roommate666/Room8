@@ -242,31 +242,195 @@
         .fab { position: fixed; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, #3B82F6, #2563EB); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4); cursor: pointer; text-decoration: none; color: white; z-index: 10000; transition: transform 0.2s, box-shadow 0.2s; }
         .fab:active { transform: scale(0.92); }
 
-        /* === MATCHING SCORE BADGE - Kibo UI Pill === */
+        /* === MATCHING SCORE BADGE === */
+        .match-badge-wrap {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 0.35rem;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            animation: matchPop 0.45s 0.1s cubic-bezier(.34,1.56,.64,1) both;
+        }
+        @keyframes matchPop {
+            0% { opacity: 0; transform: scale(0.7); }
+            60% { opacity: 1; transform: scale(1.04); }
+            100% { opacity: 1; transform: scale(1); }
+        }
         .match-badge {
             display: inline-flex;
             align-items: center;
-            gap: 3px;
-            padding: 0.2rem 0.5rem;
+            gap: 4px;
+            padding: 0;
+            background: transparent;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            line-height: 1;
+            white-space: nowrap;
+            transition: transform 0.15s ease;
+        }
+        .match-badge-wrap:active .match-badge { transform: scale(0.95); }
+        .match-badge svg { width: 12px; height: 12px; }
+
+        .match-badge.perfect { color: #D97706; }
+        .match-badge.high    { color: #059669; }
+        .match-badge.medium  { color: #B45309; }
+        .match-badge.low     { color: #6B7280; }
+
+        .match-bar {
+            position: relative;
+            height: 3px;
+            background: rgba(0,0,0,0.06);
             border-radius: 999px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 100px;
+        }
+        .match-bar-fill {
+            position: absolute;
+            top: 0; left: 0; bottom: 0;
+            border-radius: 999px;
+            transform-origin: left;
+            animation: matchBarFill 0.7s 0.25s cubic-bezier(.22,.61,.36,1) both;
+        }
+        @keyframes matchBarFill {
+            from { transform: scaleX(0); }
+            to { transform: scaleX(1); }
+        }
+        .match-bar-fill.perfect { background: linear-gradient(90deg, #FCD34D, #F59E0B); }
+        .match-bar-fill.high { background: linear-gradient(90deg, #6EE7B7, #10B981); }
+        .match-bar-fill.medium { background: linear-gradient(90deg, #FDE68A, #FBBF24); }
+        .match-bar-fill.low { background: #9CA3AF; }
+
+        /* === MATCH EXPLAIN BOTTOM-SHEET === */
+        .match-sheet-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 10001;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .match-sheet-overlay.active { display: block; opacity: 1; }
+        .match-sheet {
+            position: fixed;
+            left: 0; right: 0; bottom: 0;
+            background: white;
+            border-radius: 24px 24px 0 0;
+            padding: 1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
+            z-index: 10002;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(.22,.61,.36,1);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .match-sheet.active { transform: translateY(0); }
+        .match-sheet-handle {
+            width: 44px; height: 4px;
+            background: #D1D5DB;
+            border-radius: 999px;
+            margin: -0.5rem auto 1rem;
+        }
+        .match-sheet-score {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .match-sheet-score-num {
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 1;
+            background: linear-gradient(135deg, #10B981, #059669);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .match-sheet-score-num.perfect {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .match-sheet-score-num.medium {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .match-sheet-score-num.low {
+            background: linear-gradient(135deg, #6B7280, #4B5563);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .match-sheet-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #1F2937;
+            text-align: center;
+            margin: 0.25rem 0 1rem;
+            letter-spacing: -0.02em;
+        }
+        .match-sheet-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1.25rem;
+        }
+        .match-sheet-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.6rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            margin-bottom: 0.35rem;
+        }
+        .match-sheet-list li.hit {
+            background: #ECFDF5;
+            color: #065F46;
+            font-weight: 600;
+        }
+        .match-sheet-list li.miss {
+            background: #FEF2F2;
+            color: #991B1B;
+            font-weight: 500;
+        }
+        .match-sheet-list li.partial {
+            background: #FEFCE8;
+            color: #854D0E;
+            font-weight: 600;
+        }
+        .match-sheet-icon {
+            flex-shrink: 0;
+            width: 20px; height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: 900;
             font-size: 0.7rem;
+        }
+        .match-sheet-list li.hit .match-sheet-icon { background: #10B981; color: white; }
+        .match-sheet-list li.miss .match-sheet-icon { background: #EF4444; color: white; }
+        .match-sheet-list li.partial .match-sheet-icon { background: #F59E0B; color: white; }
+        .match-sheet-cta {
+            display: block;
+            text-align: center;
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+            color: white;
+            padding: 0.85rem 1rem;
+            border-radius: 14px;
+            text-decoration: none;
             font-weight: 700;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(59,130,246,0.3);
         }
-
-        .match-badge.high {
-            background: #D1FAE5;
-            color: #059669;
-        }
-
-        .match-badge.medium {
-            background: #FEF3C7;
-            color: #D97706;
-        }
-
-        .match-badge.low {
-            background: #F3F4F6;
-            color: #6B7280;
-        }
+        .match-sheet-cta:active { transform: scale(0.97); }
 
         /* === INFO BANNER fuer Matching - Glasmorphismus === */
         .match-info-banner {
@@ -400,6 +564,18 @@
     <div id="app-footer-nav"></div>
 </div>
 
+<!-- Match-Explain Bottom-Sheet -->
+<div class="match-sheet-overlay" id="matchSheetOverlay" onclick="closeMatchSheet()"></div>
+<div class="match-sheet" id="matchSheet" role="dialog" aria-modal="true" aria-labelledby="matchSheetTitle">
+    <div class="match-sheet-handle"></div>
+    <div class="match-sheet-score">
+        <div class="match-sheet-score-num" id="matchSheetScoreNum">--%</div>
+    </div>
+    <h3 class="match-sheet-title" id="matchSheetTitle">Match-Details</h3>
+    <ul class="match-sheet-list" id="matchSheetList"></ul>
+    <a href="saved-searches.html" class="match-sheet-cta">Suche anpassen →</a>
+</div>
+
 <a href="wohnung.html?mode=offer" class="fab" id="addListingFab" title="Neues Inserat" style="display:none;">
     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
 </a>
@@ -504,76 +680,157 @@
         }
     }
     
-    // NEU: Matching Score berechnen
+    // Matching Score berechnen — gibt { score, details: [{key,label,status}] } zurueck
+    // status: 'hit' (voll), 'partial' (teilweise), 'miss' (nicht erfuellt)
     function calculateMatchScore(listing) {
         if (userSavedSearches.length === 0) return null;
-        
-        let bestScore = 0;
-        
+
+        var best = null;
+
         userSavedSearches.forEach(function(search) {
-            let score = 0;
-            let maxScore = 0;
-            
-            // Stadt Match (40 Punkte)
-            if (search.city) {
+            var score = 0;
+            var maxScore = 0;
+            var details = [];
+
+            // Stadt Match (40 Punkte) — leeren String ignorieren
+            if (search.city && search.city.trim()) {
                 maxScore += 40;
                 if (listing.city && listing.city.toLowerCase() === search.city.toLowerCase()) {
                     score += 40;
+                    details.push({ key: 'city', label: 'Stadt: ' + search.city, status: 'hit' });
+                } else {
+                    details.push({ key: 'city', label: 'Stadt: ' + search.city + ' (Inserat in ' + (listing.city || 'unbekannt') + ')', status: 'miss' });
                 }
             }
-            
-            // Preis Match (30 Punkte)
+
+            // Preis Match (30 Punkte) — hard-cap: weit ueber max = 0 Punkte
             if (search.min_price || search.max_price) {
                 maxScore += 30;
-                const rent = listing.monthly_rent || 0;
-                const minOk = !search.min_price || rent >= search.min_price;
-                const maxOk = !search.max_price || rent <= search.max_price;
-                
+                var rent = listing.monthly_rent || 0;
+                var minOk = !search.min_price || rent >= search.min_price;
+                var maxOk = !search.max_price || rent <= search.max_price;
+                var range = (search.min_price || 0) + '–' + (search.max_price || '∞') + ' EUR';
+
                 if (minOk && maxOk) {
                     score += 30;
-                } else if (minOk || maxOk) {
-                    score += 15; // Teilweise Match
+                    details.push({ key: 'price', label: 'Preis im Budget (' + range + ')', status: 'hit' });
+                } else if (rent === 0) {
+                    details.push({ key: 'price', label: 'Preis nicht angegeben (' + range + ')', status: 'miss' });
+                } else if (search.max_price && rent <= search.max_price * 1.1) {
+                    // Nur leicht ueber Budget (bis 10%) → Teilpunkte
+                    score += 12;
+                    details.push({ key: 'price', label: 'Knapp über Budget (' + rent + ' EUR, Wunsch ' + range + ')', status: 'partial' });
+                } else if (search.min_price && rent >= search.min_price * 0.9) {
+                    score += 12;
+                    details.push({ key: 'price', label: 'Knapp unter Budget (' + rent + ' EUR, Wunsch ' + range + ')', status: 'partial' });
+                } else {
+                    details.push({ key: 'price', label: 'Preis außerhalb Budget (' + rent + ' EUR, Wunsch ' + range + ')', status: 'miss' });
                 }
             }
-            
+
             // Zimmertyp Match (15 Punkte)
             if (search.room_type) {
                 maxScore += 15;
+                var typeMap = { wg_room: 'WG-Zimmer', wg: 'WG-Zimmer', apartment: 'Apartment', entire_apartment: 'Apartment', studio: 'Studio', house: 'Haus', shared: 'Mitbewohner' };
+                var typeLabel = typeMap[search.room_type] || search.room_type;
                 if (listing.room_type === search.room_type) {
                     score += 15;
+                    details.push({ key: 'room_type', label: 'Zimmertyp: ' + typeLabel, status: 'hit' });
+                } else {
+                    details.push({ key: 'room_type', label: 'Zimmertyp: ' + typeLabel + ' gesucht', status: 'miss' });
                 }
             }
-            
-            // Verfügbar ab Match (15 Punkte)
+
+            // Verfuegbar-ab Match (15 Punkte)
             if (search.available_from) {
                 maxScore += 15;
+                var searchDate = new Date(search.available_from);
+                var searchDateStr = searchDate.toLocaleDateString('de-DE');
                 if (listing.available_from) {
-                    const searchDate = new Date(search.available_from);
-                    const listingDate = new Date(listing.available_from);
-                    
+                    var listingDate = new Date(listing.available_from);
                     if (listingDate <= searchDate) {
-                        score += 15; // Verfügbar vor oder am gewünschten Datum
+                        score += 15;
+                        details.push({ key: 'available', label: 'Verfügbar ab ' + searchDateStr, status: 'hit' });
                     } else {
-                        // Teilpunkte wenn innerhalb von 2 Wochen
-                        const diffDays = (listingDate - searchDate) / (1000 * 60 * 60 * 24);
-                        if (diffDays <= 14) score += 10;
-                        else if (diffDays <= 30) score += 5;
+                        var diffDays = (listingDate - searchDate) / (1000 * 60 * 60 * 24);
+                        if (diffDays <= 14) {
+                            score += 10;
+                            details.push({ key: 'available', label: 'Verfügbar ' + Math.round(diffDays) + ' Tage später', status: 'partial' });
+                        } else if (diffDays <= 30) {
+                            score += 5;
+                            details.push({ key: 'available', label: 'Verfügbar ' + Math.round(diffDays) + ' Tage später', status: 'partial' });
+                        } else {
+                            details.push({ key: 'available', label: 'Erst ab ' + listingDate.toLocaleDateString('de-DE') + ' frei', status: 'miss' });
+                        }
                     }
+                } else {
+                    details.push({ key: 'available', label: 'Datum im Inserat fehlt', status: 'miss' });
                 }
             }
-            
-            // Score berechnen (Prozent)
+
             if (maxScore > 0) {
-                const percentScore = Math.round((score / maxScore) * 100);
-                if (percentScore > bestScore) {
-                    bestScore = percentScore;
+                var percentScore = Math.round((score / maxScore) * 100);
+                if (!best || percentScore > best.score) {
+                    best = { score: percentScore, details: details, searchName: search.name || 'Deine Suche' };
                 }
             }
         });
-        
-        return bestScore > 0 ? bestScore : null;
+
+        return best;
     }
     
+    // Match-Erklaerung als Bottom-Sheet oeffnen
+    function showMatchExplain(wrapEl) {
+        try {
+            var raw = wrapEl.getAttribute('data-match');
+            if (!raw) return;
+            var data = JSON.parse(decodeURIComponent(raw));
+            var sheet = document.getElementById('matchSheet');
+            var overlay = document.getElementById('matchSheetOverlay');
+            var scoreNum = document.getElementById('matchSheetScoreNum');
+            var list = document.getElementById('matchSheetList');
+            var title = document.getElementById('matchSheetTitle');
+            if (!sheet || !scoreNum || !list) return;
+
+            var s = data.score;
+            var cls = s === 100 ? 'perfect' : (s >= 75 ? 'high' : (s >= 60 ? 'medium' : 'low'));
+            scoreNum.textContent = s + '%';
+            scoreNum.className = 'match-sheet-score-num ' + cls;
+
+            if (s === 100) title.textContent = 'Perfect Match';
+            else if (s >= 75) title.textContent = 'Sehr gute Übereinstimmung';
+            else if (s >= 60) title.textContent = 'Gute Übereinstimmung';
+            else title.textContent = 'Teilweise Übereinstimmung';
+
+            // Liste rendern
+            var html = '';
+            (data.details || []).forEach(function(d) {
+                var icon = d.status === 'hit' ? '✓' : (d.status === 'partial' ? '~' : '✕');
+                var safeLabel = String(d.label || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                html += '<li class="' + d.status + '">' +
+                    '<span class="match-sheet-icon">' + icon + '</span>' +
+                    '<span>' + safeLabel + '</span>' +
+                '</li>';
+            });
+            list.innerHTML = html;
+
+            overlay.classList.add('active');
+            requestAnimationFrame(function() { sheet.classList.add('active'); });
+        } catch (e) {
+            console.warn('showMatchExplain error:', e);
+        }
+    }
+    function closeMatchSheet() {
+        var sheet = document.getElementById('matchSheet');
+        var overlay = document.getElementById('matchSheetOverlay');
+        if (sheet) sheet.classList.remove('active');
+        if (overlay) setTimeout(function(){ overlay.classList.remove('active'); }, 250);
+    }
+    // ESC schliesst Sheet
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeMatchSheet();
+    });
+
     async function toggleFavorite(listingId, btnElement) {
         if (!currentUserId) { navigateTo('login.html'); return; }
 
@@ -649,14 +906,28 @@
                         roomTypeMap[(listing.type || '').toLowerCase()] ||
                         'Wohnung';
         
-        // NEU: Match Score berechnen (nur für Angebote, nicht für Gesuche)
+        // Match-Score berechnen (nur fuer Angebote, nicht fuer Gesuche)
+        // Threshold: ab 50% — alles drunter wirkt schwach
         var matchBadgeHtml = '';
         if (listingMode === 'offer') {
-            var matchScore = calculateMatchScore(listing);
-            if (matchScore !== null && matchScore >= 30) {
-                var matchClass = matchScore >= 70 ? 'high' : (matchScore >= 50 ? 'medium' : 'low');
-                var matchIcon = matchScore >= 70 ? '🎯' : (matchScore >= 50 ? '👍' : '');
-                matchBadgeHtml = `<span class="match-badge ${matchClass}">${matchIcon} ${matchScore}% Match</span>`;
+            var matchData = calculateMatchScore(listing);
+            if (matchData && matchData.score >= 50) {
+                var s = matchData.score;
+                var matchClass = s === 100 ? 'perfect' : (s >= 75 ? 'high' : (s >= 60 ? 'medium' : 'low'));
+                var iconSvg = '';
+                var label = s + '% Match';
+                if (s === 100) {
+                    iconSvg = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.39 4.84L20 8l-4 3.9L17.18 18 12 15.27 6.82 18 8 11.9 4 8l5.61-1.16L12 2z"/></svg>';
+                    label = 'Perfect Match';
+                } else if (s >= 75) {
+                    iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+                }
+                // Match-Data als data-Attribute (JSON-escaped fuer onclick)
+                var dataAttr = encodeURIComponent(JSON.stringify(matchData));
+                matchBadgeHtml = '<div class="match-badge-wrap" data-match="' + dataAttr + '" onclick="event.stopPropagation(); showMatchExplain(this);">' +
+                    '<span class="match-badge ' + matchClass + '">' + iconSvg + ' ' + label + '</span>' +
+                    '<div class="match-bar"><div class="match-bar-fill ' + matchClass + '" style="width:' + s + '%"></div></div>' +
+                '</div>';
             }
         }
         
@@ -705,7 +976,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                         ${escHtml(listing.city) || 'Unbekannt'}
                     </div>
-                    ${matchBadgeHtml ? `<div class="card-footer">${matchBadgeHtml}</div>` : ''}
+                    ${matchBadgeHtml}
                 </div>
                 <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" data-id="${listing.id}" onclick="event.stopPropagation(); toggleFavorite('${listing.id}', this);">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${isFavorited ? '#ef4444' : 'none'}" stroke="${isFavorited ? '#ef4444' : '#9ca3af'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
@@ -717,12 +988,14 @@
     function renderListings(listings) {
         listingsContainer.innerHTML = '';
         
-        // NEU: Sortierung nach Match Score (beste zuerst)
+        // Sortierung nach Match-Score (beste zuerst)
         if (userSavedSearches.length > 0 && currentFilter !== 'search') {
             listings = listings.slice().sort(function(a, b) {
-                var scoreA = calculateMatchScore(a) || 0;
-                var scoreB = calculateMatchScore(b) || 0;
-                return scoreB - scoreA; // Höchster Score zuerst
+                var mA = calculateMatchScore(a);
+                var mB = calculateMatchScore(b);
+                var scoreA = mA ? mA.score : 0;
+                var scoreB = mB ? mB.score : 0;
+                return scoreB - scoreA;
             });
         }
         
