@@ -142,22 +142,18 @@
     .lp-btn:active { transform: scale(0.97); }
     .lp-btn--primary {
       background: linear-gradient(135deg, #3B82F6, #2563EB); color: white;
-      box-shadow: 0 4px 20px rgba(59,130,246,0.35);
-      position: relative; overflow: hidden;
-    }
-    .lp-btn--primary::after {
-      content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      animation: shimmerSlide 3s ease-in-out infinite;
+      box-shadow: 0 6px 14px rgba(37,99,235,0.22);
+      position: relative;
     }
     .lp-btn--outline {
-      background: rgba(255,255,255,0.9); color: #3B82F6;
-      border: 1.5px solid rgba(59,130,246,0.2);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      background: white; color: #2563EB;
+      border: 1.5px solid #E5E7EB;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
     }
     .lp-scroll-hint {
-      position: absolute; bottom: 2rem; left: 50%;
-      transform: translateX(-50%); color: #94A3B8;
+      position: absolute; bottom: 2rem; left: 0; right: 0;
+      margin: 0 auto; width: fit-content;
+      color: #94A3B8;
       font-size: 0.8rem; display: flex; flex-direction: column;
       align-items: center; gap: 0.25rem;
       animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 2.2s both;
