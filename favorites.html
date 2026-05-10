@@ -197,15 +197,15 @@
         <a href="javascript:history.back()" class="back-arrow">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
-        <h1>Meine Favoriten</h1>
+        <h1 data-i18n="favorites_title">Meine Favoriten</h1>
         <div style="width: 40px;"></div>
     </header>
 
     <main class="app-content">
         
         <div class="favorites-tabs">
-            <button class="tab-btn active" onclick="switchTab('wohnung')" id="tab-wohnung">Wohnungen</button>
-            <button class="tab-btn" onclick="switchTab('gegenstand')" id="tab-gegenstand">Marktplatz</button>
+            <button class="tab-btn active" onclick="switchTab('wohnung')" id="tab-wohnung" data-i18n="favorites_tab_apartments">Wohnungen</button>
+            <button class="tab-btn" onclick="switchTab('gegenstand')" id="tab-gegenstand" data-i18n="favorites_tab_marketplace">Marktplatz</button>
         </div>
 
         <div id="loading" style="padding: 1rem;">
@@ -219,9 +219,9 @@
 
         <div id="emptyState" class="empty-state">
             <div class="empty-icon">❤️</div>
-            <h3>Noch keine Favoriten</h3>
-            <p>Markiere Inserate mit einem Herz, um sie hier zu speichern.</p>
-            <a href="choose-listing.html" class="btn-browse">Stöbern</a>
+            <h3 data-i18n="favorites_empty">Noch keine Favoriten</h3>
+            <p data-i18n="favorites_empty_desc">Markiere Inserate mit einem Herz, um sie hier zu speichern.</p>
+            <a href="choose-listing.html" class="btn-browse" data-i18n="common_browse">Stöbern</a>
         </div>
     </main>
 

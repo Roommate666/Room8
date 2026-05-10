@@ -171,17 +171,17 @@
         <a href="javascript:history.back()" class="back-arrow">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
-        <h1>Aktivitäten</h1>
-        <button class="mark-read-btn" id="markAllBtn" style="display:none;">Alle lesen</button>
+        <h1 data-i18n="notifications_title">Aktivitäten</h1>
+        <button class="mark-read-btn" id="markAllBtn" style="display:none;" data-i18n="notifications_mark_all_read">Alle lesen</button>
     </header>
 
     <div class="filter-tabs" id="filterTabs">
-        <div class="filter-tab active" data-filter="all">Alle</div>
-        <div class="filter-tab" data-filter="unread">Ungelesen</div>
-        <div class="filter-tab" data-filter="search_match">Suchalarme</div>
-        <div class="filter-tab" data-filter="chat_message">Chats</div>
-        <div class="filter-tab" data-filter="review">Bewertungen</div>
-        <div class="filter-tab" data-filter="favorite">Favoriten</div>
+        <div class="filter-tab active" data-filter="all" data-i18n="common_all">Alle</div>
+        <div class="filter-tab" data-filter="unread" data-i18n="notifications_filter_unread">Ungelesen</div>
+        <div class="filter-tab" data-filter="search_match" data-i18n="notifications_filter_alerts">Suchalarme</div>
+        <div class="filter-tab" data-filter="chat_message" data-i18n="notifications_filter_chats">Chats</div>
+        <div class="filter-tab" data-filter="review" data-i18n="notifications_filter_reviews">Bewertungen</div>
+        <div class="filter-tab" data-filter="favorite" data-i18n="notifications_filter_favorites">Favoriten</div>
     </div>
 
     <main class="app-content" style="padding: 0;">
@@ -224,7 +224,7 @@
         try {
             const { data: { user } } = await sb.auth.getUser();
             if (!user) {
-                container.innerHTML = '<div class="empty-state"><p>Bitte einloggen.</p></div>';
+                container.innerHTML = '<div class="empty-state"><p>' + ((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('common_login_required'):'Bitte einloggen.') + '</p></div>';
                 return;
             }
 
@@ -242,7 +242,7 @@
 
         } catch (err) {
             console.error(err);
-            container.innerHTML = '<div style="padding:2rem;text-align:center;">Fehler beim Laden.</div>';
+            container.innerHTML = '<div style="padding:2rem;text-align:center;">' + ((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('common_load_error'):'Fehler beim Laden.') + '</div>';
         }
     }
 
@@ -268,8 +268,8 @@
             container.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-icon">🔕</div>
-                    <h3>Keine Neuigkeiten</h3>
-                    <p>Aktuell gibt es nichts Neues für diesen Filter.</p>
+                    <h3>${(window.Room8i18n&&Room8i18n.t)?Room8i18n.t('notifications_empty'):'Keine Neuigkeiten'}</h3>
+                    <p>${(window.Room8i18n&&Room8i18n.t)?Room8i18n.t('notifications_empty_desc'):'Aktuell gibt es nichts Neues für diesen Filter.'}</p>
                 </div>`;
             return;
         }

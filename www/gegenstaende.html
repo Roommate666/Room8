@@ -290,9 +290,9 @@
     <div class="verify-overlay" id="verifyOverlay">
         <div class="verify-overlay-box">
             <div class="icon">🔒</div>
-            <h2>Verifizierung erforderlich</h2>
+            <h2 data-i18n="verify_required">Verifizierung erforderlich</h2>
             <p>Um den Marktplatz zu nutzen und Artikel zu kaufen oder verkaufen, musst du zuerst deinen Studentenstatus verifizieren.</p>
-            <a href="verify-options.html">Jetzt verifizieren</a>
+            <a href="verify-options.html" data-i18n="verify_now">Jetzt verifizieren</a>
         </div>
     </div>
 
@@ -300,45 +300,45 @@
         <a href="javascript:history.back()" class="back-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
-        <h1>Marktplatz</h1>
+        <h1 data-i18n="markt_title">Marktplatz</h1>
         <div class="header-spacer"></div>
     </header>
     
     <div class="search-section">
         <div class="search-bar-wrap">
             <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
-            <input type="text" id="searchInput" placeholder="Möbel, Technik, Bücher...">
+            <input type="text" id="searchInput" placeholder="Möbel, Technik, Bücher..." data-i18n-placeholder="markt_search_placeholder">
         </div>
         
         <div class="filter-container">
             <div>
                 <div class="filter-bar" id="modeFilter">
-                    <button class="filter-btn active" data-filter="all">Alle</button>
-                    <button class="filter-btn" data-filter="offer">Verkauf</button>
-                    <button class="filter-btn" data-filter="search">Gesucht</button>
+                    <button class="filter-btn active" data-filter="all" data-i18n="common_all">Alle</button>
+                    <button class="filter-btn" data-filter="offer" data-i18n="list_filter_sale">Verkauf</button>
+                    <button class="filter-btn" data-filter="search" data-i18n="list_filter_wanted">Gesucht</button>
                 </div>
             </div>
             <div>
-                <div class="filter-label">Kategorien</div>
+                <div class="filter-label" data-i18n="markt_categories">Kategorien</div>
                 <div class="filter-bar" id="categoryFilter">
-                    <button class="filter-btn active" data-category="all">Alle</button>
-                    <button class="filter-btn" data-category="Furniture & Home">Möbel</button>
-                    <button class="filter-btn" data-category="Electronics & Tech">Elektronik</button>
-                    <button class="filter-btn" data-category="Books & Study">Bücher</button>
-                    <button class="filter-btn" data-category="Clothing & Fashion">Kleidung</button>
-                    <button class="filter-btn" data-category="Kitchen & Appliances">Küche</button>
-                    <button class="filter-btn" data-category="Sports & Outdoor">Sport</button>
-                    <button class="filter-btn" data-category="Bikes & Transport">Fahrrad</button>
-                    <button class="filter-btn" data-category="Music & Instruments">Musik</button>
-                    <button class="filter-btn" data-category="Others">Sonstiges</button>
+                    <button class="filter-btn active" data-category="all" data-i18n="common_all">Alle</button>
+                    <button class="filter-btn" data-category="Furniture & Home" data-i18n="markt_cat_furniture">Möbel</button>
+                    <button class="filter-btn" data-category="Electronics & Tech" data-i18n="markt_cat_electronics">Elektronik</button>
+                    <button class="filter-btn" data-category="Books & Study" data-i18n="markt_cat_books">Bücher</button>
+                    <button class="filter-btn" data-category="Clothing & Fashion" data-i18n="markt_cat_clothing">Kleidung</button>
+                    <button class="filter-btn" data-category="Kitchen & Appliances" data-i18n="markt_cat_kitchen">Küche</button>
+                    <button class="filter-btn" data-category="Sports & Outdoor" data-i18n="markt_cat_sport">Sport</button>
+                    <button class="filter-btn" data-category="Bikes & Transport" data-i18n="markt_cat_bike">Fahrrad</button>
+                    <button class="filter-btn" data-category="Music & Instruments" data-i18n="markt_cat_music">Musik</button>
+                    <button class="filter-btn" data-category="Others" data-i18n="markt_cat_other">Sonstiges</button>
                 </div>
             </div>
             <div>
-                <div class="filter-label">Sortierung</div>
+                <div class="filter-label" data-i18n="markt_sort">Sortierung</div>
                 <div class="filter-bar" id="sortFilter">
-                    <button class="filter-btn active" data-sort="newest">Neueste</button>
-                    <button class="filter-btn" data-sort="price-asc">Preis ↑</button>
-                    <button class="filter-btn" data-sort="price-desc">Preis ↓</button>
+                    <button class="filter-btn active" data-sort="newest" data-i18n="markt_sort_newest">Neueste</button>
+                    <button class="filter-btn" data-sort="price-asc" data-i18n="markt_sort_price_asc">Preis ↑</button>
+                    <button class="filter-btn" data-sort="price-desc" data-i18n="markt_sort_price_desc">Preis ↓</button>
                 </div>
             </div>
         </div>

@@ -351,9 +351,9 @@
 <div class="verify-overlay" id="verifyOverlay">
     <div class="verify-overlay-box">
         <div class="icon">🔒</div>
-        <h2>Verifizierung erforderlich</h2>
+        <h2 data-i18n="verify_required">Verifizierung erforderlich</h2>
         <p>Um Wohnungen zu sehen und Inserate zu erstellen, musst du zuerst deinen Studentenstatus verifizieren.</p>
-        <a href="verify-options.html">Jetzt verifizieren</a>
+        <a href="verify-options.html" data-i18n="verify_now">Jetzt verifizieren</a>
     </div>
 </div>
 
@@ -362,7 +362,7 @@
         <a href="javascript:history.back()" class="back-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
-        <h1>Wohnungen</h1>
+        <h1 data-i18n="wohnungen_title">Wohnungen</h1>
         <div class="header-spacer"></div>
     </header>
     
@@ -370,7 +370,7 @@
     <div class="match-info-banner hidden" id="matchInfoBanner">
         <span class="match-info-icon">✨</span>
         <span class="match-info-text">Match-Score basiert auf <span id="savedSearchCount">0</span> gespeicherten Suchen</span>
-        <a href="saved-searches.html" class="match-info-link" onclick="navigateTo('saved-searches.html'); return false;">Bearbeiten →</a>
+        <a href="saved-searches.html" class="match-info-link" onclick="navigateTo('saved-searches.html'); return false;" data-i18n="wohnungen_match_edit">Bearbeiten →</a>
     </div>
     
     <div class="search-section">
@@ -381,10 +381,10 @@
         
         <div class="filter-container">
             <div class="filter-bar" id="modeFilter">
-                <button class="filter-btn active" data-filter="all">Alle</button>
-                <button class="filter-btn" data-filter="offer">Angebote</button>
-                <button class="filter-btn" data-filter="search">Gesucht</button>
-                <button class="filter-btn" data-filter="swap">Tausch</button>
+                <button class="filter-btn active" data-filter="all" data-i18n="common_all">Alle</button>
+                <button class="filter-btn" data-filter="offer" data-i18n="list_filter_offers">Angebote</button>
+                <button class="filter-btn" data-filter="search" data-i18n="list_filter_wanted">Gesucht</button>
+                <button class="filter-btn" data-filter="swap" data-i18n="list_filter_swap">Tausch</button>
             </div>
         </div>
     </div>
@@ -734,8 +734,8 @@
             listingsContainer.innerHTML = `
                 <div class="empty-state-container">
                     <svg class="empty-state-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                    <h3>Keine Inserate gefunden</h3>
-                    <p>Versuche andere Filter oder starte eine neue Suche.</p>
+                    <h3>${(window.Room8i18n&&Room8i18n.t)?Room8i18n.t('wohnungen_no_listings'):'Keine Inserate gefunden'}</h3>
+                    <p>${(window.Room8i18n&&Room8i18n.t)?Room8i18n.t('wohnungen_try_filters'):'Versuche andere Filter oder starte eine neue Suche.'}</p>
                 </div>`;
         }
     }

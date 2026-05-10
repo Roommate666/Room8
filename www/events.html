@@ -143,14 +143,14 @@
             <input type="text" id="eventSearchInput" placeholder="Event, Ort, Veranstalter …" autocomplete="off">
         </div>
         <div class="filter-bar" id="eventFilter">
-            <button class="filter-btn active" data-cat="all">Alle</button>
-            <button class="filter-btn" data-cat="party">Party</button>
-            <button class="filter-btn" data-cat="lecture">Vortrag</button>
-            <button class="filter-btn" data-cat="workshop">Workshop</button>
-            <button class="filter-btn" data-cat="sport">Sport</button>
-            <button class="filter-btn" data-cat="culture">Kultur</button>
-            <button class="filter-btn" data-cat="networking">Networking</button>
-            <button class="filter-btn" data-cat="food">Essen</button>
+            <button class="filter-btn active" data-cat="all" data-i18n="common_all">Alle</button>
+            <button class="filter-btn" data-cat="party" data-i18n="events_cat_party">Party</button>
+            <button class="filter-btn" data-cat="lecture" data-i18n="events_cat_lecture">Vortrag</button>
+            <button class="filter-btn" data-cat="workshop" data-i18n="events_cat_workshop">Workshop</button>
+            <button class="filter-btn" data-cat="sport" data-i18n="events_cat_sport">Sport</button>
+            <button class="filter-btn" data-cat="culture" data-i18n="events_cat_culture">Kultur</button>
+            <button class="filter-btn" data-cat="networking" data-i18n="events_cat_networking">Networking</button>
+            <button class="filter-btn" data-cat="food" data-i18n="events_cat_food">Essen</button>
         </div>
     </div>
 
@@ -251,8 +251,8 @@
             container.innerHTML =
                 '<div class="empty-state">' +
                     '<div class="icon">📅</div>' +
-                    '<h3>Noch keine Events</h3>' +
-                    '<p>Sei der Erste und erstelle ein Event!</p>' +
+                    '<h3>' + ((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('events_no_events'):'Noch keine Events') + '</h3>' +
+                    '<p>' + ((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('events_first'):'Sei der Erste und erstelle ein Event!') + '</p>' +
                 '</div>';
             return;
         }

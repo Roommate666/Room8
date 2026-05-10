@@ -123,7 +123,7 @@
 <div class="app-container">
     <div id="loadingState" class="loading">
         <div style="font-size:2rem;">⏳</div>
-        <p>Lade Event...</p>
+        <p data-i18n="event_loading">Lade Event...</p>
     </div>
 
     <div id="eventContent" style="display:none;">
@@ -144,7 +144,7 @@
             <div class="meta-grid" id="metaGrid"></div>
 
             <div class="description-section">
-                <h3>Beschreibung</h3>
+                <h3 data-i18n="event_description">Beschreibung</h3>
                 <div class="description-text" id="eventDescription"></div>
                 <a id="externalLink" class="external-link" target="_blank" rel="noopener" style="display:none;">→ Mehr Infos</a>
             </div>
@@ -152,37 +152,37 @@
             <div class="going-count" id="goingCount"></div>
 
             <button id="reportLink" class="report-link" onclick="openReportModal()" style="display:none;">
-                ⚠️ Event melden
+                ⚠️ <span data-i18n="event_report_title">Event melden</span>
             </button>
         </div>
     </div>
 
     <div id="reportModalBg" class="report-modal-bg" onclick="if(event.target===this) closeReportModal()">
         <div class="report-modal">
-            <h3>Event melden</h3>
-            <p>Was stimmt mit diesem Event nicht? Wir prüfen jede Meldung.</p>
+            <h3 data-i18n="event_report_title">Event melden</h3>
+            <p data-i18n="event_report_subtitle">Was stimmt mit diesem Event nicht? Wir prüfen jede Meldung.</p>
 
             <div class="report-options" id="reportOptions">
-                <label class="report-option"><input type="radio" name="reason" value="spam"><span>Spam / Werbung</span></label>
-                <label class="report-option"><input type="radio" name="reason" value="illegal"><span>Illegale Inhalte (Drogen, Waffen)</span></label>
-                <label class="report-option"><input type="radio" name="reason" value="hate"><span>Hass / Diskriminierung</span></label>
-                <label class="report-option"><input type="radio" name="reason" value="fake"><span>Fake / Existiert nicht</span></label>
-                <label class="report-option"><input type="radio" name="reason" value="duplicate"><span>Doppelt</span></label>
-                <label class="report-option"><input type="radio" name="reason" value="other"><span>Anderer Grund</span></label>
+                <label class="report-option"><input type="radio" name="reason" value="spam"><span data-i18n="event_report_spam">Spam / Werbung</span></label>
+                <label class="report-option"><input type="radio" name="reason" value="illegal"><span data-i18n="event_report_illegal">Illegale Inhalte (Drogen, Waffen)</span></label>
+                <label class="report-option"><input type="radio" name="reason" value="hate"><span data-i18n="event_report_hate">Hass / Diskriminierung</span></label>
+                <label class="report-option"><input type="radio" name="reason" value="fake"><span data-i18n="event_report_fake">Fake / Existiert nicht</span></label>
+                <label class="report-option"><input type="radio" name="reason" value="duplicate"><span data-i18n="event_report_duplicate">Doppelt</span></label>
+                <label class="report-option"><input type="radio" name="reason" value="other"><span data-i18n="event_report_other">Anderer Grund</span></label>
             </div>
 
-            <textarea id="reportDetails" class="report-details" placeholder="Optional: Details (max 500 Zeichen)" maxlength="500"></textarea>
+            <textarea id="reportDetails" class="report-details" placeholder="Optional: Details (max 500 Zeichen)" maxlength="500" data-i18n-placeholder="event_report_details_placeholder"></textarea>
 
             <div class="report-actions">
-                <button class="btn btn-cancel" onclick="closeReportModal()">Abbrechen</button>
-                <button id="reportSubmitBtn" class="btn btn-submit" onclick="submitReport()" disabled>Melden</button>
+                <button class="btn btn-cancel" onclick="closeReportModal()" data-i18n="common_cancel">Abbrechen</button>
+                <button id="reportSubmitBtn" class="btn btn-submit" onclick="submitReport()" disabled data-i18n="event_report_submit">Melden</button>
             </div>
         </div>
     </div>
 
     <div id="interestBar" class="interest-bar" style="display:none;">
-        <button id="goingBtn" class="btn-primary" onclick="toggleGoing()">Ich gehe hin</button>
-        <button class="btn-secondary" onclick="navigateTo('events.html')">Zurück</button>
+        <button id="goingBtn" class="btn-primary" onclick="toggleGoing()" data-i18n="event_attend">Ich gehe hin</button>
+        <button class="btn-secondary" onclick="navigateTo('events.html')" data-i18n="common_back">Zurück</button>
     </div>
 </div>
 

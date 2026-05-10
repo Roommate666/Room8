@@ -392,7 +392,7 @@
         <a href="javascript:history.back()" class="back-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
-        <h1>Studentenjobs</h1>
+        <h1 data-i18n="jobs_title">Studentenjobs</h1>
         <div style="width: 40px;"></div>
     </header>
     
@@ -442,12 +442,12 @@
             </div>
             
             <div class="showcase-content">
-                <h3 class="showcase-section-title"><span>📝</span> Beschreibung</h3>
+                <h3 class="showcase-section-title"><span>📝</span> <span data-i18n="job_description">Beschreibung</span></h3>
                 <p class="showcase-description">
                     Wir sind ein wachsendes Tech-Startup und suchen einen kreativen Werkstudenten (m/w/d) für unser Marketing-Team. Du unterstützt uns bei der Erstellung von Content für Social Media, hilfst bei Kampagnen und bringst eigene Ideen ein. Flexible Arbeitszeiten und die Möglichkeit, remote zu arbeiten, sind selbstverständlich.
                 </p>
                 
-                <h3 class="showcase-section-title"><span>✅</span> Das bringst du mit</h3>
+                <h3 class="showcase-section-title"><span>✅</span> <span data-i18n="job_requirements">Das bringst du mit</span></h3>
                 <ul class="showcase-list">
                     <li>Eingeschriebener Student (BWL, Marketing, Kommunikation o.ä.)</li>
                     <li>Erste Erfahrung mit Social Media Marketing</li>
@@ -455,7 +455,7 @@
                     <li>Sehr gute Deutschkenntnisse</li>
                 </ul>
                 
-                <h3 class="showcase-section-title"><span>🎁</span> Das bieten wir</h3>
+                <h3 class="showcase-section-title"><span>🎁</span> <span data-i18n="job_benefits">Das bieten wir</span></h3>
                 <ul class="showcase-list benefits">
                     <li>Flexible Arbeitszeiten neben dem Studium</li>
                     <li>Modernes Büro in zentraler Lage</li>
@@ -463,8 +463,8 @@
                     <li>Übernahmemöglichkeit nach dem Studium</li>
                 </ul>
                 
-                <button class="showcase-apply-btn" onclick="Room8UI.info('Dies ist ein Beispiel-Inserat. Kontaktieren Sie uns für eine Partnerschaft!')">
-                    Jetzt bewerben
+                <button class="showcase-apply-btn" onclick="Room8UI.info((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('jobs_example_info'):'Dies ist ein Beispiel-Inserat. Kontaktieren Sie uns für eine Partnerschaft!')">
+                    <span data-i18n="job_apply">Jetzt bewerben</span>
                 </button>
             </div>
             
@@ -483,14 +483,14 @@
         </div>
         
         <div class="filter-bar" id="jobFilter">
-            <button class="filter-btn active" data-type="all">Alle</button>
-            <button class="filter-btn" data-type="werkstudent">Werkstudent</button>
-            <button class="filter-btn" data-type="minijob">Minijob</button>
-            <button class="filter-btn" data-type="praktikum">Praktikum</button>
+            <button class="filter-btn active" data-type="all" data-i18n="common_all">Alle</button>
+            <button class="filter-btn" data-type="werkstudent" data-i18n="jobs_filter_werkstudent">Werkstudent</button>
+            <button class="filter-btn" data-type="minijob" data-i18n="jobs_filter_minijob">Minijob</button>
+            <button class="filter-btn" data-type="praktikum" data-i18n="jobs_filter_internship">Praktikum</button>
         </div>
     </div>
     
-    <h3 class="section-title" id="jobsSectionTitle">Weitere Beispiel-Jobs</h3>
+    <h3 class="section-title" id="jobsSectionTitle" data-i18n="jobs_more_examples">Weitere Beispiel-Jobs</h3>
     
     <main style="flex:1;">
         <div class="jobs-list" id="jobsContainer"></div>
@@ -626,7 +626,7 @@
             });
             jobsContainer.innerHTML = html;
         } else {
-            jobsContainer.innerHTML = '<div style="text-align:center; padding:3rem; color:#9ca3af;">Keine Jobs gefunden</div>';
+            jobsContainer.innerHTML = '<div style="text-align:center; padding:3rem; color:#9ca3af;">' + ((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('jobs_no_jobs'):'Keine Jobs gefunden') + '</div>';
         }
     }
     

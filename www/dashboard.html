@@ -230,8 +230,8 @@
         <div class="greeting-section" onclick="navigateTo('profile.html')">
             <div class="user-avatar-dash" id="userAvatar">?</div>
             <div class="greeting-text">
-                <p>Willkommen zurück,</p>
-                <h2 id="userName">Gast</h2>
+                <p data-i18n="dashboard_welcome_back">Willkommen zurück,</p>
+                <h2 id="userName" data-i18n="dashboard_guest">Gast</h2>
             </div>
         </div>
     </div>
@@ -239,63 +239,63 @@
     <!-- PUSH PERMISSION BANNER -->
     <div id="pushPermissionBanner" class="push-alert">
         <strong>🔔 Benachrichtigungen aktivieren</strong>
-        <p style="margin: 0.5rem 0; font-size: 0.85rem;">Verpasse keine Nachrichten oder neuen Inserate mehr!</p>
-        <button class="push-btn" onclick="enablePush()">Jetzt aktivieren</button>
+        <p style="margin: 0.5rem 0; font-size: 0.85rem;" data-i18n="dashboard_push_text">Verpasse keine Nachrichten oder neuen Inserate mehr!</p>
+        <button class="push-btn" onclick="enablePush()" data-i18n="dashboard_push_activate">Jetzt aktivieren</button>
     </div>
 
     <!-- MAIN CARDS -->
     <div class="action-cards-container">
         <a href="wohnungen.html" class="dash-card">
             <div class="dash-icon icon-housing">🏠</div>
-            <div class="dash-title">Wohnungen</div>
-            <div class="dash-subtitle">WG & Zimmer</div>
+            <div class="dash-title" data-i18n="dashboard_tile_apartments">Wohnungen</div>
+            <div class="dash-subtitle" data-i18n="dashboard_tile_apartments_sub">WG & Zimmer</div>
         </a>
         <a href="gegenstaende.html" class="dash-card">
             <div class="dash-icon icon-market">🛍️</div>
-            <div class="dash-title">Marktplatz</div>
-            <div class="dash-subtitle">Kaufen & Verkaufen</div>
+            <div class="dash-title" data-i18n="dashboard_tile_marketplace">Marktplatz</div>
+            <div class="dash-subtitle" data-i18n="dashboard_tile_marketplace_sub">Kaufen & Verkaufen</div>
         </a>
         <a href="jobs.html" class="dash-card">
             <div class="dash-icon icon-jobs">💼</div>
-            <div class="dash-title">Jobs</div>
-            <div class="dash-subtitle">Studentenjobs</div>
+            <div class="dash-title" data-i18n="dashboard_tile_jobs">Jobs</div>
+            <div class="dash-subtitle" data-i18n="dashboard_tile_jobs_sub">Studentenjobs</div>
         </a>
         <a href="coupons.html" class="dash-card">
             <div class="dash-icon icon-coupons">🎟️</div>
-            <div class="dash-title">Coupons</div>
-            <div class="dash-subtitle">Rabatte & Deals</div>
+            <div class="dash-title" data-i18n="dashboard_tile_coupons">Coupons</div>
+            <div class="dash-subtitle" data-i18n="dashboard_tile_coupons_sub">Rabatte & Deals</div>
         </a>
         <a href="events.html" class="dash-card">
             <div class="dash-icon icon-events">📅</div>
-            <div class="dash-title">Events</div>
-            <div class="dash-subtitle">Partys & Uni-Events</div>
+            <div class="dash-title" data-i18n="dashboard_tile_events">Events</div>
+            <div class="dash-subtitle" data-i18n="dashboard_tile_events_sub">Partys & Uni-Events</div>
         </a>
     </div>
 
     <!-- STATS -->
     <div class="content-section">
         <div class="section-header">
-            <h3>Deine Aktivitäten</h3>
+            <h3 data-i18n="dashboard_activities">Deine Aktivitäten</h3>
         </div>
         <div class="stats-banner">
             <div class="stat-box" onclick="navigateTo('nachrichten.html')">
                 <div class="stat-val" id="statMsg">0</div>
-                <div class="stat-lbl">Nachrichten</div>
+                <div class="stat-lbl" data-i18n="dashboard_stat_messages">Nachrichten</div>
             </div>
             <div class="stat-box" onclick="navigateTo('profile.html')">
                 <div class="stat-val" id="statListings">0</div>
-                <div class="stat-lbl">Inserate</div>
+                <div class="stat-lbl" data-i18n="dashboard_stat_listings">Inserate</div>
             </div>
             <div class="stat-box" onclick="navigateTo('favorites.html')">
                 <div class="stat-val" id="statFavs">0</div>
-                <div class="stat-lbl">Favoriten</div>
+                <div class="stat-lbl" data-i18n="dashboard_stat_favorites">Favoriten</div>
             </div>
         </div>
     </div>
 
     <!-- QUICK ACTIONS -->
     <div class="content-section" style="padding-top: 0;">
-        <div class="section-header"><h3>Schnellzugriff</h3></div>
+        <div class="section-header"><h3 data-i18n="dashboard_quick_access">Schnellzugriff</h3></div>
         <div class="quick-actions">
             <a href="choose-listing.html" class="quick-btn"><span>➕</span> Inserieren</a>
             <a href="saved-searches.html" class="quick-btn"><span>🔍</span> Suchaufträge</a>

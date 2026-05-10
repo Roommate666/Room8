@@ -237,9 +237,9 @@
     <div class="verify-overlay" id="verifyOverlay">
         <div class="verify-overlay-box">
             <div class="icon">🔒</div>
-            <h2>Verifizierung erforderlich</h2>
+            <h2 data-i18n="verify_required">Verifizierung erforderlich</h2>
             <p>Um Nachrichten zu senden und zu empfangen, musst du zuerst deinen Studentenstatus verifizieren.</p>
-            <a href="verify-options.html">Jetzt verifizieren</a>
+            <a href="verify-options.html" data-i18n="verify_now">Jetzt verifizieren</a>
         </div>
     </div>
 
@@ -247,7 +247,7 @@
         <a href="javascript:history.back()" class="back-arrow">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
-        <h1>Nachrichten</h1>
+        <h1 data-i18n="messages_title">Nachrichten</h1>
         <!-- Glocke für Konsistenz -->
         <a href="notifications.html" class="header-icon-btn" style="background:transparent; width:auto; margin-left: auto;">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
@@ -490,9 +490,9 @@
         container.innerHTML = `
             <div class="empty-state">
                 <div class="empty-icon">💬</div>
-                <h3>Keine Nachrichten</h3>
-                <p>Starte einen Chat über ein Inserat, um hier Konversationen zu sehen.</p>
-                <a href="choose-listing.html" style="color:var(--primary-color);font-weight:600;text-decoration:none;">Jetzt stöbern</a>
+                <h3>${(window.Room8i18n&&Room8i18n.t)?Room8i18n.t('messages_empty'):'Keine Nachrichten'}</h3>
+                <p>${(window.Room8i18n&&Room8i18n.t)?Room8i18n.t('messages_empty_desc'):'Starte einen Chat über ein Inserat, um hier Konversationen zu sehen.'}</p>
+                <a href="choose-listing.html" style="color:var(--primary-color);font-weight:600;text-decoration:none;">${(window.Room8i18n&&Room8i18n.t)?Room8i18n.t('messages_browse_now'):'Jetzt stöbern'}</a>
             </div>
         `;
     }

@@ -151,7 +151,7 @@
        <a href="index.html" class="back-arrow">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
        </a>
-       <h1>Anmelden</h1>
+       <h1 data-i18n="login_title">Anmelden</h1>
        <div style="width: 40px;"></div>
     </header>
 
@@ -162,7 +162,7 @@
           <img src="splash-logo.jpg" alt="Room8 Logo">
         </div>
         <h1 data-i18n="auth_login_title">Willkommen zurück!</h1>
-        <p>Logge dich ein, um fortzufahren.</p>
+        <p data-i18n="login_subtitle">Logge dich ein, um fortzufahren.</p>
       </div>
 
       <form id="loginForm">
@@ -174,14 +174,14 @@
         <div class="form-group">
           <label for="loginPassword" data-i18n="auth_password">Passwort</label>
           <input type="password" id="loginPassword" required data-i18n-placeholder="auth_password_placeholder" placeholder="••••••••" autocomplete="current-password">
-          <a href="forgot-password.html" class="forgot-password-link">Passwort vergessen?</a>
+          <a href="forgot-password.html" class="forgot-password-link" data-i18n="login_forgot">Passwort vergessen?</a>
         </div>
 
         <button type="submit" class="submit-btn" id="loginBtn" style="margin-top: 1.5rem;" data-i18n="auth_btn_login">Einloggen</button>
       </form>
 
       <!-- Social Login -->
-      <div class="social-divider"><span>oder direkt mit</span></div>
+      <div class="social-divider"><span data-i18n="login_or_with">oder direkt mit</span></div>
       <div class="social-buttons">
         <button type="button" class="social-btn google-btn" id="googleLoginBtn">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

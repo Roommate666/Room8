@@ -323,7 +323,7 @@
         <a href="javascript:history.back()" class="back-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
-        <h1>Studentenrabatte</h1>
+        <h1 data-i18n="coupons_title">Studentenrabatte</h1>
         <div style="width: 40px;"></div>
     </header>
     
@@ -340,7 +340,7 @@
         <div class="coupon-card" style="cursor: default;">
             <div class="coupon-image" style="background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%);">
                 <span class="coupon-image-emoji">☕</span>
-                <span class="example-badge">Beispiel</span>
+                <span class="example-badge" data-i18n="common_example">Beispiel</span>
                 <span class="discount-badge green">2 für 1</span>
             </div>
             <div class="coupon-content">
@@ -372,11 +372,11 @@
             <input type="text" id="couponSearchInput" placeholder="Restaurant, Code, Stadt …" autocomplete="off">
         </div>
         <div class="filter-bar" id="couponFilter">
-            <button class="filter-btn active" data-cat="all">Alle</button>
-            <button class="filter-btn" data-cat="food">Essen & Trinken</button>
-            <button class="filter-btn" data-cat="tech">Technik</button>
-            <button class="filter-btn" data-cat="fashion">Mode</button>
-            <button class="filter-btn" data-cat="leisure">Freizeit</button>
+            <button class="filter-btn active" data-cat="all" data-i18n="common_all">Alle</button>
+            <button class="filter-btn" data-cat="food" data-i18n="coupons_cat_food">Essen & Trinken</button>
+            <button class="filter-btn" data-cat="tech" data-i18n="coupons_cat_tech">Technik</button>
+            <button class="filter-btn" data-cat="fashion" data-i18n="coupons_cat_fashion">Mode</button>
+            <button class="filter-btn" data-cat="leisure" data-i18n="coupons_cat_leisure">Freizeit</button>
         </div>
     </div>
     
@@ -390,11 +390,11 @@
 <div id="codeModal" class="code-modal">
     <div class="code-box">
         <button onclick="closeModal()" style="position:absolute; top:1rem; right:1rem; background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
-        <h3 style="margin-top:0;">Dein Rabattcode</h3>
-        <p style="color:#6B7280; font-size:0.9rem;">Zeige diesen Code an der Kasse oder nutze ihn online.</p>
+        <h3 style="margin-top:0;" data-i18n="coupons_modal_title">Dein Rabattcode</h3>
+        <p style="color:#6B7280; font-size:0.9rem;" data-i18n="coupons_modal_desc">Zeige diesen Code an der Kasse oder nutze ihn online.</p>
         <div class="code-display" id="modalCode">CODE123</div>
-        <button class="copy-btn" onclick="copyCode()">Code kopieren</button>
-        <div id="copyFeedback" style="color:#10B981; font-size:0.85rem; margin-top:0.5rem; opacity:0; transition:opacity 0.3s;">Kopiert!</div>
+        <button class="copy-btn" onclick="copyCode()" data-i18n="coupons_copy_code">Code kopieren</button>
+        <div id="copyFeedback" style="color:#10B981; font-size:0.85rem; margin-top:0.5rem; opacity:0; transition:opacity 0.3s;" data-i18n="coupons_copied">Kopiert!</div>
     </div>
 </div>
 
@@ -559,7 +559,7 @@
         });
         
         if (filtered.length === 0) {
-            container.innerHTML = '<div class="loading-state">Keine Coupons in dieser Kategorie</div>';
+            container.innerHTML = '<div class="loading-state">' + ((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('coupons_no_coupons'):'Keine Coupons in dieser Kategorie') + '</div>';
             return;
         }
         
