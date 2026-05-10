@@ -279,15 +279,15 @@
         .showcase-footer-icon { font-size: 1.25rem; }
 
         /* Search & Filter — Pattern angeglichen an coupons.html / events.html */
-        .search-section { padding: 0 1.25rem 1rem; }
-        .search-bar { position: relative; margin-bottom: 0.85rem; }
-        .search-bar input {
+        .search-section { padding: 0 1.5rem 1rem; }
+        .search-bar-wrap { position: relative; margin-bottom: 0.85rem; }
+        .search-bar-wrap input {
             width: 100%; padding: 0.85rem 1.25rem 0.85rem 3.5rem; border-radius: 999px;
             border: 1.5px solid #E5E7EB; font-size: 0.95rem; background: white;
             transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box;
         }
-        .search-bar input:focus { outline: none; border-color: #8B5CF6; box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.08); }
-        .search-icon { position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; pointer-events: none; z-index: 2; }
+        .search-bar-wrap input:focus { outline: none; border-color: #8B5CF6; box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.08); }
+        .search-bar-wrap .search-icon { position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; pointer-events: none; z-index: 2; }
 
         /* Pattern: Kibo UI Pill fuer Filter */
         .filter-bar { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; scrollbar-width: none; }
@@ -477,7 +477,7 @@
     
     
     <div class="search-section">
-        <div class="search-bar">
+        <div class="search-bar-wrap">
             <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
             <input type="text" id="searchInput" placeholder="Jobtitel, Firma...">
         </div>
