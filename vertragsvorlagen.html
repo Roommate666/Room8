@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="de" data-page="legal_templates">
+<head>
+    <script src="sentry-init.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <title>Vertragsvorlagen — Room8</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        @keyframes blurFadeIn {
+            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
+        .page-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 1.5rem;
+            max-width: 720px;
+            margin: 1rem auto;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            animation: blurFadeIn 0.5s ease-out both;
+        }
+        .review-banner {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+            border: 1px solid #F59E0B;
+            border-radius: 14px;
+            padding: 1.1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            color: #78350F;
+            line-height: 1.55;
+        }
+        .review-banner strong { display: block; margin-bottom: 0.25rem; font-size: 1rem; }
+
+        .source-card {
+            display: block;
+            background: white;
+            border: 1.5px solid #E5E7EB;
+            border-radius: 14px;
+            padding: 1.1rem 1.25rem;
+            margin-bottom: 0.85rem;
+            text-decoration: none;
+            color: #1f2937;
+            transition: all 0.2s;
+        }
+        .source-card:hover, .source-card:active {
+            border-color: #3B82F6;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(59, 130, 246, 0.12);
+        }
+        .source-card .src-title { font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem; }
+        .source-card .src-title .arrow { margin-left: auto; color: #3B82F6; font-weight: 800; }
+        .source-card .src-desc { color: #6B7280; font-size: 0.88rem; line-height: 1.5; }
+        .source-card .src-tag { display: inline-block; margin-top: 0.5rem; padding: 0.2rem 0.6rem; background: #EFF6FF; color: #1D4ED8; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+
+        h2.section-h { font-size: 1.05rem; font-weight: 700; color: #374151; margin: 1.75rem 0 0.85rem; }
+        .upcoming { background: #F0FDF4; border: 1px dashed #86EFAC; border-radius: 12px; padding: 1rem 1.25rem; color: #166534; line-height: 1.55; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <a href="javascript:history.back()" class="back-arrow">&#8592;</a>
+        <h1 data-i18n="legal_templates_title">Vertragsvorlagen</h1>
+    </header>
+
+    <main class="app-content" style="padding: 0;">
+        <div class="page-card">
+
+            <div class="review-banner">
+                <strong>📝 <span data-i18n="lt_review_title">Vorlagen in anwaltlicher Pruefung</span></strong>
+                <span data-i18n="lt_review_text">Wir lassen unsere eigenen Mustervertraege gerade von einem Mietrechts-Anwalt pruefen, damit Studenten zu 100% rechtssicher unterwegs sind. Bis dahin empfehlen wir die folgenden geprueften externen Quellen:</span>
+            </div>
+
+            <h2 class="section-h" data-i18n="lt_section_official">Offizielle &amp; geprüfte Vorlagen</h2>
+
+            <a class="source-card" href="https://www.verbraucherzentrale.de/wissen/digitale-welt/datenschutz/musterbriefe-fuer-verbraucherinnen-und-verbraucher-30681" target="_blank" rel="noopener noreferrer">
+                <div class="src-title">
+                    🛡️ <span>Verbraucherzentrale</span>
+                    <span class="arrow">→</span>
+                </div>
+                <div class="src-desc" data-i18n="lt_vz_desc">Kostenlose Musterbriefe und -vertraege von der Verbraucherzentrale. Geprueft, aktuell, rechtssicher.</div>
+                <span class="src-tag" data-i18n="lt_tag_free">Kostenlos</span>
+            </a>
+
+            <a class="source-card" href="https://www.mieterbund.de/mietrecht/mustervertraege.html" target="_blank" rel="noopener noreferrer">
+                <div class="src-title">
+                    🏠 <span>Deutscher Mieterbund</span>
+                    <span class="arrow">→</span>
+                </div>
+                <div class="src-desc" data-i18n="lt_db_desc">Mustermietvertraege und Untermietvertraege vom groessten Mieterverein Deutschlands. Speziell auf das deutsche Mietrecht abgestimmt.</div>
+                <span class="src-tag" data-i18n="lt_tag_official">Offiziell</span>
+            </a>
+
+            <a class="source-card" href="https://www.smartlaw.de/musterdokumente/untermietvertrag" target="_blank" rel="noopener noreferrer">
+                <div class="src-title">
+                    ⚖️ <span>smartlaw.de</span>
+                    <span class="arrow">→</span>
+                </div>
+                <div class="src-desc" data-i18n="lt_sl_desc">Anwaltlich geprüfte Untermietvertraege als interaktiver Generator. Schritt-fuer-Schritt anpassbar.</div>
+                <span class="src-tag" data-i18n="lt_tag_lawyer">Anwaltlich geprüft</span>
+            </a>
+
+            <a class="source-card" href="https://www.studierendenwerke.de/themen/wohnen" target="_blank" rel="noopener noreferrer">
+                <div class="src-title">
+                    🎓 <span>Studierendenwerke</span>
+                    <span class="arrow">→</span>
+                </div>
+                <div class="src-desc" data-i18n="lt_st_desc">Vorlagen und Hinweise speziell fuer Studenten-WGs und Untermiete von den Studierendenwerken. Kostenlos.</div>
+                <span class="src-tag" data-i18n="lt_tag_students">Für Studenten</span>
+            </a>
+
+            <h2 class="section-h" data-i18n="lt_section_upcoming">Was bald kommt</h2>
+
+            <div class="upcoming">
+                <strong>🚀 <span data-i18n="lt_upcoming_title">Eigene Vorlagen — anwaltlich geprueft</span></strong>
+                <p style="margin: 0.5rem 0 0; font-size: 0.9rem;" data-i18n="lt_upcoming_text">Wir arbeiten an eigenen Mustervertraegen, die von einem Rechtsanwalt geprueft werden — mit allen wichtigen Klauseln (Kaution, Uebergabeprotokoll, DSGVO, WLAN-Haftung, Energieausweis). Sobald fertig, findest du sie hier.</p>
+            </div>
+
+            <p style="font-size: 0.78rem; color: #9CA3AF; text-align: center; margin-top: 2rem;" data-i18n="lt_disclaimer">
+                Hinweis: Auch externe Vorlagen sind keine Rechtsberatung. Bei wichtigen Vertraegen empfehlen wir die Beratung durch einen Anwalt.
+            </p>
+        </div>
+    </main>
+
+    <div id="app-footer-nav"></div>
+</div>
+
+<script src="config.js"></script>
+<script src="session-cache.js"></script>
+<script src="navigation.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>
