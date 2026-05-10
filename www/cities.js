@@ -330,6 +330,65 @@ function searchCities(query, maxResults) {
     return results;
 }
 
+// ==========================================
+// TIPPFEHLER-MAP (Bekannte Verschreiber -> korrekt)
+// ==========================================
+var CITY_TYPO_FIXES = {
+    'augsbrug': 'Augsburg', 'augstburg': 'Augsburg', 'agusburg': 'Augsburg',
+    'münhen': 'München', 'muenchen': 'München', 'munchen': 'München',
+    'berln': 'Berlin', 'berlim': 'Berlin',
+    'köhln': 'Köln', 'koln': 'Köln', 'koeln': 'Köln',
+    'frankfurt': 'Frankfurt am Main', 'frankfurt main': 'Frankfurt am Main',
+    'freiburg': 'Freiburg im Breisgau',
+    'halle': 'Halle (Saale)',
+    'duesseldorf': 'Düsseldorf', 'duesseldof': 'Düsseldorf',
+    'wuerzburg': 'Würzburg', 'wurzburg': 'Würzburg',
+    'tuebingen': 'Tübingen',
+    'goettingen': 'Göttingen', 'gottingen': 'Göttingen',
+    'luebeck': 'Lübeck', 'lubeck': 'Lübeck',
+    'saarbruecken': 'Saarbrücken', 'saarbrucken': 'Saarbrücken',
+    'osnabrueck': 'Osnabrück', 'osnabruck': 'Osnabrück',
+    'munster': 'Münster', 'muenster': 'Münster',
+    'nuernberg': 'Nürnberg', 'nurnberg': 'Nürnberg', 'numberg': 'Nürnberg'
+};
+
+/**
+ * Normalisiert eine Stadt: trim, Tippfehler-Fix, exakter Match aus germanCities,
+ * sonst Title-Case-Fallback.
+ * @param {string} input
+ * @returns {string}
+ */
+function normalizeCity(input) {
+    if (!input) return '';
+    var raw = String(input).trim();
+    if (!raw) return '';
+    var lower = raw.toLowerCase();
+
+    // 1. Tippfehler-Map?
+    if (CITY_TYPO_FIXES[lower]) return CITY_TYPO_FIXES[lower];
+
+    // 2. Exakter case-insensitive Match in offizieller Liste?
+    for (var i = 0; i < germanCities.length; i++) {
+        if (germanCities[i].toLowerCase() === lower) return germanCities[i];
+    }
+
+    // 3. Fallback: Title-Case (jedes Wort gross, Praepositionen klein)
+    return raw.split(' ').map(function(w){
+        if (!w) return w;
+        if (['am','im','an','der','bei','und','von','zu'].indexOf(w.toLowerCase()) > -1) return w.toLowerCase();
+        return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    }).join(' ');
+}
+
+// Window-Export fuer alle Pages
+if (typeof window !== 'undefined') {
+    window.normalizeCity = normalizeCity;
+    window.populateCityDatalist = populateCityDatalist;
+    window.populateCitySelect = populateCitySelect;
+    window.isValidCity = isValidCity;
+    window.searchCities = searchCities;
+}
+
 // ES6 Export für Module (falls verwendet)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {

@@ -1528,7 +1528,7 @@
                 title: document.getElementById('title').value,
                 description: document.getElementById('description').value,
                 
-                city: document.getElementById('city').value,
+                city: (typeof normalizeCity === 'function' ? normalizeCity(document.getElementById('city').value) : document.getElementById('city').value.trim()),
                 district: document.getElementById('district').value,
                 address_line: document.getElementById('address_line').value,
                 

@@ -300,7 +300,8 @@
             </div>
             <div class="form-group">
                 <label for="city">Stadt *</label>
-                <input type="text" id="city" required maxlength="80" placeholder="Augsburg">
+                <input type="text" id="city" required maxlength="80" placeholder="Augsburg" list="citySuggestions" autocomplete="address-level2">
+                <datalist id="citySuggestions"></datalist>
             </div>
         </div>
 
@@ -471,7 +472,7 @@
             var startDate = document.getElementById('startDate').value;
             var startTime = document.getElementById('startTime').value;
             var location = document.getElementById('location').value.trim();
-            var city = document.getElementById('city').value.trim();
+            var city = (typeof normalizeCity === 'function' ? normalizeCity(document.getElementById('city').value) : document.getElementById('city').value.trim());
 
             if (!title || !category || !description || !startDate || !startTime || !location || !city) {
                 if (window.Room8) Room8.showToast('Bitte alle Pflichtfelder ausfüllen', 'error');
@@ -732,6 +733,8 @@
         }
     });
 </script>
+<script src="cities.js"></script>
+<script>document.addEventListener('DOMContentLoaded', function(){ if (typeof populateCityDatalist === 'function') populateCityDatalist('citySuggestions'); });</script>
 
 </body>
 </html>

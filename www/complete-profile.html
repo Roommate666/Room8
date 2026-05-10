@@ -72,7 +72,8 @@
 
         <div class="cp-field">
           <label class="cp-label" for="city">Stadt / Unistadt</label>
-          <input class="cp-input" type="text" id="city" name="city" autocomplete="address-level2" required maxlength="60" placeholder="z.B. München">
+          <input class="cp-input" type="text" id="city" name="city" autocomplete="address-level2" required maxlength="60" placeholder="z.B. München" list="citySuggestions">
+          <datalist id="citySuggestions"></datalist>
         </div>
 
         <button type="submit" class="cp-btn" id="cpSubmit">Profil speichern</button>
@@ -147,7 +148,7 @@
         errEl.textContent = '';
         var fullName = $('full_name').value.trim();
         var username = $('username').value.trim();
-        var city = $('city').value.trim();
+        var city = (typeof normalizeCity === 'function' ? normalizeCity($('city').value) : $('city').value.trim());
 
         if (!fullName || fullName.length < 2) { errEl.textContent = 'Bitte vollen Namen eingeben.'; return; }
         if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) { errEl.textContent = 'Benutzername: 3-20 Zeichen, nur Buchstaben/Zahlen/_'; return; }
@@ -213,5 +214,7 @@
       });
     })();
   </script>
+  <script src="cities.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', function(){ if (typeof populateCityDatalist === 'function') populateCityDatalist('citySuggestions'); });</script>
 </body>
 </html>

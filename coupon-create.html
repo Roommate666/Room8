@@ -180,7 +180,8 @@
             <div class="row">
                 <div class="col form-group">
                     <label>Stadt *</label>
-                    <input type="text" id="city" required placeholder="München">
+                    <input type="text" id="city" required placeholder="München" list="citySuggestions" autocomplete="address-level2">
+                    <datalist id="citySuggestions"></datalist>
                 </div>
                 <div class="col form-group">
                     <label>PLZ</label>
@@ -402,7 +403,7 @@
                 discount_code: document.getElementById('code').value.toUpperCase(),
                 valid_until: document.getElementById('validUntil').value || null,
                 description: document.getElementById('description').value,
-                city: document.getElementById('city').value,
+                city: (typeof normalizeCity === 'function' ? normalizeCity(document.getElementById('city').value) : document.getElementById('city').value.trim()),
                 status: 'active'
             };
 
@@ -470,5 +471,7 @@
 </script>
 <script src="notificationHelpers.js"></script>
 <script src="notificationBell.js"></script>
+<script src="cities.js"></script>
+<script>document.addEventListener('DOMContentLoaded', function(){ if (typeof populateCityDatalist === 'function') populateCityDatalist('citySuggestions'); });</script>
 </body>
 </html>
