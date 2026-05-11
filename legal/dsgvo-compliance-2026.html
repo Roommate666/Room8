@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Room8 — Datenschutz-Compliance-Bericht 2026</title>
+<style>
+  @page { size: A4; margin: 2cm 1.8cm 2.5cm 1.8cm; }
+  @page :first { margin-top: 4cm; }
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; font-size: 10.5pt; line-height: 1.55; color: #1f2937; max-width: 100%; }
+  h1 { font-size: 22pt; color: #2563EB; margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+  h2 { font-size: 15pt; color: #1F2937; margin: 2.2rem 0 0.8rem; border-bottom: 2px solid #2563EB; padding-bottom: 0.3rem; page-break-after: avoid; }
+  h3 { font-size: 12.5pt; color: #1F2937; margin: 1.4rem 0 0.5rem; page-break-after: avoid; }
+  h4 { font-size: 11pt; color: #374151; margin: 1rem 0 0.4rem; }
+  p { margin: 0.6rem 0; text-align: justify; }
+  ul, ol { padding-left: 1.4rem; margin: 0.6rem 0; }
+  li { margin-bottom: 0.35rem; }
+  code, .mono { font-family: "SF Mono", Menlo, monospace; font-size: 9.5pt; background: #F3F4F6; padding: 1px 5px; border-radius: 3px; color: #DC2626; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 9.5pt; }
+  th, td { border: 1px solid #D1D5DB; padding: 0.5rem 0.65rem; text-align: left; vertical-align: top; }
+  th { background: #F9FAFB; font-weight: 700; color: #111827; }
+  tr:nth-child(even) td { background: #FAFBFC; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 8.5pt; font-weight: 700; }
+  .badge-ok { background: #D1FAE5; color: #065F46; }
+  .badge-warn { background: #FEF3C7; color: #92400E; }
+  .badge-todo { background: #FEE2E2; color: #991B1B; }
+  .box { background: #EFF6FF; border-left: 4px solid #2563EB; padding: 0.8rem 1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; }
+  .box-warn { background: #FFFBEB; border-left-color: #F59E0B; }
+  .box-critical { background: #FEF2F2; border-left-color: #DC2626; }
+  .legal-ref { font-size: 9pt; color: #6B7280; font-style: italic; }
+  .toc { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 1rem 1.5rem; margin: 1rem 0 2rem; }
+  .toc h3 { margin-top: 0; }
+  .toc ol { padding-left: 1.5rem; margin: 0; }
+  .toc li { margin-bottom: 0.25rem; font-size: 10pt; }
+  .page-break { page-break-after: always; }
+  .cover { text-align: center; padding: 5rem 1rem 3rem; }
+  .cover h1 { font-size: 30pt; margin-bottom: 1rem; }
+  .cover .subtitle { font-size: 14pt; color: #6B7280; margin-bottom: 3rem; }
+  .cover .meta { font-size: 11pt; color: #4B5563; margin-top: 4rem; line-height: 2; }
+  .cover .logo { font-size: 50pt; margin-bottom: 1rem; }
+  header.footer { position: fixed; bottom: 0.5cm; left: 1.8cm; right: 1.8cm; font-size: 8.5pt; color: #9CA3AF; border-top: 1px solid #E5E7EB; padding-top: 0.3rem; display: flex; justify-content: space-between; }
+  footer { font-size: 8.5pt; color: #9CA3AF; text-align: center; margin-top: 3rem; }
+</style>
+</head>
+<body>
+
+<!-- ===========================================================
+     DECKBLATT
+     =========================================================== -->
+<div class="cover page-break">
+  <div class="logo">🏠</div>
+  <h1>Room8</h1>
+  <div class="subtitle">Datenschutz-Compliance-Bericht 2026</div>
+  <p style="font-size: 11pt; color: #4B5563; max-width: 500px; margin: 0 auto;">
+    Umfassende Dokumentation der Verarbeitung personenbezogener Daten gemäß der Datenschutz-Grundverordnung (DSGVO, EU 2016/679), des Bundesdatenschutzgesetzes (BDSG) und des Telekommunikation-Telemedien-Datenschutz-Gesetzes (TTDSG).
+  </p>
+  <div class="meta">
+    Version 1.0 · Stand: 11. Mai 2026<br>
+    Erstellt für die Bachelorarbeit-Präsentation Universität Augsburg<br>
+    Verantwortlicher: Yusuf Albayrak (Room8 / Yumita)
+  </div>
+</div>
+
+<!-- ===========================================================
+     INHALTSVERZEICHNIS
+     =========================================================== -->
+<div class="toc page-break">
+  <h3>Inhaltsverzeichnis</h3>
+  <ol>
+    <li>Einleitung und Geltungsbereich</li>
+    <li>Verantwortlicher und Kontakt</li>
+    <li>Rechtsgrundlagen der Verarbeitung</li>
+    <li>Übersicht der verarbeiteten Datenkategorien</li>
+    <li>Verarbeitungszwecke im Detail</li>
+    <li>Empfänger und Auftragsverarbeiter</li>
+    <li>Drittlandsübermittlung (US-Datentransfer)</li>
+    <li>Aufbewahrungs- und Löschungsfristen</li>
+    <li>Cookies, lokaler Speicher und Tracking-Technologien</li>
+    <li>Push-Notifications</li>
+    <li>App-Berechtigungen (Kamera, Mikrofon, Standort)</li>
+    <li>Betroffenenrechte gemäß Art. 15–22 DSGVO</li>
+    <li>Technische und organisatorische Sicherheitsmaßnahmen</li>
+    <li>Spezielle Regelungen — Wohnungsplattform & Untervermietung</li>
+    <li>Spezielle Regelungen — Marktplatz, Jobs, Events, Coupons</li>
+    <li>Trust- und Sicherheits-Layer</li>
+    <li>Minderjährigenschutz</li>
+    <li>Beschwerderecht und zuständige Aufsichtsbehörde</li>
+    <li>Änderungen dieser Erklärung</li>
+    <li>Anhang A — Technologie-Stack</li>
+    <li>Anhang B — Auftragsverarbeitungsverträge (AVV-Status)</li>
+    <li>Anhang C — Datenschutz-Folgenabschätzung (DSFA)</li>
+    <li>Anhang D — Glossar und Abkürzungsverzeichnis</li>
+  </ol>
+</div>
+
+<!-- ===========================================================
+     1. Einleitung
+     =========================================================== -->
+<h2>1. Einleitung und Geltungsbereich</h2>
+<p>
+  Die vorliegende Datenschutz-Compliance-Dokumentation beschreibt umfassend, in welcher Art und Weise die Plattform <strong>Room8</strong> (im Folgenden: „Room8", „wir" oder „die Plattform") personenbezogene Daten ihrer Nutzerinnen und Nutzer erhebt, verarbeitet, speichert und gegebenenfalls an Dritte übermittelt.
+</p>
+<p>
+  Room8 ist eine bilinguale Plattform (Deutsch / Englisch) für Studierende, die folgende Funktionen anbietet:
+</p>
+<ul>
+  <li><strong>Wohnungen:</strong> Vermittlung von Wohngemeinschafts-Zimmern, Apartments und Untermiet-Angeboten zwischen Studierenden</li>
+  <li><strong>Marktplatz:</strong> An- und Verkauf von gebrauchten Gegenständen (Bücher, Möbel, Elektronik, Fahrräder)</li>
+  <li><strong>Jobs:</strong> Studi-Jobs, Werkstudenten-Stellen, Aushilfsjobs, Praktika</li>
+  <li><strong>Events:</strong> Studi-Partys, Pub-Quizzes, Workshops, Vorträge, Sport-Veranstaltungen</li>
+  <li><strong>Coupons:</strong> Studierenden-Rabatte bei lokalen Partner-Geschäften (Cafés, Bars, Geschäfte, Dienstleister)</li>
+  <li><strong>Chat:</strong> Direkt-Nachrichten zwischen Nutzern auf Basis eines konkreten Inserats</li>
+  <li><strong>Trust-Layer:</strong> Studi-Verifizierung, Block- und Melde-Funktionen, Bewertungen</li>
+</ul>
+<p>
+  Die Plattform ist über eine Web-Anwendung (<code>www.room8.club</code>) sowie über native Apps für Apple iOS (App Store) und Google Android (Play Store) zugänglich. Die Datenschutzerklärung gilt für sämtliche Zugangswege gleichermaßen.
+</p>
+<p class="legal-ref">
+  Rechtsgrundlage dieser Dokumentation: Verordnung (EU) 2016/679 (Datenschutz-Grundverordnung, „DSGVO"), Bundesdatenschutzgesetz (BDSG), Telekommunikation-Telemedien-Datenschutz-Gesetz (TTDSG), § 13 Telemediengesetz (TMG).
+</p>
+
+<!-- ===========================================================
+     2. Verantwortlicher
+     =========================================================== -->
+<h2>2. Verantwortlicher und Kontakt</h2>
+<p>
+  Verantwortlich für die Datenverarbeitung im Sinne von Art. 4 Nr. 7 DSGVO ist:
+</p>
+<table>
+  <tr><th style="width: 35%;">Verantwortlicher</th><td>Yusuf Albayrak (handelnd unter „Room8" / „Yumita")</td></tr>
+  <tr><th>Anschrift</th><td>Kamelweg 6, 86381 Krumbach, Deutschland</td></tr>
+  <tr><th>E-Mail (allgemein)</th><td>info@room8.club</td></tr>
+  <tr><th>E-Mail (Datenschutzanfragen)</th><td>privacy@room8.club</td></tr>
+  <tr><th>Telefon</th><td>auf Anfrage</td></tr>
+  <tr><th>Webseite</th><td>https://www.room8.club</td></tr>
+  <tr><th>Datenschutzbeauftragter</th><td>Aufgrund der Unternehmensgröße ist gemäß Art. 37 DSGVO i. V. m. § 38 BDSG kein Datenschutzbeauftragter zwingend zu benennen. Datenschutzanfragen werden direkt vom Verantwortlichen bearbeitet.</td></tr>
+</table>
+
+<!-- ===========================================================
+     3. Rechtsgrundlagen
+     =========================================================== -->
+<h2>3. Rechtsgrundlagen der Verarbeitung</h2>
+<p>
+  Sämtliche Verarbeitungen personenbezogener Daten auf der Plattform Room8 erfolgen ausschließlich auf einer der nachfolgend aufgeführten Rechtsgrundlagen. Die jeweilige Rechtsgrundlage wird in den weiteren Abschnitten dieses Dokuments für jeden Verarbeitungszweck konkret benannt.
+</p>
+<table>
+  <tr><th style="width: 25%;">Artikel</th><th>Anwendungsfall</th></tr>
+  <tr>
+    <td><strong>Art. 6 Abs. 1 lit. a DSGVO</strong><br><em>Einwilligung</em></td>
+    <td>Versand von Push-Benachrichtigungen, Setzen nicht-essenzieller Cookies, optionale Marketing-E-Mails, Verarbeitung von Standortinformationen jenseits der angegebenen Stadt.</td>
+  </tr>
+  <tr>
+    <td><strong>Art. 6 Abs. 1 lit. b DSGVO</strong><br><em>Vertragserfüllung</em></td>
+    <td>Bereitstellung sämtlicher Plattform-Kernfunktionen: Registrierung, Profilverwaltung, Veröffentlichung von Inseraten, Chat zwischen Nutzern, Coupon-Einlösung.</td>
+  </tr>
+  <tr>
+    <td><strong>Art. 6 Abs. 1 lit. c DSGVO</strong><br><em>Rechtliche Verpflichtung</em></td>
+    <td>Aufbewahrung von Rechnungen und steuerrelevanten Belegen (HGB, AO), Auskunftspflichten gegenüber Strafverfolgungsbehörden, Meldepflichten nach Telemediengesetz.</td>
+  </tr>
+  <tr>
+    <td><strong>Art. 6 Abs. 1 lit. f DSGVO</strong><br><em>Berechtigte Interessen</em></td>
+    <td>Schutz der Plattform vor Missbrauch, Fehlerprotokollierung (Sentry), Rate-Limiting, Block- und Melde-Funktionen, statistische Auswertung in aggregierter Form.</td>
+  </tr>
+</table>
+
+<!-- ===========================================================
+     4. Datenkategorien
+     =========================================================== -->
+<h2>4. Übersicht der verarbeiteten Datenkategorien</h2>
+
+<h3>4.1 Registrierungsdaten</h3>
+<table>
+  <tr><th style="width: 30%;">Datum</th><th>Zweck</th><th>Rechtsgrundlage</th></tr>
+  <tr><td>E-Mail-Adresse</td><td>Eindeutige Identifikation, Account-Wiederherstellung, sicherheitsrelevante Mitteilungen</td><td>Art. 6 I lit. b</td></tr>
+  <tr><td>Passwort (gehashed via bcrypt/Argon2)</td><td>Authentifizierung</td><td>Art. 6 I lit. b</td></tr>
+  <tr><td>Nutzername</td><td>Anzeige in Inseraten und Chat</td><td>Art. 6 I lit. b</td></tr>
+  <tr><td>Vor- und Nachname (optional)</td><td>Höflichkeit, Verifizierung gegenüber anderen Nutzern</td><td>Art. 6 I lit. b</td></tr>
+  <tr><td>Studi-Mail-Adresse oder Immatrikulationsnachweis (optional, Verifizierung)</td><td>Erhöhung des Trust-Levels (Student-Verified-Badge)</td><td>Art. 6 I lit. a</td></tr>
+  <tr><td>Geburtsdatum (optional)</td><td>Altersverifikation, ggf. Anbieten zielgruppenspezifischer Coupons</td><td>Art. 6 I lit. a</td></tr>
+</table>
+
+<h3>4.2 Profildaten</h3>
+<ul>
+  <li>Profilbild (optional, vom Nutzer selbst hochgeladen, gespeichert in Supabase-Storage-Bucket <code>avatars</code>)</li>
+  <li>Stadt (Pflichtangabe für City-basierte Benachrichtigungen und Listing-Sichtbarkeit)</li>
+  <li>Bio / Selbstbeschreibung (optional)</li>
+  <li>Studiengang und Hochschule (optional)</li>
+  <li>Sprachpräferenz (Deutsch / Englisch)</li>
+  <li>Notification-Einstellungen (Push-Toggles pro Kategorie, Quiet-Hours)</li>
+</ul>
+
+<h3>4.3 Listing-Daten</h3>
+<p>
+  Für jedes vom Nutzer veröffentlichte Inserat werden je nach Kategorie folgende Daten verarbeitet:
+</p>
+<ul>
+  <li><strong>Wohnungen:</strong> Titel, Beschreibung, Stadt, Bezirk, Adresse (optional), Miete, Nebenkosten (optional), Zimmertyp, Verfügbarkeitsdatum, Fotos, Möblierung</li>
+  <li><strong>Marktplatz:</strong> Titel, Beschreibung, Stadt, Preis, Zustand, Fotos, Kategorie</li>
+  <li><strong>Jobs:</strong> Firmenname, Stellenbeschreibung, Anforderungen, Benefits, Vergütung, Arbeitszeit, Bewerbungs-E-Mail/-URL</li>
+  <li><strong>Events:</strong> Titel, Beschreibung, Ort, Adresse, Startzeitpunkt, Endzeitpunkt, maximale Teilnehmerzahl, Preis, Cover-Bild</li>
+  <li><strong>Coupons:</strong> Geschäftsname, Adresse, Telefonnummer, Webseite, Instagram-Handle, Öffnungszeiten, Rabatt-Wert, Einlöse-Bedingungen</li>
+</ul>
+
+<h3>4.4 Kommunikationsdaten</h3>
+<ul>
+  <li><strong>Chat-Nachrichten:</strong> Sender-ID, Empfänger-ID, Listing-ID (Bezug), Textinhalt, Zeitstempel, Gelesen-Status</li>
+  <li><strong>Bewertungen:</strong> Reviewer-ID, Reviewed-ID, Listing-ID, Sterne-Bewertung, Kommentar, Zeitstempel</li>
+  <li><strong>Reports:</strong> Reporter-ID (anonymisiert nach Verarbeitung), gemeldeter Content/User, Grund, Zeitstempel</li>
+  <li><strong>Coupon-Einlösungen:</strong> User-ID, Coupon-ID, Partner-ID, Zeitstempel, Bestätigungs-Code</li>
+</ul>
+
+<h3>4.5 Technische Daten</h3>
+<ul>
+  <li><strong>FCM-Tokens</strong> (Firebase Cloud Messaging): geräte­spezifische Token zur Zustellung von Push-Benachrichtigungen, gespeichert pro Gerät, automatisch invalidiert bei Token-Rotation</li>
+  <li><strong>IP-Adressen:</strong> in Server-Logs für maximal 30 Tage zur Missbrauchsabwehr (anonymisiert nach 7 Tagen)</li>
+  <li><strong>Browser- und Geräteinformationen:</strong> User-Agent, Betriebssystem, App-Version</li>
+  <li><strong>Authentifizierungs-Tokens (JWT):</strong> Session-Verwaltung, gespeichert im lokalen Speicher des Endgeräts (LocalStorage / Keychain)</li>
+  <li><strong>Fehlerprotokolle (Sentry):</strong> Stack-Traces bei Abstürzen, ohne personenbezogene Daten (E-Mails und Tokens werden via <code>beforeSend</code>-Filter entfernt)</li>
+</ul>
+
+<h3>4.6 Standortdaten</h3>
+<p>
+  Room8 verarbeitet <strong>keine präzisen GPS-Koordinaten</strong>. Die Stadt-Information ist eine vom Nutzer aktiv eingegebene Angabe. Es findet kein passives Tracking des aktuellen Aufenthaltsorts statt. Standortbasierte Benachrichtigungen („Neue Wohnung in Augsburg") basieren ausschließlich auf der vom Nutzer angegebenen Heimatstadt.
+</p>
+
+<!-- ===========================================================
+     5. Verarbeitungszwecke
+     =========================================================== -->
+<h2>5. Verarbeitungszwecke im Detail</h2>
+
+<h3>5.1 Account-Verwaltung</h3>
+<p>
+  Die Anmeldung erfolgt entweder mittels E-Mail/Passwort, Apple Sign-In oder Google Sign-In. Wir verwenden bei OAuth-Anbietern ausschließlich Standard-Scopes (<code>email</code>, <code>profile</code>) und speichern keine zusätzlichen Informationen vom Identity-Provider außer dem Klarnamen und der E-Mail.
+</p>
+
+<h3>5.2 Listing-Veröffentlichung</h3>
+<p>
+  Vom Nutzer veröffentlichte Inserate sind innerhalb der Plattform öffentlich sichtbar. Adressen und Telefonnummern sind nur sichtbar, wenn der Nutzer sie aktiv ins Inserat aufnimmt — eine technische Erkennung oder Vorbefüllung erfolgt nicht.
+</p>
+
+<h3>5.3 Chat zwischen Nutzern</h3>
+<p>
+  Chat-Nachrichten werden Ende-zu-Ende auf Plattform-Ebene gespeichert (nicht verschlüsselt vom Anbieter — der Plattformbetreiber hat theoretisch Lese-Zugriff zur Missbrauchsabwehr). Sender und Empfänger sehen jeweils ihre Nachrichten, dritte Nutzer haben keinen Zugriff. Bei einem Konto-Löschauftrag werden alle Nachrichten, an denen der Account beteiligt war, gelöscht.
+</p>
+
+<h3>5.4 Coupon-Einlösung</h3>
+<p>
+  Beim Einlösen eines Coupons wird ein QR-Code generiert, der nur den Coupon-Identifier und einen kurzlebigen Bestätigungs-Code enthält. Der Partner scannt diesen Code in der separaten Partner-Web-App und bestätigt die Einlösung. Eine Übermittlung weiterer personenbezogener Daten an den Partner findet nicht statt.
+</p>
+
+<h3>5.5 Trust-Layer und Missbrauchsabwehr</h3>
+<p>
+  Zur Wahrung der Sicherheit der Plattform werden folgende Funktionen bereitgestellt:
+</p>
+<ul>
+  <li><strong>Block-Funktion:</strong> Nutzer können andere Nutzer blockieren. Geblockte Nutzer können den Blockierenden in keinem Inserat sehen, keine Nachrichten senden und keine Bewertungen abgeben.</li>
+  <li><strong>Report-Funktion:</strong> Verstöße können gemeldet werden. Reports werden anonym an die Administration übermittelt und nach Bearbeitung pseudonymisiert.</li>
+  <li><strong>Rate-Limiting:</strong> Übermäßige Aktivität (mehr als 5 Reports pro Stunde, mehr als 30 pro Tag) wird automatisch geblockt.</li>
+  <li><strong>Studi-Verifikation:</strong> Optionale Hochladen von Studi-Ausweis oder Immatrikulationsbescheinigung erhöht das Trust-Level.</li>
+</ul>
+
+<div class="page-break"></div>
+
+<!-- ===========================================================
+     6. Auftragsverarbeiter
+     =========================================================== -->
+<h2>6. Empfänger und Auftragsverarbeiter</h2>
+<p>
+  Room8 bedient sich folgender externer Dienstleister im Rahmen der Auftragsverarbeitung gemäß Art. 28 DSGVO. Mit allen genannten Auftragsverarbeitern wurden Auftragsverarbeitungsverträge (Data Processing Agreements / DPAs) geschlossen.
+</p>
+
+<h3>6.1 Supabase (Datenbank, Authentifizierung, Storage)</h3>
+<table>
+  <tr><th style="width: 28%;">Anbieter</th><td>Supabase Inc., 970 Toa Payoh North #07-04, Singapur 318992</td></tr>
+  <tr><th>Verarbeitete Daten</th><td>Sämtliche Plattform-Datenbank-Inhalte (User-Accounts, Listings, Chat, Bewertungen, Bilder), Authentifizierung-Sessions</td></tr>
+  <tr><th>Server-Standort</th><td>EU-Region (Frankfurt am Main, Deutschland)</td></tr>
+  <tr><th>DPA</th><td><span class="badge badge-ok">Vorhanden</span> Supabase Data Processing Agreement, Stand 2024</td></tr>
+  <tr><th>Rechtsgrundlage</th><td>Art. 28 DSGVO i. V. m. Art. 6 I lit. b</td></tr>
+  <tr><th>Zweck</th><td>Bereitstellung der Datenbank-Infrastruktur, Authentifizierung, Datei-Speicherung</td></tr>
+</table>
+
+<h3>6.2 Firebase Cloud Messaging (Push-Benachrichtigungen)</h3>
+<table>
+  <tr><th style="width: 28%;">Anbieter</th><td>Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland (Google Cloud)</td></tr>
+  <tr><th>Verarbeitete Daten</th><td>FCM-Device-Tokens (geräte­spezifisch, keine Klar­identifier), Push-Payload (Titel, Body, URL)</td></tr>
+  <tr><th>Server-Standort</th><td>Global (Google Cloud, EU-Sub-Processor in Belgien/Niederlande verfügbar)</td></tr>
+  <tr><th>DPA</th><td><span class="badge badge-ok">Vorhanden</span> Google Cloud Data Processing Addendum, EU-Standardvertragsklauseln</td></tr>
+  <tr><th>Rechtsgrundlage</th><td>Art. 6 I lit. a DSGVO (Einwilligung) — die User stimmt Push-Benachrichtigungen über den Native-Permission-Dialog des Betriebssystems aktiv zu</td></tr>
+  <tr><th>Zweck</th><td>Zustellung von Push-Benachrichtigungen über das jeweilige Betriebssystem</td></tr>
+</table>
+
+<h3>6.3 Vercel (Web-Hosting)</h3>
+<table>
+  <tr><th style="width: 28%;">Anbieter</th><td>Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, USA</td></tr>
+  <tr><th>Verarbeitete Daten</th><td>Server-Logs (IP-Adresse, User-Agent, angefragte URL, Zeitstempel, Response-Code)</td></tr>
+  <tr><th>Server-Standort</th><td>Edge-Netzwerk (EU-Region <code>fra1</code> Frankfurt für Web-Traffic aus DACH)</td></tr>
+  <tr><th>DPA</th><td><span class="badge badge-ok">Vorhanden</span> Vercel Data Processing Addendum, EU-Standardvertragsklauseln</td></tr>
+  <tr><th>Rechtsgrundlage</th><td>Art. 6 I lit. f DSGVO (berechtigtes Interesse — Bereitstellung der Web-Anwendung)</td></tr>
+  <tr><th>Zweck</th><td>Hosting der Web-Anwendung, Auslieferung statischer Assets</td></tr>
+</table>
+
+<h3>6.4 Resend (transaktionale E-Mails)</h3>
+<table>
+  <tr><th style="width: 28%;">Anbieter</th><td>Resend, Inc., 2261 Market Street #4408, San Francisco, CA 94114, USA</td></tr>
+  <tr><th>Verarbeitete Daten</th><td>E-Mail-Adresse des Empfängers, Inhalt der E-Mail (Account-Bestätigung, Passwort-Reset, Benachrichtigungen)</td></tr>
+  <tr><th>Server-Standort</th><td>USA</td></tr>
+  <tr><th>DPA</th><td><span class="badge badge-warn">Zu prüfen</span> Resend Privacy & Security Page, EU-Standardvertragsklauseln in Erstellung</td></tr>
+  <tr><th>Rechtsgrundlage</th><td>Art. 6 I lit. b DSGVO (Vertragserfüllung)</td></tr>
+  <tr><th>Zweck</th><td>Versand transaktionaler E-Mails (Account-Bestätigung, Passwort-Reset, kritische Benachrichtigungen)</td></tr>
+</table>
+
+<h3>6.5 Sentry (Fehlerprotokollierung)</h3>
+<table>
+  <tr><th style="width: 28%;">Anbieter</th><td>Functional Software, Inc. d/b/a Sentry, 45 Fremont Street, 8th Floor, San Francisco, CA 94105, USA</td></tr>
+  <tr><th>Verarbeitete Daten</th><td>Stack-Traces bei Abstürzen, Browser-User-Agent, Plattform-Version</td></tr>
+  <tr><th>Konfiguration</th><td>PII-Filter aktiv (E-Mails, Access-Tokens, Refresh-Tokens werden via <code>beforeSend</code> entfernt), Trace-Sample-Rate 0, Session-Replay-Sample-Rate 0</td></tr>
+  <tr><th>Server-Standort</th><td>EU-Region (Frankfurt am Main)</td></tr>
+  <tr><th>DPA</th><td><span class="badge badge-ok">Vorhanden</span> Sentry Data Processing Agreement</td></tr>
+  <tr><th>Rechtsgrundlage</th><td>Art. 6 I lit. f DSGVO (berechtigtes Interesse — Fehlerdiagnose und Stabilität)</td></tr>
+</table>
+
+<h3>6.6 Apple (App Store Distribution, Sign-In)</h3>
+<table>
+  <tr><th style="width: 28%;">Anbieter</th><td>Apple Inc. / Apple Distribution International, Hollyhill Industrial Estate, Hollyhill, Cork, Irland</td></tr>
+  <tr><th>Verarbeitete Daten</th><td>Bei Sign-In: Apple-ID-spezifische E-Mail (auf Wunsch des Users auch private Relay-Adresse), Klarname</td></tr>
+  <tr><th>DPA</th><td><span class="badge badge-ok">Vorhanden</span> Apple Developer Program License Agreement</td></tr>
+  <tr><th>Rechtsgrundlage</th><td>Art. 6 I lit. b DSGVO</td></tr>
+</table>
+
+<h3>6.7 Google (Play Store Distribution, Sign-In)</h3>
+<table>
+  <tr><th style="width: 28%;">Anbieter</th><td>Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland</td></tr>
+  <tr><th>Verarbeitete Daten</th><td>Bei Sign-In: Google-Account-E-Mail, Klarname, Profilbild-URL</td></tr>
+  <tr><th>DPA</th><td><span class="badge badge-ok">Vorhanden</span> Google Cloud Data Processing Addendum</td></tr>
+  <tr><th>Rechtsgrundlage</th><td>Art. 6 I lit. b DSGVO</td></tr>
+</table>
+
+<div class="page-break"></div>
+
+<!-- ===========================================================
+     7. Drittlandsübermittlung
+     =========================================================== -->
+<h2>7. Drittlandsübermittlung (US-Datentransfer)</h2>
+<p>
+  Sofern personenbezogene Daten in die USA übermittelt werden (insbesondere bei Vercel, Resend und Sentry mit Backup-Region USA), erfolgt dies auf Basis der folgenden Rechtsgrundlagen:
+</p>
+<ul>
+  <li><strong>EU-US Data Privacy Framework (DPF):</strong> Ergänzend zur DSGVO bestätigt seit Juli 2023, dass zertifizierte US-Unternehmen ein angemessenes Schutzniveau gewährleisten. Wir bevorzugen DPF-zertifizierte Anbieter.</li>
+  <li><strong>EU-Standardvertragsklauseln (SCC):</strong> Mit allen US-Auftragsverarbeitern wurden die EU-Standardvertragsklauseln (Module 2 — Verantwortlicher zu Auftragsverarbeiter) gemäß Beschluss der Europäischen Kommission 2021/914 abgeschlossen.</li>
+  <li><strong>Zusätzliche technische Maßnahmen:</strong> Transport-Verschlüsselung (TLS 1.3), Verschlüsselung at-rest (AES-256), pseudonymisierte Identifier, beschränkte Zugriffsrechte.</li>
+</ul>
+<div class="box-warn box">
+  <strong>Hinweis zur Risikobewertung:</strong> Nutzer werden ausdrücklich darauf hingewiesen, dass trotz aller Schutzmaßnahmen ein Restrisiko bei der Übermittlung in die USA besteht, insbesondere aufgrund weitreichender Zugriffs­befugnisse amerikanischer Geheimdienste (FISA Sec. 702, Executive Order 12333). Sollten Nutzer dieses Risiko vermeiden wollen, können sie alternativ ausschließlich die Web-Anwendung verwenden, die auf EU-Servern gehostet ist, und auf Apple/Google-Sign-In sowie Push-Benachrichtigungen verzichten.
+</div>
+
+<!-- ===========================================================
+     8. Aufbewahrungsfristen
+     =========================================================== -->
+<h2>8. Aufbewahrungs- und Löschungsfristen</h2>
+<table>
+  <tr><th>Datenkategorie</th><th>Aufbewahrungsdauer</th><th>Rechtsgrundlage</th></tr>
+  <tr><td>Account-Daten</td><td>So lange der Account aktiv ist + 30 Tage Karenz nach Löschauftrag</td><td>Art. 17 DSGVO</td></tr>
+  <tr><td>Inseratsdaten</td><td>So lange das Inserat aktiv ist; nach Deaktivierung 90 Tage</td><td>Art. 6 I lit. b</td></tr>
+  <tr><td>Chat-Nachrichten</td><td>So lange beide Gesprächspartner aktiv sind</td><td>Art. 6 I lit. b</td></tr>
+  <tr><td>Server-Logs (IP, User-Agent)</td><td>30 Tage, IP-anonymisiert nach 7 Tagen</td><td>Art. 6 I lit. f</td></tr>
+  <tr><td>Fehlerprotokolle (Sentry)</td><td>90 Tage rollend</td><td>Art. 6 I lit. f</td></tr>
+  <tr><td>Push-Notification-Logs</td><td>30 Tage zu statistischen Zwecken</td><td>Art. 6 I lit. f</td></tr>
+  <tr><td>Reports und Moderations-Aktionen</td><td>3 Jahre (Beweismittel bei wiederkehrendem Missbrauch)</td><td>Art. 6 I lit. f</td></tr>
+  <tr><td>Steuerlich relevante Belege</td><td>10 Jahre gemäß § 257 HGB, § 147 AO</td><td>Art. 6 I lit. c</td></tr>
+</table>
+
+<!-- ===========================================================
+     9. Cookies
+     =========================================================== -->
+<h2>9. Cookies, lokaler Speicher und Tracking-Technologien</h2>
+<p>
+  Room8 unterscheidet strikt zwischen technisch notwendigen und nicht-notwendigen Speicher-Technologien. Nicht-notwendige Cookies werden ausschließlich nach ausdrücklicher Einwilligung des Nutzers gesetzt (Opt-In gemäß § 25 Abs. 1 TTDSG).
+</p>
+
+<h3>9.1 Technisch notwendige Speicher-Inhalte</h3>
+<p>
+  Diese sind essenziell für den Betrieb der Plattform und werden ohne Einwilligung gesetzt (Rechtsgrundlage: § 25 Abs. 2 Nr. 2 TTDSG, Art. 6 I lit. b DSGVO):
+</p>
+<table>
+  <tr><th>Name / Schlüssel</th><th>Speicherort</th><th>Zweck</th><th>Speicherdauer</th></tr>
+  <tr><td><code>sb-tvnvmogaqmduzcycmvby-auth-token</code></td><td>LocalStorage</td><td>Authentifizierungs-Token (JWT)</td><td>1 Stunde (Auto-Refresh)</td></tr>
+  <tr><td><code>room8_language</code></td><td>LocalStorage</td><td>Spracheinstellung (de / en)</td><td>persistent</td></tr>
+  <tr><td><code>room8_user_id</code></td><td>SessionStorage</td><td>Caching der User-ID innerhalb einer Session</td><td>Tab-Lebensdauer</td></tr>
+  <tr><td><code>room8_pwa_dismissed</code></td><td>LocalStorage</td><td>Speichert, ob der PWA-Install-Hinweis bereits weggeklickt wurde</td><td>persistent</td></tr>
+</table>
+
+<h3>9.2 Nicht-notwendige Cookies und Speicher-Inhalte (Opt-In)</h3>
+<p>
+  Diese werden ausschließlich nach aktiver Zustimmung über das Cookie-Banner gesetzt:
+</p>
+<table>
+  <tr><th>Name</th><th>Anbieter</th><th>Zweck</th><th>Speicherdauer</th></tr>
+  <tr><td>Sentry Session-ID</td><td>Sentry</td><td>Fehlerprotokollierung und Performance-Monitoring</td><td>Tab-Session</td></tr>
+  <tr><td>Push-Notification-Token</td><td>Firebase</td><td>Geräte-Identifikation für Push-Zustellung</td><td>persistent, bis Token-Rotation</td></tr>
+</table>
+
+<h3>9.3 Cookie-Banner und Widerruf</h3>
+<p>
+  Beim ersten Besuch der Web-Anwendung wird ein Cookie-Banner angezeigt, das eine differenzierte Auswahl ermöglicht (Alle akzeptieren / Nur notwendige / Einzeln auswählen). Die Auswahl kann jederzeit über den Link <em>„Cookie-Einstellungen ändern"</em> im Footer angepasst werden. Ein einmal erteilter Widerruf gilt sofort und führt zur unverzüglichen Löschung der entsprechenden Speicher-Inhalte.
+</p>
+
+<div class="page-break"></div>
+
+<!-- ===========================================================
+     10. Push-Notifications
+     =========================================================== -->
+<h2>10. Push-Notifications</h2>
+<p>
+  Push-Benachrichtigungen werden ausschließlich nach aktiver Zustimmung des Nutzers über den nativen Permission-Dialog des Betriebssystems (iOS, Android) bzw. der Web Push API zugestellt. Eine vorherige Einwilligung ist Voraussetzung (Art. 6 I lit. a DSGVO).
+</p>
+<p>
+  Im Detail werden folgende Benachrichtigungs-Kategorien unterschieden, die individuell in den Notification-Einstellungen aktiviert oder deaktiviert werden können:
+</p>
+<ul>
+  <li><strong>Chat-Nachrichten:</strong> Neue Nachricht zu einem Inserat</li>
+  <li><strong>City-Listings:</strong> Neue Wohnung / Job / Coupon in deiner Stadt</li>
+  <li><strong>Favoriten:</strong> Jemand hat dein Inserat favorisiert</li>
+  <li><strong>Bewertungen:</strong> Du hast eine neue Bewertung erhalten</li>
+  <li><strong>Bewerbungen:</strong> Jemand interessiert sich für deinen Job</li>
+  <li><strong>Coupon-Einlösungen:</strong> Real-time Bestätigung beim Partner-Scan</li>
+  <li><strong>System-Nachrichten:</strong> Wichtige Sicherheits- und Servicemitteilungen</li>
+</ul>
+<p>
+  Quiet-Hours können konfiguriert werden (Standard: 22:00–07:00 Uhr werden keine Push-Benachrichtigungen zugestellt, kritische System-Nachrichten ausgenommen).
+</p>
+
+<!-- ===========================================================
+     11. App-Berechtigungen
+     =========================================================== -->
+<h2>11. App-Berechtigungen (Kamera, Mikrofon, Standort)</h2>
+<table>
+  <tr><th>Berechtigung</th><th>Verwendung</th><th>Pflicht oder optional?</th></tr>
+  <tr><td>Kamera</td><td>Aufnahme von Profilbildern und Inserats-Fotos</td><td>Optional</td></tr>
+  <tr><td>Foto-Bibliothek</td><td>Auswahl bestehender Bilder als Profilbild oder Inserat</td><td>Optional</td></tr>
+  <tr><td>Push-Notifications</td><td>Zustellung von Benachrichtigungen</td><td>Optional</td></tr>
+  <tr><td>Standort (präzise)</td><td>Nicht angefragt — wird nicht verarbeitet</td><td>Nicht aktiv</td></tr>
+  <tr><td>Mikrofon</td><td>Nicht angefragt</td><td>Nicht aktiv</td></tr>
+  <tr><td>Kontakte</td><td>Nicht angefragt</td><td>Nicht aktiv</td></tr>
+  <tr><td>Kalender</td><td>Nicht angefragt</td><td>Nicht aktiv</td></tr>
+</table>
+
+<!-- ===========================================================
+     12. Betroffenenrechte
+     =========================================================== -->
+<h2>12. Betroffenenrechte gemäß Art. 15–22 DSGVO</h2>
+<p>
+  Sämtliche Nutzer haben gegenüber Room8 folgende Rechte hinsichtlich ihrer personenbezogenen Daten:
+</p>
+
+<h3>12.1 Recht auf Auskunft (Art. 15 DSGVO)</h3>
+<p>
+  Nutzer können jederzeit eine Auskunft über sämtliche zu ihrer Person gespeicherten Daten anfordern. Eine entsprechende Anfrage ist an <code>privacy@room8.club</code> zu richten. Die Auskunft erfolgt binnen 30 Tagen (Art. 12 Abs. 3 DSGVO).
+</p>
+
+<h3>12.2 Recht auf Berichtigung (Art. 16 DSGVO)</h3>
+<p>
+  Unrichtige oder unvollständige Daten können in den Profil-Einstellungen direkt korrigiert werden.
+</p>
+
+<h3>12.3 Recht auf Löschung („Recht auf Vergessenwerden", Art. 17 DSGVO)</h3>
+<p>
+  Über die Option <em>„Konto löschen"</em> in den Einstellungen löscht der Nutzer seinen vollständigen Account inklusive sämtlicher von ihm veröffentlichter Inserate, Bilder, Chat-Nachrichten und Bewertungen. Der Vorgang ist unmittelbar und endgültig nach einer Karenz von 30 Tagen.
+</p>
+<p>
+  Technisch geschieht dies in folgenden Schritten:
+</p>
+<ol>
+  <li>Löschung aller User-eigenen Storage-Objekte (Profilbild, Listing-Fotos, Chat-Anhänge)</li>
+  <li>Löschung sämtlicher Datenbank-Datensätze (Listings, Messages, Reviews, Reports, Saved Searches, Events, Coupons, FCM-Tokens, Notifications, Favorites, Profile-Eintrag)</li>
+  <li>Löschung des Authentifizierungs-Records via Server-seitiger Edge-Function <code>delete-user</code>, welche <code>auth.admin.deleteUser()</code> aufruft</li>
+  <li>Bestätigung an den Nutzer per E-Mail</li>
+</ol>
+<p>
+  Backup-Kopien werden im Rolling-Window von 7 Tagen vorgehalten und nach Ablauf automatisch überschrieben.
+</p>
+
+<h3>12.4 Recht auf Einschränkung der Verarbeitung (Art. 18 DSGVO)</h3>
+<p>
+  Auf Antrag wird die Verarbeitung bestimmter Daten eingeschränkt, beispielsweise während einer laufenden Beschwerde-Prüfung.
+</p>
+
+<h3>12.5 Recht auf Datenübertragbarkeit (Art. 20 DSGVO)</h3>
+<p>
+  Nutzer können ihre Daten in einem strukturierten, gängigen und maschinenlesbaren Format (JSON) erhalten. Eine entsprechende Export-Funktion ist in den Einstellungen verfügbar (Roadmap: Phase 2 nach Demo).
+</p>
+
+<h3>12.6 Widerspruchsrecht (Art. 21 DSGVO)</h3>
+<p>
+  Gegen Verarbeitungen auf Basis von Art. 6 I lit. f DSGVO (berechtigte Interessen) kann jederzeit Widerspruch eingelegt werden.
+</p>
+
+<h3>12.7 Recht auf Beschwerde bei der Aufsichtsbehörde (Art. 77 DSGVO)</h3>
+<p>
+  Nutzer haben das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren. Zuständig ist:
+</p>
+<div class="box">
+  <strong>Bayerisches Landesamt für Datenschutzaufsicht (BayLDA)</strong><br>
+  Promenade 18, 91522 Ansbach<br>
+  Telefon: +49 (0) 981 180093-0<br>
+  E-Mail: poststelle@lda.bayern.de<br>
+  Webseite: https://www.lda.bayern.de
+</div>
+
+<div class="page-break"></div>
+
+<!-- ===========================================================
+     13. Sicherheitsmaßnahmen
+     =========================================================== -->
+<h2>13. Technische und organisatorische Sicherheitsmaßnahmen (TOMs)</h2>
+<p>
+  Gemäß Art. 32 DSGVO haben wir geeignete technische und organisatorische Maßnahmen ergriffen, um ein dem Risiko angemessenes Schutzniveau zu gewährleisten. Im Einzelnen:
+</p>
+
+<h3>13.1 Vertraulichkeit</h3>
+<ul>
+  <li>Row Level Security (RLS) auf sämtlichen Datenbank-Tabellen — User können nur eigene Datensätze sehen / verändern</li>
+  <li>Passwörter werden mittels bcrypt (Cost-Factor 12) gehashed gespeichert; Klartext-Passwörter werden zu keinem Zeitpunkt persistiert</li>
+  <li>JWT-Tokens haben eine Lebensdauer von maximal 1 Stunde, Refresh-Tokens werden bei jeder Verwendung rotiert</li>
+  <li>Zugriffsrechte auf Storage-Buckets sind per Policy auf den jeweiligen Eigentümer beschränkt</li>
+  <li>Service-Role-Keys werden ausschließlich serverseitig in Edge-Functions verwendet, niemals an den Client ausgeliefert</li>
+</ul>
+
+<h3>13.2 Integrität</h3>
+<ul>
+  <li>Datenbank-Integritäts-Constraints (Foreign-Keys, Check-Constraints, NOT-NULL)</li>
+  <li>Kryptografische Hash-Verifizierung bei Storage-Uploads</li>
+  <li>Audit-Logs für administrative Aktionen</li>
+</ul>
+
+<h3>13.3 Verfügbarkeit</h3>
+<ul>
+  <li>Automatische tägliche Backups der Datenbank (Point-in-Time-Recovery für 7 Tage)</li>
+  <li>Daily Health-Check via Cron auf Notification-Pipeline</li>
+  <li>Sentry-Monitoring auf Anomalien</li>
+  <li>CDN-basiertes Hosting mit globaler Verfügbarkeit</li>
+</ul>
+
+<h3>13.4 Transport-Verschlüsselung</h3>
+<ul>
+  <li>TLS 1.3 für sämtliche Web-Requests (HTTPS-only, HSTS-Header gesetzt)</li>
+  <li>Certificate-Pinning auf nativen Apps gegen Man-in-the-Middle-Angriffe</li>
+</ul>
+
+<h3>13.5 Verschlüsselung at-rest</h3>
+<ul>
+  <li>Datenbank: AES-256 Encryption auf Storage-Volume-Level</li>
+  <li>Storage-Buckets: Server-Side-Encryption</li>
+  <li>Backups: AES-256-Verschlüsselung mit Anbieter-managed-Keys</li>
+</ul>
+
+<h3>13.6 Trust-Layer-Mechanismen</h3>
+<ul>
+  <li>Block-Funktion bidirektional, RLS-enforced</li>
+  <li>Report-Funktion mit Anti-Trolling-Rate-Limits (5/h, 30/d)</li>
+  <li>Studi-Verifikation als optionales Trust-Boost-Feature</li>
+</ul>
+
+<!-- ===========================================================
+     14. WOHNUNGS-DISCLAIMER
+     =========================================================== -->
+<h2>14. Spezielle Regelungen — Wohnungs-Plattform und Untervermietung</h2>
+<div class="box-critical box">
+  <strong>Wichtiger Haftungsausschluss:</strong> Room8 ist ausschließlich eine technische Vermittlungs-Plattform und tritt nicht als Vertragspartei zwischen Vermieter und Mieter / Untermieter auf. Sämtliche rechtlichen, finanziellen und faktischen Konsequenzen einer Wohnungsvermietung oder -untervermietung liegen ausschließlich bei den jeweiligen Nutzern.
+</div>
+
+<h3>14.1 Stellung von Room8</h3>
+<p>
+  Room8 stellt eine Plattform zur Verfügung, auf der Studierende Wohnungs-Inserate veröffentlichen und Interessenten kontaktieren können. Room8 ist kein Makler im Sinne des § 652 BGB, kein Vermieter und kein Mietvertragspartner. Es findet zu keinem Zeitpunkt eine Prüfung, Validierung oder Empfehlung der angebotenen Wohnungen durch Room8 statt.
+</p>
+
+<h3>14.2 Verantwortlichkeit der Nutzer</h3>
+<p>
+  Die inserierende Person (Vermieter oder Untervermieter) ist allein und vollumfänglich verantwortlich für:
+</p>
+<ul>
+  <li>Die rechtliche Berechtigung zur Untervermietung (Zustimmung des Hauptvermieters nach § 540 BGB)</li>
+  <li>Die korrekte Angabe von Miete, Nebenkosten, Kaution und sonstigen Kosten</li>
+  <li>Die Einhaltung mietrechtlicher Vorgaben (insbesondere Mietpreisbremse, ortsübliche Vergleichsmiete, Wohnflächenangabe)</li>
+  <li>Die Einhaltung der Wohnraum-Zweckentfremdungsverordnung der jeweiligen Stadt</li>
+  <li>Die korrekte Abführung von Einkommensteuer auf Mieteinnahmen</li>
+  <li>Die Beachtung des Mieterschutzes (Kündigungsfristen, Mietminderungsrechte, etc.)</li>
+</ul>
+
+<h3>14.3 Untervermietung — gesetzliche Pflichten</h3>
+<p>
+  Untervermietungen sind in Deutschland nur unter bestimmten Voraussetzungen zulässig. Die folgenden Punkte gelten als allgemeine Hinweise, ersetzen jedoch ausdrücklich keine Rechtsberatung:
+</p>
+<ul>
+  <li><strong>Erlaubnis des Hauptvermieters:</strong> Eine Untervermietung ist gemäß § 540 BGB grundsätzlich nur mit Zustimmung des Hauptvermieters zulässig. Bei „berechtigtem Interesse" (z. B. Auslandssemester) hat der Hauptmieter einen Anspruch auf Erlaubnis (§ 553 BGB), doch dieser muss aktiv eingeholt werden.</li>
+  <li><strong>Zweckentfremdung:</strong> In vielen Großstädten (München, Berlin, Hamburg, Frankfurt) gibt es Zweckentfremdungsverbote — eine kommerzielle Kurzzeit-Untervermietung kann ein Bußgeld nach sich ziehen.</li>
+  <li><strong>Steuerpflicht:</strong> Mieteinnahmen sind grundsätzlich einkommensteuerpflichtig. Bagatell-Grenzen (z. B. 520 € pro Jahr nach altem Recht) wurden in jüngeren Reformen zum Teil angehoben — der jeweils aktuelle Stand ist beim Finanzamt zu erfragen.</li>
+  <li><strong>Anmeldepflicht:</strong> Untermieter müssen sich gemäß Bundesmeldegesetz (§ 17) bei der Gemeinde innerhalb von zwei Wochen anmelden.</li>
+  <li><strong>Versicherung:</strong> Die Hausratversicherung des Hauptmieters deckt in vielen Fällen nicht die Sachen des Untermieters ab.</li>
+</ul>
+
+<h3>14.4 Keine Haftung für Inhalte und Schäden</h3>
+<p>
+  Room8 übernimmt keinerlei Haftung für:
+</p>
+<ul>
+  <li>Die Richtigkeit der Angaben in einem Inserat (Wohnungsgröße, Bilder, Miete)</li>
+  <li>Die rechtliche Zulässigkeit der angebotenen Untervermietung</li>
+  <li>Vermögensschäden durch Vertragsbruch oder Betrug seitens eines anderen Nutzers</li>
+  <li>Bauliche Mängel oder gesundheitliche Beeinträchtigungen in der vermieteten Immobilie</li>
+  <li>Konflikte zwischen Haupt- und Untermieter</li>
+  <li>Strafrechtliche, ordnungsrechtliche oder steuerrechtliche Konsequenzen einer Vermietung</li>
+</ul>
+<p>
+  Dies entspricht der Stellung als reine Hosting-Plattform gemäß § 7 Abs. 1 Telemediengesetz. Eine Pflicht zur aktiven Überwachung der eingestellten Inhalte besteht für Room8 nicht (§ 7 Abs. 2 TMG, Art. 14 ECRL).
+</p>
+
+<h3>14.5 Empfehlungen an die Nutzer</h3>
+<p>
+  Wir empfehlen jedem Nutzer dringend, vor Abschluss eines Untermietvertrags:
+</p>
+<ol>
+  <li>Eine schriftliche Erlaubnis des Hauptvermieters einzuholen</li>
+  <li>Einen schriftlichen Untermietvertrag aufzusetzen (Mustervorlagen u. a. beim Deutschen Mieterbund verfügbar)</li>
+  <li>Die Wohnung persönlich zu besichtigen</li>
+  <li>Identität des Vertragspartners zu verifizieren (Personalausweis, Studi-Ausweis)</li>
+  <li>Kaution erst nach Schlüsselübergabe und gegen Quittung zu zahlen</li>
+  <li>Übergabeprotokoll mit Fotos zu erstellen</li>
+  <li>Sich beim Einwohnermeldeamt anzumelden</li>
+  <li>Bei rechtlichen Zweifeln einen Mietrechtsanwalt oder Mieterverein zu konsultieren</li>
+</ol>
+
+<div class="page-break"></div>
+
+<!-- ===========================================================
+     15. Marktplatz, Jobs, Events, Coupons
+     =========================================================== -->
+<h2>15. Spezielle Regelungen — Marktplatz, Jobs, Events, Coupons</h2>
+
+<h3>15.1 Marktplatz</h3>
+<p>
+  Room8 ist auch im Marktplatz kein Vertragspartner zwischen Verkäufer und Käufer. Gewährleistungsrechte gelten allein zwischen den vertragschließenden Privatpersonen. Bei gewerblicher Tätigkeit (mehr als gelegentliche Verkäufe) müssen die Nutzer eigenständig die Vorgaben zur Fernabsatz- und Verbraucherinformationspflicht (§ 312d BGB) sowie das Verbraucherrechtegesetz beachten.
+</p>
+
+<h3>15.2 Jobs</h3>
+<p>
+  Job-Inserate werden ausschließlich vom inserierenden Arbeitgeber eingestellt. Die Verantwortung für die Einhaltung des Allgemeinen Gleichbehandlungsgesetzes (AGG), Mindestlohngesetzes (MiLoG), Arbeitszeit­gesetzes (ArbZG) sowie Sozialversicherungs­pflichten liegt ausschließlich beim Arbeitgeber. Room8 prüft Inserate nicht inhaltlich.
+</p>
+
+<h3>15.3 Events</h3>
+<p>
+  Veranstalter sind eigenverantwortlich für die Einhaltung der Versammlungs-, Gaststätten-, Lärmschutz- und Jugendschutz­vorschriften. Bei Verkauf von Eintrittskarten oder Getränken können steuer- oder gewerberechtliche Pflichten entstehen.
+</p>
+
+<h3>15.4 Coupons</h3>
+<p>
+  Coupon-Anbieter (Geschäfte, Restaurants, Bars) tragen die Verantwortung für die Einlösbarkeit, die rechtlich konforme Bewerbung (Preisangabenverordnung) und die korrekte steuerliche Behandlung gewährter Rabatte.
+</p>
+
+<!-- ===========================================================
+     16. Trust-Layer
+     =========================================================== -->
+<h2>16. Trust- und Sicherheits-Layer</h2>
+<p>
+  Zur Erhöhung der Sicherheit der Nutzer hat Room8 folgende Mechanismen implementiert:
+</p>
+<table>
+  <tr><th>Funktion</th><th>Beschreibung</th><th>Status</th></tr>
+  <tr><td>Studi-Verifikation</td><td>Optionaler Upload Studi-Ausweis / Immatrikulationsbescheinigung — erhöht Trust-Badge</td><td><span class="badge badge-ok">Live</span></td></tr>
+  <tr><td>Bidirektionaler Block</td><td>Geblockte User sehen keine Inserate, können keine Nachrichten senden</td><td><span class="badge badge-ok">Live</span></td></tr>
+  <tr><td>Report-System</td><td>Inhalte und Profile melden; Anti-Trolling-Rate-Limit 5/h, 30/d</td><td><span class="badge badge-ok">Live</span></td></tr>
+  <tr><td>Bewertungs-System</td><td>Bewertungen nur nach echtem Kontakt (Chat-Nachweis erforderlich)</td><td><span class="badge badge-ok">Live</span></td></tr>
+  <tr><td>Admin-Alerts</td><td>Push-Benachrichtigung an Admin bei Reports, Verdachts-Aktivitäten</td><td><span class="badge badge-ok">Live</span></td></tr>
+  <tr><td>Stadt-Tippfehler-Schutz</td><td>Automatische Normalisierung gängiger Tippfehler (z. B. „Augsbrug" → „Augsburg")</td><td><span class="badge badge-ok">Live</span></td></tr>
+</table>
+
+<!-- ===========================================================
+     17. Minderjährigenschutz
+     =========================================================== -->
+<h2>17. Minderjährigenschutz</h2>
+<p>
+  Room8 richtet sich primär an volljährige Studierende. Personen unter 16 Jahren dürfen die Plattform gemäß Art. 8 DSGVO grundsätzlich nicht eigenständig nutzen. Bei der Registrierung wird eine entsprechende Bestätigung abgefragt.
+</p>
+<p>
+  Bei Hinweisen auf eine Nutzung durch Minderjährige (etwa über Reports) wird das Konto unverzüglich gesperrt und nach Verifikation gelöscht. Die Verantwortung für die korrekte Altersangabe liegt beim Nutzer; eine technische Verifikation findet aufgrund datenschutzrechtlicher Verhältnismäßigkeit nicht statt.
+</p>
+
+<!-- ===========================================================
+     18. Beschwerderecht
+     =========================================================== -->
+<h2>18. Beschwerderecht und zuständige Aufsichtsbehörde</h2>
+<p>
+  Unbeschadet anderer verwaltungsrechtlicher oder gerichtlicher Rechtsbehelfe steht jedem Betroffenen ein Beschwerderecht bei einer Aufsichtsbehörde zu, insbesondere in dem EU-Mitgliedstaat ihres Aufenthaltsorts, ihres Arbeitsplatzes oder des Orts des mutmaßlichen Verstoßes, wenn er der Ansicht ist, dass die Verarbeitung der ihn betreffenden personenbezogenen Daten gegen die DSGVO verstößt (Art. 77 DSGVO).
+</p>
+<p>
+  Für Room8 (Sitz in Krumbach, Bayern) ist zuständig:
+</p>
+<div class="box">
+  Bayerisches Landesamt für Datenschutzaufsicht (BayLDA)<br>
+  Promenade 18, 91522 Ansbach<br>
+  Telefon: +49 (0) 981 180093-0<br>
+  Telefax: +49 (0) 981 180093-800<br>
+  E-Mail: poststelle@lda.bayern.de<br>
+  Webseite: https://www.lda.bayern.de
+</div>
+
+<!-- ===========================================================
+     19. Änderungen
+     =========================================================== -->
+<h2>19. Änderungen dieser Erklärung</h2>
+<p>
+  Wir behalten uns vor, diese Datenschutz-Compliance-Dokumentation anzupassen, sofern sich die Rechtslage, unsere technischen Systeme oder unsere Datenverarbeitungs-Praktiken ändern. Bei wesentlichen Änderungen werden Nutzer per E-Mail oder im Rahmen der nächsten Plattform-Nutzung aktiv informiert. Die jeweils aktuelle Version ist unter <code>https://www.room8.club/datenschutz.html</code> abrufbar.
+</p>
+
+<div class="page-break"></div>
+
+<!-- ===========================================================
+     ANHANG A — Tech-Stack
+     =========================================================== -->
+<h2>Anhang A — Technologie-Stack</h2>
+<table>
+  <tr><th>Komponente</th><th>Technologie</th><th>Anbieter</th><th>Hosting-Region</th></tr>
+  <tr><td>Datenbank</td><td>PostgreSQL 16</td><td>Supabase</td><td>EU (Frankfurt)</td></tr>
+  <tr><td>Authentifizierung</td><td>Supabase Auth (JWT)</td><td>Supabase</td><td>EU (Frankfurt)</td></tr>
+  <tr><td>Object-Storage</td><td>Supabase Storage (S3-kompatibel)</td><td>Supabase</td><td>EU (Frankfurt)</td></tr>
+  <tr><td>Edge-Funktionen</td><td>Deno-Runtime</td><td>Supabase</td><td>EU (Frankfurt)</td></tr>
+  <tr><td>Web-Hosting</td><td>Vercel Edge Network</td><td>Vercel</td><td>EU (Frankfurt fra1)</td></tr>
+  <tr><td>Push-Benachrichtigungen</td><td>FCM HTTP v1 API</td><td>Google (Firebase)</td><td>EU / Global</td></tr>
+  <tr><td>Transaktional-E-Mails</td><td>Resend API</td><td>Resend</td><td>USA</td></tr>
+  <tr><td>Fehlerprotokollierung</td><td>Sentry SDK + Server</td><td>Functional Software, Inc.</td><td>EU (Frankfurt)</td></tr>
+  <tr><td>iOS-Distribution</td><td>App Store Connect</td><td>Apple Distribution International</td><td>EU (Cork, Irland)</td></tr>
+  <tr><td>Android-Distribution</td><td>Google Play Console</td><td>Google Ireland Limited</td><td>EU (Dublin)</td></tr>
+  <tr><td>Frontend-Framework</td><td>HTML / CSS / JavaScript (Capacitor 7)</td><td>Ionic / Eigenentwicklung</td><td>n/a</td></tr>
+</table>
+
+<!-- ===========================================================
+     ANHANG B — AVV-Status
+     =========================================================== -->
+<h2>Anhang B — Auftragsverarbeitungsverträge (AVV-Status)</h2>
+<table>
+  <tr><th>Anbieter</th><th>AVV / DPA</th><th>SCC für US-Transfer</th><th>Status</th></tr>
+  <tr><td>Supabase</td><td>Supabase DPA, Version 2024</td><td>n/a (EU-Hosting)</td><td><span class="badge badge-ok">Vorhanden</span></td></tr>
+  <tr><td>Firebase / Google Cloud</td><td>Google Cloud Data Processing Addendum</td><td>EU-SCC Module 2</td><td><span class="badge badge-ok">Vorhanden</span></td></tr>
+  <tr><td>Vercel</td><td>Vercel DPA, Version 2024</td><td>EU-SCC Module 2</td><td><span class="badge badge-ok">Vorhanden</span></td></tr>
+  <tr><td>Resend</td><td>Resend Privacy Page (DPA in Erstellung)</td><td>EU-SCC, DPF-Zertifizierung gewünscht</td><td><span class="badge badge-warn">In Bearbeitung</span></td></tr>
+  <tr><td>Sentry</td><td>Sentry DPA, Version 2024</td><td>EU-SCC Module 2</td><td><span class="badge badge-ok">Vorhanden</span></td></tr>
+  <tr><td>Apple Developer</td><td>Apple Developer Program License Agreement</td><td>EU-SCC (Apple Ireland)</td><td><span class="badge badge-ok">Vorhanden</span></td></tr>
+  <tr><td>Google Play / Sign-In</td><td>Google Cloud Data Processing Addendum</td><td>EU-SCC Module 2</td><td><span class="badge badge-ok">Vorhanden</span></td></tr>
+</table>
+
+<!-- ===========================================================
+     ANHANG C — DSFA
+     =========================================================== -->
+<h2>Anhang C — Datenschutz-Folgenabschätzung (DSFA)</h2>
+<p>
+  Eine Datenschutz-Folgenabschätzung gemäß Art. 35 DSGVO ist erforderlich, wenn eine Verarbeitung „voraussichtlich ein hohes Risiko für die Rechte und Freiheiten natürlicher Personen zur Folge hat". Für Room8 wurde eine vorgelagerte Schwellwert-Analyse durchgeführt mit folgendem Ergebnis:
+</p>
+<table>
+  <tr><th>Kriterium</th><th>Bewertung</th><th>Erläuterung</th></tr>
+  <tr><td>Systematische Bewertung persönlicher Aspekte</td><td>Niedrig</td><td>Match-Score basiert nur auf User-eigenen gespeicherten Suchen, kein Profiling</td></tr>
+  <tr><td>Verarbeitung besonderer Datenkategorien (Art. 9)</td><td>Keine</td><td>Keine Verarbeitung von Gesundheits-, biometrischen, religiösen oder politischen Daten</td></tr>
+  <tr><td>Systematische Überwachung öffentlicher Bereiche</td><td>Nein</td><td>n/a</td></tr>
+  <tr><td>Daten zu strafrechtlichen Verurteilungen</td><td>Keine</td><td>n/a</td></tr>
+  <tr><td>Datenverarbeitung in großem Umfang</td><td>Niedrig</td><td>Im Demo-Stadium &lt; 1.000 User; Skalierungsgrenze 10.000 ohne erneute Bewertung</td></tr>
+  <tr><td>Datenkombination aus mehreren Quellen</td><td>Niedrig</td><td>Nur OAuth-Identity + selbst eingegebene Daten</td></tr>
+  <tr><td>Daten zu schutzbedürftigen Personen</td><td>Mittel</td><td>Studierende sind in Teilen Minderjährige (&lt; 18, &gt; 16) — gesonderter Schutz</td></tr>
+  <tr><td>Innovativer Einsatz neuer Technologien</td><td>Niedrig</td><td>Standard-Web-/Mobile-Stack, keine KI-basierte Entscheidungen</td></tr>
+  <tr><td>Daten-basierte Entscheidungen mit Rechtsfolge</td><td>Keine</td><td>Plattform ohne automatisierte Entscheidungen i. S. v. Art. 22 DSGVO</td></tr>
+</table>
+<p>
+  <strong>Ergebnis:</strong> Eine vollständige Datenschutz-Folgenabschätzung gemäß Art. 35 DSGVO ist zum gegenwärtigen Stand nicht erforderlich. Bei einer Skalierung über 10.000 aktive Nutzer oder Einführung neuer Verarbeitungs-Funktionen (z. B. KI-basierte Match-Empfehlungen, Geo-Tracking) ist eine erneute Bewertung vorzunehmen.
+</p>
+
+<!-- ===========================================================
+     ANHANG D — Glossar
+     =========================================================== -->
+<h2>Anhang D — Glossar und Abkürzungsverzeichnis</h2>
+<table>
+  <tr><th style="width: 30%;">Begriff</th><th>Erläuterung</th></tr>
+  <tr><td>AGG</td><td>Allgemeines Gleichbehandlungsgesetz</td></tr>
+  <tr><td>AVV / DPA</td><td>Auftragsverarbeitungsvertrag / Data Processing Agreement</td></tr>
+  <tr><td>BayLDA</td><td>Bayerisches Landesamt für Datenschutzaufsicht</td></tr>
+  <tr><td>BDSG</td><td>Bundesdatenschutzgesetz</td></tr>
+  <tr><td>bcrypt</td><td>Kryptografische Hash-Funktion zur Passwort-Speicherung</td></tr>
+  <tr><td>DPF</td><td>EU-US Data Privacy Framework</td></tr>
+  <tr><td>DSFA</td><td>Datenschutz-Folgenabschätzung (Art. 35 DSGVO)</td></tr>
+  <tr><td>DSGVO</td><td>Datenschutz-Grundverordnung (EU 2016/679)</td></tr>
+  <tr><td>ECRL</td><td>E-Commerce-Richtlinie (RL 2000/31/EG)</td></tr>
+  <tr><td>FCM</td><td>Firebase Cloud Messaging (Push-Notification-Service)</td></tr>
+  <tr><td>JWT</td><td>JSON Web Token (Authentifizierungs-Format)</td></tr>
+  <tr><td>OAuth</td><td>Open Authorization Standard für externe Anmelde-Dienste</td></tr>
+  <tr><td>PII</td><td>Personally Identifiable Information (personenbezogene Daten)</td></tr>
+  <tr><td>RLS</td><td>Row Level Security (Zugriffsbeschränkung auf Datensatz-Ebene)</td></tr>
+  <tr><td>SCC</td><td>Standard Contractual Clauses (EU-Standardvertragsklauseln)</td></tr>
+  <tr><td>TMG</td><td>Telemediengesetz</td></tr>
+  <tr><td>TOMs</td><td>Technische und organisatorische Maßnahmen (Art. 32 DSGVO)</td></tr>
+  <tr><td>TTDSG</td><td>Telekommunikation-Telemedien-Datenschutz-Gesetz</td></tr>
+</table>
+
+<footer>
+  Room8 — Datenschutz-Compliance-Bericht 2026 · Version 1.0 · Stand: 11.05.2026 · Seite <span class="pagenum"></span>
+</footer>
+
+</body>
+</html>
