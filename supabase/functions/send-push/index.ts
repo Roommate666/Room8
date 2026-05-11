@@ -243,8 +243,10 @@ serve(async (req) => {
                 priority: 'high',
                 notification: {
                   channel_id: 'room8_v2',
-                  notification_count: parseInt(badgeCount) || 0,
-                  click_action: 'OPEN_APP'
+                  notification_count: parseInt(badgeCount) || 0
+                  // click_action entfernt: AndroidManifest hat keine matching Activity
+                  // → Tap matchte nichts und oeffnete App nicht. Default-Launcher
+                  // oeffnet jetzt MainActivity, die liest url aus Intent-Extra.
                 }
               }
             }
