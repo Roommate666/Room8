@@ -11,26 +11,264 @@
   <link rel="stylesheet" href="style.css">
     <script src="lib/qrcode.min.js"></script>
     <style>
-        /* Pattern: Magic UI BlurFade */
-        @keyframes blurFadeIn {
-            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
-            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
-        .coupon-hero { height: 320px; background-color: #F3F4F6; position: relative; cursor: zoom-in; }
-        .coupon-hero img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
-        /* Content kommt UNTER das Hero, kein Overlap mehr */
-        .coupon-content {
-            background: rgba(255,255,255,0.98);
+
+        body { background: #F9FAFB; }
+        .app-container { background: #F9FAFB; }
+
+        /* HERO mit Gradient-Overlay + Logo-Badge */
+        .coupon-hero {
             position: relative;
-            padding: 1.5rem;
-            text-align: center;
-            animation: blurFadeIn 0.5s ease-out both;
+            height: 280px;
+            background: #1F2937;
+            overflow: hidden;
+            cursor: zoom-in;
         }
-        /* Lightbox fuer Hero-Bild */
+        .coupon-hero img {
+            width: 100%; height: 100%;
+            object-fit: cover; object-position: center;
+        }
+        .coupon-hero::after {
+            content: '';
+            position: absolute; left: 0; right: 0; bottom: 0;
+            height: 50%;
+            background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.65) 100%);
+            pointer-events: none;
+        }
+        .hero-overlay {
+            position: absolute;
+            left: 1.25rem; right: 1.25rem; bottom: 1.25rem;
+            color: white;
+            z-index: 2;
+        }
+        .hero-business { font-size: 1.55rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        .hero-city { font-size: 0.92rem; font-weight: 500; opacity: 0.92; margin-top: 0.2rem; display: flex; align-items: center; gap: 0.35rem; }
+
+        /* Discount-Sticker — schwebt zwischen Hero und Card */
+        .discount-sticker {
+            position: relative;
+            margin: -2rem 1.25rem 0;
+            background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%);
+            color: white;
+            border-radius: 18px;
+            padding: 1.1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            box-shadow: 0 14px 30px -8px rgba(234,88,12,0.5), 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 3;
+            animation: fadeInUp 0.4s 0.1s ease-out both;
+        }
+        .discount-amount { font-size: 2rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1; }
+        .discount-label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.92; margin-top: 0.2rem; }
+        .discount-right { text-align: right; }
+        .discount-tag {
+            background: rgba(255,255,255,0.2);
+            border-radius: 999px;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        /* MAIN-CARD */
+        .coupon-card-main {
+            background: white;
+            margin: 1rem 1.25rem 0;
+            border-radius: 18px;
+            padding: 1.5rem 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            animation: fadeInUp 0.4s 0.15s ease-out both;
+        }
+        .deal-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #111827;
+            margin: 0 0 0.65rem;
+            letter-spacing: -0.02em;
+            line-height: 1.25;
+        }
+        .deal-desc {
+            color: #4B5563;
+            line-height: 1.55;
+            font-size: 0.93rem;
+            margin: 0;
+        }
+
+        /* CODE-TICKET — Ticket-Optik mit Notches */
+        .code-ticket {
+            position: relative;
+            margin: 1.5rem 1.25rem 0;
+            background: white;
+            border-radius: 16px;
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.15s ease;
+        }
+        .code-ticket:active { transform: scale(0.985); }
+        .code-ticket::before, .code-ticket::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 16px; height: 16px;
+            background: #F9FAFB;
+            border-radius: 50%;
+            transform: translateY(-50%);
+        }
+        .code-ticket::before { left: -8px; }
+        .code-ticket::after { right: -8px; }
+        .code-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #9CA3AF;
+            margin-bottom: 0.35rem;
+        }
+        .code-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+        .code-value {
+            font-family: 'SF Mono', Menlo, monospace;
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #111827;
+            letter-spacing: 0.08em;
+        }
+        .code-copy-btn {
+            background: #F3F4F6;
+            color: #374151;
+            border: none;
+            padding: 0.5rem 0.9rem;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* REDEEM-BUTTON */
+        .redeem-btn {
+            display: block;
+            width: calc(100% - 2.5rem);
+            margin: 1.25rem 1.25rem 0;
+            background: linear-gradient(135deg, #EA580C 0%, #DC2626 100%);
+            color: #fff;
+            border: none;
+            padding: 1.15rem 1.5rem;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 16px -4px rgba(234,88,12,0.4);
+            transition: transform 0.15s ease;
+        }
+        .redeem-btn:active { transform: scale(0.985); }
+        .redeem-btn[disabled] { background: #9CA3AF; cursor: not-allowed; box-shadow: none; }
+        .redeemed-badge {
+            background: #ECFDF5;
+            color: #047857;
+            border: 1px solid #A7F3D0;
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            margin: 1.25rem 1.25rem 0;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+        .valid-row {
+            margin: 0.75rem 1.25rem 0;
+            text-align: center;
+            color: #9CA3AF;
+            font-size: 0.78rem;
+        }
+
+        /* ABOUT-CARD */
+        .about-card {
+            background: white;
+            margin: 1rem 1.25rem 0;
+            border-radius: 18px;
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            animation: fadeInUp 0.4s 0.2s ease-out both;
+        }
+        .section-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #9CA3AF;
+            margin-bottom: 0.5rem;
+        }
+        .about-text {
+            margin: 0;
+            color: #374151;
+            line-height: 1.55;
+            font-size: 0.93rem;
+        }
+
+        /* INFO-CARD */
+        .info-card {
+            background: white;
+            margin: 1rem 1.25rem 1.5rem;
+            border-radius: 18px;
+            padding: 0.5rem 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            animation: fadeInUp 0.4s 0.25s ease-out both;
+        }
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 0.95rem 0;
+            border-bottom: 1px solid #F3F4F6;
+            text-decoration: none;
+            color: inherit;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-row:active { opacity: 0.6; }
+        .info-icon {
+            flex-shrink: 0;
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+            color: #EA580C;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+        }
+        .info-body { flex: 1; min-width: 0; }
+        .info-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9CA3AF;
+            font-weight: 700;
+            margin-bottom: 0.1rem;
+        }
+        .info-value {
+            font-size: 0.93rem;
+            color: #111827;
+            font-weight: 500;
+            white-space: pre-line;
+            word-break: break-word;
+            line-height: 1.4;
+        }
+        .info-chevron { color: #D1D5DB; font-size: 1.2rem; }
+
+        /* LIGHTBOX */
         .hero-lightbox {
             display: none;
             position: fixed; inset: 0; z-index: 999;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.92);
             align-items: center; justify-content: center;
             padding: 1rem;
         }
@@ -38,107 +276,24 @@
         .hero-lightbox img { max-width: 100%; max-height: 100vh; object-fit: contain; }
         .hero-lightbox-close {
             position: absolute; top: 1rem; right: 1rem;
-            background: rgba(255,255,255,0.15); color: white;
+            background: rgba(255,255,255,0.18); color: white;
             width: 40px; height: 40px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             font-size: 1.5rem; cursor: pointer; border: none;
         }
-        /* Info-Section unten — Address/Maps/Web/Insta/Phone/Hours */
-        .info-section {
-            background: rgba(249,250,251,0.6);
-            padding: 1.25rem 1.5rem;
-            margin-top: 0.5rem;
-        }
-        .info-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.85rem;
-            padding: 0.85rem 0;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            text-decoration: none;
-            color: inherit;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .info-row:last-child { border-bottom: none; }
-        .info-row:active { background: rgba(0,0,0,0.03); }
-        .info-icon {
-            flex-shrink: 0;
-            width: 36px; height: 36px;
-            border-radius: 10px;
-            background: rgba(234,88,12,0.1);
-            color: #EA580C;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem;
-        }
-        .info-body { flex: 1; min-width: 0; }
-        .info-label {
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #9CA3AF;
-            font-weight: 600;
-            margin-bottom: 0.15rem;
-        }
-        .info-value {
-            font-size: 0.95rem;
-            color: #111827;
-            font-weight: 500;
-            white-space: pre-line;
-            word-break: break-word;
-        }
-        .info-chevron { color: #9CA3AF; font-size: 1.25rem; align-self: center; }
-        .discount-big { font-size: 2.5rem; font-weight: 800; color: #EA580C; margin: 1rem 0; letter-spacing: -0.02em; }
-        .code-box {
-            background: rgba(243,244,246,0.88);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 2px dashed #D1D5DB;
-            padding: 1.5rem;
-            margin: 2rem 0;
-            border-radius: 16px;
-            font-family: monospace;
-            font-size: 1.8rem;
-            font-weight: 700;
-            cursor: pointer;
-            letter-spacing: 2px;
-            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .code-box:active { transform: scale(0.97); }
-        /* Redeem-Button (Primary CTA) */
-        .redeem-btn {
-            display: block;
-            width: 100%;
-            background: linear-gradient(135deg, #EA580C 0%, #DC2626 100%);
-            color: #fff;
-            border: none;
-            padding: 1.1rem 1.5rem;
-            border-radius: 16px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            margin: 1.5rem 0 0.75rem;
-            box-shadow: 0 4px 14px rgba(234,88,12,0.35);
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
-        .redeem-btn:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(234,88,12,0.25); }
-        .redeem-btn[disabled] { background: #9CA3AF; cursor: not-allowed; box-shadow: none; }
-        .redeemed-badge {
-            background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0;
-            border-radius: 12px; padding: 0.75rem 1rem; margin: 1.5rem 0 0.5rem;
-            font-weight: 600; font-size: 0.95rem;
-        }
-        /* QR-Modal */
+
+        /* QR-MODAL — KEIN BLUR */
         .qr-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            position: fixed; inset: 0;
+            background: rgba(17,24,39,0.72);
             display: none; align-items: center; justify-content: center;
             z-index: 1000; padding: 1rem;
-            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
         }
-        .qr-overlay.open { display: flex; animation: blurFadeIn 0.3s ease-out both; }
+        .qr-overlay.open { display: flex; animation: fadeInUp 0.25s ease-out both; }
         .qr-card {
             background: #fff; border-radius: 24px; padding: 2rem 1.5rem;
             max-width: 360px; width: 100%; text-align: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
         .qr-card h3 { margin: 0 0 0.5rem; font-size: 1.2rem; }
         .qr-card .sub { color: #6B7280; font-size: 0.9rem; margin-bottom: 1.25rem; }
@@ -155,7 +310,7 @@
             padding: 0.85rem 1.5rem; border-radius: 12px;
             font-weight: 600; cursor: pointer; margin-top: 1rem; width: 100%;
         }
-        /* Barrierefreiheit */
+
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
@@ -169,6 +324,13 @@
 
     <div class="coupon-hero" onclick="openLightbox()">
         <img id="heroImg" src="no-image.svg" alt="Deal">
+        <div class="hero-overlay">
+            <div class="hero-business" id="companyName">Lade…</div>
+            <div class="hero-city" id="heroCity" style="display:none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span id="heroCityText"></span>
+            </div>
+        </div>
     </div>
 
     <!-- Hero-Lightbox -->
@@ -177,31 +339,46 @@
         <img id="lightboxImg" src="" alt="">
     </div>
 
-    <div class="coupon-content">
-        <h2 id="companyName" style="color:#6B7280; font-size:0.9rem; text-transform:uppercase; margin-bottom:0.5rem; letter-spacing:0.05em;">Lade...</h2>
-        <h1 id="dealTitle" style="font-size:1.5rem; margin:0; letter-spacing:-0.01em;"></h1>
-        <div class="discount-big" id="discountValue"></div>
-        <p id="description" style="color:#4B5563; line-height:1.6; font-size:0.95rem;"></p>
-
-        <button id="redeemBtn" class="redeem-btn" onclick="openRedeemQR()" data-i18n="coupon_redeem_btn">QR-Code zum Einlösen anzeigen</button>
-        <div id="redeemedBadge" class="redeemed-badge" style="display:none;" data-i18n="coupon_already_redeemed">Bereits eingelöst</div>
-
-        <div class="code-box" onclick="copyCode()">
-            <span id="couponCode">CODE</span>
-            <div style="font-size:0.8rem; font-weight:400; color:#9CA3AF; margin-top:0.5rem; letter-spacing:0;" data-i18n="coupon_online_code_hint">Online-Code · tippen zum Kopieren</div>
+    <!-- Discount-Sticker schwebt -->
+    <div class="discount-sticker">
+        <div>
+            <div class="discount-amount" id="discountValue">--</div>
+            <div class="discount-label" id="discountLabel">Rabatt</div>
         </div>
-
-        <p style="font-size:0.8rem; color:#9CA3AF;">Gültig bis: <span id="validDate">-</span></p>
+        <div class="discount-right">
+            <span class="discount-tag" id="discountTag">Studi-Deal</span>
+        </div>
     </div>
 
-    <!-- About-Box: Was ist das fuer ein Laden? -->
-    <div id="aboutBox" style="display:none; background:rgba(249,250,251,0.6); padding:1.25rem 1.5rem;">
-        <div style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; color:#9CA3AF; font-weight:600; margin-bottom:0.5rem;">Über den Laden</div>
-        <p id="aboutText" style="margin:0; color:#374151; line-height:1.55; font-size:0.92rem;"></p>
+    <!-- Main-Card: Title + Description -->
+    <div class="coupon-card-main">
+        <h1 class="deal-title" id="dealTitle"></h1>
+        <p class="deal-desc" id="description"></p>
     </div>
 
-    <!-- Info-Section: Adresse, Maps, Website, Instagram, Phone, Hours -->
-    <div class="info-section" id="infoSection" style="display:none;">
+    <!-- Code-Ticket -->
+    <div class="code-ticket" onclick="copyCode()">
+        <div class="code-label" data-i18n="coupon_online_code_hint">Online-Code · zum Kopieren tippen</div>
+        <div class="code-row">
+            <span class="code-value" id="couponCode">CODE</span>
+            <button class="code-copy-btn" onclick="event.stopPropagation(); copyCode();">Kopieren</button>
+        </div>
+    </div>
+
+    <!-- Primary CTA: Redeem -->
+    <button id="redeemBtn" class="redeem-btn" onclick="openRedeemQR()" data-i18n="coupon_redeem_btn">QR-Code zum Einlösen anzeigen</button>
+    <div id="redeemedBadge" class="redeemed-badge" style="display:none;" data-i18n="coupon_already_redeemed">Bereits eingelöst ✓</div>
+
+    <div class="valid-row">Gültig bis <span id="validDate">-</span></div>
+
+    <!-- About-Card -->
+    <div id="aboutBox" class="about-card" style="display:none;">
+        <div class="section-label">Über den Laden</div>
+        <p class="about-text" id="aboutText"></p>
+    </div>
+
+    <!-- Info-Card: Adresse, Maps, Website, Instagram, Phone, Hours -->
+    <div class="info-card" id="infoSection" style="display:none;">
         <a id="addressRow" class="info-row" target="_blank" rel="noopener" style="display:none;">
             <span class="info-icon">📍</span>
             <div class="info-body">
@@ -373,10 +550,34 @@
 
         document.getElementById('companyName').textContent = coupon.business_name || '';
         document.getElementById('dealTitle').textContent = coupon.title || '';
-        document.getElementById('discountValue').textContent = coupon.discount_value || '';
         document.getElementById('description').textContent = coupon.description || '';
         document.getElementById('couponCode').textContent = coupon.discount_code || '';
         if(coupon.valid_until) document.getElementById('validDate').textContent = new Date(coupon.valid_until).toLocaleDateString('de-DE');
+
+        // Hero: Stadt einblenden
+        if (coupon.city) {
+            document.getElementById('heroCityText').textContent = coupon.city;
+            document.getElementById('heroCity').style.display = 'flex';
+        }
+
+        // Discount-Sticker: smart formatieren je nach value (100 = "Gratis", >50 = "%", andere = "%")
+        var dv = coupon.discount_value;
+        var dAmount = document.getElementById('discountValue');
+        var dLabel = document.getElementById('discountLabel');
+        var dTag = document.getElementById('discountTag');
+        if (dv === 100) {
+            dAmount.textContent = 'Gratis';
+            dAmount.style.fontSize = '1.8rem';
+            dLabel.textContent = 'Beim Menü';
+        } else if (dv) {
+            dAmount.textContent = dv + '%';
+            dLabel.textContent = 'Rabatt für Studis';
+        } else {
+            dAmount.textContent = '–';
+            dLabel.textContent = 'Studi-Deal';
+        }
+        // Tag: Einmalig vs Mehrfach
+        dTag.textContent = coupon.usage_limit_per_user === 1 ? '1× pro Konto' : 'Mehrfach';
 
         if (coupon.coupon_photos && coupon.coupon_photos.length > 0) {
             var photo = coupon.coupon_photos.find(function(p){ return p.photo_type === 'cover' || p.photo_type === 'hero'; }) || coupon.coupon_photos[0];
