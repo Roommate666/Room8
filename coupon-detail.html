@@ -282,6 +282,33 @@
         }
         .info-chevron { color: #D1D5DB; font-size: 1.2rem; }
 
+        /* Hours-Tabelle */
+        .hours-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin-top: 0.15rem;
+        }
+        .hours-table tr + tr td { padding-top: 0.3rem; }
+        .hours-table .hours-day {
+            color: #6B7280;
+            font-weight: 500;
+            white-space: nowrap;
+            padding-right: 1rem;
+            vertical-align: top;
+        }
+        .hours-table .hours-time {
+            color: #111827;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            text-align: right;
+        }
+        .hours-table .hours-closed {
+            color: #9CA3AF;
+            font-weight: 500;
+            font-style: italic;
+        }
+
         /* LIGHTBOX */
         .hero-lightbox {
             display: none;
@@ -545,14 +572,28 @@
             row.style.display = 'flex';
             anyShown = true;
         }
-        // Hours
+        // Hours — als Tabelle parsen (Format "Tag: Zeit\nTag: Zeit")
         if (c.opening_hours) {
-            document.getElementById('hoursValue').textContent = c.opening_hours;
+            var lines = c.opening_hours.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+            var rows = lines.map(function(line) {
+                var m = line.match(/^(.+?):\s+(.+)$/);
+                if (!m) return '<tr><td colspan="2">' + escapeHtml(line) + '</td></tr>';
+                var day = escapeHtml(m[1]);
+                var time = m[2].replace(/\s*Uhr$/i, '').trim();
+                var isClosed = /geschlossen|closed/i.test(time);
+                var cls = isClosed ? 'hours-time hours-closed' : 'hours-time';
+                return '<tr><td class="hours-day">' + day + '</td><td class="' + cls + '">' + escapeHtml(time) + '</td></tr>';
+            }).join('');
+            document.getElementById('hoursValue').innerHTML = '<table class="hours-table">' + rows + '</table>';
             document.getElementById('hoursRow').style.display = 'flex';
             anyShown = true;
         }
 
         if (anyShown) section.style.display = 'block';
+    }
+
+    function escapeHtml(s) {
+        return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
     async function load() {
