@@ -72,13 +72,13 @@ Uebersicht: `specs/00-INDEX.md` — IMMER zuerst lesen wenn Aenderungen geplant 
 - get-signed-url/ - Storage URLs generieren
 - send-email/ - Resend Email-Wrapper (deployed mit --no-verify-jwt)
 
-## Aktuelle Migrations-Zaehler (Stand 06.05.2026)
-Letzte Migration: `20260505000008_apply_counter_inline_auth_check.sql`. Naechste als `20260506000001_*.sql` (oder neuer Datum) benennen.
+## Aktuelle Migrations-Zaehler (Stand 10.05.2026)
+Letzte Migration: `20260510000001_favorite_push_trigger.sql`. Naechste als `20260511000001_*.sql` benennen.
 
-## App-Versionen (Stand 06.05.2026)
+## App-Versionen (Stand 10.05.2026)
 - Android: v2.1.8 (versionCode 44)
-- Service Worker: room8-v32
-- iOS: Cap-Sync done (06.05.), Xcode-Build/App Store Upload offen
+- Service Worker: room8-v37 (haeufige Bumps wegen i18n-Cache-Bust)
+- iOS: Cap-Sync done (10.05.), Xcode-Build/App Store Upload offen
 
 ## Build-Befehle
 ```bash
