@@ -95,6 +95,10 @@
             <img src="no-image.svg" id="logo" class="job-logo" alt="Logo">
             <h1 id="title" class="job-title"></h1>
             <div id="company" class="job-company"></div>
+            <div id="viewCountWrap" style="display:none; margin-top:0.5rem; align-items:center; gap:4px; color:#6b7280; font-size:0.85rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span id="viewCount">0</span>
+            </div>
         </div>
 
         <div class="info-grid">
@@ -150,6 +154,11 @@
         if (job) {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('content').style.display = 'block';
+
+            // View-Count Anzeige
+            var vcw = document.getElementById('viewCountWrap');
+            document.getElementById('viewCount').textContent = (job.view_count || 0) + 1;
+            vcw.style.display = 'inline-flex';
 
             document.getElementById('title').textContent = job.title;
             document.getElementById('company').textContent = job.company_name;

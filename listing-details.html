@@ -587,6 +587,10 @@
             <div class="location-row">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 <span id="location"></span>
+                <span id="viewCountWrap" style="display:none; margin-left:auto; display:inline-flex; align-items:center; gap:4px; color:#6b7280; font-size:0.85rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <span id="viewCount">0</span>
+                </span>
             </div>
         </div>
 
@@ -868,6 +872,12 @@
         document.getElementById('title').textContent = l.title;
         document.getElementById('description').textContent = l.description;
         document.getElementById('location').textContent = (l.district ? l.district + ', ' : '') + l.city;
+
+        // View-Count Anzeige (Auge-Icon)
+        var vcw = document.getElementById('viewCountWrap');
+        var vc = (l.view_count || 0) + 1; // optimistic +1 weil eigener Aufruf gleich gezaehlt
+        document.getElementById('viewCount').textContent = vc;
+        vcw.style.display = 'inline-flex';
 
         // Badge
         var typeMap = { 'offer': tr('detail_mode_offer'), 'search': tr('detail_mode_search'), 'swap': tr('detail_mode_swap') };

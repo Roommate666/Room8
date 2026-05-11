@@ -10,23 +10,24 @@ android {
     def keystorePath = System.getenv("ROOM8_KEYSTORE") ?: "${System.getProperty('user.home')}/keys/room8-release.jks"
     def keystoreFile = file(keystorePath)
     def hasReleaseKeystore = keystoreFile.exists()
-    if (hasReleaseKeystore) {
-        // Passwoerter aus ~/.gradle/gradle.properties (user-scoped) ODER env vars.
-        // NICHT mehr im Repo gehardcodet.
-        def storePwd = project.findProperty('ROOM8_STORE_PASSWORD') ?: System.getenv('ROOM8_STORE_PASSWORD')
-        def keyPwd = project.findProperty('ROOM8_KEY_PASSWORD') ?: System.getenv('ROOM8_KEY_PASSWORD')
-        if (storePwd && keyPwd) {
-            signingConfigs {
-                release {
-                    storeFile keystoreFile
-                    storePassword storePwd
-                    keyAlias 'room8'
-                    keyPassword keyPwd
-                }
+    def storePwd = project.findProperty('ROOM8_STORE_PASSWORD') ?: System.getenv('ROOM8_STORE_PASSWORD')
+    def keyPwd = project.findProperty('ROOM8_KEY_PASSWORD') ?: System.getenv('ROOM8_KEY_PASSWORD')
+
+    println "[room8] keystore=${hasReleaseKeystore} storePwd_len=${storePwd?.length() ?: 0} keyPwd_len=${keyPwd?.length() ?: 0}"
+
+    signingConfigs {
+        release {
+            // Standard-DSL: Block muss IMMER existieren, sonst greift `findByName('release')` nicht
+            if (hasReleaseKeystore && storePwd && keyPwd) {
+                storeFile keystoreFile
+                storePassword storePwd
+                keyAlias 'room8'
+                keyPassword keyPwd
             }
-        } else {
-            logger.warn("Release-Keystore vorhanden aber ROOM8_STORE_PASSWORD/ROOM8_KEY_PASSWORD fehlen. Build wird unsigned.")
         }
+    }
+    if (hasReleaseKeystore && !(storePwd && keyPwd)) {
+        logger.warn("Release-Keystore vorhanden aber ROOM8_STORE_PASSWORD/ROOM8_KEY_PASSWORD fehlen. Build wird unsigned.")
     }
 
     defaultConfig {
