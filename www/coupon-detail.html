@@ -16,19 +16,77 @@
             from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
             to { opacity: 1; filter: blur(0); transform: translateY(0); }
         }
-        .coupon-hero { height: 250px; background-color: #FED7AA; position: relative; }
-        .coupon-hero img { width: 100%; height: 100%; object-fit: cover; }
-        /* Glasmorphismus Content */
+        .coupon-hero { height: 320px; background-color: #F3F4F6; position: relative; cursor: zoom-in; }
+        .coupon-hero img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+        /* Content kommt UNTER das Hero, kein Overlap mehr */
         .coupon-content {
-            background: rgba(255,255,255,0.95);
-            border-radius: 24px 24px 0 0;
-            margin-top: -20px;
+            background: rgba(255,255,255,0.98);
             position: relative;
-            padding: 2rem 1.5rem;
+            padding: 1.5rem;
             text-align: center;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8);
             animation: blurFadeIn 0.5s ease-out both;
         }
+        /* Lightbox fuer Hero-Bild */
+        .hero-lightbox {
+            display: none;
+            position: fixed; inset: 0; z-index: 999;
+            background: rgba(0,0,0,0.9);
+            align-items: center; justify-content: center;
+            padding: 1rem;
+        }
+        .hero-lightbox.open { display: flex; }
+        .hero-lightbox img { max-width: 100%; max-height: 100vh; object-fit: contain; }
+        .hero-lightbox-close {
+            position: absolute; top: 1rem; right: 1rem;
+            background: rgba(255,255,255,0.15); color: white;
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; cursor: pointer; border: none;
+        }
+        /* Info-Section unten — Address/Maps/Web/Insta/Phone/Hours */
+        .info-section {
+            background: rgba(249,250,251,0.6);
+            padding: 1.25rem 1.5rem;
+            margin-top: 0.5rem;
+        }
+        .info-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.85rem;
+            padding: 0.85rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            text-decoration: none;
+            color: inherit;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-row:active { background: rgba(0,0,0,0.03); }
+        .info-icon {
+            flex-shrink: 0;
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            background: rgba(234,88,12,0.1);
+            color: #EA580C;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+        }
+        .info-body { flex: 1; min-width: 0; }
+        .info-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9CA3AF;
+            font-weight: 600;
+            margin-bottom: 0.15rem;
+        }
+        .info-value {
+            font-size: 0.95rem;
+            color: #111827;
+            font-weight: 500;
+            white-space: pre-line;
+            word-break: break-word;
+        }
+        .info-chevron { color: #9CA3AF; font-size: 1.25rem; align-self: center; }
         .discount-big { font-size: 2.5rem; font-weight: 800; color: #EA580C; margin: 1rem 0; letter-spacing: -0.02em; }
         .code-box {
             background: rgba(243,244,246,0.88);
@@ -109,8 +167,14 @@
         <a href="javascript:history.back()" class="back-arrow" style="background:rgba(0,0,0,0.3); border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; color:white;">&#8592;</a>
     </header>
 
-    <div class="coupon-hero">
+    <div class="coupon-hero" onclick="openLightbox()">
         <img id="heroImg" src="no-image.svg" alt="Deal">
+    </div>
+
+    <!-- Hero-Lightbox -->
+    <div id="heroLightbox" class="hero-lightbox" onclick="closeLightbox()">
+        <button class="hero-lightbox-close" onclick="event.stopPropagation(); closeLightbox();">&times;</button>
+        <img id="lightboxImg" src="" alt="">
     </div>
 
     <div class="coupon-content">
@@ -128,6 +192,49 @@
         </div>
 
         <p style="font-size:0.8rem; color:#9CA3AF;">Gültig bis: <span id="validDate">-</span></p>
+    </div>
+
+    <!-- Info-Section: Adresse, Maps, Website, Instagram, Phone, Hours -->
+    <div class="info-section" id="infoSection" style="display:none;">
+        <a id="addressRow" class="info-row" target="_blank" rel="noopener" style="display:none;">
+            <span class="info-icon">📍</span>
+            <div class="info-body">
+                <div class="info-label">Adresse · In Karten öffnen</div>
+                <div class="info-value" id="addressValue"></div>
+            </div>
+            <span class="info-chevron">›</span>
+        </a>
+        <a id="phoneRow" class="info-row" style="display:none;">
+            <span class="info-icon">📞</span>
+            <div class="info-body">
+                <div class="info-label">Anrufen</div>
+                <div class="info-value" id="phoneValue"></div>
+            </div>
+            <span class="info-chevron">›</span>
+        </a>
+        <a id="websiteRow" class="info-row" target="_blank" rel="noopener" style="display:none;">
+            <span class="info-icon">🌐</span>
+            <div class="info-body">
+                <div class="info-label">Website</div>
+                <div class="info-value" id="websiteValue"></div>
+            </div>
+            <span class="info-chevron">›</span>
+        </a>
+        <a id="instagramRow" class="info-row" target="_blank" rel="noopener" style="display:none;">
+            <span class="info-icon">📷</span>
+            <div class="info-body">
+                <div class="info-label">Instagram</div>
+                <div class="info-value" id="instagramValue"></div>
+            </div>
+            <span class="info-chevron">›</span>
+        </a>
+        <div id="hoursRow" class="info-row" style="display:none;">
+            <span class="info-icon">🕐</span>
+            <div class="info-body">
+                <div class="info-label">Öffnungszeiten</div>
+                <div class="info-value" id="hoursValue"></div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -178,6 +285,75 @@
     let userId = null;
     let alreadyRedeemed = false;
 
+    // Hero-Lightbox
+    function openLightbox() {
+        var lb = document.getElementById('heroLightbox');
+        if (lb) lb.classList.add('open');
+    }
+    function closeLightbox() {
+        var lb = document.getElementById('heroLightbox');
+        if (lb) lb.classList.remove('open');
+    }
+
+    // Maps-Link: iOS oeffnet Apple Maps, Android/Desktop Google Maps
+    function buildMapsUrl(addr) {
+        var q = encodeURIComponent(addr);
+        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        return isIOS
+            ? 'https://maps.apple.com/?q=' + q
+            : 'https://www.google.com/maps/search/?api=1&query=' + q;
+    }
+
+    // Info-Section: Adresse, Phone, Web, Insta, Hours
+    function fillInfoSection(c) {
+        var section = document.getElementById('infoSection');
+        var anyShown = false;
+
+        // Adresse mit Maps-Link
+        if (c.address) {
+            var fullAddr = c.address + (c.zip_code ? ', ' + c.zip_code : '') + (c.city ? ' ' + c.city : '');
+            var row = document.getElementById('addressRow');
+            document.getElementById('addressValue').textContent = fullAddr;
+            row.href = buildMapsUrl(fullAddr);
+            row.style.display = 'flex';
+            anyShown = true;
+        }
+        // Phone
+        if (c.phone) {
+            var row = document.getElementById('phoneRow');
+            document.getElementById('phoneValue').textContent = c.phone;
+            row.href = 'tel:' + c.phone.replace(/[^\d+]/g, '');
+            row.style.display = 'flex';
+            anyShown = true;
+        }
+        // Website
+        if (c.website) {
+            var row = document.getElementById('websiteRow');
+            var displayUrl = c.website.replace(/^https?:\/\//, '').replace(/\/$/, '');
+            document.getElementById('websiteValue').textContent = displayUrl;
+            row.href = c.website.startsWith('http') ? c.website : 'https://' + c.website;
+            row.style.display = 'flex';
+            anyShown = true;
+        }
+        // Instagram
+        if (c.instagram) {
+            var handle = c.instagram.replace(/^@/, '');
+            var row = document.getElementById('instagramRow');
+            document.getElementById('instagramValue').textContent = '@' + handle;
+            row.href = 'https://www.instagram.com/' + handle + '/';
+            row.style.display = 'flex';
+            anyShown = true;
+        }
+        // Hours
+        if (c.opening_hours) {
+            document.getElementById('hoursValue').textContent = c.opening_hours;
+            document.getElementById('hoursRow').style.display = 'flex';
+            anyShown = true;
+        }
+
+        if (anyShown) section.style.display = 'block';
+    }
+
     async function load() {
         if(!id) return;
 
@@ -185,7 +361,7 @@
         const { data: sess } = await sb.auth.getSession();
         userId = sess && sess.session && sess.session.user ? sess.session.user.id : null;
 
-        const { data: c } = await sb.from('coupons').select('*, coupon_photos(storage_path)').eq('id', id).single();
+        const { data: c } = await sb.from('coupons').select('*, coupon_photos(storage_path, photo_type, display_order)').eq('id', id).single();
         coupon = c;
         if(!coupon) return;
 
@@ -203,7 +379,15 @@
                 : null;
             var fallbackUrl = sb.storage.from('listing-images').getPublicUrl(photo.storage_path).data.publicUrl;
             document.getElementById('heroImg').src = optimized || fallbackUrl;
+            // Lightbox-Bild fuer Vollansicht
+            var fullUrl = window.Room8 && Room8.getOptimizedImageUrl
+                ? Room8.getOptimizedImageUrl('listing-images', photo.storage_path, { width: 2000, quality: 90 })
+                : fallbackUrl;
+            document.getElementById('lightboxImg').src = fullUrl;
         }
+
+        // Info-Section befuellen
+        fillInfoSection(coupon);
 
         // Redeem-Button-Status: schon eingeloest?
         const btn = document.getElementById('redeemBtn');
