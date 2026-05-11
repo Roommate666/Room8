@@ -16,13 +16,14 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        body { background: #F9FAFB; }
+        body { background: #1F2937; }
         .app-container { background: #F9FAFB; }
 
-        /* HERO mit Gradient-Overlay + Logo-Badge */
+        /* HERO mit Gradient-Overlay — Safe-Area-Schutz fuer iOS-Statusbar */
         .coupon-hero {
             position: relative;
-            height: 280px;
+            height: calc(280px + env(safe-area-inset-top, 0px));
+            padding-top: env(safe-area-inset-top, 0px);
             background: #1F2937;
             overflow: hidden;
             cursor: zoom-in;
@@ -31,46 +32,56 @@
             width: 100%; height: 100%;
             object-fit: cover; object-position: center;
         }
+        /* Dunkler Block ueber Status-Bar damit Burger nicht durchblurrt */
+        .coupon-hero::before {
+            content: '';
+            position: absolute;
+            left: 0; right: 0; top: 0;
+            height: env(safe-area-inset-top, 0px);
+            background: #1F2937;
+            z-index: 2;
+            pointer-events: none;
+        }
         .coupon-hero::after {
             content: '';
             position: absolute; left: 0; right: 0; bottom: 0;
-            height: 50%;
-            background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.65) 100%);
+            height: 55%;
+            background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.75) 100%);
             pointer-events: none;
         }
         .hero-overlay {
             position: absolute;
-            left: 1.25rem; right: 1.25rem; bottom: 1.25rem;
+            left: 1.25rem; right: 1.25rem; bottom: 1.5rem;
             color: white;
-            z-index: 2;
+            z-index: 3;
         }
-        .hero-business { font-size: 1.55rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
-        .hero-city { font-size: 0.92rem; font-weight: 500; opacity: 0.92; margin-top: 0.2rem; display: flex; align-items: center; gap: 0.35rem; }
+        .hero-business { font-size: 1.55rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; text-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+        .hero-city { font-size: 0.92rem; font-weight: 500; opacity: 0.95; margin-top: 0.3rem; display: flex; align-items: center; gap: 0.35rem; text-shadow: 0 1px 4px rgba(0,0,0,0.4); }
 
-        /* Discount-Sticker — schwebt zwischen Hero und Card */
+        /* Discount-Sticker — kompakter, kein Overlap */
         .discount-sticker {
             position: relative;
-            margin: -2rem 1.25rem 0;
+            margin: -1.5rem 1.25rem 0;
             background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%);
             color: white;
             border-radius: 18px;
-            padding: 1.1rem 1.5rem;
+            padding: 0.95rem 1.25rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 1rem;
+            gap: 0.75rem;
             box-shadow: 0 14px 30px -8px rgba(234,88,12,0.5), 0 4px 8px rgba(0,0,0,0.1);
-            z-index: 3;
+            z-index: 4;
             animation: fadeInUp 0.4s 0.1s ease-out both;
         }
-        .discount-amount { font-size: 2rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1; }
-        .discount-label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.92; margin-top: 0.2rem; }
+        .discount-amount { font-size: 1.65rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1; }
+        .discount-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.92; margin-top: 0.2rem; }
         .discount-right { text-align: right; }
         .discount-tag {
             background: rgba(255,255,255,0.2);
             border-radius: 999px;
-            padding: 0.35rem 0.75rem;
-            font-size: 0.75rem;
+            padding: 0.32rem 0.7rem;
+            font-size: 0.72rem;
             font-weight: 700;
             white-space: nowrap;
         }
@@ -318,8 +329,8 @@
 </head>
 <body>
 <div class="app-container">
-    <header class="app-header" style="position:absolute; top:0; left:0; width:100%; background:transparent; border:none; box-shadow:none; z-index:10;">
-        <a href="javascript:history.back()" class="back-arrow" style="background:rgba(0,0,0,0.3); border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; color:white;">&#8592;</a>
+    <header class="app-header" style="position:absolute; top:env(safe-area-inset-top, 0px); left:0; width:100%; background:transparent; border:none; box-shadow:none; z-index:10; padding-top:0.5rem;">
+        <a href="javascript:history.back()" class="back-arrow" style="background:rgba(0,0,0,0.45); border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; color:white;">&#8592;</a>
     </header>
 
     <div class="coupon-hero" onclick="openLightbox()">
