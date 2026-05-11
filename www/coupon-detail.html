@@ -178,11 +178,11 @@
     </div>
 
     <div class="coupon-content">
-        <h2 id="companyName" style="color:#6B7280; font-size:0.9rem; text-transform:uppercase; margin-bottom:0.5rem;">Lade...</h2>
-        <h1 id="dealTitle" style="font-size:1.5rem; margin:0;"></h1>
+        <h2 id="companyName" style="color:#6B7280; font-size:0.9rem; text-transform:uppercase; margin-bottom:0.5rem; letter-spacing:0.05em;">Lade...</h2>
+        <h1 id="dealTitle" style="font-size:1.5rem; margin:0; letter-spacing:-0.01em;"></h1>
         <div class="discount-big" id="discountValue"></div>
-        <p id="description" style="color:#4B5563; line-height:1.6;"></p>
-        
+        <p id="description" style="color:#4B5563; line-height:1.6; font-size:0.95rem;"></p>
+
         <button id="redeemBtn" class="redeem-btn" onclick="openRedeemQR()" data-i18n="coupon_redeem_btn">QR-Code zum Einlösen anzeigen</button>
         <div id="redeemedBadge" class="redeemed-badge" style="display:none;" data-i18n="coupon_already_redeemed">Bereits eingelöst</div>
 
@@ -192,6 +192,12 @@
         </div>
 
         <p style="font-size:0.8rem; color:#9CA3AF;">Gültig bis: <span id="validDate">-</span></p>
+    </div>
+
+    <!-- About-Box: Was ist das fuer ein Laden? -->
+    <div id="aboutBox" style="display:none; background:rgba(249,250,251,0.6); padding:1.25rem 1.5rem;">
+        <div style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; color:#9CA3AF; font-weight:600; margin-bottom:0.5rem;">Über den Laden</div>
+        <p id="aboutText" style="margin:0; color:#374151; line-height:1.55; font-size:0.92rem;"></p>
     </div>
 
     <!-- Info-Section: Adresse, Maps, Website, Instagram, Phone, Hours -->
@@ -384,6 +390,12 @@
                 ? Room8.getOptimizedImageUrl('listing-images', photo.storage_path, { width: 2000, quality: 90 })
                 : fallbackUrl;
             document.getElementById('lightboxImg').src = fullUrl;
+        }
+
+        // About-Box (business_description)
+        if (coupon.business_description) {
+            document.getElementById('aboutText').textContent = coupon.business_description;
+            document.getElementById('aboutBox').style.display = 'block';
         }
 
         // Info-Section befuellen
