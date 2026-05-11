@@ -80,6 +80,13 @@
             font-size: 0.7rem; font-weight: 700; padding: 0.3rem 0.6rem;
             border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
         }
+        .example-badge {
+            position: absolute; top: 12px; left: 12px;
+            background: #FEF3C7; color: #92400E;
+            font-size: 0.65rem; font-weight: 800; padding: 0.25rem 0.6rem;
+            border-radius: 999px; border: 1px solid #FCD34D;
+            letter-spacing: 0.05em;
+        }
 
         .event-body { padding: 1rem 1.25rem 1.25rem; }
         .event-category-tag {
@@ -285,6 +292,10 @@
             var goingCount = ev.interest_count || 0;
             var goingText = goingCount === 1 ? '1 Person geht hin' : goingCount + ' Leute gehen hin';
 
+            // Beispiel-Badge wenn Titel mit "Beispiel" beginnt
+            var isExample = /^beispiel/i.test(ev.title || '');
+            var exampleBadge = isExample ? '<span class="example-badge">BEISPIEL</span>' : '';
+
             return (
                 '<div class="event-card" onclick="navigateTo(\'event-detail.html?id=' + ev.id + '\')">' +
                     '<div class="event-image-wrap">' +
@@ -294,6 +305,7 @@
                             '<div class="month">' + date.month + '</div>' +
                         '</div>' +
                         officialBadge +
+                        exampleBadge +
                     '</div>' +
                     '<div class="event-body">' +
                         '<span class="event-category-tag">' + catLabel + '</span>' +

@@ -537,7 +537,8 @@
         var jobType = jobTypeLabels[job.job_type] || (job.job_type ? job.job_type.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }) : 'Job');
         var badge = job.is_demo ? '<span class="example-badge">BEISPIEL</span>' : '';
         var safeId = encodeURIComponent(job.id || '');
-        var clickAction = job.is_demo ? 'onclick="Room8UI.info(\'Dies ist ein Beispiel-Inserat.\')"' : 'onclick="navigateTo(\'job-detail.html?id=' + esc(safeId) + '\')"';
+        // is_demo Items oeffnen TROTZDEM die Detail-Page — Yusuf will dass das Beispiel komplett sichtbar ist
+        var clickAction = 'onclick="navigateTo(\'job-detail.html?id=' + esc(safeId) + '\')"';
 
         return '<div class="' + cardClass + '" ' + clickAction + '>' +
                 badge +
