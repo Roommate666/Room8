@@ -16,8 +16,8 @@
 
         /* Pattern: Magic UI BlurFade */
         @keyframes blurFadeIn {
-            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
-            to { opacity: 1; filter: blur(0px); transform: translateY(0); }
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         /* HEADER */
@@ -43,12 +43,10 @@
             letter-spacing: -0.02em;
         }
 
-        /* Example Banner - Pattern: Glasmorphismus */
+        /* Example Banner — clean ohne Blur */
         .example-banner {
-            background: rgba(245,243,255,0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(139,92,246,0.12);
+            background: #FEF3C7;
+            border: 1px solid #FCD34D;
             border-radius: 14px;
             padding: 0.75rem 1rem;
             margin: 0 1.5rem 1rem;
@@ -56,7 +54,7 @@
             align-items: center;
             gap: 0.75rem;
             font-size: 0.85rem;
-            color: #5B21B6;
+            color: #92400E;
             animation: blurFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
         }
 
@@ -64,14 +62,12 @@
         .example-banner-text { flex: 1; }
         .example-banner-text strong { display: block; font-size: 0.9rem; }
 
-        /* Partner Banner - Pattern: Magic UI MagicCard */
+        /* Partner Banner — clean ohne Blur */
         .partner-banner {
-            background: rgba(255,255,255,0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: white;
             border-radius: 16px; padding: 1.25rem; margin: 0 1.5rem 1.5rem;
-            border: 1px solid rgba(255,255,255,0.6);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             text-align: center;
             animation: blurFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
         }
@@ -311,14 +307,12 @@
 
         .jobs-list { padding: 0 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
 
-        /* Job Card - Pattern: MagicCard Glasmorphismus */
+        /* Job Card — clean, kein Blur */
         .job-card {
-            background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: white;
             border-radius: 18px; padding: 1rem;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.04);
             transition: transform 0.2s, box-shadow 0.2s;
             cursor: pointer; display: flex; gap: 1rem; align-items: center; position: relative;
             animation: blurFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
@@ -415,77 +409,6 @@
         </div>
     </div>
     
-    <!-- ============================================
-         SHOWCASE: Ausgeklapptes Beispiel-Inserat
-         ============================================ -->
-    <div class="showcase-section">
-        <div class="showcase-label">
-            <span>⭐</span> So könnte Ihr Inserat aussehen
-        </div>
-        <div class="showcase-card">
-            <div class="showcase-hero">
-                <div class="showcase-logo">🚀</div>
-                <div class="showcase-header-info">
-                    <h2 class="showcase-title">Werkstudent Marketing (m/w/d)</h2>
-                    <div class="showcase-company">TechStartup GmbH • München</div>
-                    <span class="showcase-salary">16 € / Stunde</span>
-                </div>
-            </div>
-            
-            <div class="showcase-info-grid">
-                <div class="showcase-info-item">
-                    <div class="showcase-info-label">Typ</div>
-                    <div class="showcase-info-value">Werkstudent</div>
-                </div>
-                <div class="showcase-info-item">
-                    <div class="showcase-info-label">Stunden</div>
-                    <div class="showcase-info-value">15-20h / Woche</div>
-                </div>
-                <div class="showcase-info-item">
-                    <div class="showcase-info-label">Start</div>
-                    <div class="showcase-info-value">Ab sofort</div>
-                </div>
-                <div class="showcase-info-item">
-                    <div class="showcase-info-label">Remote</div>
-                    <div class="showcase-info-value">Hybrid</div>
-                </div>
-            </div>
-            
-            <div class="showcase-content">
-                <h3 class="showcase-section-title"><span>📝</span> <span data-i18n="job_description">Beschreibung</span></h3>
-                <p class="showcase-description">
-                    Wir sind ein wachsendes Tech-Startup und suchen einen kreativen Werkstudenten (m/w/d) für unser Marketing-Team. Du unterstützt uns bei der Erstellung von Content für Social Media, hilfst bei Kampagnen und bringst eigene Ideen ein. Flexible Arbeitszeiten und die Möglichkeit, remote zu arbeiten, sind selbstverständlich.
-                </p>
-                
-                <h3 class="showcase-section-title"><span>✅</span> <span data-i18n="job_requirements">Das bringst du mit</span></h3>
-                <ul class="showcase-list">
-                    <li>Eingeschriebener Student (BWL, Marketing, Kommunikation o.ä.)</li>
-                    <li>Erste Erfahrung mit Social Media Marketing</li>
-                    <li>Kreativität und Eigeninitiative</li>
-                    <li>Sehr gute Deutschkenntnisse</li>
-                </ul>
-                
-                <h3 class="showcase-section-title"><span>🎁</span> <span data-i18n="job_benefits">Das bieten wir</span></h3>
-                <ul class="showcase-list benefits">
-                    <li>Flexible Arbeitszeiten neben dem Studium</li>
-                    <li>Modernes Büro in zentraler Lage</li>
-                    <li>Kostenloses Mittagessen & Getränke</li>
-                    <li>Übernahmemöglichkeit nach dem Studium</li>
-                </ul>
-                
-                <button class="showcase-apply-btn" onclick="Room8UI.info((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('jobs_example_info'):'Dies ist ein Beispiel-Inserat. Kontaktieren Sie uns für eine Partnerschaft!')">
-                    <span data-i18n="job_apply">Jetzt bewerben</span>
-                </button>
-            </div>
-            
-            <div class="showcase-footer">
-                <span class="showcase-footer-icon">💼</span>
-                <span>Erreichen Sie tausende Studenten mit Ihrer Stellenanzeige!</span>
-            </div>
-        </div>
-    </div>
-    
-    
     <div class="search-section">
         <div class="search-bar-wrap">
             <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
@@ -533,45 +456,46 @@
     var currentType = 'all';
     var searchQuery = '';
 
-    // Beispiel-Jobs
-    var sampleJobs = [
-        { 
-            id: 'example-1', 
-            title: 'Aushilfe im Café', 
-            company_name: 'Campus Café', 
-            city: 'Berlin', 
-            job_type: 'minijob', 
-            salary_amount: '13.50', 
-            salary_type: 'per_hour', 
-            min_hours_per_week: 10, 
-            is_demo: true, 
+    // Sample-Jobs entfernt — echte Jobs aus DB werden geladen, der "Beispiel:"-Job (mit Bild) reicht
+    var sampleJobs = [];
+    /* Alte hardcoded Beispiele (raus weil Yusuf nur 1 Demo will + echtes mit Bild reicht):
+        {
+            id: 'example-1',
+            title: 'Aushilfe im Café',
+            company_name: 'Campus Café',
+            city: 'Berlin',
+            job_type: 'minijob',
+            salary_amount: '13.50',
+            salary_type: 'per_hour',
+            min_hours_per_week: 10,
+            is_demo: true,
             logo: '☕'
         },
-        { 
-            id: 'example-2', 
-            title: 'Praktikum Softwareentwicklung', 
-            company_name: 'Digital Solutions AG', 
-            city: 'Hamburg', 
-            job_type: 'praktikum', 
-            salary_amount: '1200', 
-            salary_type: 'per_month', 
-            min_hours_per_week: 40, 
-            is_demo: true, 
+        {
+            id: 'example-2',
+            title: 'Praktikum Softwareentwicklung',
+            company_name: 'Digital Solutions AG',
+            city: 'Hamburg',
+            job_type: 'praktikum',
+            salary_amount: '1200',
+            salary_type: 'per_month',
+            min_hours_per_week: 40,
+            is_demo: true,
             logo: '💻'
         },
-        { 
-            id: 'example-3', 
-            title: 'Werkstudent Buchhaltung', 
-            company_name: 'Finance Pro GmbH', 
-            city: 'Frankfurt', 
-            job_type: 'werkstudent', 
-            salary_amount: '15', 
-            salary_type: 'per_hour', 
-            min_hours_per_week: 16, 
-            is_demo: true, 
+        {
+            id: 'example-3',
+            title: 'Werkstudent Buchhaltung',
+            company_name: 'Finance Pro GmbH',
+            city: 'Frankfurt',
+            job_type: 'werkstudent',
+            salary_amount: '15',
+            salary_type: 'per_hour',
+            min_hours_per_week: 16,
+            is_demo: true,
             logo: '📊'
         }
-    ];
+    ]; */
     
     var esc = (Room8 && Room8.escapeHtml) ? Room8.escapeHtml : function(s) {
         return (s == null ? '' : String(s)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');

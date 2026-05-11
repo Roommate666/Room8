@@ -12,8 +12,8 @@
     <style>
         /* Pattern: Magic UI BlurFade */
         @keyframes blurFadeIn {
-            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
-            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
         .app-container { background: white; padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px); }
 
@@ -25,7 +25,7 @@
             background: linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(255,255,255,0.85) 100%);
             pointer-events: none;
         }
-        .job-hero { text-align: center; padding: 2rem 1.5rem; background: rgba(249,250,251,0.88); animation: blurFadeIn 0.5s ease-out both; }
+        .job-hero { text-align: center; padding: 2rem 1.5rem; background: #F9FAFB; animation: blurFadeIn 0.5s ease-out both; }
         .job-hero.with-cover { padding-top: 1rem; margin-top: -2.5rem; position: relative; z-index: 1; }
         .job-logo { width: 80px; height: 80px; border-radius: 18px; object-fit: cover; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); background: #fff; }
         .job-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; line-height: 1.2; letter-spacing: -0.02em; }
@@ -49,22 +49,20 @@
         .content-section p, .content-section li { color: #4B5563; line-height: 1.6; font-size: 0.95rem; }
         .content-section ul { padding-left: 1.2rem; }
 
-        /* Glasmorphismus Apply Bar */
+        /* Apply Bar — clean ohne Blur */
         .apply-bar {
             position: fixed; bottom: 0; left: 0; width: 100%;
             padding: 1rem 1.5rem;
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-top: 1px solid rgba(0,0,0,0.04);
+            background: white;
+            border-top: 1px solid rgba(0,0,0,0.06);
             display: flex; justify-content: center;
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8);
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
         }
         .apply-btn {
-            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
             color: white; border: none; width: 100%; max-width: 600px;
             padding: 1rem; border-radius: 999px; font-weight: 700; font-size: 1rem; cursor: pointer;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            box-shadow: 0 4px 12px rgba(59,130,246,0.3);
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .apply-btn:active { transform: scale(0.97); }
