@@ -6,6 +6,16 @@
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
         <string>Room8</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Room8 nutzt die Kamera nur wenn du selbst ein Foto für dein Profil oder Inserat aufnehmen willst.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Room8 greift auf die Fotomediathek zu, damit du Bilder für dein Profil oder Inserat auswählen kannst.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Room8 speichert nur Bilder in deiner Fotomediathek, die du explizit aus der App heraus sichern willst.</string>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>Room8 sendet Push-Benachrichtigungen für neue Chats, Inserate in deiner Stadt und Coupon-Einlösungen.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
