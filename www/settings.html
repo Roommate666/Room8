@@ -459,7 +459,7 @@ document.getElementById('deleteAccountBtn').addEventListener('click', async func
             }
         } catch (e) { console.log('Avatar cleanup error:', e); }
 
-        // 4. Alle Datenbank-Einträge löschen
+        // 4. Alle Datenbank-Eintraege loeschen (in Reihenfolge wegen FK-Cascade)
         await sb.from('listing_photos').delete().eq('user_id', user.id);
         await sb.from('listings').delete().eq('owner_id', user.id);
         await sb.from('messages').delete().eq('sender_id', user.id);
@@ -470,6 +470,12 @@ document.getElementById('deleteAccountBtn').addEventListener('click', async func
         await sb.from('reviews').delete().eq('reviewee_id', user.id);
         await sb.from('reports').delete().eq('reporter_id', user.id);
         await sb.from('saved_searches').delete().eq('user_id', user.id);
+        // NEU: Events (Organizer) — sonst bleiben verwaiste Events nach DSGVO-Loeschung
+        await sb.from('events').delete().eq('organizer_id', user.id);
+        // NEU: Coupons (Partner oder Besitzer) — alte Logik liess Coupons haengen
+        await sb.from('coupons').delete().or('user_id.eq.' + user.id + ',partner_user_id.eq.' + user.id);
+        // FCM-Tokens haben CASCADE auf profiles, aber explizit fuer Sicherheit
+        try { await sb.from('fcm_tokens').delete().eq('user_id', user.id); } catch(e) {}
         await sb.from('profiles').delete().eq('id', user.id);
 
         // 5. Auth-User löschen (via Edge Function)

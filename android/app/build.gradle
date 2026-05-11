@@ -13,8 +13,6 @@ android {
     def storePwd = project.findProperty('ROOM8_STORE_PASSWORD') ?: System.getenv('ROOM8_STORE_PASSWORD')
     def keyPwd = project.findProperty('ROOM8_KEY_PASSWORD') ?: System.getenv('ROOM8_KEY_PASSWORD')
 
-    println "[room8] keystore=${hasReleaseKeystore} storePwd_len=${storePwd?.length() ?: 0} keyPwd_len=${keyPwd?.length() ?: 0}"
-
     signingConfigs {
         release {
             // Standard-DSL: Block muss IMMER existieren, sonst greift `findByName('release')` nicht
