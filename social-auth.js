@@ -1,23 +1,53 @@
 // Native Apple/Google Sign-In fuer Capacitor + Web-Fallback
-// Nutzung: signInWithGoogle() / signInWithApple() — danach automatisch Profile-Check
+// Nutzung: signInWithApple() / signInWithGoogle() — danach automatisch Profile-Check
+// Google: @capgo/capacitor-social-login (seit 15.05.2026, ersetzt totes codetrix-Plugin)
+// Apple : @capacitor-community/apple-sign-in (unveraendert)
 (function () {
   var isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  var googleInitDone = false;
 
   function getSb() {
     return window.sb || window.supabase;
   }
 
+  async function googleInitOnce() {
+    if (googleInitDone) return;
+    var SocialLogin = window.Capacitor.Plugins && window.Capacitor.Plugins.SocialLogin;
+    if (!SocialLogin) throw new Error('SocialLogin-Plugin nicht verfuegbar');
+    // Provider muss explizit beim initialize uebergeben werden — Plugin liest
+    // capacitor.config.json NICHT zur Laufzeit (sondern nur build-time fuer Pods).
+    await SocialLogin.initialize({
+      google: {
+        iOSClientId: '193353507606-sqa3763hp6mp67l7lv38puohmdjocovn.apps.googleusercontent.com',
+        iOSServerClientId: '193353507606-qjq74nuka2a15qbankvfshqaqukhaead.apps.googleusercontent.com',
+        mode: 'online'
+      }
+    });
+    googleInitDone = true;
+  }
+
   async function googleNative() {
-    var GoogleAuth = window.Capacitor.Plugins && window.Capacitor.Plugins.GoogleAuth;
-    if (!GoogleAuth) throw new Error('GoogleAuth-Plugin nicht verfuegbar');
-    try { await GoogleAuth.initialize(); } catch (e) { /* may be auto-init */ }
-    var res = await GoogleAuth.signIn();
+    var SocialLogin = window.Capacitor.Plugins && window.Capacitor.Plugins.SocialLogin;
+    if (!SocialLogin) throw new Error('SocialLogin-Plugin nicht verfuegbar');
+    await googleInitOnce();
+    var res = await SocialLogin.login({
+      provider: 'google',
+      options: { scopes: ['email', 'profile'] }
+    });
+    var r = (res && res.result) || {};
+    var p = r.profile || {};
+    var name = '';
+    if (p.givenName || p.familyName) {
+      name = ((p.givenName || '') + ' ' + (p.familyName || '')).trim();
+    } else if (p.name) {
+      name = p.name;
+    }
     return {
-      idToken: res.authentication && res.authentication.idToken,
+      idToken: r.idToken,
       profile: {
-        email: res.email || '',
-        full_name: ((res.givenName || '') + ' ' + (res.familyName || '')).trim() || res.name || '',
-        avatar: res.imageUrl || ''
+        email: p.email || '',
+        full_name: name,
+        avatar: p.imageUrl || p.pictureUrl || ''
       }
     };
   }

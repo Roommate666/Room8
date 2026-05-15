@@ -1,11 +1,20 @@
 # Auth + Verifizierung
 
-**Stand:** 2026-04-28
+**Stand:** 2026-05-15
 **Status:** PRODUCTION-LIVE
 
 ## Was es tut
 
 Supabase Auth mit Email/Password + Google OAuth + Apple Sign-In. Plus optionaler Studenten-Verifizierung über Uni-Mail oder Immatrikulationsbescheinigung.
+
+## iOS Native Auth-Plugins (Stand 15.05.2026)
+
+| Provider | Plugin | iOS-Pod | Begründung |
+|---|---|---|---|
+| Google | `@capgo/capacitor-social-login@7.20.0` | GoogleSignIn 9.0.0 (mit PrivacyInfo) | Ersetzt 15.05. das tote `@codetrix-studio/capacitor-google-auth` das 3x ITMS-91061 verursachte |
+| Apple | `@capacitor-community/apple-sign-in@7.1.0` | nativ via Capacitor | Funktioniert, hat PrivacyInfo, nicht angefasst bei Plugin-Migration (Sicherheit) |
+
+**SocialLogin Provider-Filter** in `capacitor.config.json`: Nur `google: true`, alle anderen `false`. Sonst zieht Plugin ungenutzte FBSDKCoreKit/FBSDKLoginKit/Twitter-Pods rein.
 
 ## Verifizierungs-Wege
 
