@@ -75,10 +75,16 @@ Uebersicht: `specs/00-INDEX.md` — IMMER zuerst lesen wenn Aenderungen geplant 
 ## Aktuelle Migrations-Zaehler (Stand 10.05.2026)
 Letzte Migration: `20260510000001_favorite_push_trigger.sql`. Naechste als `20260511000001_*.sql` benennen.
 
-## App-Versionen (Stand 10.05.2026)
-- Android: v2.1.8 (versionCode 44)
-- Service Worker: room8-v37 (haeufige Bumps wegen i18n-Cache-Bust)
-- iOS: Cap-Sync done (10.05.), Xcode-Build/App Store Upload offen
+## App-Versionen (Stand 15.05.2026)
+- Android: v2.1.9 (versionCode 45) — eingereicht Play Store 12.05.
+- iOS: v2.1.9 (Build 46) — Build 45 rejected (3x ITMS-91061), Build 46 nach Plugin-Migration
+- Service Worker: room8-v52
+
+## iOS Auth-Plugins (Stand 15.05.2026)
+- Google: `@capgo/capacitor-social-login@7.20.0` (zieht GoogleSignIn 9.0.0 mit PrivacyInfo)
+  - Provider-Filter PFLICHT in capacitor.config.json: `providers: { google: true, facebook: false, apple: false, twitter: false }` — sonst FBSDK-Pods reinkommen
+- Apple: `@capacitor-community/apple-sign-in@7.1.0` (unangetastet, hat PrivacyInfo)
+- Supabase Authorized Client IDs muss ALLE 3 enthalten: qq35... (legacy) + qjq74... (Web) + sqa3763... (iOS, echter Bundle-ID-Client)
 
 ## Build-Befehle
 ```bash
