@@ -184,7 +184,7 @@
         // Profile separat laden
         var blockedIds = blocked.map(function(b) { return b.blocked_id; });
         var { data: profiles } = await sb
-            .from('profiles')
+            .from('public_profiles')
             .select('id, username, full_name, avatar_url')
             .in('id', blockedIds);
 

@@ -502,7 +502,7 @@
                 if (!listing) throw new Error('Listing nicht gefunden.');
                 
                 var ownerPromise = listing.owner_id 
-                    ? sb.from('profiles').select('id, username, avatar_url, is_verified, university').eq('id', listing.owner_id).single()
+                    ? sb.from('public_profiles').select('id, username, avatar_url, is_verified, university').eq('id', listing.owner_id).single()
                     : Promise.resolve({ data: null });
                 
                 return ownerPromise.then(function(ownerResponse) {

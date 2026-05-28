@@ -118,11 +118,11 @@
           .then(function(listingResponse) {
             if (listingResponse.error) throw listingResponse.error;
             contextP.textContent = 'Transaktion für "' + listingResponse.data.title + '"';
-            return sb.from('profiles').select('username, avatar_url').eq('id', revieweeId).single();
+            return sb.from('public_profiles').select('username, avatar_url').eq('id', revieweeId).single();
           });
       } else {
         contextP.textContent = 'Allgemeine Nutzerbewertung';
-        loadPromise = sb.from('profiles').select('username, avatar_url').eq('id', revieweeId).single();
+        loadPromise = sb.from('public_profiles').select('username, avatar_url').eq('id', revieweeId).single();
       }
 
       loadPromise
@@ -206,7 +206,7 @@
             var auth = await sb.auth.getUser();
             var reviewer = auth.data.user;
             if (reviewer && window.NotificationHelpers) {
-              var profileRes = await sb.from('profiles').select('username, full_name').eq('id', reviewer.id).single();
+              var profileRes = await sb.from('public_profiles').select('username, full_name').eq('id', reviewer.id).single();
               var reviewerName = profileRes.data ? (profileRes.data.full_name || profileRes.data.username || 'Jemand') : 'Jemand';
               var ratingVal = parseInt(document.querySelector('input[name="rating"]:checked').value);
               NotificationHelpers.notifyReview(revieweeId, reviewerName, ratingVal, listingId || null);

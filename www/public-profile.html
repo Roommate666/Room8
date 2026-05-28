@@ -519,7 +519,7 @@
         // Whitelist nur sichere Spalten — KEIN '*', sonst leaken email/fcm_token/is_admin
         // an jeden eingeloggten User.
         const { data: profile, error } = await sb
-            .from('profiles')
+            .from('public_profiles')
             .select('id, username, full_name, avatar_url, created_at, is_verified, is_student_verified, bio, city, university, study_field, semester, age, languages, interests')
             .eq('id', userId)
             .single();

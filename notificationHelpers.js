@@ -432,7 +432,7 @@
             if (!sb) return { success: false };
 
             try {
-                var usersRes = await sb.from('profiles').select('id');
+                var usersRes = await sb.from('public_profiles').select('id');
                 if (usersRes.error) throw usersRes.error;
 
                 var notifications = usersRes.data.map(function(user) {
@@ -463,7 +463,7 @@
 
             try {
                 var usersRes = await sb
-                    .from('profiles')
+                    .from('public_profiles')
                     .select('id')
                     .ilike('city', city);
 
