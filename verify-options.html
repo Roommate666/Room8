@@ -274,6 +274,7 @@
 <script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
+<script src="uni-domains.js"></script>
 <script>
     // Init
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -335,52 +336,13 @@
         document.getElementById('selection-view').style.display = 'block';
     }
 
-    // Blockierte E-Mail-Domains (keine privaten Anbieter erlaubt)
-    var blockedDomains = [
-        'gmail.com', 'googlemail.com',
-        'yahoo.com', 'yahoo.de', 'yahoo.co.uk', 'yahoo.fr',
-        'hotmail.com', 'hotmail.de', 'hotmail.co.uk', 'hotmail.fr',
-        'outlook.com', 'outlook.de',
-        'live.com', 'live.de',
-        'msn.com',
-        'icloud.com', 'me.com', 'mac.com',
-        'aol.com', 'aol.de',
-        'gmx.de', 'gmx.net', 'gmx.at', 'gmx.ch', 'gmx.com',
-        'web.de',
-        'freenet.de',
-        'arcor.de',
-        'mail.com', 'email.com',
-        'zoho.com',
-        'yandex.com', 'yandex.ru',
-        'mail.ru',
-        'proton.me', 'protonmail.com', 'protonmail.ch', 'pm.me',
-        'tutanota.com', 'tutamail.com', 'tuta.io',
-        'posteo.de', 'posteo.net',
-        'mailbox.org',
-        't-online.de',
-        'vodafone.de',
-        'o2online.de',
-        'bluewin.ch',
-        'sunrise.ch',
-        'orange.fr',
-        'laposte.net',
-        'libero.it',
-        'seznam.cz',
-        'wp.pl', 'onet.pl', 'interia.pl',
-        'rambler.ru',
-        'ukr.net',
-        'inbox.com', 'inbox.lv',
-        'fastmail.com',
-        'hushmail.com',
-        'disroot.org',
-        'riseup.net'
-    ];
-
-    function isBlockedEmail(email) {
-        var domain = email.split('@')[1];
-        if (!domain) return true;
-        domain = domain.toLowerCase();
-        return blockedDomains.indexOf(domain) !== -1;
+    // Domain-Klassifizierung kommt aus uni-domains.js (Whitelist-first):
+    // Nur echte Hochschul-Domains werden per Mail akzeptiert. Eigene Firmen-Domains
+    // oder Freemailer muessen den Dokument-Upload nutzen.
+    function classifyUniEmail(email) {
+        if (window.Room8UniDomains) return window.Room8UniDomains.classify(email);
+        // Fallback falls Modul nicht geladen: konservativ ablehnen (auf sichere Seite)
+        return { accepted: false, blocked: false, domain: (email.split('@')[1] || '').toLowerCase() };
     }
 
     // --- LOGIC: EMAIL SUBMIT ---
@@ -389,9 +351,14 @@
         const email = document.getElementById('uniEmail').value.trim().toLowerCase();
         const btn = document.getElementById('btnEmail');
 
-        // Prüfe ob es eine private E-Mail ist
-        if (isBlockedEmail(email)) {
-            Room8UI.error('Bitte gib deine offizielle Uni-E-Mail-Adresse ein. Private E-Mail-Adressen (Gmail, GMX, etc.) sind nicht erlaubt.');
+        // Prüfe ob es eine echte Hochschul-Adresse ist (Whitelist-first)
+        var cls = classifyUniEmail(email);
+        if (cls.blocked) {
+            Room8UI.error('Private E-Mail-Adressen (Gmail, GMX, Outlook, etc.) sind nicht erlaubt. Bitte nutze deine offizielle Uni-E-Mail.');
+            return;
+        }
+        if (!cls.accepted) {
+            Room8UI.error('Diese Adresse konnten wir nicht als Hochschul-Adresse erkennen. Falls du eine gültige Uni-Mail hast, prüfe die Schreibweise — andernfalls verifiziere dich bitte per Dokument-Upload (Immatrikulationsbescheinigung oder Studentenausweis).');
             return;
         }
 
