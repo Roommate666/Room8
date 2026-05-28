@@ -360,9 +360,12 @@
         try {
             var businessName = document.getElementById('businessName').value || '';
             var category = document.getElementById('category').value || '';
+            var polishSession = await sb.auth.getSession();
+            var polishToken = polishSession.data.session && polishSession.data.session.access_token;
+            if (!polishToken) { alert('Bitte melde dich an, um die KI-Verbesserung zu nutzen.'); return; }
             var resp = await fetch(SUPABASE_URL + '/functions/v1/polish-text', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + polishToken },
                 body: JSON.stringify({ text: orig, type: 'coupon', context: 'Geschaeft: ' + businessName + ', Kategorie: ' + category })
             });
             var j = await resp.json();

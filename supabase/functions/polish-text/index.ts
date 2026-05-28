@@ -5,6 +5,7 @@
 // Cost: ~0.02 cent pro Polish (GPT-4o-mini, billiger als Claude Haiku).
 
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
+import { createClient } from 'jsr:@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -46,6 +47,35 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
+    // --- Auth-Wand: nur eingeloggte, verifizierte Partner duerfen polishen ---
+    // Vorher war die Function komplett offen -> jeder mit dem oeffentlichen
+    // Anon-Key konnte beliebig viele GPT-Calls auf unseren OpenAI-Key feuern.
+    const authHeader = req.headers.get('Authorization') || ''
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim()
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'auth_required' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
+    if (!supabaseUrl || !anonKey) {
+      return new Response(JSON.stringify({ error: 'server_misconfigured' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+    const authedClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+    // getUser(token) schlaegt bei Anon-Key fehl (kein echter User) -> 401
+    const { data: userData, error: authErr } = await authedClient.auth.getUser(token)
+    if (authErr || !userData?.user) {
+      return new Response(JSON.stringify({ error: 'auth_required' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+    // Nur Partner-Accounts duerfen die KI-Politur nutzen (RLS: User liest eigenes Profil)
+    const { data: profile, error: profErr } = await authedClient
+      .from('profiles').select('is_partner').eq('id', userData.user.id).single()
+    if (profErr || !profile || profile.is_partner !== true) {
+      return new Response(JSON.stringify({ error: 'partner_only' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
     const { text, type, context } = await req.json()
     if (!text || typeof text !== 'string' || text.length < 5) {
       return new Response(JSON.stringify({ error: 'text too short' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
