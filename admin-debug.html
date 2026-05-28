@@ -266,7 +266,7 @@
         container.innerHTML = 'Lade...';
 
         try {
-            const { data, error } = await sb.from('profiles').select('id, email, full_name, verification_status, verification_method, enrollment_certificate_url, verification_document_url, uni_email, edu_email, is_verified, is_student_verified').order('created_at', { ascending: false }).limit(50);
+            const { data, error } = await sb.from('admin_profiles').select('id, email, full_name, verification_status, verification_method, enrollment_certificate_url, verification_document_url, uni_email, edu_email, is_verified, is_student_verified').order('created_at', { ascending: false }).limit(50);
 
             if (error) {
                 container.innerHTML = `<p class="error">Fehler: ${error.message}</p>`;

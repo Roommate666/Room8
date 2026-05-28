@@ -355,9 +355,11 @@
         }
 
         // Profil laden (inklusive is_admin fuer Admin-Bereich)
+        // email NICHT aus profiles lesen (Spalte ist gegen Fremdzugriff gesperrt);
+        // die eigene Mail kommt aus der Auth-Session (user.email, s.u.).
         var profileResult = await sb
             .from('profiles')
-            .select('username, email, full_name, avatar_url, is_admin')
+            .select('username, full_name, avatar_url, is_admin')
             .eq('id', user.id)
             .single();
 

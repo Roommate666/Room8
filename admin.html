@@ -964,7 +964,7 @@
             // Partner-User-ID anhand contact_email auflösen, fallback auf Admin
             let ownerId = adminUser.id;
             if (submission.contact_email) {
-                const lookupRes = await sb.from('profiles').select('id').eq('email', submission.contact_email).maybeSingle();
+                const lookupRes = await sb.from('admin_profiles').select('id').eq('email', submission.contact_email).maybeSingle();
                 if (lookupRes.data && lookupRes.data.id) ownerId = lookupRes.data.id;
             }
 
@@ -1952,7 +1952,7 @@
 
         // Profile-Daten der Antragsteller mit-laden
         var userIds = [...new Set(res.data.map(r => r.user_id))];
-        var profilesRes = await sb.from('profiles').select('id, username, full_name, is_verified, is_student_verified, uni_email_verified, avatar_url, bio, created_at, email, edu_email, university, instagram_handle').in('id', userIds);
+        var profilesRes = await sb.from('admin_profiles').select('id, username, full_name, is_verified, is_student_verified, uni_email_verified, avatar_url, bio, created_at, email, edu_email, university, instagram_handle').in('id', userIds);
         var profilesMap = {};
         (profilesRes.data || []).forEach(p => { profilesMap[p.id] = p; });
 
