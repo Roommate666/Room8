@@ -72,6 +72,26 @@
 <script>
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // Sicherheits-Gate: Diese Debug-Seite dumpt Roh-Profildaten (inkl. Emails).
+    // Nur Admins duerfen sie sehen. Seite bleibt versteckt bis is_admin bestaetigt.
+    // HINWEIS: Vollstaendiger Schutz erst durch die profiles-RLS-Verschaerfung (DB).
+    document.documentElement.style.visibility = 'hidden';
+    (async function adminGate() {
+        try {
+            var ures = await sb.auth.getUser();
+            var user = ures && ures.data && ures.data.user;
+            if (!user) { window.location.replace('login.html'); return; }
+            var pres = await sb.from('profiles').select('is_admin').eq('id', user.id).single();
+            if (pres && pres.data && pres.data.is_admin === true) {
+                document.documentElement.style.visibility = 'visible';
+            } else {
+                window.location.replace('dashboard.html');
+            }
+        } catch (e) {
+            window.location.replace('dashboard.html');
+        }
+    })();
+
     function escapeHtml(text) {
         if (!text) return '-';
         return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
