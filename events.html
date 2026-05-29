@@ -223,13 +223,15 @@
 
     async function loadEvents() {
         try {
-            var nowIso = new Date().toISOString();
+            // Kein harter start_at-Filter mehr: ein bereits gestartetes, aber noch
+            // laufendes Event (start in Vergangenheit, status noch 'active') wuerde
+            // sonst aus der Liste fallen. Vergangene Events setzt der Cron
+            // mark-past-events auf status='past' -> status='active' reicht als Filter.
             var result = await sb
                 .from('events')
                 .select('*')
                 .eq('status', 'active')
                 .eq('is_test', false)
-                .gte('start_at', nowIso)
                 .order('start_at', { ascending: true })
                 .limit(100);
 

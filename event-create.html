@@ -462,7 +462,7 @@
     async function submitEvent() {
         var btn = document.getElementById('submitBtn');
         btn.disabled = true;
-        btn.textContent = 'Wird erstellt...';
+        btn.innerHTML = '<span class="btn-spin"></span>Wird erstellt...';
 
         try {
             // Validierung
@@ -530,7 +530,7 @@
                 } else {
                     coverImagePath = fileName;
                 }
-                btn.textContent = 'Wird erstellt...';
+                btn.innerHTML = '<span class="btn-spin"></span>Wird erstellt...';
             }
 
             // Trusted-Organizer Felder (Server-Trigger erzwingt Schutz, das hier ist nur UI)

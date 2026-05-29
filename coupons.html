@@ -482,16 +482,21 @@
 
             console.log("Coupons geladen:", result);
 
-            if (result.error) {
-                console.log("Fehler mit status filter, probiere ohne...");
-                result = await sb.from('coupons').select('*, coupon_photos(storage_path, photo_type)').order('created_at', { ascending: false });
-                console.log("Ohne Filter:", result);
-            }
+            // Bewusst KEIN Fallback ohne status/is_test-Filter: der wuerde Test- und
+            // inaktive Coupons oeffentlich anzeigen. Bei Fehler lieber leer.
 
             if (!result.error && result.data && result.data.length > 0) {
                 console.log("Anzahl Coupons:", result.data.length);
+                // Abgelaufene + ausgeschoepfte Coupons ausblenden (sonst klickt der User
+                // auf einen toten Coupon). valid_until/max_redemptions koennen null sein.
+                var heute = new Date().toISOString().slice(0, 10);
+                var liveCoupons = result.data.filter(function(c) {
+                    if (c.valid_until && c.valid_until < heute) return false;
+                    if (c.max_redemptions != null && (c.current_redemptions || 0) >= c.max_redemptions) return false;
+                    return true;
+                });
                 // Map coupon_photos auf imageUrl (cover) + logoUrl (logo) mit Image-Transform
-                allCoupons = result.data.map(function(c) {
+                allCoupons = liveCoupons.map(function(c) {
                     if (c.coupon_photos && c.coupon_photos.length > 0) {
                         c.coupon_photos.forEach(function(p) {
                             if (p.photo_type === 'cover' && !c.imageUrl) {
