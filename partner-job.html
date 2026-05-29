@@ -332,6 +332,32 @@
 <script src="image-validator.js"></script>
 <script>
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    window._submitterId = null;
+
+    // Permission-Gate (UX): eingeloggte Partner ohne Job-Recht sehen einen Hinweis
+    // statt erst das Formular auszufuellen. Anon/Nicht-Partner (Akquise) bleiben offen.
+    // Harte Wand ist die RLS-Policy partner_submission_permission_gate.
+    (async function partnerGate() {
+        try {
+            var s = await sb.auth.getSession();
+            var u = s.data.session && s.data.session.user;
+            if (!u) return;
+            window._submitterId = u.id;
+            var pr = await sb.from('profiles').select('is_partner, partner_can_jobs').eq('id', u.id).maybeSingle();
+            var p = pr.data || {};
+            if (p.is_partner && !p.partner_can_jobs) {
+                var form = document.getElementById('jobForm');
+                if (form) form.style.display = 'none';
+                var box = document.createElement('div');
+                box.style.cssText = 'max-width:560px;margin:2rem auto;padding:1.75rem;background:#FEF3C7;border:1px solid #F59E0B;border-radius:1rem;color:#92400E;text-align:center;';
+                box.innerHTML = '<div style="font-size:2rem;margin-bottom:.5rem;">🔒</div>' +
+                    '<strong style="display:block;font-size:1.05rem;margin-bottom:.35rem;">Jobs sind für dein Konto nicht freigeschaltet</strong>' +
+                    '<span style="font-size:.9rem;">Melde dich beim Room8-Team, wenn du Jobs einreichen möchtest.</span>' +
+                    '<div style="margin-top:1rem;"><a href="partner-dashboard.html" style="color:#92400E;font-weight:700;text-decoration:none;">← Zum Dashboard</a></div>';
+                if (form && form.parentNode) form.parentNode.insertBefore(box, form); else document.body.appendChild(box);
+            }
+        } catch (e) { /* Gate ist nur UX, RLS erzwingt es hart */ }
+    })();
 
     // AI Polish-Button
     document.getElementById('polishBtn').addEventListener('click', async function() {
@@ -426,6 +452,7 @@
                 application_url: document.getElementById('appUrl').value || null,
                 logo_image_path: logoPath,
                 cover_image_path: coverPath,
+                submitter_id: window._submitterId,
                 submitted_at: new Date().toISOString()
             };
 
