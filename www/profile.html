@@ -380,8 +380,8 @@
     }
 
     async function loadProfileData(userId) {
-        // Profil
-        const { data: profile } = await sb.from('profiles').select('*').eq('id', userId).single();
+        // Profil (eigenes) via my_profile-View statt select('*') direkt auf profiles
+        const { data: profile } = await sb.from('my_profile').select('*').eq('id', userId).single();
         if (profile) {
             var username = profile.username || 'User';
             welcomeMessage.childNodes[0].textContent = 'Hallo, ' + username + '! ';

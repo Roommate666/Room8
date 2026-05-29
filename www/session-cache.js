@@ -40,7 +40,9 @@
             }
 
             if (!window.sb || !userId) return null;
-            var result = await window.sb.from('profiles').select('*').eq('id', userId).single();
+            // my_profile-View: eigenes Profil komplett, ohne select('*') direkt auf
+            // profiles -> ermoeglicht spaetere profiles-Policy-Verschaerfung.
+            var result = await window.sb.from('my_profile').select('*').eq('id', userId).single();
             if (result.data) {
                 sessionStorage.setItem('_cached_profile', JSON.stringify(result.data));
                 sessionStorage.setItem('_cached_profile_at', String(Date.now()));
