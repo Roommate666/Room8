@@ -73,7 +73,8 @@ Uebersicht: `specs/00-INDEX.md` — IMMER zuerst lesen wenn Aenderungen geplant 
 - send-email/ - Resend Email-Wrapper (deployed mit --no-verify-jwt)
 
 ## Aktuelle Migrations-Zaehler (Stand 29.05.2026)
-Letzte Migration: `20260529000006_partner_submission_permission_gate.sql`. Naechste als `20260529000007_*.sql` (oder Folgetag) benennen.
+Letzte Migration: `20260529000007_notify_partner_submission_review.sql`. Naechste als `20260529000008_*.sql` (oder Folgetag) benennen.
+Trigger `trg_notify_partner_submission_review`: benachrichtigt Partner bei Approve/Reject (eingeloggt -> In-App+Push, anon -> Email).
 
 ## Partner-Permission-System (Stand 29.05.2026)
 - `partner_can_jobs/coupons/events` (profiles) werden HART durchgesetzt via RLS-Policy `partner_submission_permission_gate` (RESTRICTIVE) auf partner_submissions. Eingeloggte Partner duerfen nur Typen mit gesetztem Schalter einreichen; anon + Nicht-Partner (Akquise) bleiben offen (Hybrid). Live-getestet: Recht=NEIN -> 403, Recht=JA -> 201.
