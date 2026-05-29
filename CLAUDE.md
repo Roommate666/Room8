@@ -73,7 +73,12 @@ Uebersicht: `specs/00-INDEX.md` — IMMER zuerst lesen wenn Aenderungen geplant 
 - send-email/ - Resend Email-Wrapper (deployed mit --no-verify-jwt)
 
 ## Aktuelle Migrations-Zaehler (Stand 29.05.2026)
-Letzte Migration: `20260529000005_my_profile_view.sql`. Naechste als `20260529000006_*.sql` (oder Folgetag) benennen.
+Letzte Migration: `20260529000006_partner_submission_permission_gate.sql`. Naechste als `20260529000007_*.sql` (oder Folgetag) benennen.
+
+## Partner-Permission-System (Stand 29.05.2026)
+- `partner_can_jobs/coupons/events` (profiles) werden HART durchgesetzt via RLS-Policy `partner_submission_permission_gate` (RESTRICTIVE) auf partner_submissions. Eingeloggte Partner duerfen nur Typen mit gesetztem Schalter einreichen; anon + Nicht-Partner (Akquise) bleiben offen (Hybrid). Live-getestet: Recht=NEIN -> 403, Recht=JA -> 201.
+- `partner_submissions.submitter_id` (uuid, auth.uid() beim Einreichen, null bei anon) = feste Identitaet. partner-job/coupon/event.html schreiben es + haben ein UX-Gate (Hinweis statt Formular wenn kein Recht).
+- OFFEN: admin.html Approve nutzt noch contact_email-Lookup mit Admin-Fallback statt submitter_id -> genehmigter Partner sieht Live-Inhalt ggf. nicht im Dashboard. submitter_id ist die Basis fuer den Fix.
 Security-Views vorhanden: `public_profiles` (Anzeige-Spalten, security_definer), `admin_profiles` (alle Spalten nur fuer is_admin), `my_profile` (eigenes Profil komplett, security_invoker + WHERE id=auth.uid()). FREMD-Profil-Reads laufen ueber public_profiles, EIGEN-Reads (profile.html + session-cache.js) ueber my_profile. Kein select('*') mehr auf profiles im www/-Source (nur noch admin-debug.html, admin-gegated). profiles-Policy noch USING(true) — Verschaerfung erst NACHDEM ein App-Build mit diesem www/-Stand live ist (cap sync zieht www/ in ios/+android/ Bundles).
 
 ## App-Versionen (Stand 15.05.2026)
