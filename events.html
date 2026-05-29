@@ -351,13 +351,18 @@
         if (!userRes.data.user) return;
 
         var profileRes = await sb.from('profiles')
-            .select('is_partner, is_admin, partner_can_events')
+            .select('is_partner, is_admin, partner_can_events, can_create_events, trusted_organizer')
             .eq('id', userRes.data.user.id).maybeSingle();
         var p = profileRes.data || {};
 
-        // Plus nur zeigen wenn: Admin ODER Partner mit Events-Permission
-        var canCreate = !!(p.is_admin || (p.is_partner && p.partner_can_events));
-        if (headerBtn && canCreate) {
+        // Plus zeigen wenn: Admin ODER Partner mit Events-Permission.
+        // Ziel je nach Recht: wer direkt erstellen darf (Admin/trusted/can_create_events)
+        // -> event-create.html (sofort live). Normaler Partner -> partner-event.html
+        // (Einreichen, Admin-Review). Sonst liefe der direkte Insert in die RLS-Wand.
+        var canShow = !!(p.is_admin || (p.is_partner && p.partner_can_events));
+        var canCreateDirect = !!(p.is_admin || p.trusted_organizer || p.can_create_events);
+        if (headerBtn && canShow) {
+            headerBtn.setAttribute('href', canCreateDirect ? 'event-create.html' : 'partner-event.html');
             headerBtn.style.display = 'flex';
         }
     }

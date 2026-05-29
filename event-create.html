@@ -389,9 +389,16 @@
         var isPartner = profileRes.data && profileRes.data.is_partner === true;
         var isAdmin = profileRes.data && profileRes.data.is_admin === true;
 
-        // Partner und Admins duerfen direkt — keine Verify/Antrag-Pruefung
-        if (isPartner || isAdmin) {
+        // Direkt erstellen (sofort live) darf nur: Admin, trusted_organizer,
+        // can_create_events. Ein normaler Partner (nur partner_can_events) wuerde sonst
+        // das Formular ausfuellen und der INSERT in die RLS-Wand events_creator_insert
+        // laufen (can_create_events Pflicht). Solche Partner reichen ueber
+        // partner-event.html ein (Admin-Review) -> dorthin umleiten.
+        if (isAdmin || isTrusted || canCreate) {
             // Skip Overlays, direkt zum Form
+        } else if (isPartner) {
+            window.location.replace('partner-event.html');
+            return;
         } else {
             if (!isVerified) {
                 document.getElementById('verifyOverlay').classList.add('active');
@@ -399,10 +406,8 @@
                 document.body.style.overflow = 'hidden';
                 return;
             }
-            if (!canCreate) {
-                await showPermissionOverlay();
-                return;
-            }
+            await showPermissionOverlay();
+            return;
         }
 
         // Trusted-Section nur fuer Trusted-Organizer
