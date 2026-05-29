@@ -424,9 +424,13 @@
             document.getElementById('organizerName').value = profileRes.data.full_name || profileRes.data.username || '';
         }
 
-        // Default Datum: heute
+        // Default Datum: heute (LOKALES Datum, nicht UTC -> sonst zeigt es
+        // fuer CEST-Nutzer nachts 00-02 Uhr faelschlich "gestern")
         var today = new Date();
-        document.getElementById('startDate').value = today.toISOString().split('T')[0];
+        document.getElementById('startDate').value =
+            today.getFullYear() + '-' +
+            String(today.getMonth() + 1).padStart(2, '0') + '-' +
+            String(today.getDate()).padStart(2, '0');
 
         // Description Counter
         document.getElementById('description').addEventListener('input', function(e) {

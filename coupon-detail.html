@@ -626,21 +626,31 @@
             document.getElementById('heroCity').style.display = 'flex';
         }
 
-        // Discount-Sticker: smart formatieren je nach value (100 = "Gratis", >50 = "%", andere = "%")
+        // Discount-Sticker robust gegen das Eingabeformat: discount_value ist Freitext
+        // (coupon-create laesst "-20%", "GRATIS" etc. zu), war aber als Zahl behandelt
+        // -> ergab "-20%%" oder traf 'Gratis' nie. Jetzt formatabhaengig rendern.
         var dv = coupon.discount_value;
         var dAmount = document.getElementById('discountValue');
         var dLabel = document.getElementById('discountLabel');
         var dTag = document.getElementById('discountTag');
-        if (dv === 100) {
-            dAmount.textContent = 'Gratis';
-            dAmount.style.fontSize = '1.8rem';
-            dLabel.textContent = 'Beim Menü';
-        } else if (dv) {
-            dAmount.textContent = dv + '%';
-            dLabel.textContent = 'Rabatt für Studis';
-        } else {
+        if (!dv && dv !== 0) {
             dAmount.textContent = '–';
             dLabel.textContent = 'Studi-Deal';
+        } else {
+            var dvStr = String(dv).trim();
+            if (/gratis|free/i.test(dvStr) || dvStr === '100') {
+                dAmount.textContent = 'Gratis';
+                dAmount.style.fontSize = '1.8rem';
+                dLabel.textContent = 'Rabatt für Studis';
+            } else if (/^\d+$/.test(dvStr)) {
+                // reine Zahl -> Prozent anhaengen
+                dAmount.textContent = dvStr + '%';
+                dLabel.textContent = 'Rabatt für Studis';
+            } else {
+                // Freitext ("-20%", "2 fuer 1") unveraendert anzeigen, kein doppeltes %
+                dAmount.textContent = dvStr;
+                dLabel.textContent = 'Rabatt für Studis';
+            }
         }
         // Tag: Einmalig vs Mehrfach
         dTag.textContent = coupon.usage_limit_per_user === 1 ? '1× pro Konto' : 'Mehrfach';
