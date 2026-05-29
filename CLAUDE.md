@@ -72,8 +72,9 @@ Uebersicht: `specs/00-INDEX.md` — IMMER zuerst lesen wenn Aenderungen geplant 
 - get-signed-url/ - Storage URLs generieren
 - send-email/ - Resend Email-Wrapper (deployed mit --no-verify-jwt)
 
-## Aktuelle Migrations-Zaehler (Stand 10.05.2026)
-Letzte Migration: `20260510000001_favorite_push_trigger.sql`. Naechste als `20260511000001_*.sql` benennen.
+## Aktuelle Migrations-Zaehler (Stand 29.05.2026)
+Letzte Migration: `20260529000005_my_profile_view.sql`. Naechste als `20260529000006_*.sql` (oder Folgetag) benennen.
+Security-Views vorhanden: `public_profiles` (Anzeige-Spalten, security_definer), `admin_profiles` (alle Spalten nur fuer is_admin), `my_profile` (eigenes Profil komplett, security_invoker + WHERE id=auth.uid()). FREMD-Profil-Reads laufen ueber public_profiles, EIGEN-Reads (profile.html + session-cache.js) ueber my_profile. Kein select('*') mehr auf profiles im www/-Source (nur noch admin-debug.html, admin-gegated). profiles-Policy noch USING(true) — Verschaerfung erst NACHDEM ein App-Build mit diesem www/-Stand live ist (cap sync zieht www/ in ios/+android/ Bundles).
 
 ## App-Versionen (Stand 15.05.2026)
 - Android: v2.1.9 (versionCode 45) — eingereicht Play Store 12.05.
