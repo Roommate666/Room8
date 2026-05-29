@@ -961,9 +961,14 @@
         try {
             const { data: { user: adminUser } } = await sb.auth.getUser();
 
-            // Partner-User-ID anhand contact_email auflösen, fallback auf Admin
+            // Owner aufloesen: 1. submitter_id (feste Identitaet beim Einreichen),
+            // 2. Fallback contact_email-Lookup (Alt-Submissions + anon-Akquise),
+            // 3. letzter Fallback Admin. So sieht der Partner seinen Live-Inhalt im
+            // eigenen Dashboard (loadActive matcht owner_id/user_id/organizer_id).
             let ownerId = adminUser.id;
-            if (submission.contact_email) {
+            if (submission.submitter_id) {
+                ownerId = submission.submitter_id;
+            } else if (submission.contact_email) {
                 const lookupRes = await sb.from('admin_profiles').select('id').eq('email', submission.contact_email).maybeSingle();
                 if (lookupRes.data && lookupRes.data.id) ownerId = lookupRes.data.id;
             }
