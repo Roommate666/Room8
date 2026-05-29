@@ -73,7 +73,8 @@ Uebersicht: `specs/00-INDEX.md` — IMMER zuerst lesen wenn Aenderungen geplant 
 - send-email/ - Resend Email-Wrapper (deployed mit --no-verify-jwt)
 
 ## Aktuelle Migrations-Zaehler (Stand 29.05.2026)
-Letzte Migration: `20260529000007_notify_partner_submission_review.sql`. Naechste als `20260529000008_*.sql` (oder Folgetag) benennen.
+Letzte Migration: `20260529000008_coupon_status_single_source.sql`. Naechste als `20260529000009_*.sql` (oder Folgetag) benennen.
+redeem_coupon: status='active' ist Single Source of Truth (is_active = zusaetzlicher Kill-Switch). Coupons via status='inactive' deaktivierbar.
 Trigger `trg_notify_partner_submission_review`: benachrichtigt Partner bei Approve/Reject (eingeloggt -> In-App+Push, anon -> Email).
 
 ## Partner-Permission-System (Stand 29.05.2026)
