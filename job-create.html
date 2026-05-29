@@ -293,6 +293,13 @@
         e.preventDefault();
         const user = await checkAdmin();
         if (!user) return;
+        // Mind. ein Bewerbungsweg Pflicht, sonst Sackgasse fuer den Bewerber
+        const appEmailVal = (document.getElementById('appEmail').value || '').trim();
+        const appUrlVal = (document.getElementById('appUrl').value || '').trim();
+        if (!appEmailVal && !appUrlVal) {
+            alert('Bitte gib mindestens einen Bewerbungsweg an: Bewerbungs-E-Mail oder Bewerbungs-Link.');
+            return;
+        }
         const btn = e.target.querySelector('button');
         btn.innerHTML = '<span class="btn-spin"></span>Speichere...'; btn.disabled = true;
 

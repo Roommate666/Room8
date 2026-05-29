@@ -284,7 +284,7 @@
         e.preventDefault();
         var btn = document.getElementById('submitBtn');
         btn.disabled = true;
-        btn.textContent = 'Wird gesendet...';
+        btn.innerHTML = '<span class="btn-spin"></span>Wird gesendet...';
 
         try {
             var logoFile = document.getElementById('logoImage').files[0];
