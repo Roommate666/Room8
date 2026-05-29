@@ -1377,7 +1377,7 @@
         
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
-        btn.textContent = "Speichere...";
+        btn.innerHTML = '<span class="btn-spin"></span>Speichere...';
 
         try {
             const { data: { user } } = await sb.auth.getUser();

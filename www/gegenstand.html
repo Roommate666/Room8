@@ -480,7 +480,7 @@
         var btn = document.getElementById('submitBtn');
         btn.disabled = true;
         var originalText = btn.textContent;
-        btn.textContent = "Wird gespeichert...";
+        btn.innerHTML = '<span class="btn-spin"></span>Wird gespeichert...';
 
         try {
             // 1. Auth Check

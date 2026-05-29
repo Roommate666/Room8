@@ -216,6 +216,9 @@
           <a href="verify-options.html" id="retryBtn" class="btn btn-primary" style="display: none;">
             Erneut versuchen
           </a>
+          <button type="button" id="withdrawBtn" class="btn btn-primary" style="display: none;" onclick="withdrawVerification()">
+            Zurückziehen &amp; neu beantragen
+          </button>
         </div>
 
         <!-- Help Text -->
@@ -331,8 +334,14 @@
               <p style="margin: 0.5rem 0 0 0; color: #92400e; font-size: 0.9rem;">
                 Unser Team prüft deine ${verificationMethod === 'document' ? 'Dokumente' : 'Uni-Email'}. Du erhältst eine E-Mail sobald die Prüfung abgeschlossen ist. Dies dauert normalerweise 24-48 Stunden.
               </p>
+              <p style="margin: 0.75rem 0 0 0; color: #92400e; font-size: 0.85rem;">
+                Falsche Angaben gemacht? Du kannst deinen Antrag zurückziehen und neu beantragen.
+              </p>
             </div>
           `;
+
+          // Bei pending: Zurueckziehen-Button zeigen, damit der User nicht festhaengt
+          document.getElementById('withdrawBtn').style.display = 'block';
 
         } else {
           // NOT VERIFIED
@@ -371,6 +380,34 @@
           </div>
         `;
         retryBtn.style.display = 'block';
+      }
+    }
+
+    // Antrag zurueckziehen + neu beantragen. verification_status/document_url darf
+    // der User selbst zuruecksetzen (is_verified bleibt Trigger-geschuetzt).
+    async function withdrawVerification() {
+      if (!confirm('Antrag zurückziehen und neu beantragen? Dein hochgeladenes Dokument wird entfernt.')) return;
+      var btn = document.getElementById('withdrawBtn');
+      var orig = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '⏳ Wird zurückgezogen...';
+      try {
+        var { data: { user } } = await sb.auth.getUser();
+        if (!user) { window.location.href = 'login.html'; return; }
+        var { error } = await sb.from('profiles').update({
+          verification_status: 'not_started',
+          verification_method: null,
+          verification_document_url: null
+        }).eq('id', user.id);
+        if (error) throw error;
+        try { sessionStorage.removeItem('_cached_profile'); sessionStorage.removeItem('_cached_profile_at'); } catch (e) {}
+        window.location.href = 'verify-options.html';
+      } catch (e) {
+        console.error(e);
+        if (window.Room8UI && Room8UI.error) Room8UI.error('Konnte nicht zurückziehen: ' + e.message);
+        else alert('Fehler: ' + e.message);
+        btn.disabled = false;
+        btn.textContent = orig;
       }
     }
 

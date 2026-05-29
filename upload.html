@@ -109,7 +109,7 @@
       e.preventDefault();
       setFormMessage('', true);
       submitBtn.disabled = true;
-      submitBtn.textContent = getTranslation('uploading', 'Wird hochgeladen...');
+      submitBtn.innerHTML = '<span class="btn-spin"></span>' + getTranslation('uploading', 'Wird hochgeladen...');
 
       requireAuth()
         .then(function(user) {
