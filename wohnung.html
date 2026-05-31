@@ -312,6 +312,24 @@
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
+
+        /* ===== WIZARD (Angebot-Modus) ===== */
+        #wizardProgressBar { height: 6px; background: #E5E7EB; border-radius: 999px; overflow: hidden; margin-bottom: 1rem; }
+        #wizardProgressFill { height: 100%; width: 0%; background: #4F46E5; border-radius: 999px; transition: width 0.3s ease; }
+        #wizardHead { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.25rem; }
+        #wizardStepCount { font-size: 0.8rem; font-weight: 600; color: #6B7280; letter-spacing: 0.02em; }
+        .wbadge-required, .wbadge-optional { font-size: 0.72rem; font-weight: 700; padding: 0.15rem 0.55rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.03em; }
+        .wbadge-required { background: #FEE2E2; color: #B91C1C; }
+        .wbadge-optional { background: #ECFDF5; color: #047857; }
+        #wizardTitle { font-size: 1.35rem; font-weight: 700; color: #111827; margin-bottom: 1.1rem; }
+        #wizardViewport { min-height: 120px; }
+        #wizardViewport .section-title { margin-top: 0.5rem; }
+        #wizardNav { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+        #wizardNav button { flex: 1; padding: 0.95rem; border-radius: 12px; font-weight: 600; font-size: 1rem; cursor: pointer; border: none; }
+        #wizardBack { background: #F3F4F6; color: #374151; }
+        #wizardBack:disabled { opacity: 0.4; cursor: not-allowed; }
+        #wizardNext { background: #4F46E5; color: #fff; }
+        #wizardPublish { background: #10B981; color: #fff; }
     </style>
 </head>
 <body>
@@ -329,13 +347,31 @@
         
         <!-- Modus Auswahl (Angebot / Gesuch / Tausch) -->
         <div class="mode-switch">
-            <div class="mode-option active" id="mode-offer" onclick="setMode('offer')">Angebot</div>
-            <div class="mode-option" id="mode-search" onclick="setMode('search')">Gesuch</div>
-            <div class="mode-option" id="mode-swap" onclick="setMode('swap')">Tausch</div>
+            <div class="mode-option active" id="mode-offer" onclick="wizardSwitchMode('offer')">Angebot</div>
+            <div class="mode-option" id="mode-search" onclick="wizardSwitchMode('search')">Gesuch</div>
+            <div class="mode-option" id="mode-swap" onclick="wizardSwitchMode('swap')">Tausch</div>
         </div>
 
         <form id="listingForm">
-            
+
+            <!-- ========== WIZARD (nur Angebot-Modus) ========== -->
+            <div id="wizardWrap" style="display:none;">
+                <div id="wizardProgressBar"><div id="wizardProgressFill"></div></div>
+                <div id="wizardHead">
+                    <span id="wizardStepCount">Schritt 1</span>
+                    <span id="wizardBadge" class="wbadge-required">Pflicht</span>
+                </div>
+                <div id="wizardTitle">Fotos hochladen</div>
+                <div id="wizardViewport"></div>
+                <div id="wizardNav">
+                    <button type="button" id="wizardBack" onclick="wizardGoBack()">Zurück</button>
+                    <button type="button" id="wizardNext" onclick="wizardGoNext()">Weiter</button>
+                    <button type="submit" id="wizardPublish" class="submit-btn" style="display:none;">Inserat veröffentlichen</button>
+                </div>
+            </div>
+
+            <div id="oldFormBody">
+
             <!-- ========== ÜBER MICH - BASIC (Nur für Suche, alle Typen) ========== -->
             <div id="group-about-me-basic" class="hidden">
                 <div class="section-title">👤 Über mich</div>
@@ -851,6 +887,8 @@
 
             <button type="submit" class="submit-btn" id="submitBtn">Inserat veröffentlichen</button>
             <div style="height: 20px;"></div>
+
+            </div><!-- /oldFormBody -->
         </form>
 
     </main>
@@ -990,6 +1028,18 @@
     var editListingId = null;
     var existingPhotos = [];
 
+    // ===== Wizard-Daten (vor dem Init, da setMode('offer') sie beim Laden braucht) =====
+    var OFFER_STEPS = [
+        { t: 'Fotos hochladen', b: 'optional', req: [], box: ['#group-images'] },
+        { t: 'Eckdaten', b: 'required', req: ['room_type', 'city', 'monthly_rent'], box: ['#room_type', '#room_size', '#city', '#monthly_rent'] },
+        { t: 'Räume & WG', b: 'required', req: [], box: ['#group-rooms', '#group-wg-details'] },
+        { t: 'Kosten & Verfügbarkeit', b: 'optional', req: [], box: ['#group-deposit', '#group-utilities', '#available_from'] },
+        { t: 'Ausstattung (optional)', b: 'optional', req: [], box: ['#district', '#group-location-info', '#group-bathroom-details', '#group-kitchen-details', '#group-features', '#group-furniture', '#group-misc'] },
+        { t: 'Titel & Beschreibung', b: 'required', req: ['title', 'description'], box: ['#aiGenBtn', '#title', '#description'], last: true },
+    ];
+    var wizardStep = 0;
+    var wizardOn = false;
+
     // URL Parameter prüfen (z.B. ?mode=search oder ?id=123)
     var urlParams = new URLSearchParams(window.location.search);
     var modeParam = urlParams.get('mode');
@@ -998,8 +1048,9 @@
     if (idParam) {
         editListingId = idParam;
         loadListingForEdit(idParam);
-    } else if (modeParam) {
-        setMode(modeParam);
+    } else {
+        // Kein Parameter -> Angebot-Modus mit Wizard (Standard beim "+"-Klick)
+        setMode(modeParam || 'offer');
     }
 
     // Listing laden für Bearbeitung
@@ -1347,6 +1398,104 @@
             btn.textContent = 'Inserat veröffentlichen';
             document.getElementById('monthly_rent').required = true;
         }
+
+        // Wizard nur im Angebot-Modus (und nicht beim Bearbeiten)
+        setupWizard(mode);
+    }
+
+    // ===== SCHRITT-FUER-SCHRITT WIZARD (nur Angebot) =====
+    // OFFER_STEPS + wizardStep/wizardOn sind weiter oben (vor dem Init) definiert,
+    // damit setMode('offer') beim Laden nicht auf undefined trifft.
+
+    function wizardBoxOf(sel) {
+        var el = document.querySelector(sel);
+        if (!el) return null;
+        if (el.id && el.id.indexOf('group-') === 0) return el;
+        return el.closest('.form-group') || el;
+    }
+
+    function setupWizard(mode) {
+        var wrap = document.getElementById('wizardWrap');
+        var oldBody = document.getElementById('oldFormBody');
+        // Edit-Modus (bestehende Anzeige) -> klassisches Formular, kein Wizard
+        var isEdit = (typeof editListingId !== 'undefined' && editListingId);
+        if (mode !== 'offer' || isEdit) {
+            wizardOn = false;
+            wrap.style.display = 'none';
+            oldBody.style.display = '';
+            return;
+        }
+        wizardOn = true;
+        oldBody.style.display = 'none';
+        wrap.style.display = 'block';
+        // Pflicht-Attribute raus -> versteckte Felder blockieren den Submit nicht; wir validieren selbst
+        ['title', 'description', 'room_type', 'city', 'monthly_rent'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.required = false;
+        });
+        wizardStep = 0;
+        renderWizardStep();
+    }
+
+    function renderWizardStep() {
+        var viewport = document.getElementById('wizardViewport');
+        var oldBody = document.getElementById('oldFormBody');
+        // aktuelle Inhalte zurueck in den (versteckten) oldFormBody parken
+        while (viewport.firstChild) oldBody.appendChild(viewport.firstChild);
+        var step = OFFER_STEPS[wizardStep];
+        step.box.forEach(function(sel) {
+            var box = wizardBoxOf(sel);
+            if (box) viewport.appendChild(box);
+        });
+        // Kopf, Fortschritt, Badge
+        document.getElementById('wizardTitle').textContent = step.t;
+        document.getElementById('wizardStepCount').textContent = 'Schritt ' + (wizardStep + 1) + ' von ' + OFFER_STEPS.length;
+        var badge = document.getElementById('wizardBadge');
+        badge.textContent = step.b === 'required' ? 'Pflicht' : 'Optional';
+        badge.className = step.b === 'required' ? 'wbadge-required' : 'wbadge-optional';
+        document.getElementById('wizardProgressFill').style.width = ((wizardStep + 1) / OFFER_STEPS.length * 100) + '%';
+        // Nav-Buttons
+        document.getElementById('wizardBack').disabled = (wizardStep === 0);
+        document.getElementById('wizardNext').style.display = step.last ? 'none' : '';
+        document.getElementById('wizardPublish').style.display = step.last ? '' : 'none';
+        viewport.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function wizardValidate() {
+        var step = OFFER_STEPS[wizardStep];
+        for (var i = 0; i < step.req.length; i++) {
+            var el = document.getElementById(step.req[i]);
+            if (el && !String(el.value || '').trim()) {
+                Room8UI.warning('Bitte dieses Pflichtfeld ausfüllen.');
+                el.focus();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function wizardGoNext() {
+        if (!wizardValidate()) return;
+        if (wizardStep < OFFER_STEPS.length - 1) {
+            wizardStep++;
+            renderWizardStep();
+        }
+    }
+
+    function wizardGoBack() {
+        if (wizardStep > 0) {
+            wizardStep--;
+            renderWizardStep();
+        }
+    }
+
+    // Moduswechsel im Wizard = sauberer Reload mit ?mode (kein Box-Rueckbau noetig)
+    function wizardSwitchMode(m) {
+        if (m === currentMode) return;
+        var qs = '?mode=' + m;
+        var ed = new URLSearchParams(window.location.search).get('edit');
+        if (ed) qs += '&edit=' + ed;
+        window.location.href = window.location.pathname + qs;
     }
 
     // Datei Handling
@@ -1467,7 +1616,19 @@
     // Formular Absenden
     document.getElementById('listingForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        
+
+        // Wizard-Guard: Titel + Beschreibung muessen da sein (sonst zurueck zum letzten Schritt)
+        if (wizardOn) {
+            var tEl = document.getElementById('title');
+            var dEl = document.getElementById('description');
+            if (!String(tEl.value || '').trim() || !String(dEl.value || '').trim()) {
+                Room8UI.warning('Bitte Titel und Beschreibung ausfüllen — die KI kann das aus deinen Fotos erstellen.');
+                wizardStep = OFFER_STEPS.length - 1;
+                renderWizardStep();
+                return;
+            }
+        }
+
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
         btn.innerHTML = '<span class="btn-spin"></span>Speichere...';
