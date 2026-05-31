@@ -12,6 +12,16 @@ function escHtml(s: unknown): string {
   return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
+// Plain-Text-Fallback aus HTML. HTML-only Mails scoren schlechter im Spam-Filter.
+function htmlToText(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<a [^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, '$2 ($1)')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&copy;/g, '(c)').replace(/&amp;/g, '&').replace(/&#\d+;/g, '')
+    .replace(/[ \t]+/g, ' ').replace(/(\s*\n\s*){2,}/g, '\n\n').trim()
+}
+
 // CORS Headers
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -70,14 +80,14 @@ serve(async (req) => {
             <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
               <div style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); padding: 40px; text-align: center;">
                 <div style="font-size: 3rem; margin-bottom: 15px;">&#127891;</div>
-                <h1 style="color: white; margin: 0; font-size: 2rem;">Uni-E-Mail bestaerigen</h1>
+                <h1 style="color: white; margin: 0; font-size: 2rem;">Uni-E-Mail bestaetigen</h1>
               </div>
               <div style="padding: 40px 30px;">
                 <p style="color: #374151; line-height: 1.6; font-size: 16px;">Hi,</p>
                 <p style="color: #374151; line-height: 1.6; font-size: 16px;">Fast geschafft! Bestaetige jetzt deine Uni-E-Mail-Adresse, um deine Room8-Verifizierung abzuschliessen.</p>
                 <div style="text-align: center; margin: 30px 0;">
                   <a href="${data.verificationLink}" style="display: inline-block; background: #3b82f6; color: white !important; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);">
-                    &#9989; E-Mail bestaerigen
+                    &#9989; E-Mail bestaetigen
                   </a>
                 </div>
                 <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
@@ -256,7 +266,11 @@ serve(async (req) => {
         from: template.from,
         to: [to],
         subject: template.subject,
-        html: template.html
+        html: template.html,
+        text: htmlToText(template.html),
+        headers: {
+          'List-Unsubscribe': '<mailto:help@room8.club?subject=unsubscribe>'
+        }
       })
     })
     
