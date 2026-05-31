@@ -199,12 +199,28 @@
             }
         });
 
+        _pdUserId = user.id;
         await Promise.all([
             loadSubmissions(user.id),
             loadActive(user.id),
             loadScanStats(user.id)
         ]);
+
+        // Live-Refresh: Stats neu laden wenn der Partner zur Seite zurueckkehrt
+        // (Tab-Focus / App-Resume nach Scan am anderen Geraet)
+        document.addEventListener('visibilitychange', pdRefresh);
+        window.addEventListener('focus', pdRefresh);
     })();
+
+    var _pdUserId = null;
+    var _pdRefreshing = false;
+    async function pdRefresh() {
+        if (!_pdUserId || _pdRefreshing || document.visibilityState === 'hidden') return;
+        _pdRefreshing = true;
+        try {
+            await Promise.all([loadSubmissions(_pdUserId), loadActive(_pdUserId), loadScanStats(_pdUserId)]);
+        } finally { _pdRefreshing = false; }
+    }
 
     async function loadScanStats(userId) {
         // Heute-Counter aus v_partner_redemptions_today (nur eigene Coupons via auth.uid())
