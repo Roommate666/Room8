@@ -5,7 +5,12 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
 
 // Typen die Mails an FREMDE User schicken -> nur Admins duerfen sie ausloesen.
-const ADMIN_TYPES = ['account_verified', 'verification_rejected', 'admin_verification_request']
+const ADMIN_TYPES = ['account_verified', 'verification_approved', 'verification_rejected', 'admin_verification_request']
+
+// HTML-Escape gegen Injection in Mail-Templates (User-kontrollierte Felder wie Name).
+function escHtml(s: unknown): string {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
 
 // CORS Headers
 const corsHeaders = {
@@ -102,7 +107,7 @@ serve(async (req) => {
                 <h1 style="color: white; margin: 0; font-size: 2.5rem;">Herzlichen Glueckwunsch!</h1>
               </div>
               <div style="padding: 40px 30px;">
-                <p style="color: #374151; line-height: 1.6; font-size: 16px;">Hi ${data.userName},</p>
+                <p style="color: #374151; line-height: 1.6; font-size: 16px;">Hi ${escHtml(data.userName)},</p>
                 <p style="color: #374151; line-height: 1.6; font-size: 16px;"><strong>Dein Studenten-Status wurde verifiziert.</strong></p>
                 <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; margin: 25px 0; border-radius: 8px;">
                   <h3 style="margin: 0 0 15px 0; color: #065f46;">Du hast jetzt vollen Zugriff auf:</h3>
@@ -218,10 +223,10 @@ serve(async (req) => {
             <div style="max-width: 600px; margin: 0 auto;">
               <h2>🔔 Neue Verifizierungsanfrage</h2>
               <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                <strong>User:</strong> ${data.userName}<br>
-                <strong>E-Mail:</strong> ${data.userEmail}<br>
-                <strong>Uni-Domain:</strong> ${data.emailDomain}<br>
-                <strong>Registriert:</strong> ${data.registeredAt}
+                <strong>User:</strong> ${escHtml(data.userName)}<br>
+                <strong>E-Mail:</strong> ${escHtml(data.userEmail)}<br>
+                <strong>Uni-Domain:</strong> ${escHtml(data.emailDomain)}<br>
+                <strong>Registriert:</strong> ${escHtml(data.registeredAt)}
               </div>
               ${data.documentUploaded ? '<p>📄 Immatrikulationsbescheinigung wurde hochgeladen.</p>' : '<p>✉️ E-Mail-Verifizierung wird genutzt.</p>'}
               <a href="https://room8.club/admin.html" style="display: inline-block; background: #8b5cf6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; margin-top: 15px;">

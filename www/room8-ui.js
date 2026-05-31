@@ -327,7 +327,7 @@
     function createEmptyState(icon, title, message, actionText, actionUrl) {
         var actionHtml = '';
         if (actionText && actionUrl) {
-            actionHtml = '<a href="' + actionUrl + '" class="empty-action">' + actionText + '</a>';
+            actionHtml = '<a href="' + escapeHtml(actionUrl) + '" class="empty-action">' + escapeHtml(actionText) + '</a>';
         }
 
         return `

@@ -1553,8 +1553,8 @@
                 var userName = profile ? (profile.full_name || profile.display_name || 'Nutzer') : 'Nutzer';
 
                 var emailPayload = approve
-                    ? { userId: id, type: 'account_verified', data: { userName: userName } }
-                    : { userId: id, type: 'verification_rejected', data: { verificationLink: 'https://room8.club/verify-options.html' } };
+                    ? { to: (profile && profile.email) || null, userId: id, type: 'account_verified', data: { userName: userName } }
+                    : { to: (profile && profile.email) || null, userId: id, type: 'verification_rejected', data: { verificationLink: 'https://room8.club/verify-options.html' } };
 
                 // invoke sendet automatisch den Admin-Session-Token mit (send-notification
                 // verlangt jetzt einen eingeloggten Admin fuer diese Mail-Typen).
