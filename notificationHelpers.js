@@ -110,7 +110,6 @@
         },
 
         notifyReview: async function(userId, reviewerName, rating, listingId) {
-            console.log('⭐ notifyReview called for user:', userId, 'by:', reviewerName);
             var stars = '';
             for (var i = 0; i < rating; i++) stars += '⭐';
             var T = function(k, fb){ return (window.Room8i18n && Room8i18n.t) ? Room8i18n.t(k) : fb; };
@@ -130,7 +129,6 @@
         // ==========================================
 
         notifyFavorite: async function(listingOwnerId, faverName, listingTitle, listingId) {
-            console.log('❤️ notifyFavorite called for owner:', listingOwnerId, 'by:', faverName);
             var T = function(k, fb){ return (window.Room8i18n && Room8i18n.t) ? Room8i18n.t(k) : fb; };
             return await this.createNotification(
                 listingOwnerId,
