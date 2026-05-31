@@ -590,9 +590,9 @@
         }
 
         // Buttons
-        document.getElementById('messageBtn').onclick = () => {
+        document.getElementById('messageBtn').onclick = async () => {
             if (!currentUser) {
-                if(confirm("Bitte einloggen um Nachrichten zu senden.")) navigateTo('login.html');
+                if(await Room8UI.confirm("Bitte einloggen um Nachrichten zu senden.", { danger: false })) navigateTo('login.html');
                 return;
             }
             navigateTo(`chat.html?user=${userId}`);
@@ -620,7 +620,7 @@
 
             try {
                 if (isBlocked) {
-                    if (!confirm(T('pp_unblock_confirm', 'Möchtest du diesen Nutzer entsperren?'))) return;
+                    if (!(await Room8UI.confirm(T('pp_unblock_confirm', 'Möchtest du diesen Nutzer entsperren?'), { danger: true }))) return;
                     try {
                         await Room8.trust.unblock(userId);
                         Room8UI.success(T('pp_user_unblocked', 'Nutzer wurde entsperrt.'));
@@ -765,7 +765,7 @@
     }
 
     async function deleteReview(reviewId) {
-        if (!confirm(T('pp_review_delete_confirm', 'Bewertung wirklich löschen?'))) return;
+        if (!(await Room8UI.confirm(T('pp_review_delete_confirm', 'Bewertung wirklich löschen?'), { danger: true }))) return;
 
         var el = document.getElementById('review-' + reviewId);
         if (el) el.style.opacity = '0.5';

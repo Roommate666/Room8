@@ -297,7 +297,7 @@
         const appEmailVal = (document.getElementById('appEmail').value || '').trim();
         const appUrlVal = (document.getElementById('appUrl').value || '').trim();
         if (!appEmailVal && !appUrlVal) {
-            alert('Bitte gib mindestens einen Bewerbungsweg an: Bewerbungs-E-Mail oder Bewerbungs-Link.');
+            Room8UI.error('Bitte gib mindestens einen Bewerbungsweg an: Bewerbungs-E-Mail oder Bewerbungs-Link.');
             return;
         }
         const btn = e.target.querySelector('button');

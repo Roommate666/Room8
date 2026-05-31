@@ -387,7 +387,7 @@
 
     var T = function(k, fb){ return (window.Room8i18n && Room8i18n.t) ? Room8i18n.t(k) : fb; };
     document.getElementById('logoutBtn').addEventListener('click', async function() {
-        if (confirm(T('common_logout_confirm', 'Möchtest du dich wirklich abmelden?'))) {
+        if (await Room8UI.confirm(T('common_logout_confirm', 'Möchtest du dich wirklich abmelden?'), { danger: false })) {
             // FCM Token löschen damit keine Push an dieses Gerät gehen
             try {
                 var auth = await sb.auth.getUser();
@@ -417,13 +417,13 @@
      // Konto löschen
 document.getElementById('deleteAccountBtn').addEventListener('click', async function() {
     var deleteWord = T('settings_delete_keyword', 'LOESCHEN');
-    var confirmText = prompt(T('settings_delete_prompt', 'Um dein Konto zu loeschen, gib LOESCHEN ein:'));
+    var confirmText = await Room8UI.prompt(T('settings_delete_prompt', 'Um dein Konto zu loeschen, gib LOESCHEN ein:'));
     if (confirmText !== deleteWord && confirmText !== 'LÖSCHEN' && confirmText !== 'DELETE') {
         Room8UI.info(T('settings_delete_invalid', 'Eingabe falsch. Konto wurde nicht geloescht.'));
         return;
     }
 
-    if (!confirm(T('settings_delete_final_confirm', 'Bist du WIRKLICH sicher? Alle deine Daten werden unwiderruflich geloescht!'))) {
+    if (!(await Room8UI.confirm(T('settings_delete_final_confirm', 'Bist du WIRKLICH sicher? Alle deine Daten werden unwiderruflich geloescht!'), { danger: true }))) {
         return;
     }
 

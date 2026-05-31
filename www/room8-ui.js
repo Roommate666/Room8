@@ -243,6 +243,45 @@
             @keyframes btnSpin {
                 to { transform: rotate(360deg); }
             }
+
+            /* Confirm / Prompt Modal (ersetzt natives confirm()/prompt()) */
+            .room8-modal-overlay {
+                position: fixed; inset: 0; z-index: 100000;
+                display: flex; align-items: center; justify-content: center;
+                padding: 24px;
+                background: rgba(17,24,39,0.45);
+                backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+                opacity: 0; transition: opacity 0.2s ease;
+            }
+            .room8-modal-overlay.visible { opacity: 1; }
+            .room8-modal {
+                background: #fff; border-radius: 20px;
+                padding: 24px; width: 100%; max-width: 360px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+                transform: translateY(12px) scale(0.97);
+                transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+            }
+            .room8-modal-overlay.visible .room8-modal { transform: translateY(0) scale(1); }
+            .room8-modal-title { font-size: 1.1rem; font-weight: 700; color: #111827; margin: 0 0 8px; }
+            .room8-modal-msg { font-size: 0.95rem; line-height: 1.5; color: #4B5563; margin: 0 0 20px; }
+            .room8-modal-input {
+                width: 100%; box-sizing: border-box; padding: 12px 14px; margin: 0 0 20px;
+                border: 1.5px solid #E5E7EB; border-radius: 12px; font-size: 1rem; color: #111827;
+                outline: none; transition: border-color 0.2s;
+            }
+            .room8-modal-input:focus { border-color: #3B82F6; }
+            .room8-modal-actions { display: flex; gap: 10px; }
+            .room8-modal-btn {
+                flex: 1; padding: 12px 16px; border-radius: 12px; font-size: 0.95rem; font-weight: 600;
+                cursor: pointer; border: none; transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+            }
+            .room8-modal-btn:active { transform: scale(0.97); }
+            .room8-modal-cancel { background: #F3F4F6; color: #374151; }
+            .room8-modal-cancel:hover { background: #E5E7EB; }
+            .room8-modal-confirm { background: linear-gradient(135deg, #3B82F6, #2563EB); color: #fff; }
+            .room8-modal-confirm:hover { box-shadow: 0 4px 15px rgba(59,130,246,0.4); }
+            .room8-modal-confirm-danger { background: linear-gradient(135deg, #EF4444, #DC2626); }
+            .room8-modal-confirm-danger:hover { box-shadow: 0 4px 15px rgba(239,68,68,0.4); }
         `;
         document.head.appendChild(style);
     }
@@ -342,6 +381,78 @@
     }
 
     // ==========================================
+    // 6. CONFIRM / PROMPT MODALS (ersetzt natives confirm()/prompt())
+    // ==========================================
+
+    function showModal(opts) {
+        opts = opts || {};
+        injectToastStyles();
+        var isPrompt = opts.mode === 'prompt';
+        return new Promise(function(resolve) {
+            var overlay = document.createElement('div');
+            overlay.className = 'room8-modal-overlay';
+
+            var titleHtml = opts.title ? '<h3 class="room8-modal-title">' + escapeHtml(opts.title) + '</h3>' : '';
+            var msgHtml = opts.message ? '<p class="room8-modal-msg">' + escapeHtml(opts.message).replace(/\n/g, '<br>') + '</p>' : '';
+            var inputHtml = isPrompt ? '<input class="room8-modal-input" type="text">' : '';
+            var dangerCls = opts.danger ? ' room8-modal-confirm-danger' : '';
+            var cancelHtml = opts.hideCancel ? '' : '<button type="button" class="room8-modal-btn room8-modal-cancel">' + escapeHtml(opts.cancelText || 'Abbrechen') + '</button>';
+
+            overlay.innerHTML =
+                '<div class="room8-modal" role="dialog" aria-modal="true">' +
+                    titleHtml + msgHtml + inputHtml +
+                    '<div class="room8-modal-actions">' +
+                        cancelHtml +
+                        '<button type="button" class="room8-modal-btn room8-modal-confirm' + dangerCls + '">' + escapeHtml(opts.okText || 'OK') + '</button>' +
+                    '</div>' +
+                '</div>';
+
+            document.body.appendChild(overlay);
+
+            var input = overlay.querySelector('.room8-modal-input');
+            var confirmBtn = overlay.querySelector('.room8-modal-confirm');
+            var cancelBtn = overlay.querySelector('.room8-modal-cancel');
+            if (input && opts.defaultValue != null) input.value = opts.defaultValue;
+            if (input && opts.placeholder) input.placeholder = opts.placeholder;
+
+            requestAnimationFrame(function() {
+                overlay.classList.add('visible');
+                if (input) input.focus();
+            });
+
+            var done = false;
+            function close(result) {
+                if (done) return;
+                done = true;
+                document.removeEventListener('keydown', onKey);
+                overlay.classList.remove('visible');
+                setTimeout(function() { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 200);
+                resolve(result);
+            }
+            function onKey(e) {
+                if (e.key === 'Escape') close(isPrompt ? null : false);
+                else if (e.key === 'Enter' && isPrompt) close(input ? input.value : '');
+            }
+
+            confirmBtn.addEventListener('click', function() { close(isPrompt ? (input ? input.value : '') : true); });
+            if (cancelBtn) cancelBtn.addEventListener('click', function() { close(isPrompt ? null : false); });
+            overlay.addEventListener('click', function(e) { if (e.target === overlay) close(isPrompt ? null : false); });
+            document.addEventListener('keydown', onKey);
+            hapticFeedback('light');
+        });
+    }
+
+    function showConfirm(message, opts) {
+        opts = opts || {};
+        return showModal({ mode: 'confirm', message: message, title: opts.title, okText: opts.okText, cancelText: opts.cancelText, danger: opts.danger });
+    }
+
+    function showPrompt(message, opts) {
+        opts = opts || {};
+        return showModal({ mode: 'prompt', message: message, title: opts.title, okText: opts.okText, cancelText: opts.cancelText, defaultValue: opts.defaultValue, placeholder: opts.placeholder });
+    }
+
+    // ==========================================
     // INIT
     // ==========================================
 
@@ -361,6 +472,10 @@
         error: function(msg, duration) { return showToast(msg, 'error', duration); },
         warning: function(msg, duration) { return showToast(msg, 'warning', duration); },
         info: function(msg, duration) { return showToast(msg, 'info', duration); },
+
+        confirm: showConfirm,
+        prompt: showPrompt,
+        modal: showModal,
 
         skeleton: {
             card: createSkeletonCard,

@@ -2,6 +2,7 @@
 <html lang="de">
 <head>
     <script src="sentry-init.js"></script>
+    <script src="room8-ui.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Event einreichen - Room8 Partner</title>
@@ -226,7 +227,7 @@
         var btn = this;
         var ta = document.getElementById('description');
         var orig = ta.value.trim();
-        if (orig.length < 5) { alert('Schreib erst ein paar Stichpunkte.'); return; }
+        if (orig.length < 5) { Room8UI.error('Schreib erst ein paar Stichpunkte.'); return; }
         var oldText = btn.innerHTML;
         btn.innerHTML = '⏳ Verbessere...'; btn.disabled = true;
         try {
@@ -234,7 +235,7 @@
             var orgType = document.getElementById('organizerType').value || '';
             var polishSession = await sb.auth.getSession();
             var polishToken = polishSession.data.session && polishSession.data.session.access_token;
-            if (!polishToken) { alert('Bitte melde dich an, um die KI-Verbesserung zu nutzen.'); return; }
+            if (!polishToken) { Room8UI.warning('Bitte melde dich an, um die KI-Verbesserung zu nutzen.'); return; }
             var resp = await fetch(SUPABASE_URL + '/functions/v1/polish-text', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + polishToken },
@@ -242,18 +243,18 @@
             });
             var j = await resp.json();
             if (j.polished) {
-                if (confirm('AI-Vorschlag uebernehmen?\n\n' + j.polished)) ta.value = j.polished;
+                if (await Room8UI.confirm('AI-Vorschlag uebernehmen?\n\n' + j.polished)) ta.value = j.polished;
             } else {
-                alert('Fehler: ' + (j.error || 'Unbekannt'));
+                Room8UI.error('Fehler: ' + (j.error || 'Unbekannt'));
             }
-        } catch (e) { alert('Fehler: ' + e.message); }
+        } catch (e) { Room8UI.error('Fehler: ' + e.message); }
         finally { btn.innerHTML = oldText; btn.disabled = false; }
     });
 
     function setupImagePreview(inputId, previewId, imgId) {
         document.getElementById(inputId).addEventListener('change', function(e) {
             var f = e.target.files[0];
-            if (f && f.size > 5 * 1024 * 1024) { alert('Bild zu gross (max 5 MB)'); this.value=''; return; }
+            if (f && f.size > 5 * 1024 * 1024) { Room8UI.error('Bild zu gross (max 5 MB)'); this.value=''; return; }
             if (f) {
                 var r = new FileReader();
                 r.onload = function(ev) {
@@ -331,7 +332,7 @@
             document.getElementById('successMessage').style.display = 'block';
         } catch (err) {
             console.error(err);
-            alert('Fehler: ' + (err.message || 'Bitte später erneut versuchen.'));
+            Room8UI.error('Fehler: ' + (err.message || 'Bitte später erneut versuchen.'));
             btn.disabled = false;
             btn.textContent = '🎉 Event einreichen';
         }

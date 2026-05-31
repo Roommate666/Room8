@@ -170,7 +170,9 @@
         container.innerHTML = 'Lade...';
 
         try {
-            const { data, error } = await sb.from('profiles').select('*').limit(1);
+            // admin_profiles-View (security_definer, nur fuer is_admin) statt direktem
+            // profiles-select('*') -> kein PII-Dump falls der Client-Gate mal versagt.
+            const { data, error } = await sb.from('admin_profiles').select('*').limit(1);
 
             if (error) {
                 container.innerHTML = `<p class="error">Fehler: ${error.message}</p>`;

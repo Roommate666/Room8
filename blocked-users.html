@@ -223,7 +223,7 @@
                 var blockedId = this.dataset.blockedId;
                 var name = this.dataset.name;
 
-                if (!confirm(`Möchtest du "${name}" wirklich entsperren? Du wirst wieder Nachrichten und Inserate von diesem Nutzer sehen.`)) {
+                if (!(await Room8UI.confirm(`Möchtest du "${name}" wirklich entsperren? Du wirst wieder Nachrichten und Inserate von diesem Nutzer sehen.`, { danger: true }))) {
                     return;
                 }
 

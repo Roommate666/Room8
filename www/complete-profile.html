@@ -169,7 +169,6 @@
             updated_at: new Date().toISOString()
           };
 
-          console.log('[complete-profile] Upsert payload:', payload);
 
           // Erst Update versuchen (Profil existiert wahrscheinlich schon durch Trigger)
           var upd = await sb.from('profiles').update({
@@ -179,13 +178,11 @@
             updated_at: new Date().toISOString()
           }).eq('id', user.id).select();
 
-          console.log('[complete-profile] Update result:', upd);
 
           if (upd.error) {
             // Falls Update wegen "no row" fehlschlaegt -> Insert
             console.warn('[complete-profile] Update failed, trying insert:', upd.error);
             var ins = await sb.from('profiles').insert(payload).select();
-            console.log('[complete-profile] Insert result:', ins);
             if (ins.error) {
               errEl.textContent = 'Fehler: ' + (ins.error.message || JSON.stringify(ins.error));
               btn.disabled = false; btn.textContent = 'Profil speichern';
@@ -195,7 +192,6 @@
             // Update lief, aber keine Zeile betroffen -> Insert
             console.warn('[complete-profile] Update returned no rows, trying insert');
             var ins2 = await sb.from('profiles').insert(payload).select();
-            console.log('[complete-profile] Insert result:', ins2);
             if (ins2.error) {
               errEl.textContent = 'Fehler: ' + (ins2.error.message || JSON.stringify(ins2.error));
               btn.disabled = false; btn.textContent = 'Profil speichern';
@@ -204,7 +200,6 @@
           }
 
           try { sessionStorage.removeItem('oauth_prefill'); } catch (e) {}
-          console.log('[complete-profile] Saved, redirecting to dashboard');
           window.location.replace('dashboard.html');
         } catch (err) {
           console.error('[complete-profile] Submit error:', err);

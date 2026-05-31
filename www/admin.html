@@ -819,7 +819,7 @@
     };
 
     window.resetVerification = async (id) => {
-        if (!confirm("Verifizierungsstatus zurücksetzen auf 'pending'?")) return;
+        if (!(await Room8UI.confirm("Verifizierungsstatus zurücksetzen auf 'pending'?", { danger: false }))) return;
         await sb.from('profiles').update({
             verification_status: 'pending',
             is_verified: false,
@@ -953,7 +953,7 @@
     };
 
     window.approveSubmission = async (id, type) => {
-        if (!confirm("Einreichung übernehmen und veröffentlichen? Studenten in der Stadt bekommen Push.")) return;
+        if (!(await Room8UI.confirm("Einreichung übernehmen und veröffentlichen? Studenten in der Stadt bekommen Push.", { danger: false }))) return;
 
         const submission = allSubmissions.find(s => s.id === id);
         if (!submission) return;
@@ -1104,7 +1104,7 @@
     };
 
     window.rejectSubmission = async (id) => {
-        const reason = prompt("Grund für die Ablehnung (optional):");
+        const reason = await Room8UI.prompt("Grund für die Ablehnung (optional):");
         if (reason === null) return; // Cancelled
 
         const { data: { user } } = await sb.auth.getUser();
@@ -1211,7 +1211,7 @@
     // Event-Creator Toggle (nutzt RPC mit System-Bypass)
     window.toggleEventCreator = async (userId, grant) => {
         const action = grant ? 'freischalten' : 'die Erlaubnis entziehen';
-        if (!confirm('Diesem User Events erstellen ' + action + '?')) return;
+        if (!(await Room8UI.confirm('Diesem User Events erstellen ' + action + '?', { danger: false }))) return;
 
         // Direkter UPDATE via Service-Role-Pattern: nutze RPC dafuer
         // (admin_set_can_create_events) - existiert noch nicht, also direkt updaten
@@ -1239,7 +1239,7 @@
     // Partner-Toggle (Direct Update, RLS erlaubt fuer Admins)
     window.togglePartner = async (userId, grant) => {
         const action = grant ? 'als Partner markieren' : 'Partner-Status entziehen';
-        if (!confirm('Diesen User ' + action + '?')) return;
+        if (!(await Room8UI.confirm('Diesen User ' + action + '?', { danger: false }))) return;
         const { error } = await sb.from('profiles').update({ is_partner: grant }).eq('id', userId);
         if (error) {
             console.error(error);
@@ -1267,7 +1267,7 @@
     // Trusted-Organizer Toggle (nutzt existierende RPC)
     window.toggleTrusted = async (userId, grant) => {
         const action = grant ? 'als Trusted Organizer markieren' : 'Trusted-Status entziehen';
-        if (!confirm('Diesen User ' + action + '?')) return;
+        if (!(await Room8UI.confirm('Diesen User ' + action + '?', { danger: false }))) return;
 
         const { data, error } = await sb.rpc('admin_set_trusted_organizer', {
             target_user_id: userId,
@@ -1447,7 +1447,7 @@
     };
 
     window.deleteMarktplatz = async (id) => {
-        if(!confirm("Inserat endgültig löschen?")) return;
+        if(!(await Room8UI.confirm("Inserat endgültig löschen?", { danger: true }))) return;
 
         // Erst zugehörige Fotos löschen
         await sb.from('listing_photos').delete().eq('listing_id', id);
@@ -1484,13 +1484,13 @@
     // --- ACTIONS ---
 
     window.resolveReport = async (id) => {
-        if(!confirm("Meldung schließen?")) return;
+        if(!(await Room8UI.confirm("Meldung schließen?", { danger: false }))) return;
         await sb.from('reports').update({ status: 'resolved' }).eq('id', id);
         loadReports();
     };
 
     window.banUser = async (id) => {
-        if(!confirm("Nutzer wirklich sperren?")) return;
+        if(!(await Room8UI.confirm("Nutzer wirklich sperren?", { danger: true }))) return;
         await sb.from('profiles').update({ is_banned: true }).eq('id', id);
         Room8UI.success("Gesperrt.");
         loadUsers();
@@ -1512,7 +1512,7 @@
     };
 
     window.deleteReportedListing = async (listingId, reportId) => {
-        if (!confirm("Inserat endgültig löschen und Meldung schließen?")) return;
+        if (!(await Room8UI.confirm("Inserat endgültig löschen und Meldung schließen?", { danger: true }))) return;
         // Fotos löschen
         await sb.from('listing_photos').delete().eq('listing_id', listingId);
         // Listing löschen
@@ -1530,7 +1530,7 @@
 
     window.verifyUser = async (id, approve) => {
         const action = approve ? 'genehmigen' : 'ablehnen';
-        if (!confirm(`Nutzer wirklich ${action}?`)) return;
+        if (!(await Room8UI.confirm(`Nutzer wirklich ${action}?`, { danger: false }))) return;
 
         try {
             const updates = {
@@ -1556,12 +1556,12 @@
                     ? { userId: id, type: 'account_verified', data: { userName: userName } }
                     : { userId: id, type: 'verification_rejected', data: { verificationLink: 'https://room8.club/verify-options.html' } };
 
-                var emailRes = await fetch(SUPABASE_URL + '/functions/v1/send-notification', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-                    body: JSON.stringify(emailPayload)
-                });
-                var emailResult = await emailRes.json();
+                // invoke sendet automatisch den Admin-Session-Token mit (send-notification
+                // verlangt jetzt einen eingeloggten Admin fuer diese Mail-Typen).
+                var emailInvoke = await sb.functions.invoke('send-notification', { body: emailPayload });
+                var emailResult = emailInvoke.error
+                    ? { success: false, error: (emailInvoke.error.message || 'Unbekannt') }
+                    : (emailInvoke.data || { success: false, error: 'Keine Antwort' });
 
                 if (emailResult.success) {
                     Room8UI.success("E-Mail wurde gesendet!");
@@ -1654,7 +1654,7 @@
     };
 
     window.deleteListing = async (id) => {
-        if(!confirm("Inserat endgültig löschen? Dies kann nicht rückgängig gemacht werden!")) return;
+        if(!(await Room8UI.confirm("Inserat endgültig löschen? Dies kann nicht rückgängig gemacht werden!", { danger: true }))) return;
 
         console.log("Deleting listing:", id);
 
@@ -1732,7 +1732,7 @@
     };
 
     window.deleteJob = async (id) => {
-        if (!confirm("Job wirklich löschen?")) return;
+        if (!(await Room8UI.confirm("Job wirklich löschen?", { danger: true }))) return;
         const { error } = await sb.from('listings').delete().eq('id', id);
         if (error) {
             Room8UI.error("Fehler: " + error.message);
@@ -1794,7 +1794,7 @@
     };
 
     window.deleteCoupon = async (id) => {
-        if (!confirm("Coupon wirklich löschen?")) return;
+        if (!(await Room8UI.confirm("Coupon wirklich löschen?", { danger: true }))) return;
         const { error } = await sb.from('coupons').delete().eq('id', id);
         if (error) {
             Room8UI.error("Fehler: " + error.message);
@@ -1898,7 +1898,7 @@
     };
 
     window.deleteMessage = async (id) => {
-        if (!confirm("Nachricht wirklich löschen?")) return;
+        if (!(await Room8UI.confirm("Nachricht wirklich löschen?", { danger: true }))) return;
         const { error } = await sb.from('contact_messages').delete().eq('id', id);
         if (error) {
             Room8UI.error("Fehler: " + error.message);
@@ -2092,7 +2092,7 @@
     }
 
     window.approveRequest = async (requestId) => {
-        if (!confirm('Antrag genehmigen? User wird sofort freigeschaltet und kann Events erstellen.')) return;
+        if (!(await Room8UI.confirm('Antrag genehmigen? User wird sofort freigeschaltet und kann Events erstellen.', { danger: false }))) return;
         var res = await sb.rpc('admin_review_event_creator_request', {
             request_id_input: requestId,
             new_status: 'approved'
@@ -2111,7 +2111,7 @@
     };
 
     window.rejectRequest = async (requestId) => {
-        var reason = prompt('Grund für Ablehnung (wird dem User angezeigt):', '');
+        var reason = await Room8UI.prompt('Grund für Ablehnung (wird dem User angezeigt):', { defaultValue: '' });
         if (reason === null) return;
         var res = await sb.rpc('admin_review_event_creator_request', {
             request_id_input: requestId,
@@ -2217,7 +2217,7 @@
     }
 
     window.approveEvent = async (eventId) => {
-        if (!confirm('Event wieder freigeben? (status -> active, Reports werden gelöscht)')) return;
+        if (!(await Room8UI.confirm('Event wieder freigeben? (status -> active, Reports werden gelöscht)', { danger: false }))) return;
         // System-Bypass via SQL direkt geht nicht, also als Admin (RLS-Bypass via events_admin_all)
         await sb.from('events').update({ status: 'active' }).eq('id', eventId);
         await sb.from('event_reports').delete().eq('event_id', eventId);
@@ -2226,14 +2226,14 @@
     };
 
     window.cancelEventAdmin = async (eventId) => {
-        if (!confirm('Event absagen? Going-User bekommen automatisch eine Push-Notification.')) return;
+        if (!(await Room8UI.confirm('Event absagen? Going-User bekommen automatisch eine Push-Notification.', { danger: false }))) return;
         await sb.from('events').update({ status: 'cancelled' }).eq('id', eventId);
         if (window.Room8) Room8.showToast('Event abgesagt', 'success');
         loadEventsAdmin(currentEventFilter);
     };
 
     window.dismissReports = async (eventId) => {
-        if (!confirm('Alle Reports für dieses Event löschen?')) return;
+        if (!(await Room8UI.confirm('Alle Reports für dieses Event löschen?', { danger: true }))) return;
         await sb.from('event_reports').delete().eq('event_id', eventId);
         if (window.Room8) Room8.showToast('Reports gelöscht', 'success');
         loadEventsAdmin(currentEventFilter);
@@ -2270,8 +2270,8 @@
                     '\n   ' + e.created_at);
             });
             if (!errs || !errs.length) txt.push('(keine Push-Versuche)');
-            alert(txt.join('\n'));
-        } catch (e) { alert('Exception: ' + e.message); }
+            Room8UI.info(txt.join('\n'), 8000);
+        } catch (e) { Room8UI.error('Exception: ' + e.message); }
     };
 
     window.testPush = async () => {
@@ -2281,13 +2281,13 @@
                 p_body: 'FCM funktioniert! Wenn du das auf deinem Handy siehst, geht alles.'
             });
             if (error) {
-                alert('RPC-Fehler:\n' + error.message);
+                Room8UI.error('RPC-Fehler:\n' + error.message);
                 return;
             }
             const msg = String(data || '');
-            alert('Push gefeuert!\n\n' + msg + '\n\nPruefe:\n1. Handy/Web-Notif sollte in <30s kommen\n2. Push Health Tab refresh — Eintrag mit success/no_token/fcm_error\n3. Bei "no_token": Native App auf iPhone/Android starten + Push-Permission geben');
+            Room8UI.success('Push gefeuert!\n\n' + msg + '\n\nPruefe:\n1. Handy/Web-Notif sollte in <30s kommen\n2. Push Health Tab refresh — Eintrag mit success/no_token/fcm_error\n3. Bei "no_token": Native App auf iPhone/Android starten + Push-Permission geben');
         } catch (e) {
-            alert('Test-Push Exception: ' + e.message);
+            Room8UI.error('Test-Push Exception: ' + e.message);
         }
     };
 
@@ -2297,7 +2297,7 @@
         const stubReady = !!window.Room8Sentry;
 
         if (!stubReady && !sdkLoaded) {
-            alert('Sentry NICHT geladen.\nMoeglich blockt AdBlocker/Brave Sentry-CDN.\nCheck DevTools → Network → Filter "sentry"');
+            Room8UI.error('Sentry NICHT geladen.\nMoeglich blockt AdBlocker/Brave Sentry-CDN.\nCheck DevTools → Network → Filter "sentry"');
             return;
         }
 
@@ -2309,9 +2309,9 @@
                 window.Room8Sentry.captureMessage('admin-test-message ' + ts, { level: 'warning' });
                 window.Room8Sentry.captureException(new Error('admin-test-exception ' + ts));
             }
-            alert('OK — 2 Events an Sentry gesendet.\n\nSDK geladen: ' + (sdkLoaded ? 'JA' : 'NEIN (Queue)') + '\nTimestamp: ' + ts + '\n\nJetzt im Sentry-Dashboard pruefen:\nhttps://yumita.sentry.io → Project room8-web → Issues');
+            Room8UI.success('OK — 2 Events an Sentry gesendet.\n\nSDK geladen: ' + (sdkLoaded ? 'JA' : 'NEIN (Queue)') + '\nTimestamp: ' + ts + '\n\nJetzt im Sentry-Dashboard pruefen:\nhttps://yumita.sentry.io → Project room8-web → Issues');
         } catch (e) {
-            alert('Fehler beim Sentry-Test: ' + e.message);
+            Room8UI.error('Fehler beim Sentry-Test: ' + e.message);
         }
     };
 

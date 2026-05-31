@@ -996,9 +996,9 @@
         }
 
         // Contact Button Logic
-        document.getElementById('contactBtn').onclick = () => {
+        document.getElementById('contactBtn').onclick = async () => {
             if (!currentUserId) {
-                if(confirm(tr('detail_login_required'))) navigateTo('login.html');
+                if(await Room8UI.confirm(tr('detail_login_required'), { danger: false })) navigateTo('login.html');
                 return;
             }
             if (!currentListing || !currentListing.owner_id) {
@@ -1609,7 +1609,7 @@
 
     async function toggleFavorite() {
         if (!currentUserId) {
-            if(confirm(tr('detail_please_login'))) navigateTo('login.html');
+            if(await Room8UI.confirm(tr('detail_please_login'), { danger: false })) navigateTo('login.html');
             return;
         }
 

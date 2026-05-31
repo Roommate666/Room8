@@ -386,7 +386,7 @@
     // Antrag zurueckziehen + neu beantragen. verification_status/document_url darf
     // der User selbst zuruecksetzen (is_verified bleibt Trigger-geschuetzt).
     async function withdrawVerification() {
-      if (!confirm('Antrag zurückziehen und neu beantragen? Dein hochgeladenes Dokument wird entfernt.')) return;
+      if (!(await Room8UI.confirm('Antrag zurückziehen und neu beantragen? Dein hochgeladenes Dokument wird entfernt.', { danger: true }))) return;
       var btn = document.getElementById('withdrawBtn');
       var orig = btn.textContent;
       btn.disabled = true;
@@ -405,7 +405,7 @@
       } catch (e) {
         console.error(e);
         if (window.Room8UI && Room8UI.error) Room8UI.error('Konnte nicht zurückziehen: ' + e.message);
-        else alert('Fehler: ' + e.message);
+        else Room8UI.error('Fehler: ' + e.message);
         btn.disabled = false;
         btn.textContent = orig;
       }

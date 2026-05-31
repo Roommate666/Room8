@@ -1,7 +1,11 @@
 // Supabase Edge Function: send-notification
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
+
+// Typen die Mails an FREMDE User schicken -> nur Admins duerfen sie ausloesen.
+const ADMIN_TYPES = ['account_verified', 'verification_rejected', 'admin_verification_request']
 
 // CORS Headers
 const corsHeaders = {
@@ -16,8 +20,39 @@ serve(async (req) => {
   }
 
   try {
+    // --- Auth-Wand: nur eingeloggte User. Vorher war die Function offen ->
+    // jeder konnte ueber unsere verifizierte Domain beliebige Mails verschicken. ---
+    const authHeader = req.headers.get('Authorization') || ''
+    const userToken = authHeader.replace(/^Bearer\s+/i, '').trim()
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
+    if (!userToken || !supabaseUrl || !anonKey) {
+      return new Response(JSON.stringify({ success: false, error: 'auth_required' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+    const authedClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: `Bearer ${userToken}` } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+    const { data: userData, error: authErr } = await authedClient.auth.getUser(userToken)
+    if (authErr || !userData?.user) {
+      return new Response(JSON.stringify({ success: false, error: 'auth_required' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
     const { to, type, data } = await req.json()
-    
+
+    // Admin-Typen (Mail an fremde User) nur fuer Admins.
+    if (ADMIN_TYPES.includes(type)) {
+      const { data: prof } = await authedClient.from('profiles').select('is_admin').eq('id', userData.user.id).single()
+      if (!prof || prof.is_admin !== true) {
+        return new Response(JSON.stringify({ success: false, error: 'admin_only' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+    }
+
+    // Link-Injection-Schutz: nur room8.club-Links erlaubt (kein Phishing ueber unsere Domain).
+    if (data && data.verificationLink && !/^https:\/\/(www\.)?room8\.club\//.test(String(data.verificationLink))) {
+      return new Response(JSON.stringify({ success: false, error: 'invalid_link' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
     // E-Mail Templates
     const templates = {
       'uni_email_verification': {

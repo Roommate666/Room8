@@ -410,7 +410,7 @@
     }
 
     async function removeFavorite(id) {
-        if (!confirm((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('favorites_remove_confirm'):'Aus Favoriten entfernen?')) return;
+        if (!(await Room8UI.confirm((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('favorites_remove_confirm'):'Aus Favoriten entfernen?', { danger: true }))) return;
 
         // UI Optimistisch entfernen (fühlt sich schneller an)
         const btn = document.querySelector(`.delete-fav-btn[data-id="${id}"]`);

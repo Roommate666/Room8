@@ -165,7 +165,11 @@
             return true; // Gate aktiv
         } catch (err) {
             console.error('verifyGate error:', err);
-            return false;
+            if (window.Room8Sentry) window.Room8Sentry.captureException(err);
+            // Fail-CLOSED: bei Fehler (Netzwerk/Auth) Gate AKTIV lassen statt still
+            // durchzulassen. Verifizierte User koennen per Reload erneut pruefen.
+            showVerifyOverlay(blurSelectors, _t2('verify_check_failed') || message);
+            return true;
         }
     };
 

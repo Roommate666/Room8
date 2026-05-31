@@ -55,6 +55,7 @@ const translations = {
  verify_required: 'Verifizierung erforderlich',
  verify_now: 'Jetzt verifizieren',
  verify_default_message: 'Verifiziere dich, um alle Details sehen und Kontakt aufnehmen zu können.',
+ verify_check_failed: 'Verifizierungs-Status konnte nicht geprüft werden. Bitte lade die Seite neu.',
  verify_create_message: 'Verifiziere dich, um Inserate erstellen zu können.',
 
  
@@ -1826,6 +1827,7 @@ const translations = {
  verify_required: 'Verification Required',
  verify_now: 'Verify Now',
  verify_default_message: 'Verify yourself to see all details and contact the poster.',
+ verify_check_failed: 'Could not check your verification status. Please reload the page.',
  verify_create_message: 'Verify yourself to create listings.',
 
  

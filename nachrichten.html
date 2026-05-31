@@ -469,7 +469,7 @@
     }
 
     async function deleteChat(btn) {
-        if (!confirm('Chat ausblenden? Er erscheint wieder, wenn eine neue Nachricht kommt.')) return;
+        if (!(await Room8UI.confirm('Chat ausblenden? Er erscheint wieder, wenn eine neue Nachricht kommt.', { danger: true }))) return;
         var partnerId = btn.dataset.partner;
         var listingId = btn.dataset.listing || null;
 
