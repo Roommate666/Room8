@@ -72,7 +72,7 @@ serve(async (req) => {
     const templates = {
       'uni_email_verification': {
         from: 'Room8 Team <help@room8.club>',
-        subject: 'Bestaetige deine Uni-E-Mail fuer Room8',
+        subject: 'Bestätige deine Uni-E-Mail für Room8',
         html: `
           <!DOCTYPE html>
           <html>
@@ -80,14 +80,14 @@ serve(async (req) => {
             <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
               <div style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); padding: 40px; text-align: center;">
                 <div style="font-size: 3rem; margin-bottom: 15px;">&#127891;</div>
-                <h1 style="color: white; margin: 0; font-size: 2rem;">Uni-E-Mail bestaetigen</h1>
+                <h1 style="color: white; margin: 0; font-size: 2rem;">Uni-E-Mail bestätigen</h1>
               </div>
               <div style="padding: 40px 30px;">
                 <p style="color: #374151; line-height: 1.6; font-size: 16px;">Hi,</p>
-                <p style="color: #374151; line-height: 1.6; font-size: 16px;">Fast geschafft! Bestaetige jetzt deine Uni-E-Mail-Adresse, um deine Room8-Verifizierung abzuschliessen.</p>
+                <p style="color: #374151; line-height: 1.6; font-size: 16px;">Fast geschafft! Bestätige jetzt deine Uni-E-Mail-Adresse, um deine Room8-Verifizierung abzuschließen.</p>
                 <div style="text-align: center; margin: 30px 0;">
                   <a href="${data.verificationLink}" style="display: inline-block; background: #3b82f6; color: white !important; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);">
-                    &#9989; E-Mail bestaetigen
+                    &#9989; E-Mail bestätigen
                   </a>
                 </div>
                 <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
@@ -114,7 +114,7 @@ serve(async (req) => {
             <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden;">
               <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 50px 30px; text-align: center;">
                 <div style="font-size: 4rem; margin-bottom: 15px;">&#127881;</div>
-                <h1 style="color: white; margin: 0; font-size: 2.5rem;">Herzlichen Glueckwunsch!</h1>
+                <h1 style="color: white; margin: 0; font-size: 2.5rem;">Herzlichen Glückwunsch!</h1>
               </div>
               <div style="padding: 40px 30px;">
                 <p style="color: #374151; line-height: 1.6; font-size: 16px;">Hi ${escHtml(data.userName)},</p>
@@ -122,7 +122,7 @@ serve(async (req) => {
                 <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; margin: 25px 0; border-radius: 8px;">
                   <h3 style="margin: 0 0 15px 0; color: #065f46;">Du hast jetzt vollen Zugriff auf:</h3>
                   <ul style="margin: 10px 0; padding-left: 20px;">
-                    <li style="margin: 8px 0; color: #065f46;">Alle Inserate mit vollstaendigen Details</li>
+                    <li style="margin: 8px 0; color: #065f46;">Alle Inserate mit vollständigen Details</li>
                     <li style="margin: 8px 0; color: #065f46;">Nachrichten an andere Nutzer senden</li>
                     <li style="margin: 8px 0; color: #065f46;">Eigene Inserate erstellen</li>
                   </ul>
@@ -148,7 +148,7 @@ serve(async (req) => {
 
       'verification_approved': {
         from: 'Room8 Team <help@room8.club>',
-        subject: 'Deine Verifizierung wurde bestaetigt!',
+        subject: 'Deine Verifizierung wurde bestätigt!',
         html: `
           <!DOCTYPE html>
           <html>
@@ -156,7 +156,7 @@ serve(async (req) => {
             <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
               <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px; text-align: center;">
                 <div style="font-size: 3rem; margin-bottom: 15px;">&#9989;</div>
-                <h1 style="color: white; margin: 0; font-size: 2rem;">Verifizierung bestaetigt!</h1>
+                <h1 style="color: white; margin: 0; font-size: 2rem;">Verifizierung bestätigt!</h1>
               </div>
               <div style="padding: 40px 30px;">
                 <p style="color: #374151; line-height: 1.6; font-size: 16px;">Hi,</p>
@@ -203,7 +203,7 @@ serve(async (req) => {
               </div>
               <div style="padding: 40px 30px;">
                 <p style="color: #374151; line-height: 1.6; font-size: 16px;">Hi,</p>
-                <p style="color: #374151; line-height: 1.6; font-size: 16px;">Deine Verifizierung wurde leider abgelehnt. Bitte versuche es erneut mit einem gueltigen Dokument oder deiner Uni-E-Mail-Adresse.</p>
+                <p style="color: #374151; line-height: 1.6; font-size: 16px;">Deine Verifizierung wurde leider abgelehnt. Bitte versuche es erneut mit einem gültigen Dokument oder deiner Uni-E-Mail-Adresse.</p>
                 <div style="text-align: center; margin: 30px 0;">
                   <a href="https://room8.club/verify-options.html" style="display: inline-block; background: #3b82f6; color: white !important; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);">
                     Erneut verifizieren
