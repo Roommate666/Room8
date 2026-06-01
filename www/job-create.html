@@ -22,6 +22,24 @@
 
     <main class="app-content">
         <form id="createJobForm">
+
+            <!-- ===== WIZARD ===== -->
+            <div id="wizardWrap" style="display:none;">
+                <div id="wizardProgressBar"><div id="wizardProgressFill"></div></div>
+                <div id="wizardHead">
+                    <span id="wizardStepCount">Schritt 1</span>
+                    <span id="wizardBadge" class="wbadge-required">Pflicht</span>
+                </div>
+                <div id="wizardTitle">Firma & Stelle</div>
+                <div id="wizardViewport"></div>
+                <div id="wizardNav">
+                    <button type="button" id="wizardBack" onclick="Wizard.back()">Zurück</button>
+                    <button type="button" id="wizardNext" onclick="Wizard.next()">Weiter</button>
+                    <button type="submit" id="wizardPublish" style="display:none;" onclick="return Wizard.tryPublish(event)">Job veröffentlichen</button>
+                </div>
+            </div>
+
+            <div id="oldFormBody">
             <!-- Logo -->
             <div class="form-group">
                 <label>Firmenlogo</label>
@@ -126,6 +144,8 @@
 
             <button type="button" class="submit-btn" style="background:linear-gradient(135deg,#8B5CF6 0%,#6D28D9 100%); box-shadow:0 4px 15px rgba(139,92,246,0.3); margin-top:1.5rem;" onclick="showJobPreview()">Vorschau anzeigen</button>
             <button type="submit" class="submit-btn" style="background:#111827;">Job Veröffentlichen</button>
+
+            </div><!-- /oldFormBody -->
         </form>
     </main>
 </div>
@@ -146,6 +166,7 @@
 <script src="translations.js"></script>
 <script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
+<script src="wizard-engine.js"></script>
 <script>
     // Supabase Client - Direkte Initialisierung
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -291,6 +312,15 @@
 
     document.getElementById('createJobForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (window.Wizard && Wizard.isOn()) {
+            var tEl = document.getElementById('title');
+            var dEl = document.getElementById('description');
+            if (!String(tEl.value || '').trim() || !String(dEl.value || '').trim()) {
+                Room8UI.warning('Bitte Titel und Beschreibung ausfüllen.');
+                Wizard.gotoLast();
+                return;
+            }
+        }
         const user = await checkAdmin();
         if (!user) return;
         // Mind. ein Bewerbungsweg Pflicht, sonst Sackgasse fuer den Bewerber
@@ -377,6 +407,14 @@
     });
 
     checkAdmin();
+
+    // Schritt-fuer-Schritt Wizard
+    Wizard.start([
+        { t: 'Firma & Stelle', b: 'required', req: ['company', 'title', 'location'], box: ['#logoInput', '#company', '#title', '#location', '#website'] },
+        { t: 'Details (optional)', b: 'optional', req: [], box: ['#companySize', '#jobType', '#contractDuration', '#salaryAmount', '#minHours'] },
+        { t: 'Beschreibung', b: 'required', req: ['description'], box: ['#description', '#requirements', '#benefits'] },
+        { t: 'Bewerbung & Veröffentlichen', b: 'optional', req: [], box: ['#appEmail', '#appUrl', '#isDemo'], last: true },
+    ]);
 </script>
 <script src="notificationHelpers.js"></script>
 <script src="notificationBell.js"></script>

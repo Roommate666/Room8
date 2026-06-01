@@ -236,6 +236,24 @@
     </header>
 
     <form id="eventForm" class="form-container" style="display:none;">
+
+        <!-- ===== WIZARD ===== -->
+        <div id="wizardWrap" style="display:none;">
+            <div id="wizardProgressBar"><div id="wizardProgressFill"></div></div>
+            <div id="wizardHead">
+                <span id="wizardStepCount">Schritt 1</span>
+                <span id="wizardBadge" class="wbadge-required">Pflicht</span>
+            </div>
+            <div id="wizardTitle">Event-Basis</div>
+            <div id="wizardViewport"></div>
+            <div id="wizardNav">
+                <button type="button" id="wizardBack" onclick="Wizard.back()">Zurück</button>
+                <button type="button" id="wizardNext" onclick="Wizard.next()">Weiter</button>
+                <button type="button" id="wizardPublish" style="display:none;" onclick="if(Wizard.tryPublish())submitEvent()">Event erstellen</button>
+            </div>
+        </div>
+
+        <div id="oldFormBody">
         <div class="form-section">
             <div class="form-group">
                 <label for="title">Titel *</label>
@@ -348,6 +366,8 @@
             <input type="file" id="coverImage" accept="image/*" style="display:none;">
             <img id="imagePreview" class="image-preview" style="display:none;">
         </div>
+
+        </div><!-- /oldFormBody -->
     </form>
 
     <div id="submitBar" class="submit-bar" style="display:none;">
@@ -361,6 +381,7 @@
 <script src="translations.js"></script>
 <script src="navigation.js"></script>
 <script src="room8-utils.js"></script>
+<script src="wizard-engine.js"></script>
 <script>
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     function navigateTo(url) { try { window.location.href = url; } catch(e) {} }
@@ -418,6 +439,15 @@
 
         document.getElementById('eventForm').style.display = 'block';
         document.getElementById('submitBar').style.display = 'flex';
+
+        // Schritt-fuer-Schritt Wizard (der eigene Publish-Button ersetzt den submitBar)
+        document.getElementById('submitBar').style.display = 'none';
+        Wizard.start([
+            { t: 'Event-Basis', b: 'required', req: ['title', 'category'], box: ['#title', '#category'] },
+            { t: 'Wann & Wo', b: 'required', req: ['startDate', 'startTime', 'location', 'city'], box: ['#startDate', '#startTime', '#endDate', '#endTime', '#location', '#address', '#city'] },
+            { t: 'Beschreibung', b: 'required', req: ['description'], box: ['#description'] },
+            { t: 'Bild & Details (optional)', b: 'optional', req: [], box: ['#price', '#maxParticipants', '#organizerName', '#externalUrl', '#uploadZone', '#coverImage', '#imagePreview'], last: true },
+        ]);
 
         // Default Organizer-Name vorausfuellen
         if (profileRes.data) {
