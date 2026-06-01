@@ -168,6 +168,23 @@
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
+
+        /* ===== WIZARD ===== */
+        #wizardProgressBar { height: 6px; background: #E5E7EB; border-radius: 999px; overflow: hidden; margin-bottom: 1rem; }
+        #wizardProgressFill { height: 100%; width: 0%; background: #4F46E5; border-radius: 999px; transition: width 0.3s ease; }
+        #wizardHead { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.25rem; }
+        #wizardStepCount { font-size: 0.8rem; font-weight: 600; color: #6B7280; letter-spacing: 0.02em; }
+        .wbadge-required, .wbadge-optional { font-size: 0.72rem; font-weight: 700; padding: 0.15rem 0.55rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.03em; }
+        .wbadge-required { background: #FEE2E2; color: #B91C1C; }
+        .wbadge-optional { background: #ECFDF5; color: #047857; }
+        #wizardTitle { font-size: 1.35rem; font-weight: 700; color: #111827; margin-bottom: 1.1rem; }
+        #wizardViewport { min-height: 100px; }
+        #wizardNav { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+        #wizardNav button { flex: 1; padding: 0.95rem; border-radius: 12px; font-weight: 600; font-size: 1rem; cursor: pointer; border: none; }
+        #wizardBack { background: #F3F4F6; color: #374151; }
+        #wizardBack:disabled { opacity: 0.4; cursor: not-allowed; }
+        #wizardNext { background: #4F46E5; color: #fff; }
+        #wizardPublish { background: #10B981; color: #fff; }
     </style>
 </head>
 <body>
@@ -185,11 +202,29 @@
         
         <!-- Modus Auswahl -->
         <div class="mode-switch">
-            <div class="mode-option active" id="mode-offer" onclick="setMode('offer')">Verkaufen</div>
-            <div class="mode-option" id="mode-search" onclick="setMode('search')">Suche</div>
+            <div class="mode-option active" id="mode-offer" onclick="wizardSwitchMode('offer')">Verkaufen</div>
+            <div class="mode-option" id="mode-search" onclick="wizardSwitchMode('search')">Suche</div>
         </div>
 
         <form id="createForm">
+
+            <!-- ===== WIZARD ===== -->
+            <div id="wizardWrap" style="display:none;">
+                <div id="wizardProgressBar"><div id="wizardProgressFill"></div></div>
+                <div id="wizardHead">
+                    <span id="wizardStepCount">Schritt 1</span>
+                    <span id="wizardBadge" class="wbadge-optional">Optional</span>
+                </div>
+                <div id="wizardTitle">Fotos</div>
+                <div id="wizardViewport"></div>
+                <div id="wizardNav">
+                    <button type="button" id="wizardBack" onclick="wizardGoBack()">Zurück</button>
+                    <button type="button" id="wizardNext" onclick="wizardGoNext()">Weiter</button>
+                    <button type="submit" id="wizardPublish" class="submit-btn" style="display:none;">Veröffentlichen</button>
+                </div>
+            </div>
+
+            <div id="oldFormBody">
             <!-- Bilder Upload -->
             <div class="form-group" id="imageSection">
                 <label class="section-title">Fotos (Max. 5)</label>
@@ -203,6 +238,12 @@
             </div>
 
             <!-- Titel -->
+            <div class="form-group" id="aiGenWrap" style="background:#EEF2FF;border:1px solid #C7D2FE;border-radius:12px;padding:1rem;">
+                <div style="font-weight:600;color:#3730A3;margin-bottom:0.3rem;">✨ Titel & Beschreibung automatisch erstellen</div>
+                <div style="font-size:0.85rem;color:#4B5563;margin-bottom:0.75rem;">Lad Fotos hoch und füll Kategorie, Zustand, Preis & Stadt aus — dann schreibt die KI den Text. Du kannst alles anpassen.</div>
+                <button type="button" id="aiGenBtn" onclick="generateListingText()" style="width:100%;padding:0.85rem;background:#4F46E5;color:#fff;border:none;border-radius:10px;font-weight:600;font-size:0.95rem;cursor:pointer;">Aus Fotos & Details generieren</button>
+            </div>
+
             <div class="form-group">
                 <label for="title">Titel</label>
                 <input type="text" id="title" required placeholder="Was möchtest du anbieten?">
@@ -268,6 +309,8 @@
             </div>
 
             <button type="submit" class="submit-btn" id="submitBtn">Veröffentlichen</button>
+
+            </div><!-- /oldFormBody -->
         </form>
 
     </main>
@@ -302,11 +345,25 @@
     var modeParam = urlParams.get('mode');
     var idParam = urlParams.get('id');
 
+    // ===== Wizard-Daten (vor dem Init noetig, da setMode sie braucht) =====
+    var OFFER_STEPS = [
+        { t: 'Fotos', b: 'optional', req: [], box: ['#imageSection'] },
+        { t: 'Details', b: 'required', req: ['price', 'category', 'city'], box: ['#price-group', '#category', '#condition-group', '#city'] },
+        { t: 'Titel & Beschreibung', b: 'required', req: ['title', 'description'], box: ['#aiGenWrap', '#title', '#description'], last: true },
+    ];
+    var SEARCH_STEPS = [
+        { t: 'Was suchst du?', b: 'required', req: ['category', 'city'], box: ['#category', '#price-range-group', '#condition-group', '#city'] },
+        { t: 'Titel & Beschreibung', b: 'required', req: ['title', 'description'], box: ['#title', '#description'], last: true },
+    ];
+    var WIZARD_STEPS = OFFER_STEPS;
+    var wizardStep = 0;
+    var wizardOn = false;
+
     if (idParam) {
         editListingId = idParam;
         loadListingForEdit(idParam);
-    } else if (modeParam) {
-        setMode(modeParam);
+    } else {
+        setMode(modeParam || 'offer');
     }
 
     // Listing laden für Bearbeitung
@@ -417,6 +474,144 @@
             cityInput.placeholder = 'Wo befindet sich der Artikel?';
             descInput.placeholder = 'Beschreibe den Artikel genauer...';
         }
+
+        // Wizard aktivieren (nur Inserieren, nicht beim Bearbeiten)
+        setupWizard(mode);
+    }
+
+    // ===== SCHRITT-FUER-SCHRITT WIZARD =====
+    function wizardBoxOf(sel) {
+        var el = document.querySelector(sel);
+        if (!el) return null;
+        if (el.classList.contains('form-group')) return el;
+        if (el.id && (el.id.indexOf('group-') === 0 || el.id.indexOf('-group') > 0 || el.id.indexOf('Section') > 0 || el.id.indexOf('Wrap') > 0)) return el;
+        return el.closest('.form-group') || el;
+    }
+
+    function setupWizard(mode) {
+        var wrap = document.getElementById('wizardWrap');
+        var oldBody = document.getElementById('oldFormBody');
+        var isEdit = (typeof editListingId !== 'undefined' && editListingId);
+        if (isEdit) {
+            wizardOn = false;
+            wrap.style.display = 'none';
+            oldBody.style.display = '';
+            return;
+        }
+        WIZARD_STEPS = mode === 'search' ? SEARCH_STEPS : OFFER_STEPS;
+        wizardOn = true;
+        oldBody.style.display = 'none';
+        wrap.style.display = 'block';
+        ['title', 'description', 'price', 'category', 'condition', 'city'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.required = false;
+        });
+        wizardStep = 0;
+        renderWizardStep();
+    }
+
+    function renderWizardStep() {
+        var viewport = document.getElementById('wizardViewport');
+        var oldBody = document.getElementById('oldFormBody');
+        while (viewport.firstChild) oldBody.appendChild(viewport.firstChild);
+        var step = WIZARD_STEPS[wizardStep];
+        step.box.forEach(function(sel) {
+            var box = wizardBoxOf(sel);
+            if (box) viewport.appendChild(box);
+        });
+        document.getElementById('wizardTitle').textContent = step.t;
+        document.getElementById('wizardStepCount').textContent = 'Schritt ' + (wizardStep + 1) + ' von ' + WIZARD_STEPS.length;
+        var badge = document.getElementById('wizardBadge');
+        badge.textContent = step.b === 'required' ? 'Pflicht' : 'Optional';
+        badge.className = step.b === 'required' ? 'wbadge-required' : 'wbadge-optional';
+        document.getElementById('wizardProgressFill').style.width = ((wizardStep + 1) / WIZARD_STEPS.length * 100) + '%';
+        document.getElementById('wizardBack').disabled = (wizardStep === 0);
+        document.getElementById('wizardNext').style.display = step.last ? 'none' : '';
+        document.getElementById('wizardPublish').style.display = step.last ? '' : 'none';
+        viewport.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function wizardValidate() {
+        var step = WIZARD_STEPS[wizardStep];
+        for (var i = 0; i < step.req.length; i++) {
+            var el = document.getElementById(step.req[i]);
+            if (el && !String(el.value || '').trim()) {
+                Room8UI.warning('Bitte dieses Pflichtfeld ausfüllen.');
+                el.focus();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function wizardGoNext() {
+        if (!wizardValidate()) return;
+        if (wizardStep < WIZARD_STEPS.length - 1) { wizardStep++; renderWizardStep(); }
+    }
+
+    function wizardGoBack() {
+        if (wizardStep > 0) { wizardStep--; renderWizardStep(); }
+    }
+
+    function wizardSwitchMode(m) {
+        if (m === currentMode) return;
+        var qs = '?mode=' + m;
+        var ed = new URLSearchParams(window.location.search).get('edit');
+        if (ed) qs += '&edit=' + ed;
+        window.location.href = window.location.pathname + qs;
+    }
+
+    // ===== KI-Generierung: Titel + Beschreibung aus Fotos + Details =====
+    function fileToDataUrl(file) {
+        return new Promise(function(resolve, reject) {
+            var reader = new FileReader();
+            reader.onload = function() { resolve(reader.result); };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    async function generateListingText() {
+        var btn = document.getElementById('aiGenBtn');
+        var catEl = document.getElementById('category');
+        var city = document.getElementById('city').value.trim();
+        var price = document.getElementById('price').value;
+        if (!catEl.value || !city) {
+            Room8UI.warning('Bitte erst Kategorie und Stadt ausfüllen.');
+            return;
+        }
+        function txt(id) { var el = document.getElementById(id); if (!el) return null; if (el.tagName === 'SELECT') { var o = el.options[el.selectedIndex]; return o ? o.text : null; } return el.value || null; }
+        var facts = {
+            kategorie: txt('category'),
+            zustand: txt('condition'),
+            preis: price || null,
+            stadt: city,
+        };
+        var oldTxt = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'KI schreibt …';
+        try {
+            var images = [];
+            for (var i = 0; i < Math.min(selectedFiles.length, 3); i++) images.push(await fileToDataUrl(selectedFiles[i]));
+            var sess = await sb.auth.getSession();
+            var token = sess.data.session && sess.data.session.access_token;
+            if (!token) { Room8UI.warning('Bitte erst einloggen.'); return; }
+            var resp = await fetch(SUPABASE_URL + '/functions/v1/generate-listing', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ type: 'gegenstand', facts: facts, images: images })
+            });
+            var data = await resp.json();
+            if (!resp.ok) { Room8UI.error('Konnte nicht generieren: ' + (data.error || resp.status)); return; }
+            if (data.title) document.getElementById('title').value = data.title;
+            if (data.description) document.getElementById('description').value = data.description;
+            Room8UI.success('Titel und Beschreibung erstellt — schau drüber und passe an!');
+        } catch (e) {
+            Room8UI.error('Fehler: ' + e.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = oldTxt;
+        }
     }
 
     // Datei Handling
@@ -476,7 +671,19 @@
     // Formular Absenden
     document.getElementById('createForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        
+
+        // Wizard-Guard: Titel + Beschreibung muessen da sein
+        if (wizardOn) {
+            var tEl = document.getElementById('title');
+            var dEl = document.getElementById('description');
+            if (!String(tEl.value || '').trim() || !String(dEl.value || '').trim()) {
+                Room8UI.warning('Bitte Titel und Beschreibung ausfüllen — die KI kann das aus deinen Fotos erstellen.');
+                wizardStep = WIZARD_STEPS.length - 1;
+                renderWizardStep();
+                return;
+            }
+        }
+
         var btn = document.getElementById('submitBtn');
         btn.disabled = true;
         var originalText = btn.textContent;

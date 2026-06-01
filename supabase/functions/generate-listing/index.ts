@@ -16,17 +16,32 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-const SYS_PROMPT = `Du erstellst Wohnungs-Inserate fuer eine Studenten-WG-Plattform.
+const PROMPT_WOHNUNG = `Du erstellst Wohnungs-Inserate fuer eine Studenten-WG-Plattform.
 Du bekommst Eckdaten und optional 1-3 Fotos der Unterkunft.
 
 Erzeuge:
-- "title": kurz (max 60 Zeichen), enthaelt Typ + Groesse + Stadt. Beispiel: "Helles 18 m2 WG-Zimmer in Augsburg".
+- "title": kurz (max 60 Zeichen), enthaelt Typ + Groesse + Stadt. Beispiel: "Helles 18 m² WG-Zimmer in Augsburg".
 - "description": 3 bis 5 fluessige Saetze in der Du-Form. Nutze die Eckdaten. Wenn Fotos da sind, beschreibe was sichtbar ist (Helligkeit, Moeblierung, Bodenart, sichtbare Ausstattung). Erwaehne die Bad- und Kueche-Situation und ob Nebenkosten inklusive sind.
 
 Strikte Regeln:
 - Erfinde NICHTS. Keine Quadratmeter, Preise, Lagen oder Ausstattung die nicht in den Eckdaten oder klar auf den Fotos zu sehen sind.
 - Sprich Studenten direkt an (Du-Form), locker aber serioes.
 - Keine Werbe-Floskeln, keine Buzzwords, hoechstens 1 Emoji oder keins.
+- Verwende im Ausgabetext korrekte deutsche Rechtschreibung MIT echten Umlauten und scharfem S, nicht die Ersatzschreibung ae/oe/ue/ss.
+
+Antworte ausschliesslich als JSON-Objekt: {"title": "...", "description": "..."}`
+
+const PROMPT_GEGENSTAND = `Du erstellst Marktplatz-Inserate fuer eine Studenten-Plattform (gebrauchte Sachen verkaufen).
+Du bekommst Eckdaten (Kategorie, Zustand, Preis, Stadt) und optional 1-3 Fotos des Artikels.
+
+Erzeuge:
+- "title": kurz (max 60 Zeichen), konkret was es ist. Beispiel: "IKEA Schreibtisch weiss, sehr gut".
+- "description": 2 bis 4 fluessige Saetze in der Du-Form. Nutze die Eckdaten. Wenn Fotos da sind, beschreibe was sichtbar ist (Farbe, Material, Zustand, Marke wenn erkennbar). Nenne den Zustand ehrlich.
+
+Strikte Regeln:
+- Erfinde NICHTS. Keine Marke, Masse, Preise oder Eigenschaften die nicht in den Eckdaten oder klar auf den Fotos zu sehen sind.
+- Sprich Studenten direkt an (Du-Form), locker aber ehrlich.
+- Keine Werbe-Floskeln, hoechstens 1 Emoji oder keins.
 - Verwende im Ausgabetext korrekte deutsche Rechtschreibung MIT echten Umlauten und scharfem S, nicht die Ersatzschreibung ae/oe/ue/ss.
 
 Antworte ausschliesslich als JSON-Objekt: {"title": "...", "description": "..."}`
@@ -59,19 +74,25 @@ Deno.serve(async (req: Request) => {
 
     const body = await req.json()
     const facts = body?.facts
+    const type = body?.type === 'gegenstand' ? 'gegenstand' : 'wohnung'
     const images = Array.isArray(body?.images) ? body.images.slice(0, 3) : []
     if (!facts || typeof facts !== 'object') {
       return new Response(JSON.stringify({ error: 'facts_required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
     // Eckdaten als lesbare Liste fuer das Modell aufbereiten (nur gesetzte Werte)
-    const labels: Record<string, string> = {
+    const LABELS_WOHNUNG: Record<string, string> = {
       typ: 'Art der Unterkunft', stadt: 'Stadt', stadtteil: 'Stadtteil',
       groesse_qm: 'Groesse (m2)', kaltmiete: 'Kaltmiete (EUR)', kaution: 'Kaution (EUR)',
       nebenkosten: 'Nebenkosten', bad: 'Badezimmer', kueche: 'Kueche',
       moebliert: 'Moebliert', frei_ab: 'Frei ab', wg_groesse: 'Anzahl Mitbewohner',
       wg_typ: 'WG-Typ', anmeldung: 'Wohnsitz-Anmeldung', provisionsfrei: 'Provisionsfrei',
     }
+    const LABELS_GEGENSTAND: Record<string, string> = {
+      kategorie: 'Kategorie', zustand: 'Zustand', preis: 'Preis (EUR)', stadt: 'Stadt',
+    }
+    const labels = type === 'gegenstand' ? LABELS_GEGENSTAND : LABELS_WOHNUNG
+    const sysPrompt = type === 'gegenstand' ? PROMPT_GEGENSTAND : PROMPT_WOHNUNG
     const factLines: string[] = []
     for (const key of Object.keys(labels)) {
       const v = facts[key]
@@ -105,7 +126,7 @@ Deno.serve(async (req: Request) => {
         temperature: 0.6,
         response_format: { type: 'json_object' },
         messages: [
-          { role: 'system', content: SYS_PROMPT },
+          { role: 'system', content: sysPrompt },
           { role: 'user', content: userContent },
         ],
       }),
