@@ -1028,7 +1028,7 @@
     var editListingId = null;
     var existingPhotos = [];
 
-    // ===== Wizard-Daten (vor dem Init, da setMode('offer') sie beim Laden braucht) =====
+    // ===== Wizard-Daten (vor dem Init, da setMode() sie beim Laden braucht) =====
     var OFFER_STEPS = [
         { t: 'Fotos hochladen', b: 'optional', req: [], box: ['#group-images'] },
         { t: 'Eckdaten', b: 'required', req: ['room_type', 'city', 'monthly_rent'], box: ['#room_type', '#room_size', '#city', '#monthly_rent'] },
@@ -1037,6 +1037,21 @@
         { t: 'Ausstattung (optional)', b: 'optional', req: [], box: ['#district', '#group-location-info', '#group-bathroom-details', '#group-kitchen-details', '#group-features', '#group-furniture', '#group-misc'] },
         { t: 'Titel & Beschreibung', b: 'required', req: ['title', 'description'], box: ['#aiGenBtn', '#title', '#description'], last: true },
     ];
+    // Gesuch: Student sucht ein Zimmer (kein Wohnungs-Foto -> kein KI-Button)
+    var SEARCH_STEPS = [
+        { t: 'Was suchst du?', b: 'required', req: ['room_type', 'city'], box: ['#room_type', '#room_size', '#city', '#group-price-range'] },
+        { t: 'Über dich & Wünsche', b: 'optional', req: [], box: ['#group-about-me-basic', '#group-about-me-wg', '#group-wg-preferences'] },
+        { t: 'Titel & Beschreibung', b: 'required', req: ['title', 'description'], box: ['#title', '#description'], last: true },
+    ];
+    // Tausch: du hast eine Wohnung und suchst eine zum Tauschen
+    var SWAP_STEPS = [
+        { t: 'Fotos deiner Wohnung', b: 'optional', req: [], box: ['#group-images'] },
+        { t: 'Deine Wohnung', b: 'required', req: ['room_type', 'city'], box: ['#room_type', '#room_size', '#city', '#monthly_rent'] },
+        { t: 'Räume & Ausstattung', b: 'optional', req: [], box: ['#group-rooms', '#group-utilities', '#group-bathroom-details', '#group-kitchen-details', '#group-features', '#group-furniture'] },
+        { t: 'Was suchst du im Tausch?', b: 'required', req: ['swap_target_city'], box: ['#group-swap-target'] },
+        { t: 'Titel & Beschreibung', b: 'required', req: ['title', 'description'], box: ['#aiGenBtn', '#title', '#description'], last: true },
+    ];
+    var WIZARD_STEPS = OFFER_STEPS;
     var wizardStep = 0;
     var wizardOn = false;
 
@@ -1419,17 +1434,19 @@
         var oldBody = document.getElementById('oldFormBody');
         // Edit-Modus (bestehende Anzeige) -> klassisches Formular, kein Wizard
         var isEdit = (typeof editListingId !== 'undefined' && editListingId);
-        if (mode !== 'offer' || isEdit) {
+        if (isEdit) {
             wizardOn = false;
             wrap.style.display = 'none';
             oldBody.style.display = '';
             return;
         }
+        // Step-Liste je Modus
+        WIZARD_STEPS = mode === 'search' ? SEARCH_STEPS : (mode === 'swap' ? SWAP_STEPS : OFFER_STEPS);
         wizardOn = true;
         oldBody.style.display = 'none';
         wrap.style.display = 'block';
         // Pflicht-Attribute raus -> versteckte Felder blockieren den Submit nicht; wir validieren selbst
-        ['title', 'description', 'room_type', 'city', 'monthly_rent'].forEach(function(id) {
+        ['title', 'description', 'room_type', 'city', 'monthly_rent', 'swap_target_city'].forEach(function(id) {
             var el = document.getElementById(id);
             if (el) el.required = false;
         });
@@ -1442,18 +1459,18 @@
         var oldBody = document.getElementById('oldFormBody');
         // aktuelle Inhalte zurueck in den (versteckten) oldFormBody parken
         while (viewport.firstChild) oldBody.appendChild(viewport.firstChild);
-        var step = OFFER_STEPS[wizardStep];
+        var step = WIZARD_STEPS[wizardStep];
         step.box.forEach(function(sel) {
             var box = wizardBoxOf(sel);
             if (box) viewport.appendChild(box);
         });
         // Kopf, Fortschritt, Badge
         document.getElementById('wizardTitle').textContent = step.t;
-        document.getElementById('wizardStepCount').textContent = 'Schritt ' + (wizardStep + 1) + ' von ' + OFFER_STEPS.length;
+        document.getElementById('wizardStepCount').textContent = 'Schritt ' + (wizardStep + 1) + ' von ' + WIZARD_STEPS.length;
         var badge = document.getElementById('wizardBadge');
         badge.textContent = step.b === 'required' ? 'Pflicht' : 'Optional';
         badge.className = step.b === 'required' ? 'wbadge-required' : 'wbadge-optional';
-        document.getElementById('wizardProgressFill').style.width = ((wizardStep + 1) / OFFER_STEPS.length * 100) + '%';
+        document.getElementById('wizardProgressFill').style.width = ((wizardStep + 1) / WIZARD_STEPS.length * 100) + '%';
         // Nav-Buttons
         document.getElementById('wizardBack').disabled = (wizardStep === 0);
         document.getElementById('wizardNext').style.display = step.last ? 'none' : '';
@@ -1462,7 +1479,7 @@
     }
 
     function wizardValidate() {
-        var step = OFFER_STEPS[wizardStep];
+        var step = WIZARD_STEPS[wizardStep];
         for (var i = 0; i < step.req.length; i++) {
             var el = document.getElementById(step.req[i]);
             if (el && !String(el.value || '').trim()) {
@@ -1476,7 +1493,7 @@
 
     function wizardGoNext() {
         if (!wizardValidate()) return;
-        if (wizardStep < OFFER_STEPS.length - 1) {
+        if (wizardStep < WIZARD_STEPS.length - 1) {
             wizardStep++;
             renderWizardStep();
         }
@@ -1623,7 +1640,7 @@
             var dEl = document.getElementById('description');
             if (!String(tEl.value || '').trim() || !String(dEl.value || '').trim()) {
                 Room8UI.warning('Bitte Titel und Beschreibung ausfüllen — die KI kann das aus deinen Fotos erstellen.');
-                wizardStep = OFFER_STEPS.length - 1;
+                wizardStep = WIZARD_STEPS.length - 1;
                 renderWizardStep();
                 return;
             }
