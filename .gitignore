@@ -27,3 +27,10 @@ supabase/.temp/
 *.jks
 *.keystore
 AuthKey_*
+
+# Repo-Ballast — soll nie wieder committed werden (siehe Quality-Pass 01.06.2026)
+supabase.exe          # Supabase-CLI-Binary (42MB) gehoert nicht ins Repo
+*.zip                 # gepackte Build-Artefakte (z.B. altes www.zip)
+www_backup*/          # manuelle Backup-Verzeichnisse
+roommate_full_updated/  # alter, kompletter App-Build (Duplikat)
+*.bat                 # Windows-Helfer-Skripte (maschinen-spezifisch)

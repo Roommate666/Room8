@@ -1,7 +1,11 @@
 # Room8 — Offene Bugs, Security-Issues & Feature-Gaps
 
-**Stand:** 04.05.2026 — nach Bug-Detective + Security-Audit + Live-Test
+**Stand:** 01.06.2026 — Quality-Pass (Repo-Konsolidierung, Security-Header, Rest-Bugs)
 **Quellen:** Sub-Agent Reports `a40f99cbe5f663c43` (Bug-Hunt) + `a4798b09a9e20d6e8` (Security)
+
+> **Update 01.06.2026:** B5, B19, B20, B21 GEFIXT (siehe unten). Repo-Konsolidierung:
+> www/ ist jetzt Single Source of Truth, Root-Web-Duplikate + ~110MB Binaer-Ballast
+> (supabase.exe, www.zip, www_backup_*/, roommate_full_updated/) aus Tracking entfernt.
 
 ---
 
@@ -143,11 +147,12 @@
 - **Auswirkung:** Stored-XSS via Partner-Job-Submission
 - **Fix:** alle Felder durch escapeHtml()
 
-### B5. chat.html sendMessage = keine Race-Protection
-- **Pfad:** `www/chat.html:829-914`
+### B5. chat.html sendMessage = keine Race-Protection — RESOLVED 01.06.
+- **Pfad:** `www/chat.html` `sendMessage`
 - **Issue:** Kein `isSending`-Flag. Bei schnellem Enter mehrfach: 2-3 Inserts
-- **Auswirkung:** Doppelt/dreifach gesendete Nachrichten. tempMsg + Realtime-Echo = Duplikate in UI
-- **Fix:** `if (isSending) return; isSending = true; try{...} finally{isSending=false}`
+- **Fix:** Modul-Variable `isSending`; Body in `try{...}finally{isSending=false; sendBtn.disabled=false}`
+  gekapselt, `if (isSending) return;` + Button-Disable am Start. Alle frueh-Return-Pfade
+  triggern das finally.
 
 ### B6. Partner-Dashboard "Laedt..." (GEFIXT 04.05.)
 - room8-utils.js wurde nicht geladen → Room8.escapeHtml = undefined
@@ -210,17 +215,30 @@
 ### B18. nachrichten.html err.message ungescaped
 - **Fix:** escapeHtml
 
-### B19. console.log mit FCM-Token-Prefix
-- **Pfad:** `www/push-logic.js:57,262`
-- **Fix:** Token-Logging entfernen
+### B19. console.log mit FCM-Token-Prefix — RESOLVED 01.06.
+- **Pfad:** `www/push-logic.js:57,266`
+- **Fix:** Token-Inhalt aus beiden `console.log` entfernt — loggt jetzt nur noch die
+  Token-Laenge statt Wert/Prefix. (debugTrace ist ohnehin No-op.)
 
-### B20. Anon-Key dupliziert in 6 Dateien
-- Tippfehler-Variante existiert bereits (`MuLv9AdclVZZ` statt `MuLv9AdclVVZ`)
-- **Fix:** Single Source of Truth in config.js
+### B20. Anon-Key dupliziert / Tippfehler-Fallback — RESOLVED 01.06.
+- Tippfehler-Variante (`MuLv9AdclVZZ` statt `MuLv9AdclVVZ`) im hardcodierten Fallback
+  von `www/room8-utils.js:100`
+- **Fix:** Hardcodierten Fallback-Key komplett entfernt. `room8-utils.js` nutzt jetzt nur
+  noch `SUPABASE_URL`/`SUPABASE_ANON_KEY` aus `config.js`; fehlt config.js → sauberer
+  `console.error` + `return null` statt stillem Scheitern mit kaputtem Key. config.js
+  bleibt einzige Key-Quelle.
+- **OFFEN (Polish):** Diverse www/-HTML rufen noch eigenes `createClient(...)` statt
+  `window.sb` zu teilen — kein Bug, aber Dedup waere sauberer.
 
-### B21. Vercel-Headers fehlen
+### B21. Vercel-Headers fehlen — RESOLVED 01.06.
 - Keine CSP, X-Frame-Options, HSTS, Permissions-Policy
-- **Fix:** vercel.json Headers-Block
+- **Fix:** Globaler Header-Block in `www/vercel.json`: HSTS (max-age 1y, preload),
+  X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy
+  (strict-origin-when-cross-origin), Permissions-Policy (camera/geolocation=self, rest off).
+  CSP zunaechst als **Content-Security-Policy-Report-Only** (App hat 257 Inline-Handler →
+  enforcing braucht 'unsafe-inline' bzw. spaeter Nonces).
+- **OFFEN (Follow-up):** Nach Live-Beobachtung ohne Violations CSP auf enforcing
+  (`Content-Security-Policy`) umstellen; mittelfristig Inline-Handler reduzieren.
 
 ---
 
