@@ -100,7 +100,25 @@
 
     <main class="app-content">
         <form id="createCouponForm">
-            
+
+            <!-- ===== WIZARD ===== -->
+            <div id="wizardWrap" style="display:none;">
+                <div id="wizardProgressBar"><div id="wizardProgressFill"></div></div>
+                <div id="wizardHead">
+                    <span id="wizardStepCount">Schritt 1</span>
+                    <span id="wizardBadge" class="wbadge-required">Pflicht</span>
+                </div>
+                <div id="wizardTitle">Coupon-Angebot</div>
+                <div id="wizardViewport"></div>
+                <div id="wizardNav">
+                    <button type="button" id="wizardBack" onclick="Wizard.back()">Zurück</button>
+                    <button type="button" id="wizardNext" onclick="Wizard.next()">Weiter</button>
+                    <button type="submit" id="wizardPublish" style="display:none;" onclick="return Wizard.tryPublish(event)">Coupon veröffentlichen</button>
+                </div>
+            </div>
+
+            <div id="oldFormBody">
+
             <!-- DEAL INFOS -->
             <div class="section-divider">🎟️ Deal Informationen</div>
             
@@ -216,6 +234,8 @@
 
             <button type="button" class="submit-btn" id="previewBtn" style="background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%); box-shadow: 0 4px 15px rgba(245,158,11,0.3); margin-top: 1.5rem;" onclick="showPreview()">Vorschau anzeigen</button>
             <button type="submit" class="submit-btn" id="submitBtn">Coupon Veröffentlichen</button>
+
+            </div><!-- /oldFormBody -->
         </form>
     </main>
 </div>
@@ -236,6 +256,7 @@
 <script src="translations.js"></script>
 <script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
+<script src="wizard-engine.js"></script>
 <script>
     // Supabase Client - Direkte Initialisierung
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -386,9 +407,21 @@
 
     document.getElementById('createCouponForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        // Wizard-Guard: Titel + Beschreibung muessen da sein
+        if (window.Wizard && Wizard.isOn()) {
+            var tEl = document.getElementById('title');
+            var dEl = document.getElementById('description');
+            if (!String(tEl.value || '').trim() || !String(dEl.value || '').trim()) {
+                Room8UI.warning('Bitte Titel und Beschreibung ausfüllen.');
+                Wizard.gotoLast();
+                return;
+            }
+        }
+
         const user = await checkAdmin();
         if (!user) return;
-        
+
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
         btn.innerHTML = '<span class="btn-spin"></span>Wird erstellt...';
@@ -468,6 +501,14 @@
 
     // Admin Check beim Laden
     checkAdmin();
+
+    // Schritt-fuer-Schritt Wizard
+    Wizard.start([
+        { t: 'Coupon-Angebot', b: 'required', req: ['title', 'discountValue', 'code'], box: ['#imgInput', '#title', '#discountValue', '#code', '#category'] },
+        { t: 'Beschreibung & Gültigkeit', b: 'required', req: ['description'], box: ['#description', '#validUntil'] },
+        { t: 'Dein Geschäft', b: 'required', req: ['businessName', 'city'], box: ['#logoInput', '#businessName', '#businessDesc', '#city', '#zipCode', '#address'] },
+        { t: 'Kontakt & Öffnungszeiten (optional)', b: 'optional', req: [], box: ['#website', '#instagram', '#openingHours', '#phone'], last: true },
+    ]);
 </script>
 <script src="notificationHelpers.js"></script>
 <script src="notificationBell.js"></script>
