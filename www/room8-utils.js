@@ -96,11 +96,15 @@ var Room8 = (function() {
         }
 
         // Fallback: eigenen Client bauen (Pages ohne window.sb)
-        var url = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://tvnvmogaqmduzcycmvby.supabase.co';
-        var key = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2bnZtb2dhcW1kdXpjeWNtdmJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NTA4MTksImV4cCI6MjA3MDUyNjgxOX0.MuLv9AdclVZZYZpUFv6Bc2Jn1Z9cmmcarHwBHlHkvZw';
+        // config.js ist die EINZIGE Quelle fuer URL + Anon-Key. Fehlt sie, brechen wir
+        // sauber ab statt mit einem hardcodierten (frueher fehlerhaften) Key still zu scheitern.
+        if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_ANON_KEY === 'undefined') {
+            console.error('room8-utils: SUPABASE_URL/SUPABASE_ANON_KEY fehlen - config.js nicht geladen?');
+            return null;
+        }
 
         if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-            _supabase = window.supabase.createClient(url, key);
+            _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
         return _supabase;
     }

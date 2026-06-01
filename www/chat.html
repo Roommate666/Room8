@@ -884,6 +884,10 @@
     var pendingImage = null;
     var pendingImagePreviewEl = null;
 
+    // Sende-Guard gegen Doppelversand (B5): blockt parallele sendMessage-Aufrufe
+    // (schnelles Enter-Druecken) bis der laufende Insert fertig ist.
+    var isSending = false;
+
     // Attach Button öffnet File Picker
     document.getElementById('attachBtn').addEventListener('click', () => {
         document.getElementById('imageInput').click();
@@ -961,6 +965,13 @@
             console.log('Nothing to send');
             return;
         }
+
+        // Doppelversand verhindern (B5): laeuft bereits ein Send, abbrechen.
+        if (isSending) return;
+        isSending = true;
+        document.getElementById('sendBtn').disabled = true;
+
+        try {
 
         var imageUrl = null;
 
@@ -1045,6 +1056,12 @@
 
         // Notification + Push wird vom DB-Trigger (on_new_message) gehandhabt.
         // Kein Frontend-Notify nötig (verhindert doppelte Glocken-Einträge).
+
+        } finally {
+            isSending = false;
+            var sendBtn = document.getElementById('sendBtn');
+            if (sendBtn) sendBtn.disabled = false;
+        }
     }
 
     function escapeHtml(text) {

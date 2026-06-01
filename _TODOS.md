@@ -1,101 +1,71 @@
-# TODOs - [PROJECT_NAME]
+# TODOs — Room8
 
-**Planned improvements and tasks.**
-
----
-
-## Instructions for Claude
-
-**Read this file at session start (step 2 of the load order)** to understand what work is pending, in progress, or blocked.
-
-- Before starting new work, check if a relevant task already exists here
-- When user completes a task, move it to the Completed section with a completion date
-- When new tasks emerge during a session, add them to the appropriate priority section
-- Always ask before reprioritizing existing tasks
-- If a task reveals a non-obvious issue, also document it in [_LESSONS-LEARNED.md](./_LESSONS-LEARNED.md)
-- Reference task items by their title when discussing work priorities
-
-**When to update this file:**
-- After completing any task
-- When new work is identified
-- When priorities shift
-- When blockers are discovered or resolved
+**Geplante Verbesserungen & offene Aufgaben.** Live-Bug-/Security-Tracking laeuft in
+[BUGS-OFFEN.md](./BUGS-OFFEN.md); diese Datei ist die Vorwaerts-Roadmap.
 
 ---
 
-## High Priority
+## Hinweise fuer Claude
 
-<!-- CUSTOMIZE: Add urgent/blocking tasks here. These are worked on first. -->
-
-- [ ] **Review and customize _GOLDEN-RULES.md**
-  - Add project-specific security rules
-  - Define deployment constraints
-  - **Added:** [DATE]
-
-- [ ] **[Task Title]**
-  - [Subtask or detail]
-  - [Subtask or detail]
-  - **Blocked by:** [dependency, if any]
-  - **Added:** [DATE]
+- Diese Datei am Session-Start lesen (nach `_GOLDEN-RULES.md` + `CLAUDE.md`).
+- Vor neuer Arbeit pruefen, ob hier schon ein passender Punkt existiert.
+- Erledigtes nach **Erledigt** verschieben (mit Datum).
+- Neue Erkenntnisse waehrend einer Session hier ergaenzen.
 
 ---
 
-## Medium Priority
+## Hoch (terminkritisch)
 
-<!-- CUSTOMIZE: Add important but non-urgent tasks -->
-
-- [ ] **Set up CI/CD pipeline**
-  - Configure automated testing on push
-  - Add deployment workflow
-  - **Acceptance criteria:** All tests pass before merge, auto-deploy to staging
-  - **Added:** [DATE]
-
-- [ ] **[Task Title]**
-  - [Description]
-  - [Acceptance criteria]
-  - **Added:** [DATE]
+- [ ] **Apple OAuth JWT erneuern — VOR 11.09.2026**
+  - Laeuft 180 Tage nach Erstellung ab (letzte Erneuerung 15.03.2026). Verstreicht der
+    Termin, bricht iOS-Login fuer ALLE User. Tool: `tools/generate-apple-jwt.js`.
+  - Siehe `_GOLDEN-RULES.md` Regel 9.
 
 ---
 
-## Low Priority
+## Mittel
 
-<!-- CUSTOMIZE: Add nice-to-have improvements -->
+- [ ] **CSP von Report-Only auf enforcing umstellen**
+  - In `www/vercel.json` laeuft die Content-Security-Policy aktuell als
+    `Content-Security-Policy-Report-Only`. Nach Live-Phase ohne Violations auf
+    `Content-Security-Policy` umstellen.
+  - **Voraussetzung:** Idealerweise vorher die 257 Inline-Event-Handler (`onclick=` etc.)
+    reduzieren, damit `script-src` ohne `'unsafe-inline'` auskommt (Nonces/Hashes).
+  - **Added:** 01.06.2026
 
-- [ ] **Add input validation to all API endpoints**
-  - Sanitize user input at system boundaries
-  - See Golden Rule #4: Validate Before You Trust
-  - **Added:** [DATE]
+- [ ] **createClient-Dedup in www/-HTML**
+  - Mehrere Seiten bauen einen eigenen Supabase-Client statt das globale `window.sb`
+    (aus `config.js`) zu teilen. Kein Bug, aber sauberer + ein Key-Punkt weniger.
+  - **Added:** 01.06.2026
 
-- [ ] **[Task Title]**
-  - [Description]
-  - **Added:** [DATE]
-
----
-
-## Completed
-
-<!-- Move completed tasks here with [x] checkbox and completion date -->
-
-- [x] Set up Claude Anchor framework — **Completed:** [DATE]
+- [ ] **Submissions editieren / zurueckziehen (F4)**
+  - User koennen eingereichte Inhalte aktuell weder editieren noch withdrawen.
 
 ---
 
-## Ideas for Future
+## Niedrig / Nice-to-have
 
-<!-- Parking lot for ideas not yet committed to -->
+- [ ] **Optional: Git-History verschlanken**
+  - Binaer-Ballast (supabase.exe, www.zip, www_backup_*, roommate_full_updated/) wurde aus
+    dem Tracking entfernt, steckt aber noch in der History → `.git` bleibt gross.
+  - `git filter-repo` schrumpft die History, ABER: schreibt sie um → force-push noetig,
+    bricht bestehende Klone (Yusufs USB-Stick-Sync Win↔Mac beachten). Nur abgestimmt.
 
-- [Idea 1]
-- [Idea 2]
-- [Idea 3]
+- [ ] **Job-Bewerbungs-Inbox (F3)** — internes Tracking statt nur extern (Email/URL).
+- [ ] **Login-UX (F5)** — Hinweis "Du hast dich mit Google/Apple angemeldet" auf dem Login-Tab.
 
 ---
 
-## Maintenance
+## Offene Tests (Verifikation steht aus)
 
-- **Review** this file at each session start — remove stale items, update priorities
-- **Archive** completed tasks quarterly if the list grows long
-- **Cross-reference** with `_LESSONS-LEARNED.md` when tasks reveal gotchas
+- [ ] **F6** Push-Emojis: FCM mit UTF-8-Emojis live testen.
+- [ ] **F7** DE/EN-Sprachumschaltung systematisch durchspielen (translations.js).
+- [ ] **F8** Email-Versand: echte Mail in Inbox bestaetigen.
 
-**Add new items as they come up. Move to Completed when done.**
+---
 
-<!-- Claude Anchor v1.0 -->
+## Erledigt
+
+- [x] **Quality-Pass 01.06.2026:** www/ als Single Source of Truth, Repo-Ballast aus
+  Tracking entfernt, Security-Header in vercel.json, B5/B19/B20/B21 gefixt.
+- [x] Security-Phase 1+2 (04.05.2026): siehe BUGS-OFFEN.md (S1–S13, B1–B12, N1).

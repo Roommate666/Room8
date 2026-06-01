@@ -2,7 +2,8 @@
 # Room8 Pre-Commit Hook
 # Verhindert Commits mit:
 # 1. Echten Umlauten in JS/TS/Python/CSS Code-Files (User-Regel: nur ae/oe/ue/ss)
-# 2. Sync-Drift zwischen root *.html und www/*.html (CLAUDE.md Pflicht)
+# 2. Web-Dateien (*.html / *.css / *.js) im Repo-Root — Web-Code lebt AUSSCHLIESSLICH
+#    in www/ (Single Source of Truth, siehe _GOLDEN-RULES.md Regel 11).
 #
 # UI-Texte (HTML-Content) und MD-Files sind ausgenommen.
 # Bypass mit `git commit --no-verify` (nur in Notfall).
@@ -46,88 +47,19 @@ if [ -n "$CODE_FILES" ]; then
 fi
 
 # ============================================
-# 2. Sync-Drift zwischen Root und www/
-# Erlaubt: Wenn beide Seiten gestaged sind ODER Drift schon vor diesem
-#          Commit existierte (HEAD vs HEAD vergleichen).
-# Faengt:  Wenn nur EINE Seite jetzt gestaged ist und die andere
-#          dadurch out-of-sync waere (relativ zum HEAD).
+# 2. Keine Web-Dateien im Repo-Root
+# Web-Code (HTML/CSS/JS) gehoert ausschliesslich nach www/. Frueher wurden Root
+# und www/ doppelt gepflegt -> Drift. Seit dem Quality-Pass 01.06.2026 ist www/
+# die Single Source of Truth. Dieser Check faengt versehentlich im Root abgelegte
+# Web-Dateien (z.B. durch das alte setup_www.bat-Muster oder falsches Editieren).
 # ============================================
-HAS_STAGED() { echo "$STAGED" | grep -qE "^$1$"; }
-
-ROOT_NAMES=$(echo "$STAGED" | grep -E '^[^/]+\.html$' | sort -u || true)
-WWW_NAMES=$(echo "$STAGED" | grep -E '^www/[^/]+\.html$' | sed 's|^www/||' | sort -u || true)
-ALL_NAMES=$(printf "%s\n%s\n" "$ROOT_NAMES" "$WWW_NAMES" | grep -v '^$' | sort -u)
-
-if [ -n "$ALL_NAMES" ]; then
-    while IFS= read -r name; do
-        [ -z "$name" ] && continue
-        ROOT_F="$name"; WWW_F="www/$name"
-        [ ! -f "$ROOT/$ROOT_F" ] && continue
-        [ ! -f "$ROOT/$WWW_F" ] && continue
-
-        ROOT_STAGED=0; WWW_STAGED=0
-        HAS_STAGED "$ROOT_F" && ROOT_STAGED=1
-        HAS_STAGED "$WWW_F" && WWW_STAGED=1
-
-        # Beide gestaged = bewusste Aenderung → OK
-        if [ "$ROOT_STAGED" -eq 1 ] && [ "$WWW_STAGED" -eq 1 ]; then
-            continue
-        fi
-
-        # War der Drift schon im HEAD? Dann ist es kein neues Problem.
-        if git rev-parse --verify HEAD >/dev/null 2>&1; then
-            if ! git diff HEAD -- "$ROOT_F" "$WWW_F" --quiet 2>/dev/null; then
-                # Working-tree weicht vom HEAD ab — pruefen ob HEAD-Versionen identisch sind
-                HEAD_DIFF=$(git diff HEAD:"$ROOT_F" HEAD:"$WWW_F" 2>/dev/null | head -1 || true)
-                if [ -n "$HEAD_DIFF" ]; then
-                    # Bestand schon im HEAD — kein neuer Drift
-                    continue
-                fi
-            else
-                # Nichts geaendert seit HEAD an diesen Files
-                continue
-            fi
-        fi
-
-        # Eine Seite jetzt gestaged → andere muss synchron sein
-        if ! diff -q "$ROOT/$ROOT_F" "$ROOT/$WWW_F" > /dev/null 2>&1; then
-            if [ "$ROOT_STAGED" -eq 1 ]; then
-                echo -e "${YELLOW}WARN${NC} $name gestaged, aber www/$name driftet!"
-                echo -e "      Sync mit: ${GREEN}cp $name www/$name && git add www/$name${NC}"
-                FAIL=1
-            else
-                echo -e "${YELLOW}WARN${NC} www/$name gestaged, aber $name driftet!"
-                echo -e "      Sync mit: ${GREEN}cp www/$name $name && git add $name${NC}"
-                FAIL=1
-            fi
-        fi
-    done <<< "$ALL_NAMES"
-fi
-
-# ============================================
-# 3. Working-Tree Vollscan: Verhindere ALLEN bestehenden Drift
-# Egal ob gestaged oder nicht — wenn irgendein Root<->www/ Pair driftet,
-# blockieren. So bleibt der Tree dauerhaft sauber.
-# Bypass: ROOM8_SKIP_DRIFT_SCAN=1 git commit ...
-# ============================================
-if [ "${ROOM8_SKIP_DRIFT_SCAN:-0}" != "1" ]; then
-    DRIFT_PAIRS=""
-    for rootfile in "$ROOT"/*.html; do
-        [ -f "$rootfile" ] || continue
-        base=$(basename "$rootfile")
-        wwwfile="$ROOT/www/$base"
-        [ -f "$wwwfile" ] || continue
-        if ! diff -q "$rootfile" "$wwwfile" > /dev/null 2>&1; then
-            DRIFT_PAIRS="$DRIFT_PAIRS $base"
-        fi
-    done
-    if [ -n "$DRIFT_PAIRS" ]; then
-        echo -e "${RED}FAIL${NC} Bestehender Drift Root <-> www/ in:"
-        for d in $DRIFT_PAIRS; do echo "      - $d"; done
-        echo -e "      Heile mit: ${GREEN}for f in$DRIFT_PAIRS; do cp www/\$f \$f; done${NC}"
-        echo -e "      Notfall-Bypass: ${YELLOW}ROOM8_SKIP_DRIFT_SCAN=1 git commit ...${NC}"
-        FAIL=1
-    fi
+ROOT_WEB=$(echo "$STAGED" | grep -E '^[^/]+\.(html|css|js)$' || true)
+if [ -n "$ROOT_WEB" ]; then
+    echo -e "${RED}FAIL${NC} Web-Datei(en) im Repo-Root gestaged — gehoeren nach www/:"
+    echo "$ROOT_WEB" | sed 's/^/      - /'
+    echo -e "      Verschiebe mit: ${GREEN}git mv <datei> www/<datei>${NC}"
+    echo -e "      (Web-Code lebt ausschliesslich in www/ — Single Source of Truth.)"
+    FAIL=1
 fi
 
 # ============================================

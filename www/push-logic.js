@@ -54,7 +54,7 @@
 
                 // Registration erfolg (FCM/APNs Token)
                 PushNotifications.addListener('registration', function(token) {
-                    console.log('Push: Token erhalten:', token.value);
+                    console.log('Push: Token erhalten (Laenge ' + (token.value ? token.value.length : 0) + ')');
                     debugTrace('S4_registration_event', 'tokenLen=' + (token.value ? token.value.length : 0), { preview: token.value ? token.value.substring(0, 30) : null });
                     PushService.saveTokenToSupabase(token.value);
                 });
@@ -263,7 +263,7 @@
     // FCM Token Listener - bei JEDEM Event speichern (wichtig fuer Account-Wechsel)
     window.addEventListener('fcmToken', async function(e) {
         var token = e.detail;
-        console.log('📱 FCM Token Event empfangen:', token ? token.substring(0, 20) + '...' : 'leer');
+        console.log('📱 FCM Token Event empfangen:', token ? '(Laenge ' + token.length + ')' : 'leer');
         debugTrace('S5_fcmToken_event', 'tokenLen=' + (token ? token.length : 0), { preview: token ? token.substring(0, 30) : null });
         if (token) {
             await PushService.saveTokenToSupabase(token);

@@ -24,7 +24,7 @@ Uebersicht: `specs/00-INDEX.md` — IMMER zuerst lesen wenn Aenderungen geplant 
 - `.github/workflows/email-watchdog.yml` — taeglich 06:30 UTC, aktiver Test: feuert daily_health_check RPC, prueft 30s spaeter ob success-Log existiert. Bei Fail: Pipeline tot → GitHub mailt direkt
 - Setup: `SUPABASE_SERVICE_ROLE_KEY` als Repo-Secret hinterlegen
 
-**Git-Hooks:** Lokal aktivieren mit `bash tools/install-hooks.sh` (pre-commit blockt Umlaute in Code + Sync-Drift root↔www).
+**Git-Hooks:** Lokal aktivieren mit `bash tools/install-hooks.sh` (pre-commit blockt Umlaute in Code + Web-Dateien im Repo-Root, die nach www/ gehoeren).
 
 **Sentry Error Monitoring (Project: room8-web @ yumita.sentry.io):**
 - `sentry-init.js` im Repo-Root (+ www/) wird in alle HTML-Pages via `<script src="sentry-init.js">` direkt nach `<head>` geladen
@@ -37,7 +37,7 @@ Uebersicht: `specs/00-INDEX.md` — IMMER zuerst lesen wenn Aenderungen geplant 
 ## Sprache & Arbeitsweise
 - Auf Deutsch antworten, Code-Kommentare Deutsch (ae/oe/ue statt Umlaute)
 - Kein Framework - reines HTML/CSS/JS mit Capacitor
-- Dateien in Root UND www/ muessen synchron gehalten werden
+- **Web-Code lebt AUSSCHLIESSLICH in `www/`** (Single Source of Truth seit 01.06.2026). Kein HTML/CSS/JS mehr im Repo-Root — Capacitor (`webDir: www`) und Vercel bundeln/deployen nur `www/`. Frueheres Root↔www-Dual-Sync ist abgeschafft (war Drift-Quelle).
 - Nach Aenderungen: `cd www && npx vercel --prod --yes` fuer Web-Deploy
 - Yusuf arbeitet auf Windows UND Mac parallel (USB-Stick Sync)
 

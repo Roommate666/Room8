@@ -102,9 +102,12 @@ Code-Dateien: Variablen + Funktionen + Kommentare = `ae/oe/ue/ss`.
 AUSNAHME: User-sichtbare UI-Strings duerfen echte Umlaute (`ä/ö/ü/ß`).
 Content-Dateien (`.md`, `.html`-Content): Echte Umlaute.
 
-## 11. Root + www/ Sync
+## 11. Web-Code lebt ausschliesslich in www/
 
-Nach JEDER Aenderung an einer HTML/JS/CSS-Datei: Root und www/ MUESSEN synchron sein.
+`www/` ist die Single Source of Truth fuer allen Web-Code (HTML/CSS/JS). Capacitor
+(`webDir: www`) bundelt und Vercel deployt ausschliesslich `www/`. Im Repo-Root liegt
+KEIN HTML/CSS/JS mehr (Stand 01.06.2026 — frueheres Dual-Sync Root↔www war Drift-Quelle
+und wurde abgeschafft). Der pre-commit-Hook blockt Web-Dateien im Root.
 
 ## 12. Deployment-Pflicht
 
