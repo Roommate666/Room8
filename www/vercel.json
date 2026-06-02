@@ -81,6 +81,7 @@
     }
   ],
   "rewrites": [
-    { "source": "/s/:id", "destination": "/api/share?id=:id" }
+    { "source": "/s/:id", "destination": "/api/share?id=:id" },
+    { "source": "/inserieren", "destination": "/inserieren.html" }
   ]
 }
