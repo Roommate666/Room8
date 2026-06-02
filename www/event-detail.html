@@ -398,8 +398,10 @@
     }
 
     function shareEvent() {
-        var url = window.location.href;
+        // Geteilt wird /s/<id>?t=event -> Server-Side-OG-Vorschau (Bild+Titel) -> App
+        var id = new URLSearchParams(window.location.search).get('id');
         var title = currentEvent ? currentEvent.title : 'Room8 Event';
+        var url = id ? ('https://www.room8.club/s/' + encodeURIComponent(id) + '?t=event') : window.location.href;
         if (navigator.share) {
             navigator.share({ title: title, url: url }).catch(function(){});
         } else {

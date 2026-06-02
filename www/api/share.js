@@ -19,9 +19,18 @@ const TYPE_LABEL = {
   house: 'Haus', shared_room: 'Geteiltes Zimmer',
 };
 
+// Konfiguration je Inhaltstyp: Tabelle, Detailseite, Bild-Bucket.
+const TYPES = {
+  listing: { table: 'listings', page: 'detail.html', bucket: 'listing-images' },
+  coupon:  { table: 'coupons',  page: 'coupon-detail.html', bucket: null },
+  event:   { table: 'events',   page: 'event-detail.html',  bucket: 'event-images' },
+};
+
 module.exports = async (req, res) => {
   const id = (req.query && req.query.id) || '';
-  const appUrl = 'https://www.room8.club/detail.html' + (id ? '?id=' + encodeURIComponent(id) : '');
+  const t = (req.query && req.query.t) || 'listing';
+  const cfg = TYPES[t] || TYPES.listing;
+  const appUrl = 'https://www.room8.club/' + cfg.page + (id ? '?id=' + encodeURIComponent(id) : '');
 
   let title = 'Room8 - Studenten-Wohnungen & Marktplatz';
   let desc = 'Finde dein WG-Zimmer, deine Wohnung oder verkaufe Sachen - alles fuer Studenten.';
@@ -29,19 +38,30 @@ module.exports = async (req, res) => {
 
   try {
     if (id) {
-      const url = SUPABASE_URL + '/rest/v1/listings?id=eq.' + encodeURIComponent(id) +
-        '&is_active=eq.true&select=title,description,city,monthly_rent,price,type,room_type,listing_photos(storage_path)';
+      let select = 'title,description,city';
+      if (t === 'listing') select += ',monthly_rent,price,type,room_type,listing_photos(storage_path)';
+      else if (t === 'coupon') select += ',business_name,discount_value';
+      else if (t === 'event') select += ',cover_image_path,start_at,price,organizer_name';
+      const url = SUPABASE_URL + '/rest/v1/' + cfg.table + '?id=eq.' + encodeURIComponent(id) + '&select=' + select;
       const r = await fetch(url, { headers: { apikey: ANON, Authorization: 'Bearer ' + ANON } });
       const rows = await r.json();
       const l = Array.isArray(rows) && rows[0];
       if (l) {
-        const typ = TYPE_LABEL[l.room_type] || (l.type === 'wohnung' ? 'Wohnung' : 'Angebot');
-        const price = l.monthly_rent ? (l.monthly_rent + ' EUR/Monat') : (l.price ? (l.price + ' EUR') : '');
-        title = (l.title || typ) + (l.city ? ' - ' + l.city : '');
-        desc = [typ, l.city, price].filter(Boolean).join(' - ');
-        if (l.description) desc = String(l.description).slice(0, 160);
-        const ph = l.listing_photos && l.listing_photos[0] && l.listing_photos[0].storage_path;
-        if (ph) image = SUPABASE_URL + '/storage/v1/object/public/listing-images/' + ph;
+        if (t === 'listing') {
+          const typ = TYPE_LABEL[l.room_type] || (l.type === 'wohnung' ? 'Wohnung' : 'Angebot');
+          const price = l.monthly_rent ? (l.monthly_rent + ' EUR/Monat') : (l.price ? (l.price + ' EUR') : '');
+          title = (l.title || typ) + (l.city ? ' - ' + l.city : '');
+          desc = l.description ? String(l.description).slice(0, 160) : [typ, l.city, price].filter(Boolean).join(' - ');
+          const ph = l.listing_photos && l.listing_photos[0] && l.listing_photos[0].storage_path;
+          if (ph) image = SUPABASE_URL + '/storage/v1/object/public/listing-images/' + ph;
+        } else if (t === 'coupon') {
+          title = (l.title || 'Deal') + (l.business_name ? ' - ' + l.business_name : '');
+          desc = l.description ? String(l.description).slice(0, 160) : ([l.discount_value, l.city].filter(Boolean).join(' - '));
+        } else if (t === 'event') {
+          title = (l.title || 'Event') + (l.city ? ' - ' + l.city : '');
+          desc = l.description ? String(l.description).slice(0, 160) : ([l.organizer_name, l.city].filter(Boolean).join(' - '));
+          if (l.cover_image_path) image = SUPABASE_URL + '/storage/v1/object/public/event-images/' + l.cover_image_path;
+        }
       }
     }
   } catch (e) { /* Fallback-Werte bleiben */ }

@@ -4,8 +4,11 @@
 (function () {
   window.Room8Share = function (opts) {
     opts = opts || {};
-    var shareUrl = opts.id
-      ? ('https://www.room8.club/s/' + encodeURIComponent(opts.id))
+    // ID notfalls aus der aktuellen URL ziehen (robust gegen const-Scope)
+    var id = opts.id || new URLSearchParams(window.location.search).get('id');
+    var typeQuery = opts.type ? ('?t=' + encodeURIComponent(opts.type)) : '';
+    var shareUrl = id
+      ? ('https://www.room8.club/s/' + encodeURIComponent(id) + typeQuery)
       : (opts.url || window.location.href);
     var data = { title: opts.title || 'Room8', text: opts.text || '', url: shareUrl };
 
