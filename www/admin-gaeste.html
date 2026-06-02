@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="de" data-page="admin-gaeste">
+<head>
+<script src="sentry-init.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gast-Inserate freigeben - Room8 Admin</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f3f4f6; color: #111827; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 1.25rem; }
+  h1 { font-size: 1.3rem; margin-bottom: 0.25rem; }
+  .sub { color: #6B7280; font-size: 0.9rem; margin-bottom: 1.25rem; }
+  .card { background: #fff; border-radius: 14px; padding: 1.1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 1rem; }
+  .card h3 { font-size: 1.05rem; margin-bottom: 0.3rem; }
+  .meta { font-size: 0.85rem; color: #4B5563; margin: 0.15rem 0; }
+  .meta strong { color: #111827; }
+  .desc { font-size: 0.9rem; color: #374151; margin: 0.6rem 0; white-space: pre-wrap; }
+  .actions { display: flex; gap: 0.6rem; margin-top: 0.8rem; }
+  .actions button { flex: 1; padding: 0.7rem; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.95rem; }
+  .approve { background: #10B981; color: #fff; }
+  .reject { background: #F3F4F6; color: #6B7280; }
+  .empty { text-align: center; color: #6B7280; padding: 2.5rem 1rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Gast-Inserate</h1>
+  <div class="sub">Eingereicht ueber room8.club/inserieren - pruefen + freigeben.</div>
+  <div id="list"><p class="empty">Lade …</p></div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="room8-ui.js"></script>
+<script>
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  var listEl = document.getElementById('list');
+  // Fester System-Account "Room8 Vermieter" besitzt alle Gast-Inserate (owner_id ist NOT NULL).
+  // Echter Kontakt laeuft ueber guest_listings.contact_email (via created_listing_id verknuepft).
+  var GUEST_OWNER_ID = 'a7f9f1bb-7319-49ed-bb0b-14c91a1d1832';
+
+  (async function init() {
+    var ures = await sb.auth.getUser();
+    var user = ures.data && ures.data.user;
+    if (!user) { window.location.href = 'login.html'; return; }
+    var prof = await sb.from('profiles').select('is_admin').eq('id', user.id).maybeSingle();
+    if (!prof.data || prof.data.is_admin !== true) { window.location.href = 'index.html'; return; }
+    loadGuests();
+  })();
+
+  async function loadGuests() {
+    var res = await sb.from('guest_listings').select('*').eq('status', 'pending').order('created_at', { ascending: false });
+    if (res.error) { listEl.innerHTML = '<p class="empty">Fehler: ' + res.error.message + '</p>'; return; }
+    var rows = res.data || [];
+    if (!rows.length) { listEl.innerHTML = '<p class="empty">Keine offenen Gast-Inserate. 🎉</p>'; return; }
+    listEl.innerHTML = '';
+    rows.forEach(renderCard);
+  }
+
+  function esc(s) { var d = document.createElement('div'); d.textContent = (s == null ? '' : s); return d.innerHTML; }
+
+  function renderCard(g) {
+    var d = g.data || {};
+    var extra = [];
+    if (d.room_type) extra.push(d.room_type);
+    if (d.room_size) extra.push(d.room_size + ' m2');
+    if (d.monthly_rent) extra.push(d.monthly_rent + ' EUR');
+    if (d.bad) extra.push('Bad: ' + d.bad);
+    if (d.kueche) extra.push('Kueche: ' + d.kueche);
+    if (d.moebliert) extra.push('moebliert: ' + d.moebliert);
+    if (d.available_from) extra.push('frei: ' + d.available_from);
+
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML =
+      '<h3>' + esc(g.title) + '</h3>' +
+      '<div class="meta"><strong>' + esc(g.city || '?') + '</strong> · ' + esc(extra.join(' · ')) + '</div>' +
+      '<div class="desc">' + esc(d.description || '') + '</div>' +
+      '<div class="meta">Kontakt: <strong>' + esc(d.contact_name || '') + '</strong> · ' + esc(g.contact_email || '') +
+        (g.contact_phone ? ' · ' + esc(g.contact_phone) : '') + '</div>' +
+      '<div class="actions">' +
+        '<button class="approve">Freigeben - geht live</button>' +
+        '<button class="reject">Ablehnen</button>' +
+      '</div>';
+    card.querySelector('.approve').onclick = function () { approveGuest(g, card); };
+    card.querySelector('.reject').onclick = function () { rejectGuest(g, card); };
+    listEl.appendChild(card);
+  }
+
+  async function approveGuest(g, card) {
+    var btn = card.querySelector('.approve');
+    btn.disabled = true; btn.textContent = 'Wird live gestellt …';
+    try {
+      var d = g.data || {};
+      var extra = [];
+      if (d.bad) extra.push('Bad: ' + d.bad);
+      if (d.kueche) extra.push('Kueche: ' + d.kueche);
+      if (d.moebliert) extra.push('Moebliert: ' + d.moebliert);
+      if (d.available_from) extra.push('Frei ab: ' + d.available_from);
+      var desc = (d.description || '') + (extra.length ? '\n\n' + extra.join(' · ') : '');
+
+      var listing = {
+        owner_id: GUEST_OWNER_ID,
+        type: d.type || 'wohnung',
+        listing_mode: d.listing_mode || 'offer',
+        title: d.title || g.title,
+        description: desc,
+        city: d.city || g.city,
+        room_type: d.room_type || null,
+        room_size: d.room_size ? Number(d.room_size) : null,
+        monthly_rent: d.monthly_rent ? Number(d.monthly_rent) : null,
+        is_active: true,
+      };
+      var ins = await sb.from('listings').insert(listing).select('id').single();
+      if (ins.error) throw ins.error;
+      await sb.from('guest_listings').update({
+        status: 'approved', created_listing_id: ins.data.id, reviewed_at: new Date().toISOString(),
+      }).eq('id', g.id);
+      Room8UI.success('Live! Studenten in ' + (g.city || 'der Stadt') + ' werden benachrichtigt.');
+      card.remove();
+      if (!listEl.querySelector('.card')) loadGuests();
+    } catch (e) {
+      Room8UI.error('Fehler: ' + (e.message || e));
+      btn.disabled = false; btn.textContent = 'Freigeben - geht live';
+    }
+  }
+
+  async function rejectGuest(g, card) {
+    if (!confirm('Dieses Inserat ablehnen?')) return;
+    await sb.from('guest_listings').update({ status: 'rejected', reviewed_at: new Date().toISOString() }).eq('id', g.id);
+    card.remove();
+    if (!listEl.querySelector('.card')) loadGuests();
+  }
+</script>
+</body>
+</html>
