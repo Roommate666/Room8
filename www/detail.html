@@ -280,7 +280,13 @@
             </svg>
             <span data-i18n="general_back">Zurück</span>
         </a>
-        <button id="reportListingBtn" style="display: none; background: #fee2e2; color: #ef4444; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; align-items: center; justify-content: center; transition: all 0.2s;">&#9888;</button>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+            <button id="shareListingBtn" onclick="Room8Share({ id: listingId, title: (window.__shareTitle || 'Room8'), text: 'Schau dir das auf Room8 an' })" title="Teilen" style="background:#EEF2FF; color:#4F46E5; border:none; height:36px; padding:0 0.85rem; border-radius:999px; cursor:pointer; display:flex; align-items:center; gap:0.4rem; font-weight:600; font-size:0.9rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Teilen
+            </button>
+            <button id="reportListingBtn" style="display: none; background: #fee2e2; color: #ef4444; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; align-items: center; justify-content: center; transition: all 0.2s;">&#9888;</button>
+        </div>
     </header>
     
     <main class="app-content" style="padding-bottom: 160px;">
@@ -297,6 +303,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
 <script src="room8-ui.js"></script>
+<script src="room8-share.js"></script>
 <script src="room8-utils.js"></script>
 <script>
     // Supabase Client - Direkte Initialisierung
@@ -500,6 +507,7 @@
                 if (listingResponse.error) throw listingResponse.error;
                 var listing = listingResponse.data;
                 if (!listing) throw new Error('Listing nicht gefunden.');
+                window.__shareTitle = listing.title || 'Room8';
                 
                 var ownerPromise = listing.owner_id 
                     ? sb.from('public_profiles').select('id, username, avatar_url, is_verified, university').eq('id', listing.owner_id).single()
