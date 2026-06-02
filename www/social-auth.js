@@ -95,7 +95,8 @@
       !prof ||
       !prof.username ||
       /^user[_-]?[0-9a-f]{4,}/i.test(prof.username) ||
-      !prof.full_name;
+      !prof.full_name ||
+      !prof.city;   // Stadt ist Pflicht -> sonst keine Stadt-Push (Wachstums-Loop)
 
     if (needsCompletion) {
       if (oauthProfile) {
