@@ -508,6 +508,10 @@
                 var listing = listingResponse.data;
                 if (!listing) throw new Error('Listing nicht gefunden.');
                 window.__shareTitle = listing.title || 'Room8';
+                // Wohnungen NICHT oeffentlich teilbar (Untervermietungs-Risiko fuer Studenten).
+                // Teilen nur fuer Marktplatz/Gegenstaende etc.
+                var _shareBtn = document.getElementById('shareListingBtn');
+                if (_shareBtn && listing.type === 'wohnung') _shareBtn.style.display = 'none';
                 
                 var ownerPromise = listing.owner_id 
                     ? sb.from('public_profiles').select('id, username, avatar_url, is_verified, university').eq('id', listing.owner_id).single()

@@ -47,8 +47,13 @@ module.exports = async (req, res) => {
       const rows = await r.json();
       const l = Array.isArray(rows) && rows[0];
       if (l) {
-        if (t === 'listing') {
-          const typ = TYPE_LABEL[l.room_type] || (l.type === 'wohnung' ? 'Wohnung' : 'Angebot');
+        if (t === 'listing' && l.type === 'wohnung') {
+          // Wohnungen NIE oeffentlich preview-bar (Untervermietungs-Schutz fuer Studenten).
+          // Generische Karte + Redirect in die App (Login), keine Wohnungs-Details/Fotos.
+          title = 'Room8 - Studenten-Wohnungen';
+          desc = 'WG-Zimmer und Wohnungen fuer Studenten. Sichtbar nur fuer eingeloggte, verifizierte Studenten in der App.';
+        } else if (t === 'listing') {
+          const typ = TYPE_LABEL[l.room_type] || 'Angebot';
           const price = l.monthly_rent ? (l.monthly_rent + ' EUR/Monat') : (l.price ? (l.price + ' EUR') : '');
           title = (l.title || typ) + (l.city ? ' - ' + l.city : '');
           desc = l.description ? String(l.description).slice(0, 160) : [typ, l.city, price].filter(Boolean).join(' - ');
