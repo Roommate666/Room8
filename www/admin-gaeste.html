@@ -26,7 +26,7 @@
 <body>
 <div class="wrap">
   <h1>Gast-Inserate</h1>
-  <div class="sub">Eingereicht ueber room8.club/inserieren - pruefen + freigeben.</div>
+  <div class="sub">Eingereicht über room8.club/inserieren - prüfen + freigeben.</div>
   <div id="list"><p class="empty">Lade …</p></div>
 </div>
 
@@ -67,8 +67,8 @@
     if (d.room_size) extra.push(d.room_size + ' m2');
     if (d.monthly_rent) extra.push(d.monthly_rent + ' EUR');
     if (d.bad) extra.push('Bad: ' + d.bad);
-    if (d.kueche) extra.push('Kueche: ' + d.kueche);
-    if (d.moebliert) extra.push('moebliert: ' + d.moebliert);
+    if (d.kueche) extra.push('Küche: ' + d.kueche);
+    if (d.moebliert) extra.push('möbliert: ' + d.moebliert);
     if (d.available_from) extra.push('frei: ' + d.available_from);
 
     var card = document.createElement('div');
@@ -95,8 +95,8 @@
       var d = g.data || {};
       var extra = [];
       if (d.bad) extra.push('Bad: ' + d.bad);
-      if (d.kueche) extra.push('Kueche: ' + d.kueche);
-      if (d.moebliert) extra.push('Moebliert: ' + d.moebliert);
+      if (d.kueche) extra.push('Küche: ' + d.kueche);
+      if (d.moebliert) extra.push('Möbliert: ' + d.moebliert);
       if (d.available_from) extra.push('Frei ab: ' + d.available_from);
       var desc = (d.description || '') + (extra.length ? '\n\n' + extra.join(' · ') : '');
 

@@ -835,6 +835,10 @@
                     actionBarHTML = '<a href="' + editPage + '?id=' + listing.id + '" class="submit-btn" style="background-color:' + buttonColor + '">' + getT('edit_listing') + '</a>';
                 } else if (listing.type === 'wohnung' && !showPrivateInfo) {
                     actionBarHTML = '<a href="verify-options.html" class="submit-btn" style="background-color:#f59e0b;">' + getT('verify_to_contact') + '</a>';
+                } else if (listing.owner_id === GUEST_OWNER_ID && currentUser) {
+                    // Gast-Inserat (kein Chat-Postfach) -> Interesse per Mail an den Vermieter
+                    window.__guestListingId = listing.id;
+                    actionBarHTML = '<button type="button" onclick="openGuestInterest()" class="submit-btn" style="background-color:#4F46E5; border:none; cursor:pointer; width:100%;">Interesse melden</button>';
                 } else if (currentUser) {
                     var buttonText = getT('contact_seller');
                     if (listing.listing_mode === 'offer') buttonText = getT('contact_owner');
@@ -853,8 +857,64 @@
             });
     }
     
+    // ===== Gast-Inserat: Interesse melden (Mail an Vermieter via Edge Function) =====
+    var GUEST_OWNER_ID = 'a7f9f1bb-7319-49ed-bb0b-14c91a1d1832';
+    function openGuestInterest() { document.getElementById('guestInterestModal').style.display = 'flex'; }
+    function closeGuestInterest() { document.getElementById('guestInterestModal').style.display = 'none'; }
+    async function submitGuestInterest() {
+        var contact = document.getElementById('giContact').value.trim();
+        var message = document.getElementById('giMessage').value.trim();
+        if (!contact) { Room8UI.warning('Bitte gib an, wie der Vermieter dich erreicht (E-Mail oder Handy).'); return; }
+        var btn = document.getElementById('giSubmit');
+        btn.disabled = true; btn.textContent = 'Wird gesendet …';
+        try {
+            var sess = await sb.auth.getSession();
+            var token = sess.data.session && sess.data.session.access_token;
+            if (!token) { Room8UI.warning('Bitte erst einloggen.'); return; }
+            var name = '';
+            try {
+                var u = await sb.auth.getUser();
+                var p = await sb.from('public_profiles').select('username, full_name').eq('id', u.data.user.id).maybeSingle();
+                name = (p.data && (p.data.full_name || p.data.username)) || '';
+            } catch (e) { /* Name optional */ }
+            var resp = await fetch(SUPABASE_URL + '/functions/v1/guest-interest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ listing_id: window.__guestListingId, name: name, contact: contact, message: message })
+            });
+            var data = await resp.json();
+            if (!resp.ok) { Room8UI.error('Konnte nicht senden: ' + (data.error || resp.status)); return; }
+            closeGuestInterest();
+            Room8UI.success('Geschickt! Der Vermieter meldet sich bei dir.');
+        } catch (e) {
+            Room8UI.error('Fehler: ' + e.message);
+        } finally {
+            btn.disabled = false; btn.textContent = 'Interesse senden';
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', loadListingDetails);
 </script>
+
+<!-- GAST-INTERESSE MODAL -->
+<div id="guestInterestModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center; padding:1rem;">
+  <div style="background:#fff; border-radius:16px; padding:1.5rem; max-width:440px; width:100%;">
+    <h3 style="margin:0 0 0.3rem;">Interesse an dieser Wohnung</h3>
+    <p style="color:#6B7280; font-size:0.9rem; margin-bottom:1rem;">Der Vermieter bekommt deine Nachricht + deinen Kontakt per Mail und meldet sich bei dir.</p>
+    <div style="margin-bottom:0.8rem;">
+      <label style="display:block; font-weight:600; margin-bottom:0.3rem;">Wie erreicht dich der Vermieter? *</label>
+      <input id="giContact" type="text" placeholder="E-Mail oder Handynummer" style="width:100%; padding:0.7rem; border:1px solid #E5E7EB; border-radius:10px; font-size:1rem;">
+    </div>
+    <div style="margin-bottom:1rem;">
+      <label style="display:block; font-weight:600; margin-bottom:0.3rem;">Nachricht (optional)</label>
+      <textarea id="giMessage" placeholder="z.B. Ab wann frei? Kann ich es besichtigen?" style="width:100%; padding:0.7rem; border:1px solid #E5E7EB; border-radius:10px; min-height:70px; font-size:1rem; font-family:inherit;"></textarea>
+    </div>
+    <div style="display:flex; gap:0.6rem;">
+      <button type="button" onclick="closeGuestInterest()" style="flex:1; padding:0.8rem; border:none; border-radius:10px; background:#F3F4F6; color:#374151; font-weight:600; cursor:pointer;">Abbrechen</button>
+      <button type="button" id="giSubmit" onclick="submitGuestInterest()" style="flex:1; padding:0.8rem; border:none; border-radius:10px; background:#4F46E5; color:#fff; font-weight:600; cursor:pointer;">Interesse senden</button>
+    </div>
+  </div>
+</div>
 
 <!-- REPORT MODAL -->
 <div id="reportModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">

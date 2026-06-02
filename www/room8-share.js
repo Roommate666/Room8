@@ -16,7 +16,7 @@
       navigator.share(data).catch(function () { /* User-Abbruch ignorieren */ });
     } else if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(shareUrl).then(function () {
-        if (window.Room8UI) Room8UI.success('Link kopiert - jetzt einfuegen!');
+        if (window.Room8UI) Room8UI.success('Link kopiert - jetzt einfügen!');
         else window.prompt('Link kopieren:', shareUrl);
       }).catch(function () { window.prompt('Link kopieren:', shareUrl); });
     } else {
