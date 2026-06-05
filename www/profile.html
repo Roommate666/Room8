@@ -2,6 +2,7 @@
 <html lang="de" data-page="profile">
 <head>
     <script src="sentry-init.js"></script>
+    <script src="features.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Mein Profil - Room8</title>
@@ -222,8 +223,8 @@
             <a href="settings.html" title="Einstellungen" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: white; border-radius: 50%; color: #3B82F6; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
             </a>
-            <!-- New Listing -->
-            <a href="choose-listing.html" data-i18n="profile_new_listing" style="white-space: nowrap; padding: 0.5rem 0.75rem; background: white; color: #3B82F6; border-radius: 18px; font-weight: 700; font-size: 0.8rem; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">+ Inserat</a>
+            <!-- New Listing (versteckt in reduzierter App via features.js) -->
+            <a href="choose-listing.html" data-feature="housing" data-i18n="profile_new_listing" style="white-space: nowrap; padding: 0.5rem 0.75rem; background: white; color: #3B82F6; border-radius: 18px; font-weight: 700; font-size: 0.8rem; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">+ Inserat</a>
         </div>
     </header>
 
@@ -258,7 +259,7 @@
                 <a href="partner-dashboard.html" style="flex:1; text-align:center; padding:0.7rem; background:#3B82F6; color:white; border-radius:10px; text-decoration:none; font-weight:600; font-size:0.85rem; box-shadow:0 2px 8px rgba(59,130,246,0.3);">
                     🏪 Partner-Ansicht
                 </a>
-                <a href="dashboard.html" style="flex:1; text-align:center; padding:0.7rem; background:white; color:#3B82F6; border-radius:10px; text-decoration:none; font-weight:600; font-size:0.85rem; border:1.5px solid #3B82F6;">
+                <a href="coupons.html" style="flex:1; text-align:center; padding:0.7rem; background:white; color:#3B82F6; border-radius:10px; text-decoration:none; font-weight:600; font-size:0.85rem; border:1.5px solid #3B82F6;">
                     🎓 Studenten-Ansicht
                 </a>
             </div>
@@ -280,12 +281,12 @@
         </ul>
         <div class="feature-buttons">
             <a href="verify-options.html" class="feature-btn feature-btn-primary" data-i18n="profile_setup_now">Verifizieren</a>
-            <a href="saved-searches.html" class="feature-btn feature-btn-secondary" data-i18n="profile_save_search">Suchen</a>
+            <a href="saved-searches.html" data-feature="housing" class="feature-btn feature-btn-secondary" data-i18n="profile_save_search">Suchen</a>
         </div>
     </div>
 
-    <!-- FAVORITES LINK -->
-    <div style="padding: 1rem 1.5rem; background-color: white; border-bottom: 1px solid var(--border-color);">
+    <!-- FAVORITES LINK (versteckt in reduzierter App via features.js) -->
+    <div data-feature="marketplace" style="padding: 1rem 1.5rem; background-color: white; border-bottom: 1px solid var(--border-color);">
         <a href="favorites.html" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 12px; text-decoration: none; color: #991b1b; border: 2px solid #fecaca; transition: all 0.2s;">
             <div style="display: flex; align-items: center; gap: 1rem;">
                 <div style="width: 48px; height: 48px; background-color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
@@ -305,10 +306,11 @@
     </div>
 
     <main class="app-content" style="padding: 0;">
-        <div class="my-listings-header">
+        <!-- Meine Inserate (versteckt in reduzierter App via features.js) -->
+        <div class="my-listings-header" data-feature="marketplace">
             <h3><span data-i18n="profile_my_listings">Meine Inserate</span> <span id="listing-count"></span></h3>
         </div>
-        <div id="my-listings-container" class="listings-grid">
+        <div id="my-listings-container" class="listings-grid" data-feature="marketplace">
             <div class="skeleton-card"><div class="skeleton-image"></div><div style="flex:1;padding:0.75rem;display:flex;flex-direction:column;gap:0.5rem"><div class="skeleton-line" style="width:70%"></div><div class="skeleton-line short" style="width:40%"></div></div></div>
             <div class="skeleton-card"><div class="skeleton-image"></div><div style="flex:1;padding:0.75rem;display:flex;flex-direction:column;gap:0.5rem"><div class="skeleton-line" style="width:60%"></div><div class="skeleton-line short" style="width:50%"></div></div></div>
         </div>

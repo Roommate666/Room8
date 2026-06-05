@@ -33,6 +33,7 @@ const translations = {
  nav_tab_coupons: 'Coupons',
  nav_tab_events: 'Events',
  nav_tab_chat: 'Chat',
+ nav_tab_profile: 'Profil',
 
  // Events
  events_title: 'Events',
@@ -1805,6 +1806,7 @@ const translations = {
  nav_tab_coupons: 'Coupons',
  nav_tab_events: 'Events',
  nav_tab_chat: 'Chat',
+ nav_tab_profile: 'Profile',
 
  // Events
  events_title: 'Events',

@@ -37,7 +37,8 @@
         }
         filename = filename || 'index.html';
 
-        if (filename === 'dashboard.html' || filename === '') return 'home';
+        // dashboard.html ist jetzt Redirect -> Coupons (Start der reduzierten App)
+        if (filename === 'dashboard.html' || filename === '') return 'coupons';
         // listing-details.html: Typ wird dynamisch gesetzt via window.currentListingType
         if (filename === 'listing-details.html') {
             if (window.currentListingType === 'gegenstand') return 'marketplace';
@@ -49,7 +50,7 @@
         if (filename === 'event-detail.html' || filename === 'event-create.html') return 'events';
 
         var pageMap = {
-            'dashboard.html': 'home',
+            'dashboard.html': 'coupons',
             'wohnungen.html': 'housing',
             'wohnung.html': 'housing',
             'gegenstaende.html': 'marketplace',
@@ -111,14 +112,14 @@
         var currentPage = getCurrentPage();
 
         var _t = (typeof Room8i18n !== 'undefined') ? Room8i18n.t : function(k) { return k; };
+        // Reduzierte App (05.06.2026): nur single-sided Features. Reihenfolge =
+        // Mentor-Strategie Coupons -> Jobs -> Events. Profil als 4. Tab.
+        // Housing/Marketplace/Chat sind hinter features.js-Flags versteckt.
         var navItems = [
-            { id: 'home', href: 'dashboard.html', icon: 'grid', label: _t('nav_tab_home') },
-            { id: 'housing', href: 'wohnungen.html', icon: 'home', label: _t('nav_tab_housing') },
-            { id: 'marketplace', href: 'gegenstaende.html', icon: 'shopping', label: _t('nav_tab_market') },
+            { id: 'coupons', href: 'coupons.html', icon: 'tag', label: _t('nav_tab_coupons') || 'Coupons' },
+            { id: 'jobs', href: 'jobs.html', icon: 'briefcase', label: _t('nav_tab_jobs') || 'Jobs' },
             { id: 'events', href: 'events.html', icon: 'calendar', label: _t('nav_tab_events') || 'Events' },
-            { id: 'jobs', href: 'jobs.html', icon: 'briefcase', label: _t('nav_tab_jobs') },
-            { id: 'coupons', href: 'coupons.html', icon: 'tag', label: _t('nav_tab_coupons') },
-            { id: 'messages', href: 'nachrichten.html', icon: 'message', label: _t('nav_tab_chat') }
+            { id: 'profile', href: 'profile.html', icon: 'user', label: _t('nav_tab_profile') || 'Profil' }
         ];
 
         // Build nav items

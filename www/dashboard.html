@@ -2,6 +2,10 @@
 <html lang="de" data-page="dashboard">
 <head>
     <script src="sentry-init.js"></script>
+    <!-- Reduzierte App (05.06.2026): Dashboard entfernt, Start = Coupons.
+         Redirect feuert vor dem Rendern. Der komplette Dashboard-Code bleibt
+         darunter ERHALTEN fuer den spaeteren Re-Launch (Kacheln zurueckholen). -->
+    <script>window.location.replace('coupons.html' + (window.location.search || ''));</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Home - Room8</title>
