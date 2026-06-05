@@ -2,6 +2,7 @@
 <html lang="de" data-page="notifications">
 <head>
     <script src="sentry-init.js"></script>
+    <script src="features.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Benachrichtigungen - Room8</title>
@@ -178,10 +179,10 @@
     <div class="filter-tabs" id="filterTabs">
         <div class="filter-tab active" data-filter="all" data-i18n="common_all">Alle</div>
         <div class="filter-tab" data-filter="unread" data-i18n="notifications_filter_unread">Ungelesen</div>
-        <div class="filter-tab" data-filter="search_match" data-i18n="notifications_filter_alerts">Suchalarme</div>
-        <div class="filter-tab" data-filter="chat_message" data-i18n="notifications_filter_chats">Chats</div>
+        <div class="filter-tab" data-feature="housing" data-filter="search_match" data-i18n="notifications_filter_alerts">Suchalarme</div>
+        <div class="filter-tab" data-feature="chat" data-filter="chat_message" data-i18n="notifications_filter_chats">Chats</div>
         <div class="filter-tab" data-filter="review" data-i18n="notifications_filter_reviews">Bewertungen</div>
-        <div class="filter-tab" data-filter="favorite" data-i18n="notifications_filter_favorites">Favoriten</div>
+        <div class="filter-tab" data-feature="marketplace" data-filter="favorite" data-i18n="notifications_filter_favorites">Favoriten</div>
     </div>
 
     <main class="app-content" style="padding: 0;">
