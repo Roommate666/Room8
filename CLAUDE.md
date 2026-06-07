@@ -54,9 +54,10 @@ Uebersicht: `specs/00-INDEX.md` — IMMER zuerst lesen wenn Aenderungen geplant 
 - Signing Key: C:\Dev\keys\room8-release.jks
 
 ## Wichtige Dateien
-- config.js - Supabase URL + Keys + Navigation Config
+- config.js - Supabase URL + Keys (navigation-Array darin ist TOTER Alt-Code, navigation.js nutzt eigene Liste)
 - translations.js - Alle DE/EN Uebersetzungen (2666 Zeilen)
-- navigation.js - Bottom Tab Bar
+- features.js - FEATURE-FLAGS (Single Source). Reduzierte App seit 06.06.2026: housing/marketplace/chat=false. Seiten-Guard (versteckte Seite -> redirect coupons.html) + DOM-Hider (`[data-feature="X"]`-Elemente werden ausgeblendet wenn Flag X aus). RE-LAUNCH der two-sided Features = Flag auf true + neuer Build.
+- navigation.js - Bottom Tab Bar. AKTUELL 4 Tabs: Coupons/Jobs/Events/Profil (reduzierte App). Housing/Marketplace/Chat/Home-Tabs entfernt.
 - push-logic.js - Push Notification Service (FCM Token)
 - room8-ui.js + room8-utils.js - Shared UI + Utilities
 - supabaseClient.js - Supabase Client Init
@@ -124,13 +125,17 @@ npx supabase functions deploy get-signed-url --no-verify-jwt
 ```
 
 ## Features (Seiten)
-- Wohnungen (wohnungen.html, wohnung.html, upload.html)
-- Marktplatz (gegenstaende.html, gegenstand.html)
-- Jobs (jobs.html, job-create.html, job-detail.html)
-- Coupons (coupons.html, coupon-create.html, coupon-detail.html)
-- Chat (nachrichten.html, chat.html) - getrennt pro Inserat via listing_id
-- Profil, Verifizierung, Admin, Partner-Bereich
-- Push Notifications (FCM v1 API)
+**REDUZIERTE APP seit 06.06.2026 (Mentor-Pivot, Web LIVE):** Nur AKTIV: Coupons, Jobs, Events.
+Reihenfolge bewusst Coupons->Jobs->Events. Versteckte (NICHT geloeschte) Features via features.js-Flags:
+- AKTIV Coupons (coupons.html, coupon-create.html, coupon-detail.html)
+- AKTIV Jobs (jobs.html, job-create.html, job-detail.html)
+- AKTIV Events (events.html, event-create.html, event-detail.html)
+- AKTIV Profil, Verifizierung, Admin, Partner-Bereich, Push Notifications (FCM v1)
+- VERSTECKT (housing-Flag) Wohnungen (wohnungen.html, wohnung.html, upload.html, saved-searches.html, choose-listing.html)
+- VERSTECKT (marketplace-Flag) Marktplatz (gegenstaende.html, gegenstand.html, detail.html, listing-details.html, favorites.html)
+- VERSTECKT (chat-Flag) Chat (nachrichten.html, chat.html)
+- dashboard.html = Redirect auf coupons.html (Dashboard-Code drunter erhalten)
+- Wenn an versteckten Features gearbeitet wird: erst Flag in features.js temporaer auf true, NICHT Guard-Code anfassen.
 
 ## Bekannte Eigenheiten
 - Push-Token: PushService.saveTokenToSupabase() im registration Handler
