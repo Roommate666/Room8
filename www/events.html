@@ -139,9 +139,7 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </a>
         <h1 data-i18n="events_title">Events</h1>
-        <a href="event-create.html" id="headerCreateBtn" class="back-btn" aria-label="Event erstellen" style="display:none;">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        </a>
+        <div style="width: 40px;"></div>
     </header>
 
     <!-- Partner-CTA Banner -->
@@ -169,6 +167,9 @@
             <button class="filter-btn" data-cat="networking" data-i18n="events_cat_networking">Networking</button>
             <button class="filter-btn" data-cat="food" data-i18n="events_cat_food">Essen</button>
         </div>
+        <div class="city-filter-row" style="padding:0;">
+            <button id="cityChip" class="city-chip" type="button" style="display:none;"></button>
+        </div>
     </div>
 
 
@@ -194,6 +195,9 @@
 <script src="session-cache.js"></script>
 <script src="navigation.js"></script>
 <script src="room8-utils.js"></script>
+<script src="cities.js"></script>
+<script src="room8-saves.js"></script>
+<script src="room8-cityfilter.js"></script>
 <script src="notificationBell.js"></script>
 <script>
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -222,6 +226,11 @@
     var MONTHS_DE = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 
     async function loadEvents() {
+        if (window.Room8Saves) { try { await Room8Saves.load(); } catch (e) {} }
+        if (window.Room8City) {
+            try { await Room8City.load(); } catch (e) {}
+            Room8City.renderChip(document.getElementById('cityChip'), function() { renderEvents(); });
+        }
         try {
             // Kein harter start_at-Filter mehr: ein bereits gestartetes, aber noch
             // laufendes Event (start in Vergangenheit, status noch 'active') wuerde
@@ -264,7 +273,19 @@
             ? allEvents
             : allEvents.filter(function(e) { return e.category === currentCat; });
 
-        var filtered = byCat.filter(function(e) { return matchesSearch(e, currentSearch); });
+        function withFilters(useCity) {
+            return byCat.filter(function(e) {
+                var cityOK = !useCity || !window.Room8City || Room8City.matches(e.city);
+                return cityOK && matchesSearch(e, currentSearch);
+            });
+        }
+        var filtered = withFilters(true);
+        // Fallback: Stadt-Filter aktiv aber 0 Treffer -> Stadt-Filter aus
+        if (filtered.length === 0 && window.Room8City && Room8City.isActive() && Room8City.getCity()) {
+            Room8City.setActive(false);
+            Room8City.renderChip(document.getElementById('cityChip'), function() { renderEvents(); });
+            filtered = withFilters(false);
+        }
 
         if (filtered.length === 0) {
             container.innerHTML =
@@ -308,6 +329,7 @@
                         '</div>' +
                         officialBadge +
                         exampleBadge +
+                        '<button class="save-btn card-save-overlay" data-save-type="event" data-save-id="' + ev.id + '"></button>' +
                     '</div>' +
                     '<div class="event-body">' +
                         '<span class="event-category-tag">' + catLabel + '</span>' +
@@ -322,6 +344,15 @@
                 '</div>'
             );
         }).join('');
+        wireSaveButtons(container);
+    }
+
+    // Speichern-Buttons in einem Container verdrahten
+    function wireSaveButtons(container) {
+        if (!window.Room8Saves) return;
+        container.querySelectorAll('.save-btn[data-save-id]').forEach(function(btn) {
+            Room8Saves.wire(btn, btn.getAttribute('data-save-type'), btn.getAttribute('data-save-id'));
+        });
     }
 
     // Filter Click Handler
@@ -342,30 +373,9 @@
     }
 
     // Permission-Check: Plus-Icon im Header NUR fuer Partner oder Admin.
-    // Normale User sollen Events nicht erstellen koennen — nur konsumieren.
-    async function setupPermissionUI() {
-        var headerBtn = document.getElementById('headerCreateBtn');
-        if (headerBtn) headerBtn.style.display = 'none';
-
-        var userRes = await sb.auth.getUser();
-        if (!userRes.data.user) return;
-
-        var profileRes = await sb.from('profiles')
-            .select('is_partner, is_admin, partner_can_events, can_create_events, trusted_organizer')
-            .eq('id', userRes.data.user.id).maybeSingle();
-        var p = profileRes.data || {};
-
-        // Plus zeigen wenn: Admin ODER Partner mit Events-Permission.
-        // Ziel je nach Recht: wer direkt erstellen darf (Admin/trusted/can_create_events)
-        // -> event-create.html (sofort live). Normaler Partner -> partner-event.html
-        // (Einreichen, Admin-Review). Sonst liefe der direkte Insert in die RLS-Wand.
-        var canShow = !!(p.is_admin || (p.is_partner && p.partner_can_events));
-        var canCreateDirect = !!(p.is_admin || p.trusted_organizer || p.can_create_events);
-        if (headerBtn && canShow) {
-            headerBtn.setAttribute('href', canCreateDirect ? 'event-create.html' : 'partner-event.html');
-            headerBtn.style.display = 'flex';
-        }
-    }
+    // Reduzierte App: User erstellen keine Events. Erstellen laeuft ueber den
+    // Partner-Banner (partner-event.html) bzw. Admin-Panel. Kein Plus im Header.
+    async function setupPermissionUI() { /* no-op */ }
 
     loadEvents();
     setupPermissionUI();

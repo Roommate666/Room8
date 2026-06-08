@@ -366,10 +366,13 @@
 <div class="app-container">
     <header class="app-header" style="position:absolute; top:env(safe-area-inset-top, 0px); left:0; width:100%; background:transparent; border:none; box-shadow:none; z-index:10; padding-top:0.5rem; display:flex; justify-content:space-between; align-items:center;">
         <a href="javascript:history.back()" class="back-arrow" style="background:rgba(0,0,0,0.45); border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; color:white;">&#8592;</a>
-        <button onclick="Room8Share({ type: 'coupon' })" title="Teilen" style="background:rgba(0,0,0,0.45); border:none; border-radius:999px; height:36px; padding:0 0.85rem; display:flex; align-items:center; gap:0.4rem; color:white; cursor:pointer; font-weight:600; font-size:0.9rem;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            Teilen
-        </button>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+            <button id="couponSaveBtn" class="save-btn" type="button" aria-label="Speichern" style="background:rgba(0,0,0,0.45); color:white; box-shadow:none; width:36px; height:36px;"></button>
+            <button onclick="Room8Share({ type: 'coupon' })" title="Teilen" style="background:rgba(0,0,0,0.45); border:none; border-radius:999px; height:36px; padding:0 0.85rem; display:flex; align-items:center; gap:0.4rem; color:white; cursor:pointer; font-weight:600; font-size:0.9rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Teilen
+            </button>
+        </div>
     </header>
 
     <div class="coupon-hero" onclick="openLightbox()">
@@ -510,6 +513,7 @@
 <script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script src="room8-share.js"></script>
+<script src="room8-saves.js"></script>
 <script>
     // Supabase Client - Direkte Initialisierung
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -619,6 +623,12 @@
         coupon = c;
         if(!coupon) return;
 
+        // Speichern-Button verdrahten
+        if (window.Room8Saves) {
+            try { await Room8Saves.load(); } catch (e) {}
+            Room8Saves.wire(document.getElementById('couponSaveBtn'), 'coupon', id);
+        }
+
         document.getElementById('companyName').textContent = coupon.business_name || '';
         document.getElementById('dealTitle').textContent = coupon.title || '';
         document.getElementById('description').textContent = coupon.description || '';
@@ -686,6 +696,10 @@
         // Redeem-Button-Status: schon eingeloest?
         const btn = document.getElementById('redeemBtn');
         const badge = document.getElementById('redeemedBadge');
+
+        // Anmelde-Modus (koordinierte Aktionen, z.B. Kurs): kein QR, sondern Selbst-Anmeldung
+        if (coupon.signup_notify_email) { await setupSignupMode(); return; }
+
         if (!userId) {
             btn.setAttribute('data-i18n', 'coupon_redeem_login');
             btn.textContent = (window.Room8i18n && Room8i18n.t('coupon_redeem_login')) || 'Zum Einlösen einloggen';
@@ -701,6 +715,53 @@
                 btn.style.display = 'none';
                 badge.style.display = 'block';
             }
+        }
+    }
+
+    // Anmelde-Modus: Selbst-Anmeldung statt QR-Einloesung
+    async function setupSignupMode() {
+        const btn = document.getElementById('redeemBtn');
+        const badge = document.getElementById('redeemedBadge');
+        if (!userId) {
+            btn.textContent = (window.Room8i18n && Room8i18n.t('coupon_signup_login')) || 'Zum Anmelden einloggen';
+            btn.onclick = function() { window.location.href = 'login.html'; };
+            return;
+        }
+        try {
+            const { data: mine } = await sb.from('coupon_signups')
+                .select('id').eq('coupon_id', id).eq('user_id', userId).maybeSingle();
+            if (mine) {
+                btn.style.display = 'none';
+                badge.textContent = (window.Room8i18n && Room8i18n.t('coupon_signup_done')) || 'Angemeldet ✓ - wir melden uns bei dir';
+                badge.style.display = 'block';
+                return;
+            }
+        } catch (e) {}
+        btn.textContent = (window.Room8i18n && Room8i18n.t('coupon_signup_btn')) || 'Für den Kurs anmelden';
+        btn.onclick = signupForCourse;
+    }
+
+    async function signupForCourse() {
+        if (!userId) { window.location.href = 'login.html'; return; }
+        const btn = document.getElementById('redeemBtn');
+        const badge = document.getElementById('redeemedBadge');
+        btn.disabled = true;
+        const { error } = await sb.from('coupon_signups').insert({ coupon_id: id, user_id: userId });
+        if (!error) {
+            btn.style.display = 'none';
+            badge.textContent = (window.Room8i18n && Room8i18n.t('coupon_signup_done')) || 'Angemeldet ✓ - wir melden uns bei dir';
+            badge.style.display = 'block';
+            if (window.Room8UI) Room8UI.success((window.Room8i18n && Room8i18n.t('coupon_signup_success')) || 'Anmeldung erfolgreich! Wir melden uns per E-Mail.');
+        } else if (error.code === '23505') {
+            if (window.Room8UI) Room8UI.error('Du bist bereits angemeldet.');
+            btn.disabled = false;
+        } else if (error.code === '23514' || (error.message || '').indexOf('SIGNUP_LIMIT') >= 0 || (error.message || '').indexOf('check') >= 0) {
+            btn.textContent = (window.Room8i18n && Room8i18n.t('coupon_signup_full')) || 'Leider ausgebucht';
+            btn.disabled = true;
+            if (window.Room8UI) Room8UI.error('Dieser Kurs ist leider schon ausgebucht.');
+        } else {
+            if (window.Room8UI) Room8UI.error('Anmeldung fehlgeschlagen. Versuch es spaeter nochmal.');
+            btn.disabled = false;
         }
     }
 

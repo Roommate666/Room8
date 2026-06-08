@@ -1921,3 +1921,43 @@ body.has-sidebar-nav .app-container {
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
   background: rgba(255, 255, 255, 0.95);
 }
+/* Speichern-Button (Coupons/Jobs/Events) */
+.save-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: #6b7280;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  transition: color 0.15s ease, transform 0.1s ease, background 0.15s ease;
+}
+.save-btn:hover { background: #fff; color: var(--primary-color); }
+.save-btn:active { transform: scale(0.92); }
+.save-btn.is-saved { color: var(--primary-color); }
+.save-btn:disabled { opacity: 0.5; cursor: default; }
+/* Karten-Overlay-Variante (Bild oben rechts) */
+.card-save-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+}
+
+/* Stadt-Filter Chip (Coupons/Jobs/Events) */
+.city-chip {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.45rem 0.9rem; border-radius: 999px; cursor: pointer;
+  border: 1.5px solid var(--primary-color, #2563EB);
+  background: #fff; color: var(--primary-color, #2563EB);
+  font-weight: 600; font-size: 0.85rem; white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.city-chip.active { background: var(--primary-color, #2563EB); color: #fff; }
+.city-filter-row { display: flex; align-items: center; gap: 0.5rem; padding: 0 1.25rem; margin-bottom: 0.75rem; }
+.city-filter-hint { font-size: 0.78rem; color: #9CA3AF; }

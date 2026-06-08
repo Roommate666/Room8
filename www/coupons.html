@@ -343,6 +343,9 @@
             <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
             <input type="text" id="couponSearchInput" placeholder="Restaurant, Code, Stadt …" autocomplete="off">
         </div>
+        <div class="city-filter-row">
+            <button id="cityChip" class="city-chip" type="button" style="display:none;"></button>
+        </div>
         <div class="filter-bar" id="couponFilter">
             <button class="filter-btn active" data-cat="all" data-i18n="common_all">Alle</button>
             <button class="filter-btn" data-cat="food" data-i18n="coupons_cat_food">Essen & Trinken</button>
@@ -376,6 +379,9 @@
 <script src="session-cache.js"></script>
 <script src="navigation.js"></script>
 <script src="room8-utils.js"></script>
+<script src="cities.js"></script>
+<script src="room8-saves.js"></script>
+<script src="room8-cityfilter.js"></script>
 <script src="notificationBell.js"></script>
 <script>
     // Supabase Client - Direkte Initialisierung
@@ -472,6 +478,11 @@
 
     // Coupons laden (mit JOIN auf coupon_photos fuer Bilder)
     async function loadCoupons() {
+        if (window.Room8Saves) { try { await Room8Saves.load(); } catch (e) {} }
+        if (window.Room8City) {
+            try { await Room8City.load(); } catch (e) {}
+            Room8City.renderChip(document.getElementById('cityChip'), function() { renderCoupons(); });
+        }
         try {
             var result = await sb
                 .from('coupons')
@@ -530,16 +541,25 @@
 
     function renderCoupons() {
         container.innerHTML = '';
-        var filtered = allCoupons.filter(function(c) {
+        function pass(c, withCity) {
             var catOK = (currentCat === 'all') || (c.category === currentCat);
-            return catOK && matchesSearch(c, currentSearch);
-        });
-        
+            var cityOK = !withCity || !window.Room8City || Room8City.matches(c.city);
+            return catOK && cityOK && matchesSearch(c, currentSearch);
+        }
+        var filtered = allCoupons.filter(function(c) { return pass(c, true); });
+
+        // Fallback: Stadt-Filter aktiv aber 0 Treffer -> Stadt-Filter aus + Hinweis
+        if (filtered.length === 0 && window.Room8City && Room8City.isActive() && Room8City.getCity()) {
+            Room8City.setActive(false);
+            Room8City.renderChip(document.getElementById('cityChip'), function() { renderCoupons(); });
+            filtered = allCoupons.filter(function(c) { return pass(c, false); });
+        }
+
         if (filtered.length === 0) {
             container.innerHTML = '<div class="loading-state">' + ((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('coupons_no_coupons'):'Keine Coupons in dieser Kategorie') + '</div>';
             return;
         }
-        
+
         filtered.forEach(function(c) {
             var card = document.createElement('div');
             card.className = 'coupon-card';
@@ -576,12 +596,18 @@
 
             // Logo
             var logoHtml = c.logoUrl ? '<img src="' + encodeURI(c.logoUrl) + '" alt="Logo" width="40" height="40" loading="lazy" decoding="async">' : escapeHtml(c.logo || '🏪');
-            
+
+            // Speichern-Button nur fuer echte Coupons (Beispiele haben keine id)
+            var saveBtnHtml = (c.id && !c.isExample)
+                ? '<button class="save-btn card-save-overlay" data-save-type="coupon" data-save-id="' + escapeHtml(String(c.id)) + '"></button>'
+                : '';
+
             card.innerHTML =
                 '<div class="coupon-image" style="' + bgStyle + '">' +
                     emojiHtml +
                     (c.isExample ? '<span class="example-badge">Beispiel</span>' : '') +
                     '<span class="discount-badge ' + badgeClass + '">' + escapeHtml(c.discount_value) + '</span>' +
+                    saveBtnHtml +
                 '</div>' +
                 '<div class="coupon-content">' +
                     '<div class="partner-header">' +
@@ -611,6 +637,11 @@
                         openModal(redeemBtn.getAttribute('data-code') || '');
                     }
                 });
+            }
+
+            var saveBtn = card.querySelector('.save-btn[data-save-id]');
+            if (saveBtn && window.Room8Saves) {
+                Room8Saves.wire(saveBtn, saveBtn.getAttribute('data-save-type'), saveBtn.getAttribute('data-save-id'));
             }
 
             container.appendChild(card);

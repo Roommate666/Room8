@@ -48,31 +48,6 @@ color: var(--text-main);
 margin-top: 1.5rem;
 font-size: 1.05rem;
 }
-/* Tabs */
-.tab-bar {
-display: flex;
-background: var(--glass-bg);
-padding: 4px;
-border-radius: 14px;
-border: 1px solid var(--glass-border);
-margin: 1rem;
-}
-.tab-link {
-flex: 1;
-text-align: center;
-padding: 0.7rem;
-font-weight: 600;
-cursor: pointer;
-border-radius: 10px;
-transition: all 0.2s;
-color: var(--text-light);
-font-size: 0.9rem;
-}
-.tab-link.active {
-background: var(--primary-color);
-color: white;
-box-shadow: 0 2px 8px rgba(59,130,246,0.25);
-}
 /* Info Boxes */
 .info-box, .warning-box, .success-box {
 padding: 1rem 1.25rem;
@@ -83,54 +58,6 @@ font-size: 0.95rem;
 .info-box { background: #EFF6FF; border-left: 4px solid #3B82F6; color: #1E40AF; }
 .warning-box { background: #FFFBEB; border-left: 4px solid #F59E0B; color: #92400E; }
 .success-box { background: #ECFDF5; border-left: 4px solid #10B981; color: #065F46; }
-/* Template Box (Verträge) */
-.template-box {
-background: rgba(248,250,252,0.92);
-border: 1px solid rgba(0,0,0,0.06);
-border-radius: 16px;
-padding: 1.5rem;
-margin: 1.5rem 0;
-font-family: 'Courier New', Courier, monospace;
-font-size: 0.85rem;
-white-space: pre-wrap;
-word-wrap: break-word;
-overflow-x: auto;
-color: #334155;
-box-shadow: 0 2px 12px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
-position: relative;
-backdrop-filter: blur(8px);
--webkit-backdrop-filter: blur(8px);
-        }
-.template-title {
-background: linear-gradient(135deg, #334155 0%, #1E293B 100%);
-color: white;
-padding: 0.6rem 1.2rem;
-margin: -1.5rem -1.5rem 1rem -1.5rem;
-border-radius: 16px 16px 0 0;
-font-family: sans-serif;
-font-weight: 600;
-font-size: 0.9rem;
-letter-spacing: 0.5px;
-display: flex;
-align-items: center;
-gap: 0.5rem;
-        }
-.copy-btn {
-background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-color: white;
-border: none;
-padding: 0.75rem 1.5rem;
-border-radius: 999px;
-cursor: pointer;
-font-size: 0.9rem;
-font-weight: 600;
-margin-top: 0.5rem;
-transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
-box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
-width: 100%;
-        }
-.copy-btn:active { transform: scale(0.97); }
-.copy-btn:hover { box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4); transform: translateY(-1px); }
 .email-link {
 background: #EFF6FF;
 padding: 0.2rem 0.6rem;
@@ -150,11 +77,6 @@ font-weight: 500;
         <h1 data-i18n="terms_title">Rechtliches</h1>
         <div style="width:40px;"></div>
     </header>
-
-    <div class="tab-bar">
-        <div class="tab-link active" onclick="switchTab('agb')" data-i18n="settings_terms_short">AGB</div>
-        <div class="tab-link" onclick="switchTab('contracts')" data-i18n="terms_templates">Musterverträge</div>
-    </div>
 
 <main class="legal-content">
 <!-- AGB TAB -->
@@ -316,31 +238,6 @@ Der Nutzer stellt Room8, seine Geschäftsführer, Mitarbeiter und Beauftragten v
 Stand: Februar 2026
 </p>
 </div>
-<!-- VERTRÄGE TAB -->
-<div id="tab-contracts" class="content-card" style="display:none;">
-
-<div style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); border: 1px solid #F59E0B; border-radius: 14px; padding: 1.25rem; margin-bottom: 1.5rem; color: #78350F; line-height: 1.55;">
-<strong style="display:block; margin-bottom: 0.4rem; font-size: 1rem;">📝 <span data-i18n="lt_review_title">Vorlagen in anwaltlicher Pruefung</span></strong>
-<span data-i18n="lt_contracts_review_text">Wir lassen unsere eigenen Mustervertraege gerade von einem Mietrechts-Anwalt pruefen. Aktuelle, geprüfte Vorlagen findest du auf unserer Web-Seite — dort fuegen wir laufend neue Versionen ein, ohne dass du die App aktualisieren musst.</span>
-</div>
-
-<a href="https://www.room8.club/vertragsvorlagen.html" target="_blank" rel="noopener noreferrer" style="display: block; background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; text-decoration: none; padding: 1.25rem 1.5rem; border-radius: 14px; text-align: center; font-weight: 700; font-size: 1.05rem; box-shadow: 0 6px 18px rgba(59, 130, 246, 0.25); margin-bottom: 1.5rem;">
-<span data-i18n="lt_contracts_open">Aktuelle Vorlagen ansehen</span> &nbsp;→
-</a>
-
-<div style="background: #F0FDF4; border: 1px dashed #86EFAC; border-radius: 12px; padding: 1rem 1.25rem; color: #166534; font-size: 0.9rem; line-height: 1.55;">
-<strong>💡 <span data-i18n="lt_contracts_tip_label">Empfohlene Quellen bis dahin:</span></strong>
-<ul style="margin: 0.5rem 0 0; padding-left: 1.2rem;">
-<li><a href="https://www.verbraucherzentrale.de/" target="_blank" rel="noopener noreferrer" style="color:#0EA5E9; font-weight: 600;">Verbraucherzentrale</a></li>
-<li><a href="https://www.mieterbund.de/" target="_blank" rel="noopener noreferrer" style="color:#0EA5E9; font-weight: 600;">Deutscher Mieterbund</a></li>
-<li><a href="https://www.smartlaw.de/" target="_blank" rel="noopener noreferrer" style="color:#0EA5E9; font-weight: 600;">smartlaw.de</a> <span data-i18n="lt_tag_lawyer" style="font-size: 0.8rem; color: #6B7280;">(anwaltlich geprüft)</span></li>
-</ul>
-</div>
-
-<p style="font-size: 0.78rem; color: #9CA3AF; margin-top: 1.5rem; text-align: center;" data-i18n="lt_contracts_disclaimer">
-Room8 uebernimmt keine Haftung fuer die Vorlagen. Bei wichtigen Vertraegen Anwalt konsultieren.
-</p>
-</div>
 </main>
 </div>
 
@@ -348,61 +245,5 @@ Room8 uebernimmt keine Haftung fuer die Vorlagen. Bei wichtigen Vertraegen Anwal
 <script src="session-cache.js"></script>
 <script src="room8-ui.js"></script>
 <script src="translations.js"></script>
-<script>
-function switchTab(tab) {
-    var agbTab = document.getElementById('tab-agb');
-    var contractsTab = document.getElementById('tab-contracts');
-    var tabLinks = document.querySelectorAll('.tab-link');
-
-    if (tab === 'agb') {
-        agbTab.style.display = 'block';
-        contractsTab.style.display = 'none';
-        tabLinks[0].classList.add('active');
-        tabLinks[1].classList.remove('active');
-    } else {
-        agbTab.style.display = 'none';
-        contractsTab.style.display = 'block';
-        tabLinks[0].classList.remove('active');
-        tabLinks[1].classList.add('active');
-    }
-}
-
-function copyTemplate(templateId) {
-    var template = document.getElementById(templateId);
-    var text = template.innerText || template.textContent;
-
-    // Remove the title from the copied text
-    var lines = text.split('\n');
-    lines.shift(); // Remove first line (title)
-    text = lines.join('\n').trim();
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function() {
-            Room8UI.success('Vorlage wurde kopiert! Du kannst sie jetzt in Word oder Google Docs einfügen.');
-        }).catch(function() {
-            fallbackCopy(text);
-        });
-    } else {
-        fallbackCopy(text);
-    }
-}
-
-function fallbackCopy(text) {
-    var textArea = document.createElement('textarea');
-    textArea.value = text;
-    textArea.style.position = 'fixed';
-    textArea.style.left = '-9999px';
-    document.body.appendChild(textArea);
-    textArea.select();
-    try {
-        document.execCommand('copy');
-        Room8UI.success('Vorlage wurde kopiert!');
-    } catch (err) {
-        Room8UI.error('Kopieren fehlgeschlagen. Bitte manuell markieren und kopieren.');
-    }
-    document.body.removeChild(textArea);
-}
-
-</script>
 </body>
 </html>

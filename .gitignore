@@ -34,3 +34,4 @@ supabase.exe          # Supabase-CLI-Binary (42MB) gehoert nicht ins Repo
 www_backup*/          # manuelle Backup-Verzeichnisse
 roommate_full_updated/  # alter, kompletter App-Build (Duplikat)
 *.bat                 # Windows-Helfer-Skripte (maschinen-spezifisch)
+roommate-app/

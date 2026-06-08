@@ -421,6 +421,9 @@
             <button class="filter-btn" data-type="minijob" data-i18n="jobs_filter_minijob">Minijob</button>
             <button class="filter-btn" data-type="praktikum" data-i18n="jobs_filter_internship">Praktikum</button>
         </div>
+        <div class="city-filter-row" style="padding:0;">
+            <button id="cityChip" class="city-chip" type="button" style="display:none;"></button>
+        </div>
     </div>
     
     <h3 class="section-title" id="jobsSectionTitle" data-i18n="jobs_more_examples">Weitere Beispiel-Jobs</h3>
@@ -437,6 +440,9 @@
 <script src="translations.js"></script>
 <script src="session-cache.js"></script>
 <script src="room8-utils.js"></script>
+<script src="cities.js"></script>
+<script src="room8-saves.js"></script>
+<script src="room8-cityfilter.js"></script>
 <script src="room8-ui.js"></script>
 <script src="navigation.js"></script>
 <script src="notificationBell.js"></script>
@@ -540,8 +546,14 @@
         // is_demo Items oeffnen TROTZDEM die Detail-Page — Yusuf will dass das Beispiel komplett sichtbar ist
         var clickAction = 'onclick="navigateTo(\'job-detail.html?id=' + esc(safeId) + '\')"';
 
+        // Speichern-Button nur fuer echte Jobs (Beispiele haben is_demo)
+        var saveBtnHtml = (job.id && !job.is_demo)
+            ? '<button class="save-btn card-save-overlay" data-save-type="job" data-save-id="' + esc(String(job.id)) + '"></button>'
+            : '';
+
         return '<div class="' + cardClass + '" ' + clickAction + '>' +
                 badge +
+                saveBtnHtml +
                 (heroHtml || logoContent) +
                 '<div class="job-content">' +
                     '<div class="job-title">' + esc(job.title) + '</div>' +
@@ -560,22 +572,40 @@
                 html += renderJobCard(j);
             });
             jobsContainer.innerHTML = html;
+            if (window.Room8Saves) {
+                jobsContainer.querySelectorAll('.save-btn[data-save-id]').forEach(function(btn) {
+                    Room8Saves.wire(btn, btn.getAttribute('data-save-type'), btn.getAttribute('data-save-id'));
+                });
+            }
         } else {
             jobsContainer.innerHTML = '<div style="text-align:center; padding:3rem; color:#9ca3af;">' + ((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('jobs_no_jobs'):'Keine Jobs gefunden') + '</div>';
         }
     }
     
     function applyFilters() {
-        var filtered = allJobs.filter(function(job) {
+        function pass(job, withCity) {
             var matchesType = currentType === 'all' || job.job_type === currentType;
             var q = searchQuery.toLowerCase();
             var matchesSearch = !q || (job.title && job.title.toLowerCase().includes(q)) || (job.company_name && job.company_name.toLowerCase().includes(q));
-            return matchesType && matchesSearch;
-        });
+            var cityOK = !withCity || !window.Room8City || Room8City.matches(job.city);
+            return matchesType && matchesSearch && cityOK;
+        }
+        var filtered = allJobs.filter(function(job) { return pass(job, true); });
+        // Fallback: Stadt-Filter aktiv aber 0 Treffer -> Stadt-Filter aus
+        if (filtered.length === 0 && window.Room8City && Room8City.isActive() && Room8City.getCity()) {
+            Room8City.setActive(false);
+            Room8City.renderChip(document.getElementById('cityChip'), function() { applyFilters(); });
+            filtered = allJobs.filter(function(job) { return pass(job, false); });
+        }
         renderJobs(filtered);
     }
-    
-    function loadJobs() {
+
+    async function loadJobs() {
+        if (window.Room8Saves) { try { await Room8Saves.load(); } catch (e) {} }
+        if (window.Room8City) {
+            try { await Room8City.load(); } catch (e) {}
+            Room8City.renderChip(document.getElementById('cityChip'), function() { applyFilters(); });
+        }
         // Versuche echte Jobs zu laden
         sb.from('listings')
             .select('*, listing_photos(storage_path, photo_type, display_order)')

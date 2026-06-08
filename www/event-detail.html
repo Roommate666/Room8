@@ -48,6 +48,9 @@
         .description-section h3 { font-size: 1rem; font-weight: 700; color: #111827; margin: 0 0 0.5rem; }
         .description-text { color: #374151; font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; }
 
+        /* Detail-Seite: keine Bottom-Tab-Nav (verdeckte sonst die Anmelde-Leiste).
+           Navigation laeuft ueber Zurueck-Button im Hero + interest-bar. */
+        .bottom-nav { display: none !important; }
         .interest-bar {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: white; border-top: 1px solid #E5E7EB;
@@ -68,6 +71,35 @@
 
         .going-count { color: #6B7280; font-size: 0.85rem; margin-bottom: 0.5rem; }
 
+        .attendees-section { margin: 1rem 0 0.5rem; }
+        .attendees-title { font-size: 0.95rem; font-weight: 700; color: #374151; margin: 0 0 0.6rem; }
+        .attendees-list { display: flex; flex-wrap: wrap; gap: 0.85rem; }
+        .attendee {
+            display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+            width: 64px; text-decoration: none; color: #374151; cursor: pointer;
+        }
+        .attendee-avatar {
+            width: 48px; height: 48px; border-radius: 50%; object-fit: cover;
+            background: #E5E7EB; display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; font-weight: 700; color: #6B7280; overflow: hidden;
+        }
+        .attendee-name {
+            font-size: 0.72rem; text-align: center; line-height: 1.1;
+            max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .attendee-more {
+            display: flex; align-items: center; justify-content: center;
+            width: 48px; height: 48px; border-radius: 50%; background: #F3F4F6;
+            color: #6B7280; font-size: 0.8rem; font-weight: 700;
+        }
+        /* Speichern-Button im Hero (oben rechts, links neben Teilen) */
+        .detail-save {
+            position: absolute; top: calc(1rem + env(safe-area-inset-top)); right: 4rem;
+            background: rgba(255,255,255,0.95); border-radius: 50%;
+            width: 40px; height: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            color: #111827;
+        }
+
         .external-link {
             display: inline-block; margin-top: 0.5rem;
             color: #0F766E; text-decoration: none; font-size: 0.9rem; font-weight: 600;
@@ -76,12 +108,22 @@
         .loading { text-align: center; padding: 4rem 1rem; color: #9CA3AF; }
 
         /* Report Button + Modal */
-        .report-link {
-            display: inline-block; margin-top: 1rem; padding: 0.5rem 0;
-            color: #9CA3AF; font-size: 0.85rem; text-decoration: none;
-            background: none; border: none; cursor: pointer;
+        /* Melden = sekundaere, seltene Aktion: dezent, zentriert, am Ende des Contents.
+           Eigener Bereich ausserhalb von .detail-content, leicht abgesetzt vor der interest-bar. */
+        .report-footer {
+            text-align: center;
+            padding: 1.25rem 1.25rem 0.5rem;
+            background: white;
         }
-        .report-link:hover { color: #EF4444; }
+        .report-link {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            padding: 0.5rem 0.85rem; border-radius: 999px;
+            color: #9CA3AF; font-size: 0.8rem; font-weight: 500; text-decoration: none;
+            background: none; border: none; cursor: pointer;
+            transition: color 0.15s, background 0.15s;
+        }
+        .report-link svg { width: 14px; height: 14px; flex-shrink: 0; }
+        .report-link:hover { color: #EF4444; background: #FEF2F2; }
 
         .report-modal-bg {
             position: fixed; inset: 0; background: rgba(17,24,39,0.6);
@@ -135,6 +177,7 @@
             <button class="detail-share" onclick="shareEvent()" aria-label="Teilen">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
             </button>
+            <button id="eventSaveBtn" class="detail-save save-btn" type="button" aria-label="Speichern"></button>
         </div>
 
         <div class="detail-content">
@@ -151,13 +194,21 @@
             </div>
 
             <div class="going-count" id="goingCount"></div>
+            <div id="attendeesSection" class="attendees-section" style="display:none;">
+                <h3 class="attendees-title" data-i18n="event_attendees_title">Wer geht hin</h3>
+                <div id="attendeesList" class="attendees-list"></div>
+            </div>
             <div id="viewCountWrap" style="display:none; align-items:center; gap:4px; color:#6b7280; font-size:0.85rem; margin-top:0.25rem;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
                 <span id="viewCount">0</span>
             </div>
+        </div>
 
+        <!-- Melden: dezent, zentriert am Ende des Contents (vor der interest-bar) -->
+        <div class="report-footer">
             <button id="reportLink" class="report-link" onclick="openReportModal()" style="display:none;">
-                ⚠️ <span data-i18n="event_report_title">Event melden</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                <span data-i18n="event_report_title">Event melden</span>
             </button>
         </div>
     </div>
@@ -196,6 +247,7 @@
 <script src="translations.js"></script>
 <script src="navigation.js"></script>
 <script src="room8-utils.js"></script>
+<script src="room8-saves.js"></script>
 <script>
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     function escapeHtml(t) { if (t === null || t === undefined) return ''; return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -215,6 +267,7 @@
     }
 
     async function loadEvent() {
+        if (window.Room8Saves) { try { await Room8Saves.load(); } catch (e) {} }
         try {
             var userRes = await sb.auth.getUser();
             currentUserId = userRes.data.user ? userRes.data.user.id : null;
@@ -251,6 +304,11 @@
         document.getElementById('loadingState').style.display = 'none';
         document.getElementById('eventContent').style.display = 'block';
         document.getElementById('interestBar').style.display = 'flex';
+
+        // Speichern-Button verdrahten
+        if (window.Room8Saves) {
+            Room8Saves.wire(document.getElementById('eventSaveBtn'), 'event', eventId);
+        }
 
         // Hero-Bild
         var hero = document.getElementById('eventHero');
@@ -308,10 +366,11 @@
             }
         }
 
-        // Going Count
-        document.getElementById('goingCount').textContent = (ev.interest_count || 0) > 0
-            ? '👥 ' + ev.interest_count + (ev.interest_count === 1 ? ' Person geht hin' : ' Leute gehen hin')
-            : '';
+        // Interessenten-Zaehler (mit freien Plaetzen bei begrenztem Event)
+        updateGoingCount();
+
+        // Teilnehmer-Liste (wer ist dabei) -> Profil zum Abchecken
+        loadAttendees();
 
         // View-Count Anzeige
         var vcw = document.getElementById('viewCountWrap');
@@ -323,6 +382,50 @@
 
         // Report-Link anzeigen (wenn User eingeloggt + nicht eigenes Event)
         showReportLink();
+    }
+
+    // Teilnehmer laden (going) + als Avatar-Liste mit Link zum Profil rendern
+    async function loadAttendees() {
+        var section = document.getElementById('attendeesSection');
+        var list = document.getElementById('attendeesList');
+        if (!section || !list) return;
+        try {
+            var ires = await sb.from('event_interests')
+                .select('user_id')
+                .eq('event_id', eventId)
+                .eq('status', 'going')
+                .limit(50);
+            var ids = (ires.data || []).map(function (r) { return r.user_id; }).filter(Boolean);
+            if (ids.length === 0) { section.style.display = 'none'; return; }
+
+            var pres = await sb.from('public_profiles')
+                .select('id, username, full_name, avatar_url')
+                .in('id', ids);
+            var byId = {};
+            (pres.data || []).forEach(function (p) { byId[p.id] = p; });
+
+            var shown = ids.slice(0, 12);
+            var html = shown.map(function (uid) {
+                var p = byId[uid] || {};
+                var name = p.full_name || p.username || 'Student';
+                var first = String(name).split(' ')[0] || 'Student';
+                var initial = escapeHtml((first[0] || '?').toUpperCase());
+                var avatar = p.avatar_url
+                    ? '<span class="attendee-avatar"><img src="' + encodeURI(p.avatar_url) + '" alt="" width="48" height="48" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;"></span>'
+                    : '<span class="attendee-avatar">' + initial + '</span>';
+                return '<a class="attendee" href="public-profile.html?id=' + encodeURIComponent(uid) + '">' +
+                    avatar + '<span class="attendee-name">' + escapeHtml(first) + '</span></a>';
+            }).join('');
+
+            var total = (currentEvent && currentEvent.interest_count) ? currentEvent.interest_count : ids.length;
+            if (total > shown.length) {
+                html += '<div class="attendee"><span class="attendee-more">+' + (total - shown.length) + '</span></div>';
+            }
+            list.innerHTML = html;
+            section.style.display = 'block';
+        } catch (e) {
+            section.style.display = 'none';
+        }
     }
 
     function metaRow(icon, label, value) {
@@ -350,15 +453,35 @@
         return result;
     }
 
+    function evL(key, fb) { return (window.Room8i18n && Room8i18n.t(key)) || fb; }
+
     function updateGoingButton() {
         var btn = document.getElementById('goingBtn');
+        var max = currentEvent && currentEvent.max_participants;
+        var count = (currentEvent && currentEvent.interest_count) || 0;
         if (userIsGoing) {
-            btn.textContent = '✓ Du gehst hin';
+            btn.textContent = evL('event_attend_done', '✓ Angemeldet - wir melden uns');
             btn.classList.add('going');
-        } else {
-            btn.textContent = 'Ich gehe hin';
+            btn.disabled = false;
+        } else if (max && count >= max) {
+            // Begrenztes Event ausgebucht
+            btn.textContent = evL('event_attend_full', 'Ausgebucht');
             btn.classList.remove('going');
+            btn.disabled = true;
+        } else {
+            btn.textContent = evL('event_attend', 'Ich bin interessiert');
+            btn.classList.remove('going');
+            btn.disabled = false;
         }
+    }
+
+    function updateGoingCount() {
+        var c = (currentEvent && currentEvent.interest_count) || 0;
+        var max = currentEvent && currentEvent.max_participants;
+        var el = document.getElementById('goingCount');
+        if (c <= 0) { el.textContent = ''; return; }
+        var base = '👥 ' + c + (c === 1 ? ' Person interessiert' : ' Leute interessiert');
+        el.textContent = max ? (base + ' · ' + Math.max(0, max - c) + ' Plätze frei') : base;
     }
 
     async function toggleGoing() {
@@ -366,35 +489,43 @@
             navigateTo('login.html?redirect=' + encodeURIComponent(window.location.href));
             return;
         }
-
         var btn = document.getElementById('goingBtn');
-        btn.disabled = true;
+        var max = currentEvent && currentEvent.max_participants;
 
+        // Limit-Schutz beim Anmelden (begrenztes Event)
+        if (!userIsGoing && max && (currentEvent.interest_count || 0) >= max) {
+            if (window.Room8) Room8.showToast(evL('event_attend_full', 'Ausgebucht'), 'error');
+            return;
+        }
+
+        btn.disabled = true;
         try {
             if (userIsGoing) {
                 await sb.from('event_interests').delete()
                     .eq('event_id', eventId).eq('user_id', currentUserId);
                 userIsGoing = false;
                 if (currentEvent.interest_count > 0) currentEvent.interest_count -= 1;
+                if (window.Room8) Room8.showToast(evL('event_attend_left', 'Anmeldung zurückgenommen.'), 'info');
             } else {
-                await sb.from('event_interests').upsert({
+                var ins = await sb.from('event_interests').upsert({
                     event_id: eventId,
                     user_id: currentUserId,
                     status: 'going'
                 }, { onConflict: 'event_id,user_id' });
+                if (ins.error) throw ins.error;
                 userIsGoing = true;
                 currentEvent.interest_count = (currentEvent.interest_count || 0) + 1;
+                if (window.Room8) Room8.showToast(evL('event_attend_toast', 'Angemeldet! Wir melden uns per E-Mail bei dir.'), 'success');
             }
             updateGoingButton();
-            document.getElementById('goingCount').textContent = currentEvent.interest_count > 0
-                ? '👥 ' + currentEvent.interest_count + (currentEvent.interest_count === 1 ? ' Person geht hin' : ' Leute gehen hin')
-                : '';
+            updateGoingCount();
+            loadAttendees();
         } catch (e) {
             console.error('Going toggle:', e);
             if (window.Room8) Room8.showToast('Fehler. Bitte erneut versuchen.', 'error');
-        } finally {
             btn.disabled = false;
         }
+        // updateGoingButton() im try-Zweig setzt den disabled-State korrekt (z.B. "Ausgebucht").
     }
 
     function shareEvent() {
@@ -416,7 +547,7 @@
     function showReportLink() {
         // Report-Link nur zeigen wenn eingeloggt UND nicht eigenes Event
         if (currentUserId && currentEvent && currentEvent.organizer_id !== currentUserId) {
-            document.getElementById('reportLink').style.display = 'inline-block';
+            document.getElementById('reportLink').style.display = 'inline-flex';
         }
     }
 

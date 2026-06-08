@@ -1,0 +1,74 @@
+==========================================
+ROOM8 v2.1.9 — App Store Connect Texte
+==========================================
+
+
+─────────────────────────────────────────
+WERBETEXT (max. 170 Zeichen)
+─────────────────────────────────────────
+
+Neu: Coupons mit echten Studenten-Rabatten, Jobs & Events in deiner Stadt, smarter Match-Score für WG-Inserate. Finde deine WG schneller denn je.
+
+
+─────────────────────────────────────────
+NEUIGKEITEN IN DIESER VERSION (max. 4000 Zeichen)
+─────────────────────────────────────────
+
+Version 2.1.9 — das bisher größte Update für Room8.
+
+WAS IST NEU:
+
+• Coupons: Echte Studenten-Rabatte bei lokalen Partnern. Mit Karte, Öffnungszeiten und Einlöse-Code direkt aus der App.
+
+• Jobs für Studenten: Werkstudent, Minijob, Praktikum — Inserate aus deiner Stadt, übersichtlich gebündelt.
+
+• Events: Pub Quiz, Studi-Partys, Sport — finde Veranstaltungen in deiner Nähe und sieh, wer noch hingeht.
+
+• Smarter Match-Score: Jedes WG-Inserat zeigt dir auf einen Blick, wie gut es zu deinen Vorlieben passt — mit visueller Erklärung wenn du tippst.
+
+• Push-Benachrichtigungen verbessert: Du landest jetzt direkt im richtigen Inserat, Job oder Event — kein lästiges Suchen mehr.
+
+• Schöneres Design: Neue Detailansichten für Coupons, Jobs und Events. Sauber, schnell, ohne Schnickschnack.
+
+VERBESSERUNGEN:
+
+• Konto-Löschung jetzt direkt aus der App möglich (DSGVO-konform)
+• Cookie-Banner und Datenschutz nach EU-Standard
+• Stabilere Push-Benachrichtigungen auf iPhone und Android
+• Schnellere Ladezeiten bei Inseraten
+• Bessere Lesbarkeit bei langen Beschreibungstexten
+• Zahlreiche kleine Bugfixes
+
+Wir bauen Room8 weiter aus, damit du als Student schneller findest, was du brauchst — von der WG bis zum Coupon.
+
+Feedback gerne an: help@room8.club
+
+
+─────────────────────────────────────────
+DEMO-ACCOUNT FÜR APP REVIEW
+─────────────────────────────────────────
+
+E-Mail:    lisa.demo@room8.test
+Passwort:  Demo2026Lisa!
+
+
+─────────────────────────────────────────
+APP REVIEW NOTES (Englisch, falls gefragt)
+─────────────────────────────────────────
+
+Room8 is a student housing platform for finding shared apartments (WGs), student jobs, local events and student discount coupons in Germany.
+
+To test the full experience, please use the demo account above. The app includes:
+- Roommate matching with preference-based score
+- Coupons redeemable at local partner stores
+- Student job listings
+- Local event listings
+- In-app chat between users
+- Push notifications for new matches and messages
+
+All user-generated content can be reported and removed. The app is GDPR-compliant. Account deletion is available in-app under Settings.
+
+
+==========================================
+Stand: 12.05.2026 — Version 2.1.9 / Build 45
+==========================================
