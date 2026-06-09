@@ -335,7 +335,7 @@ const translations = {
 
  profile_feature_1: 'Benachrichtigungen nach deinen Wünschen anpassen',
 
- profile_feature_2: 'Suchen speichern und automatisch Alerts bekommen',
+ profile_feature_2: 'Coupons, Jobs & Events speichern',
 
  profile_feature_3: 'Updates für neue Inserate in deiner Stadt',
 
@@ -2136,7 +2136,7 @@ const translations = {
 
  profile_feature_1: 'Customize notifications to your preferences',
 
- profile_feature_2: 'Save searches and get automatic alerts',
+ profile_feature_2: 'Save coupons, jobs & events',
 
  profile_feature_3: 'Updates for new listings in your city',
 

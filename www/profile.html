@@ -210,6 +210,19 @@
             align-items: center;
             gap: 0.5rem;
         }
+        .activity-tabs {
+            display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem;
+            margin-bottom: 0.9rem; scrollbar-width: none;
+        }
+        .activity-tabs::-webkit-scrollbar { display: none; }
+        .activity-tab {
+            flex: 0 0 auto; padding: 0.5rem 0.95rem; border-radius: 999px;
+            border: 1.5px solid #E5E7EB; background: #fff; color: #6B7280;
+            font-weight: 700; font-size: 0.85rem; cursor: pointer; white-space: nowrap;
+            transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+        }
+        .activity-tab.active { background: #3B82F6; color: #fff; border-color: #3B82F6; }
+        .activity-panel { animation: blurFadeIn 0.3s ease-out both; }
         .activity-block { margin-bottom: 1rem; }
         .activity-block-head {
             display: flex; align-items: center; justify-content: space-between;
@@ -345,7 +358,7 @@
         </ul>
         <div class="feature-buttons">
             <a href="verify-options.html" class="feature-btn feature-btn-primary" data-i18n="profile_setup_now">Verifizieren</a>
-            <a href="saved-searches.html" data-feature="housing" class="feature-btn feature-btn-secondary" data-i18n="profile_save_search">Suchen</a>
+            <a href="coupons.html" class="feature-btn feature-btn-secondary">Rabatte entdecken</a>
         </div>
     </div>
 
@@ -383,45 +396,24 @@
         <section class="activity-section" id="activitySection" style="display:none;">
             <h3>📋 <span data-i18n="profile_activity_title">Meine Aktivität</span></h3>
 
-            <!-- Eingeloeste Coupons -->
-            <div class="activity-block">
-                <div class="activity-block-head">
-                    <h4>🎟️ <span data-i18n="profile_activity_coupons">Eingelöste Coupons</span></h4>
-                </div>
-                <div class="activity-list" id="activityCoupons">
-                    <div class="activity-loading" data-i18n="common_loading">Lade...</div>
-                </div>
+            <div class="activity-tabs" id="activityTabs">
+                <button class="activity-tab active" type="button" data-tab="coupons">🎟️ <span data-i18n="saves_tab_coupons">Coupons</span></button>
+                <button class="activity-tab" type="button" data-tab="jobs">💼 <span data-i18n="saves_tab_jobs">Jobs</span></button>
+                <button class="activity-tab" type="button" data-tab="events">📅 <span data-i18n="saves_tab_events">Events</span></button>
+                <button class="activity-tab" type="button" data-tab="saved">🔖 <span data-i18n="profile_activity_saved">Gespeichert</span></button>
             </div>
 
-            <!-- Beworbene Jobs -->
-            <div class="activity-block">
-                <div class="activity-block-head">
-                    <h4>💼 <span data-i18n="profile_activity_jobs">Beworbene Jobs</span></h4>
-                </div>
-                <div class="activity-list" id="activityJobs">
-                    <div class="activity-loading" data-i18n="common_loading">Lade...</div>
-                </div>
+            <div class="activity-panel" data-panel="coupons">
+                <div class="activity-list" id="activityCoupons"><div class="activity-loading" data-i18n="common_loading">Lade...</div></div>
             </div>
-
-            <!-- Events: Ich gehe hin -->
-            <div class="activity-block">
-                <div class="activity-block-head">
-                    <h4>📅 <span data-i18n="profile_activity_events">Meine Events</span></h4>
-                </div>
-                <div class="activity-list" id="activityEvents">
-                    <div class="activity-loading" data-i18n="common_loading">Lade...</div>
-                </div>
+            <div class="activity-panel" data-panel="jobs" style="display:none;">
+                <div class="activity-list" id="activityJobs"><div class="activity-loading" data-i18n="common_loading">Lade...</div></div>
             </div>
-
-            <!-- Gespeichertes -> Link zur saved.html -->
-            <div class="activity-block">
-                <div class="activity-block-head">
-                    <h4>🔖 <span data-i18n="profile_activity_saved">Gespeichert</span></h4>
-                </div>
-                <a href="saved.html" class="saved-cta">
-                    <span data-i18n="profile_activity_saved_cta">Gespeicherte Coupons, Jobs und Events ansehen</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </a>
+            <div class="activity-panel" data-panel="events" style="display:none;">
+                <div class="activity-list" id="activityEvents"><div class="activity-loading" data-i18n="common_loading">Lade...</div></div>
+            </div>
+            <div class="activity-panel" data-panel="saved" style="display:none;">
+                <div class="activity-list" id="activitySaved"><div class="activity-loading" data-i18n="common_loading">Lade...</div></div>
             </div>
         </section>
     </main>
@@ -508,6 +500,7 @@
             '</div></a>';
     }
 
+    var _savedLoaded = false;
     async function loadActivity(userId) {
         var section = document.getElementById('activitySection');
         if (section) section.style.display = 'block';
@@ -515,6 +508,56 @@
         loadRedeemedCoupons(userId);
         loadAppliedJobs(userId);
         loadGoingEvents(userId);
+
+        // Tab-Umschaltung
+        var tabs = document.querySelectorAll('.activity-tab');
+        tabs.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var tab = btn.getAttribute('data-tab');
+                tabs.forEach(function(b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                document.querySelectorAll('.activity-panel').forEach(function(p) {
+                    p.style.display = (p.getAttribute('data-panel') === tab) ? 'block' : 'none';
+                });
+                // Gespeichert lazy laden (erst beim ersten Oeffnen)
+                if (tab === 'saved' && !_savedLoaded) { _savedLoaded = true; loadSavedItems(userId); }
+            });
+        });
+    }
+
+    // Gespeicherte Items (saved_items -> coupons/listings/events)
+    async function loadSavedItems(userId) {
+        var el = document.getElementById('activitySaved');
+        if (!el) return;
+        try {
+            var res = await sb.from('saved_items').select('item_type, item_id').eq('user_id', userId);
+            var rows = res.data || [];
+            if (!rows.length) {
+                el.innerHTML = '<div class="activity-empty">' + escapeHtml(ti('saves_empty', 'Noch nichts gespeichert.')) + '</div>';
+                return;
+            }
+            var byType = { coupon: [], job: [], event: [] };
+            rows.forEach(function(r) { if (byType[r.item_type]) byType[r.item_type].push(r.item_id); });
+            var cards = [];
+            if (byType.coupon.length) {
+                var c = await sb.from('coupons').select('id,title,business_name,city').in('id', byType.coupon);
+                (c.data || []).forEach(function(x) { cards.push(activityCard('coupon-detail.html?id=' + encodeURIComponent(x.id), '🎟️', x.title || x.business_name || 'Coupon', [x.business_name, x.city].filter(Boolean).join(' · '))); });
+            }
+            if (byType.job.length) {
+                var j = await sb.from('listings').select('id,title,company_name,city').eq('type', 'job').in('id', byType.job);
+                (j.data || []).forEach(function(x) { cards.push(activityCard('job-detail.html?id=' + encodeURIComponent(x.id), '💼', x.title || 'Job', [x.company_name, x.city].filter(Boolean).join(' · '))); });
+            }
+            if (byType.event.length) {
+                var e = await sb.from('events').select('id,title,start_at,city').in('id', byType.event);
+                (e.data || []).forEach(function(x) {
+                    var d = x.start_at ? new Date(x.start_at).toLocaleDateString('de-DE', { day:'2-digit', month:'short' }) : '';
+                    cards.push(activityCard('event-detail.html?id=' + encodeURIComponent(x.id), '📅', x.title || 'Event', [d, x.city].filter(Boolean).join(' · ')));
+                });
+            }
+            el.innerHTML = cards.length ? cards.join('') : ('<div class="activity-empty">' + escapeHtml(ti('saves_empty', 'Noch nichts gespeichert.')) + '</div>');
+        } catch (e) {
+            el.innerHTML = '<div class="activity-empty">' + escapeHtml(ti('saves_empty', 'Noch nichts gespeichert.')) + '</div>';
+        }
     }
 
     // Beworbene Jobs (job_applications -> listings)
