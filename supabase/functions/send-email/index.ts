@@ -19,6 +19,36 @@ const corsHeaders = {
 
 const FROM_ADDRESS = 'Room8 <noreply@room8.club>'
 
+// Jugendliches, buntes Room8-Mail-Template. Bettet den uebergebenen HTML-Body
+// in einen Brand-Wrapper (bunter Gradient-Header, weisse Card, freundlicher Footer).
+// Aufrufer koennen mit skipWrap:true das rohe HTML behalten.
+function wrapEmail(innerHtml: string, preheader?: string): string {
+  const pre = preheader ? String(preheader).slice(0, 120) : 'Deine Studenten-App für Rabatte, Jobs & Events.'
+  return `<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#F4F6FB;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,sans-serif;">
+<span style="display:none;max-height:0;overflow:hidden;opacity:0;">${pre}</span>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F6FB;padding:24px 12px;"><tr><td align="center">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 8px 30px rgba(30,41,59,0.08);">
+    <tr><td style="background:linear-gradient(120deg,#3B82F6 0%,#10B981 38%,#F59E0B 70%,#EC4899 100%);padding:30px 28px;text-align:center;">
+      <div style="font-size:30px;font-weight:800;letter-spacing:-0.5px;color:#ffffff;">Room<span style="color:#FFE08A;">8</span></div>
+      <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.92);margin-top:4px;">Die App von Studenten, für Studenten 🎓</div>
+    </td></tr>
+    <tr><td style="padding:32px 28px 8px;color:#1F2937;font-size:16px;line-height:1.6;">
+      ${innerHtml}
+    </td></tr>
+    <tr><td style="padding:20px 28px 28px;">
+      <div style="border-top:1px solid #EEF0F3;padding-top:18px;text-align:center;">
+        <div style="font-size:13px;color:#6B7280;line-height:1.5;">Studentenrabatte ☕ · Nebenjobs 💼 · Events 🎉<br>Alles für deine Unistadt — kostenlos &amp; nur für verifizierte Studenten.</div>
+        <div style="font-size:12px;color:#9CA3AF;margin-top:14px;">Room8 · <a href="https://www.room8.club" style="color:#3B82F6;text-decoration:none;">room8.club</a></div>
+      </div>
+    </td></tr>
+  </table>
+  <div style="font-size:11px;color:#B6BCC6;margin-top:16px;">Du bekommst diese Mail, weil du bei Room8 dabei bist.</div>
+</td></tr></table>
+</body></html>`
+}
+
 // Best-effort Logging in notification_logs.
 async function logNotification(
   supabase: SupabaseClient,
@@ -88,7 +118,10 @@ serve(async (req) => {
     const parsed = await req.json()
     to = parsed.to ?? null
     subject = parsed.subject ?? null
+    // HTML in das bunte Room8-Brand-Template einbetten (ausser skipWrap:true)
     const html = parsed.html
+      ? (parsed.skipWrap === true ? parsed.html : wrapEmail(parsed.html, parsed.subject))
+      : parsed.html
     const text = parsed.text
     const replyTo = parsed.replyTo
     userId = parsed.userId ?? null
