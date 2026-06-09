@@ -177,6 +177,55 @@
             font-size: 0.85rem;
             color: #92400E;
         }
+        /* Zurueck/Schliessen oben links im Header */
+        .partner-close {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            border: none;
+            background: rgba(255,255,255,0.18);
+            color: #fff;
+            font-size: 1.25rem;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .partner-close:hover { background: rgba(255,255,255,0.32); }
+        .partner-header { position: relative; }
+        /* Success-Button "Zurueck zur App" */
+        .success-back-btn {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 0.9rem 2rem;
+            background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+            color: white;
+            border: none;
+            border-radius: 999px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .success-back-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(245,158,11,0.4); }
+        /* Vorschau vor dem Einreichen */
+        #previewWrap { display: none; }
+        #previewWrap h3 { font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0 0 1rem; }
+        .preview-list { list-style: none; padding: 0; margin: 0 0 1.5rem; }
+        .preview-list li { padding: 0.65rem 0; border-bottom: 1px solid #F3F4F6; font-size: 0.95rem; color: #374151; }
+        .preview-list li:last-child { border-bottom: none; }
+        .preview-list .pv-label { display: block; font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.15rem; }
+        .preview-list .pv-value { white-space: pre-wrap; word-break: break-word; }
+        #previewNav { display: flex; gap: 0.75rem; }
+        #previewNav button { flex: 1; padding: 0.95rem; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; border: none; }
+        #previewEdit { background: #F3F4F6; color: #374151; }
+        #previewSubmit { background: #10B981; color: #fff; }
+        #previewSubmit:disabled { opacity: 0.6; cursor: not-allowed; }
         /* Barrierefreiheit */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
@@ -187,6 +236,7 @@
 
 <div class="partner-container">
     <div class="partner-header">
+        <button type="button" class="partner-close" aria-label="Zurück zur App" title="Zurück zur App" onclick="window.location.href='coupons.html'">←</button>
         <div class="partner-logo">🎟️</div>
         <h1>Studentenrabatt einreichen</h1>
         <p>Biete exklusive Rabatte für tausende Studenten</p>
@@ -211,7 +261,7 @@
                 <div id="wizardNav">
                     <button type="button" id="wizardBack" onclick="Wizard.back()">Zurück</button>
                     <button type="button" id="wizardNext" onclick="Wizard.next()">Weiter</button>
-                    <button type="submit" id="wizardPublish" style="display:none;" onclick="return Wizard.tryPublish(event)">Coupon einreichen</button>
+                    <button type="button" id="wizardPublish" style="display:none;" onclick="showPreview()">Weiter zur Vorschau</button>
                 </div>
             </div>
 
@@ -349,12 +399,23 @@
             <button type="submit" class="submit-btn" id="submitBtn">🎟️ Coupon einreichen</button>
 
             </div><!-- /oldFormBody -->
+
+            <!-- ===== VORSCHAU ===== -->
+            <div id="previewWrap">
+                <h3>So sieht dein Eintrag aus:</h3>
+                <ul class="preview-list" id="previewList"></ul>
+                <div id="previewNav">
+                    <button type="button" id="previewEdit" onclick="hidePreview()">Bearbeiten</button>
+                    <button type="submit" id="previewSubmit">Jetzt einreichen</button>
+                </div>
+            </div>
         </form>
 
         <div class="success-message" id="successMessage">
             <div class="success-icon">🎉</div>
             <h2>Vielen Dank!</h2>
             <p>Dein Coupon wurde erfolgreich eingereicht und wird in Kürze geprüft. Du erhältst eine Bestätigung per E-Mail sobald er live ist.</p>
+            <a href="coupons.html" class="success-back-btn" onclick="window.location.href='coupons.html'; return false;">Zurück zur App</a>
         </div>
     </div>
 </div>
@@ -461,6 +522,74 @@
         return path;
     }
 
+    // ===== Vorschau-Logik =====
+    // Klinkt sich zwischen "letzter Wizard-Schritt" und "Insert" ein:
+    // wizardPublish ruft showPreview() -> validiert letzten Schritt (Wizard.tryPublish),
+    // blendet den Wizard aus + die Vorschau ein. "Jetzt einreichen" ist ein echter
+    // type=submit-Button und loest den unveraenderten Form-Submit (Insert) aus.
+    function previewFieldValue(id) {
+        var node = document.getElementById(id);
+        if (!node) return '';
+        if (node.type === 'file') {
+            var f = node.files && node.files[0];
+            return f ? f.name : '';
+        }
+        return String(node.value || '').trim();
+    }
+    function buildPreviewRows() {
+        // [Label, Feld-Id] — leere Felder werden weggelassen
+        return [
+            ['Titel des Angebots', 'title'],
+            ['Geschäft', 'businessName'],
+            ['Kategorie', 'category'],
+            ['Rabatt-Wert', 'discountValue'],
+            ['Beschreibung', 'description'],
+            ['Bedingungen', 'terms'],
+            ['Gültig ab', 'validFrom'],
+            ['Gültig bis', 'validUntil'],
+            ['Adresse', 'address'],
+            ['Stadt', 'city'],
+            ['PLZ', 'zip'],
+            ['Kontakt E-Mail', 'contactEmail'],
+            ['Telefon', 'phone'],
+            ['Website', 'website'],
+            ['Logo', 'logoImage'],
+            ['Cover-Bild', 'coverImage']
+        ];
+    }
+    function renderPreview() {
+        var ul = document.getElementById('previewList');
+        ul.innerHTML = '';
+        buildPreviewRows().forEach(function (row) {
+            var val = previewFieldValue(row[1]);
+            if (!val) return;
+            var li = document.createElement('li');
+            var lbl = document.createElement('span');
+            lbl.className = 'pv-label';
+            lbl.textContent = row[0];
+            var v = document.createElement('span');
+            v.className = 'pv-value';
+            v.textContent = val;
+            li.appendChild(lbl); li.appendChild(v);
+            ul.appendChild(li);
+        });
+    }
+    window.showPreview = function () {
+        // letzten Schritt validieren (gleiche Logik wie der alte Publish-Button)
+        if (window.Wizard && Wizard.isOn() && !Wizard.tryPublish()) return;
+        renderPreview();
+        var w = document.getElementById('wizardWrap');
+        if (w) w.style.display = 'none';
+        document.getElementById('previewWrap').style.display = 'block';
+        document.getElementById('previewWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    window.hidePreview = function () {
+        document.getElementById('previewWrap').style.display = 'none';
+        var w = document.getElementById('wizardWrap');
+        if (w) w.style.display = 'block';
+        w.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
     document.getElementById('couponForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         if (window.Wizard && Wizard.isOn()) {
@@ -475,6 +604,8 @@
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
         btn.innerHTML = '<span class="btn-spin"></span>Wird gesendet...';
+        var pvBtn = document.getElementById('previewSubmit');
+        if (pvBtn) { pvBtn.disabled = true; pvBtn.textContent = 'Wird gesendet...'; }
 
         try {
             var logoFile = document.getElementById('logoImage').files[0];
@@ -520,6 +651,7 @@
             Room8UI.error('Fehler beim Einreichen: ' + err.message);
             btn.disabled = false;
             btn.textContent = '🎟️ Coupon einreichen';
+            if (pvBtn) { pvBtn.disabled = false; pvBtn.textContent = 'Jetzt einreichen'; }
         }
     });
 
