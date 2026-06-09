@@ -283,6 +283,28 @@
             display: flex; justify-content: flex-end; gap: 0.75rem;
         }
         .approve-modal-foot .btn-mini { padding: 0.7rem 1.5rem; font-size: 0.9rem; }
+
+        /* Cover-Bild-Bereich im Approve-Editor */
+        .approve-cover-box {
+            border: 1px solid #E5E7EB; border-radius: 12px; padding: 0.9rem;
+            background: #F9FAFB; display: flex; flex-direction: column; gap: 0.6rem;
+        }
+        .approve-cover-box label {
+            font-size: 0.75rem; font-weight: 600; color: #6b7280;
+            text-transform: uppercase; letter-spacing: 0.03em; margin: 0;
+        }
+        .approve-cover-current {
+            width: 100%; max-height: 150px; object-fit: cover;
+            border-radius: 10px; border: 1px solid #E5E7EB; background: #F3F4F6; display: block;
+        }
+        .approve-cover-empty {
+            font-size: 0.85rem; color: #9CA3AF; padding: 0.75rem; text-align: center;
+            border: 1px dashed #D1D5DB; border-radius: 10px;
+        }
+        .approve-cover-box input[type="file"] { font-size: 0.85rem; }
+        .approve-cover-status { font-size: 0.8rem; color: #6b7280; min-height: 1rem; }
+        .approve-cover-status.uploading { color: #1E40AF; }
+        .approve-cover-status.done { color: #065F46; }
     </style>
 </head>
 <body>
@@ -934,7 +956,7 @@
         const { data: submissions, error } = await sb
             .from('partner_submissions')
             .select('*')
-            .eq('status', 'pending')
+            .in('status', ['pending', 'changes_requested'])
             .order('submitted_at', { ascending: false });
 
         if (error) {
@@ -1033,6 +1055,7 @@
                     <div class="action-bar">
                         <a href="mailto:${escapeHtml(s.contact_email)}?subject=Room8%20Partner%20-%20Ihre%20Einreichung" class="btn-mini" style="background:#10B981;color:white;">✉️ Kontaktieren</a>
                         <button class="btn-mini btn-green" onclick="approveSubmission('${s.id}', '${s.submission_type}')" style="padding: 0.75rem 1.5rem;">✅ ÜBERNEHMEN</button>
+                        <button class="btn-mini btn-yellow" onclick="requestChanges('${s.id}')" style="padding: 0.75rem 1.5rem;">📝 NACHBESSERN</button>
                         <button class="btn-mini btn-red" onclick="rejectSubmission('${s.id}')" style="padding: 0.75rem 1.5rem;">❌ ABLEHNEN</button>
                     </div>
                 </div>
@@ -1184,7 +1207,22 @@
             return `<div class="approve-field"><label>${f.label}</label>${inputHtml}</div>`;
         }).join('');
 
-        document.getElementById('approveFields').innerHTML = fieldsHtml;
+        // Cover-Bild-Bereich (unter den Textfeldern): aktuelles Bild + Replace-Upload
+        const coverUrl = submission.cover_image_path
+            ? sb.storage.from('event-images').getPublicUrl(submission.cover_image_path).data.publicUrl
+            : null;
+        const coverImgHtml = coverUrl
+            ? `<img id="appCoverCurrent" class="approve-cover-current" src="${coverUrl}" alt="Cover-Bild">`
+            : `<div id="appCoverCurrent" class="approve-cover-empty">Kein Cover-Bild vorhanden</div>`;
+        const coverHtml = `
+            <div class="approve-cover-box">
+                <label>Cover-Bild</label>
+                ${coverImgHtml}
+                <input type="file" id="appCoverInput" accept="image/*">
+                <div id="appCoverStatus" class="approve-cover-status"></div>
+            </div>`;
+
+        document.getElementById('approveFields').innerHTML = fieldsHtml + coverHtml;
         // Live-Vorschau bei jeder Eingabe
         fields.forEach(f => {
             const el = document.getElementById('appf_' + f.key);
@@ -1193,9 +1231,69 @@
                 el.addEventListener('change', renderApprovePreview);
             }
         });
+        // Cover-Upload-Handler
+        const coverInput = document.getElementById('appCoverInput');
+        if (coverInput) coverInput.addEventListener('change', handleCoverUpload);
         renderApprovePreview();
         document.getElementById('approveOverlay').classList.add('open');
     };
+
+    // Laedt ein neues Cover-Bild in den Bucket 'event-images' hoch und setzt
+    // den neuen Pfad in approveCtx.submission.cover_image_path. publishSubmission
+    // liest cover_image_path aus der submission -> neuer Pfad wird automatisch genutzt.
+    async function handleCoverUpload(ev) {
+        if (!approveCtx) return;
+        const input = ev.target;
+        const file = input.files && input.files[0];
+        if (!file) return;
+
+        const statusEl = document.getElementById('appCoverStatus');
+        const setStatus = (txt, cls) => {
+            if (!statusEl) return;
+            statusEl.textContent = txt;
+            statusEl.className = 'approve-cover-status' + (cls ? ' ' + cls : '');
+        };
+
+        input.disabled = true;
+        setStatus('Lade hoch...', 'uploading');
+
+        try {
+            const ext = file.type === 'image/png' ? 'png' : 'jpg';
+            const path = `admin-uploads/${crypto.randomUUID()}/cover-${Date.now()}.${ext}`;
+            const { error: upErr } = await sb.storage
+                .from('event-images')
+                .upload(path, file, { upsert: true, contentType: file.type || undefined });
+            if (upErr) throw upErr;
+
+            // Neuen Pfad in die aktive submission schreiben -> publishSubmission nimmt ihn
+            approveCtx.submission.cover_image_path = path;
+
+            // Aktuelles Bild im Editor + Live-Vorschau aktualisieren
+            const newUrl = sb.storage.from('event-images').getPublicUrl(path).data.publicUrl;
+            const curEl = document.getElementById('appCoverCurrent');
+            if (curEl) {
+                if (curEl.tagName === 'IMG') {
+                    curEl.src = newUrl;
+                } else {
+                    const img = document.createElement('img');
+                    img.id = 'appCoverCurrent';
+                    img.className = 'approve-cover-current';
+                    img.alt = 'Cover-Bild';
+                    img.src = newUrl;
+                    curEl.replaceWith(img);
+                }
+            }
+            renderApprovePreview();
+            setStatus('Neues Bild hochgeladen.', 'done');
+        } catch (err) {
+            console.error(err);
+            input.value = '';
+            setStatus('', '');
+            Room8UI.error('Bild-Upload fehlgeschlagen: ' + (err.message || JSON.stringify(err)));
+        } finally {
+            input.disabled = false;
+        }
+    }
 
     // Schritt 2: Veroeffentlichen-Button -> Insert mit bearbeiteten Werten
     window.confirmPublishSubmission = async () => {
@@ -1389,6 +1487,33 @@
         Room8UI.success("Einreichung abgelehnt.");
         loadSubmissions();
         loadStats();
+    };
+
+    // Nachbesserung anfordern: setzt status='changes_requested' + admin_notes.
+    // DB-Trigger trg_notify_partner_submission_review verschickt die
+    // Benachrichtigung/Mail automatisch (hier NICHT selbst mailen).
+    window.requestChanges = async (id) => {
+        const message = await Room8UI.prompt("Was soll der Einreicher ändern? (z.B. 'Bilder sind zu klein, bitte in höherer Auflösung schicken')");
+        if (message === null) return; // Abgebrochen
+
+        const { data: { user } } = await sb.auth.getUser();
+
+        const { error } = await sb.from('partner_submissions').update({
+            status: 'changes_requested',
+            admin_notes: message,
+            reviewed_at: new Date().toISOString(),
+            reviewed_by: user.id
+        }).eq('id', id);
+
+        if (error) {
+            console.error(error);
+            Room8UI.error("Fehler: " + (error.message || JSON.stringify(error)));
+            return;
+        }
+
+        Room8UI.success("Nachbesserung angefordert - Einreicher wurde benachrichtigt.");
+        loadSubmissions();
+        if (typeof loadStats === 'function') loadStats();
     };
 
     // --- USERS ---
