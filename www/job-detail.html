@@ -173,6 +173,36 @@
     </div>
 </div>
 
+<!-- Bewerbungs-Modal -->
+<div id="applyOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1000; align-items:flex-end; justify-content:center;">
+  <div style="background:#fff; width:100%; max-width:560px; max-height:92vh; overflow-y:auto; border-radius:20px 20px 0 0; padding:1.5rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom));">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.25rem;">
+      <h2 style="margin:0; font-size:1.25rem;">Jetzt bewerben</h2>
+      <button id="applyClose" style="background:none; border:none; font-size:1.6rem; color:#9ca3af; cursor:pointer; line-height:1;">&times;</button>
+    </div>
+    <p id="applyJobName" style="margin:0 0 1rem; color:#6b7280; font-size:0.9rem;"></p>
+
+    <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.25rem;">Name *</label>
+    <input id="appName" type="text" placeholder="Vor- und Nachname" style="width:100%; padding:0.75rem; border:1px solid #e5e7eb; border-radius:12px; margin-bottom:0.85rem; font-size:1rem;">
+
+    <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.25rem;">E-Mail *</label>
+    <input id="appEmail" type="email" placeholder="dein@email.de" style="width:100%; padding:0.75rem; border:1px solid #e5e7eb; border-radius:12px; margin-bottom:0.85rem; font-size:1rem;">
+
+    <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.25rem;">Telefon <small style="color:#9ca3af;">(optional)</small></label>
+    <input id="appPhone" type="tel" placeholder="0151 ..." style="width:100%; padding:0.75rem; border:1px solid #e5e7eb; border-radius:12px; margin-bottom:0.85rem; font-size:1rem;">
+
+    <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.25rem;">Anschreiben <small style="color:#9ca3af;">(optional)</small></label>
+    <textarea id="appLetter" rows="4" placeholder="Warum passt du zu dieser Stelle?" style="width:100%; padding:0.75rem; border:1px solid #e5e7eb; border-radius:12px; margin-bottom:0.85rem; font-size:1rem; resize:vertical;"></textarea>
+
+    <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.25rem;">Lebenslauf <small style="color:#9ca3af;">(PDF, optional, max 5 MB)</small></label>
+    <input id="appResume" type="file" accept="application/pdf" style="width:100%; margin-bottom:0.35rem; font-size:0.9rem;">
+    <div id="appResumeName" style="font-size:0.8rem; color:#047857; margin-bottom:0.85rem;"></div>
+
+    <button id="appSubmit" class="apply-btn" style="width:100%;">Bewerbung absenden</button>
+    <p style="font-size:0.75rem; color:#9ca3af; text-align:center; margin-top:0.6rem;">Deine Daten gehen nur an den Anbieter dieser Stelle.</p>
+  </div>
+</div>
+
 <script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
 <script src="translations.js"></script>
@@ -252,20 +282,73 @@
                 document.getElementById('benList').innerHTML = job.benefits.map(i => `<li>${i}</li>`).join('');
             }
 
-            // Apply Button — Klick zaehlen BEFORE oeffnen (kein await, blockt nicht)
-            document.getElementById('applyBtn').onclick = () => {
-                sb.rpc('increment_listing_apply', { p_listing_id: id }).then(function(){}, function(){});
-                // Bewerbung pro User merken (fuer Profil "Beworbene Jobs"); eingeloggt + nur einmal
-                sb.auth.getSession().then(function(s){
-                    var uid = s && s.data && s.data.session ? s.data.session.user.id : null;
-                    if (uid) sb.from('job_applications').upsert({ user_id: uid, listing_id: id }, { onConflict: 'user_id,listing_id', ignoreDuplicates: true }).then(function(){}, function(){});
-                }, function(){});
-                if (job.application_url) window.open(job.application_url, '_blank');
-                else if (job.application_email) window.location.href = `mailto:${job.application_email}`;
-                else Room8UI.info("Bitte direkt beim Anbieter melden.");
-            };
+            // Apply Button -> In-App-Bewerbungsformular oeffnen
+            document.getElementById('applyBtn').onclick = openApply;
+            document.getElementById('applyJobName').textContent = job.title + (job.company_name ? ' bei ' + job.company_name : '');
         }
     }
+
+    // ===== Bewerbungs-Flow =====
+    var overlay = document.getElementById('applyOverlay');
+    function closeApply() { overlay.style.display = 'none'; }
+    document.getElementById('applyClose').onclick = closeApply;
+    overlay.onclick = function (e) { if (e.target === overlay) closeApply(); };
+    document.getElementById('appResume').onchange = function () {
+        var f = this.files[0];
+        document.getElementById('appResumeName').textContent = f ? ('Ausgewaehlt: ' + f.name) : '';
+    };
+
+    async function openApply() {
+        var ses = await sb.auth.getSession();
+        var user = ses && ses.data && ses.data.session ? ses.data.session.user : null;
+        if (!user) { Room8UI.info('Bitte melde dich an, um dich zu bewerben.'); setTimeout(function(){ window.location.href = 'login.html'; }, 1200); return; }
+        // Profil vorbefuellen (Name aus my_profile, Email aus Auth)
+        try {
+            var p = await sb.from('my_profile').select('full_name').maybeSingle();
+            if (p && p.data && p.data.full_name && !document.getElementById('appName').value) document.getElementById('appName').value = p.data.full_name;
+        } catch (e) {}
+        if (!document.getElementById('appEmail').value) document.getElementById('appEmail').value = user.email || '';
+        overlay.style.display = 'flex';
+    }
+
+    document.getElementById('appSubmit').onclick = async function () {
+        var btn = this;
+        var name = document.getElementById('appName').value.trim();
+        var email = document.getElementById('appEmail').value.trim();
+        var phone = document.getElementById('appPhone').value.trim();
+        var letter = document.getElementById('appLetter').value.trim();
+        var file = document.getElementById('appResume').files[0];
+        if (!name || !email) { Room8UI.warning('Bitte Name und E-Mail ausfuellen.'); return; }
+        if (file && file.size > 5 * 1024 * 1024) { Room8UI.warning('Lebenslauf max 5 MB.'); return; }
+
+        btn.disabled = true; btn.textContent = 'Wird gesendet...';
+        try {
+            var ses = await sb.auth.getSession();
+            var uid = ses.data.session.user.id;
+            var resumePath = null;
+            if (file) {
+                resumePath = uid + '/cv_' + Date.now() + '.pdf';
+                var up = await sb.storage.from('resumes').upload(resumePath, file, { contentType: 'application/pdf', upsert: true });
+                if (up.error) throw up.error;
+            }
+            // apply-Counter (fire-and-forget)
+            sb.rpc('increment_listing_apply', { p_listing_id: id }).then(function(){}, function(){});
+            var { error } = await sb.from('job_applications').upsert({
+                user_id: uid, listing_id: id,
+                applicant_name: name, applicant_email: email,
+                applicant_phone: phone || null, cover_letter: letter || null,
+                resume_path: resumePath
+            }, { onConflict: 'user_id,listing_id' });
+            if (error) throw error;
+            closeApply();
+            Room8UI.success('Bewerbung gesendet! Der Anbieter meldet sich bei dir.');
+        } catch (e) {
+            Room8UI.warning('Fehler: ' + (e.message || e));
+        } finally {
+            btn.disabled = false; btn.textContent = 'Bewerbung absenden';
+        }
+    };
+
     load();
 </script>
 <script src="notificationBell.js"></script>

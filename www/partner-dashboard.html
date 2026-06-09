@@ -197,6 +197,7 @@
     })();
 
     var _pdUserId = null;
+    var _appsByJob = {};
     var _pdRefreshing = false;
     async function pdRefresh() {
         if (!_pdUserId || _pdRefreshing || document.visibilityState === 'hidden') return;
@@ -258,19 +259,37 @@
         // Listings (jobs, gegenstand, wohnung) wo owner = user — view_count direkt
         // mitziehen, das wird in listing-details.html bei jedem Open hochgesetzt.
         var listRes = await sb.from('listings').select('id, type, title, city, is_active, view_count, apply_clicks').eq('owner_id', userId).eq('is_active', true).limit(20);
-        (listRes.data || []).forEach(function(l) {
+        var listings = listRes.data || [];
+
+        // Bewerbungen fuer alle eigenen Jobs in EINEM Query laden + nach Job gruppieren
+        _appsByJob = {};
+        var jobIds = listings.filter(function(l){ return l.type === 'job'; }).map(function(l){ return l.id; });
+        if (jobIds.length) {
+            var appRes = await sb.from('job_applications')
+                .select('id, listing_id, applicant_name, applicant_email, applicant_phone, cover_letter, resume_path, applied_at')
+                .in('listing_id', jobIds)
+                .order('applied_at', { ascending: false });
+            (appRes.data || []).forEach(function(a) {
+                (_appsByJob[a.listing_id] = _appsByJob[a.listing_id] || []).push(a);
+            });
+        }
+
+        listings.forEach(function(l) {
             var icon = l.type === 'job' ? '💼' : (l.type === 'wohnung' ? '🏠' : '📦');
             var v = l.view_count || 0;
             totalViews += v;
             var stats = [{ icon: '👁', value: v, label: 'Aufrufe' }];
+            var appsLink = null;
             if (l.type === 'job') {
-                var ac = l.apply_clicks || 0;
-                stats.push({ icon: '✉️', value: ac, label: ti('pd_stat_apply_clicks', 'Bewerber-Klicks') });
+                var nApps = (_appsByJob[l.id] || []).length;
+                stats.push({ icon: '📨', value: nApps, label: 'Bewerbungen' });
+                if (nApps > 0) appsLink = l.id;
             }
             items.push({
                 icon: icon, title: l.title, city: l.city, id: l.id,
                 type: 'listing-' + l.type,
-                stats: stats
+                stats: stats,
+                appsLink: appsLink
             });
         });
         // Coupons — current_redemptions (Klicks auf "Code kopieren") + max_redemptions
@@ -325,23 +344,86 @@
             var scanHtml = it.scanLink
                 ? '<a href="' + it.scanLink + '" class="pd-item-scan">' + Room8.escapeHtml(ti('pd_item_scan', '📷 Scannen')) + '</a>'
                 : '';
+            var appsHtml = it.appsLink
+                ? '<a href="#" class="pd-item-scan" onclick="openApps(\'' + it.appsLink + '\'); return false;">📨 Bewerbungen ansehen</a>'
+                : '';
             return '<div class="pd-item">' +
                 '<div class="meta">' +
                     '<div class="title">' + it.icon + ' ' + Room8.escapeHtml(it.title || '-') + '</div>' +
                     '<div class="sub">' + Room8.escapeHtml(it.city || '') + '</div>' +
                     statsHtml +
                     scanHtml +
+                    appsHtml +
                 '</div>' +
                 '<div class="status status-active">🟢 Live</div>' +
             '</div>';
         }).join('');
     }
 
+    // ===== Bewerbungen-Ansicht =====
+    function escAttr(s) { return Room8.escapeHtml(String(s || '')); }
+    window.openApps = function (jobId) {
+        var apps = _appsByJob[jobId] || [];
+        var ov = document.getElementById('appsOverlay');
+        var body = document.getElementById('appsBody');
+        if (!apps.length) { body.innerHTML = '<div class="pd-empty">Noch keine Bewerbungen</div>'; }
+        else {
+            body.innerHTML = apps.map(function(a) {
+                var d = a.applied_at ? new Date(a.applied_at).toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric' }) : '';
+                var cv = a.resume_path
+                    ? '<button class="pd-cv-btn" onclick="openResume(\'' + a.id + '\', this)">📎 Lebenslauf oeffnen</button>'
+                    : '<span style="color:#9ca3af; font-size:0.85rem;">Kein Lebenslauf</span>';
+                var letter = a.cover_letter
+                    ? '<div style="margin-top:0.5rem; padding:0.6rem 0.75rem; background:#f9fafb; border-left:3px solid #f59e0b; border-radius:8px; white-space:pre-wrap; font-size:0.9rem;">' + Room8.escapeHtml(a.cover_letter) + '</div>'
+                    : '';
+                return '<div style="padding:0.9rem 0; border-bottom:1px solid #f3f4f6;">' +
+                    '<div style="font-weight:700;">' + Room8.escapeHtml(a.applicant_name || 'Bewerber') + '</div>' +
+                    '<div style="font-size:0.85rem; color:#6b7280; margin:0.15rem 0;">' +
+                        '<a href="mailto:' + escAttr(a.applicant_email) + '">' + Room8.escapeHtml(a.applicant_email || '') + '</a>' +
+                        (a.applicant_phone ? ' &middot; <a href="tel:' + escAttr(a.applicant_phone) + '">' + Room8.escapeHtml(a.applicant_phone) + '</a>' : '') +
+                        (d ? ' &middot; ' + d : '') +
+                    '</div>' +
+                    letter +
+                    '<div style="margin-top:0.6rem;">' + cv + '</div>' +
+                '</div>';
+            }).join('');
+        }
+        ov.style.display = 'flex';
+    };
+    window.openResume = async function (appId, btn) {
+        var orig = btn.textContent;
+        btn.disabled = true; btn.textContent = 'Laedt...';
+        try {
+            var { data, error } = await sb.functions.invoke('get-resume-url', { body: { application_id: appId } });
+            if (error || !data || !data.signedUrl) throw new Error((error && error.message) || 'Nicht verfuegbar');
+            window.open(data.signedUrl, '_blank');
+        } catch (e) {
+            Room8UI.warning('Lebenslauf konnte nicht geladen werden.');
+        } finally {
+            btn.disabled = false; btn.textContent = orig;
+        }
+    };
+
     async function logout() {
         await sb.auth.signOut();
         window.location.href = 'login.html';
     }
 </script>
+
+<!-- Bewerbungen-Modal -->
+<div id="appsOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1000; align-items:flex-end; justify-content:center;">
+  <div style="background:#fff; width:100%; max-width:560px; max-height:90vh; overflow-y:auto; border-radius:20px 20px 0 0; padding:1.5rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom));">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+      <h2 style="margin:0; font-size:1.25rem;">📨 Bewerbungen</h2>
+      <button onclick="document.getElementById('appsOverlay').style.display='none'" style="background:none; border:none; font-size:1.6rem; color:#9ca3af; cursor:pointer; line-height:1;">&times;</button>
+    </div>
+    <div id="appsBody"></div>
+  </div>
+</div>
+<style>
+  .pd-cv-btn { background:#f59e0b; color:#fff; border:none; padding:0.5rem 0.9rem; border-radius:10px; font-size:0.85rem; font-weight:600; cursor:pointer; }
+  .pd-cv-btn:disabled { opacity:0.6; }
+</style>
 
 </body>
 </html>
