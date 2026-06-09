@@ -456,7 +456,7 @@ var Room8 = (function() {
 
         var transform = {
             width: actualWidth,
-            quality: opts.quality || 70,
+            quality: opts.quality || 80,
             resize: opts.resize || 'cover'
         };
         if (opts.height) transform.height = opts.skipDpr ? opts.height : Math.round(opts.height * dprCapped);

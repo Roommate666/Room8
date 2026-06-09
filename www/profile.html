@@ -615,7 +615,7 @@
                 // Event-Cover als verkleinertes Thumbnail statt Kalender-Emoji
                 var icon = '📅';
                 if (ev.cover_image_path && window.Room8 && Room8.getOptimizedImageUrl) {
-                    var url = Room8.getOptimizedImageUrl('event-images', ev.cover_image_path, { width: 120, height: 120, quality: 70 });
+                    var url = Room8.getOptimizedImageUrl('event-images', ev.cover_image_path, { width: 200, height: 200, quality: 88 });
                     if (url) icon = '<img src="' + encodeURI(url) + '" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;">';
                 }
                 return activityCard('event-detail.html?id=' + encodeURIComponent(ev.id),

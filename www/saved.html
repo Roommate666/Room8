@@ -128,7 +128,7 @@
                 (eres.data || []).forEach(function(ev) {
                     var img = '📅';
                     if (ev.cover_image_path && window.Room8) {
-                        var url = Room8.getOptimizedImageUrl('event-images', ev.cover_image_path, { width: 120, height: 120, quality: 70 });
+                        var url = Room8.getOptimizedImageUrl('event-images', ev.cover_image_path, { width: 200, height: 200, quality: 88 });
                         if (url) img = '<img src="' + encodeURI(url) + '" alt="" loading="lazy">';
                     }
                     var date = ev.start_at ? new Date(ev.start_at).toLocaleDateString('de-DE', { day:'2-digit', month:'short' }) : '';
