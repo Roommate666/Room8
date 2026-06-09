@@ -211,6 +211,19 @@
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
+        .ai-polish-btn {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+            border: none;
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .ai-polish-btn:disabled { opacity: 0.6; cursor: default; }
     </style>
 </head>
 <body>
@@ -337,19 +350,25 @@
             <div class="form-group">
                 <label style="display:flex; justify-content:space-between; align-items:center;">
                     <span>Jobbeschreibung <span class="required">*</span></span>
-                    <button type="button" id="polishBtn" style="background:linear-gradient(135deg,#8B5CF6,#6366F1); color:white; border:none; padding:0.35rem 0.75rem; border-radius:999px; font-size:0.75rem; font-weight:700; cursor:pointer;">🪄 Mit AI verbessern</button>
+                    <button type="button" class="ai-polish-btn" data-field="description" data-ptype="job">🪄 Mit AI verbessern</button>
                 </label>
                 <textarea id="description" required placeholder="Aufgaben + was der Student lernt — Stichpunkte reichen, AI macht daraus klaren Text"></textarea>
             </div>
 
             <div class="form-group">
-                <label>Anforderungen</label>
+                <label style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>Anforderungen</span>
+                    <button type="button" class="ai-polish-btn" data-field="requirements" data-ptype="job_requirements">🪄 Mit AI verbessern</button>
+                </label>
                 <textarea id="requirements" placeholder="Was sollten Bewerber mitbringen? (Eine Anforderung pro Zeile)"></textarea>
                 <small>Eine Anforderung pro Zeile</small>
             </div>
 
             <div class="form-group">
-                <label>Benefits / Was wir bieten</label>
+                <label style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>Benefits / Was wir bieten</span>
+                    <button type="button" class="ai-polish-btn" data-field="benefits" data-ptype="job_benefits">🪄 Mit AI verbessern</button>
+                </label>
                 <textarea id="benefits" placeholder="z.B. Flexible Arbeitszeiten, Homeoffice, etc. (Ein Benefit pro Zeile)"></textarea>
                 <small>Ein Benefit pro Zeile</small>
             </div>
@@ -441,24 +460,40 @@
         } catch (e) { /* Gate ist nur UX, RLS erzwingt es hart */ }
     })();
 
-    // AI Polish-Button
-    document.getElementById('polishBtn').addEventListener('click', async function() {
-        var btn = this;
-        var ta = document.getElementById('description');
-        var orig = ta.value.trim();
+    // AI Polish — sammelt den vollen Job-Kontext, damit die KI stimmig
+    // formuliert (nicht nur das eine Feld blind). Ein Handler fuer alle
+    // .ai-polish-btn (Beschreibung, Anforderungen, Benefits).
+    function buildJobContext(skipField) {
+        function val(id) { var e = document.getElementById(id); return e ? (e.value || '').trim() : ''; }
+        var parts = [];
+        if (val('title')) parts.push('Jobtitel: ' + val('title'));
+        if (val('company')) parts.push('Firma: ' + val('company'));
+        if (val('jobType')) parts.push('Job-Typ: ' + val('jobType'));
+        if (val('location')) parts.push('Ort: ' + val('location'));
+        if (val('salary')) parts.push('Gehalt: ' + val('salary'));
+        if (val('hours')) parts.push('Stunden/Woche: ' + val('hours'));
+        if (skipField !== 'description' && val('description')) parts.push('Aufgaben: ' + val('description'));
+        if (skipField !== 'requirements' && val('requirements')) parts.push('Anforderungen: ' + val('requirements'));
+        if (skipField !== 'benefits' && val('benefits')) parts.push('Benefits: ' + val('benefits'));
+        return parts.join(' | ');
+    }
+
+    async function runPolish(btn) {
+        var field = btn.getAttribute('data-field');
+        var ptype = btn.getAttribute('data-ptype');
+        var ta = document.getElementById(field);
+        var orig = (ta.value || '').trim();
         if (orig.length < 5) { Room8UI.error('Schreib erst ein paar Stichpunkte.'); return; }
         var oldText = btn.innerHTML;
         btn.innerHTML = '⏳ Verbessere...'; btn.disabled = true;
         try {
-            var company = document.getElementById('company').value || '';
-            var jobType = document.getElementById('jobType').value || '';
             var polishSession = await sb.auth.getSession();
             var polishToken = polishSession.data.session && polishSession.data.session.access_token;
             if (!polishToken) { Room8UI.warning('Bitte melde dich an, um die KI-Verbesserung zu nutzen.'); return; }
             var resp = await fetch(SUPABASE_URL + '/functions/v1/polish-text', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + polishToken },
-                body: JSON.stringify({ text: orig, type: 'job', context: 'Firma: ' + company + ', Job-Typ: ' + jobType })
+                body: JSON.stringify({ text: orig, type: ptype, context: buildJobContext(field) })
             });
             var j = await resp.json();
             if (j.polished) {
@@ -468,6 +503,10 @@
             }
         } catch (e) { Room8UI.error('Fehler: ' + e.message); }
         finally { btn.innerHTML = oldText; btn.disabled = false; }
+    }
+
+    Array.prototype.forEach.call(document.querySelectorAll('.ai-polish-btn'), function(btn) {
+        btn.addEventListener('click', function() { runPolish(btn); });
     });
 
     function setupImagePreview(inputId, previewId, imgId) {

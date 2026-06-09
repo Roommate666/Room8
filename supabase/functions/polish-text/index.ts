@@ -31,14 +31,40 @@ Schreib den Text in 2-4 lebendigen Saetzen um:
 - Echte Umlaute
 Antwort: NUR der verbesserte Text.`,
   job: `Du verbesserst Job-Beschreibungen fuer Studenten-Werkstudent-Stellen.
-Schreib den Text in 3-5 klaren Saetzen um:
+Nutze den mitgelieferten Kontext (Jobtitel, Firma, Job-Typ, Ort, Gehalt,
+Stunden), um den Text konkret und stimmig zu machen — erfinde aber KEINE
+Fakten, die nicht im Kontext oder Text stehen.
+Schreib die Beschreibung in 3-5 klaren Saetzen um:
 - Was die Aufgabe ist (konkret)
 - Was der Student lernt / mitbringt
-- Wieviel Stunden, ob Remote moeglich
+- Wieviel Stunden, ob Remote moeglich (nur wenn im Kontext bekannt)
 - Du-Form, professionell aber zugaenglich
 - Keine Buzzwords, kein Bullshit
 - Echte Umlaute
 Antwort: NUR der verbesserte Text.`,
+  job_requirements: `Du formulierst die Anforderungen ("Das bringst du mit")
+fuer eine Studenten-/Werkstudenten-Stelle. Nutze den Kontext (Jobtitel,
+Firma, Job-Typ, Aufgaben), um passende, realistische Anforderungen zu
+schaerfen — erfinde keine harten Zwaenge (z.B. keine Jahre Berufserfahrung
+fuer Werkstudenten).
+Gib eine knackige Stichpunkt-Liste zurueck:
+- EINE Anforderung pro Zeile, KEIN Aufzaehlungszeichen, KEIN Spiegelstrich
+- Kurz und konkret (max ~10 Woerter pro Zeile)
+- Du-Form ("Du studierst...", "Du kannst...")
+- 3-6 Punkte, nach Wichtigkeit sortiert
+- Echte Umlaute
+Antwort: NUR die Zeilen, nichts davor oder danach.`,
+  job_benefits: `Du formulierst die Benefits ("Das bieten wir dir") fuer eine
+Studenten-/Werkstudenten-Stelle. Nutze den Kontext (Firma, Job-Typ, Gehalt,
+Stunden), um die Vorteile attraktiv und konkret zu machen — erfinde keine
+Benefits, die nicht im Text/Kontext stehen.
+Gib eine knackige Stichpunkt-Liste zurueck:
+- EIN Benefit pro Zeile, KEIN Aufzaehlungszeichen, KEIN Spiegelstrich
+- Kurz und konkret (max ~10 Woerter pro Zeile)
+- Was Studenten wirklich zieht (Flexibilitaet, Lernen, Bezahlung, Team)
+- 3-6 Punkte, das Staerkste zuerst
+- Echte Umlaute
+Antwort: NUR die Zeilen, nichts davor oder danach.`,
 }
 
 Deno.serve(async (req: Request) => {
