@@ -209,6 +209,80 @@
         .status-badge.status-pending { background: #FEF3C7; color: #92400E; }
         .status-badge.status-approved { background: #D1FAE5; color: #065F46; }
         .status-badge.status-rejected { background: #FEE2E2; color: #991B1B; }
+
+        /* Approve-Editor + Vorschau Modal (Glasmorphismus) */
+        .approve-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(17, 24, 39, 0.55);
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            display: none; align-items: flex-start; justify-content: center;
+            padding: 2rem 1rem; overflow-y: auto;
+        }
+        .approve-overlay.open { display: flex; }
+        .approve-modal {
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px -10px rgba(0,0,0,0.35);
+            width: 100%; max-width: 900px;
+            display: flex; flex-direction: column;
+            max-height: calc(100vh - 4rem);
+        }
+        .approve-modal-head {
+            padding: 1.25rem 1.5rem; border-bottom: 1px solid #E5E7EB;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .approve-modal-head h2 { margin: 0; font-size: 1.1rem; }
+        .approve-modal-close {
+            background: none; border: none; font-size: 1.5rem; cursor: pointer;
+            color: #6b7280; line-height: 1; padding: 0.25rem;
+        }
+        .approve-modal-body {
+            padding: 1.5rem; display: grid; gap: 1.5rem;
+            grid-template-columns: 1fr 320px; overflow-y: auto;
+        }
+        @media (max-width: 720px) {
+            .approve-modal-body { grid-template-columns: 1fr; }
+        }
+        .approve-fields { display: flex; flex-direction: column; gap: 0.9rem; }
+        .approve-field label {
+            display: block; font-size: 0.75rem; font-weight: 600;
+            color: #6b7280; margin-bottom: 0.3rem; text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        .approve-field input, .approve-field textarea, .approve-field select {
+            width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #D1D5DB;
+            border-radius: 10px; font-size: 0.9rem; font-family: inherit;
+            background: white; box-sizing: border-box;
+        }
+        .approve-field textarea { min-height: 90px; resize: vertical; }
+        .approve-field input:focus, .approve-field textarea:focus, .approve-field select:focus {
+            outline: none; border-color: #111827;
+        }
+        .approve-preview-wrap { display: flex; flex-direction: column; gap: 0.5rem; }
+        .approve-preview-label {
+            font-size: 0.75rem; font-weight: 600; color: #6b7280;
+            text-transform: uppercase; letter-spacing: 0.03em;
+        }
+        .preview-card {
+            background: #fff; border: 1px solid #E5E7EB; border-radius: 16px;
+            overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+        }
+        .preview-card-cover {
+            width: 100%; height: 130px; object-fit: cover; background: #F3F4F6;
+            display: block;
+        }
+        .preview-card-body { padding: 1rem; }
+        .preview-card-title { font-size: 1.05rem; font-weight: 700; margin: 0 0 0.35rem 0; color: #111827; }
+        .preview-card-meta { font-size: 0.8rem; color: #6b7280; margin-bottom: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+        .preview-card-badge { background: #111827; color: white; padding: 0.15rem 0.55rem; border-radius: 99px; font-size: 0.7rem; font-weight: 600; }
+        .preview-card-desc { font-size: 0.85rem; color: #374151; white-space: pre-wrap; }
+        .preview-card-logo { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; border: 1px solid #E5E7EB; }
+        .approve-modal-foot {
+            padding: 1rem 1.5rem; border-top: 1px solid #E5E7EB;
+            display: flex; justify-content: flex-end; gap: 0.75rem;
+        }
+        .approve-modal-foot .btn-mini { padding: 0.7rem 1.5rem; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -474,6 +548,27 @@
         </div>
     </div>
 
+</div>
+
+<!-- Approve-Editor + Vorschau Modal -->
+<div id="approveOverlay" class="approve-overlay" role="dialog" aria-modal="true">
+    <div class="approve-modal">
+        <div class="approve-modal-head">
+            <h2 id="approveModalTitle">Einreichung prüfen &amp; veröffentlichen</h2>
+            <button type="button" class="approve-modal-close" onclick="closeApproveModal()" aria-label="Schließen">&times;</button>
+        </div>
+        <div class="approve-modal-body">
+            <div id="approveFields" class="approve-fields"></div>
+            <div class="approve-preview-wrap">
+                <div class="approve-preview-label">Vorschau in der App</div>
+                <div id="approvePreview" class="preview-card"></div>
+            </div>
+        </div>
+        <div class="approve-modal-foot">
+            <button type="button" class="btn-mini" style="background:#E5E7EB;color:#374151;" onclick="closeApproveModal()">Abbrechen</button>
+            <button type="button" id="approvePublishBtn" class="btn-mini btn-green" onclick="confirmPublishSubmission()">✅ Veröffentlichen</button>
+        </div>
+    </div>
 </div>
 
 <script src="lib/supabase.min.js"></script>
@@ -952,13 +1047,193 @@
         renderSubmissions();
     };
 
-    window.approveSubmission = async (id, type) => {
-        if (!(await Room8UI.confirm("Einreichung übernehmen und veröffentlichen? Studenten in der Stadt bekommen Push.", { danger: false }))) return;
+    // Aktuell im Editor-Modal geoeffnete Einreichung
+    var approveCtx = null;
 
+    // Feld-Definitionen pro Typ: key = Spaltenname in der submission,
+    // label = sichtbarer Name, kind = input/textarea/select/datetime
+    function getEditorFields(type) {
+        if (type === 'job') {
+            return [
+                { key: 'title', label: 'Titel', kind: 'input' },
+                { key: 'company_name', label: 'Firma', kind: 'input' },
+                { key: 'description', label: 'Beschreibung', kind: 'textarea' },
+                { key: 'city', label: 'Stadt', kind: 'input' },
+                { key: 'job_type', label: 'Job-Typ', kind: 'input' },
+                { key: 'salary', label: 'Gehalt', kind: 'input' },
+                { key: 'hours', label: 'Stunden/Woche', kind: 'input' },
+                { key: 'application_email', label: 'Bewerbungs-E-Mail', kind: 'input' }
+            ];
+        }
+        if (type === 'event') {
+            return [
+                { key: 'title', label: 'Titel', kind: 'input' },
+                { key: 'description', label: 'Beschreibung', kind: 'textarea' },
+                { key: 'city', label: 'Stadt', kind: 'input' },
+                { key: 'start_at', label: 'Start', kind: 'datetime' },
+                { key: 'location', label: 'Ort / Adresse', kind: 'input' },
+                { key: 'category', label: 'Kategorie', kind: 'eventCategory' }
+            ];
+        }
+        // coupon
+        return [
+            { key: 'title', label: 'Titel', kind: 'input' },
+            { key: 'business_name', label: 'Geschäft', kind: 'input' },
+            { key: 'description', label: 'Beschreibung', kind: 'textarea' },
+            { key: 'discount_value', label: 'Rabatt', kind: 'input' },
+            { key: 'category', label: 'Kategorie', kind: 'input' },
+            { key: 'city', label: 'Stadt', kind: 'input' },
+            { key: 'address', label: 'Adresse', kind: 'input' },
+            { key: 'opening_hours', label: 'Öffnungszeiten', kind: 'input' }
+        ];
+    }
+
+    // ISO-Timestamp -> Wert fuer <input type="datetime-local"> (lokale Zeit)
+    function isoToLocalInput(iso) {
+        if (!iso) return '';
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return '';
+        const pad = n => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    // Liest die ggf. bearbeiteten Werte aus dem Editor zurueck.
+    // datetime-local wird nach ISO konvertiert, der Rest bleibt String.
+    function readEditorValues() {
+        const out = {};
+        const fields = getEditorFields(approveCtx.type);
+        fields.forEach(f => {
+            const el = document.getElementById('appf_' + f.key);
+            if (!el) return;
+            let val = el.value;
+            if (f.kind === 'datetime') {
+                val = val ? new Date(val).toISOString() : '';
+            }
+            out[f.key] = val;
+        });
+        return out;
+    }
+
+    function renderApprovePreview() {
+        const type = approveCtx.type;
+        const v = readEditorValues();
+        const s = approveCtx.submission;
+        const coverUrl = s.cover_image_path
+            ? sb.storage.from('event-images').getPublicUrl(s.cover_image_path).data.publicUrl
+            : null;
+        const logoUrl = s.logo_image_path
+            ? sb.storage.from('event-images').getPublicUrl(s.logo_image_path).data.publicUrl
+            : null;
+
+        const title = v.title || s.title || 'Ohne Titel';
+        const city = v.city || s.city || '';
+        let badge = type === 'job' ? '💼 Job' : (type === 'event' ? '🎉 Event' : '🎟️ Coupon');
+        let metaExtra = '';
+        if (type === 'coupon') metaExtra = v.discount_value || s.discount_value || '';
+        else if (type === 'job') metaExtra = v.company_name || s.company_name || '';
+        else if (type === 'event') {
+            const startVal = v.start_at || s.start_at;
+            metaExtra = startVal ? new Date(startVal).toLocaleString('de-DE') : '';
+        }
+        const desc = v.description || s.description || '';
+
+        let html = '';
+        if (coverUrl) html += `<img class="preview-card-cover" src="${coverUrl}" alt="">`;
+        html += `<div class="preview-card-body">`;
+        html += `<div class="preview-card-meta"><span class="preview-card-badge">${badge}</span>`;
+        if (logoUrl) html += `<img class="preview-card-logo" src="${logoUrl}" alt="">`;
+        html += `</div>`;
+        html += `<h3 class="preview-card-title">${escapeHtml(title)}</h3>`;
+        html += `<div class="preview-card-meta">`;
+        if (city) html += `<span>📍 ${escapeHtml(city)}</span>`;
+        if (metaExtra) html += `<span>• ${escapeHtml(metaExtra)}</span>`;
+        html += `</div>`;
+        html += `<div class="preview-card-desc">${escapeHtml(desc) || '<span style="color:#9CA3AF;">Keine Beschreibung</span>'}</div>`;
+        html += `</div>`;
+        document.getElementById('approvePreview').innerHTML = html;
+    }
+
+    function closeApproveModal() {
+        document.getElementById('approveOverlay').classList.remove('open');
+        approveCtx = null;
+    }
+    window.closeApproveModal = closeApproveModal;
+
+    // Schritt 1: UEBERNEHMEN oeffnet Editor + Vorschau (publiziert NICHT direkt)
+    window.approveSubmission = async (id, type) => {
         const submission = allSubmissions.find(s => s.id === id);
         if (!submission) return;
+        approveCtx = { id, type, submission };
+
+        const fields = getEditorFields(type);
+        const fieldsHtml = fields.map(f => {
+            let initial = submission[f.key];
+            let inputHtml;
+            if (f.kind === 'textarea') {
+                inputHtml = `<textarea id="appf_${f.key}">${escapeHtml(initial)}</textarea>`;
+            } else if (f.kind === 'datetime') {
+                inputHtml = `<input type="datetime-local" id="appf_${f.key}" value="${escapeHtml(isoToLocalInput(initial))}">`;
+            } else if (f.kind === 'eventCategory') {
+                const cats = ['party','lecture','workshop','sport','culture','networking','food','other'];
+                const cur = cats.includes(initial) ? initial : 'other';
+                inputHtml = `<select id="appf_${f.key}">` + cats.map(c =>
+                    `<option value="${c}"${c === cur ? ' selected' : ''}>${c}</option>`).join('') + `</select>`;
+            } else {
+                inputHtml = `<input type="text" id="appf_${f.key}" value="${escapeHtml(initial)}">`;
+            }
+            return `<div class="approve-field"><label>${f.label}</label>${inputHtml}</div>`;
+        }).join('');
+
+        document.getElementById('approveFields').innerHTML = fieldsHtml;
+        // Live-Vorschau bei jeder Eingabe
+        fields.forEach(f => {
+            const el = document.getElementById('appf_' + f.key);
+            if (el) {
+                el.addEventListener('input', renderApprovePreview);
+                el.addEventListener('change', renderApprovePreview);
+            }
+        });
+        renderApprovePreview();
+        document.getElementById('approveOverlay').classList.add('open');
+    };
+
+    // Schritt 2: Veroeffentlichen-Button -> Insert mit bearbeiteten Werten
+    window.confirmPublishSubmission = async () => {
+        if (!approveCtx) return;
+        const { id, type, submission } = approveCtx;
+        const edited = readEditorValues();
+        const publishBtn = document.getElementById('approvePublishBtn');
+        publishBtn.disabled = true;
+        const oldLabel = publishBtn.textContent;
+        publishBtn.textContent = 'Veröffentliche...';
 
         try {
+            await publishSubmission(id, type, submission, edited);
+            closeApproveModal();
+            Room8UI.success("Erfolgreich übernommen — ist jetzt live in der App!");
+            loadSubmissions();
+            loadStats();
+        } catch (err) {
+            console.error(err);
+            // DEUTLICHES, bleibendes Feedback: aktiv wegklicken noetig.
+            await Room8UI.confirm(
+                "❌ NICHT veröffentlicht. Fehler: " + (err.message || JSON.stringify(err)),
+                { danger: true, okText: 'Verstanden', cancelText: 'Schließen' }
+            );
+        } finally {
+            publishBtn.disabled = false;
+            publishBtn.textContent = oldLabel;
+        }
+    };
+
+    // Fuehrt den eigentlichen Insert-Flow aus. Werte kommen aus dem Editor
+    // (edited); fehlende Felder weiter aus der Original-submission.
+    // RLS/Owner-Logik unveraendert.
+    async function publishSubmission(id, type, submission, edited) {
+        // Editierte Werte ueber die Original-submission legen
+        const m = key => (edited && edited[key] !== undefined && edited[key] !== '') ? edited[key] : submission[key];
+
+        {
             const { data: { user: adminUser } } = await sb.auth.getUser();
 
             // Owner aufloesen: 1. submitter_id (feste Identitaet beim Einreichen),
@@ -983,21 +1258,21 @@
                 const jobData = {
                     owner_id: ownerId,
                     type: 'job',
-                    title: submission.title || 'Unbenannter Job',
-                    description: submission.description || '',
-                    city: submission.city || submission.location || 'Remote',
-                    location: submission.location || submission.city || 'Remote',
-                    company_name: submission.company_name || 'Unbekannt',
+                    title: m('title') || 'Unbenannter Job',
+                    description: m('description') || '',
+                    city: m('city') || submission.location || 'Remote',
+                    location: submission.location || m('city') || 'Remote',
+                    company_name: m('company_name') || 'Unbekannt',
                     company_website: submission.company_website || null,
                     company_size: submission.company_size || null,
                     company_logo_url: logoUrl,
-                    job_type: submission.job_type || 'werkstudent',
+                    job_type: m('job_type') || 'werkstudent',
                     contract_duration: submission.contract_duration || null,
-                    salary_amount: submission.salary ? parseFloat(submission.salary) : null,
-                    min_hours_per_week: submission.hours ? parseInt(submission.hours) : null,
+                    salary_amount: m('salary') ? parseFloat(m('salary')) : null,
+                    min_hours_per_week: m('hours') ? parseInt(m('hours')) : null,
                     requirements: submission.requirements ? submission.requirements.split('\n').filter(r => r.trim()) : [],
                     benefits: submission.benefits ? submission.benefits.split('\n').filter(b => b.trim()) : [],
-                    application_email: submission.application_email || submission.contact_email,
+                    application_email: m('application_email') || submission.contact_email,
                     application_url: submission.application_url || null,
                     is_active: true
                 };
@@ -1023,19 +1298,19 @@
                 const couponData = {
                     user_id: ownerId,
                     partner_user_id: ownerId !== adminUser.id ? ownerId : null,
-                    business_name: submission.business_name || 'Partner',
-                    title: submission.title || 'Studenten-Rabatt',
-                    category: submission.category || 'food',
-                    discount_value: submission.discount_value || '10%',
-                    discount_code: (submission.business_name || 'ROOM8').replace(/\s/g,'').substring(0, 6).toUpperCase() + Math.floor(Math.random() * 100),
+                    business_name: m('business_name') || 'Partner',
+                    title: m('title') || 'Studenten-Rabatt',
+                    category: m('category') || 'food',
+                    discount_value: m('discount_value') || '10%',
+                    discount_code: (m('business_name') || 'ROOM8').replace(/\s/g,'').substring(0, 6).toUpperCase() + Math.floor(Math.random() * 100),
                     valid_until: validUntil,
-                    description: submission.description || '',
-                    city: submission.city || '-',
-                    address: submission.address || null,
+                    description: m('description') || '',
+                    city: m('city') || '-',
+                    address: m('address') || null,
                     zip_code: submission.zip || null,
                     website: submission.website || null,
                     phone: submission.phone || null,
-                    opening_hours: submission.opening_hours || null,
+                    opening_hours: m('opening_hours') || null,
                     status: 'active'
                 };
                 const couponInsert = await sb.from('coupons').insert(couponData).select('id').single();
@@ -1054,8 +1329,8 @@
                 }
 
             } else if (type === 'event') {
-                // 1. Strukturiertes start_at aus Submission
-                let startAt = submission.start_at;
+                // 1. Strukturiertes start_at aus Editor (datetime-local -> ISO), sonst Submission
+                let startAt = m('start_at');
                 let endAt = submission.end_at;
                 // Fallback: free-text terms/valid_from parsen (DD.MM.YYYY)
                 if (!startAt && (submission.terms || submission.valid_from)) {
@@ -1067,17 +1342,20 @@
                     const d = new Date(); d.setDate(d.getDate() + 14); d.setHours(19,0,0,0);
                     startAt = d.toISOString();
                 }
+                // Editor-Feld "location" bildet die Adresse ab (Fallback: submission.address/location)
+                const eventAddress = m('location') || submission.address || submission.location || null;
+                const eventCategory = m('category');
                 const eventData = {
                     organizer_id: ownerId,
                     organizer_name: submission.business_name || 'Partner',
                     organizer_type: 'partner',
-                    title: submission.title || 'Event',
-                    description: submission.description || '',
-                    address: submission.address || null,
-                    city: submission.city || '-',
+                    title: m('title') || 'Event',
+                    description: m('description') || '',
+                    address: eventAddress,
+                    city: m('city') || '-',
                     start_at: startAt,
                     end_at: endAt || null,
-                    category: ['party','lecture','workshop','sport','culture','networking','food','other'].includes(submission.category) ? submission.category : 'other',
+                    category: ['party','lecture','workshop','sport','culture','networking','food','other'].includes(eventCategory) ? eventCategory : 'other',
                     status: 'active',
                     external_url: submission.website || null,
                     cover_image_path: submission.cover_image_path || null,
@@ -1092,16 +1370,8 @@
                 reviewed_at: new Date().toISOString(),
                 reviewed_by: adminUser.id
             }).eq('id', id);
-
-            Room8UI.success("Erfolgreich übernommen — ist jetzt live in der App!");
-            loadSubmissions();
-            loadStats();
-
-        } catch (err) {
-            console.error(err);
-            Room8UI.error("Fehler: " + (err.message || JSON.stringify(err)));
         }
-    };
+    }
 
     window.rejectSubmission = async (id) => {
         const reason = await Room8UI.prompt("Grund für die Ablehnung (optional):");
@@ -1284,6 +1554,15 @@
     };
 
     document.getElementById('userSearch').addEventListener('input', loadUsers);
+
+    // Approve-Modal: Klick auf Hintergrund + Escape schliesst (nur wenn nicht am Veroeffentlichen)
+    document.getElementById('approveOverlay').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget && !document.getElementById('approvePublishBtn').disabled) closeApproveModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.getElementById('approveOverlay').classList.contains('open')
+            && !document.getElementById('approvePublishBtn').disabled) closeApproveModal();
+    });
 
     // --- LISTINGS (nur Wohnungen & Gegenstände, keine Jobs) ---
     var allListingsCache = [];
