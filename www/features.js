@@ -35,6 +35,7 @@
         'detail.html': 'marketplace',
         'listing-details.html': 'marketplace',
         'choose-listing.html': 'housing',
+        'vertragsvorlagen.html': 'housing',
         'nachrichten.html': 'chat',
         'chat.html': 'chat'
     };
