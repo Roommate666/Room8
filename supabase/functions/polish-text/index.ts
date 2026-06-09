@@ -69,12 +69,10 @@ Deno.serve(async (req: Request) => {
     if (authErr || !userData?.user) {
       return new Response(JSON.stringify({ error: 'auth_required' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
-    // Nur Partner-Accounts duerfen die KI-Politur nutzen (RLS: User liest eigenes Profil)
-    const { data: profile, error: profErr } = await authedClient
-      .from('profiles').select('is_partner').eq('id', userData.user.id).single()
-    if (profErr || !profile || profile.is_partner !== true) {
-      return new Response(JSON.stringify({ error: 'partner_only' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-    }
+    // Jeder eingeloggte User darf polishen (konsistent mit generate-listing).
+    // Login-Wand oben schuetzt bereits gegen anonymen Massen-Missbrauch des
+    // OpenAI-Keys; ein is_partner-Zwang wuerde Akquise-Einreicher aussperren,
+    // die ueber dieselben Partner-Formulare einreichen.
 
     const { text, type, context } = await req.json()
     if (!text || typeof text !== 'string' || text.length < 5) {
