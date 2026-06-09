@@ -368,8 +368,8 @@
             </div>
 
             <div class="form-group">
-                <label>Firmen-Logo <span class="required">*</span></label>
-                <input type="file" id="logoImage" accept="image/*" required>
+                <label>Firmen-Logo <small style="color:#9ca3af;">(optional)</small></label>
+                <input type="file" id="logoImage" accept="image/*">
                 <small>Logo deiner Firma (quadratisch, max 5 MB).</small>
                 <div id="logoPreview" style="margin-top:0.5rem; display:none;"><img id="logoPreviewImg" style="max-width:120px; max-height:120px; border-radius:8px;"></div>
             </div>
@@ -599,9 +599,8 @@
         try {
             var logoFile = document.getElementById('logoImage').files[0];
             var coverFile = document.getElementById('coverImage').files[0];
-            if (!logoFile) throw new Error('Bitte Firmen-Logo hochladen.');
             if (!coverFile) throw new Error('Bitte Cover-Bild hochladen.');
-            var logoPath = await uploadImage(logoFile, 'job_logo', 'square');
+            var logoPath = logoFile ? await uploadImage(logoFile, 'job_logo', 'square') : null;
             var coverPath = await uploadImage(coverFile, 'job_cover', '16:9');
 
             const data = {
@@ -648,7 +647,8 @@
         { t: 'Unternehmen', b: 'required', req: ['company', 'contactEmail'], box: ['#company', '#website', '#contactEmail'] },
         { t: 'Die Stelle', b: 'required', req: ['title', 'jobType', 'location'], box: ['#title', '#jobType', '#location', '#salary', '#hours'] },
         { t: 'Beschreibung', b: 'required', req: ['description'], box: ['#description', '#requirements', '#benefits'] },
-        { t: 'Bewerbung & Logo (optional)', b: 'optional', req: [], box: ['#appEmail', '#appUrl', '#logoImage', '#coverImage'], last: true },
+        { t: 'Bewerbung (optional)', b: 'optional', req: [], box: ['#appEmail', '#appUrl'] },
+        { t: 'Bilder', b: 'required', req: ['coverImage'], box: ['#coverImage', '#logoImage'], last: true },
     ]);
 </script>
 </body>

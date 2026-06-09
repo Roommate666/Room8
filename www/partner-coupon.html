@@ -383,8 +383,8 @@
             </div>
 
             <div class="form-group">
-                <label>Logo <span class="required">*</span></label>
-                <input type="file" id="logoImage" accept="image/*" required>
+                <label>Logo <small style="color:#9ca3af;">(optional)</small></label>
+                <input type="file" id="logoImage" accept="image/*">
                 <small>Dein Geschaefts-Logo. Wird automatisch auf quadratisch gecroppt — leg's mittig im Bild aus. Max 5 MB.</small>
                 <div id="logoPreview" style="margin-top:0.5rem; display:none;"><img id="logoPreviewImg" style="max-width:120px; max-height:120px; border-radius:8px;"></div>
             </div>
@@ -610,9 +610,8 @@
         try {
             var logoFile = document.getElementById('logoImage').files[0];
             var coverFile = document.getElementById('coverImage').files[0];
-            if (!logoFile) throw new Error('Bitte ein Logo hochladen.');
             if (!coverFile) throw new Error('Bitte ein Cover-Bild hochladen.');
-            var logoPath = await uploadImage(logoFile, 'coupon_logo', 'square');
+            var logoPath = logoFile ? await uploadImage(logoFile, 'coupon_logo', 'square') : null;
             var coverPath = await uploadImage(coverFile, 'coupon_cover', '16:9');
 
             const data = {
@@ -661,7 +660,8 @@
         { t: 'Der Coupon', b: 'required', req: ['title', 'discountType'], box: ['#title', '#discountType', '#discountValue'] },
         { t: 'Beschreibung', b: 'required', req: ['description'], box: ['#description', '#terms'] },
         { t: 'Gültigkeit & Adresse', b: 'required', req: ['address', 'city'], box: ['#validFrom', '#validUntil', '#address', '#city', '#zip'] },
-        { t: 'Kontakt (optional)', b: 'optional', req: [], box: ['#website', '#phone', '#openingHours'], last: true },
+        { t: 'Kontakt (optional)', b: 'optional', req: [], box: ['#website', '#phone', '#openingHours'] },
+        { t: 'Bilder', b: 'required', req: ['coverImage'], box: ['#coverImage', '#logoImage'], last: true },
     ]);
 </script>
 </body>
