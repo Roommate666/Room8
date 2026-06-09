@@ -257,18 +257,23 @@
             var heroPhoto = photos.find(function(p){ return p.photo_type === 'hero'; });
             var logoPhoto = photos.find(function(p){ return p.photo_type === 'logo'; }) ||
                             photos.find(function(p){ return p.photo_type !== 'hero'; }); // fallback first non-hero
+            // Bucket aus dem Pfad ableiten: Partner-Einreichungen liegen in
+            // event-images/partner-uploads/, normale Inserate in listing-images.
+            function bucketFor(p) { return (p && p.indexOf('partner-uploads/') === 0) ? 'event-images' : 'listing-images'; }
             if (heroPhoto) {
+                var heroBkt = bucketFor(heroPhoto.storage_path);
                 var heroUrl = (window.Room8 && Room8.getOptimizedImageUrl)
-                    ? Room8.getOptimizedImageUrl('listing-images', heroPhoto.storage_path, { width: 1200, quality: 80 })
-                    : sb.storage.from('listing-images').getPublicUrl(heroPhoto.storage_path).data.publicUrl;
+                    ? Room8.getOptimizedImageUrl(heroBkt, heroPhoto.storage_path, { width: 1200, quality: 80 })
+                    : sb.storage.from(heroBkt).getPublicUrl(heroPhoto.storage_path).data.publicUrl;
                 document.getElementById('coverImg').src = heroUrl;
                 document.getElementById('jobCover').style.display = 'block';
                 document.getElementById('jobHero').classList.add('with-cover');
             }
             if (logoPhoto) {
+                var logoBkt = bucketFor(logoPhoto.storage_path);
                 var logoUrl = (window.Room8 && Room8.getOptimizedImageUrl)
-                    ? Room8.getOptimizedImageUrl('listing-images', logoPhoto.storage_path, { width: 200, height: 200, quality: 80 })
-                    : sb.storage.from('listing-images').getPublicUrl(logoPhoto.storage_path).data.publicUrl;
+                    ? Room8.getOptimizedImageUrl(logoBkt, logoPhoto.storage_path, { width: 200, height: 200, quality: 80 })
+                    : sb.storage.from(logoBkt).getPublicUrl(logoPhoto.storage_path).data.publicUrl;
                 document.getElementById('logo').src = logoUrl;
             }
 

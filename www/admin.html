@@ -1377,14 +1377,20 @@
                 const jobInsert = await sb.from('listings').insert(jobData).select('id').single();
                 if (jobInsert.error) throw jobInsert.error;
 
-                // Cover-Bild als listing_photos (mit photo_type='cover')
+                // Bilder als listing_photos. WICHTIG: job-detail.html sucht
+                // photo_type==='hero' fuer den Cover-Banner + 'logo' fuers Logo.
+                // Frueher als 'cover' gespeichert -> Banner blieb leer, Cover
+                // landete faelschlich als Logo (Fallback "erstes non-hero").
+                var jobPhotos = [];
                 if (submission.cover_image_path) {
-                    await sb.from('listing_photos').insert({
-                        listing_id: jobInsert.data.id,
-                        storage_path: submission.cover_image_path,
-                        display_order: 0,
-                        photo_type: 'cover'
-                    });
+                    jobPhotos.push({ listing_id: jobInsert.data.id, storage_path: submission.cover_image_path, display_order: 0, photo_type: 'hero' });
+                }
+                if (submission.logo_image_path) {
+                    jobPhotos.push({ listing_id: jobInsert.data.id, storage_path: submission.logo_image_path, display_order: 1, photo_type: 'logo' });
+                }
+                if (jobPhotos.length) {
+                    var jpRes = await sb.from('listing_photos').insert(jobPhotos);
+                    if (jpRes.error) throw jpRes.error;
                 }
 
             } else if (type === 'coupon') {

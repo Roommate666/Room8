@@ -13,58 +13,55 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
+// Gemeinsames Grundgesetz fuer ALLE Polish-Typen. Sorgt fuer einen
+// einheitlichen Stil ueber Jobs, Coupons und Events hinweg und verhindert,
+// dass die KI frei dazudichtet / den Inhalt verbiegt.
+const RULES = `GRUNDREGELN (gelten IMMER, strikt einhalten):
+1. Bleib INHALTLICH exakt beim Original. Du redigierst nur — Grammatik,
+   Rechtschreibung, Satzbau, Struktur. Du erfindest NICHTS dazu: keine neuen
+   Fakten, Zahlen, Orte, Vorteile, Eigenschaften oder Versprechen.
+2. Wenn der Input kurz oder stichpunktartig ist, halte das Ergebnis ebenfalls
+   kurz. NICHT aufblaehen, nicht ausschmuecken, keine Fuell-Saetze.
+3. Du-Form. Echte Umlaute (ä, ö, ü, ß). Klares Deutsch.
+4. Keine Werbe-Floskeln, keine Buzzwords (kein "innovativ", "Synergien",
+   "spannend", "einzigartig"). Keine Emojis im Text.
+5. Antwort: NUR der fertige Text, keine Einleitung, keine Anfuehrungszeichen,
+   keine Erklaerung.`
+
 const PROMPTS = {
-  coupon: `Du verbesserst Coupon-Beschreibungen fuer eine Studenten-App.
-Schreib den Text in 2-3 prägnanten Saetzen um:
-- Lass Stichpunkte fluessig klingen
-- Sprich Studenten direkt an (Du-Form)
-- Hebe den Vorteil hervor (Rabatt, Gratis-Item)
-- Keine Werbe-Floskeln, keine Emojis (max 1 wenn passend)
-- Echte Umlaute (ä, ö, ü, ß) verwenden
-Antwort: NUR der verbesserte Text, keine Einleitung.`,
-  event: `Du verbesserst Event-Beschreibungen fuer eine Studenten-App.
-Schreib den Text in 2-4 lebendigen Saetzen um:
-- Was passiert, wer wird angesprochen, was erwartet die Gaeste
-- Du-Form, locker aber nicht zu hip
-- Highlights vorne (Live-Musik, Quiz, etc.)
-- Keine Emojis (max 1)
-- Echte Umlaute
-Antwort: NUR der verbesserte Text.`,
-  job: `Du verbesserst Job-Beschreibungen fuer Studenten-Werkstudent-Stellen.
-Nutze den mitgelieferten Kontext (Jobtitel, Firma, Job-Typ, Ort, Gehalt,
-Stunden), um den Text konkret und stimmig zu machen — erfinde aber KEINE
-Fakten, die nicht im Kontext oder Text stehen.
-Schreib die Beschreibung in 3-5 klaren Saetzen um:
-- Was die Aufgabe ist (konkret)
-- Was der Student lernt / mitbringt
-- Wieviel Stunden, ob Remote moeglich (nur wenn im Kontext bekannt)
-- Du-Form, professionell aber zugaenglich
-- Keine Buzzwords, kein Bullshit
-- Echte Umlaute
-Antwort: NUR der verbesserte Text.`,
-  job_requirements: `Du formulierst die Anforderungen ("Das bringst du mit")
-fuer eine Studenten-/Werkstudenten-Stelle. Nutze den Kontext (Jobtitel,
-Firma, Job-Typ, Aufgaben), um passende, realistische Anforderungen zu
-schaerfen — erfinde keine harten Zwaenge (z.B. keine Jahre Berufserfahrung
-fuer Werkstudenten).
-Gib eine knackige Stichpunkt-Liste zurueck:
-- EINE Anforderung pro Zeile, KEIN Aufzaehlungszeichen, KEIN Spiegelstrich
-- Kurz und konkret (max ~10 Woerter pro Zeile)
-- Du-Form ("Du studierst...", "Du kannst...")
-- 3-6 Punkte, nach Wichtigkeit sortiert
-- Echte Umlaute
-Antwort: NUR die Zeilen, nichts davor oder danach.`,
-  job_benefits: `Du formulierst die Benefits ("Das bieten wir dir") fuer eine
-Studenten-/Werkstudenten-Stelle. Nutze den Kontext (Firma, Job-Typ, Gehalt,
-Stunden), um die Vorteile attraktiv und konkret zu machen — erfinde keine
-Benefits, die nicht im Text/Kontext stehen.
-Gib eine knackige Stichpunkt-Liste zurueck:
-- EIN Benefit pro Zeile, KEIN Aufzaehlungszeichen, KEIN Spiegelstrich
-- Kurz und konkret (max ~10 Woerter pro Zeile)
-- Was Studenten wirklich zieht (Flexibilitaet, Lernen, Bezahlung, Team)
-- 3-6 Punkte, das Staerkste zuerst
-- Echte Umlaute
-Antwort: NUR die Zeilen, nichts davor oder danach.`,
+  coupon: `${RULES}
+
+AUFGABE: Du redigierst die Beschreibung eines Studenten-Coupons.
+- Nutze den Kontext (Geschaeft, Kategorie, Rabatt) nur zur Einordnung.
+- 1-3 knappe Saetze. Der Vorteil (Rabatt/Gratis-Item) steht vorne.`,
+  event: `${RULES}
+
+AUFGABE: Du redigierst die Beschreibung eines Studenten-Events.
+- Nutze den Kontext (Titel, Ort, Datum) nur zur Einordnung.
+- 2-4 knappe Saetze. Was passiert + fuer wen, das Wichtigste zuerst.`,
+  job: `${RULES}
+
+AUFGABE: Du redigierst die Beschreibung einer Studenten-/Werkstudenten-Stelle.
+- Nutze den Kontext (Jobtitel, Firma, Job-Typ, Ort, Gehalt, Stunden) nur zur
+  Einordnung — uebernimm daraus nur, was wirklich relevant ist.
+- 2-4 klare Saetze: Was ist die Aufgabe, was bringt der Student mit.`,
+  job_requirements: `${RULES}
+
+AUSNAHME zu Regel 5: Gib eine Stichpunkt-Liste aus (eine Anforderung pro
+Zeile), KEIN Spiegelstrich/Aufzaehlungszeichen davor.
+AUFGABE: Du redigierst die Anforderungen ("Das bringst du mit").
+- Nimm NUR die Punkte aus dem Input. Du darfst sie sprachlich glaetten und
+  klar formulieren, aber KEINE neuen Anforderungen erfinden.
+- Erfinde keine harten Zwaenge (keine Jahre Berufserfahrung fuer Werkstudenten).
+- Eine Anforderung pro Zeile, kurz (max ~10 Woerter), Du-Form.`,
+  job_benefits: `${RULES}
+
+AUSNAHME zu Regel 5: Gib eine Stichpunkt-Liste aus (ein Benefit pro Zeile),
+KEIN Spiegelstrich/Aufzaehlungszeichen davor.
+AUFGABE: Du redigierst die Benefits ("Das bieten wir dir").
+- Nimm NUR die Punkte aus dem Input. Sprachlich glaetten ja, aber KEINE
+  Benefits erfinden, die nicht dastehen.
+- Ein Benefit pro Zeile, kurz (max ~10 Woerter).`,
 }
 
 Deno.serve(async (req: Request) => {
@@ -125,7 +122,7 @@ Deno.serve(async (req: Request) => {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         max_tokens: 350,
-        temperature: 0.7,
+        temperature: 0.35,
         messages: [
           { role: 'system', content: sysPrompt },
           { role: 'user', content: userMsg },
