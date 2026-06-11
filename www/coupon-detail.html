@@ -357,6 +357,12 @@
             font-weight: 600; cursor: pointer; margin-top: 1rem; width: 100%;
         }
 
+        /* Einheitliche Meta-Chip-Zeile (identisch auf Job/Coupon/Event-Detail) */
+        .r8-meta-chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0}
+        .r8-chip{display:inline-flex;align-items:center;gap:.35rem;background:#F3F4F6;
+            color:#374151;padding:.4rem .7rem;border-radius:999px;font-size:.85rem;
+            font-weight:600;line-height:1}
+
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
@@ -406,6 +412,7 @@
     <!-- Main-Card: Title + Description -->
     <div class="coupon-card-main">
         <h1 class="deal-title" id="dealTitle"></h1>
+        <div class="r8-meta-chips" id="r8MetaChips"></div>
         <p class="deal-desc" id="description"></p>
     </div>
 
@@ -612,6 +619,35 @@
         return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
+    // Einheitliche Meta-Chip-Zeile: 📍 Ort · 🕒 Zeit · 💶 Wert · 🏢 Anbieter
+    // Chip wird weggelassen wenn die Daten fehlen/leer sind. Feste Reihenfolge.
+    function renderMetaChips(c, discountDisplay) {
+        var el = document.getElementById('r8MetaChips');
+        if (!el) return;
+        var chips = [];
+
+        // 1. Ort -> Stadt bzw. Adresse
+        var ort = c.city || c.address || '';
+        if (ort) chips.push({ icon: '📍', text: ort });
+
+        // 2. Zeit -> Coupon: gueltig bis <Datum>
+        if (c.valid_until) {
+            var d = new Date(c.valid_until);
+            if (!isNaN(d)) chips.push({ icon: '🕒', text: 'gültig bis ' + d.toLocaleDateString('de-DE') });
+        }
+
+        // 3. Wert -> Rabatt (bereits formatierter Anzeige-Wert, z.B. "20%" / "Gratis")
+        var wert = (discountDisplay || '').trim();
+        if (wert && wert !== '–' && wert !== '--') chips.push({ icon: '💶', text: wert });
+
+        // 4. Anbieter -> Geschaeft / Business-Name
+        if (c.business_name) chips.push({ icon: '🏢', text: c.business_name });
+
+        el.innerHTML = chips.map(function(ch) {
+            return '<span class="r8-chip">' + ch.icon + ' ' + escapeHtml(ch.text) + '</span>';
+        }).join('');
+    }
+
     async function load() {
         if(!id) return;
 
@@ -669,6 +705,9 @@
         }
         // Tag: Einmalig vs Mehrfach
         dTag.textContent = coupon.usage_limit_per_user === 1 ? '1× pro Konto' : 'Mehrfach';
+
+        // Einheitliche Meta-Chip-Zeile (Ort / Zeit / Wert / Anbieter)
+        renderMetaChips(coupon, dAmount.textContent);
 
         if (coupon.coupon_photos && coupon.coupon_photos.length > 0) {
             var photo = coupon.coupon_photos.find(function(p){ return p.photo_type === 'cover' || p.photo_type === 'hero'; }) || coupon.coupon_photos[0];

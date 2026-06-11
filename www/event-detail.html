@@ -35,6 +35,12 @@
         .badge-past { background: #F3F4F6; color: #6B7280; }
 
         .event-title { font-size: 1.6rem; font-weight: 800; color: #111827; margin: 0 0 0.5rem; line-height: 1.25; }
+
+        /* Einheitliche Meta-Chip-Zeile (identisch auf allen 3 Detail-Seiten) */
+        .r8-meta-chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0}
+        .r8-chip{display:inline-flex;align-items:center;gap:.35rem;background:#F3F4F6;
+            color:#374151;padding:.4rem .7rem;border-radius:999px;font-size:.85rem;
+            font-weight:600;line-height:1}
         .event-organizer-line { color: #6B7280; font-size: 0.9rem; margin-bottom: 1rem; }
 
         .meta-grid { display: flex; flex-direction: column; gap: 0.75rem; padding: 1rem; background: #F9FAFB; border-radius: 12px; margin-bottom: 1rem; }
@@ -183,6 +189,7 @@
         <div class="detail-content">
             <div class="badge-row" id="badgeRow"></div>
             <h1 class="event-title" id="eventTitle"></h1>
+            <div class="r8-meta-chips" id="r8MetaChips"></div>
             <div class="event-organizer-line" id="eventOrganizer"></div>
 
             <div class="meta-grid" id="metaGrid"></div>
@@ -336,16 +343,13 @@
         document.getElementById('eventTitle').textContent = ev.title;
         document.getElementById('eventOrganizer').textContent = ev.organizer_name ? 'von ' + ev.organizer_name : '';
 
-        // Meta-Grid
+        // Einheitliche Meta-Chip-Zeile (Reihenfolge: Ort, Zeit, Wert, Anbieter; leere weglassen)
+        renderMetaChips(ev);
+
+        // Meta-Grid: Ort + Preis stehen schon in den Chips oben -> hier nur noch
+        // das ausfuehrliche "Wann" (mit Zeitspanne) + Plaetze, um Doppelung zu vermeiden.
         var meta = '';
         meta += metaRow('🕒', 'Wann', formatFullDate(ev.start_at, ev.end_at));
-        if (ev.location || ev.address || ev.city) {
-            var locText = [ev.location, ev.address, ev.city].filter(Boolean).join(', ');
-            meta += metaRow('📍', 'Wo', locText);
-        }
-        if (ev.price !== null && ev.price !== undefined) {
-            meta += metaRow('💶', 'Preis', ev.price > 0 ? Number(ev.price).toLocaleString('de-DE', { style:'currency', currency:'EUR' }) : 'Kostenlos');
-        }
         if (ev.max_participants) {
             meta += metaRow('👥', 'Plätze', ev.max_participants + ' max.');
         }
@@ -426,6 +430,40 @@
         } catch (e) {
             section.style.display = 'none';
         }
+    }
+
+    // Einheitliche Meta-Chip-Zeile: feste Reihenfolge, leere Chips weglassen
+    function renderMetaChips(ev) {
+        var el = document.getElementById('r8MetaChips');
+        if (!el) return;
+        var chips = [];
+
+        // 1. Ort -> Stadt bzw. Adresse
+        var ort = ev.city || ev.location || ev.address;
+        if (ort) chips.push('📍 ' + escapeHtml(ort));
+
+        // 2. Zeit -> Datum + Uhrzeit (z.B. "Sa 13.06. 13:00")
+        if (ev.start_at) {
+            var d = new Date(ev.start_at);
+            if (!isNaN(d.getTime())) {
+                var day = d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
+                var time = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+                chips.push('🕒 ' + escapeHtml(day + ' ' + time));
+            }
+        }
+
+        // 3. Wert -> Eintritt, sonst "Gratis"
+        if (ev.price !== null && ev.price !== undefined) {
+            var wert = Number(ev.price) > 0
+                ? Number(ev.price).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
+                : 'Gratis';
+            chips.push('💶 ' + escapeHtml(wert));
+        }
+
+        // 4. Anbieter -> Veranstalter-Name
+        if (ev.organizer_name) chips.push('🏢 ' + escapeHtml(ev.organizer_name));
+
+        el.innerHTML = chips.map(function (c) { return '<span class="r8-chip">' + c + '</span>'; }).join('');
     }
 
     function metaRow(icon, label, value) {
