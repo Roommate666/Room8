@@ -78,7 +78,7 @@ Deno.serve(async (req: Request) => {
         to: [gl.contact_email],
         subject: 'Interesse an deiner Wohnung auf Room8',
         html,
-        text: `Ein Student interessiert sich fuer "${gl.title}". Name: ${name}. Kontakt: ${contact}. Nachricht: ${message}`,
+        text: `Ein Student interessiert sich für "${gl.title}". Name: ${name}. Kontakt: ${contact}. Nachricht: ${message}`,
         headers: { 'List-Unsubscribe': '<mailto:help@room8.club?subject=unsubscribe>' },
       }),
     })

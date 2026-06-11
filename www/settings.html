@@ -417,14 +417,14 @@
     });
      // Konto löschen
 document.getElementById('deleteAccountBtn').addEventListener('click', async function() {
-    var deleteWord = T('settings_delete_keyword', 'LOESCHEN');
-    var confirmText = await Room8UI.prompt(T('settings_delete_prompt', 'Um dein Konto zu loeschen, gib LOESCHEN ein:'));
+    var deleteWord = T('settings_delete_keyword', 'LÖSCHEN');
+    var confirmText = await Room8UI.prompt(T('settings_delete_prompt', 'Um dein Konto zu löschen, gib LÖSCHEN ein:'));
     if (confirmText !== deleteWord && confirmText !== 'LÖSCHEN' && confirmText !== 'DELETE') {
-        Room8UI.info(T('settings_delete_invalid', 'Eingabe falsch. Konto wurde nicht geloescht.'));
+        Room8UI.info(T('settings_delete_invalid', 'Eingabe falsch. Konto wurde nicht gelöscht.'));
         return;
     }
 
-    if (!(await Room8UI.confirm(T('settings_delete_final_confirm', 'Bist du WIRKLICH sicher? Alle deine Daten werden unwiderruflich geloescht!'), { danger: true }))) {
+    if (!(await Room8UI.confirm(T('settings_delete_final_confirm', 'Bist du WIRKLICH sicher? Alle deine Daten werden unwiderruflich gelöscht!'), { danger: true }))) {
         return;
     }
 

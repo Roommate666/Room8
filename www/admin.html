@@ -2112,7 +2112,23 @@
             return;
         }
 
-        container.innerHTML = jobs.map(j => `
+        // Bewerbungen fuer alle Jobs in EINEM Query laden (Admin-Read via RLS) + gruppieren
+        _adminAppsByJob = {};
+        const jobIds = jobs.map(j => j.id);
+        if (jobIds.length) {
+            const appRes = await sb.from('job_applications')
+                .select('id, listing_id, applicant_name, applicant_email, applicant_phone, cover_letter, resume_path, applied_at')
+                .in('listing_id', jobIds)
+                .order('applied_at', { ascending: false });
+            (appRes.data || []).forEach(a => {
+                (_adminAppsByJob[a.listing_id] = _adminAppsByJob[a.listing_id] || []).push(a);
+            });
+        }
+
+        container.innerHTML = jobs.map(j => {
+            const nApps = (_adminAppsByJob[j.id] || []).length;
+            const appsBtn = `<button class="btn-mini ${nApps ? 'btn-green' : ''}" ${nApps ? '' : 'disabled style="opacity:0.5;cursor:default;"'} onclick="openAdminApps('${j.id}')">📨 Bewerbungen (${nApps})</button>`;
+            return `
             <div class="admin-card">
                 <div class="card-header">
                     <div class="card-title">💼 ${escapeHtml(j.title)}</div>
@@ -2126,12 +2142,58 @@
                 </div>
                 <div class="action-bar">
                     <button class="btn-mini btn-blue" onclick="window.open('job-detail.html?id=${j.id}', '_blank')">👁️ Ansehen</button>
+                    ${appsBtn}
                     <button class="btn-mini ${j.is_active ? 'btn-yellow' : 'btn-green'}" onclick="toggleJobActive('${j.id}', ${!j.is_active})">${j.is_active ? '⏸️ Deaktivieren' : '▶️ Aktivieren'}</button>
                     <button class="btn-mini btn-red" onclick="deleteJob('${j.id}')">🗑️ Löschen</button>
                 </div>
             </div>
-        `).join('');
+            `;
+        }).join('');
     }
+
+    // Admin-Bewerbungs-Ansicht (gleiche Logik wie Partner-Dashboard, RLS gibt Admin Read)
+    var _adminAppsByJob = {};
+    window.openAdminApps = function (jobId) {
+        const apps = _adminAppsByJob[jobId] || [];
+        const body = document.getElementById('adminAppsBody');
+        if (!apps.length) {
+            body.innerHTML = '<div class="empty-state">Noch keine Bewerbungen</div>';
+        } else {
+            body.innerHTML = apps.map(a => {
+                const d = a.applied_at ? new Date(a.applied_at).toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric' }) : '';
+                const cv = a.resume_path
+                    ? `<button class="btn-mini btn-yellow" onclick="openAdminResume('${a.id}', this)">📎 Lebenslauf öffnen</button>`
+                    : '<span style="color:#9ca3af; font-size:0.85rem;">Kein Lebenslauf</span>';
+                const letter = a.cover_letter
+                    ? `<div style="margin-top:0.5rem; padding:0.6rem 0.75rem; background:#f9fafb; border-left:3px solid #3B82F6; border-radius:8px; white-space:pre-wrap; font-size:0.9rem;">${escapeHtml(a.cover_letter)}</div>`
+                    : '';
+                return `<div style="padding:0.9rem 0; border-bottom:1px solid #f3f4f6;">
+                    <div style="font-weight:700;">${escapeHtml(a.applicant_name || 'Bewerber')}</div>
+                    <div style="font-size:0.85rem; color:#6b7280; margin:0.15rem 0;">
+                        <a href="mailto:${escapeHtml(a.applicant_email || '')}">${escapeHtml(a.applicant_email || '')}</a>
+                        ${a.applicant_phone ? ` &middot; <a href="tel:${escapeHtml(a.applicant_phone)}">${escapeHtml(a.applicant_phone)}</a>` : ''}
+                        ${d ? ' &middot; ' + d : ''}
+                    </div>
+                    ${letter}
+                    <div style="margin-top:0.6rem;">${cv}</div>
+                </div>`;
+            }).join('');
+        }
+        document.getElementById('adminAppsOverlay').style.display = 'flex';
+    };
+    window.openAdminResume = async function (appId, btn) {
+        const orig = btn.textContent;
+        btn.disabled = true; btn.textContent = 'Lädt...';
+        try {
+            const { data, error } = await sb.functions.invoke('get-resume-url', { body: { application_id: appId } });
+            if (error || !data || !data.signedUrl) throw new Error((error && error.message) || 'Nicht verfügbar');
+            window.open(data.signedUrl, '_blank');
+        } catch (e) {
+            Room8UI.error('Lebenslauf konnte nicht geladen werden.');
+        } finally {
+            btn.disabled = false; btn.textContent = orig;
+        }
+    };
 
     window.toggleJobActive = async (id, active) => {
         const { error } = await sb.from('listings').update({ is_active: active }).eq('id', id);
@@ -2903,6 +2965,18 @@
 
     checkAdmin();
 </script>
+
+<!-- Admin-Bewerbungen-Modal (d) -->
+<div id="adminAppsOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1000; align-items:flex-end; justify-content:center;">
+  <div style="background:#fff; width:100%; max-width:560px; max-height:90vh; overflow-y:auto; border-radius:20px 20px 0 0; padding:1.5rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom));">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+      <h2 style="margin:0; font-size:1.25rem;">📨 Bewerbungen</h2>
+      <button onclick="document.getElementById('adminAppsOverlay').style.display='none'" style="background:none; border:none; font-size:1.6rem; color:#9ca3af; cursor:pointer; line-height:1;">&times;</button>
+    </div>
+    <div id="adminAppsBody"></div>
+  </div>
+</div>
+
 <script src="notificationBell.js"></script>
 </body>
 </html>

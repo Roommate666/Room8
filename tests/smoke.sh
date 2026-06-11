@@ -65,13 +65,13 @@ http_check "intro.mp4"            "$BASE/intro.mp4"         "200"
 http_check "sw.js"                "$BASE/sw.js"             "200"
 
 # 2. Pflicht-Patterns (Regression-Detection)
-check "events.html: Plus-Icon im Header"            "$BASE/events.html"       "headerCreateBtn"
+check "events.html: Kategorie-Chip party"           "$BASE/events.html"       "data-i18n=\"events_cat_party\""
 check "events.html: i18n-Key ist events_title"      "$BASE/events.html"       "data-i18n=\"events_title\""
 check "event-detail.html: sanitizeUrl-Pattern"      "$BASE/event-detail.html" "sanitizeUrl"
 check "event-create.html: SVG-Block"                "$BASE/event-create.html" "image/jpeg.*image/png.*image/webp.*image/gif"
 check "event-create.html: End-Datum-Check"          "$BASE/event-create.html" "Endzeit muss nach Startzeit"
 check "event-create.html: Antrag-RPC"               "$BASE/event-create.html" "request_event_creator_permission"
-check "events.html: Plus initial display:none"      "$BASE/events.html"       'id="headerCreateBtn".*display:none'
+check "events.html: Kategorie-Chip food"            "$BASE/events.html"       "data-i18n=\"events_cat_food\""
 check "nachrichten.html: ROTER Verify-Button"       "$BASE/nachrichten.html"  "linear-gradient.135deg, ?#EF4444"
 check "chat.html: ROTER Verify-Button"              "$BASE/chat.html"         "linear-gradient.135deg, ?#EF4444"
 check "room8-utils.js: compressImage"               "$BASE/room8-utils.js"    "function compressImage"
@@ -131,7 +131,7 @@ check "partner-scan: translations.js geladen"       "$BASE/partner-scan.html" "t
 check "partner-scan: data-i18n=scan_page_title"     "$BASE/partner-scan.html" "data-i18n=\"scan_page_title\""
 check "partner-scan: ti() helper definiert"         "$BASE/partner-scan.html" "function ti\\("
 check "partner-dashboard: translations.js geladen"  "$BASE/partner-dashboard.html" "translations.js"
-check "partner-dashboard: data-i18n=pd_action_scan" "$BASE/partner-dashboard.html" "data-i18n=\"pd_action_scan\""
+check "partner-dashboard: Scan-Banner i18n"         "$BASE/partner-dashboard.html" "data-i18n=\"pd_scan_banner_title\""
 
 echo ""
 echo "========================================"

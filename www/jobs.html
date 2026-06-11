@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="stylesheet" href="style.css">
     <style>
-        .app-container { --primary-color: #8B5CF6; --primary-dark: #7C3AED; background-color: #f3f4f6; padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px); }
+        .app-container { --primary-color: #3B82F6; --primary-dark: #2563EB; background-color: #f3f4f6; padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px); }
 
         /* Pattern: Magic UI BlurFade */
         @keyframes blurFadeIn {
@@ -26,9 +26,9 @@
             grid-template-columns: 40px 1fr 40px;
             align-items: center;
             padding: calc(1.5rem + env(safe-area-inset-top)) 1.5rem 1.5rem 1.5rem;
-            background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+            background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
             color: white; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;
-            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.25);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25);
             margin-bottom: 1.25rem;
         }
 
@@ -74,10 +74,10 @@
         .partner-banner h3 { margin: 0 0 0.5rem 0; font-size: 1rem; color: var(--text-main); font-weight: 700; }
         .partner-banner p { margin: 0 0 0.75rem 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; }
         .partner-email {
-            display: inline-block; background: rgba(139,92,246,0.08); color: #7C3AED;
+            display: inline-block; background: rgba(59,130,246,0.08); color: #2563EB;
             font-weight: 600; padding: 0.5rem 1.25rem; border-radius: 999px;
             text-decoration: none; font-size: 0.9rem;
-            border: 1px solid rgba(139,92,246,0.15);
+            border: 1px solid rgba(59,130,246,0.15);
             transition: transform 0.2s;
         }
         .partner-email:active { transform: scale(0.97); }
@@ -93,7 +93,7 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+            background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
             color: white;
             font-size: 0.75rem;
             font-weight: 700;
@@ -107,12 +107,12 @@
             background: white;
             border-radius: 0 20px 20px 20px;
             overflow: hidden;
-            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.12);
-            border: 1.5px solid rgba(139,92,246,0.2);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.12);
+            border: 1.5px solid rgba(59,130,246,0.2);
         }
 
         .showcase-hero {
-            background: linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 100%);
+            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
             padding: 1.5rem;
             display: flex;
             gap: 1rem;
@@ -140,7 +140,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+            background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
             color: white;
             font-weight: 700;
             padding: 0.3rem 0.75rem;
@@ -237,14 +237,14 @@
         .showcase-apply-btn {
             width: 100%;
             padding: 0.9rem;
-            background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+            background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
             color: white;
             border: none;
             border-radius: 999px;
             font-size: 1rem;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
             position: relative;
             overflow: hidden;
             transition: transform 0.2s;
@@ -282,7 +282,7 @@
             border: 1.5px solid #E5E7EB; font-size: 0.95rem; background: white;
             transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box;
         }
-        .search-bar-wrap input:focus { outline: none; border-color: #8B5CF6; box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.08); }
+        .search-bar-wrap input:focus { outline: none; border-color: #3B82F6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08); }
         .search-bar-wrap .search-icon { position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; pointer-events: none; z-index: 2; }
 
         /* Pattern: Kibo UI Pill fuer Filter */
@@ -294,7 +294,7 @@
             white-space: nowrap; cursor: pointer; font-weight: 600;
             transition: all 0.2s;
         }
-        .filter-btn.active { background: #8B5CF6; color: white; border-color: #8B5CF6; box-shadow: 0 4px 12px rgba(139,92,246,0.25); }
+        .filter-btn.active { background: #3B82F6; color: white; border-color: #3B82F6; box-shadow: 0 4px 12px rgba(59,130,246,0.25); }
 
         .section-title {
             padding: 0 1.5rem;
@@ -330,8 +330,8 @@
 
         .job-logo {
             width: 56px; height: 56px; border-radius: 14px;
-            background: linear-gradient(135deg, #F3E8FF, #EDE9FE);
-            color: #7C3AED;
+            background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
+            color: #2563EB;
             display: flex; align-items: center; justify-content: center;
             font-weight: 700; font-size: 1.4rem; flex-shrink: 0;
         }
@@ -356,12 +356,12 @@
         /* Pattern: Kibo UI Pill + Status Dot */
         .job-tag {
             font-size: 0.7rem; padding: 3px 8px; border-radius: 999px;
-            background: rgba(139,92,246,0.06); color: #6D28D9;
-            font-weight: 600; border: 1px solid rgba(139,92,246,0.1);
+            background: rgba(59,130,246,0.06); color: #1E40AF;
+            font-weight: 600; border: 1px solid rgba(59,130,246,0.1);
         }
         .job-salary {
             font-size: 0.9rem; font-weight: 800;
-            background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+            background: linear-gradient(135deg, #3B82F6, #1E40AF);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;

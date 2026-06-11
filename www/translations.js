@@ -838,7 +838,7 @@ const translations = {
  chat_hide_confirm: 'Chat ausblenden? Er erscheint wieder, wenn der andere Nutzer schreibt.',
 
  // Settings extra
- settings_delete_prompt: 'Um dein Konto zu löschen, gib LOESCHEN ein:',
+ settings_delete_prompt: 'Um dein Konto zu löschen, gib LÖSCHEN ein:',
  settings_delete_invalid: 'Eingabe falsch. Konto wurde nicht gelöscht.',
  settings_delete_success: 'Dein Konto wurde gelöscht. Auf Wiedersehen!',
  settings_delete_keyword: 'LÖSCHEN',
@@ -1180,7 +1180,7 @@ const translations = {
  detail_workers_wg: 'Berufstätigen-WG',
  detail_international: 'Internationale WG',
  detail_smoking_yes: 'Raucher-WG',
- detail_smoking_outside: 'Rauchen nur draussen',
+ detail_smoking_outside: 'Rauchen nur draußen',
  detail_transport_excellent: 'Sehr gut',
  detail_transport_good: 'Gut',
  detail_transport_moderate: 'Mittel',

@@ -133,7 +133,7 @@
             return await this.createNotification(
                 listingOwnerId,
                 'favorite',
-                '❤️ ' + faverName + T('notif_new_favorite_body', ' hat dein Inserat zu Favoriten hinzugefuegt.'),
+                '❤️ ' + faverName + T('notif_new_favorite_body', ' hat dein Inserat zu Favoriten hinzugefügt.'),
                 '"' + listingTitle + '"',
                 listingId ? 'listing-details.html?id=' + listingId : null,
                 listingId

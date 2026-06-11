@@ -497,7 +497,7 @@
             });
             var j = await resp.json();
             if (j.polished) {
-                if (await Room8UI.confirm('AI-Vorschlag uebernehmen?\n\n' + j.polished)) ta.value = j.polished;
+                if (await Room8UI.confirm('AI-Vorschlag übernehmen?\n\n' + j.polished)) ta.value = j.polished;
             } else {
                 Room8UI.error('Fehler: ' + (j.error || 'Unbekannt'));
             }
@@ -595,7 +595,7 @@
         var appEmailV = (document.getElementById('appEmail').value || '').trim();
         var appUrlV = (document.getElementById('appUrl').value || '').trim();
         if (!appEmailV && !appUrlV) {
-            Room8UI.error('Bitte gib mindestens einen Bewerbungsweg an: Bewerbungs-E-Mail oder Bewerbungs-Link. Sonst koennen sich Studenten nicht bewerben.');
+            Room8UI.error('Bitte gib mindestens einen Bewerbungsweg an: Bewerbungs-E-Mail oder Bewerbungs-Link. Sonst können sich Studenten nicht bewerben.');
             return;
         }
         renderPreview();
@@ -626,7 +626,7 @@
         var appEmail = (document.getElementById('appEmail').value || '').trim();
         var appUrl = (document.getElementById('appUrl').value || '').trim();
         if (!appEmail && !appUrl) {
-            Room8UI.error('Bitte gib mindestens einen Bewerbungsweg an: Bewerbungs-E-Mail oder Bewerbungs-Link. Sonst koennen sich Studenten nicht bewerben.');
+            Room8UI.error('Bitte gib mindestens einen Bewerbungsweg an: Bewerbungs-E-Mail oder Bewerbungs-Link. Sonst können sich Studenten nicht bewerben.');
             return;
         }
         const btn = document.getElementById('submitBtn');

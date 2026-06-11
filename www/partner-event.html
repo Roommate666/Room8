@@ -344,7 +344,7 @@
             });
             var j = await resp.json();
             if (j.polished) {
-                if (await Room8UI.confirm('AI-Vorschlag uebernehmen?\n\n' + j.polished)) ta.value = j.polished;
+                if (await Room8UI.confirm('AI-Vorschlag übernehmen?\n\n' + j.polished)) ta.value = j.polished;
             } else {
                 Room8UI.error('Fehler: ' + (j.error || 'Unbekannt'));
             }

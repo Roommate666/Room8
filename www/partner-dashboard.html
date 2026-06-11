@@ -38,6 +38,13 @@
             padding: 0.4rem 0.7rem; border-radius: 999px;
             font-size: 0.75rem; font-weight: 700; margin-top: 0.5rem;
         }
+        .pd-item-toggle {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            background: transparent; color: #374151; cursor: pointer;
+            border: 1px solid #E5E7EB; padding: 0.4rem 0.7rem; border-radius: 999px;
+            font-size: 0.75rem; font-weight: 700; margin-top: 0.5rem; margin-left: 0.4rem;
+        }
+        .pd-item-toggle:disabled { opacity: 0.6; cursor: default; }
         .pd-action-card { background: white; border-radius: 1rem; padding: 1rem; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.05); text-decoration: none; color: inherit; transition: transform 0.2s; }
         .pd-action-card:active { transform: scale(0.97); }
         .pd-action-card .icon { font-size: 1.6rem; margin-bottom: 0.4rem; }
@@ -99,9 +106,23 @@
         <div class="pd-scan-today" id="scanTodayCount">0 heute</div>
     </a>
 
-    <!-- Inhalte werden vom Room8-Team eingestellt. Partner sehen hier nur
-         ihre Live-Inhalte + Reichweite und koennen Coupons einloesen (Scan-Banner oben).
-         Kein Selbst-Erstellen/Einreichen im Partner-Dashboard. -->
+    <!-- Einreichen: Partner reicht Inhalte zur PRUEFUNG ein (Submit-to-Admin).
+         Jede Einreichung laeuft ueber partner_submissions -> Admin gibt frei.
+         Nur Typen mit gesetztem Recht sichtbar (data-perm-Filter unten), Admin sieht alles. -->
+    <div class="pd-actions">
+        <a href="partner-coupon.html" class="pd-action-card" data-perm="partner_can_coupons" style="display:none;">
+            <div class="icon">🎟️</div>
+            <div class="label">Coupon einreichen</div>
+        </a>
+        <a href="partner-job.html" class="pd-action-card" data-perm="partner_can_jobs" style="display:none;">
+            <div class="icon">💼</div>
+            <div class="label">Job einreichen</div>
+        </a>
+        <a href="partner-event.html" class="pd-action-card" data-perm="partner_can_events" style="display:none;">
+            <div class="icon">🎉</div>
+            <div class="label">Event einreichen</div>
+        </a>
+    </div>
 
     <!-- Meine Submissions (eingereicht, noch in Pruefung) -->
     <div class="pd-section">
@@ -176,8 +197,9 @@
         document.querySelectorAll('[data-perm]').forEach(function(el) {
             var perm = el.getAttribute('data-perm');
             if (profile.is_admin || profile[perm]) {
-                if (el.id === 'scanBanner') el.style.display = 'flex';
-                // pd-action-cards bleiben mit ihrem default display (grid item)
+                // inline display:none entfernen -> CSS-Default greift
+                // (scanBanner -> flex, pd-action-card -> block/grid-item)
+                el.style.display = '';
             } else {
                 el.style.display = 'none';
             }
@@ -220,12 +242,13 @@
 
     async function loadSubmissions(userId) {
         var listEl = document.getElementById('submissionsList');
-        // partner_submissions sucht nach contact_email vom user
-        var u = await sb.auth.getUser();
-        var email = u.data.user.email;
+        // partner_submissions ueber submitter_id (feste Identitaet beim Einreichen).
+        // RLS (partner_submissions_read_own) liefert ohnehin nur submitter_id=auth.uid()
+        // bzw. Admin -> der fruehere contact_email-Filter konnte eigene Eintraege
+        // verstecken wenn Login-Mail != angegebene Kontakt-Mail war.
         var res = await sb.from('partner_submissions')
             .select('id, submission_type, title, business_name, city, status, submitted_at')
-            .eq('contact_email', email)
+            .eq('submitter_id', userId)
             .order('submitted_at', { ascending: false })
             .limit(10);
         if (res.error || !res.data || res.data.length === 0) {
@@ -258,7 +281,7 @@
 
         // Listings (jobs, gegenstand, wohnung) wo owner = user — view_count direkt
         // mitziehen, das wird in listing-details.html bei jedem Open hochgesetzt.
-        var listRes = await sb.from('listings').select('id, type, title, city, is_active, view_count, apply_clicks').eq('owner_id', userId).eq('is_active', true).limit(20);
+        var listRes = await sb.from('listings').select('id, type, title, city, is_active, view_count, apply_clicks').eq('owner_id', userId).limit(20);
         var listings = listRes.data || [];
 
         // Bewerbungen fuer alle eigenen Jobs in EINEM Query laden + nach Job gruppieren
@@ -288,12 +311,14 @@
             items.push({
                 icon: icon, title: l.title, city: l.city, id: l.id,
                 type: 'listing-' + l.type,
+                baseType: 'listing', active: l.is_active !== false,
                 stats: stats,
                 appsLink: appsLink
             });
         });
         // Coupons — current_redemptions (Klicks auf "Code kopieren") + max_redemptions
-        var coupRes = await sb.from('coupons').select('id, title, business_name, city, current_redemptions, max_redemptions').eq('user_id', userId).eq('status', 'active').limit(20);
+        // status active + inactive (pausiert) laden -> Partner kann selbst toggeln
+        var coupRes = await sb.from('coupons').select('id, title, business_name, city, current_redemptions, max_redemptions, status').eq('user_id', userId).in('status', ['active', 'inactive']).limit(20);
         (coupRes.data || []).forEach(function(c) {
             var r = c.current_redemptions || 0;
             totalRedemptions += r;
@@ -301,12 +326,14 @@
             items.push({
                 icon: '🎟️', title: c.title || c.business_name, city: c.city, id: c.id,
                 type: 'coupon',
+                baseType: 'coupon', active: c.status === 'active',
                 stats: [{ icon: '🎫', value: redLabel, label: 'Eingelöst' }],
                 scanLink: 'partner-scan.html?coupon=' + c.id
             });
         });
         // Events — view_count + interest_count direkt aus Tabelle
-        var evRes = await sb.from('events').select('id, title, city, status, view_count, interest_count').eq('organizer_id', userId).eq('status', 'active').limit(20);
+        // active + cancelled (pausiert) laden
+        var evRes = await sb.from('events').select('id, title, city, status, view_count, interest_count').eq('organizer_id', userId).in('status', ['active', 'cancelled']).limit(20);
         (evRes.data || []).forEach(function(e) {
             var ev = e.view_count || 0;
             var ei = e.interest_count || 0;
@@ -314,6 +341,7 @@
             totalInterests += ei;
             items.push({
                 icon: '🎉', title: e.title, city: e.city, id: e.id, type: 'event',
+                baseType: 'event', active: e.status === 'active',
                 stats: [
                     { icon: '👁', value: ev, label: 'Aufrufe' },
                     { icon: '✋', value: ei, label: 'Interessiert' }
@@ -326,7 +354,8 @@
         document.getElementById('totalRedemptions').textContent = totalRedemptions;
         document.getElementById('totalInterests').textContent = totalInterests;
 
-        document.getElementById('cntActive').textContent = items.length;
+        var liveCount = items.filter(function(it) { return it.active; }).length;
+        document.getElementById('cntActive').textContent = liveCount;
         if (items.length === 0) {
             listEl.innerHTML = '<div class="pd-empty">Noch keine Live-Inhalte</div>';
             return;
@@ -347,6 +376,12 @@
             var appsHtml = it.appsLink
                 ? '<a href="#" class="pd-item-scan" onclick="openApps(\'' + it.appsLink + '\'); return false;">📨 Bewerbungen ansehen</a>'
                 : '';
+            // Toggle: Live -> Pausieren, Pausiert -> Aktivieren (Submit-to-Admin: nur eigene)
+            var toggleLabel = it.active ? '⏸ Pausieren' : '▶ Aktivieren';
+            var toggleHtml = '<button type="button" class="pd-item-toggle" onclick="toggleContent(\'' + it.baseType + '\', \'' + it.id + '\', ' + (!it.active) + ', this)">' + toggleLabel + '</button>';
+            var statusBadge = it.active
+                ? '<div class="status status-active">🟢 Live</div>'
+                : '<div class="status status-inactive">⏸ Pausiert</div>';
             return '<div class="pd-item">' +
                 '<div class="meta">' +
                     '<div class="title">' + it.icon + ' ' + Room8.escapeHtml(it.title || '-') + '</div>' +
@@ -354,11 +389,31 @@
                     statsHtml +
                     scanHtml +
                     appsHtml +
+                    toggleHtml +
                 '</div>' +
-                '<div class="status status-active">🟢 Live</div>' +
+                statusBadge +
             '</div>';
         }).join('');
     }
+
+    // (c) Partner pausiert/aktiviert eigene Live-Inhalte (RPC mit Owner-Check)
+    window.toggleContent = async function (baseType, id, makeActive, btn) {
+        if (!makeActive) {
+            var ok = await Room8UI.confirm('Diesen Inhalt pausieren? Studenten sehen ihn dann nicht mehr.', { danger: true });
+            if (!ok) return;
+        }
+        var orig = btn.textContent;
+        btn.disabled = true; btn.textContent = '...';
+        try {
+            var res = await sb.rpc('partner_set_content_active', { p_type: baseType, p_id: id, p_active: makeActive });
+            if (res.error) throw res.error;
+            Room8UI.success(makeActive ? 'Wieder aktiv' : 'Pausiert');
+            await loadActive(_pdUserId);
+        } catch (e) {
+            btn.disabled = false; btn.textContent = orig;
+            Room8UI.error('Konnte nicht geändert werden.');
+        }
+    };
 
     // ===== Bewerbungen-Ansicht =====
     function escAttr(s) { return Room8.escapeHtml(String(s || '')); }

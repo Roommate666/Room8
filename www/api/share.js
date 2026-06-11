@@ -33,7 +33,7 @@ module.exports = async (req, res) => {
   const appUrl = 'https://www.room8.club/' + cfg.page + (id ? '?id=' + encodeURIComponent(id) : '');
 
   let title = 'Room8 - Studenten-Wohnungen & Marktplatz';
-  let desc = 'Finde dein WG-Zimmer, deine Wohnung oder verkaufe Sachen - alles fuer Studenten.';
+  let desc = 'Finde dein WG-Zimmer, deine Wohnung oder verkaufe Sachen - alles für Studenten.';
   let image = 'https://www.room8.club/icons/og-default.jpg';
 
   try {
@@ -51,7 +51,7 @@ module.exports = async (req, res) => {
           // Wohnungen NIE oeffentlich preview-bar (Untervermietungs-Schutz fuer Studenten).
           // Generische Karte + Redirect in die App (Login), keine Wohnungs-Details/Fotos.
           title = 'Room8 - Studenten-Wohnungen';
-          desc = 'WG-Zimmer und Wohnungen fuer Studenten. Sichtbar nur fuer eingeloggte, verifizierte Studenten in der App.';
+          desc = 'WG-Zimmer und Wohnungen für Studenten. Sichtbar nur für eingeloggte, verifizierte Studenten in der App.';
         } else if (t === 'listing') {
           const typ = TYPE_LABEL[l.room_type] || 'Angebot';
           const price = l.monthly_rent ? (l.monthly_rent + ' EUR/Monat') : (l.price ? (l.price + ' EUR') : '');
