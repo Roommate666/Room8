@@ -730,7 +730,7 @@
                 var ownerMap = {};
                 if (ownerIds.length > 0) {
                     const { data: owners } = await sb
-                        .from('profiles')
+                        .from('admin_profiles')
                         .select('id, email, full_name, username')
                         .in('id', ownerIds);
                     if (owners) owners.forEach(o => ownerMap[o.id] = o);
@@ -830,7 +830,7 @@
 
         // Lade alle Profile die irgendeine Art von Verifizierung haben
         const { data: profiles, error } = await sb
-            .from('profiles')
+            .from('admin_profiles')
             .select('*')
             .order('created_at', { ascending: false });
 
@@ -1530,7 +1530,7 @@
         const search = document.getElementById('userSearch').value.trim();
 
         // Server-side Search via ilike (statt client-filter auf 20er-Slice)
-        let query = sb.from('profiles')
+        let query = sb.from('admin_profiles')
             .select('*')
             .order('created_at', { ascending: false })
             .limit(100);
