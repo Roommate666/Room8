@@ -176,13 +176,13 @@
             full_name: fullName,
             city: city,
             updated_at: new Date().toISOString()
-          }).eq('id', user.id).select();
+          }).eq('id', user.id).select('id');
 
 
           if (upd.error) {
             // Falls Update wegen "no row" fehlschlaegt -> Insert
             console.warn('[complete-profile] Update failed, trying insert:', upd.error);
-            var ins = await sb.from('profiles').insert(payload).select();
+            var ins = await sb.from('profiles').insert(payload).select('id');
             if (ins.error) {
               errEl.textContent = 'Fehler: ' + (ins.error.message || JSON.stringify(ins.error));
               btn.disabled = false; btn.textContent = 'Profil speichern';
@@ -191,7 +191,7 @@
           } else if (!upd.data || upd.data.length === 0) {
             // Update lief, aber keine Zeile betroffen -> Insert
             console.warn('[complete-profile] Update returned no rows, trying insert');
-            var ins2 = await sb.from('profiles').insert(payload).select();
+            var ins2 = await sb.from('profiles').insert(payload).select('id');
             if (ins2.error) {
               errEl.textContent = 'Fehler: ' + (ins2.error.message || JSON.stringify(ins2.error));
               btn.disabled = false; btn.textContent = 'Profil speichern';
