@@ -356,6 +356,11 @@
     </div>
     
     <main style="flex:1;">
+        <a id="verifyBanner" href="verify-options.html" style="display:none; align-items:center; gap:0.75rem; margin:0 1rem 1rem; padding:0.85rem 1rem; border-radius:16px; background:linear-gradient(135deg,#3B82F6 0%,#14B8A6 100%); color:#fff; text-decoration:none; box-shadow:0 10px 24px rgba(20,184,166,0.28);">
+            <span style="font-size:1.6rem;">🎓</span>
+            <span style="flex:1; line-height:1.3;"><b style="display:block; font-size:0.95rem;">Fast drin! Verifizier dich</b><small style="opacity:0.92; font-size:0.78rem;">1 Min mit Uni-Mail → alle Rabatte freischalten</small></span>
+            <span style="font-size:1.4rem;">→</span>
+        </a>
         <div class="coupon-list" id="couponContainer"></div>
     </main>
     
@@ -689,6 +694,19 @@
     // Start - nur echte Coupons laden
     allCoupons = [];
     loadCoupons();
+
+    // Verify-Banner fuer Unverifizierte (sehen Coupons = Motivation, klarer Anstoss zum Freischalten)
+    (function showVerifyBanner() {
+        try {
+            sb.from('my_profile').select('is_verified, is_student_verified').maybeSingle().then(function (r) {
+                var p = r && r.data; if (!p) return;
+                if (!(p.is_verified || p.is_student_verified)) {
+                    var b = document.getElementById('verifyBanner');
+                    if (b) b.style.display = 'flex';
+                }
+            }).catch(function () {});
+        } catch (e) {}
+    })();
 </script>
 </body>
 </html>
