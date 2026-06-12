@@ -86,19 +86,27 @@
       align-items: center; justify-content: center;
       padding: calc(6rem + env(safe-area-inset-top, 0px)) 1.5rem 4rem; text-align: center;
       position: relative; overflow: hidden;
-      background: linear-gradient(180deg, #EFF6FF 0%, #F7F7F5 100%);
+      background: #F7F9FF;
     }
+    /* Lebendige Farb-Aurora: Blau=Rabatte, Teal=Events, Amber=Jobs */
     .lp-hero::before {
-      content: ''; position: absolute; top: -50%; right: -30%;
-      width: 600px; height: 600px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+      content: ''; position: absolute; inset: -25%;
+      background:
+        radial-gradient(42% 46% at 15% 16%, rgba(59,130,246,0.48) 0%, transparent 60%),
+        radial-gradient(40% 44% at 88% 22%, rgba(20,184,166,0.42) 0%, transparent 60%),
+        radial-gradient(48% 52% at 50% 96%, rgba(245,158,11,0.32) 0%, transparent 62%);
+      filter: blur(14px);
+      animation: lpAurora 18s ease-in-out infinite alternate;
       pointer-events: none;
     }
     .lp-hero::after {
-      content: ''; position: absolute; bottom: -40%; left: -20%;
-      width: 500px; height: 500px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(59,130,246,0.05) 0%, transparent 70%);
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(247,249,255,0) 60%, #F7F7F5 100%);
       pointer-events: none;
+    }
+    @keyframes lpAurora {
+      0%   { transform: translate3d(0, 0, 0) scale(1); }
+      100% { transform: translate3d(0, -3%, 0) scale(1.08); }
     }
     .lp-hero-content {
       position: relative; z-index: 2; max-width: 620px;
@@ -124,7 +132,11 @@
       font-size: 2.5rem; font-weight: 800; line-height: 1.1;
       letter-spacing: -0.03em; margin-bottom: 1rem; color: #1A1A2E;
     }
-    .lp-hero h1 span { color: #3B82F6; }
+    .lp-hero h1 span {
+      background: linear-gradient(120deg, #3B82F6 0%, #14B8A6 55%, #2563EB 100%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; color: #3B82F6;
+    }
     .lp-hero-sub {
       font-size: 1.1rem; color: #64748B; line-height: 1.6;
       max-width: 480px; margin: 0 auto 2rem;
@@ -135,6 +147,32 @@
       animation: blurFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 1.8s both;
     }
     .lp-hero-actions .lp-btn { flex: 0 1 auto; min-width: 140px; }
+    /* Produkt-Vorschau-Cards: Student sieht sofort was er kriegt */
+    .lp-hero-preview {
+      display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;
+      max-width: 400px; margin: 1.5rem auto 0;
+      animation: blurFadeIn 0.6s cubic-bezier(0.4,0,0.2,1) 2s both;
+    }
+    .lp-pcard {
+      display: flex; align-items: center; gap: 0.55rem;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: 14px; padding: 0.6rem 0.8rem;
+      box-shadow: 0 10px 26px rgba(30,64,175,0.12);
+      text-align: left; animation: lpFloatY 4s ease-in-out infinite;
+    }
+    .lp-pcard:nth-child(2) { animation-delay: 0.7s; }
+    .lp-pcard:nth-child(3) { animation-delay: 1.4s; }
+    .lp-pcard .ic { font-size: 1.25rem; line-height: 1; }
+    .lp-pcard b { display: block; font-size: 0.82rem; font-weight: 800; color: #1A1A2E; }
+    .lp-pcard small { display: block; font-weight: 600; color: #64748B; font-size: 0.68rem; }
+    @keyframes lpFloatY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    .lp-trust {
+      margin-top: 1.25rem; font-size: 0.82rem; color: #64748B; font-weight: 700;
+      letter-spacing: 0.01em;
+      animation: blurFadeIn 0.6s cubic-bezier(0.4,0,0.2,1) 2.2s both;
+    }
     .lp-btn {
       display: block; padding: 0.75rem 1.25rem; border-radius: 999px;
       font-size: 0.95rem; font-weight: 700; text-decoration: none;
@@ -441,7 +479,8 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .lp-hero-content, .lp-hero-actions, .lp-scroll-hint { animation: none !important; opacity: 1; }
+      .lp-hero-content, .lp-hero-actions, .lp-scroll-hint, .lp-hero-preview, .lp-trust { animation: none !important; opacity: 1; }
+      .lp-hero::before, .lp-pcard { animation: none !important; }
       .lp-btn--primary::after { animation: none; }
       .fade-in { opacity: 1; transform: none; transition: none; }
     }
@@ -531,16 +570,22 @@
     <div class="lp-hero-content">
       <div class="lp-badge">
         <span class="lp-badge-dot"></span>
-        Exklusiv für Studenten
+        Exklusiv für verifizierte Studenten
       </div>
       <h1>Studium kostet genug.<br><span>Spar, wo's geht.</span></h1>
       <p class="lp-hero-sub">
-        Exklusive Studentenrabatte, Nebenjobs und Events aus deiner Unistadt - gebündelt in einer App. Nur für verifizierte Studenten. Komplett kostenlos.
+        Rabatte, Nebenjobs und Events aus deiner Unistadt - alles in einer App. Komplett kostenlos.
       </p>
       <div class="lp-hero-actions">
         <a href="register.html" class="lp-btn lp-btn--primary">Kostenlos starten</a>
-        <a href="#problem" class="lp-btn lp-btn--outline">Was ist das Problem?</a>
+        <a href="#problem" class="lp-btn lp-btn--outline">Mehr erfahren</a>
       </div>
+      <div class="lp-hero-preview">
+        <div class="lp-pcard"><span class="ic">🎟️</span><span><b>-20%</b><small>Cafés &amp; Läden</small></span></div>
+        <div class="lp-pcard"><span class="ic">💼</span><span><b>Nebenjobs</b><small>in deiner Stadt</small></span></div>
+        <div class="lp-pcard"><span class="ic">🎉</span><span><b>Events</b><small>vom Campus</small></span></div>
+      </div>
+      <div class="lp-trust">📍 Ulm · Augsburg · Neu-Ulm</div>
     </div>
     <div class="lp-scroll-hint">
       <span>Scroll</span>
