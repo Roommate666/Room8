@@ -162,12 +162,32 @@
       box-shadow: 0 10px 26px rgba(30,64,175,0.12);
       text-align: left; animation: lpFloatY 4s ease-in-out infinite;
     }
-    .lp-pcard:nth-child(2) { animation-delay: 0.7s; }
-    .lp-pcard:nth-child(3) { animation-delay: 1.4s; }
+    .lp-pcard { --rot: 0deg; }
+    .lp-pcard:nth-child(1) { --rot: -3deg; }
+    .lp-pcard:nth-child(2) { --rot: 2deg; animation-delay: 0.7s; }
+    .lp-pcard:nth-child(3) { --rot: -1.5deg; animation-delay: 1.4s; }
     .lp-pcard .ic { font-size: 1.25rem; line-height: 1; }
     .lp-pcard b { display: block; font-size: 0.82rem; font-weight: 800; color: #1A1A2E; }
     .lp-pcard small { display: block; font-weight: 600; color: #64748B; font-size: 0.68rem; }
-    @keyframes lpFloatY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    @keyframes lpFloatY {
+      0%,100% { transform: translateY(0) rotate(var(--rot)); }
+      50% { transform: translateY(-7px) rotate(var(--rot)); }
+    }
+    /* Verspielt: bunte Confetti-Punkte im Hero */
+    .lp-confetti { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+    .lp-confetti i {
+      position: absolute; width: 11px; height: 11px; border-radius: 3px;
+      opacity: 0.75; animation: lpDrift 8s ease-in-out infinite;
+    }
+    .lp-confetti i:nth-child(1) { left: 10%; top: 22%; background: #3B82F6; transform: rotate(20deg); }
+    .lp-confetti i:nth-child(2) { left: 86%; top: 30%; background: #14B8A6; border-radius: 50%; animation-delay: 1.2s; }
+    .lp-confetti i:nth-child(3) { left: 78%; top: 70%; background: #F59E0B; transform: rotate(35deg); animation-delay: 2.1s; }
+    .lp-confetti i:nth-child(4) { left: 16%; top: 64%; background: #F59E0B; border-radius: 50%; animation-delay: 0.6s; }
+    .lp-confetti i:nth-child(5) { left: 50%; top: 14%; background: #14B8A6; transform: rotate(15deg); animation-delay: 3s; }
+    @keyframes lpDrift {
+      0%,100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-14px) rotate(25deg); }
+    }
     .lp-trust {
       margin-top: 1.25rem; font-size: 0.82rem; color: #64748B; font-weight: 700;
       letter-spacing: 0.01em;
@@ -180,6 +200,8 @@
       border: none; cursor: pointer;
     }
     .lp-btn:active { transform: scale(0.97); }
+    .lp-btn--primary:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 12px 24px rgba(37,99,235,0.32); }
+    .lp-btn--outline:hover { transform: translateY(-2px); border-color: #14B8A6; color: #0F766E; }
     .lp-btn--primary {
       background: linear-gradient(135deg, #3B82F6, #2563EB); color: white;
       box-shadow: 0 6px 14px rgba(37,99,235,0.22);
@@ -480,7 +502,8 @@
 
     @media (prefers-reduced-motion: reduce) {
       .lp-hero-content, .lp-hero-actions, .lp-scroll-hint, .lp-hero-preview, .lp-trust { animation: none !important; opacity: 1; }
-      .lp-hero::before, .lp-pcard { animation: none !important; }
+      .lp-hero::before, .lp-pcard, .lp-confetti i { animation: none !important; }
+      .lp-confetti { display: none; }
       .lp-btn--primary::after { animation: none; }
       .fade-in { opacity: 1; transform: none; transition: none; }
     }
@@ -567,6 +590,7 @@
 
   <!-- Hero: Problem-first -->
   <section class="lp-hero">
+    <div class="lp-confetti" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
     <div class="lp-hero-content">
       <div class="lp-badge">
         <span class="lp-badge-dot"></span>

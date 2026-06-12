@@ -360,20 +360,6 @@
             >
           </div>
 
-          <div class="form-group">
-            <label for="passwordConfirm" data-i18n="auth_confirm_password">Passwort bestätigen</label>
-            <input
-              type="password"
-              id="passwordConfirm"
-              name="passwordConfirm"
-              required
-              minlength="6"
-              autocomplete="new-password"
-              data-i18n-placeholder="register_password_confirm_placeholder"
-              placeholder="Passwort wiederholen"
-            >
-          </div>
-
           <div class="form-group" style="margin-bottom: 1.5rem;">
             <label class="checkbox-container" style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; font-weight: normal; font-size: 0.9rem; color: #4b5563;">
               <input
@@ -388,15 +374,6 @@
                 <a href="nutzungsbedingungen.html" target="_blank" style="color: var(--primary-color); text-decoration: underline;" data-i18n="register_terms_link">Nutzungsbedingungen (AGB)</a>
                 <span data-i18n="register_terms_and">und die</span>
                 <a href="datenschutz.html" target="_blank" style="color: var(--primary-color); text-decoration: underline;" data-i18n="register_privacy_link">Datenschutzerklärung</a>
-              </span>
-            </label>
-          </div>
-
-          <div class="form-group" style="margin-bottom: 0.75rem; padding: 0.6rem; background: #F0F9FF; border: 1px solid #BFDBFE; border-radius: 10px;">
-            <label style="display: flex; gap: 0.5rem; align-items: flex-start; cursor: pointer;">
-              <input type="checkbox" id="isPartner" style="margin-top: 0.2rem;">
-              <span style="font-size: 0.85rem; color: #1E40AF; line-height: 1.4;">
-                <strong>Ich bin Partner</strong> (Bar, Verein, Unternehmen, Veranstalter) — gibt Zugriff aufs Partner-Dashboard zum Inserieren.
               </span>
             </label>
           </div>
@@ -461,7 +438,6 @@
       var username = document.getElementById('username').value.trim();
       var email = document.getElementById('email').value.trim().toLowerCase();
       var password = document.getElementById('password').value;
-      var passwordConfirm = document.getElementById('passwordConfirm').value;
 
       var lang = localStorage.getItem('room8_language') || 'en';
       var messages = {
@@ -502,11 +478,6 @@
         return;
       }
 
-      if (password !== passwordConfirm) {
-        setMsg(m.mismatch, false);
-        return;
-      }
-
       if (password.length < 6) {
         setMsg(m.short, false);
         return;
@@ -515,26 +486,18 @@
       registerBtn.disabled = true;
       setMsg(m.creating, true);
 
-      var isPartnerChecked = document.getElementById('isPartner') && document.getElementById('isPartner').checked;
       sb.auth.signUp({
         email: email,
         password: password,
         options: {
           data: {
-            username: username,
-            is_partner: isPartnerChecked
+            username: username
           }
         }
       })
       .then(async function(response) {
         if (response.error) {
           throw response.error;
-        }
-        // is_partner Flag in profiles setzen wenn Checkbox angehakt
-        if (isPartnerChecked && response.data.user) {
-          try {
-            await sb.from('profiles').update({ is_partner: true }).eq('id', response.data.user.id);
-          } catch (e) { console.warn('is_partner update failed:', e); }
         }
 
         // Supabase gibt bei bereits existierender Email ein User-Objekt
