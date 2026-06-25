@@ -2,16 +2,16 @@ const puppeteer = require('puppeteer');
 const path = require('path');
 
 const files = [
-    { html: 'sticker-a7.html',   pdf: 'Room8-Sticker-A7.pdf',  width: '74mm',  height: '105mm' },
-    { html: 'flyer-a5.html',     pdf: 'Room8-Flyer-A5.pdf',    width: '148mm', height: '210mm' },
-    { html: 'flyer-final.html',  pdf: 'Room8-Flyer-A4.pdf',    width: '210mm', height: '297mm' },
-    { html: 'plakat-a3.html',    pdf: 'Room8-Plakat-A3.pdf',   width: '297mm', height: '420mm' },
-    { html: 'plakat-a2.html',    pdf: 'Room8-Plakat-A2.pdf',   width: '420mm', height: '594mm' },
-    { html: 'plakat-a1.html',    pdf: 'Room8-Plakat-A1.pdf',   width: '594mm', height: '841mm' },
+    { html: 'sticker-a7.html',   pdf: 'UniGoat-Sticker-A7.pdf',  width: '74mm',  height: '105mm' },
+    { html: 'flyer-a5.html',     pdf: 'UniGoat-Flyer-A5.pdf',    width: '148mm', height: '210mm' },
+    { html: 'flyer-final.html',  pdf: 'UniGoat-Flyer-A4.pdf',    width: '210mm', height: '297mm' },
+    { html: 'plakat-a3.html',    pdf: 'UniGoat-Plakat-A3.pdf',   width: '297mm', height: '420mm' },
+    { html: 'plakat-a2.html',    pdf: 'UniGoat-Plakat-A2.pdf',   width: '420mm', height: '594mm' },
+    { html: 'plakat-a1.html',    pdf: 'UniGoat-Plakat-A1.pdf',   width: '594mm', height: '841mm' },
 ];
 
 const srcDir = path.join(__dirname, 'www');
-const outDir = 'C:\\Users\\yusuf\\Desktop\\Room8-Druckdateien';
+const outDir = 'C:\\Users\\yusuf\\Desktop\\UniGoat-Druckdateien';
 
 (async () => {
     const browser = await puppeteer.launch({

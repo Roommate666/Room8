@@ -1,5 +1,5 @@
 // =============================================================
-// Room8 Saves - Universelles Speichern fuer Coupons / Jobs / Events
+// UniGoat Saves - Universelles Speichern fuer Coupons / Jobs / Events
 // Nutzt Tabelle saved_items (Mig 20260608000001).
 // API:
 //   Room8Saves.load()                 -> laedt alle gespeicherten IDs des Users (Promise)

@@ -4,8 +4,8 @@
     <script src="sentry-init.js"></script>
     <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-    <title data-i18n="faq_page_title">Hilfe & FAQ - Room8</title>
-    <meta name="description" content="Häufig gestellte Fragen zur Room8 App. Hilfe zu WG-Suche, Marktplatz, Jobs und Coupons für Studenten.">
+    <title data-i18n="faq_page_title">Hilfe & FAQ - UniGoat</title>
+    <meta name="description" content="Häufig gestellte Fragen zur UniGoat App. Hilfe zu WG-Suche, Marktplatz, Jobs und Coupons für Studenten.">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -270,11 +270,11 @@
 
                 <div class="faq-item">
                     <div class="faq-question" onclick="toggleFaq(this)">
-                        <span data-i18n="faq_q1">Was ist Room8?</span>
+                        <span data-i18n="faq_q1">Was ist UniGoat?</span>
                         <span class="faq-arrow">▼</span>
                     </div>
                     <div class="faq-answer"><div class="faq-answer-inner">
-                        <p data-i18n="faq_a1_intro">Room8 ist die exklusive Plattform von Studenten für Studenten. Hier kannst du:</p>
+                        <p data-i18n="faq_a1_intro">UniGoat ist die exklusive Plattform von Studenten für Studenten. Hier kannst du:</p>
                         <ul style="padding-left: 1.2rem; margin-top: 0.5rem;">
                             <li data-i18n="faq_a1_li1">Wohnungen & WG-Zimmer finden oder anbieten</li>
                             <li data-i18n="faq_a1_li2">Gegenstände (Möbel, Technik) verkaufen</li>
@@ -286,7 +286,7 @@
 
                 <div class="faq-item">
                     <div class="faq-question" onclick="toggleFaq(this)">
-                        <span data-i18n="faq_q2">Ist Room8 kostenlos?</span>
+                        <span data-i18n="faq_q2">Ist UniGoat kostenlos?</span>
                         <span class="faq-arrow">▼</span>
                     </div>
                     <div class="faq-answer"><div class="faq-answer-inner">
@@ -473,7 +473,7 @@
             if (error) {
                 console.error('Supabase error:', error);
                 // Fallback: Mailto öffnen
-                const subject = encodeURIComponent('Room8 Support: ' + (category || 'Anfrage'));
+                const subject = encodeURIComponent('UniGoat Support: ' + (category || 'Anfrage'));
                 const body = encodeURIComponent('Name: ' + name + '\nEmail: ' + email + '\n\nNachricht:\n' + msg);
                 window.location.href = 'mailto:help@room8.club?subject=' + subject + '&body=' + body;
                 return;
@@ -490,7 +490,7 @@
             btn.innerText = "Nachricht senden";
 
             // Fallback: Mailto öffnen
-            const subject = encodeURIComponent('Room8 Support: ' + (category || 'Anfrage'));
+            const subject = encodeURIComponent('UniGoat Support: ' + (category || 'Anfrage'));
             const body = encodeURIComponent('Name: ' + name + '\nEmail: ' + email + '\n\nNachricht:\n' + msg);
             window.location.href = 'mailto:help@room8.club?subject=' + subject + '&body=' + body;
         }

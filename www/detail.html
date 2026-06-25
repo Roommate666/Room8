@@ -5,7 +5,7 @@
     <script src="features.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-    <title>Details - Room8</title>
+    <title>Details - UniGoat</title>
     <link rel="stylesheet" href="style.css">
     <style>
         #listing-detail-container { padding: 0; }
@@ -282,7 +282,7 @@
             <span data-i18n="general_back">Zurück</span>
         </a>
         <div style="display:flex; gap:0.5rem; align-items:center;">
-            <button id="shareListingBtn" onclick="Room8Share({ id: listingId, title: (window.__shareTitle || 'Room8'), text: 'Schau dir das auf Room8 an' })" title="Teilen" style="background:#EEF2FF; color:#4F46E5; border:none; height:36px; padding:0 0.85rem; border-radius:999px; cursor:pointer; display:flex; align-items:center; gap:0.4rem; font-weight:600; font-size:0.9rem;">
+            <button id="shareListingBtn" onclick="Room8Share({ id: listingId, title: (window.__shareTitle || 'UniGoat'), text: 'Schau dir das auf UniGoat an' })" title="Teilen" style="background:#EEF2FF; color:#4F46E5; border:none; height:36px; padding:0 0.85rem; border-radius:999px; cursor:pointer; display:flex; align-items:center; gap:0.4rem; font-weight:600; font-size:0.9rem;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                 Teilen
             </button>
@@ -309,7 +309,7 @@
 <script>
     // Supabase Client - Direkte Initialisierung
     var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    var esc = (typeof Room8 !== 'undefined') ? Room8.escapeHtml : function(t) { return t ? String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;") : ''; };
+    var esc = (typeof UniGoat !== 'undefined') ? Room8.escapeHtml : function(t) { return t ? String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;") : ''; };
 
     function getT(key) {
         var lang = localStorage.getItem('room8_language') || localStorage.getItem('language') || 'de';
@@ -508,7 +508,7 @@
                 if (listingResponse.error) throw listingResponse.error;
                 var listing = listingResponse.data;
                 if (!listing) throw new Error('Listing nicht gefunden.');
-                window.__shareTitle = listing.title || 'Room8';
+                window.__shareTitle = listing.title || 'UniGoat';
                 // Wohnungen NICHT oeffentlich teilbar (Untervermietungs-Risiko fuer Studenten).
                 // Teilen nur fuer Marktplatz/Gegenstaende etc.
                 var _shareBtn = document.getElementById('shareListingBtn');

@@ -10,7 +10,7 @@
     var shareUrl = id
       ? ('https://www.room8.club/s/' + encodeURIComponent(id) + typeQuery)
       : (opts.url || window.location.href);
-    var data = { title: opts.title || 'Room8', text: opts.text || '', url: shareUrl };
+    var data = { title: opts.title || 'UniGoat', text: opts.text || '', url: shareUrl };
 
     if (navigator.share) {
       navigator.share(data).catch(function () { /* User-Abbruch ignorieren */ });

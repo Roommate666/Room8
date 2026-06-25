@@ -17,9 +17,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
 }
 
-const FROM_ADDRESS = 'Room8 <noreply@room8.club>'
+const FROM_ADDRESS = 'UniGoat <noreply@room8.club>'
 
-// Jugendliches, buntes Room8-Mail-Template. Bettet den uebergebenen HTML-Body
+// Jugendliches, buntes UniGoat-Mail-Template. Bettet den uebergebenen HTML-Body
 // in einen Brand-Wrapper (bunter Gradient-Header, weisse Card, freundlicher Footer).
 // Aufrufer koennen mit skipWrap:true das rohe HTML behalten.
 function wrapEmail(innerHtml: string, preheader?: string): string {
@@ -40,11 +40,11 @@ function wrapEmail(innerHtml: string, preheader?: string): string {
     <tr><td style="padding:20px 28px 28px;">
       <div style="border-top:1px solid #EEF0F3;padding-top:18px;text-align:center;">
         <div style="font-size:13px;color:#6B7280;line-height:1.5;">Studentenrabatte ☕ · Nebenjobs 💼 · Events 🎉<br>Alles für deine Unistadt — kostenlos &amp; nur für verifizierte Studenten.</div>
-        <div style="font-size:12px;color:#9CA3AF;margin-top:14px;">Room8 · <a href="https://www.room8.club" style="color:#3B82F6;text-decoration:none;">room8.club</a></div>
+        <div style="font-size:12px;color:#9CA3AF;margin-top:14px;">UniGoat · <a href="https://www.room8.club" style="color:#3B82F6;text-decoration:none;">room8.club</a></div>
       </div>
     </td></tr>
   </table>
-  <div style="font-size:11px;color:#B6BCC6;margin-top:16px;">Du bekommst diese Mail, weil du bei Room8 dabei bist.</div>
+  <div style="font-size:11px;color:#B6BCC6;margin-top:16px;">Du bekommst diese Mail, weil du bei UniGoat dabei bist.</div>
 </td></tr></table>
 </body></html>`
 }
@@ -118,7 +118,7 @@ serve(async (req) => {
     const parsed = await req.json()
     to = parsed.to ?? null
     subject = parsed.subject ?? null
-    // HTML in das bunte Room8-Brand-Template einbetten (ausser skipWrap:true)
+    // HTML in das bunte UniGoat-Brand-Template einbetten (ausser skipWrap:true)
     const html = parsed.html
       ? (parsed.skipWrap === true ? parsed.html : wrapEmail(parsed.html, parsed.subject))
       : parsed.html

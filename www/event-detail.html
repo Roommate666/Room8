@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="robots" content="noindex, nofollow, noarchive">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-    <title>Event - Room8</title>
+    <title>Event - UniGoat</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="stylesheet" href="style.css">
@@ -569,7 +569,7 @@
     function shareEvent() {
         // Geteilt wird /s/<id>?t=event -> Server-Side-OG-Vorschau (Bild+Titel) -> App
         var id = new URLSearchParams(window.location.search).get('id');
-        var title = currentEvent ? currentEvent.title : 'Room8 Event';
+        var title = currentEvent ? currentEvent.title : 'UniGoat Event';
         var url = id ? ('https://www.room8.club/s/' + encodeURIComponent(id) + '?t=event') : window.location.href;
         if (navigator.share) {
             navigator.share({ title: title, url: url }).catch(function(){});

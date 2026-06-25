@@ -4,7 +4,7 @@
 <script src="sentry-init.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Gast-Inserate freigeben - Room8 Admin</title>
+<title>Gast-Inserate freigeben - UniGoat Admin</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f3f4f6; color: #111827; }
@@ -36,7 +36,7 @@
 <script>
   var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   var listEl = document.getElementById('list');
-  // Fester System-Account "Room8 Vermieter" besitzt alle Gast-Inserate (owner_id ist NOT NULL).
+  // Fester System-Account "UniGoat Vermieter" besitzt alle Gast-Inserate (owner_id ist NOT NULL).
   // Echter Kontakt laeuft ueber guest_listings.contact_email (via created_listing_id verknuepft).
   var GUEST_OWNER_ID = 'a7f9f1bb-7319-49ed-bb0b-14c91a1d1832';
 

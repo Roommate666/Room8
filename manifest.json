@@ -1,6 +1,6 @@
 {
-  "name": "Room8 - Dein Campus. Dein Deal.",
-  "short_name": "Room8",
+  "name": "UniGoat - Dein Campus. Dein Deal.",
+  "short_name": "UniGoat",
   "description": "Die exklusive Plattform von Studenten, für Studenten. Finde Wohnungen, verkaufe Gegenstände und finde Jobs.",
   "start_url": "/wohnungen.html",
   "display": "standalone",

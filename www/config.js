@@ -7,7 +7,7 @@ var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 var APP_CONFIG = {
     // App Info
-    name: 'Room8',
+    name: 'UniGoat',
     version: '1.0.0',
     
     // Supabase Configuration

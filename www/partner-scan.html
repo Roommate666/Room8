@@ -4,7 +4,7 @@
     <script src="sentry-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-    <title>Coupon scannen - Room8</title>
+    <title>Coupon scannen - UniGoat</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="style.css">
     <script src="lib/html5-qrcode.min.js"></script>
@@ -161,7 +161,7 @@
             console.warn('QR-Scanner Start:', e && e.name, e && e.message);
             const name = (e && e.name) || '';
             if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
-                setStatus(ti('scan_perm_denied', 'Kamera-Zugriff verweigert. Bitte in den Geräte-Einstellungen erlauben: Einstellungen → Apps → Room8 → Berechtigungen → Kamera.'), 'error');
+                setStatus(ti('scan_perm_denied', 'Kamera-Zugriff verweigert. Bitte in den Geräte-Einstellungen erlauben: Einstellungen → Apps → UniGoat → Berechtigungen → Kamera.'), 'error');
             } else if (name === 'NotFoundError' || name === 'OverconstrainedError') {
                 setStatus(ti('scan_no_camera', 'Keine passende Kamera gefunden. Nutze "Manuell eingeben".'), 'error');
             } else if (name === 'NotReadableError') {
@@ -183,7 +183,7 @@
         if (isProcessing) return;
         const m = decodedText.match(QR_REGEX);
         if (!m) {
-            setStatus(ti('scan_invalid_qr', 'Kein gültiger Room8-QR. Versuche es erneut.'), 'error');
+            setStatus(ti('scan_invalid_qr', 'Kein gültiger UniGoat-QR. Versuche es erneut.'), 'error');
             return;
         }
         isProcessing = true;

@@ -1,4 +1,4 @@
-// translations.js - Sprachunterstützung für Room8
+// translations.js - Sprachunterstützung für UniGoat
 
 
 
@@ -63,7 +63,7 @@ const translations = {
 
  // Housing Page
 
- housing_page_title: 'Wohnungen - Room8',
+ housing_page_title: 'Wohnungen - UniGoat',
 
  housing_header: 'Housing',
 
@@ -73,7 +73,7 @@ const translations = {
 
  // Marketplace Page
 
- marketplace_page_title: 'Marktplatz - Room8',
+ marketplace_page_title: 'Marktplatz - UniGoat',
 
  marketplace_header: 'Marktplatz',
 
@@ -389,7 +389,7 @@ const translations = {
 
  // Register
 
- register_join: 'Tritt Room8 bei',
+ register_join: 'Tritt UniGoat bei',
 
  register_subtitle: 'Erstelle dein Konto und sichere dir Studentenrabatte, Jobs und Events',
 
@@ -910,24 +910,24 @@ const translations = {
  notif_new_favorite_body: ' hat dein Inserat zu Favoriten hinzugefügt.',
 
  // Page Titles
- page_title_dashboard: 'Room8 — Studenten-Plattform',
- page_title_login: 'Anmelden — Room8',
- page_title_register: 'Registrieren — Room8',
- page_title_wohnungen: 'Wohnungen — Room8',
- page_title_gegenstaende: 'Marktplatz — Room8',
- page_title_jobs: 'Jobs — Room8',
- page_title_coupons: 'Coupons — Room8',
- page_title_events: 'Events — Room8',
- page_title_messages: 'Nachrichten — Room8',
- page_title_profile: 'Profil — Room8',
- page_title_settings: 'Einstellungen — Room8',
- page_title_favorites: 'Favoriten — Room8',
- page_title_notifications: 'Aktivitäten — Room8',
- page_title_faq: 'Hilfe & FAQ — Room8',
- page_title_disclaimer: 'Disclaimer — Room8',
- page_title_imprint: 'Impressum — Room8',
- page_title_terms: 'AGB — Room8',
- page_title_privacy: 'Datenschutz — Room8',
+ page_title_dashboard: 'UniGoat — Studenten-Plattform',
+ page_title_login: 'Anmelden — UniGoat',
+ page_title_register: 'Registrieren — UniGoat',
+ page_title_wohnungen: 'Wohnungen — UniGoat',
+ page_title_gegenstaende: 'Marktplatz — UniGoat',
+ page_title_jobs: 'Jobs — UniGoat',
+ page_title_coupons: 'Coupons — UniGoat',
+ page_title_events: 'Events — UniGoat',
+ page_title_messages: 'Nachrichten — UniGoat',
+ page_title_profile: 'Profil — UniGoat',
+ page_title_settings: 'Einstellungen — UniGoat',
+ page_title_favorites: 'Favoriten — UniGoat',
+ page_title_notifications: 'Aktivitäten — UniGoat',
+ page_title_faq: 'Hilfe & FAQ — UniGoat',
+ page_title_disclaimer: 'Disclaimer — UniGoat',
+ page_title_imprint: 'Impressum — UniGoat',
+ page_title_terms: 'AGB — UniGoat',
+ page_title_privacy: 'Datenschutz — UniGoat',
 
  // Legal-Banner (für DE/AGB/Impressum)
  legal_banner_title: 'Rechtsverbindlich nur auf Deutsch',
@@ -936,13 +936,13 @@ const translations = {
 
  // FAQ Content (vollständig übersetzt)
  faq_title: 'Hilfe & Support',
- faq_q1: 'Was ist Room8?',
- faq_a1_intro: 'Room8 ist die exklusive Plattform von Studenten für Studenten. Hier kannst du:',
+ faq_q1: 'Was ist UniGoat?',
+ faq_a1_intro: 'UniGoat ist die exklusive Plattform von Studenten für Studenten. Hier kannst du:',
  faq_a1_li1: 'Wohnungen & WG-Zimmer finden oder anbieten',
  faq_a1_li2: 'Gegenstände (Möbel, Technik) verkaufen',
  faq_a1_li3: 'Coole Studentenjobs finden',
  faq_a1_li4: 'Exklusive Rabatte (Coupons) nutzen',
- faq_q2: 'Ist Room8 kostenlos?',
+ faq_q2: 'Ist UniGoat kostenlos?',
  faq_a2: 'Ja, 100% kostenlos! Keine Gebühren für Inserate, keine Provisionen. Wir finanzieren uns über Partner-Angebote (Jobs & Coupons).',
  faq_q4: 'Warum verifizieren?',
  faq_a4_intro: 'Die Verifizierung schafft Vertrauen. Nur verifizierte Nutzer (mit blauem Haken) können:',
@@ -964,7 +964,7 @@ const translations = {
  faq_form_submit: 'Nachricht senden',
  faq_form_sent: 'Gesendet!',
  faq_form_reply: 'Wir melden uns bald bei dir.',
- faq_page_title: 'Hilfe & FAQ — Room8',
+ faq_page_title: 'Hilfe & FAQ — UniGoat',
  faq_search_placeholder: 'Suche nach Themen...',
  faq_no_results: 'Keine Ergebnisse gefunden.',
  faq_quick_templates: 'Musterverträge',
@@ -1000,16 +1000,16 @@ const translations = {
  lt_contracts_review_text: 'Wir lassen unsere eigenen Musterverträge gerade von einem Mietrechts-Anwalt prüfen. Aktuelle, geprüfte Vorlagen findest du auf unserer Web-Seite — dort fügen wir laufend neue Versionen ein, ohne dass du die App aktualisieren musst.',
  lt_contracts_open: 'Aktuelle Vorlagen ansehen',
  lt_contracts_tip_label: 'Empfohlene Quellen bis dahin:',
- lt_contracts_disclaimer: 'Room8 übernimmt keine Haftung für die Vorlagen. Bei wichtigen Verträgen Anwalt konsultieren.',
+ lt_contracts_disclaimer: 'UniGoat übernimmt keine Haftung für die Vorlagen. Bei wichtigen Verträgen Anwalt konsultieren.',
 
  faq_q9: 'Wie erkenne ich Betrug?',
  faq_a9: 'Achtung bei: Aufforderungen zur Vorab-Überweisung (Western Union etc.), Vermieter die angeblich im Ausland sind, Kommunikation nur außerhalb der App. Melde verdächtige Inserate sofort über den Melden-Button.',
 
  // Disclaimer Content (vollständig)
  disclaimer_title: 'Haftungsausschluss',
- disclaimer_p1: 'Room8 ist eine reine Vermittlungsplattform. Wir bieten lediglich den technischen Rahmen, damit Studierende untereinander Wohnungen, Gegenstände, Jobs und Rabatte teilen können.',
- disclaimer_p2: 'Sämtliche Vereinbarungen, Verträge oder Geschäfte werden direkt zwischen den Nutzern geschlossen. Room8 ist nicht Vertragspartei und übernimmt keine Verantwortung für die Erfüllung dieser Vereinbarungen.',
- disclaimer_p3: 'Room8 steht in keiner offiziellen Verbindung zu Universitäten oder Hochschulen. Die Plattform richtet sich an Studierende, ist aber kein offizielles Angebot dieser Institutionen.',
+ disclaimer_p1: 'UniGoat ist eine reine Vermittlungsplattform. Wir bieten lediglich den technischen Rahmen, damit Studierende untereinander Wohnungen, Gegenstände, Jobs und Rabatte teilen können.',
+ disclaimer_p2: 'Sämtliche Vereinbarungen, Verträge oder Geschäfte werden direkt zwischen den Nutzern geschlossen. UniGoat ist nicht Vertragspartei und übernimmt keine Verantwortung für die Erfüllung dieser Vereinbarungen.',
+ disclaimer_p3: 'UniGoat steht in keiner offiziellen Verbindung zu Universitäten oder Hochschulen. Die Plattform richtet sich an Studierende, ist aber kein offizielles Angebot dieser Institutionen.',
  disclaimer_p4: 'Jeder Nutzer ist eigenverantwortlich für seine Aktivitäten auf Room8. Bitte prüfe sorgfältig, mit wem du Kontakt aufnimmst, und nutze gesunden Menschenverstand bei jeder Transaktion.',
 
  
@@ -1600,7 +1600,7 @@ const translations = {
 
  // Jobs Page
 
- jobs_page_title: 'Jobs & Karriere - Room8',
+ jobs_page_title: 'Jobs & Karriere - UniGoat',
 
  jobs_header: 'Jobs & Karriere',
 
@@ -1620,7 +1620,7 @@ const translations = {
 
  jobs_demo_remote: 'Remote möglich',
 
- jobs_demo_description: 'Werde Teil unseres Teams und gestalte die Zukunft der Campus-Community mit! Wir bei Room8 entwickeln die führende Plattform für Studenten zum Finden von Wohnungen, Verkaufen von Gegenständen und Vernetzen auf dem Campus.',
+ jobs_demo_description: 'Werde Teil unseres Teams und gestalte die Zukunft der Campus-Community mit! Wir bei UniGoat entwickeln die führende Plattform für Studenten zum Finden von Wohnungen, Verkaufen von Gegenständen und Vernetzen auf dem Campus.',
 
  jobs_demo_tasks_title: 'Deine Aufgaben',
 
@@ -1690,7 +1690,7 @@ const translations = {
 
  // Coupons
 
- coupons_page_title: 'Coupons & Angebote - Room8',
+ coupons_page_title: 'Coupons & Angebote - UniGoat',
 
  coupons_header: 'Coupons & Angebote',
 
@@ -1706,7 +1706,7 @@ const translations = {
 
  coupons_valid_until: 'Gültig bis',
 
- coupons_demo_description: 'Werde Teil unserer Community und genieße exklusive Rabatte! Bei Café Room8 erhältst du 15% auf alle Getränke - perfekt für deine Kaffeepause zwischen den Vorlesungen.',
+ coupons_demo_description: 'Werde Teil unserer Community und genieße exklusive Rabatte! Bei Café UniGoat erhältst du 15% auf alle Getränke - perfekt für deine Kaffeepause zwischen den Vorlesungen.',
 
  coupons_how_to_redeem: 'So löst du den Coupon ein',
 
@@ -1784,9 +1784,9 @@ const translations = {
  scan_active_status: 'Halte den QR-Code des Gastes vor die Kamera.',
  scan_manual_heading: 'Manuelle Eingabe',
  scan_manual_submit: 'Coupon einlösen',
- scan_invalid_qr: 'Kein gültiger Room8-QR. Versuche es erneut.',
+ scan_invalid_qr: 'Kein gültiger UniGoat-QR. Versuche es erneut.',
  scan_uuid_required: 'Beide Felder müssen UUIDs sein.',
- scan_perm_denied: 'Kamera-Zugriff verweigert. Bitte in den Geräte-Einstellungen erlauben: Einstellungen → Apps → Room8 → Berechtigungen → Kamera.',
+ scan_perm_denied: 'Kamera-Zugriff verweigert. Bitte in den Geräte-Einstellungen erlauben: Einstellungen → Apps → UniGoat → Berechtigungen → Kamera.',
  scan_no_camera: 'Keine passende Kamera gefunden. Nutze „Manuell eingeben“.',
  scan_camera_busy: 'Kamera ist gerade von einer anderen App belegt. Schließe andere Kamera-Apps.',
  scan_camera_unavailable: 'Kamera nicht verfügbar.',
@@ -1866,7 +1866,7 @@ const translations = {
 
  // Housing Page
 
- housing_page_title: 'Housing - Room8',
+ housing_page_title: 'Housing - UniGoat',
 
  housing_header: 'Housing',
 
@@ -1876,7 +1876,7 @@ const translations = {
 
  // Marketplace Page
 
- marketplace_page_title: 'Marketplace - Room8',
+ marketplace_page_title: 'Marketplace - UniGoat',
 
  marketplace_header: 'Marktplatz',
 
@@ -2190,7 +2190,7 @@ const translations = {
 
  // Register
 
- register_join: 'Join Room8',
+ register_join: 'Join UniGoat',
 
  register_subtitle: 'Create your account for student deals, jobs and events',
 
@@ -2711,24 +2711,24 @@ const translations = {
  notif_new_favorite_body: ' added your listing to favorites.',
 
  // Page Titles
- page_title_dashboard: 'Room8 — Student Platform',
- page_title_login: 'Sign In — Room8',
- page_title_register: 'Sign Up — Room8',
- page_title_wohnungen: 'Apartments — Room8',
- page_title_gegenstaende: 'Marketplace — Room8',
- page_title_jobs: 'Jobs — Room8',
- page_title_coupons: 'Coupons — Room8',
- page_title_events: 'Events — Room8',
- page_title_messages: 'Messages — Room8',
- page_title_profile: 'Profile — Room8',
- page_title_settings: 'Settings — Room8',
- page_title_favorites: 'Favorites — Room8',
- page_title_notifications: 'Activity — Room8',
- page_title_faq: 'Help & FAQ — Room8',
- page_title_disclaimer: 'Disclaimer — Room8',
- page_title_imprint: 'Legal Notice — Room8',
- page_title_terms: 'Terms of Use — Room8',
- page_title_privacy: 'Privacy — Room8',
+ page_title_dashboard: 'UniGoat — Student Platform',
+ page_title_login: 'Sign In — UniGoat',
+ page_title_register: 'Sign Up — UniGoat',
+ page_title_wohnungen: 'Apartments — UniGoat',
+ page_title_gegenstaende: 'Marketplace — UniGoat',
+ page_title_jobs: 'Jobs — UniGoat',
+ page_title_coupons: 'Coupons — UniGoat',
+ page_title_events: 'Events — UniGoat',
+ page_title_messages: 'Messages — UniGoat',
+ page_title_profile: 'Profile — UniGoat',
+ page_title_settings: 'Settings — UniGoat',
+ page_title_favorites: 'Favorites — UniGoat',
+ page_title_notifications: 'Activity — UniGoat',
+ page_title_faq: 'Help & FAQ — UniGoat',
+ page_title_disclaimer: 'Disclaimer — UniGoat',
+ page_title_imprint: 'Legal Notice — UniGoat',
+ page_title_terms: 'Terms of Use — UniGoat',
+ page_title_privacy: 'Privacy — UniGoat',
 
  // Legal-Banner
  legal_banner_title: 'Legally binding only in German',
@@ -2737,13 +2737,13 @@ const translations = {
 
  // FAQ Content
  faq_title: 'Help & Support',
- faq_q1: 'What is Room8?',
- faq_a1_intro: 'Room8 is the exclusive platform for students by students. Here you can:',
+ faq_q1: 'What is UniGoat?',
+ faq_a1_intro: 'UniGoat is the exclusive platform for students by students. Here you can:',
  faq_a1_li1: 'Find or list apartments & shared rooms',
  faq_a1_li2: 'Sell items (furniture, electronics)',
  faq_a1_li3: 'Find cool student jobs',
  faq_a1_li4: 'Use exclusive discounts (coupons)',
- faq_q2: 'Is Room8 free?',
+ faq_q2: 'Is UniGoat free?',
  faq_a2: 'Yes, 100% free! No fees for listings, no commissions. We finance ourselves through partner offers (jobs & coupons).',
  faq_q4: 'Why verify?',
  faq_a4_intro: 'Verification creates trust. Only verified users (with blue checkmark) can:',
@@ -2765,7 +2765,7 @@ const translations = {
  faq_form_submit: 'Send message',
  faq_form_sent: 'Sent!',
  faq_form_reply: 'We will get back to you soon.',
- faq_page_title: 'Help & FAQ — Room8',
+ faq_page_title: 'Help & FAQ — UniGoat',
  faq_search_placeholder: 'Search topics...',
  faq_no_results: 'No results found.',
  faq_quick_templates: 'Template Contracts',
@@ -2801,16 +2801,16 @@ const translations = {
  lt_contracts_review_text: 'We are having our own template contracts reviewed by a rental-law attorney. Current verified templates are on our web page — we keep adding new versions there without requiring you to update the app.',
  lt_contracts_open: 'View current templates',
  lt_contracts_tip_label: 'Recommended sources for now:',
- lt_contracts_disclaimer: 'Room8 assumes no liability for these templates. For important contracts, consult an attorney.',
+ lt_contracts_disclaimer: 'UniGoat assumes no liability for these templates. For important contracts, consult an attorney.',
 
  faq_q9: 'How do I recognize fraud?',
  faq_a9: 'Be careful with: requests for advance bank transfers (Western Union etc.), landlords who claim to be abroad, communication only outside the app. Report suspicious listings immediately via the Report button.',
 
  // Disclaimer Content
  disclaimer_title: 'Disclaimer',
- disclaimer_p1: 'Room8 is purely a brokerage platform. We only provide the technical framework for students to share apartments, items, jobs and discounts among each other.',
- disclaimer_p2: 'All agreements, contracts or transactions are concluded directly between the users. Room8 is not a party to the contract and accepts no responsibility for the fulfillment of these agreements.',
- disclaimer_p3: 'Room8 has no official connection to universities or colleges. The platform is aimed at students but is not an official offering of these institutions.',
+ disclaimer_p1: 'UniGoat is purely a brokerage platform. We only provide the technical framework for students to share apartments, items, jobs and discounts among each other.',
+ disclaimer_p2: 'All agreements, contracts or transactions are concluded directly between the users. UniGoat is not a party to the contract and accepts no responsibility for the fulfillment of these agreements.',
+ disclaimer_p3: 'UniGoat has no official connection to universities or colleges. The platform is aimed at students but is not an official offering of these institutions.',
  disclaimer_p4: 'Each user is responsible for their own activities on Room8. Please carefully check who you contact, and use common sense in every transaction.',
 
  
@@ -3401,7 +3401,7 @@ const translations = {
 
  // Jobs Page
 
- jobs_page_title: 'Jobs & Career - Room8',
+ jobs_page_title: 'Jobs & Career - UniGoat',
 
  jobs_header: 'Jobs & Career',
 
@@ -3421,7 +3421,7 @@ const translations = {
 
  jobs_demo_remote: 'Remote possible',
 
- jobs_demo_description: 'Become part of our team and shape the future of the campus community! At Room8, we develop the leading platform for students to find housing, sell items and connect on campus.',
+ jobs_demo_description: 'Become part of our team and shape the future of the campus community! At UniGoat, we develop the leading platform for students to find housing, sell items and connect on campus.',
 
  jobs_demo_tasks_title: 'Your Tasks',
 
@@ -3491,7 +3491,7 @@ const translations = {
 
  // Coupons
 
- coupons_page_title: 'Coupons & Offers - Room8',
+ coupons_page_title: 'Coupons & Offers - UniGoat',
 
  coupons_header: 'Coupons & Offers',
 
@@ -3507,7 +3507,7 @@ const translations = {
 
  coupons_valid_until: 'Valid until',
 
- coupons_demo_description: 'Become part of our community and enjoy exclusive discounts! At Café Room8 you get 15% off all drinks - perfect for your coffee break between lectures.',
+ coupons_demo_description: 'Become part of our community and enjoy exclusive discounts! At Café UniGoat you get 15% off all drinks - perfect for your coffee break between lectures.',
 
  coupons_how_to_redeem: 'How to redeem the coupon',
 
@@ -3585,9 +3585,9 @@ const translations = {
  scan_active_status: "Hold the guest's QR code in front of the camera.",
  scan_manual_heading: 'Manual entry',
  scan_manual_submit: 'Redeem coupon',
- scan_invalid_qr: 'Not a valid Room8 QR. Try again.',
+ scan_invalid_qr: 'Not a valid UniGoat QR. Try again.',
  scan_uuid_required: 'Both fields must be UUIDs.',
- scan_perm_denied: 'Camera access denied. Please allow it in device settings: Settings → Apps → Room8 → Permissions → Camera.',
+ scan_perm_denied: 'Camera access denied. Please allow it in device settings: Settings → Apps → UniGoat → Permissions → Camera.',
  scan_no_camera: 'No matching camera found. Use "Manual entry".',
  scan_camera_busy: 'Camera is in use by another app. Close other camera apps.',
  scan_camera_unavailable: 'Camera unavailable.',
@@ -3757,7 +3757,7 @@ function showLanguagePopup() {
 
  <div style="background: white; padding: 2.5rem; border-radius: 16px; text-align: center; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
 
- <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; color: #1f2937;">Welcome to Room8</h2>
+ <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; color: #1f2937;">Welcome to UniGoat</h2>
 
  <p style="margin: 0 0 2rem 0; color: #6b7280;">Please select your language<br>Bitte wähle deine Sprache</p>
 

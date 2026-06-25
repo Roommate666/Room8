@@ -3,7 +3,7 @@
 <head>
     <script src="sentry-init.js"></script>
     <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">    <title>Admin Panel - Room8</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">    <title>Admin Panel - UniGoat</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -779,13 +779,13 @@
             }
 
             // E-Mail Links
-            let emailLink = reporterEmail ? `<a href="mailto:${escapeHtml(reporterEmail)}?subject=Room8%20Meldung%20-%20Rückfrage" class="btn-mini" style="background:#10B981;color:white;">✉️ Melder kontaktieren</a>` : '';
+            let emailLink = reporterEmail ? `<a href="mailto:${escapeHtml(reporterEmail)}?subject=UniGoat%20Meldung%20-%20Rückfrage" class="btn-mini" style="background:#10B981;color:white;">✉️ Melder kontaktieren</a>` : '';
 
             // Owner Profil + Mail
             let ownerLinks = '';
             if (isListing && listing && listing.owner) {
                 ownerLinks = `<button class="btn-mini" style="background:#E8604C;color:white;" onclick="window.location.href='public-profile.html?id=${listing.owner_id}'">👤 Inserent Profil</button>`;
-                ownerLinks += `<a href="mailto:${escapeHtml(listing.owner.email)}?subject=Room8%20-%20Ihr%20Inserat%20wurde%20gemeldet" class="btn-mini" style="background:#F59E0B;color:white;">✉️ Inserent kontaktieren</a>`;
+                ownerLinks += `<a href="mailto:${escapeHtml(listing.owner.email)}?subject=UniGoat%20-%20Ihr%20Inserat%20wurde%20gemeldet" class="btn-mini" style="background:#F59E0B;color:white;">✉️ Inserent kontaktieren</a>`;
             }
 
             // Delete button
@@ -892,7 +892,7 @@
             else statusBadge = '<span class="status-badge" style="background:#F3F4F6;color:#6B7280;">Kein Status</span>';
 
             // Action Buttons je nach Status
-            let actionButtons = `<a href="mailto:${escapeHtml(p.email)}?subject=Room8%20Verifizierung" class="btn-mini" style="background:#10B981;color:white;">✉️ E-Mail</a>`;
+            let actionButtons = `<a href="mailto:${escapeHtml(p.email)}?subject=UniGoat%20Verifizierung" class="btn-mini" style="background:#10B981;color:white;">✉️ E-Mail</a>`;
 
             if (status !== 'approved') {
                 actionButtons += `<button class="btn-mini btn-green" onclick="verifyUser('${p.id}', true)" style="padding: 0.75rem 1.5rem;">✅ GENEHMIGEN</button>`;
@@ -1053,7 +1053,7 @@
                         <p style="margin:0; color:#374151; font-size:0.9rem; white-space:pre-wrap;">${escapeHtml(s.description) || 'Keine Beschreibung'}</p>
                     </div>
                     <div class="action-bar">
-                        <a href="mailto:${escapeHtml(s.contact_email)}?subject=Room8%20Partner%20-%20Ihre%20Einreichung" class="btn-mini" style="background:#10B981;color:white;">✉️ Kontaktieren</a>
+                        <a href="mailto:${escapeHtml(s.contact_email)}?subject=UniGoat%20Partner%20-%20Ihre%20Einreichung" class="btn-mini" style="background:#10B981;color:white;">✉️ Kontaktieren</a>
                         <button class="btn-mini btn-green" onclick="approveSubmission('${s.id}', '${s.submission_type}')" style="padding: 0.75rem 1.5rem;">✅ ÜBERNEHMEN</button>
                         <button class="btn-mini btn-yellow" onclick="requestChanges('${s.id}')" style="padding: 0.75rem 1.5rem;">📝 NACHBESSERN</button>
                         <button class="btn-mini btn-red" onclick="rejectSubmission('${s.id}')" style="padding: 0.75rem 1.5rem;">❌ ABLEHNEN</button>
@@ -1598,7 +1598,7 @@
                         <div class="info-item"><label>ID</label><span style="font-size:0.7rem">${u.id.substring(0,8)}...</span></div>
                     </div>
                     <div class="action-bar" style="flex-wrap:wrap;gap:0.4rem;">
-                        <a href="mailto:${escapeHtml(u.email)}?subject=Room8%20-%20Nachricht%20vom%20Admin" class="btn-mini" style="background:#10B981;color:white;">✉️ E-Mail</a>
+                        <a href="mailto:${escapeHtml(u.email)}?subject=UniGoat%20-%20Nachricht%20vom%20Admin" class="btn-mini" style="background:#10B981;color:white;">✉️ E-Mail</a>
                         <a href="public-profile.html?id=${u.id}" target="_blank" class="btn-mini btn-blue">👤 Profil</a>
                         ${permBtns}
                         ${u.is_banned
@@ -2494,7 +2494,7 @@
             var emailLine = '';
             var userEmail = profile.email || profile.edu_email;
             if (userEmail) {
-                emailLine = '<a href="mailto:' + Room8.escapeHtml(userEmail) + '?subject=Room8%20Event-Antrag" style="color:#3B82F6;text-decoration:underline;">✉️ ' + Room8.escapeHtml(userEmail) + '</a>';
+                emailLine = '<a href="mailto:' + Room8.escapeHtml(userEmail) + '?subject=UniGoat%20Event-Antrag" style="color:#3B82F6;text-decoration:underline;">✉️ ' + Room8.escapeHtml(userEmail) + '</a>';
                 if (profile.uni_email_verified && profile.edu_email) {
                     emailLine += ' <span style="background:#DCFCE7;color:#166534;padding:0.1rem 0.4rem;border-radius:999px;font-size:0.7rem;font-weight:600;">Hochschul-Mail verifiziert</span>';
                 }

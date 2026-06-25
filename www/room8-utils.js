@@ -1,9 +1,9 @@
 /**
- * Room8 Shared Utilities
+ * UniGoat Shared Utilities
  * Zentrale Funktionen für Sicherheit, Auth und wiederverwendbare Logik
  */
 
-var Room8 = (function() {
+var UniGoat = (function() {
     'use strict';
 
     // ============================================
@@ -954,4 +954,4 @@ var Room8 = (function() {
 })();
 
 // Make available globally
-window.Room8 = Room8;
+window.Room8 = UniGoat;

@@ -1,4 +1,4 @@
-// Room8 Cookie-Consent Banner (TTDSG-konform, § 25 Abs. 1)
+// UniGoat Cookie-Consent Banner (TTDSG-konform, § 25 Abs. 1)
 // Zeigt ein Opt-In-Banner beim ersten Besuch.
 // Bis Einwilligung: keine nicht-essentiellen Tracker (Sentry, FCM Token-Persist).
 (function () {

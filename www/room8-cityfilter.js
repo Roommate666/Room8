@@ -1,5 +1,5 @@
 // =============================================================
-// Room8 City-Filter - Auto-Filter auf die Wohnstadt des Users
+// UniGoat City-Filter - Auto-Filter auf die Wohnstadt des Users
 // Bei Registrierung ist Stadt Pflicht (complete-profile). Coupons/Jobs/
 // Events werden automatisch auf diese Stadt vorgefiltert. Toggle-Chip
 // erlaubt Wechsel auf "Alle Staedte". Fallback: wenn 0 Treffer in der

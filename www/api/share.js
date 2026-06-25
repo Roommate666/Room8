@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
   const cfg = TYPES[t] || TYPES.listing;
   const appUrl = 'https://www.room8.club/' + cfg.page + (id ? '?id=' + encodeURIComponent(id) : '');
 
-  let title = 'Room8 - Studenten-Wohnungen & Marktplatz';
+  let title = 'UniGoat - Studenten-Wohnungen & Marktplatz';
   let desc = 'Finde dein WG-Zimmer, deine Wohnung oder verkaufe Sachen - alles für Studenten.';
   let image = 'https://www.room8.club/icons/og-default.jpg';
 
@@ -50,7 +50,7 @@ module.exports = async (req, res) => {
         if (t === 'listing' && l.type === 'wohnung') {
           // Wohnungen NIE oeffentlich preview-bar (Untervermietungs-Schutz fuer Studenten).
           // Generische Karte + Redirect in die App (Login), keine Wohnungs-Details/Fotos.
-          title = 'Room8 - Studenten-Wohnungen';
+          title = 'UniGoat - Studenten-Wohnungen';
           desc = 'WG-Zimmer und Wohnungen für Studenten. Sichtbar nur für eingeloggte, verifizierte Studenten in der App.';
         } else if (t === 'listing') {
           const typ = TYPE_LABEL[l.room_type] || 'Angebot';
@@ -79,7 +79,7 @@ module.exports = async (req, res) => {
     '<meta property="og:description" content="' + esc(desc) + '">' +
     '<meta property="og:image" content="' + esc(image) + '">' +
     '<meta property="og:url" content="' + esc(appUrl) + '">' +
-    '<meta property="og:site_name" content="Room8">' +
+    '<meta property="og:site_name" content="UniGoat">' +
     '<meta name="twitter:card" content="summary_large_image">' +
     '<meta name="twitter:title" content="' + esc(title) + '">' +
     '<meta name="twitter:description" content="' + esc(desc) + '">' +
@@ -87,7 +87,7 @@ module.exports = async (req, res) => {
     '<meta http-equiv="refresh" content="0; url=' + esc(appUrl) + '">' +
     '<link rel="canonical" href="' + esc(appUrl) + '">' +
     '</head><body style="font-family:system-ui;text-align:center;padding:3rem;">' +
-    '<p>Weiterleitung zu Room8 ...</p>' +
+    '<p>Weiterleitung zu UniGoat ...</p>' +
     '<p><a href="' + esc(appUrl) + '">Hier klicken, falls es nicht automatisch geht</a></p>' +
     '</body></html>';
 

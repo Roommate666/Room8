@@ -495,5 +495,44 @@
         };
     };
 
-    console.log('Room8 UI Components loaded');
+    // ==========================================
+    // BETA BADGE (Fixed-Pill oben mittig, blockt keine Taps)
+    // ==========================================
+    function injectBetaBadge() {
+        if (document.getElementById('app-beta-badge')) return;
+        if (!document.body) return;
+        var badge = document.createElement('div');
+        badge.id = 'app-beta-badge';
+        badge.textContent = 'BETA';
+        badge.setAttribute('role', 'note');
+        badge.setAttribute('aria-label', 'Beta-Version');
+        badge.style.cssText = [
+            'position:fixed',
+            'top:calc(env(safe-area-inset-top, 0px) + 2px)',
+            'left:50%',
+            'transform:translateX(-50%)',
+            'z-index:9990',
+            'pointer-events:none',
+            'font-family:inherit',
+            'font-size:9px',
+            'font-weight:800',
+            'letter-spacing:1.5px',
+            'color:#ffffff',
+            'background:linear-gradient(135deg,#3B82F6,#2563EB)',
+            'padding:2px 8px',
+            'border-radius:0 0 8px 8px',
+            'box-shadow:0 2px 6px rgba(37,99,235,0.35)',
+            'opacity:0.92',
+            'text-transform:uppercase',
+            'user-select:none'
+        ].join(';');
+        document.body.appendChild(badge);
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectBetaBadge);
+    } else {
+        injectBetaBadge();
+    }
+
+    console.log('UniGoat UI Components loaded');
 })();
