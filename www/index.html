@@ -53,6 +53,11 @@
       display: flex; align-items: center; justify-content: center;
       box-shadow: 0 2px 8px rgba(59,130,246,0.25);
     }
+    .lp-beta-tag {
+      display: inline-block; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.05em;
+      text-transform: uppercase; color: #fff; background: linear-gradient(135deg, #3B82F6, #2563EB);
+      padding: 2px 7px; border-radius: 999px; margin-left: 6px; vertical-align: middle; line-height: 1.5;
+    }
     .lp-nav-actions { display: flex; gap: 0.5rem; align-items: center; }
     .lp-nav-link {
       padding: 0.5rem 1rem; border-radius: 999px;
@@ -579,7 +584,7 @@
   <nav class="lp-nav" id="lpNav">
     <a href="#" class="lp-nav-brand">
       <img src="splash-logo.jpg?v61" alt="UniGoat" class="lp-nav-brand-icon" style="width:40px;height:40px;border-radius:10px;object-fit:cover;">
-      UniGoat
+      UniGoat<span class="lp-beta-tag">Beta</span>
     </a>
     <div class="lp-nav-actions">
       <a href="#partner" class="lp-nav-link lp-nav-link--ghost">Partner werden</a>
