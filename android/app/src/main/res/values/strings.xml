@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Room8</string>
-    <string name="title_activity_main">Room8</string>
+    <string name="app_name">UniGoat</string>
+    <string name="title_activity_main">UniGoat</string>
     <string name="package_name">club.room8.app</string>
     <string name="custom_url_scheme">club.room8.app</string>
     <string name="server_client_id">193353507606-qjq74nuka2a15qbankvfshqaqukhaead.apps.googleusercontent.com</string>

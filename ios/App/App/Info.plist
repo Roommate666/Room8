@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Room8</string>
+        <string>UniGoat</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Room8 nutzt die Kamera nur wenn du selbst ein Foto für dein Profil oder Inserat aufnehmen willst.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
