@@ -5,7 +5,7 @@
 // Returns: { success: bool, id?: string, error?: string }
 //
 // Voraussetzung: RESEND_API_KEY in Supabase-Secrets
-// Domain: room8.club (muss in Resend als verified domain hinterlegt sein)
+// Domain: unigoat.de (muss in Resend als verified domain hinterlegt sein)
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.47.14"
@@ -17,7 +17,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
 }
 
-const FROM_ADDRESS = 'UniGoat <noreply@room8.club>'
+const FROM_ADDRESS = 'UniGoat <noreply@unigoat.de>'
 
 // Jugendliches, buntes UniGoat-Mail-Template. Bettet den uebergebenen HTML-Body
 // in einen Brand-Wrapper (bunter Gradient-Header, weisse Card, freundlicher Footer).
@@ -40,7 +40,7 @@ function wrapEmail(innerHtml: string, preheader?: string): string {
     <tr><td style="padding:20px 28px 28px;">
       <div style="border-top:1px solid #EEF0F3;padding-top:18px;text-align:center;">
         <div style="font-size:13px;color:#6B7280;line-height:1.5;">Studentenrabatte ☕ · Nebenjobs 💼 · Events 🎉<br>Alles für deine Unistadt — kostenlos &amp; nur für verifizierte Studenten.</div>
-        <div style="font-size:12px;color:#9CA3AF;margin-top:14px;">UniGoat · <a href="https://www.room8.club" style="color:#3B82F6;text-decoration:none;">room8.club</a></div>
+        <div style="font-size:12px;color:#9CA3AF;margin-top:14px;">UniGoat · <a href="https://www.unigoat.de" style="color:#3B82F6;text-decoration:none;">unigoat.de</a></div>
       </div>
     </td></tr>
   </table>

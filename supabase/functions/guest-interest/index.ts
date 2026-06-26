@@ -68,18 +68,18 @@ Deno.serve(async (req: Request) => {
       (message ? `<p><strong>Nachricht:</strong><br>${esc(message)}</p>` : '') +
       `</div>` +
       `<p>Antworte einfach direkt auf den angegebenen Kontakt.</p>` +
-      `<p style="color:#9CA3AF;font-size:13px;">Room8 - room8.club</p></div>`
+      `<p style="color:#9CA3AF;font-size:13px;">UniGoat - unigoat.de</p></div>`
 
     const r = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'Room8 <help@room8.club>',
+        from: 'UniGoat <hallo@unigoat.de>',
         to: [gl.contact_email],
         subject: 'Interesse an deiner Wohnung auf Room8',
         html,
         text: `Ein Student interessiert sich für "${gl.title}". Name: ${name}. Kontakt: ${contact}. Nachricht: ${message}`,
-        headers: { 'List-Unsubscribe': '<mailto:help@room8.club?subject=unsubscribe>' },
+        headers: { 'List-Unsubscribe': '<mailto:hallo@unigoat.de?subject=unsubscribe>' },
       }),
     })
     if (!r.ok) return json({ error: 'mail_failed', detail: (await r.text()).slice(0, 300) }, 502)

@@ -71,7 +71,7 @@ serve(async (req) => {
     // E-Mail Templates
     const templates = {
       'uni_email_verification': {
-        from: 'Room8 Team <help@room8.club>',
+        from: 'UniGoat Team <hallo@unigoat.de>',
         subject: 'Bestätige deine Uni-E-Mail für Room8',
         html: `
           <!DOCTYPE html>
@@ -96,7 +96,7 @@ serve(async (req) => {
               </div>
               <div style="background: #1f2937; color: #9ca3af; padding: 30px; text-align: center; font-size: 14px;">
                 <p style="margin: 0 0 10px 0;">&copy; 2025 Room8</p>
-                <p style="margin: 0;">Fragen? <a href="mailto:help@room8.club" style="color: #60a5fa; text-decoration: none;">help@room8.club</a></p>
+                <p style="margin: 0;">Fragen? <a href="mailto:hallo@unigoat.de" style="color: #60a5fa; text-decoration: none;">hallo@unigoat.de</a></p>
               </div>
             </div>
           </body>
@@ -105,7 +105,7 @@ serve(async (req) => {
       },
       
       'account_verified': {
-        from: 'Room8 Team <help@room8.club>',
+        from: 'UniGoat Team <hallo@unigoat.de>',
         subject: 'Dein Konto wurde verifiziert!',
         html: `
           <!DOCTYPE html>
@@ -147,7 +147,7 @@ serve(async (req) => {
       },
 
       'verification_approved': {
-        from: 'Room8 Team <help@room8.club>',
+        from: 'UniGoat Team <hallo@unigoat.de>',
         subject: 'Deine Verifizierung wurde bestätigt!',
         html: `
           <!DOCTYPE html>
@@ -181,7 +181,7 @@ serve(async (req) => {
               </div>
               <div style="background: #1f2937; color: #9ca3af; padding: 30px; text-align: center; font-size: 14px;">
                 <p style="margin: 0 0 10px 0;">&copy; 2025 Room8</p>
-                <p style="margin: 0;">Fragen? <a href="mailto:help@room8.club" style="color: #60a5fa; text-decoration: none;">help@room8.club</a></p>
+                <p style="margin: 0;">Fragen? <a href="mailto:hallo@unigoat.de" style="color: #60a5fa; text-decoration: none;">hallo@unigoat.de</a></p>
               </div>
             </div>
           </body>
@@ -190,7 +190,7 @@ serve(async (req) => {
       },
 
       'verification_rejected': {
-        from: 'Room8 Team <help@room8.club>',
+        from: 'UniGoat Team <hallo@unigoat.de>',
         subject: 'Deine Verifizierung wurde abgelehnt',
         html: `
           <!DOCTYPE html>
@@ -210,12 +210,12 @@ serve(async (req) => {
                   </a>
                 </div>
                 <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
-                  Falls du Fragen hast, kontaktiere uns unter <a href="mailto:help@room8.club" style="color: #3b82f6; text-decoration: none;">help@room8.club</a>.
+                  Falls du Fragen hast, kontaktiere uns unter <a href="mailto:hallo@unigoat.de" style="color: #3b82f6; text-decoration: none;">hallo@unigoat.de</a>.
                 </p>
               </div>
               <div style="background: #1f2937; color: #9ca3af; padding: 30px; text-align: center; font-size: 14px;">
                 <p style="margin: 0 0 10px 0;">&copy; 2025 Room8</p>
-                <p style="margin: 0;">Fragen? <a href="mailto:help@room8.club" style="color: #60a5fa; text-decoration: none;">help@room8.club</a></p>
+                <p style="margin: 0;">Fragen? <a href="mailto:hallo@unigoat.de" style="color: #60a5fa; text-decoration: none;">hallo@unigoat.de</a></p>
               </div>
             </div>
           </body>
@@ -224,7 +224,7 @@ serve(async (req) => {
       },
 
       'admin_verification_request': {
-        from: 'Room8 Admin <admin@room8.club>',
+        from: 'UniGoat <noreply@unigoat.de>',
         subject: '🔔 Neue Verifizierungsanfrage',
         html: `
           <!DOCTYPE html>
@@ -269,7 +269,7 @@ serve(async (req) => {
         html: template.html,
         text: htmlToText(template.html),
         headers: {
-          'List-Unsubscribe': '<mailto:help@room8.club?subject=unsubscribe>'
+          'List-Unsubscribe': '<mailto:hallo@unigoat.de?subject=unsubscribe>'
         }
       })
     })
