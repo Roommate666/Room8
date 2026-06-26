@@ -30,11 +30,11 @@ module.exports = async (req, res) => {
   const id = (req.query && req.query.id) || '';
   const t = (req.query && req.query.t) || 'listing';
   const cfg = TYPES[t] || TYPES.listing;
-  const appUrl = 'https://www.room8.club/' + cfg.page + (id ? '?id=' + encodeURIComponent(id) : '');
+  const appUrl = 'https://www.unigoat.de/' + cfg.page + (id ? '?id=' + encodeURIComponent(id) : '');
 
   let title = 'UniGoat - Studenten-Wohnungen & Marktplatz';
   let desc = 'Finde dein WG-Zimmer, deine Wohnung oder verkaufe Sachen - alles für Studenten.';
-  let image = 'https://www.room8.club/icons/og-default.jpg';
+  let image = 'https://www.unigoat.de/icons/og-default.jpg';
 
   try {
     if (id) {
