@@ -501,6 +501,11 @@
     function injectBetaBadge() {
         if (document.getElementById('app-beta-badge')) return;
         if (!document.body) return;
+        // Badge-Farbe an die jeweilige Seite anpassen
+        var _p = (location.pathname || '').toLowerCase();
+        var _c0 = '#3B82F6', _c1 = '#2563EB', _sh = '37,99,235'; // Default Blau (Jobs/Profil)
+        if (_p.indexOf('coupon') !== -1) { _c0 = '#F59E0B'; _c1 = '#EA580C'; _sh = '234,88,12'; }      // Coupons = Orange
+        else if (_p.indexOf('event') !== -1) { _c0 = '#14B8A6'; _c1 = '#0F766E'; _sh = '15,118,110'; }  // Events = Teal
         var badge = document.createElement('div');
         badge.id = 'app-beta-badge';
         badge.textContent = 'BETA';
@@ -518,10 +523,10 @@
             'font-weight:800',
             'letter-spacing:1.5px',
             'color:#ffffff',
-            'background:linear-gradient(135deg,#3B82F6,#2563EB)',
+            'background:linear-gradient(135deg,' + _c0 + ',' + _c1 + ')',
             'padding:2px 8px',
             'border-radius:0 0 8px 8px',
-            'box-shadow:0 2px 6px rgba(37,99,235,0.35)',
+            'box-shadow:0 2px 6px rgba(' + _sh + ',0.4)',
             'opacity:0.92',
             'text-transform:uppercase',
             'user-select:none'
