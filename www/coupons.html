@@ -344,7 +344,7 @@
             <input type="text" id="couponSearchInput" placeholder="Restaurant, Code, Stadt …" autocomplete="off">
         </div>
         <div class="city-filter-row">
-            <button id="cityChip" class="city-chip" type="button" style="display:none;"></button>
+            <select id="cityChip" class="city-select" style="display:none;"></select>
         </div>
         <div class="filter-bar" id="couponFilter">
             <button class="filter-btn active" data-cat="all" data-i18n="common_all">Alle</button>
@@ -536,6 +536,7 @@
             allCoupons = [];
         }
 
+        if (window.Room8City) Room8City.renderChip(document.getElementById('cityChip'), function () { renderCoupons(); }, allCoupons.map(function (c) { return c.city; }));
         renderCoupons();
     }
 
@@ -553,13 +554,6 @@
             return catOK && cityOK && matchesSearch(c, currentSearch);
         }
         var filtered = allCoupons.filter(function(c) { return pass(c, true); });
-
-        // Fallback: Stadt-Filter aktiv aber 0 Treffer -> Stadt-Filter aus + Hinweis
-        if (filtered.length === 0 && window.Room8City && Room8City.isActive() && Room8City.getCity()) {
-            Room8City.setActive(false);
-            Room8City.renderChip(document.getElementById('cityChip'), function() { renderCoupons(); });
-            filtered = allCoupons.filter(function(c) { return pass(c, false); });
-        }
 
         if (filtered.length === 0) {
             container.innerHTML = '<div class="loading-state">' + ((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('coupons_no_coupons'):'Keine Coupons in dieser Kategorie') + '</div>';

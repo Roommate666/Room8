@@ -422,7 +422,7 @@
             <button class="filter-btn" data-type="praktikum" data-i18n="jobs_filter_internship">Praktikum</button>
         </div>
         <div class="city-filter-row" style="padding:0;">
-            <button id="cityChip" class="city-chip" type="button" style="display:none;"></button>
+            <select id="cityChip" class="city-select" style="display:none;"></select>
         </div>
     </div>
     
@@ -591,13 +591,8 @@
             var cityOK = !withCity || !window.Room8City || Room8City.matches(job.city);
             return matchesType && matchesSearch && cityOK;
         }
+        if (window.Room8City) Room8City.renderChip(document.getElementById('cityChip'), function () { applyFilters(); }, allJobs.map(function (j) { return j.city; }));
         var filtered = allJobs.filter(function(job) { return pass(job, true); });
-        // Fallback: Stadt-Filter aktiv aber 0 Treffer -> Stadt-Filter aus
-        if (filtered.length === 0 && window.Room8City && Room8City.isActive() && Room8City.getCity()) {
-            Room8City.setActive(false);
-            Room8City.renderChip(document.getElementById('cityChip'), function() { applyFilters(); });
-            filtered = allJobs.filter(function(job) { return pass(job, false); });
-        }
         renderJobs(filtered);
     }
 

@@ -1961,3 +1961,17 @@ body.has-sidebar-nav .app-container {
 .city-chip.active { background: var(--primary-color, #2563EB); color: #fff; }
 .city-filter-row { display: flex; align-items: center; gap: 0.5rem; padding: 0 1.25rem; margin-bottom: 0.75rem; }
 .city-filter-hint { font-size: 0.78rem; color: #9CA3AF; }
+
+/* Staedte-Waehler (Dropdown) - UniGoat City-Filter */
+.city-select {
+  -webkit-appearance: none; -moz-appearance: none; appearance: none;
+  border: 1px solid #e5e7eb; border-radius: 999px;
+  background-color: #fff; color: #1f2937;
+  font-size: 0.85rem; font-weight: 600;
+  padding: 6px 30px 6px 13px; line-height: 1.2;
+  max-width: 55vw; cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat; background-position: right 11px center;
+}
+.city-select:focus { outline: none; border-color: #3B82F6; }
