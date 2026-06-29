@@ -293,7 +293,9 @@
                 var heroUrl = (window.Room8 && Room8.getOptimizedImageUrl)
                     ? Room8.getOptimizedImageUrl(heroBkt, heroPhoto.storage_path, { width: 1200, quality: 80 })
                     : sb.storage.from(heroBkt).getPublicUrl(heroPhoto.storage_path).data.publicUrl;
-                document.getElementById('coverImg').src = heroUrl;
+                var _cv = document.getElementById('coverImg');
+                _cv.onerror = function () { document.getElementById('jobCover').style.display = 'none'; };
+                _cv.src = heroUrl;
                 document.getElementById('jobCover').style.display = 'block';
                 document.getElementById('jobHero').classList.add('with-cover');
             }
