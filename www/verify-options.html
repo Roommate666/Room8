@@ -206,6 +206,12 @@
                 <p style="color: var(--text-muted);">Verifizier dich als Student und schalt Rabatte, Nebenjobs und Events in deiner Stadt frei. Dauert 1 Minute.</p>
             </div>
 
+            <div class="info-notice" style="background:#FEF2F2; border-color:#FCA5A5; color:#991B1B; margin-bottom:1.25rem;">
+                <strong>Solange du nicht verifiziert bist:</strong> Du kannst keine Coupons einlösen, dich auf keine Jobs bewerben und keine Events sehen. Mit der Verifizierung schaltest du alles frei.
+            </div>
+
+            <p style="text-align:center; font-size:0.82rem; color:var(--text-muted); margin:-0.25rem 0 1rem;">💡 Am schnellsten geht es mit deiner Uni-Mail.</p>
+
             <!-- Option 1: E-Mail -->
             <div class="option-card" id="card-email" onclick="toggleOption('email')">
                 <span class="option-badge">Schnell</span>
@@ -213,7 +219,7 @@
                     <span>📧</span> Per Uni-E-Mail
                 </div>
                 <p class="option-desc">
-                    Code an deine Hochschul-Adresse senden (z.B. @uni-koeln.de).
+                    Wir schicken dir eine Nachricht an deine Hochschul-Adresse (z.B. @uni-koeln.de). Achte auf die richtige Schreibweise. In der Mail bestätigst du mit einem Klick und bist <strong>sofort verifiziert</strong>. (Schau auch im Spam-Ordner.)
                 </p>
 
                 <form id="emailForm" class="verify-form" onclick="event.stopPropagation();">
@@ -231,7 +237,7 @@
                     <span>📄</span> Dokument-Upload
                 </div>
                 <p class="option-desc">
-                    Foto von Studentenausweis oder Immatrikulationsbescheinigung hochladen.
+                    Foto von Studentenausweis oder Immatrikulationsbescheinigung hochladen. Wird von uns manuell geprüft &ndash; das kann <strong>1&ndash;3 Werktage</strong> dauern.
                 </p>
 
                 <form id="uploadForm" class="verify-form" onclick="event.stopPropagation();">
@@ -326,7 +332,20 @@
         }
     }
 
-    function showSuccess() {
+    function showSuccess(method) {
+        var h = document.querySelector('#success-view h2');
+        var p = document.querySelector('#success-view p');
+        if (method === 'email' && h && p) {
+            h.textContent = 'Mail ist unterwegs!';
+            p.innerHTML = 'Wir haben dir eine Nachricht an deine Uni-Mail geschickt.<br>' +
+                'Öffne sie, bestätige mit einem Klick &ndash; und du bist <strong>sofort verifiziert</strong>.<br>' +
+                'Nichts da? Schau im Spam-Ordner und prüfe die Schreibweise deiner Adresse.';
+        } else if (method === 'document' && h && p) {
+            h.textContent = 'Dokument eingereicht!';
+            p.innerHTML = 'Wir prüfen dein Dokument.<br>' +
+                'Das dauert in der Regel <strong>1&ndash;3 Werktage</strong>.<br>' +
+                'Du bekommst eine Benachrichtigung, sobald du verifiziert bist.';
+        }
         document.getElementById('selection-view').style.display = 'none';
         document.getElementById('success-view').style.display = 'block';
     }
@@ -399,7 +418,7 @@
                 // Still show success - the profile is updated, admin can verify manually
             }
 
-            showSuccess();
+            showSuccess('email');
 
         } catch (err) {
             Room8UI.error("Fehler: " + err.message);
@@ -448,7 +467,7 @@
 
             if (dbError) throw dbError;
 
-            showSuccess();
+            showSuccess('document');
 
         } catch (err) {
             Room8UI.error("Fehler: " + err.message);

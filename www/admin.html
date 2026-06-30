@@ -331,7 +331,7 @@
         </div>
         <div class="stat-box">
             <div class="stat-val" id="statPending">-</div>
-            <div class="stat-lbl">⏳ Verifizierungen</div>
+            <div class="stat-lbl">⏳ Doku-Prüfung</div>
         </div>
         <div class="stat-box">
             <div class="stat-val" id="statUsers">-</div>
@@ -656,7 +656,9 @@
 
     async function loadStats() {
         // Simple counts via Separate Queries
-        const pending = await sb.from('profiles').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending');
+        // Nur Dokument-Uploads brauchen manuelle Pruefung. Der Mail-Weg bestaetigt sich
+        // selbst per Klick -> Mail-pending wuerde den To-Do-Zaehler mit Karteileichen aufblaehen.
+        const pending = await sb.from('profiles').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending').eq('verification_method', 'document');
         const reports = await sb.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'open');
         const users = await sb.from('profiles').select('id', { count: 'exact', head: true });
         const listings = await sb.from('listings').select('id', { count: 'exact', head: true }).eq('is_active', true);
@@ -904,6 +906,11 @@
                 actionButtons += `<button class="btn-mini btn-yellow" onclick="resetVerification('${p.id}')">↩️ Zurücksetzen</button>`;
             }
 
+            // Mail-Weg bestaetigt sich selbst -> Hinweis, damit nicht manuell durchgewunken wird
+            const selfServeNote = (status === 'pending' && p.verification_method === 'uni-email')
+                ? `<div style="margin:0.75rem 0;padding:0.6rem 0.8rem;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;font-size:0.8rem;color:#1E40AF;">ℹ️ Uni-Mail-Weg: wird automatisch verifiziert, sobald der Nutzer den Link in seiner Mail anklickt. Meist keine Aktion nötig.</div>`
+                : '';
+
             return `
                 <div class="admin-card">
                     <div class="card-header">
@@ -920,6 +927,7 @@
                         <label style="font-size: 0.75rem; color: #6b7280; display: block; margin-bottom: 0.5rem;">BEWEIS / DOKUMENT</label>
                         ${proofHtml}
                     </div>
+                    ${selfServeNote}
                     <div class="action-bar">
                         ${actionButtons}
                     </div>
