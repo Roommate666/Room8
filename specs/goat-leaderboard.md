@@ -50,8 +50,9 @@ Danach End-to-End testen (eingeloggt Score submitten -> Board zeigt Eintrag).
 - [x] Migration geschrieben + **DEPLOYED** (goat_scores + View live, RLS greift)
 - [x] Edge Function geschrieben + **DEPLOYED** (submit-goat-score, 401 ohne Login verifiziert)
 - [x] **Phase 2 Fundament: core.js (deterministisch) + replay() + Test 84/84 OK**
-- [ ] Spiel (index.html) auf core.js umstellen (Single Source of Truth, kein Drift)
-- [ ] Client-Wiring: Submit (seed+Zuege+Zeit) bei Game Over + Online-Board-Tabs (Global/Uni/Daily)
+- [x] **Spiel (index.html) auf core.js umgestellt** (Single Source of Truth). Verifiziert: Live-Spiel
+      spielt fehlerfrei, recorded moveLog replayt exakt zum Live-Score (344==344), Optik ok, 0 Fehler.
+- [ ] Client-Wiring: Submit (seed+Zuege+Zeit) bei Game Over an submit-goat-score + Online-Board-Tabs (Global/Uni/Daily)
 - [ ] Edge Function: core.js importieren + replay -> replay_validated=true bei Score-Match
 - [ ] End-to-End-Test (eingeloggt Score submitten -> Board)
 - [ ] Phase 3 Preisgeld-Zyklus + Recht
