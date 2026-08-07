@@ -60,6 +60,7 @@ serve(async (req) => {
     const seed = payload?.seed != null ? Number(payload.seed) : null
     const moves = Array.isArray(payload?.moves) ? payload.moves : null
     const durationMs = payload?.duration_ms != null ? Number(payload.duration_ms) : null
+    const eventId = (typeof payload?.event_id === 'string' && payload.event_id) ? payload.event_id : null
 
     if (mode !== 'high' && mode !== 'daily') return json({ success: false, error: 'invalid mode' }, 400)
     if (!Number.isFinite(clientScore) || clientScore < 0 || clientScore > MAX_SCORE)
@@ -107,6 +108,7 @@ serve(async (req) => {
       seed: seed != null && Number.isFinite(seed) ? Math.trunc(seed) : null,
       lines_total: linesTotal,
       duration_ms: durationMs != null && Number.isFinite(durationMs) ? Math.trunc(durationMs) : null,
+      event_id: eventId,
       verified,
       replay_validated: replayValidated,
     })
