@@ -405,6 +405,9 @@
         <button class="admin-tab" onclick="switchTab('pushhealth')">
             📡 Push Health
         </button>
+        <button class="admin-tab" onclick="switchTab('games')">
+            🎮 Spiele
+        </button>
     </div>
 
     <!-- 1. REPORTS SECTION -->
@@ -568,6 +571,62 @@
         <div id="pushHealthTokenCleanup" style="margin-top:1.5rem; padding:0.875rem 1rem; background:#FFFBEB; border:1px solid #FEF3C7; border-radius:8px; font-size:0.9rem; color:#92400E;">
             <span id="tokenCleanupText">Lade Token-Cleanup...</span>
         </div>
+    </div>
+
+    <!-- Spiele-Events (Remote-Config: Spiel/Preis/Zeitraum ohne App-Deploy umschalten) -->
+    <div id="tab-games" class="admin-section">
+        <div style="margin-bottom:1rem; padding:0.875rem 1rem; background:#ECFDF5; border:1px solid #A7F3D0; border-radius:8px; font-size:0.9rem; color:#065F46;">
+            🎮 Hier schaltest du die aktuelle Spiele-Runde um — welches Spiel, welcher Preis, welcher Zeitraum. Änderungen wirken sofort in der App, <b>ohne Neu-Deploy</b>. Preis-Auszahlung bleibt bis zur Rechtsfreigabe manuell.
+        </div>
+        <div id="gamesCurrent" style="margin-bottom:1.25rem;"><div class="loading-state">Lade aktuelles Event...</div></div>
+
+        <h3 style="margin:1rem 0 0.5rem; font-size:1rem; color:#374151;">Neues Event / Runde anlegen</h3>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:0.75rem; background:#fff; border:1px solid #E5E7EB; border-radius:10px; padding:1rem;">
+            <label style="font-size:0.85rem; color:#374151;">Spiel
+                <select id="geGameKey" style="width:100%; padding:0.5rem; border:1px solid #D1D5DB; border-radius:8px; margin-top:0.25rem;">
+                    <option value="goat_blast">Goat Blast (verfügbar)</option>
+                    <option value="jump_run">Jump'n'Run (folgt)</option>
+                    <option value="doodle">Doodle-Jump-Style (folgt)</option>
+                </select>
+            </label>
+            <label style="font-size:0.85rem; color:#374151;">Titel
+                <input id="geTitle" type="text" placeholder="z.B. Goat Blast Woche 1" style="width:100%; padding:0.5rem; border:1px solid #D1D5DB; border-radius:8px; margin-top:0.25rem;">
+            </label>
+            <label style="font-size:0.85rem; color:#374151;">Preis (Freitext)
+                <input id="gePrize" type="text" placeholder="z.B. 500€ + Sessel" style="width:100%; padding:0.5rem; border:1px solid #D1D5DB; border-radius:8px; margin-top:0.25rem;">
+            </label>
+            <label style="font-size:0.85rem; color:#374151;">Preis-Art
+                <select id="gePrizeType" style="width:100%; padding:0.5rem; border:1px solid #D1D5DB; border-radius:8px; margin-top:0.25rem;">
+                    <option value="mixed">Gemischt</option>
+                    <option value="cash">Bargeld</option>
+                    <option value="goods">Sachpreis</option>
+                    <option value="voucher">Gutschein</option>
+                </select>
+            </label>
+            <label style="font-size:0.85rem; color:#374151;">Wertung
+                <select id="geScope" style="width:100%; padding:0.5rem; border:1px solid #D1D5DB; border-radius:8px; margin-top:0.25rem;">
+                    <option value="both">Global + pro Uni</option>
+                    <option value="global">Nur global</option>
+                    <option value="uni">Nur pro Uni</option>
+                </select>
+            </label>
+            <label style="font-size:0.85rem; color:#374151;">Start
+                <input id="geStart" type="datetime-local" style="width:100%; padding:0.5rem; border:1px solid #D1D5DB; border-radius:8px; margin-top:0.25rem;">
+            </label>
+            <label style="font-size:0.85rem; color:#374151;">Ende
+                <input id="geEnd" type="datetime-local" style="width:100%; padding:0.5rem; border:1px solid #D1D5DB; border-radius:8px; margin-top:0.25rem;">
+            </label>
+            <label style="font-size:0.85rem; color:#374151; display:flex; align-items:center; gap:0.5rem; margin-top:1.5rem;">
+                <input id="geActive" type="checkbox" checked> Sofort aktiv (deaktiviert andere)
+            </label>
+            <div style="grid-column:1/-1;">
+                <button onclick="createGameEvent()" style="padding:0.6rem 1rem; background:#12B489; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:700;">➕ Event anlegen</button>
+                <span id="geMsg" style="margin-left:0.75rem; font-size:0.85rem;"></span>
+            </div>
+        </div>
+
+        <h3 style="margin:1.5rem 0 0.5rem; font-size:1rem; color:#374151;">Alle Events</h3>
+        <div id="gamesList" class="data-list"><div class="loading-state">Lade Events...</div></div>
     </div>
 
 </div>
@@ -2401,7 +2460,100 @@
         if (tab === 'events') loadEventsAdmin('reported');
         if (tab === 'eventrequests') loadEventRequests('pending');
         if (tab === 'pushhealth') loadPushHealth(currentPushHealthHours);
+        if (tab === 'games') loadGamesAdmin();
     }
+
+    // ============================================
+    // SPIELE-EVENTS (Remote-Config fuer die Spiele-Plattform)
+    // ============================================
+    function geEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+    function geFmt(ts){ if(!ts) return '–'; try{ return new Date(ts).toLocaleString('de-DE'); }catch(e){ return ts; } }
+
+    window.loadGamesAdmin = async () => {
+        var cur = document.getElementById('gamesCurrent');
+        var list = document.getElementById('gamesList');
+        try {
+            // Aktuelles Event
+            var curRes = await sb.from('current_game_event').select('*').limit(1);
+            var ev = (curRes.data && curRes.data[0]) ? curRes.data[0] : null;
+            if (ev) {
+                // Aktueller Fuehrender (nur verifiziert)
+                var lb = await sb.from('goat_leaderboard').select('username,score').eq('mode','high').order('score',{ascending:false}).limit(1);
+                var top = (lb.data && lb.data[0]) ? lb.data[0] : null;
+                cur.innerHTML = '<div style="background:#fff; border:2px solid #12B489; border-radius:10px; padding:1rem;">'
+                    + '<div style="font-weight:800; font-size:1.05rem; color:#065F46;">🟢 Aktiv: ' + geEsc(ev.title || ev.game_key) + '</div>'
+                    + '<div style="font-size:0.9rem; color:#374151; margin-top:0.35rem;">Spiel: <b>' + geEsc(ev.game_key) + '</b> · Wertung: ' + geEsc(ev.scope) + '</div>'
+                    + '<div style="font-size:0.9rem; color:#374151;">Preis: <b>' + geEsc(ev.prize_text || 'noch nicht gesetzt') + '</b> (' + geEsc(ev.prize_type||'–') + ')</div>'
+                    + '<div style="font-size:0.85rem; color:#6B7280;">Start: ' + geFmt(ev.starts_at) + ' · Ende: ' + geFmt(ev.ends_at) + '</div>'
+                    + (top ? '<div style="font-size:0.9rem; color:#12B489; margin-top:0.35rem;">👑 Aktuell vorn: <b>' + geEsc(top.username||'Anonym') + '</b> — ' + Number(top.score).toLocaleString('de-DE') + '</div>' : '<div style="font-size:0.85rem; color:#9CA3AF; margin-top:0.35rem;">Noch keine Wertung.</div>')
+                    + '</div>';
+            } else {
+                cur.innerHTML = '<div style="background:#FEF2F2; border:1px solid #FECACA; border-radius:10px; padding:1rem; color:#991B1B;">Kein aktives Event. Lege unten eins an.</div>';
+            }
+            // Alle Events
+            var allRes = await sb.from('game_events').select('*').order('starts_at',{ascending:false});
+            var rows = allRes.data || [];
+            if (!rows.length) { list.innerHTML = '<div class="loading-state">Noch keine Events.</div>'; return; }
+            list.innerHTML = rows.map(function(e){
+                return '<div style="display:flex; align-items:center; gap:0.75rem; padding:0.75rem; border:1px solid #E5E7EB; border-radius:8px; margin-bottom:0.5rem; background:#fff;">'
+                    + '<div style="flex:1;">'
+                    + '<div style="font-weight:700;">' + (e.active ? '🟢 ' : '⚪ ') + geEsc(e.title || e.game_key) + '</div>'
+                    + '<div style="font-size:0.8rem; color:#6B7280;">' + geEsc(e.game_key) + ' · ' + geEsc(e.prize_text||'kein Preis') + ' · ' + geFmt(e.starts_at) + ' → ' + geFmt(e.ends_at) + '</div>'
+                    + '</div>'
+                    + (e.active
+                        ? '<button onclick="setEventActive(\'' + e.id + '\', false)" style="padding:0.4rem 0.7rem; background:#F59E0B; color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.8rem;">Deaktivieren</button>'
+                        : '<button onclick="setEventActive(\'' + e.id + '\', true)" style="padding:0.4rem 0.7rem; background:#12B489; color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.8rem;">Aktivieren</button>')
+                    + '<button onclick="deleteGameEvent(\'' + e.id + '\')" style="padding:0.4rem 0.7rem; background:#EF4444; color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.8rem;">Löschen</button>'
+                    + '</div>';
+            }).join('');
+        } catch (err) {
+            cur.innerHTML = '<div style="color:#991B1B;">Fehler: ' + geEsc(err.message) + '</div>';
+        }
+    };
+
+    window.createGameEvent = async () => {
+        var msg = document.getElementById('geMsg');
+        msg.textContent = 'Speichere...'; msg.style.color = '#6B7280';
+        var active = document.getElementById('geActive').checked;
+        var startV = document.getElementById('geStart').value;
+        var endV = document.getElementById('geEnd').value;
+        var row = {
+            game_key: document.getElementById('geGameKey').value,
+            title: document.getElementById('geTitle').value || null,
+            prize_text: document.getElementById('gePrize').value || null,
+            prize_type: document.getElementById('gePrizeType').value,
+            scope: document.getElementById('geScope').value,
+            starts_at: startV ? new Date(startV).toISOString() : new Date().toISOString(),
+            ends_at: endV ? new Date(endV).toISOString() : null,
+            active: active
+        };
+        try {
+            if (active) { await sb.from('game_events').update({ active: false }).eq('active', true); } // nur eins aktiv
+            var { error } = await sb.from('game_events').insert(row);
+            if (error) throw error;
+            msg.textContent = '✅ Angelegt.'; msg.style.color = '#12B489';
+            document.getElementById('geTitle').value = ''; document.getElementById('gePrize').value = '';
+            loadGamesAdmin();
+        } catch (err) { msg.textContent = '❌ ' + err.message; msg.style.color = '#EF4444'; }
+    };
+
+    window.setEventActive = async (id, makeActive) => {
+        try {
+            if (makeActive) { await sb.from('game_events').update({ active: false }).eq('active', true); }
+            var { error } = await sb.from('game_events').update({ active: makeActive }).eq('id', id);
+            if (error) throw error;
+            loadGamesAdmin();
+        } catch (err) { alert('Fehler: ' + err.message); }
+    };
+
+    window.deleteGameEvent = async (id) => {
+        if (!confirm('Dieses Event wirklich löschen?')) return;
+        try {
+            var { error } = await sb.from('game_events').delete().eq('id', id);
+            if (error) throw error;
+            loadGamesAdmin();
+        } catch (err) { alert('Fehler: ' + err.message); }
+    };
 
     // ============================================
     // EVENT-CREATOR ANTRÄGE (Admin-Queue)
