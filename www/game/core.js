@@ -89,6 +89,16 @@
     else if (roll < CHILI_CHANCE + GOLD_CHANCE) p.special = { i: Math.floor(rng() * s.c.length), t: 'g' };
     return p;
   }
+  // Quests geben Bonus-Punkte -> muessen im Core sein (sonst nicht replaybar).
+  // ev(e) mit e={lines,gold,chili,streakNow}. Reihenfolge = Anzeige-Reihenfolge im Spiel.
+  const QUESTS = [
+    { goal: 1, ev: e => (e.lines >= 2 ? 1 : 0) },
+    { goal: 2, ev: e => e.gold },
+    { goal: 4, ev: e => e.lines },
+    { goal: 1, ev: e => e.chili },
+    { goal: 1, ev: e => (e.streakNow >= 3 ? 1 : 0) },
+    { goal: 1, ev: e => (e.lines >= 3 ? 1 : 0) },
+  ];
   function moldCadence(level) { return level >= 6 ? 5 : level >= 4 ? 6 : level >= 2 ? 8 : 0; }
   function bombCadence(level) { return level >= 5 ? 7 : level >= 3 ? 9 : 0; }
   function heatDur(streak) { return streak >= GOATMODE_AT ? HEAT_MS_GOAT : HEAT_MS; }
@@ -99,6 +109,7 @@
       seed: seed | 0, mode: mode || 'high',
       grid: emptyGrid(),
       score: 0, level: 1, linesTotal: 0, streak: 0, placements: 0,
+      questIdx: 0, questProg: 0,
       heat: 0, heatLast: 0, tMs: 0,
       tray: null, nextTray: [], over: false,
       _rng: mulberry32(seed | 0),
@@ -234,6 +245,20 @@
       res.boomSet = Array.from(boomSet);
       res.gold = gold; res.chili = chili; res.clearPts = pts;
       res.levelUp = updateLevel(st);
+
+      // Quests (Bonus-Punkte, deterministisch -> sofortige Weiterschaltung statt 1400ms-Timer)
+      const qe = { lines: nLines, gold, chili, streakNow: st.streak };
+      const q = QUESTS[st.questIdx % QUESTS.length];
+      const add = q.ev(qe) || 0;
+      if (add) {
+        st.questProg = Math.min(q.goal, st.questProg + add);
+        if (st.questProg >= q.goal) {
+          const bonus = Math.round(150 * mult(st.streak));
+          st.score += bonus;
+          res.questDone = true; res.questBonus = bonus;
+          st.questIdx++; st.questProg = 0;
+        }
+      }
     }
 
     // afterMove-Reihenfolge EXAKT wie Live: tickBombs -> mold -> bomb -> refill -> gameover
@@ -261,6 +286,7 @@
   }
 
   return { SIZE, MAX_LEVEL, SHAPES, mulberry32, create, place, replay,
+    advanceTime, igniteHeat,
     // fuer Tests/Renderer exportiert:
     canPlaceAt, anyPlacement, findFullLines, piecePool, mult, _internal: { newPiece, moldCadence, bombCadence } };
 });

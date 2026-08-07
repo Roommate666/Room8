@@ -411,6 +411,7 @@ body.shake .board-card{animation:shake .3s;}
   </div>
 </div>
 
+<script src="core.js"></script>
 <script>
 (function(){
 "use strict";
@@ -498,11 +499,24 @@ function setPhase(){
 }
 function skyFlash(){const f=$('skyflash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');}
 
-/* ================= State ================= */
-let grid,score,level=1,linesTotal,streak,mode,rng,tray,nextTray=[],gameActive=false;
+/* ================= State =================
+   Autoritativer Zustand lebt im deterministischen Core (G). Die lokalen Variablen
+   sind nur Spiegel fuers Rendering und werden nach jeder Core-Operation synchronisiert. */
+let G=null;                 // Core-Spielzustand (GoatCore)
+let grid,score=0,level=1,linesTotal=0,streak=0,mode,tray=[],nextTray=[],gameActive=false;
 let dragging=null,placements=0;
-let heat=0,heatLast=0;
+let heat=0;                 // gespiegelt aus G.heat (nur Anzeige)
 let questIdx=0,questProg=0;
+let gameStartMs=0;          // performance.now() bei Rundenstart -> Zug-Zeitstempel
+let moveLog=[];             // aufgezeichnete Zuege {idx,r,c,t} fuer Server-Replay
+function nowMs(){return Math.round(performance.now()-gameStartMs);}
+function colorVal(c){return (typeof c==='number')?COLORS[c]:c;}
+function syncFromCore(){
+  if(!G)return;
+  grid=G.grid;tray=G.tray;nextTray=G.nextTray;
+  score=G.score;level=G.level;linesTotal=G.linesTotal;streak=G.streak;
+  placements=G.placements;questIdx=G.questIdx;questProg=G.questProg;heat=G.heat;
+}
 
 /* ================= Board ================= */
 const boardEl=$('board'),cells=[];
@@ -514,7 +528,7 @@ function renderBoard(){
     const el=cellEl(r,c),v=grid[r][c];
     el.className='cell';el.textContent='';el.style.removeProperty('--c');
     if(v){el.classList.add('filled','t'+v.t);
-      if(v.t==='n')el.style.setProperty('--c',v.c);
+      if(v.t==='n')el.style.setProperty('--c',colorVal(v.c));
       if(v.t==='m')el.textContent='🦠';
       if(v.t==='b'){el.textContent=v.timer;el.classList.toggle('bombhot',v.timer<=3);}}
   }
@@ -543,8 +557,8 @@ function newPiece(){
   return p;
 }
 function refillTray(){
-  tray=(nextTray&&nextTray.length===3)?nextTray:[newPiece(),newPiece(),newPiece()];
-  nextTray=[newPiece(),newPiece(),newPiece()];
+  // Core besitzt tray/nextTray (in create/place erzeugt) -> hier nur spiegeln + rendern
+  tray=G.tray;nextTray=G.nextTray;
   renderTray();renderPreview();
 }
 function renderPreview(){
@@ -564,7 +578,7 @@ function buildPieceEl(p,px){
     const idx=map.get(r+','+c);
     if(idx===undefined){d.className='pc empty';}
     else{
-      d.className='pc';d.style.setProperty('--c',p.color);
+      d.className='pc';d.style.setProperty('--c',colorVal(p.color));
       if(p.special&&p.special.i===idx){
         if(p.special.t==='g'){d.classList.add('g');}
         else{d.classList.add('x');}
@@ -586,15 +600,8 @@ function renderTray(){
 }
 
 /* ================= Platzierung ================= */
-function canPlaceAt(p,R,C){
-  for(const[r,c]of p.cells){const rr=R+r,cc=C+c;
-    if(rr<0||cc<0||rr>=SIZE||cc>=SIZE||grid[rr][cc])return false;}
-  return true;
-}
-function anyPlacement(p){
-  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(canPlaceAt(p,r,c))return true;
-  return false;
-}
+function canPlaceAt(p,R,C){return GoatCore.canPlaceAt(G.grid,p.cells,R,C);}
+function anyPlacement(p){return GoatCore.anyPlacement(G.grid,p.cells);}
 function findFullLines(){
   const rows=[],cols=[];
   for(let r=0;r<SIZE;r++)if(grid[r].every(v=>v))rows.push(r);
@@ -617,18 +624,22 @@ function maybeSpawnMold(){
 }
 
 /* ================= Streak-Feuer (Echtzeit) ================= */
-function heatDur(){return streak>=GOATMODE_AT?HEAT_MS_GOAT:HEAT_MS;}
-function igniteHeat(){heat=1;heatLast=performance.now();$('heatWrap').classList.add('alive');}
-function heatTick(now){
-  if(gameActive&&heat>0){
-    heat-=(now-heatLast)/heatDur();
-    if(heat<=0){heat=0;
-      if(streak>0){const prev=streak;streak=0;updateGoat(prev);say('Feuer aus… 💨',1200);}
-      $('heatWrap').classList.remove('alive');
+// Echtzeit-Heat: Core ist Autoritaet (advanceTime). Hier nur Zeit vorspulen + rendern.
+// advanceTime ist linear -> Frame-fuer-Frame ergibt exakt dasselbe wie der eine Sprung
+// beim Zug (place ruft ebenfalls advanceTime auf) -> Server-Replay bleibt identisch.
+function heatTick(){
+  if(gameActive&&G&&!G.over){
+    const before=G.streak;
+    GoatCore.advanceTime(G,nowMs());
+    heat=G.heat;
+    if(G.streak!==before){
+      streak=G.streak;
+      updateGoat(before);
+      if(G.streak===0)say('Feuer aus… 💨',1200);
     }
+    $('heatfill').style.width=(Math.max(0,heat)*100)+'%';
+    if(heat<=0)$('heatWrap').classList.remove('alive');
   }
-  heatLast=now;
-  $('heatfill').style.width=(heat*100)+'%';
   requestAnimationFrame(heatTick);
 }
 requestAnimationFrame(heatTick);
@@ -663,10 +674,11 @@ function questEvent(e){
 }
 
 /* ================= Scoring / Ziege ================= */
-function mult(){return Math.min(1+streak*0.5,5);}
+function mult(){return GoatCore.mult(G?G.streak:streak);}
+// Core besitzt den Score. addScore zeigt nur die Float-Zahl + aktualisiert die Anzeige aus G.
 function addScore(n,x,y,bonus){
-  score+=n;$('score').textContent=score;
-  if(x!=null){const f=document.createElement('div');
+  if(G)$('score').textContent=G.score;
+  if(n>0&&x!=null){const f=document.createElement('div');
     f.className='floatpts'+(bonus?' bonus':'');f.textContent='+'+n;
     f.style.left=x+'px';f.style.top=y+'px';
     f.style.fontSize=(n>=100?28:n>=30?22:16)+'px';
@@ -775,9 +787,8 @@ function updateGoat(prev){
   GoatRig.mode(streak>=GOATMODE_AT);
   const mb=$('multBadge');if(mb){const m=mult();mb.textContent=(m%1?m.toFixed(1):m)+'×';mb.style.display=m>1?'block':'none';}
 }
+// Nur Anzeige (Level-Aufstieg berechnet der Core, say/setPhase macht commitPlacement via res.levelUp)
 function updateLevel(){
-  const nl=Math.min(MAX_LEVEL,Math.floor(linesTotal/LINES_PER_LEVEL)+1);
-  if(nl>level){level=nl;say('Level '+level+'! 🎓',1500);setPhase();}
   $('level').textContent=level;
   const prog=(linesTotal%LINES_PER_LEVEL)/LINES_PER_LEVEL*100;
   $('levelFill').style.width=(level>=MAX_LEVEL?100:prog)+'%';
@@ -840,88 +851,72 @@ function endDrag(e){
   if(anchor)commitPlacement(p,idx,anchor,e.clientX,e.clientY);
 }
 
-/* ================= Zug ausführen ================= */
-function commitPlacement(p,idx,[R,C],px,py){
+/* ================= Zug ausführen (ueber den Core) ================= */
+function paintPlaced(p,R,C){
+  // Stein sofort sichtbar machen (vor der Clear-Animation), rein visuell
   p.cells.forEach(([r,c],i)=>{
-    let cellVal={c:p.color,t:'n'};
-    if(p.special&&p.special.i===i)cellVal=p.special.t==='g'?{t:'g'}:{c:'var(--chili)',t:'x'};
-    grid[R+r][C+c]=cellVal;
+    const el=cellEl(R+r,C+c);el.className='cell filled';el.textContent='';el.style.removeProperty('--c');
+    let t='n';if(p.special&&p.special.i===i)t=(p.special.t==='g')?'g':'x';
+    el.classList.add('t'+t);
+    if(t==='n')el.style.setProperty('--c',colorVal(p.color));
   });
-  tray[idx]=null;placements++;
+}
+function commitPlacement(p,idx,[R,C],px,py){
+  if(!G||G.over)return;
+  const prev=G.streak;
+  const t=nowMs();
+  paintPlaced(p,R,C);
   sfx.place();
   goatLook(px);
-  const prev=streak;
-  addScore(Math.round(p.cells.length*mult()),px,py-40);
-  renderBoard();
-  const{rows,cols}=findFullLines();
-  const nLines=rows.length+cols.length;
-  if(nLines>0){
-    streak++;igniteHeat();
-    linesTotal+=nLines;
-    // Clear-Set aufbauen
-    const clearSet=new Set();
-    rows.forEach(r=>{for(let c=0;c<SIZE;c++)clearSet.add(r*SIZE+c);});
-    cols.forEach(c=>{for(let r=0;r<SIZE;r++)clearSet.add(r*SIZE+c);});
-    // Chili & Gold auswerten
-    let chili=0,gold=0;const boomSet=new Set();
-    clearSet.forEach(i=>{
-      const r=(i/SIZE)|0,c=i%SIZE,v=grid[r][c];
-      if(v&&v.t==='x'){chili++;
-        for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
-          const rr=r+dr,cc=c+dc;
-          if(rr>=0&&cc>=0&&rr<SIZE&&cc<SIZE&&grid[rr][cc])boomSet.add(rr*SIZE+cc);
-        }}
-      if(v&&v.t==='g')gold++;
-    });
-    boomSet.forEach(i=>clearSet.add(i));
-    // Punkte
-    const m=mult();
-    let pts=Math.round(nLines*10*nLines*m);
-    if(gold)pts+=Math.round(gold*50*m);
-    if(chili)pts+=Math.round(boomSet.size*4*m);
-    // Animation
-    clearSet.forEach(i=>{
-      const el=cells[i];
-      el.classList.add(boomSet.has(i)?'boom':'clearing');
-    });
-    sfx.clear(nLines);
-    if(chili){sfx.boom();particles(px,py-40,12,['🌶️','💥','🔥']);}
-    if(gold){sfx.gold();particles(px,py-60,8,['✨','🌟']);}
-    particles(px,py-40,5+nLines*4+(streak>=GOATMODE_AT?8:0));
+  const res=GoatCore.place(G,idx,R,C,t);
+  if(!res.ok){renderBoard();renderTray();return;}
+  moveLog.push({idx,r:R,c:C,t});
+  syncFromCore();
+  addScore(res.basePts,px,py-40);
+  if(res.nLines>0){
+    $('heatWrap').classList.add('alive');
+    res.clearSet.forEach(i=>{const el=cells[i];if(el)el.classList.add(res.boomSet.indexOf(i)>=0?'boom':'clearing');});
+    sfx.clear(res.nLines);
+    if(res.chili){sfx.boom();particles(px,py-40,12,['🌶️','💥','🔥']);}
+    if(res.gold){sfx.gold();particles(px,py-60,8,['✨','🌟']);}
+    particles(px,py-40,5+res.nLines*4+(streak>=GOATMODE_AT?8:0));
     skyFlash();
-    goatJumpFX(nLines>=2||streak>=GOATMODE_AT);
-    if(streak>=GOATMODE_AT||nLines>=2||chili){
+    goatJumpFX(res.nLines>=2||streak>=GOATMODE_AT);
+    if(streak>=GOATMODE_AT||res.nLines>=2||res.chili){
       document.body.classList.add('shake');
       setTimeout(()=>document.body.classList.remove('shake'),320);
     }
     setTimeout(()=>{
-      clearSet.forEach(i=>{grid[(i/SIZE)|0][i%SIZE]=null;});
       renderBoard();
-      if(grid.every(row=>row.every(c=>!c))){
-        pts+=Math.round(300*mult());
-        say('PERFECT! ✨',1600);
-        particles(window.innerWidth/2,window.innerHeight*0.42,22,['✨','🧀','🌟']);
-        skyFlash();
-      }
-      addScore(pts,px,py-72,chili>0||gold>0);
+      if(res.perfect){say('PERFECT! ✨',1600);particles(window.innerWidth/2,window.innerHeight*0.42,22,['✨','🧀','🌟']);skyFlash();}
+      addScore(res.clearPts,px,py-72,res.chili>0||res.gold>0);
       updateLevel();
-      questEvent({lines:nLines,gold,chili,streakNow:streak});
-      afterMove();
+      if(res.levelUp){say('Level '+G.level+'! 🎓',1500);setPhase();}
+      if(res.questDone){
+        questEl().classList.add('done');questEl().textContent='🎯 Quest geschafft! +'+res.questBonus;
+        addScore(res.questBonus,window.innerWidth/2,window.innerHeight*0.35,true);sfx.quest();say('Quest!! 🎯',1400);
+        setTimeout(()=>{questEl().classList.remove('done');renderQuest();},1400);
+      }else renderQuest();
+      if(res.spawnedMold)say('Igitt, Schimmel! 🦠',1300);
+      if(res.spawnedBomb)say('Bombe! Räum die Reihe! 💣',1600);
+      finishMove(res);
     },210);
   }else{
     renderBoard();
-    afterMove();
+    if(res.spawnedMold)say('Igitt, Schimmel! 🦠',1300);
+    if(res.spawnedBomb)say('Bombe! Räum die Reihe! 💣',1600);
+    finishMove(res);
   }
   updateGoat(prev);
   renderTray();
 }
-function afterMove(){
-  if(!gameActive)return;
-  if(tickBombs())return; // Bombe explodiert -> Game Over
-  maybeSpawnMold();
-  maybeSpawnBomb();
-  if(tray.every(p=>!p))refillTray();
-  if(!tray.some(p=>p&&anyPlacement(p)))gameOver();
+function finishMove(res){
+  if(res.bombExploded){say('BOOM! 💣',1600);sfx.boom();
+    document.body.classList.add('shake');setTimeout(()=>document.body.classList.remove('shake'),320);
+    gameOver();return;}
+  if(res.trayRefilled)refillTray();
+  renderTray();renderPreview();
+  if(res.over)gameOver();
 }
 function tickBombs(){
   let boom=false;
@@ -961,13 +956,14 @@ function bumpDayStreak(){
 }
 function newGame(m){
   mode=m;
-  grid=Array.from({length:SIZE},()=>Array(SIZE).fill(null));
-  score=0;level=1;linesTotal=0;streak=0;placements=0;heat=0;
-  questIdx=0;questProg=0;nextTray=[];gameActive=true;
-  rng=m==='daily'?mulberry32(todayKey()):mulberry32((Math.random()*2**31)|0);
+  const seed=(m==='daily')?todayKey():((Math.random()*2**31)>>>0);
+  G=GoatCore.create(seed,m);
+  gameActive=true;dragging=null;moveLog=[];gameStartMs=performance.now();
+  syncFromCore();
   $('score').textContent='0';
+  $('heatfill').style.width='0%';$('heatWrap').classList.remove('alive');
   updateGoat(0);updateLevel();setPhase();renderQuest();
-  renderBoard();refillTray();
+  renderBoard();renderTray();renderPreview();
   const days=bumpDayStreak();
   $('startOverlay').classList.add('hidden');
   $('overOverlay').classList.add('hidden');
@@ -1058,7 +1054,8 @@ setInterval(()=>{
     say(SPEECH.idle[Math.floor(Math.random()*SPEECH.idle.length)]);
 },8000);
 
-window.__gb={forceBomb:t=>{for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(!grid[r][c]){grid[r][c]={t:'b',timer:t};renderBoard();return true;}return false;},tick:tickBombs,active:()=>gameActive,score:()=>score,look:goatLook,jump:goatJumpFX,rig:()=>GoatRig.ready};
+window.__gb={forceBomb:t=>{for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(!grid[r][c]){grid[r][c]={t:'b',timer:t};renderBoard();return true;}return false;},tick:tickBombs,active:()=>gameActive,score:()=>G?G.score:score,look:goatLook,jump:goatJumpFX,rig:()=>GoatRig.ready,
+  seed:()=>G&&G.seed,moves:()=>moveLog.slice(),mode:()=>mode,over:()=>G&&G.over};
 GoatRig.init();
 showMenu();
 })();
