@@ -75,5 +75,19 @@ for (let i = 0; i < 40; i++) {
 console.log('\nCoverage ueber 40 Runden:', JSON.stringify(agg));
 check('Specials/Bomben/Schimmel wurden getriggert', agg.chili>0 && agg.gold>0 && agg.bomb>0 && agg.mold>0);
 
+// 5) DRIFT-GUARD: Browser-Core und Server-Core (Edge Function) muessen byte-identisch sein.
+{
+  const fs = require('fs'), path = require('path');
+  const browser = path.join(__dirname, 'core.js');
+  const server = path.join(__dirname, '..', '..', 'supabase', 'functions', '_shared', 'goat-core.js');
+  let same = false, note = '';
+  try {
+    const a = fs.readFileSync(browser), b = fs.readFileSync(server);
+    same = a.equals(b);
+    if (!same) note = 'server-core weicht ab -> `cp www/game/core.js supabase/functions/_shared/goat-core.js`';
+  } catch (e) { note = 'server-core fehlt: ' + e.message; }
+  check('Server-Core byte-identisch (kein Drift)', same, note);
+}
+
 console.log('\nErgebnis: '+pass+' OK, '+fail+' FAIL');
 process.exit(fail ? 1 : 0);
