@@ -54,9 +54,21 @@ Danach End-to-End testen (eingeloggt Score submitten -> Board zeigt Eintrag).
       spielt fehlerfrei, recorded moveLog replayt exakt zum Live-Score (344==344), Optik ok, 0 Fehler.
 - [x] **Client-Wiring: Submit (seed+Zuege+Zeit+lines+duration) bei Game Over + Online-Board-Tabs (Global/Uni/Daily)**
       Verifiziert gegen echte DB: Tabs, Login-Hinweis + lokaler Fallback, Submit=no-login (kein Crash), fetch global {ok,rows:0}, 0 Fehler.
-- [ ] Edge Function: core.js importieren + replay -> replay_validated=true bei Score-Match (Drift-frei: EIN core-File fuer Browser+Deno)
-- [ ] End-to-End-Test EINGELOGGT (Score submitten -> Board zeigt Eintrag) — braucht echte Room8-Session
-- [ ] Phase 3 Preisgeld-Zyklus + Recht
+- [x] **Edge Function: Server-Replay-Validierung aktiv + DEPLOYED.** submit-goat-score importiert
+      byte-identischen Shared-Core, rechnet replay(seed,moves) nach, speichert SERVER-Score,
+      setzt replay_validated=true nur bei Match (+Mindestdauer). Illegale Zuege->400, moves-Cap.
+      Drift-Guard-Test (85/85). Deno-Laufzeit + 401-Gate verifiziert.
+- [ ] End-to-End-Test EINGELOGGT (in der App: Score submitten -> Board zeigt Eintrag, replay_validated=true) — braucht echte Room8-Session
+- [ ] Phase 3 Preisgeld-Zyklus (woechentl. Reset, Gewinner je Uni/global) + Recht (Teilnahmebedingungen)
+
+## WARTUNG: Kein Drift zwischen Browser- und Server-Core
+`www/game/core.js` ist die Quelle. Nach JEDER Aenderung daran:
+```
+cp www/game/core.js supabase/functions/_shared/goat-core.js
+node www/game/core.test.js            # muss inkl. Drift-Guard gruen sein
+npx supabase functions deploy submit-goat-score
+```
+Der Test `core.test.js` schlaegt fehl, wenn die beiden Dateien nicht byte-identisch sind.
 
 ### Deployed am 08.08. (durch Claude, mit Yusuf-OK)
 `npx supabase db push` (Migration 20260612000002) + `npx supabase functions deploy submit-goat-score`.
