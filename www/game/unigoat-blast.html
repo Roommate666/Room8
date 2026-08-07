@@ -1082,10 +1082,13 @@ const OnlineBoard={
       let q=sb.from('goat_leaderboard').select('username,university,score,created_at,user_id');
       if(scope==='daily'){const d=new Date();d.setHours(0,0,0,0);q=q.eq('mode','daily').gte('created_at',d.toISOString());}
       else{q=q.eq('mode','high');if(scope==='uni'){const uni=await this.uni();if(!uni)return{ok:false,reason:'no-uni',rows:[]};q=q.eq('university',uni);}}
-      q=q.order('score',{ascending:false}).limit(20);
+      q=q.order('score',{ascending:false}).limit(200);
       const{data,error}=await q;
       if(error)return{ok:false,reason:error.message,rows:[]};
-      return{ok:true,rows:data||[]};
+      // Bestwert je Nutzer: da nach Score absteigend sortiert, ist der erste Treffer pro user_id der beste
+      const seen={},rows=[];
+      (data||[]).forEach(r=>{if(!seen[r.user_id]){seen[r.user_id]=1;rows.push(r);}});
+      return{ok:true,rows:rows.slice(0,20)};
     }catch(e){return{ok:false,reason:String((e&&e.message)||e),rows:[]};}
   }
 };

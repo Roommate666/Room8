@@ -1010,7 +1010,7 @@ const translations = {
  disclaimer_p1: 'UniGoat ist eine reine Vermittlungsplattform. Wir bieten lediglich den technischen Rahmen, damit Studierende untereinander Wohnungen, Gegenstände, Jobs und Rabatte teilen können.',
  disclaimer_p2: 'Sämtliche Vereinbarungen, Verträge oder Geschäfte werden direkt zwischen den Nutzern geschlossen. UniGoat ist nicht Vertragspartei und übernimmt keine Verantwortung für die Erfüllung dieser Vereinbarungen.',
  disclaimer_p3: 'UniGoat steht in keiner offiziellen Verbindung zu Universitäten oder Hochschulen. Die Plattform richtet sich an Studierende, ist aber kein offizielles Angebot dieser Institutionen.',
- disclaimer_p4: 'Jeder Nutzer ist eigenverantwortlich für seine Aktivitäten auf Room8. Bitte prüfe sorgfältig, mit wem du Kontakt aufnimmst, und nutze gesunden Menschenverstand bei jeder Transaktion.',
+ disclaimer_p4: 'Jeder Nutzer ist eigenverantwortlich für seine Aktivitäten auf UniGoat. Bitte prüfe sorgfältig, mit wem du Kontakt aufnimmst, und nutze gesunden Menschenverstand bei jeder Transaktion.',
 
  
 
@@ -2811,7 +2811,7 @@ const translations = {
  disclaimer_p1: 'UniGoat is purely a brokerage platform. We only provide the technical framework for students to share apartments, items, jobs and discounts among each other.',
  disclaimer_p2: 'All agreements, contracts or transactions are concluded directly between the users. UniGoat is not a party to the contract and accepts no responsibility for the fulfillment of these agreements.',
  disclaimer_p3: 'UniGoat has no official connection to universities or colleges. The platform is aimed at students but is not an official offering of these institutions.',
- disclaimer_p4: 'Each user is responsible for their own activities on Room8. Please carefully check who you contact, and use common sense in every transaction.',
+ disclaimer_p4: 'Each user is responsible for their own activities on UniGoat. Please carefully check who you contact, and use common sense in every transaction.',
 
  
 
