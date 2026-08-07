@@ -33,10 +33,22 @@ Yusuf-Feedback 08.08.: "Es ist ja nicht der gleiche Goat der sich organisch bewe
 - Kann NICHT auf Spielzustand reagieren (kein Blick-nach-links bei Platzierung links).
 - Fell/Metall-Morphing sieht oft schlecht aus. Nur fuer nicht-interaktives Deko-Loop.
 
-## Empfehlung
-Rive (A). Ich baue die Integration; Rig via Fiverr-Artist oder Yusuf. Bis dahin bleibt die
-Zwischenloesung (eine smoothe Ziege) drin. Ungenutzte Posen-Assets (left/right/jump/shades)
-bleiben liegen — als Referenz fuer den Rigger.
+## ENTSCHEIDUNG 08.08. (nach Recherche): Canvas-Warp, code-only, gratis
+Yusuf will es OHNE Artist/Editor/Lizenz zusammen im Code loesen. Recherche-Ergebnis:
+- Rive = binaeres Editor-Format, NICHT per Code erzeugbar.
+- Spine (auch AI-Auto-Rigger Keyframe.it/God Mode) = Runtime braucht Spine-Lizenz ab ~69 EUR.
+- Live2D = braucht Cubism-Editor. Meta Animated-Drawings = offline, nicht reaktiv.
+- => EINZIGE 100% code-only/gratis/kein-Editor Loesung: eigenes Warp-Rig im Canvas.
+
+### UMGESETZT (LIVE): `GoatRig` = Canvas-Slice-Warp
+- Zeichnet `goat-full.png` in 30 horizontalen Slices; obere Slices (Kopf/Ohren) bewegen sich
+  staerker (Gewicht (1-v)^1.5), Fuesse bleiben am Boden.
+- look(dir): Kopf lehnt zur Platzierung. Idle: Wiegen + feines Fell-Wackeln + Atmen.
+  jump(): globaler Squash-Sprung um Fuss-Pivot. mode(on): Amplitude hoch + Gluehen. Blinzeln.
+- EINE durchgehende Ziege, kein Bild-Swap, kein Ploppen. Fallback: PNG bleibt wenn Bild fehlt.
+- API identisch (look/jump/mode) -> Spielcode unveraendert.
+- OFFEN/Feintuning: Amplituden nach Yusuf-Feedback; ggf. Kopf als eigener Layer fuer echte
+  Drehung (dann Higgsfield-Teile generieren). Rive/Spine bleibt Option falls spaeter Budget.
 
 ## Assets vorhanden (fuer Rigger als Referenz)
 `www/game/assets/`: goat-full.png (front), goat-left/right/jump/shades.webp
