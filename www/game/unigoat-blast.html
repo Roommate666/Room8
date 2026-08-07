@@ -210,6 +210,8 @@ body.shake .board-card{animation:shake .3s;}
 /* ============ Ziege v2 ============ */
 /* transform-origin an den Fuessen -> Rotation wirkt wie Gewichts-Verlagerung, kein Schweben */
 #goat{width:82px;height:auto;display:block;transform-origin:50% 100%;filter:drop-shadow(0 3px 4px rgba(0,0,0,.22));position:relative;z-index:1;}
+/* Rive-Canvas: gerigte Ziege. Standard versteckt, wird bei erfolgreichem Rig-Load eingeblendet (Ziege-PNG dann aus) */
+#goatCanvas{width:82px;height:110px;display:none;position:relative;z-index:1;}
 /* Boden-Schatten bleibt am Platz -> Ziege STEHT sichtbar auf dem Boden */
 .goat-wrap::before{content:"";position:absolute;left:50%;bottom:1px;width:54px;height:11px;
   transform:translateX(-50%);border-radius:50%;z-index:0;pointer-events:none;
@@ -321,6 +323,7 @@ body.shake .board-card{animation:shake .3s;}
 <div id="app">
   <div class="topbar">
     <div class="goat-wrap">
+      <canvas id="goatCanvas" width="200" height="270"></canvas>
       <img id="goat" src="assets/goat-full.png" alt="UniGoat">
       <div id="goatSpeech">Määäh!</div>
     </div>
@@ -374,6 +377,7 @@ body.shake .board-card{animation:shake .3s;}
   </div>
 </div>
 
+<script src="https://unpkg.com/@rive-app/canvas@2.10.3"></script>
 <script>
 (function(){
 "use strict";
@@ -643,17 +647,51 @@ const SPEECH={
 let speechTimer=null;
 function say(t,ms){const s=$('goatSpeech');s.textContent=t;s.classList.add('show');
   clearTimeout(speechTimer);speechTimer=setTimeout(()=>s.classList.remove('show'),ms||1400);}
-/* EINE Ziege, organisch bewegt per Transform (kein Bild-Swap -> kein Ploppen).
-   Fuer echte organische Bewegung folgt ein Rig (Rive), siehe specs/goat-rig-plan.md */
+/* ===== Rive-Rig (echte organische Bewegung, EIN Charakter) =====
+   Laedt assets/goat.riv mit State-Machine "Goat" + Inputs lookX(number -100..100),
+   celebrate(trigger), goatMode(boolean). Faellt sauber auf die PNG-Ziege zurueck,
+   solange keine .riv-Datei vorhanden ist. Spec fuer den Rigger: specs/goat-rig-plan.md */
+const GoatRig={ready:false,r:null,inLook:null,inJump:null,inMode:null,
+  init(){
+    if(!window.rive||!$('goatCanvas'))return;
+    try{
+      this.r=new rive.Rive({src:'assets/goat.riv',canvas:$('goatCanvas'),autoplay:true,stateMachines:'Goat',
+        onLoad:()=>{
+          try{
+            this.r.resizeDrawingSurfaceToCanvas();
+            const ins=this.r.stateMachineInputs('Goat')||[];
+            this.inLook=ins.find(i=>i.name==='lookX')||null;
+            this.inJump=ins.find(i=>i.name==='celebrate')||null;
+            this.inMode=ins.find(i=>i.name==='goatMode')||null;
+            this.ready=true;
+            $('goatCanvas').style.display='block';
+            const img=$('goat');if(img)img.style.display='none';
+            window.addEventListener('resize',()=>{try{this.r.resizeDrawingSurfaceToCanvas();}catch(e){}});
+          }catch(e){}
+        },
+        onLoadError:()=>{/* keine .riv -> PNG-Ziege bleibt */}
+      });
+    }catch(e){/* Runtime nicht verfuegbar (offline) -> PNG-Ziege bleibt */}
+  },
+  look(dir){if(this.ready&&this.inLook)this.inLook.value=Math.max(-100,Math.min(100,dir*100));},
+  jump(){if(this.ready&&this.inJump)this.inJump.fire();},
+  mode(on){if(this.ready&&this.inMode)this.inMode.value=!!on;}
+};
+
+/* Bewegungs-API: nutzt Rive wenn gerigt, sonst PNG-Transform-Fallback (kein Bild-Swap, kein Ploppen) */
 function goatJumpFX(big){
+  if(GoatRig.ready){GoatRig.jump();return;}
   const g=$('goat');if(!g||!g.animate)return;
   if(big){g.animate([{transform:'translateY(0) rotate(0) scale(1,1)'},{transform:'translateY(-30px) rotate(-10deg) scale(1.14,.94)',offset:.3},{transform:'translateY(-6px) rotate(8deg) scale(.97,1.05)',offset:.62},{transform:'translateY(0) rotate(0) scale(1,1)'}],{duration:720,easing:'cubic-bezier(.2,.85,.25,1)'});}
   else{g.animate([{transform:'translateY(0) scale(1,1)'},{transform:'translateY(-16px) scale(1.08,.92)',offset:.3},{transform:'translateY(-3px) scale(.97,1.04)',offset:.62},{transform:'translateY(0) scale(1,1)'}],{duration:470,easing:'cubic-bezier(.2,.85,.25,1)'});}
 }
 function goatLook(px){
-  const g=$('goat');if(!g||!g.animate)return;
-  const gr=g.getBoundingClientRect();const dir=Math.max(-1,Math.min(1,(px-(gr.left+gr.width/2))/150));
-  // organischer Blick: leichte Neigung + Mini-Nicken zur Platzierung, gleiche Ziege
+  const gc=$('goatCanvas'),g=$('goat');
+  const ref=(GoatRig.ready&&gc)?gc:g;if(!ref)return;
+  const gr=ref.getBoundingClientRect();const dir=Math.max(-1,Math.min(1,(px-(gr.left+gr.width/2))/150));
+  if(GoatRig.ready){GoatRig.look(dir);return;}
+  if(!g||!g.animate)return;
+  // Fallback organischer Blick: leichte Neigung + Mini-Nicken, gleiche Ziege
   g.animate([{transform:'rotate(0deg) translateY(0)'},{transform:'rotate('+(dir*8).toFixed(1)+'deg) translateY(-2px)',offset:.4},{transform:'rotate('+(dir*3).toFixed(1)+'deg) translateY(0)',offset:.75},{transform:'rotate(0deg) translateY(0)'}],{duration:700,easing:'ease-out'});
 }
 function updateGoat(prev){
@@ -668,6 +706,7 @@ function updateGoat(prev){
     if(prev<CURIOUS_AT)say(SPEECH.curious[Math.floor(Math.random()*SPEECH.curious.length)]);}
   else b.classList.add('goat-idle');
   $('streak').textContent=streak;
+  GoatRig.mode(streak>=GOATMODE_AT);
   const mb=$('multBadge');if(mb){const m=mult();mb.textContent=(m%1?m.toFixed(1):m)+'×';mb.style.display=m>1?'block':'none';}
 }
 function updateLevel(){
@@ -911,7 +950,8 @@ setInterval(()=>{
     say(SPEECH.idle[Math.floor(Math.random()*SPEECH.idle.length)]);
 },8000);
 
-window.__gb={forceBomb:t=>{for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(!grid[r][c]){grid[r][c]={t:'b',timer:t};renderBoard();return true;}return false;},tick:tickBombs,active:()=>gameActive,score:()=>score,look:goatLook,jump:goatJumpFX};
+window.__gb={forceBomb:t=>{for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(!grid[r][c]){grid[r][c]={t:'b',timer:t};renderBoard();return true;}return false;},tick:tickBombs,active:()=>gameActive,score:()=>score,look:goatLook,jump:goatJumpFX,rig:()=>GoatRig.ready};
+GoatRig.init();
 showMenu();
 })();
 (function(){

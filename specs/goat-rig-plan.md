@@ -40,3 +40,26 @@ bleiben liegen — als Referenz fuer den Rigger.
 
 ## Assets vorhanden (fuer Rigger als Referenz)
 `www/game/assets/`: goat-full.png (front), goat-left/right/jump/shades.webp
+
+## STATUS 08.08.: Code-Integration FERTIG (Rive-Plumbing live, wartet nur auf .riv)
+Die Web-Integration ist gebaut und getestet (Fallback auf PNG solange keine .riv da ist, 0 Fehler):
+- CDN-Runtime `@rive-app/canvas@2.10.3` in `www/game/index.html`
+- `<canvas id="goatCanvas">` in der goat-wrap (versteckt bis Rig laedt)
+- Treiber `GoatRig` laedt `assets/goat.riv`, blendet Canvas ein + PNG aus bei Erfolg
+- Bewegungs-API `goatLook/goatJumpFX/updateGoat` treibt Rive wenn ready, sonst PNG-Transform
+
+### VERTRAG fuer den Rigger (MUSS exakt so heissen, sonst greift der Code nicht):
+- Datei ablegen als: `www/game/assets/goat.riv`
+- **State-Machine-Name: `Goat`**
+- **Inputs:**
+  - `lookX` — Number, Bereich -100..+100. Kopf/Blick nach links (negativ) / rechts (positiv).
+    Code setzt hier die Richtung der letzten Platzierung.
+  - `celebrate` — Trigger. Wird bei Line-Clear/Combo gefeuert (Sprung/Jubel).
+  - `goatMode` — Boolean. true ab Streak>=4 (Sonnenbrille/Ausflippen-Loop), sonst false.
+- **Empfohlene States:** Idle (atmen/blinzeln/Ohren), Look (per lookX geblendet),
+  Celebrate (Sprung, one-shot ueber celebrate), GoatMode (Dauer-Loop solange goatMode=true).
+- Artboard so exportieren, dass die Ziege auf dem Boden steht (Fuesse unten), Format ~200x270.
+
+### Fuer Produktion (Capacitor offline) spaeter:
+Runtime lokal bundlen statt CDN (`@rive-app/canvas` npm -> www/vendor/), sonst laedt der Rig
+offline nicht (dann greift automatisch der PNG-Fallback).
