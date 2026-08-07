@@ -47,9 +47,15 @@ Danach End-to-End testen (eingeloggt Score submitten -> Board zeigt Eintrag).
   Preisgeld-Aktion vorab juristisch gegenchecken (Gewinnspiel-/UWG-Regeln DE).
 
 ## Status
-- [x] Migration geschrieben (nicht deployed)
-- [x] Edge Function geschrieben (nicht deployed)
-- [ ] Client-Wiring (Submit + Online-Board-Tabs)
-- [ ] Deploy + End-to-End-Test
-- [ ] Phase 2 Replay-Validierung
+- [x] Migration geschrieben + **DEPLOYED** (goat_scores + View live, RLS greift)
+- [x] Edge Function geschrieben + **DEPLOYED** (submit-goat-score, 401 ohne Login verifiziert)
+- [x] **Phase 2 Fundament: core.js (deterministisch) + replay() + Test 84/84 OK**
+- [ ] Spiel (index.html) auf core.js umstellen (Single Source of Truth, kein Drift)
+- [ ] Client-Wiring: Submit (seed+Zuege+Zeit) bei Game Over + Online-Board-Tabs (Global/Uni/Daily)
+- [ ] Edge Function: core.js importieren + replay -> replay_validated=true bei Score-Match
+- [ ] End-to-End-Test (eingeloggt Score submitten -> Board)
 - [ ] Phase 3 Preisgeld-Zyklus + Recht
+
+### Deployed am 08.08. (durch Claude, mit Yusuf-OK)
+`npx supabase db push` (Migration 20260612000002) + `npx supabase functions deploy submit-goat-score`.
+Verifiziert: Function 401 ohne/mit-anon-JWT ohne User; `goat_leaderboard`-View liefert 200 + [].
