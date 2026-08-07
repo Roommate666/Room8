@@ -353,7 +353,7 @@ body.shake .board-card{animation:shake .3s;}
 <div class="overlay" id="startOverlay">
   <div class="panel">
     <h1><span class="ge">🐐</span> Unigoat Blast</h1>
-    <p class="sub">7×7-Feld. Räume Linien <b>schnell hintereinander</b>,<br>
+    <p class="sub">6×6-Feld. Räume Linien <b>schnell hintereinander</b>,<br>
     sonst erlischt dein Streak-Feuer! 🔥</p>
     <div class="daystreak" id="dayStreak">🔥 0 Tage in Folge</div>
     <div class="legend"><span>✨ Goldkäse</span><span>🌶️ Chili</span><span>🦠 Schimmel</span><span>💣 Bombe</span></div>
@@ -688,7 +688,7 @@ const GoatRig={ready:false,img:null,ctx:null,cv:null,dpr:1,W:88,H:118,raf:null,
     const breathe=1+Math.sin(s.t*1.7)*0.018;
     const jsX=1+je*0.12, jsY=1-je*0.14;
     const jy=-je*24*(1+s.mode*0.35);
-    const tilt=(s.look*0.06)+Math.sin(s.t*1.05)*0.015*amp; // ganz leichte Gesamt-Neigung
+    const tilt=(s.look*0.032)+Math.sin(s.t*1.05)*0.008*amp; // ganz leichte Gesamt-Neigung
     c.translate(W/2,H);
     c.rotate(tilt);
     c.scale(jsX,breathe*jsY);
@@ -698,9 +698,9 @@ const GoatRig={ready:false,img:null,ctx:null,cv:null,dpr:1,W:88,H:118,raf:null,
     for(let i=0;i<N;i++){
       const v=i/(N-1);                 // 0=Kopf ... 1=Fuesse
       const w=Math.pow(1-v,1.5);       // Gewicht: Kopf viel, Fuesse ~0
-      const dx=s.look*13*w             // Blick-Lehnen
-             +Math.sin(s.t*1.25+v*1.2)*2.2*w*amp   // Idle-Wiegen
-             +Math.sin(s.t*3.0+i*0.5)*0.9*w*amp;   // feines Fell-Wackeln
+      const dx=s.look*7*w              // Blick-Lehnen (schwaecher)
+             +Math.sin(s.t*1.15+v*1.2)*1.2*w*amp   // Idle-Wiegen (ruhiger)
+             +Math.sin(s.t*2.6+i*0.5)*0.45*w*amp;  // feines Fell-Wackeln (weniger Flackern)
       const sy=i*sh, dy=i*dh;
       c.drawImage(img,0,sy,iw,sh, dx,dy, W,dh+0.6);
     }
