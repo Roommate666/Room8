@@ -52,9 +52,10 @@ Danach End-to-End testen (eingeloggt Score submitten -> Board zeigt Eintrag).
 - [x] **Phase 2 Fundament: core.js (deterministisch) + replay() + Test 84/84 OK**
 - [x] **Spiel (index.html) auf core.js umgestellt** (Single Source of Truth). Verifiziert: Live-Spiel
       spielt fehlerfrei, recorded moveLog replayt exakt zum Live-Score (344==344), Optik ok, 0 Fehler.
-- [ ] Client-Wiring: Submit (seed+Zuege+Zeit) bei Game Over an submit-goat-score + Online-Board-Tabs (Global/Uni/Daily)
-- [ ] Edge Function: core.js importieren + replay -> replay_validated=true bei Score-Match
-- [ ] End-to-End-Test (eingeloggt Score submitten -> Board)
+- [x] **Client-Wiring: Submit (seed+Zuege+Zeit+lines+duration) bei Game Over + Online-Board-Tabs (Global/Uni/Daily)**
+      Verifiziert gegen echte DB: Tabs, Login-Hinweis + lokaler Fallback, Submit=no-login (kein Crash), fetch global {ok,rows:0}, 0 Fehler.
+- [ ] Edge Function: core.js importieren + replay -> replay_validated=true bei Score-Match (Drift-frei: EIN core-File fuer Browser+Deno)
+- [ ] End-to-End-Test EINGELOGGT (Score submitten -> Board zeigt Eintrag) — braucht echte Room8-Session
 - [ ] Phase 3 Preisgeld-Zyklus + Recht
 
 ### Deployed am 08.08. (durch Claude, mit Yusuf-OK)
