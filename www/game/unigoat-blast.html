@@ -383,7 +383,7 @@ const COLORS=['var(--gouda)','var(--cheddar)','var(--emmental)','var(--berg)','v
 const LINES_PER_LEVEL=6, MAX_LEVEL=15;
 const GOATMODE_AT=4, HYPED_AT=2, CURIOUS_AT=1;
 const HEAT_MS=6000, HEAT_MS_GOAT=7500;
-const GOLD_CHANCE=.08, CHILI_CHANCE=.07;
+const GOLD_CHANCE=.11, CHILI_CHANCE=.1;
 
 const SHAPES=[
   {c:[[0,0]],t:1},
@@ -566,7 +566,7 @@ function findFullLines(){
 }
 
 /* ================= Schimmel ================= */
-function moldCadence(){return level>=8?5:level>=5?6:level>=3?8:0;}
+function moldCadence(){return level>=6?5:level>=4?6:level>=2?8:0;}
 function maybeSpawnMold(){
   const cad=moldCadence();
   if(!cad||placements%cad!==0)return;
@@ -643,25 +643,18 @@ const SPEECH={
 let speechTimer=null;
 function say(t,ms){const s=$('goatSpeech');s.textContent=t;s.classList.add('show');
   clearTimeout(speechTimer);speechTimer=setTimeout(()=>s.classList.remove('show'),ms||1400);}
-/* Posen-Wechsel: echte Bild-Wechsel statt nur CSS -> Ziege schaut/springt/flippt aus */
-const GOAT_POSES={front:'assets/goat-full.png',left:'assets/goat-left.webp',right:'assets/goat-right.webp',jump:'assets/goat-jump.webp',shades:'assets/goat-shades.webp'};
-Object.values(GOAT_POSES).forEach(function(u){var im=new Image();im.src=u;}); // vorladen
-let goatPoseTimer=null;
-function goatResting(){return document.body.classList.contains('goat-mode')?'shades':'front';}
-function setGoatPose(name){const g=$('goat');if(g&&GOAT_POSES[name]&&!g.getAttribute('src').endsWith(GOAT_POSES[name]))g.setAttribute('src',GOAT_POSES[name]);}
-function goatPoseTemp(name,ms){setGoatPose(name);clearTimeout(goatPoseTimer);goatPoseTimer=setTimeout(function(){goatPoseTimer=null;setGoatPose(goatResting());},ms||650);}
+/* EINE Ziege, organisch bewegt per Transform (kein Bild-Swap -> kein Ploppen).
+   Fuer echte organische Bewegung folgt ein Rig (Rive), siehe specs/goat-rig-plan.md */
 function goatJumpFX(big){
   const g=$('goat');if(!g||!g.animate)return;
-  goatPoseTemp('jump',big?760:520);
-  if(big){g.animate([{transform:'translateY(0) rotate(0) scale(1)'},{transform:'translateY(-32px) rotate(-14deg) scale(1.18)',offset:.3},{transform:'translateY(-8px) rotate(11deg) scale(1.06)',offset:.62},{transform:'translateY(0) rotate(0) scale(1)'}],{duration:720,easing:'cubic-bezier(.2,.85,.25,1)'});}
-  else{g.animate([{transform:'translateY(0) scale(1,1)'},{transform:'translateY(-18px) scale(1.1,.9)',offset:.3},{transform:'translateY(-3px) scale(.97,1.05)',offset:.62},{transform:'translateY(0) scale(1,1)'}],{duration:470,easing:'cubic-bezier(.2,.85,.25,1)'});}
+  if(big){g.animate([{transform:'translateY(0) rotate(0) scale(1,1)'},{transform:'translateY(-30px) rotate(-10deg) scale(1.14,.94)',offset:.3},{transform:'translateY(-6px) rotate(8deg) scale(.97,1.05)',offset:.62},{transform:'translateY(0) rotate(0) scale(1,1)'}],{duration:720,easing:'cubic-bezier(.2,.85,.25,1)'});}
+  else{g.animate([{transform:'translateY(0) scale(1,1)'},{transform:'translateY(-16px) scale(1.08,.92)',offset:.3},{transform:'translateY(-3px) scale(.97,1.04)',offset:.62},{transform:'translateY(0) scale(1,1)'}],{duration:470,easing:'cubic-bezier(.2,.85,.25,1)'});}
 }
 function goatLook(px){
   const g=$('goat');if(!g||!g.animate)return;
   const gr=g.getBoundingClientRect();const dir=Math.max(-1,Math.min(1,(px-(gr.left+gr.width/2))/150));
-  // Kopf-Pose passend zur Platzierung (links/rechts), sonst leichter Blick geradeaus
-  if(dir<-.1)goatPoseTemp('left',720);else if(dir>.1)goatPoseTemp('right',720);
-  g.animate([{transform:'rotate(0deg) translateY(0)'},{transform:'rotate('+(dir*7).toFixed(1)+'deg) translateY(-2px)',offset:.4},{transform:'rotate(0deg) translateY(0)'}],{duration:650,easing:'ease-out'});
+  // organischer Blick: leichte Neigung + Mini-Nicken zur Platzierung, gleiche Ziege
+  g.animate([{transform:'rotate(0deg) translateY(0)'},{transform:'rotate('+(dir*8).toFixed(1)+'deg) translateY(-2px)',offset:.4},{transform:'rotate('+(dir*3).toFixed(1)+'deg) translateY(0)',offset:.75},{transform:'rotate(0deg) translateY(0)'}],{duration:700,easing:'ease-out'});
 }
 function updateGoat(prev){
   const b=document.body;
@@ -675,8 +668,6 @@ function updateGoat(prev){
     if(prev<CURIOUS_AT)say(SPEECH.curious[Math.floor(Math.random()*SPEECH.curious.length)]);}
   else b.classList.add('goat-idle');
   $('streak').textContent=streak;
-  // Ruhe-Pose nur setzen wenn gerade keine temporaere Pose (Sprung/Blick) laeuft
-  if(goatPoseTimer===null)setGoatPose(goatResting());
   const mb=$('multBadge');if(mb){const m=mult();mb.textContent=(m%1?m.toFixed(1):m)+'×';mb.style.display=m>1?'block':'none';}
 }
 function updateLevel(){
@@ -837,7 +828,7 @@ function tickBombs(){
     gameOver();return true;}
   return false;
 }
-function bombCadence(){return level>=6?7:level>=4?9:0;}
+function bombCadence(){return level>=5?7:level>=3?9:0;}
 function maybeSpawnBomb(){
   const cad=bombCadence();
   if(!cad||placements%cad!==0)return;
@@ -920,7 +911,7 @@ setInterval(()=>{
     say(SPEECH.idle[Math.floor(Math.random()*SPEECH.idle.length)]);
 },8000);
 
-window.__gb={forceBomb:t=>{for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(!grid[r][c]){grid[r][c]={t:'b',timer:t};renderBoard();return true;}return false;},tick:tickBombs,active:()=>gameActive,score:()=>score,pose:goatPoseTemp,look:goatLook,jump:goatJumpFX};
+window.__gb={forceBomb:t=>{for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(!grid[r][c]){grid[r][c]={t:'b',timer:t};renderBoard();return true;}return false;},tick:tickBombs,active:()=>gameActive,score:()=>score,look:goatLook,jump:goatJumpFX};
 showMenu();
 })();
 (function(){
