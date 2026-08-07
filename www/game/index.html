@@ -145,6 +145,9 @@ body.goatmode #multBadge{display:block;animation:pulse .45s infinite alternate;}
 @keyframes goldpulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.22)}}
 .cell.filled.tx{font-size:13px;}
 .cell.filled.tm{background:linear-gradient(160deg,#a8bf7e,#7d9a54);font-size:12px;filter:saturate(.8);}
+.cell.filled.tb{font-size:14px;font-weight:900;color:#fff;}
+.cell.filled.tb.bombhot{animation:bombhot .5s infinite alternate;}
+@keyframes bombhot{from{filter:brightness(1)}to{filter:brightness(1.5) drop-shadow(0 0 7px var(--chili))}}
 .cell.clearing{animation:popOut .2s forwards;}
 @keyframes popOut{55%{transform:scale(1.14);filter:brightness(1.4)}100%{transform:scale(0);opacity:0}}
 .cell.boom{animation:boom .28s forwards;}
@@ -185,7 +188,7 @@ body.shake .board-card{animation:shake .3s;}
   to{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.55)}}
 
 /* ============ Ziege v2 ============ */
-#goat{width:92px;height:auto;display:block;transform-origin:50% 92%;}
+#goat{width:82px;height:auto;display:block;transform-origin:50% 90%;filter:drop-shadow(0 4px 6px rgba(0,0,0,.18));}
 .goat-idle #goat{animation:bob 3s ease-in-out infinite;}
 @keyframes bob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-3px) rotate(1.5deg)}}
 .goat-curious #goat{animation:peek 1.3s ease-in-out infinite;}
@@ -262,71 +265,7 @@ body.shake .board-card{animation:shake .3s;}
 <div id="app">
   <div class="topbar">
     <div class="goat-wrap">
-      <svg id="goat" viewBox="0 0 120 118" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="furG" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e9e2d2"/>
-          </linearGradient>
-          <linearGradient id="hornG" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#e0b87e"/><stop offset="1" stop-color="#b98a4e"/>
-          </linearGradient>
-          <linearGradient id="earG" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#f6f2e8"/><stop offset="1" stop-color="#dfd5bf"/>
-          </linearGradient>
-        </defs>
-        <!-- Hörner (geriffelt) -->
-        <path d="M40 26 Q30 10 38 3 Q43 14 50 23 Z" fill="url(#hornG)" stroke="#43351f" stroke-width="3" stroke-linejoin="round"/>
-        <path d="M80 26 Q90 10 82 3 Q77 14 70 23 Z" fill="url(#hornG)" stroke="#43351f" stroke-width="3" stroke-linejoin="round"/>
-        <path d="M36 15 L43 18 M35 9 L41 12" stroke="#8a6a3c" stroke-width="2" stroke-linecap="round"/>
-        <path d="M84 15 L77 18 M85 9 L79 12" stroke="#8a6a3c" stroke-width="2" stroke-linecap="round"/>
-        <!-- Schlappohren -->
-        <path d="M30 38 Q10 40 8 52 Q20 56 32 48 Z" fill="url(#earG)" stroke="#43351f" stroke-width="3" stroke-linejoin="round"/>
-        <path d="M90 38 Q110 40 112 52 Q100 56 88 48 Z" fill="url(#earG)" stroke="#43351f" stroke-width="3" stroke-linejoin="round"/>
-        <path d="M16 48 Q22 48 27 45" stroke="#c9aeb0" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-        <path d="M104 48 Q98 48 93 45" stroke="#c9aeb0" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-        <!-- Kopf -->
-        <path d="M38 28 Q60 15 82 28 Q93 42 88 64 Q84 86 60 91 Q36 86 32 64 Q27 42 38 28 Z"
-              fill="url(#furG)" stroke="#43351f" stroke-width="3.5"/>
-        <!-- Stirn-Fellbüschel -->
-        <path d="M52 22 Q56 14 60 21 Q64 13 68 21" fill="none" stroke="#43351f" stroke-width="3" stroke-linecap="round"/>
-        <!-- Augenbrauen -->
-        <path id="browL" d="M40 41 Q47 37 53 40" stroke="#43351f" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-        <path id="browR" d="M67 40 Q73 37 80 41" stroke="#43351f" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-        <!-- Augen -->
-        <g id="eyes">
-          <ellipse cx="47" cy="52" rx="7.5" ry="9" fill="#fff" stroke="#43351f" stroke-width="2.5"/>
-          <ellipse cx="73" cy="52" rx="7.5" ry="9" fill="#fff" stroke="#43351f" stroke-width="2.5"/>
-          <g class="pupil"><circle cx="47" cy="53" r="3.6" fill="#43351f"/><circle cx="48.4" cy="51.6" r="1.2" fill="#fff"/></g>
-          <g class="pupil"><circle cx="73" cy="53" r="3.6" fill="#43351f"/><circle cx="74.4" cy="51.6" r="1.2" fill="#fff"/></g>
-          <ellipse id="lidL" cx="47" cy="52" rx="8" ry="9.5" fill="#e9e2d2"/>
-          <ellipse id="lidR" cx="73" cy="52" rx="8" ry="9.5" fill="#e9e2d2"/>
-        </g>
-        <!-- Sonnenbrille -->
-        <g id="shades">
-          <rect x="37" y="45" width="21" height="14" rx="5" fill="#1c1c1e"/>
-          <rect x="62" y="45" width="21" height="14" rx="5" fill="#1c1c1e"/>
-          <path d="M58 50 L62 50" stroke="#1c1c1e" stroke-width="3"/>
-          <path d="M37 49 L29 44 M83 49 L91 44" stroke="#1c1c1e" stroke-width="3"/>
-          <path d="M41 49 L48 49" stroke="#7fd0ff" stroke-width="2.4" stroke-linecap="round" opacity=".8"/>
-          <path d="M66 49 L73 49" stroke="#7fd0ff" stroke-width="2.4" stroke-linecap="round" opacity=".8"/>
-        </g>
-        <!-- Schnauze -->
-        <ellipse cx="60" cy="74" rx="15" ry="11" fill="#f4cdd4" stroke="#43351f" stroke-width="3"/>
-        <ellipse cx="54" cy="72" rx="2.1" ry="3" fill="#43351f"/>
-        <ellipse cx="66" cy="72" rx="2.1" ry="3" fill="#43351f"/>
-        <path id="mouth" d="M54 80 Q60 84 66 80" stroke="#43351f" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-        <!-- Grashalm -->
-        <g id="grasshalm"><path d="M64 82 Q75 77 79 66" stroke="#5aa93c" stroke-width="3.2" fill="none" stroke-linecap="round"/>
-        <path d="M79 66 L83 61 M79 66 L74 62" stroke="#5aa93c" stroke-width="2.6" stroke-linecap="round"/></g>
-        <!-- Bart -->
-        <path d="M55 90 Q58 103 60 92 Q62 104 65 90" fill="#e9e2d2" stroke="#43351f" stroke-width="3" stroke-linejoin="round"/>
-        <!-- Halsband + Glocke -->
-        <path d="M42 92 Q60 102 78 92" stroke="#d94f4f" stroke-width="6" fill="none" stroke-linecap="round"/>
-        <g id="bell">
-          <path d="M55 97 Q60 93 65 97 L66 105 Q60 109 54 105 Z" fill="#ffd34d" stroke="#43351f" stroke-width="2.6" stroke-linejoin="round"/>
-          <circle cx="60" cy="107" r="2.4" fill="#43351f"/>
-        </g>
-      </svg>
+      <img id="goat" src="assets/goat-full.png" alt="UniGoat">
       <div id="goatSpeech">Määäh!</div>
     </div>
     <div class="stats">
@@ -358,7 +297,7 @@ body.shake .board-card{animation:shake .3s;}
     <p class="sub">7×7-Feld. Räume Linien <b>schnell hintereinander</b>,<br>
     sonst erlischt dein Streak-Feuer! 🔥</p>
     <div class="daystreak" id="dayStreak">🔥 0 Tage in Folge</div>
-    <div class="legend"><span>✨ Goldkäse</span><span>🌶️ Chili = Boom</span><span>🦠 Schimmel</span></div>
+    <div class="legend"><span>✨ Goldkäse</span><span>🌶️ Chili</span><span>🦠 Schimmel</span><span>💣 Bombe</span></div>
     <button class="btn primary" id="btnHigh">🏆 Highscore-Modus</button>
     <button class="btn daily" id="btnDaily">📅 Daily Challenge</button>
     <div class="best-row">
@@ -485,7 +424,8 @@ function renderBoard(){
       if(v.t==='n')el.style.setProperty('--c',v.c);
       if(v.t==='g')el.textContent='✨';
       if(v.t==='x'){el.style.setProperty('--c','var(--chili)');el.textContent='🌶️';}
-      if(v.t==='m')el.textContent='🦠';}
+      if(v.t==='m')el.textContent='🦠';
+      if(v.t==='b'){el.style.setProperty('--c','#4a4a55');el.textContent=v.timer;el.classList.toggle('bombhot',v.timer<=3);}}
   }
 }
 
@@ -803,9 +743,33 @@ function commitPlacement(p,idx,[R,C],px,py){
 }
 function afterMove(){
   if(!gameActive)return;
+  if(tickBombs())return; // Bombe explodiert -> Game Over
   maybeSpawnMold();
+  maybeSpawnBomb();
   if(tray.every(p=>!p))refillTray();
   if(!tray.some(p=>p&&anyPlacement(p)))gameOver();
+}
+function tickBombs(){
+  let boom=false;
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){const v=grid[r][c];
+    if(v&&v.t==='b'){v.timer--;if(v.timer<=0)boom=true;}}
+  renderBoard();
+  if(boom){say('BOOM! 💣',1600);sfx.boom();
+    document.body.classList.add('shake');setTimeout(()=>document.body.classList.remove('shake'),320);
+    gameOver();return true;}
+  return false;
+}
+function bombCadence(){return level>=6?7:level>=4?9:0;}
+function maybeSpawnBomb(){
+  const cad=bombCadence();
+  if(!cad||placements%cad!==0)return;
+  const empty=[];
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(!grid[r][c])empty.push([r,c]);
+  if(empty.length<=8)return;
+  const[r,c]=empty[Math.floor(rng()*empty.length)];
+  grid[r][c]={t:'b',timer:12};
+  renderBoard();
+  say('Bombe! Räum die Reihe! 💣',1600);
 }
 
 /* ================= Game Flow ================= */
@@ -876,6 +840,7 @@ setInterval(()=>{
     say(SPEECH.idle[Math.floor(Math.random()*SPEECH.idle.length)]);
 },8000);
 
+window.__gb={forceBomb:t=>{for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(!grid[r][c]){grid[r][c]={t:'b',timer:t};renderBoard();return true;}return false;},tick:tickBombs,active:()=>gameActive,score:()=>score};
 showMenu();
 })();
 </script>
