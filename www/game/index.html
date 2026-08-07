@@ -269,6 +269,7 @@ body.shake .board-card{animation:shake .3s;}
 .lb-list li .sc{font-family:'Fredoka',sans-serif;font-weight:700;color:#12B489;}
 .lb-list li.me{outline:2px solid #21D0A1;}
 .lb-empty{text-align:center;color:#8a9099;font-size:14px;padding:16px 0;}
+.lb-status{text-align:center;color:#8a9099;font-size:12px;margin:2px 0 8px;min-height:14px;}
 #goatSpeech{position:absolute;left:76px;top:-8px;background:#fff;border:2px solid var(--card-edge);
   border-radius:12px;padding:4px 8px;font-size:11px;font-weight:900;white-space:nowrap;opacity:0;
   transition:opacity .18s;box-shadow:0 3px 0 rgba(0,0,0,.1);z-index:5;}
@@ -391,11 +392,13 @@ body.shake .board-card{animation:shake .3s;}
   <div class="hp-card">
     <h3>🏆 Rangliste</h3>
     <div class="lb-tabs">
-      <button class="lb-tab active" data-lb="high">Highscore</button>
+      <button class="lb-tab active" data-lb="global">Global</button>
+      <button class="lb-tab" data-lb="uni">Meine Uni</button>
       <button class="lb-tab" data-lb="daily">Daily</button>
     </div>
     <ol id="lbList" class="lb-list"></ol>
     <p class="lb-empty" id="lbEmpty" hidden>Noch keine Eintraege — spiel eine Runde! 🐐</p>
+    <p class="lb-status" id="lbStatus"></p>
     <button id="boardClose">Schliessen</button>
   </div>
 </div>
@@ -411,6 +414,8 @@ body.shake .board-card{animation:shake .3s;}
   </div>
 </div>
 
+<script src="../lib/supabase.min.js"></script>
+<script src="../config.js"></script>
 <script src="core.js"></script>
 <script>
 (function(){
@@ -984,6 +989,13 @@ function gameOver(){
   if(rank>=1&&rank<=10)bestLine+=' · Platz '+rank+' 🏆';
   $('overBest').textContent=bestLine;
   setTimeout(()=>$('overOverlay').classList.remove('hidden'),450);
+  // Online-Submit (nur eingeloggt, fire-and-forget). Score+Seed+Zuege -> Server (spaeter Replay-validiert).
+  if(score>0&&G){
+    const payload={mode:mode,score:G.score,seed:G.seed,moves:moveLog.slice(),lines_total:G.linesTotal,duration_ms:nowMs()};
+    OnlineBoard.submit(payload).then(r=>{
+      if(r&&r.ok&&r.rank&&$('overBest'))$('overBest').textContent+=' · Online #'+r.rank;
+    }).catch(()=>{});
+  }
   say(isNew?'REKORD!! 🏆':'Määäh… nochmal!',2200);
 }
 function showMenu(){
@@ -1017,25 +1029,84 @@ function lbAdd(m,sc){
   top.forEach(e=>delete e.me);store.set(lbKey(m),JSON.stringify(top));
   return rank; // 0 = nicht in Top 10
 }
-let lbTab='high';
-function renderLeaderboard(){
-  const list=lbGet(lbTab).sort((a,b)=>b.score-a.score),ol=$('lbList');ol.innerHTML='';
-  $('lbEmpty').hidden=list.length>0;
+/* ===== Online-Board (Room8-Login) + Score-Submit. Fallback: lokales Board. ===== */
+const OnlineBoard={
+  _user:undefined,_profile:undefined,
+  client(){return window.sb||null;},
+  async user(){
+    if(this._user!==undefined)return this._user;
+    const sb=this.client();if(!sb){this._user=null;return null;}
+    try{const{data}=await sb.auth.getUser();this._user=(data&&data.user)?data.user:null;}catch(e){this._user=null;}
+    return this._user;
+  },
+  async profile(){
+    if(this._profile!==undefined)return this._profile;
+    const sb=this.client(),u=await this.user();if(!sb||!u){this._profile=null;return null;}
+    try{const{data}=await sb.from('public_profiles').select('username,university').eq('id',u.id).single();
+      this._profile=data||null;
+      if(data&&data.username&&!store.get('ugb2_name'))store.set('ugb2_name',data.username);
+    }catch(e){this._profile=null;}
+    return this._profile;
+  },
+  async uni(){const p=await this.profile();return p?p.university:null;},
+  async submit(payload){
+    const sb=this.client();if(!sb)return{ok:false,reason:'offline'};
+    const u=await this.user();if(!u)return{ok:false,reason:'no-login'};
+    try{const{data,error}=await sb.functions.invoke('submit-goat-score',{body:payload});
+      if(error)return{ok:false,reason:error.message||'error'};
+      return Object.assign({ok:true},data||{});
+    }catch(e){return{ok:false,reason:String((e&&e.message)||e)};}
+  },
+  async fetch(scope){
+    const sb=this.client();if(!sb)return{ok:false,reason:'offline',rows:[]};
+    try{
+      let q=sb.from('goat_leaderboard').select('username,university,score,created_at,user_id');
+      if(scope==='daily'){const d=new Date();d.setHours(0,0,0,0);q=q.eq('mode','daily').gte('created_at',d.toISOString());}
+      else{q=q.eq('mode','high');if(scope==='uni'){const uni=await this.uni();if(!uni)return{ok:false,reason:'no-uni',rows:[]};q=q.eq('university',uni);}}
+      q=q.order('score',{ascending:false}).limit(20);
+      const{data,error}=await q;
+      if(error)return{ok:false,reason:error.message,rows:[]};
+      return{ok:true,rows:data||[]};
+    }catch(e){return{ok:false,reason:String((e&&e.message)||e),rows:[]};}
+  }
+};
+
+let lbTab='global';
+function renderLocalInto(m){
+  const ol=$('lbList');ol.innerHTML='';
+  const list=lbGet(m).sort((a,b)=>b.score-a.score);$('lbEmpty').hidden=list.length>0;
   const myName=store.get('ugb2_name');
-  list.forEach(e=>{const li=document.createElement('li');
-    if(myName&&e.name===myName)li.className='me';
+  list.forEach(e=>{const li=document.createElement('li');if(myName&&e.name===myName)li.className='me';
     const nm=document.createElement('span');nm.className='nm';nm.textContent=e.name||'Anonym';
+    const sc=document.createElement('span');sc.className='sc';sc.textContent=(+e.score).toLocaleString('de-DE');
+    li.appendChild(nm);li.appendChild(sc);ol.appendChild(li);});
+}
+async function renderBoardTab(){
+  const ol=$('lbList'),status=$('lbStatus');ol.innerHTML='';$('lbEmpty').hidden=true;status.textContent='Lade…';
+  const localMode=(lbTab==='daily')?'daily':'high';
+  if(!OnlineBoard.client()){status.textContent='Offline — lokales Board.';return renderLocalInto(localMode);}
+  const u=await OnlineBoard.user();
+  if(!u){status.textContent='Logge dich in Room8 ein fuers Online-Board.';return renderLocalInto(localMode);}
+  const res=await OnlineBoard.fetch(lbTab);
+  if(!res.ok&&res.reason==='no-uni'){status.textContent='Keine Uni im Profil hinterlegt.';$('lbEmpty').hidden=false;return;}
+  if(!res.ok){status.textContent='Board nicht ladbar — lokal:';return renderLocalInto(localMode);}
+  status.textContent='';$('lbEmpty').hidden=res.rows.length>0;
+  const myId=u.id;
+  res.rows.forEach(e=>{const li=document.createElement('li');if(e.user_id===myId)li.className='me';
+    const nm=document.createElement('span');nm.className='nm';
+    nm.textContent=(e.username||'Anonym')+((lbTab==='global'&&e.university)?(' · '+e.university):'');
     const sc=document.createElement('span');sc.className='sc';sc.textContent=(+e.score).toLocaleString('de-DE');
     li.appendChild(nm);li.appendChild(sc);ol.appendChild(li);});
 }
 (function(){
   const bp=$('boardPanel'),bo=$('btnBoard'),bc=$('boardClose');if(!bp)return;
-  function open(){lbTab='high';document.querySelectorAll('.lb-tab').forEach(t=>t.classList.toggle('active',t.dataset.lb==='high'));renderLeaderboard();bp.hidden=false;}
+  OnlineBoard.profile(); // frueh laden: setzt ugb2_name aus Room8-Username (kein Prompt bei Login)
+  function open(){lbTab='global';document.querySelectorAll('.lb-tab').forEach(t=>t.classList.toggle('active',t.dataset.lb==='global'));bp.hidden=false;renderBoardTab();}
   if(bo)bo.onclick=open;
   if(bc)bc.onclick=()=>bp.hidden=true;
   bp.addEventListener('click',e=>{if(e.target===bp)bp.hidden=true;});
   document.querySelectorAll('.lb-tab').forEach(t=>t.onclick=()=>{
-    lbTab=t.dataset.lb;document.querySelectorAll('.lb-tab').forEach(x=>x.classList.toggle('active',x===t));renderLeaderboard();});
+    lbTab=t.dataset.lb;document.querySelectorAll('.lb-tab').forEach(x=>x.classList.toggle('active',x===t));renderBoardTab();});
 })();
 
 /* Pupillen folgen dem Finger + Blinzeln */
@@ -1055,7 +1126,7 @@ setInterval(()=>{
 },8000);
 
 window.__gb={forceBomb:t=>{for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(!grid[r][c]){grid[r][c]={t:'b',timer:t};renderBoard();return true;}return false;},tick:tickBombs,active:()=>gameActive,score:()=>G?G.score:score,look:goatLook,jump:goatJumpFX,rig:()=>GoatRig.ready,
-  seed:()=>G&&G.seed,moves:()=>moveLog.slice(),mode:()=>mode,over:()=>G&&G.over};
+  seed:()=>G&&G.seed,moves:()=>moveLog.slice(),mode:()=>mode,over:()=>G&&G.over,online:OnlineBoard};
 GoatRig.init();
 showMenu();
 })();
