@@ -202,27 +202,45 @@ body.shake .board-card{animation:shake .3s;}
   to{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.55)}}
 
 /* ============ Ziege v2 ============ */
-#goat{width:82px;height:auto;display:block;transform-origin:50% 90%;filter:drop-shadow(0 4px 6px rgba(0,0,0,.18));}
-.goat-idle #goat{animation:bob 2.3s ease-in-out infinite;}
-@keyframes bob{0%,100%{transform:translateY(0) rotate(-2.5deg)}25%{transform:translateY(-6px) rotate(1deg)}50%{transform:translateY(-9px) rotate(3deg)}75%{transform:translateY(-4px) rotate(-1deg)}}
-.goat-curious #goat{animation:peek 1.3s ease-in-out infinite;}
-@keyframes peek{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(5deg) translateY(-3px)}}
-.goat-hyped #goat{animation:hop .4s ease-in-out infinite;}
-@keyframes hop{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px) rotate(-4deg)}}
-.goat-mode #goat{animation:bang .24s ease-in-out infinite;}
-@keyframes bang{0%,100%{transform:translateY(0) rotate(-10deg)}50%{transform:translateY(-11px) rotate(10deg)}}
-#goat .pupil{transition:transform .16s;}
-#goat #lidL,#goat #lidR{transform-origin:center;transform:scaleY(0);transition:transform .1s;}
-#goat.blink #lidL,#goat.blink #lidR{transform:scaleY(1);}
-#goat #shades{opacity:0;transform:translateY(-16px);transition:all .22s;}
-.goat-mode #goat #shades{opacity:1;transform:translateY(0);}
-#goat #bell{transform-origin:60px 96px;}
-.goat-hyped #goat #bell,.goat-mode #goat #bell{animation:ring .3s ease-in-out infinite;}
-@keyframes ring{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(14deg)}}
-#goat #grasshalm{transform-origin:64px 82px;animation:chew 1.8s ease-in-out infinite;}
-@keyframes chew{0%,100%{transform:rotate(0)}50%{transform:rotate(9deg)}}
+/* transform-origin an den Fuessen -> Rotation wirkt wie Gewichts-Verlagerung, kein Schweben */
+#goat{width:82px;height:auto;display:block;transform-origin:50% 100%;filter:drop-shadow(0 3px 4px rgba(0,0,0,.22));position:relative;z-index:1;}
+/* Boden-Schatten bleibt am Platz -> Ziege STEHT sichtbar auf dem Boden */
+.goat-wrap::before{content:"";position:absolute;left:50%;bottom:1px;width:54px;height:11px;
+  transform:translateX(-50%);border-radius:50%;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at center,rgba(0,0,0,.30),rgba(0,0,0,0) 70%);
+  animation:gshadow 3.6s ease-in-out infinite;}
+@keyframes gshadow{0%,100%{opacity:.30;transform:translateX(-50%) scaleX(1)}50%{opacity:.22;transform:translateX(-50%) scaleX(.92)}}
+/* Idle: atmet + wiegt sich leicht, Fuesse bleiben am Boden (KEIN translateY) */
+.goat-idle #goat{animation:breathe 3.6s ease-in-out infinite;}
+@keyframes breathe{0%,100%{transform:scale(1,1) rotate(-1.2deg)}50%{transform:scale(1.02,.985) rotate(1.4deg)}}
+.goat-curious #goat{animation:peek 1.5s ease-in-out infinite;}
+@keyframes peek{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(5deg)}}
+/* hyped/goat-mode DUERFEN springen -> gewolltes Ausflippen bei hohem Streak */
+.goat-hyped #goat{animation:hop .42s ease-in-out infinite;}
+@keyframes hop{0%,100%{transform:translateY(0) scale(1,1)}45%{transform:translateY(-8px) scale(.96,1.05)}}
+.goat-mode #goat{animation:bang .26s ease-in-out infinite;}
+@keyframes bang{0%,100%{transform:translateY(0) rotate(-9deg)}50%{transform:translateY(-8px) rotate(9deg)}}
 .goat-mode .goat-wrap::after{content:"🔥";position:absolute;bottom:-2px;left:-8px;font-size:18px;
   animation:pulse .35s infinite alternate;}
+
+/* ============ Feature-Legende (Spielhilfe) ============ */
+#helpBtn{position:fixed;top:8px;right:52px;z-index:70;width:34px;height:34px;border-radius:50%;
+  border:2px solid rgba(0,0,0,.18);background:#fff;font-family:'Fredoka',sans-serif;font-weight:700;
+  font-size:18px;line-height:1;cursor:pointer;color:#15181C;box-shadow:0 2px 6px rgba(0,0,0,.18);}
+#helpPanel{position:fixed;inset:0;z-index:200;background:rgba(20,24,28,.55);
+  display:flex;align-items:center;justify-content:center;padding:20px;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);}
+#helpPanel[hidden]{display:none;}
+.hp-card{background:#fff;border-radius:20px;max-width:340px;width:100%;padding:22px 20px;
+  box-shadow:0 18px 50px rgba(0,0,0,.35);font-family:'Nunito',sans-serif;max-height:88vh;overflow:auto;}
+.hp-card h3{font-family:'Fredoka',sans-serif;margin:0 0 8px;font-size:22px;color:#15181C;}
+.hp-card p{margin:0 0 12px;font-size:14px;line-height:1.45;color:#3a4048;}
+.hp-card ul{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:9px;}
+.hp-card li{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.35;color:#3a4048;}
+.hp-card li span{font-size:20px;flex:0 0 24px;text-align:center;line-height:1.2;}
+.hp-card li b{color:#15181C;}
+.hp-tip{background:#f2faf6;border-left:3px solid #21D0A1;border-radius:8px;padding:9px 11px;font-size:13px !important;}
+#helpClose{width:100%;margin-top:4px;padding:12px;border:none;border-radius:12px;
+  background:#21D0A1;color:#083b2f;font-family:'Fredoka',sans-serif;font-weight:700;font-size:16px;cursor:pointer;}
 #goatSpeech{position:absolute;left:76px;top:-8px;background:#fff;border:2px solid var(--card-edge);
   border-radius:12px;padding:4px 8px;font-size:11px;font-weight:900;white-space:nowrap;opacity:0;
   transition:opacity .18s;box-shadow:0 3px 0 rgba(0,0,0,.1);z-index:5;}
@@ -276,6 +294,23 @@ body.shake .board-card{animation:shake .3s;}
 <div id="nature"></div>
 
 <button id="muteBtn" title="Ton an/aus">🔊</button>
+<button id="helpBtn" title="Spielhilfe" aria-label="Spielhilfe">?</button>
+
+<div id="helpPanel" hidden>
+  <div class="hp-card">
+    <h3>So spielst du 🐐</h3>
+    <p>Zieh die Blöcke aufs Feld. Volle Reihen &amp; Spalten lösen sich auf — je mehr auf einmal, desto mehr Punkte.</p>
+    <ul>
+      <li><span>🧀</span><b>Käse-Block</b> — der normale Baustein.</li>
+      <li><span>✨</span><b>Goldkäse</b> — löst du ihn auf, gibt es fette Bonus-Punkte (mal deinem Streak-Multiplikator).</li>
+      <li><span>🌶️</span><b>Chili</b> — explodiert beim Auflösen und sprengt die direkt angrenzenden Felder mit weg.</li>
+      <li><span>💣</span><b>Bombe</b> — zählt jeden Zug runter. Räum ihre Reihe frei, BEVOR die Zahl 0 erreicht — sonst ist das Spiel vorbei.</li>
+      <li><span>🟢</span><b>Schimmel</b> — breitet sich aus, wenn du zu passiv in den Ecken baust. Schnell wegräumen!</li>
+    </ul>
+    <p class="hp-tip">💡 Streak = dein Punkte-Multiplikator (bis 5×). Bau gezielt Combos auf, statt einzeln wegzuräumen — dafür flippt die Ziege aus.</p>
+    <button id="helpClose">Los geht's!</button>
+  </div>
+</div>
 
 <div id="app">
   <div class="topbar">
@@ -825,6 +860,8 @@ function newGame(m){
   $('startOverlay').classList.add('hidden');
   $('overOverlay').classList.add('hidden');
   say(m==='daily'?'Daily Challenge! 📅':(days>1?days+' Tage Streak! 🔥':'Los geht\'s! 🧀'),1700);
+  // Spielhilfe beim allerersten Start einmalig zeigen
+  try{if(!localStorage.getItem('gb_help_seen')){var hp=$('helpPanel');if(hp)hp.hidden=false;localStorage.setItem('gb_help_seen','1');}}catch(e){}
 }
 function gameOver(){
   gameActive=false;heat=0;
@@ -886,12 +923,23 @@ showMenu();
     b.style.fontSize=(15+Math.random()*9)+'px';
     b.style.animationDuration=(15+Math.random()*11)+'s';
     b.style.animationDelay=(-Math.random()*13)+'s';nat.appendChild(b);}
-  // Ziege lebt: alle ~3s kleiner Hop/Wackler (zusaetzlich zum Bob)
+  // Ziege lebt, bleibt aber am Boden: alle ~3s Gewichts-Verlagerung ODER Kopf-Umschauen
+  // (transform-origin ist an den Fuessen -> kein Schweben, sieht aus wie echtes Stehen+Bewegen)
   setInterval(function(){
     var g=document.getElementById('goat'); if(!g||!g.animate||document.hidden)return;
-    if(Math.random()<0.5) g.animate([{transform:'translateY(0) rotate(0)'},{transform:'translateY(-12px) rotate(-4deg)',offset:.4},{transform:'translateY(0) rotate(0)'}],{duration:620,easing:'ease-out'});
-    else g.animate([{transform:'rotate(0)'},{transform:'rotate(6deg)',offset:.3},{transform:'rotate(-5deg)',offset:.65},{transform:'rotate(0)'}],{duration:760,easing:'ease-in-out'});
+    if(document.body.classList.contains('goat-hyped')||document.body.classList.contains('goat-mode'))return;
+    if(Math.random()<0.5) g.animate([{transform:'scale(1,1) rotate(0)'},{transform:'scale(1.03,.955) rotate(0)',offset:.35},{transform:'scale(.99,1.01) rotate(0)',offset:.7},{transform:'scale(1,1) rotate(0)'}],{duration:720,easing:'ease-in-out'});
+    else g.animate([{transform:'rotate(0)'},{transform:'rotate(7deg)',offset:.3},{transform:'rotate(-6deg)',offset:.65},{transform:'rotate(0)'}],{duration:840,easing:'ease-in-out'});
   },3000);
+})();
+(function(){
+  // Spielhilfe: oeffnen/schliessen + einmalig automatisch beim ersten Start zeigen
+  var hb=document.getElementById('helpBtn'),hp=document.getElementById('helpPanel'),hc=document.getElementById('helpClose');
+  if(!hb||!hp)return;
+  function open(){hp.hidden=false;} function close(){hp.hidden=true;}
+  hb.addEventListener('click',open);
+  if(hc)hc.addEventListener('click',close);
+  hp.addEventListener('click',function(e){if(e.target===hp)close();});
 })();
 </script>
 </body>
