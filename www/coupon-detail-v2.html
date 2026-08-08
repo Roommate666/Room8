@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Coupon — UniGoat</title>
+<style>
+  :root{
+    --bg:#F4F1EA; --ink:#1A1C1A; --muted:#8A8F88; --line:#E6E2D8;
+    --green:#2E6B4F; --green-600:#255c43; --green-pill:#E4EFE8; --card:#1B1D1B; --gold:#C9A24B;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;padding-bottom:6rem;}
+  .serif{font-family:'Georgia','Times New Roman',serif;}
+  .wrap{max-width:480px;margin:0 auto;padding:0 1.1rem;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.1rem .4rem;max-width:480px;margin:0 auto;}
+  .back{display:flex;align-items:center;gap:.4rem;background:none;border:none;font-size:1rem;color:var(--ink);cursor:pointer;font-weight:600;}
+  .coins{display:inline-flex;align-items:center;gap:.4rem;background:#fff;border:1px solid var(--line);border-radius:999px;padding:.35rem .7rem;font-weight:700;font-size:.9rem;}
+  .coins .g{width:18px;height:18px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-size:.7rem;font-weight:800;}
+  .hero{position:relative;height:230px;border-radius:22px;overflow:hidden;background:var(--card);margin-top:.4rem;}
+  .hero img{width:100%;height:100%;object-fit:cover;display:block;}
+  .hero .badge{position:absolute;left:16px;bottom:16px;background:var(--green);color:#fff;font-weight:800;font-size:1.5rem;padding:.5rem .85rem;border-radius:14px;letter-spacing:-.02em;box-shadow:0 6px 18px rgba(0,0,0,.25);}
+  .hero .brandtag{position:absolute;right:14px;top:14px;background:#fff;border-radius:12px;width:44px;height:44px;display:grid;place-items:center;font-weight:800;color:var(--ink);box-shadow:0 4px 12px rgba(0,0,0,.2);overflow:hidden;}
+  .hero .brandtag img{width:100%;height:100%;object-fit:cover;}
+  .biz{color:var(--muted);font-size:.92rem;margin:1rem 0 .25rem;font-weight:600;}
+  h1.title{font-size:1.7rem;line-height:1.15;margin:.1rem 0 .7rem;letter-spacing:-.01em;}
+  .status{display:inline-flex;align-items:center;gap:.45rem;background:var(--green-pill);color:var(--green-600);font-weight:700;font-size:.82rem;padding:.35rem .7rem;border-radius:999px;}
+  .status .dot{width:8px;height:8px;border-radius:50%;background:var(--green);}
+  .desc{color:#3d423c;line-height:1.55;font-size:.98rem;margin:1rem 0;}
+  .coinpill{display:flex;align-items:center;gap:.55rem;background:var(--green-pill);border:1px solid #cfe4d7;border-radius:14px;padding:.75rem .9rem;color:var(--green-600);font-weight:700;font-size:.95rem;margin:.8rem 0;}
+  .coinpill .g{width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-size:.75rem;font-weight:800;flex:0 0 22px;}
+  .row{display:flex;align-items:center;gap:.75rem;padding:.85rem 0;border-top:1px solid var(--line);}
+  .row .ic{width:34px;height:34px;border-radius:10px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;flex:0 0 34px;font-size:1rem;}
+  .row .t{flex:1;}
+  .row .t b{display:block;font-size:.96rem;}
+  .row .t small{color:var(--muted);font-size:.82rem;}
+  .row a{color:var(--green-600);font-weight:700;text-decoration:none;font-size:.9rem;}
+  .cta{position:fixed;left:0;right:0;bottom:0;padding:.9rem 1.1rem calc(.9rem + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(244,241,234,0),var(--bg) 32%);}
+  .cta .inner{max-width:480px;margin:0 auto;}
+  .btn{width:100%;padding:1rem;border:none;border-radius:16px;background:var(--green);color:#fff;font-size:1.05rem;font-weight:800;cursor:pointer;box-shadow:0 8px 22px rgba(46,107,79,.35);display:flex;align-items:center;justify-content:center;gap:.5rem;}
+  .btn:active{transform:scale(.99);}
+  .btn.done{background:#cfd3cc;color:#5a5f58;box-shadow:none;}
+  .valid{text-align:center;color:var(--muted);font-size:.82rem;margin:.8rem 0 0;}
+  /* QR Modal */
+  .ov{position:fixed;inset:0;z-index:60;background:rgba(20,22,20,.55);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px;}
+  .ov.open{display:flex;}
+  .sheet{background:#fff;border-radius:24px;max-width:360px;width:100%;padding:1.6rem 1.3rem;text-align:center;}
+  .sheet h2{font-size:1.4rem;margin:0 0 .3rem;}
+  .sheet p{color:var(--muted);margin:.2rem 0 1rem;}
+  #qr{display:flex;justify-content:center;margin:.5rem 0 1rem;}
+  #qr canvas,#qr img{border-radius:12px;}
+  .wait{color:var(--green-600);font-weight:700;display:inline-flex;align-items:center;gap:.4rem;}
+  .wait .dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .success-ico{width:64px;height:64px;border-radius:18px;background:var(--green);display:grid;place-items:center;margin:0 auto .6rem;color:#fff;font-size:2rem;}
+  .code{border:2px dashed #bfe0cd;border-radius:14px;background:var(--green-pill);padding:.9rem;margin:.8rem 0;}
+  .code small{display:block;color:var(--green-600);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;}
+  .code b{font-size:1.7rem;letter-spacing:.12em;color:var(--green-600);}
+  .close{width:100%;padding:.9rem;border:none;border-radius:14px;background:#eee;font-weight:700;cursor:pointer;margin-top:.4rem;}
+</style>
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="lib/qrcode.min.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <button class="back" onclick="history.length>1?history.back():location.href='coupons.html'">‹ Zurück</button>
+  <span class="coins"><span class="g">G</span> <span id="coinCount">–</span></span>
+</div>
+<div class="wrap">
+  <div class="hero">
+    <img id="heroImg" src="no-image.svg" alt="">
+    <div class="badge serif" id="badge">–</div>
+    <div class="brandtag" id="brandTag"></div>
+  </div>
+  <div class="biz" id="biz">Lade…</div>
+  <h1 class="title serif" id="title"></h1>
+  <span class="status" id="status" style="display:none;"><span class="dot"></span><span id="statusText"></span></span>
+  <p class="desc" id="desc"></p>
+  <div class="coinpill"><span class="g">G</span> <span>+50 Goat-Coins, sobald du einlöst</span></div>
+  <div class="row" id="addrRow" style="display:none;">
+    <div class="ic">📍</div>
+    <div class="t"><b id="addrText"></b><small>In Karten öffnen</small></div>
+    <a id="mapLink" target="_blank" rel="noopener">Öffnen ›</a>
+  </div>
+  <div class="row" id="hoursRow" style="display:none;">
+    <div class="ic">🕒</div>
+    <div class="t"><b>Öffnungszeiten</b><small id="hoursText"></small></div>
+  </div>
+</div>
+<div class="cta"><div class="inner">
+  <button class="btn" id="redeemBtn" onclick="openQR()">▶ Jetzt einlösen</button>
+  <div class="valid">Gültig bis <span id="validDate">–</span></div>
+</div></div>
+
+<div class="ov" id="ov" onclick="if(event.target===this)closeQR()">
+  <div class="sheet">
+    <div id="waitView">
+      <h2 class="serif">Vor Ort einlösen</h2>
+      <p>Lass den Partner den QR-Code scannen.</p>
+      <div id="qr"></div>
+      <div class="wait"><span class="dot"></span> Warte auf Partner-Scan…</div>
+      <button class="close" onclick="closeQR()">Schließen</button>
+    </div>
+    <div id="successView" style="display:none;">
+      <div class="success-ico">✓</div>
+      <h2 class="serif" style="color:var(--green-600)">Erfolgreich eingelöst!</h2>
+      <p>Der Partner hat deinen Coupon bestätigt.</p>
+      <div class="code"><small>Bestätigungs-Code</small><b id="succCode">–</b></div>
+      <button class="close" style="background:var(--green);color:#fff" onclick="closeQR();location.reload()">Fertig</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var params=new URLSearchParams(location.search); var id=params.get('id');
+  var coupon=null, userId=null, channel=null, already=false;
+  var $=function(x){return document.getElementById(x);};
+  function fmtDate(d){ if(!d)return '—'; try{return new Date(d).toLocaleDateString('de-DE');}catch(e){return d;} }
+
+  async function init(){
+    if(!window.sb){ $('biz').textContent='Nicht verfuegbar'; return; }
+    try{ var u=await sb.auth.getUser(); userId=u&&u.data&&u.data.user?u.data.user.id:null; }catch(e){}
+    // Goat-Coins (Platzhalter aus Profil falls vorhanden)
+    if(userId){ try{ var pr=await sb.from('public_profiles').select('username').eq('id',userId).single(); }catch(e){} }
+    if(!id){ $('biz').textContent='Kein Coupon'; return; }
+    var r=await sb.from('coupons').select('*, coupon_photos(storage_path)').eq('id',id).single();
+    if(r.error||!r.data){ $('biz').textContent='Coupon nicht gefunden'; return; }
+    coupon=r.data; render();
+    // bereits eingeloest?
+    if(userId){ try{ var red=await sb.from('coupon_redemptions').select('id').eq('coupon_id',id).eq('user_id',userId).maybeSingle(); if(red.data){ already=true; markDone(); } }catch(e){} }
+  }
+  function render(){
+    document.title=(coupon.title||'Coupon')+' — UniGoat';
+    $('biz').textContent=(coupon.business_name||'')+(coupon.city?(' · '+coupon.city):'');
+    $('title').textContent=coupon.title||'';
+    $('badge').textContent=coupon.discount_value||'–';
+    $('desc').textContent=coupon.description||'';
+    $('validDate').textContent=fmtDate(coupon.valid_until);
+    $('coinCount').textContent='1.240';
+    // Bild
+    var photo=(coupon.coupon_photos&&coupon.coupon_photos[0]&&coupon.coupon_photos[0].storage_path)?coupon.coupon_photos[0].storage_path:null;
+    if(photo){ var url=sb.storage.from('coupon-images').getPublicUrl(photo).data.publicUrl; $('heroImg').src=url; }
+    // Marken-Kuerzel
+    $('brandTag').textContent=(coupon.business_name||'?').trim().slice(0,2).toUpperCase();
+    // Status (aus opening_hours grob)
+    if(coupon.opening_hours){ $('status').style.display='inline-flex'; $('statusText').textContent='Geöffnet'; $('hoursRow').style.display='flex'; $('hoursText').textContent=coupon.opening_hours; }
+    // Adresse
+    if(coupon.address){ $('addrRow').style.display='flex'; $('addrText').textContent=coupon.address+(coupon.city?(', '+coupon.city):''); $('mapLink').href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(coupon.address+' '+(coupon.city||'')); }
+  }
+  function markDone(){ var b=$('redeemBtn'); b.textContent='Bereits eingelöst ✓'; b.classList.add('done'); b.onclick=null; }
+
+  window.openQR=function(){
+    if(already||!coupon)return;
+    if(!userId){ alert('Bitte einloggen zum Einlösen.'); return; }
+    var payload='room8:redeem:'+coupon.id+':'+userId;
+    var box=$('qr'); box.innerHTML='';
+    new QRCode(box,{text:payload,width:220,height:220,colorDark:'#1A1C1A',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+    $('waitView').style.display='block'; $('successView').style.display='none';
+    $('ov').classList.add('open');
+    channel=sb.channel('cd-'+coupon.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'coupon_redemptions',filter:'user_id=eq.'+userId},function(p){
+      if(p&&p.new&&p.new.coupon_id===coupon.id){ onSuccess(p.new); }
+    }).subscribe();
+  };
+  function onSuccess(red){ $('succCode').textContent=red.verification_code||'—'; $('waitView').style.display='none'; $('successView').style.display='block'; already=true; if(navigator.vibrate)navigator.vibrate([60,40,80]); }
+  window.closeQR=function(){ $('ov').classList.remove('open'); if(channel){try{sb.removeChannel(channel);}catch(e){} channel=null;} };
+  init();
+})();
+</script>
+</body>
+</html>
