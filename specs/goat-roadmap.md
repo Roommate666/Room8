@@ -12,7 +12,7 @@ FERTIG + verifiziert (alles auf Branch `unigoat-vision`, Supabase-Teile DEPLOYED
 - [x] Mail-Infra geklaert: Resend + Domain unigoat.de + noreply@unigoat.de (kein Zoho noetig)
 
 OFFEN (Prioritaet):
-- [ ] Daily-Reminder-Push automatisiert (Cron -> Nutzer die heute nicht gespielt haben) — Scheduler-Entscheid noetig (pg_cron vs GitHub Action)
+- [x] Daily-Reminder-Push automatisiert: pg_cron 17:00 UTC -> send_daily_game_reminders() (nur User die schon spielten aber heute nicht; Safeguards+Dedup). Deployed.
 - [ ] Preisgeld scharf: nach Anwalts-Freigabe (Bargeld+Sachpreis gewaehlt) + Wochen-Reset/Gewinner-Job
 - [ ] Deploy auf unigoat.de (aktuell nur Branch) + App-Build
 - [ ] Coupon-Redeem Klick-Test mit echtem Partner-Scan (Flow im Code verifiziert)
