@@ -15,12 +15,9 @@
     superhero:'Superheld', astronaut:'Astronaut', ninja:'Ninja', dino:'Dino'
   };
   var BG = { mint:'#21D0A1', sky:'#7cc6ff', peach:'#ffb27c', lav:'#b6a8ff', gold:'#F4B740', grey:'#e5e7eb', night:'#2b3040', rose:'#ff9fb6' };
-  var FLAGS = {
-    none:'', de:'🇩🇪', tr:'🇹🇷', at:'🇦🇹', ch:'🇨🇭', it:'🇮🇹', fr:'🇫🇷', es:'🇪🇸', pt:'🇵🇹',
-    gb:'🇬🇧', us:'🇺🇸', nl:'🇳🇱', pl:'🇵🇱', ro:'🇷🇴', gr:'🇬🇷', ua:'🇺🇦', ru:'🇷🇺', hr:'🇭🇷',
-    rs:'🇷🇸', ba:'🇧🇦', al:'🇦🇱', xk:'🇽🇰', sy:'🇸🇾', iq:'🇮🇶', ir:'🇮🇷', ma:'🇲🇦', tn:'🇹🇳',
-    dz:'🇩🇿', eg:'🇪🇬', in:'🇮🇳', pk:'🇵🇰', cn:'🇨🇳', vn:'🇻🇳', ng:'🇳🇬', gh:'🇬🇭', br:'🇧🇷', mx:'🇲🇽'
-  };
+  // Echte Flaggen-SVGs (Nationalflaggen, gemeinfrei) statt Emoji -> randlos, scharf, geraeteunabhaengig.
+  var FLAG_PATH = '/game/assets/flags/';
+  var FLAG_CODES = ['none','de','tr','at','ch','it','fr','es','pt','gb','us','nl','pl','ro','gr','ua','ru','hr','rs','ba','al','xk','sy','iq','ir','ma','tn','dz','eg','in','pk','cn','vn','ng','gh','br','mx'];
   var DEFAULTS = { avatar:'classic', flag:'none', bg:'mint' };
 
   function renderGoatAvatar(config, size) {
@@ -28,11 +25,10 @@
     if (AVATARS.indexOf(c.avatar) === -1) c.avatar = 'classic';
     var s = size || 96, h = Math.round(s * 1.2);
     var bg = BG[c.bg] || BG.mint;
-    var flag = FLAGS[c.flag] || '';
-    // Flagge fuellt den Hintergrund gross; Ziege etwas kleiner + unten -> Flagge bleibt sichtbar
-    var flagLayer = flag
-      ? '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:' + Math.round(h * 1.25) + 'px;line-height:1;">' + flag + '</div>' +
-        '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,.10));"></div>'
+    // Echte Flagge randlos als Hintergrund; leichter Verlauf unten fuers Erden der Ziege
+    var flagLayer = (c.flag && c.flag !== 'none')
+      ? '<div style="position:absolute;inset:0;background:url(' + FLAG_PATH + c.flag + '.svg) center/cover no-repeat;"></div>' +
+        '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(0,0,0,.16));"></div>'
       : '';
     return (
       '<div class="ug-av" style="position:relative;width:' + s + 'px;height:' + h + 'px;border-radius:16%;overflow:hidden;background:' + bg + ';">' +
@@ -43,8 +39,8 @@
   }
 
   var api = { renderGoatAvatar: renderGoatAvatar, DEFAULTS: DEFAULTS, PATH: PATH,
-    AVATARS: AVATARS, AV_LABELS: AV_LABELS, FLAGS: FLAGS, BG: BG,
-    OPTIONS: { avatar: AVATARS, flag: Object.keys(FLAGS), bg: Object.keys(BG) } };
+    AVATARS: AVATARS, AV_LABELS: AV_LABELS, BG: BG, FLAG_PATH: FLAG_PATH, FLAG_CODES: FLAG_CODES,
+    OPTIONS: { avatar: AVATARS, flag: FLAG_CODES, bg: Object.keys(BG) } };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.GoatAvatar = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
