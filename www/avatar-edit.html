@@ -13,7 +13,8 @@
   h1{font-size:1.2rem;margin:0;font-family:'Fredoka',sans-serif;}
   .wrap{max-width:460px;margin:0 auto;padding:1rem 1.1rem 3rem;}
   .preview{display:flex;justify-content:center;margin:1rem 0 1.25rem;}
-  .preview svg{width:160px;height:160px;filter:drop-shadow(0 8px 20px rgba(0,0,0,.18));border-radius:50%;}
+  .preview svg{height:200px;width:auto;filter:drop-shadow(0 10px 24px rgba(0,0,0,.20));border-radius:18px;}
+  .flagchip{font-size:20px;line-height:1;padding:.4rem .55rem;}
   .grp{margin-bottom:1.1rem;}
   .grp h3{font-size:.95rem;margin:0 0 .5rem;color:#374151;font-family:'Fredoka',sans-serif;}
   .chips{display:flex;flex-wrap:wrap;gap:.5rem;}
@@ -53,18 +54,19 @@
   var OPT = GoatAvatar.OPTIONS;
   var LABELS = {
     fur:{grey:'Grau',white:'Weiss',caramel:'Karamell',brown:'Braun',black:'Schwarz',mint:'Mint'},
-    bg:{mint:'Mint',sky:'Himmel',peach:'Pfirsich',lav:'Lavendel',gold:'Gold',grey:'Grau',night:'Nacht'},
+    bg:{mint:'Mint',sky:'Himmel',peach:'Pfirsich',lav:'Lavendel',gold:'Gold',grey:'Grau',night:'Nacht',rose:'Rose'},
     glasses:{none:'Keine',sun:'Sonnenbrille',nerd:'Nerd'},
-    hat:{none:'Keiner',beanie:'Muetze',cap:'Cap',grad:'Doktorhut',party:'Partyhut'},
-    accessory:{none:'Keins',scarf:'Schal',chain:'Kette',flower:'Blume'}
+    hat:{none:'Keiner',beanie:'Muetze',cap:'Cap',grad:'Doktorhut',party:'Partyhut',crown:'Krone'},
+    outfit:{none:'Keins',suit:'Anzug',hoodie:'Hoodie',jersey:'Trikot',dress:'Kleid',lab:'Kittel'},
+    accessory:{none:'Keins',scarf:'Schal',chain:'Kette',flower:'Blume',headphones:'Kopfhoerer'}
   };
-  var GROUP_TITLES = {fur:'Fellfarbe',bg:'Hintergrund',glasses:'Brille',hat:'Kopf',accessory:'Accessoire'};
+  var GROUP_TITLES = {fur:'Fellfarbe',flag:'Flagge (Land)',bg:'Hintergrund',glasses:'Brille',hat:'Kopf',outfit:'Outfit',accessory:'Accessoire'};
   var cfg = Object.assign({}, GoatAvatar.DEFAULTS);
 
-  function drawPreview(){ document.getElementById('preview').innerHTML = GoatAvatar.renderGoatAvatar(cfg,160); }
+  function drawPreview(){ document.getElementById('preview').innerHTML = GoatAvatar.renderGoatAvatar(cfg,180); }
   function buildControls(){
     var host = document.getElementById('controls'); host.innerHTML='';
-    ['fur','bg','glasses','hat','accessory'].forEach(function(key){
+    ['fur','flag','bg','outfit','hat','glasses','accessory'].forEach(function(key){
       var g=document.createElement('div'); g.className='grp';
       var h=document.createElement('h3'); h.textContent=GROUP_TITLES[key]; g.appendChild(h);
       var row=document.createElement('div'); row.className='chips';
@@ -72,11 +74,14 @@
         var el;
         if(key==='fur'||key==='bg'){
           el=document.createElement('button'); el.className='swatch'+(cfg[key]===val?' active':'');
-          el.title=LABELS[key][val]||val;
-          el.innerHTML=GoatAvatar.renderGoatAvatar(key==='fur'?{fur:val,bg:'grey'}:{fur:'grey',bg:val},34);
+          el.title=(LABELS[key]&&LABELS[key][val])||val;
+          el.innerHTML=GoatAvatar.renderGoatAvatar(key==='fur'?{fur:val,bg:'grey'}:{fur:'grey',bg:val},30);
+        } else if(key==='flag'){
+          el=document.createElement('button'); el.className='chip flagchip'+(cfg[key]===val?' active':'');
+          el.textContent = val==='none' ? 'Keine' : (GoatAvatar.FLAGS[val]||val);
         } else {
           el=document.createElement('button'); el.className='chip'+(cfg[key]===val?' active':'');
-          el.textContent=LABELS[key][val]||val;
+          el.textContent=(LABELS[key]&&LABELS[key][val])||val;
         }
         el.onclick=function(){ cfg[key]=val; drawPreview(); buildControls(); };
         row.appendChild(el);
