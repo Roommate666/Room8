@@ -1114,7 +1114,7 @@ async function renderBoardTab(){
   const localMode=(lbTab==='daily')?'daily':'high';
   if(!OnlineBoard.client()){status.textContent='Offline — lokales Board.';return renderLocalInto(localMode);}
   const u=await OnlineBoard.user();
-  if(!u){status.textContent='Logge dich in Room8 ein fuers Online-Board.';return renderLocalInto(localMode);}
+  if(!u){status.textContent='Logge dich in UniGoat ein fuers Online-Board.';return renderLocalInto(localMode);}
   const res=await OnlineBoard.fetch(lbTab);
   if(!res.ok&&res.reason==='no-uni'){status.textContent='Keine Uni im Profil hinterlegt.';$('lbEmpty').hidden=false;return;}
   if(!res.ok){status.textContent='Board nicht ladbar — lokal:';return renderLocalInto(localMode);}
