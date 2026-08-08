@@ -8,10 +8,11 @@
   'use strict';
 
   var PATH = '/game/assets/avatars/';
-  var AVATARS = ['classic','hoodie','suit','jersey','dress','lab','graduate','king','cool','gamer','winter','chef'];
+  var AVATARS = ['classic','hoodie','suit','jersey','dress','lab','graduate','king','cool','gamer','winter','chef','superhero','astronaut','ninja','dino'];
   var AV_LABELS = {
     classic:'Klassisch', hoodie:'Hoodie', suit:'Anzug', jersey:'Trikot', dress:'Kleid',
-    lab:'Kittel', graduate:'Absolvent', king:'Koenig', cool:'Cool', gamer:'Gamer', winter:'Winter', chef:'Koch'
+    lab:'Kittel', graduate:'Absolvent', king:'Koenig', cool:'Cool', gamer:'Gamer', winter:'Winter', chef:'Koch',
+    superhero:'Superheld', astronaut:'Astronaut', ninja:'Ninja', dino:'Dino'
   };
   var BG = { mint:'#21D0A1', sky:'#7cc6ff', peach:'#ffb27c', lav:'#b6a8ff', gold:'#F4B740', grey:'#e5e7eb', night:'#2b3040', rose:'#ff9fb6' };
   var FLAGS = {
@@ -28,13 +29,15 @@
     var s = size || 96, h = Math.round(s * 1.2);
     var bg = BG[c.bg] || BG.mint;
     var flag = FLAGS[c.flag] || '';
+    // Flagge fuellt den Hintergrund gross; Ziege etwas kleiner + unten -> Flagge bleibt sichtbar
     var flagLayer = flag
-      ? '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:' + Math.round(h * 0.95) + 'px;line-height:1;">' + flag + '</div><div style="position:absolute;inset:0;background:#ffffff;opacity:.12;"></div>'
+      ? '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:' + Math.round(h * 1.25) + 'px;line-height:1;">' + flag + '</div>' +
+        '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,.10));"></div>'
       : '';
     return (
       '<div class="ug-av" style="position:relative;width:' + s + 'px;height:' + h + 'px;border-radius:16%;overflow:hidden;background:' + bg + ';">' +
       flagLayer +
-      '<img src="' + PATH + c.avatar + '.webp" alt="Ziege" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;" onerror="this.style.display=\'none\'">' +
+      '<img src="' + PATH + c.avatar + '.webp" alt="Ziege" loading="lazy" style="position:absolute;left:8%;bottom:0;width:84%;height:90%;object-fit:contain;object-position:bottom center;" onerror="this.style.display=\'none\'">' +
       '</div>'
     );
   }
