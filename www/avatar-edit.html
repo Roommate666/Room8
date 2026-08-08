@@ -15,6 +15,10 @@
   .preview{display:flex;justify-content:center;margin:1rem 0 1.25rem;}
   .preview svg{height:200px;width:auto;filter:drop-shadow(0 10px 24px rgba(0,0,0,.20));border-radius:18px;}
   .flagchip{font-size:20px;line-height:1;padding:.4rem .55rem;}
+  .gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;}
+  .avcell{border:2px solid #e5e7eb;background:#fff;border-radius:14px;padding:.35rem;cursor:pointer;display:flex;justify-content:center;}
+  .avcell.active{border-color:var(--mint);background:#e9fbf5;}
+  .avcell .ug-av{width:60px !important;}
   .grp{margin-bottom:1.1rem;}
   .grp h3{font-size:.95rem;margin:0 0 .5rem;color:#374151;font-family:'Fredoka',sans-serif;}
   .chips{display:flex;flex-wrap:wrap;gap:.5rem;}
@@ -51,43 +55,43 @@
 <script>
 (function(){
   "use strict";
-  var OPT = GoatAvatar.OPTIONS;
-  var LABELS = {
-    fur:{grey:'Grau',white:'Weiss',caramel:'Karamell',brown:'Braun',black:'Schwarz',mint:'Mint'},
-    bg:{mint:'Mint',sky:'Himmel',peach:'Pfirsich',lav:'Lavendel',gold:'Gold',grey:'Grau',night:'Nacht',rose:'Rose'},
-    glasses:{none:'Keine',sun:'Sonnenbrille',nerd:'Nerd'},
-    hat:{none:'Keiner',beanie:'Muetze',cap:'Cap',grad:'Doktorhut',party:'Partyhut',crown:'Krone'},
-    outfit:{none:'Keins',suit:'Anzug',hoodie:'Hoodie',jersey:'Trikot',dress:'Kleid',lab:'Kittel'},
-    accessory:{none:'Keins',scarf:'Schal',chain:'Kette',flower:'Blume',headphones:'Kopfhoerer'}
-  };
-  var GROUP_TITLES = {fur:'Fellfarbe',flag:'Flagge (Land)',bg:'Hintergrund',glasses:'Brille',hat:'Kopf',outfit:'Outfit',accessory:'Accessoire'};
   var cfg = Object.assign({}, GoatAvatar.DEFAULTS);
 
-  function drawPreview(){ document.getElementById('preview').innerHTML = GoatAvatar.renderGoatAvatar(cfg,180); }
+  function drawPreview(){ document.getElementById('preview').innerHTML = GoatAvatar.renderGoatAvatar(cfg,190); }
   function buildControls(){
     var host = document.getElementById('controls'); host.innerHTML='';
-    ['fur','flag','bg','outfit','hat','glasses','accessory'].forEach(function(key){
-      var g=document.createElement('div'); g.className='grp';
-      var h=document.createElement('h3'); h.textContent=GROUP_TITLES[key]; g.appendChild(h);
-      var row=document.createElement('div'); row.className='chips';
-      OPT[key].forEach(function(val){
-        var el;
-        if(key==='fur'||key==='bg'){
-          el=document.createElement('button'); el.className='swatch'+(cfg[key]===val?' active':'');
-          el.title=(LABELS[key]&&LABELS[key][val])||val;
-          el.innerHTML=GoatAvatar.renderGoatAvatar(key==='fur'?{fur:val,bg:'grey'}:{fur:'grey',bg:val},30);
-        } else if(key==='flag'){
-          el=document.createElement('button'); el.className='chip flagchip'+(cfg[key]===val?' active':'');
-          el.textContent = val==='none' ? 'Keine' : (GoatAvatar.FLAGS[val]||val);
-        } else {
-          el=document.createElement('button'); el.className='chip'+(cfg[key]===val?' active':'');
-          el.textContent=(LABELS[key]&&LABELS[key][val])||val;
-        }
-        el.onclick=function(){ cfg[key]=val; drawPreview(); buildControls(); };
-        row.appendChild(el);
-      });
-      g.appendChild(row); host.appendChild(g);
+    // 1) Avatar-Galerie
+    var g1=document.createElement('div'); g1.className='grp';
+    g1.innerHTML='<h3>Ziege waehlen</h3>';
+    var gal=document.createElement('div'); gal.className='gallery';
+    GoatAvatar.AVATARS.forEach(function(id){
+      var b=document.createElement('button'); b.className='avcell'+(cfg.avatar===id?' active':'');
+      b.title=GoatAvatar.AV_LABELS[id]||id;
+      b.innerHTML=GoatAvatar.renderGoatAvatar({avatar:id,bg:'grey',flag:'none'},60);
+      b.onclick=function(){ cfg.avatar=id; drawPreview(); buildControls(); };
+      gal.appendChild(b);
     });
+    g1.appendChild(gal); host.appendChild(g1);
+    // 2) Flagge
+    var g2=document.createElement('div'); g2.className='grp'; g2.innerHTML='<h3>Flagge (Land)</h3>';
+    var fr=document.createElement('div'); fr.className='chips';
+    GoatAvatar.OPTIONS.flag.forEach(function(val){
+      var el=document.createElement('button'); el.className='chip flagchip'+(cfg.flag===val?' active':'');
+      el.textContent = val==='none' ? 'Keine' : (GoatAvatar.FLAGS[val]||val);
+      el.onclick=function(){ cfg.flag=val; drawPreview(); buildControls(); };
+      fr.appendChild(el);
+    });
+    g2.appendChild(fr); host.appendChild(g2);
+    // 3) Hintergrund-Farbe (falls keine Flagge)
+    var g3=document.createElement('div'); g3.className='grp'; g3.innerHTML='<h3>Hintergrund</h3>';
+    var br=document.createElement('div'); br.className='chips';
+    GoatAvatar.OPTIONS.bg.forEach(function(val){
+      var el=document.createElement('button'); el.className='swatch'+(cfg.bg===val?' active':'');
+      el.style.background=GoatAvatar.BG[val]; el.title=val;
+      el.onclick=function(){ cfg.bg=val; drawPreview(); buildControls(); };
+      br.appendChild(el);
+    });
+    g3.appendChild(br); host.appendChild(g3);
   }
 
   async function init(){
