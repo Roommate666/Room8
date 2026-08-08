@@ -8,11 +8,12 @@
   'use strict';
 
   var PATH = '/game/assets/avatars/';
-  var AVATARS = ['classic','hoodie','suit','jersey','dress','lab','graduate','king','cool','gamer','winter','chef','superhero','astronaut','ninja','dino'];
+  var AVATARS = ['classic','hoodie','suit','jersey','dress','lab','graduate','king','cool','gamer','winter','chef','superhero','astronaut','ninja','dino','pirate','rockstar','cowboy'];
   var AV_LABELS = {
     classic:'Klassisch', hoodie:'Hoodie', suit:'Anzug', jersey:'Trikot', dress:'Kleid',
     lab:'Kittel', graduate:'Absolvent', king:'Koenig', cool:'Cool', gamer:'Gamer', winter:'Winter', chef:'Koch',
-    superhero:'Superheld', astronaut:'Astronaut', ninja:'Ninja', dino:'Dino'
+    superhero:'Superheld', astronaut:'Astronaut', ninja:'Ninja', dino:'Dino',
+    pirate:'Pirat', rockstar:'Rockstar', cowboy:'Cowboy'
   };
   var BG = { mint:'#21D0A1', sky:'#7cc6ff', peach:'#ffb27c', lav:'#b6a8ff', gold:'#F4B740', grey:'#e5e7eb', night:'#2b3040', rose:'#ff9fb6' };
   // Echte Flaggen-SVGs (Nationalflaggen, gemeinfrei) statt Emoji -> randlos, scharf, geraeteunabhaengig.
