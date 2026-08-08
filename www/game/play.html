@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>UniGoat - Spiel wird geladen</title>
+<style>
+  html,body{margin:0;height:100%;background:#0f1115;color:#e7e9ee;font-family:system-ui,sans-serif;}
+  .c{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;}
+  .goat{font-size:3rem;animation:b 1.2s ease-in-out infinite;}
+  @keyframes b{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  .bar{width:140px;height:6px;border-radius:3px;background:#2a2f38;overflow:hidden;}
+  .bar i{display:block;height:100%;width:40%;background:#21D0A1;animation:s 1s linear infinite;}
+  @keyframes s{from{transform:translateX(-100%)}to{transform:translateX(350%)}}
+  a{color:#21D0A1;}
+</style>
+</head>
+<body>
+<div class="c">
+  <div class="goat">🐐</div>
+  <div class="bar"><i></i></div>
+  <div id="msg">Aktuelles Spiel wird geladen…</div>
+</div>
+<script src="../lib/supabase.min.js"></script>
+<script src="../config.js"></script>
+<script>
+(function(){
+  "use strict";
+  // Routen je game_key des aktiven Events. Fallback: Goat Blast.
+  var ROUTES = { goat_blast:'index.html', jumprun:'games/jumprun/index.html', doodle:'games/doodle/index.html' };
+  function go(key){ location.replace(ROUTES[key] || ROUTES.goat_blast); }
+  var done=false; function once(k){ if(done)return; done=true; go(k); }
+  // Sicherheitsnetz: nach 3.5s trotzdem starten
+  setTimeout(function(){ once('goat_blast'); }, 3500);
+  (async function(){
+    try{
+      if(!window.sb){ once('goat_blast'); return; }
+      var r = await sb.from('current_game_event').select('game_key').limit(1);
+      var key = (r.data && r.data[0] && r.data[0].game_key) ? r.data[0].game_key : 'goat_blast';
+      once(key);
+    }catch(e){ once('goat_blast'); }
+  })();
+})();
+</script>
+</body>
+</html>

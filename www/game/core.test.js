@@ -89,5 +89,18 @@ check('Specials/Bomben/Schimmel wurden getriggert', agg.chili>0 && agg.gold>0 &&
   check('Server-Core byte-identisch (kein Drift)', same, note);
 }
 
+// 6) DRIFT-GUARD fuer die Multi-Game-Cores (Browser vs Edge-Function-Kopie)
+{
+  const fs = require('fs'), path = require('path');
+  [['games/jumprun/jumprun.js', 'jumprun-core.js'], ['games/doodle/doodle.js', 'doodle-core.js']].forEach(function (pair) {
+    const browser = path.join(__dirname, pair[0]);
+    const server = path.join(__dirname, '..', '..', 'supabase', 'functions', '_shared', pair[1]);
+    let same = false, note = '';
+    try { same = fs.readFileSync(browser).equals(fs.readFileSync(server)); if (!same) note = 'cp ' + pair[0] + ' -> _shared/' + pair[1]; }
+    catch (e) { note = e.message; }
+    check(pair[1] + ' byte-identisch (kein Drift)', same, note);
+  });
+}
+
 console.log('\nErgebnis: '+pass+' OK, '+fail+' FAIL');
 process.exit(fail ? 1 : 0);

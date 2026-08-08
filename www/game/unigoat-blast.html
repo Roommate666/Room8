@@ -1052,7 +1052,8 @@ const OnlineBoard={
   },
   async eventWinner(){
     const sb=this.client(),ev=await this.event();if(!sb||!ev)return null;
-    try{const{data}=await sb.from('goat_leaderboard').select('username,university,score,user_id').eq('mode','high').order('score',{ascending:false}).limit(1);
+    const gk=ev.game_key||'goat_blast';
+    try{const{data}=await sb.from('goat_leaderboard').select('username,university,score,user_id').eq('game_key',gk).eq('mode','high').order('score',{ascending:false}).limit(1);
       return (data&&data[0])?data[0]:null;
     }catch(e){return null;}
   },
@@ -1083,7 +1084,8 @@ const OnlineBoard={
   async fetch(scope){
     const sb=this.client();if(!sb)return{ok:false,reason:'offline',rows:[]};
     try{
-      let q=sb.from('goat_leaderboard').select('username,university,score,created_at,user_id,avatar_config');
+      const gk=(this._event&&this._event.game_key)?this._event.game_key:'goat_blast';
+      let q=sb.from('goat_leaderboard').select('username,university,score,created_at,user_id,avatar_config,game_key').eq('game_key',gk);
       if(scope==='daily'){const d=new Date();d.setHours(0,0,0,0);q=q.eq('mode','daily').gte('created_at',d.toISOString());}
       else{q=q.eq('mode','high');if(scope==='uni'){const uni=await this.uni();if(!uni)return{ok:false,reason:'no-uni',rows:[]};q=q.eq('university',uni);}}
       q=q.order('score',{ascending:false}).limit(200);
