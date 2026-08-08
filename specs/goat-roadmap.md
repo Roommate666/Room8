@@ -1,4 +1,25 @@
-# Goat / Room8 Spiele-Plattform — Roadmap & Anforderungen (Stand 08.08.2026)
+# UniGoat Spiele-Plattform — Roadmap & Anforderungen (Stand 08.08.2026)
+
+## STATUS-SNAPSHOT (was steht, was fehlt)
+FERTIG + verifiziert (alles auf Branch `unigoat-vision`, Supabase-Teile DEPLOYED auf Prod):
+- [x] Spiel Goat Blast: organische Ziege (Canvas-Warp), 3D-Specials, 6x6, Quests, Streak
+- [x] Deterministischer Core (core.js) + Server-Replay -> Anti-Cheat (E2E + Cheat-Ablehnung LIVE bewiesen)
+- [x] Online-Board (Global/Uni/Daily), Bestwert je Nutzer (Dedupe), lokaler Fallback
+- [x] Event-System (game_events) redeploy-frei: Spiel/Preis/Zeitraum/Scope als Daten
+- [x] Admin: Spiele-Tab (Events umschalten) + Push-Broadcast (Event/Sieger/Reminder-Vorlagen)
+- [x] Rechts-Check (gruen als Gratis-Skill-Gewinnspiel) + Teilnahmebedingungen-Entwurf
+- [x] Rebrand Room8->UniGoat (sichtbare Texte + Kontaktmail info@unigoat.de)
+- [x] Mail-Infra geklaert: Resend + Domain unigoat.de + noreply@unigoat.de (kein Zoho noetig)
+
+OFFEN (Prioritaet):
+- [ ] Daily-Reminder-Push automatisiert (Cron -> Nutzer die heute nicht gespielt haben) — Scheduler-Entscheid noetig (pg_cron vs GitHub Action)
+- [ ] Preisgeld scharf: nach Anwalts-Freigabe (Bargeld+Sachpreis gewaehlt) + Wochen-Reset/Gewinner-Job
+- [ ] Deploy auf unigoat.de (aktuell nur Branch) + App-Build
+- [ ] Coupon-Redeem Klick-Test mit echtem Partner-Scan (Flow im Code verifiziert)
+- [ ] GROSSE Bloecke: Multi-Game-Engine · KI-Immatrikulations-Scan · Bitmoji-Avatar (Konzept steht: goat-avatar.md)
+
+---
+# (Original-Roadmap 08.08.2026)
 
 Erfasst aus Yusuf-Briefing 08.08. Ziel: Room8 wird eine **wechselnde Spiele-Event-Plattform**
 mit Preisen. Leitprinzip (Yusuf, HOCH PRIO): **alles ohne Neu-Deploy aenderbar** (Remote-Config).
