@@ -627,6 +627,22 @@
 
         <h3 style="margin:1.5rem 0 0.5rem; font-size:1rem; color:#374151;">Alle Events</h3>
         <div id="gamesList" class="data-list"><div class="loading-state">Lade Events...</div></div>
+
+        <h3 style="margin:1.75rem 0 0.5rem; font-size:1rem; color:#374151;">📢 Push an alle senden</h3>
+        <div style="background:#fff; border:1px solid #E5E7EB; border-radius:10px; padding:1rem;">
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.75rem;">
+                <button onclick="prefillBroadcast('event')" style="padding:0.4rem 0.7rem; background:#EEF2FF; color:#3730A3; border:1px solid #C7D2FE; border-radius:8px; cursor:pointer; font-size:0.8rem;">Vorlage: Neues Event</button>
+                <button onclick="prefillBroadcast('winner')" style="padding:0.4rem 0.7rem; background:#FFF7ED; color:#9A3412; border:1px solid #FED7AA; border-radius:8px; cursor:pointer; font-size:0.8rem;">Vorlage: Wochensieger</button>
+                <button onclick="prefillBroadcast('reminder')" style="padding:0.4rem 0.7rem; background:#ECFDF5; color:#065F46; border:1px solid #A7F3D0; border-radius:8px; cursor:pointer; font-size:0.8rem;">Vorlage: Spiel-Reminder</button>
+            </div>
+            <input id="bcTitle" type="text" maxlength="120" placeholder="Titel (z.B. Neue Runde: Goat Blast! 🐐)" style="width:100%; padding:0.5rem; border:1px solid #D1D5DB; border-radius:8px; margin-bottom:0.5rem;">
+            <textarea id="bcBody" maxlength="240" rows="2" placeholder="Text (z.B. Diese Woche 500€ zu gewinnen. Jetzt spielen!)" style="width:100%; padding:0.5rem; border:1px solid #D1D5DB; border-radius:8px; margin-bottom:0.5rem;"></textarea>
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+                <button onclick="sendBroadcast()" style="padding:0.6rem 1rem; background:#EF4444; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:700;">📢 An alle senden</button>
+                <span id="bcMsg" style="font-size:0.85rem; color:#6B7280;"></span>
+            </div>
+            <div style="font-size:0.75rem; color:#9CA3AF; margin-top:0.5rem;">Sendet Push an alle Nutzer mit App-Erlaubnis. Quiet-Hours/Rate-Limit/Dedup greifen automatisch. E-Mail-Broadcast ist bewusst nicht dabei (braucht Opt-in).</div>
+        </div>
     </div>
 
 </div>
@@ -2553,6 +2569,28 @@
             if (error) throw error;
             loadGamesAdmin();
         } catch (err) { alert('Fehler: ' + err.message); }
+    };
+
+    window.prefillBroadcast = (kind) => {
+        var t = document.getElementById('bcTitle'), b = document.getElementById('bcBody');
+        if (kind === 'event') { t.value = 'Neue Runde: Goat Blast! 🐐'; b.value = 'Neues Event ist live — spiel jetzt um den Preis!'; }
+        else if (kind === 'winner') { t.value = 'Wir haben einen Sieger! 🏆'; b.value = 'Die Runde ist vorbei. Schau, wer gewonnen hat — und die nächste läuft schon!'; }
+        else { t.value = 'Deine Ziege wartet 🐐'; b.value = 'Heute schon gespielt? Sichere dir deinen Highscore!'; }
+    };
+
+    window.sendBroadcast = async () => {
+        var msg = document.getElementById('bcMsg');
+        var title = document.getElementById('bcTitle').value.trim();
+        var body = document.getElementById('bcBody').value.trim();
+        if (!title) { msg.textContent = 'Titel fehlt.'; msg.style.color = '#EF4444'; return; }
+        if (!confirm('Push an ALLE Nutzer senden?\n\n' + title)) return;
+        msg.textContent = 'Sende...'; msg.style.color = '#6B7280';
+        try {
+            var { data, error } = await sb.functions.invoke('notify-broadcast', { body: { title: title, body: body } });
+            if (error) throw error;
+            if (data && data.success) { msg.textContent = '✅ Gesendet an ' + data.sent + '/' + data.candidates + ' (Fehler: ' + data.failed + ')'; msg.style.color = '#12B489'; }
+            else { msg.textContent = '❌ ' + ((data && data.error) || 'Fehler'); msg.style.color = '#EF4444'; }
+        } catch (err) { msg.textContent = '❌ ' + err.message; msg.style.color = '#EF4444'; }
     };
 
     // ============================================
