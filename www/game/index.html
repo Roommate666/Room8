@@ -265,6 +265,8 @@ body.shake .board-card{animation:shake .3s;}
 .lb-list li:nth-child(1)::before{content:"🥇";}
 .lb-list li:nth-child(2)::before{content:"🥈";}
 .lb-list li:nth-child(3)::before{content:"🥉";}
+.lb-list li .lb-av{flex:0 0 26px;width:26px;height:26px;line-height:0;}
+.lb-list li .lb-av svg{width:26px;height:26px;display:block;}
 .lb-list li .nm{flex:1;color:#15181C;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .lb-list li .sc{font-family:'Fredoka',sans-serif;font-weight:700;color:#12B489;}
 .lb-list li.me{outline:2px solid #21D0A1;}
@@ -391,6 +393,7 @@ body.shake .board-card{animation:shake .3s;}
       <div class="stat"><div class="lbl">Best (Heute)</div><div class="val" id="bestDaily">0</div></div>
     </div>
     <button class="btn ghost" id="btnBoard">🏆 Rangliste</button>
+    <a class="btn ghost" id="btnAvatar" href="../avatar-edit.html" style="display:block;text-decoration:none;text-align:center;">🐐 Deine Ziege</a>
   </div>
 </div>
 
@@ -423,6 +426,7 @@ body.shake .board-card{animation:shake .3s;}
 <script src="../lib/supabase.min.js"></script>
 <script src="../config.js"></script>
 <script src="core.js"></script>
+<script src="avatar.js"></script>
 <script>
 (function(){
 "use strict";
@@ -1079,7 +1083,7 @@ const OnlineBoard={
   async fetch(scope){
     const sb=this.client();if(!sb)return{ok:false,reason:'offline',rows:[]};
     try{
-      let q=sb.from('goat_leaderboard').select('username,university,score,created_at,user_id');
+      let q=sb.from('goat_leaderboard').select('username,university,score,created_at,user_id,avatar_config');
       if(scope==='daily'){const d=new Date();d.setHours(0,0,0,0);q=q.eq('mode','daily').gte('created_at',d.toISOString());}
       else{q=q.eq('mode','high');if(scope==='uni'){const uni=await this.uni();if(!uni)return{ok:false,reason:'no-uni',rows:[]};q=q.eq('university',uni);}}
       q=q.order('score',{ascending:false}).limit(200);
@@ -1115,10 +1119,12 @@ async function renderBoardTab(){
   status.textContent='';$('lbEmpty').hidden=res.rows.length>0;
   const myId=u.id;
   res.rows.forEach(e=>{const li=document.createElement('li');if(e.user_id===myId)li.className='me';
+    const av=document.createElement('span');av.className='lb-av';
+    if(window.GoatAvatar)av.innerHTML=GoatAvatar.renderGoatAvatar(e.avatar_config||{},26);
     const nm=document.createElement('span');nm.className='nm';
     nm.textContent=(e.username||'Anonym')+((lbTab==='global'&&e.university)?(' · '+e.university):'');
     const sc=document.createElement('span');sc.className='sc';sc.textContent=(+e.score).toLocaleString('de-DE');
-    li.appendChild(nm);li.appendChild(sc);ol.appendChild(li);});
+    li.appendChild(av);li.appendChild(nm);li.appendChild(sc);ol.appendChild(li);});
 }
 let currentEventCache=null;
 function fmtEnds(ts){

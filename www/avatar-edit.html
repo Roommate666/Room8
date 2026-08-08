@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Deine Ziege - UniGoat</title>
+<style>
+  :root{ --mint:#21D0A1; --mint-600:#12B489; --ink:#15181C; }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Nunito',system-ui,sans-serif;background:#f4f6f8;color:var(--ink);}
+  header{background:var(--ink);color:#fff;padding:1rem 1.25rem;display:flex;align-items:center;gap:.6rem;}
+  header a{color:#9fb;text-decoration:none;font-weight:700;font-size:.9rem;margin-left:auto;}
+  h1{font-size:1.2rem;margin:0;font-family:'Fredoka',sans-serif;}
+  .wrap{max-width:460px;margin:0 auto;padding:1rem 1.1rem 3rem;}
+  .preview{display:flex;justify-content:center;margin:1rem 0 1.25rem;}
+  .preview svg{width:160px;height:160px;filter:drop-shadow(0 8px 20px rgba(0,0,0,.18));border-radius:50%;}
+  .grp{margin-bottom:1.1rem;}
+  .grp h3{font-size:.95rem;margin:0 0 .5rem;color:#374151;font-family:'Fredoka',sans-serif;}
+  .chips{display:flex;flex-wrap:wrap;gap:.5rem;}
+  .chip{border:2px solid #e5e7eb;background:#fff;border-radius:12px;padding:.5rem .8rem;cursor:pointer;font-weight:700;font-size:.85rem;color:#374151;}
+  .chip.active{border-color:var(--mint);background:#e9fbf5;color:var(--mint-600);}
+  .swatch{width:40px;height:40px;border-radius:12px;border:3px solid #e5e7eb;cursor:pointer;padding:0;}
+  .swatch.active{border-color:var(--ink);}
+  .save{position:sticky;bottom:0;background:#f4f6f8;padding:.9rem 0 .5rem;}
+  .save button{width:100%;padding:.95rem;border:none;border-radius:14px;background:var(--mint);color:#083b2f;font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.05rem;cursor:pointer;}
+  #msg{text-align:center;font-size:.85rem;margin-top:.5rem;min-height:1rem;color:#6b7280;}
+  .login{max-width:460px;margin:3rem auto;padding:2rem 1.5rem;text-align:center;color:#6b7280;}
+</style>
+</head>
+<body>
+<header>
+  <span>🐐</span><h1>Deine Ziege</h1>
+  <a href="game/index.html">Zum Spiel →</a>
+</header>
+<div class="wrap" id="app" style="display:none;">
+  <div class="preview" id="preview"></div>
+  <div id="controls"></div>
+  <div class="save">
+    <button id="saveBtn">Speichern</button>
+    <div id="msg"></div>
+  </div>
+</div>
+<div class="login" id="login" style="display:none;">
+  Bitte logg dich in UniGoat ein, um deine Ziege zu personalisieren.
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="game/avatar.js"></script>
+<script>
+(function(){
+  "use strict";
+  var OPT = GoatAvatar.OPTIONS;
+  var LABELS = {
+    fur:{grey:'Grau',white:'Weiss',caramel:'Karamell',brown:'Braun',black:'Schwarz',mint:'Mint'},
+    bg:{mint:'Mint',sky:'Himmel',peach:'Pfirsich',lav:'Lavendel',gold:'Gold',grey:'Grau',night:'Nacht'},
+    glasses:{none:'Keine',sun:'Sonnenbrille',nerd:'Nerd'},
+    hat:{none:'Keiner',beanie:'Muetze',cap:'Cap',grad:'Doktorhut',party:'Partyhut'},
+    accessory:{none:'Keins',scarf:'Schal',chain:'Kette',flower:'Blume'}
+  };
+  var GROUP_TITLES = {fur:'Fellfarbe',bg:'Hintergrund',glasses:'Brille',hat:'Kopf',accessory:'Accessoire'};
+  var cfg = Object.assign({}, GoatAvatar.DEFAULTS);
+
+  function drawPreview(){ document.getElementById('preview').innerHTML = GoatAvatar.renderGoatAvatar(cfg,160); }
+  function buildControls(){
+    var host = document.getElementById('controls'); host.innerHTML='';
+    ['fur','bg','glasses','hat','accessory'].forEach(function(key){
+      var g=document.createElement('div'); g.className='grp';
+      var h=document.createElement('h3'); h.textContent=GROUP_TITLES[key]; g.appendChild(h);
+      var row=document.createElement('div'); row.className='chips';
+      OPT[key].forEach(function(val){
+        var el;
+        if(key==='fur'||key==='bg'){
+          el=document.createElement('button'); el.className='swatch'+(cfg[key]===val?' active':'');
+          el.title=LABELS[key][val]||val;
+          el.innerHTML=GoatAvatar.renderGoatAvatar(key==='fur'?{fur:val,bg:'grey'}:{fur:'grey',bg:val},34);
+        } else {
+          el=document.createElement('button'); el.className='chip'+(cfg[key]===val?' active':'');
+          el.textContent=LABELS[key][val]||val;
+        }
+        el.onclick=function(){ cfg[key]=val; drawPreview(); buildControls(); };
+        row.appendChild(el);
+      });
+      g.appendChild(row); host.appendChild(g);
+    });
+  }
+
+  async function init(){
+    if(!window.sb){ document.getElementById('login').style.display='block'; return; }
+    var u; try{ u=(await sb.auth.getUser()).data.user; }catch(e){ u=null; }
+    if(!u){ document.getElementById('login').style.display='block'; return; }
+    try{
+      var r=await sb.from('public_profiles').select('avatar_config').eq('id',u.id).single();
+      if(r.data && r.data.avatar_config && typeof r.data.avatar_config==='object'){
+        cfg=Object.assign({}, GoatAvatar.DEFAULTS, r.data.avatar_config);
+      }
+    }catch(e){}
+    document.getElementById('app').style.display='block';
+    drawPreview(); buildControls();
+    document.getElementById('saveBtn').onclick=save;
+  }
+  async function save(){
+    var msg=document.getElementById('msg'); msg.textContent='Speichere...'; msg.style.color='#6b7280';
+    try{
+      var r=await sb.rpc('set_my_avatar',{p_config:cfg});
+      if(r.error) throw r.error;
+      msg.textContent='✅ Gespeichert! Deine Ziege erscheint jetzt im Board.'; msg.style.color='#12B489';
+    }catch(e){ msg.textContent='❌ '+(e.message||'Fehler'); msg.style.color='#ef4444'; }
+  }
+  init();
+})();
+</script>
+</body>
+</html>
