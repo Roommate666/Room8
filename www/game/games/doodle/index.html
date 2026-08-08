@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>UniGoat — Ziegen-Sprung</title>
+<style>
+  :root{
+    --ink:#0e1116; --paper:#ffffff; --line:#e5e7eb;
+    --mint:#21D0A1; --mint-600:#12B489; --gold:#F4B740;
+    --muted:#6b7280;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink); background:#f4f6f8;
+    display:flex; align-items:center; justify-content:center;
+    overscroll-behavior:none; touch-action:none; user-select:none;
+  }
+  #wrap{
+    position:relative; width:100vw; height:100vh; max-width:480px; max-height:100vh;
+    background:var(--paper); overflow:hidden; touch-action:none;
+  }
+  canvas{display:block; width:100%; height:100%; touch-action:none;}
+  /* HUD */
+  #hud{
+    position:absolute; top:0; left:0; right:0; z-index:5;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 16px; pointer-events:none;
+    font-variant-numeric:tabular-nums;
+  }
+  #score{font-size:30px; font-weight:800; letter-spacing:-0.5px;}
+  #score small{font-size:12px; font-weight:600; color:var(--muted); display:block; letter-spacing:0.5px; text-transform:uppercase;}
+  #best{font-size:13px; color:var(--muted); text-align:right; font-weight:600;}
+  /* Touch-Zonen-Hinweis */
+  .zonehint{
+    position:absolute; bottom:22px; z-index:4; color:var(--muted);
+    font-size:12px; font-weight:700; letter-spacing:1px; opacity:.5; pointer-events:none;
+    text-transform:uppercase;
+  }
+  #zoneL{left:24px;} #zoneR{right:24px;}
+  /* Overlays (Start / Game Over) */
+  .overlay{
+    position:absolute; inset:0; z-index:10; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center; padding:28px;
+    background:rgba(255,255,255,.92); backdrop-filter:blur(4px);
+  }
+  .overlay.hidden{display:none;}
+  .goaticon{width:96px; height:96px; margin-bottom:8px;}
+  .overlay h1{font-size:26px; margin:6px 0 2px; letter-spacing:-0.5px;}
+  .overlay p{color:var(--muted); margin:2px 0 18px; font-size:15px; max-width:280px; line-height:1.45;}
+  .bigscore{font-size:56px; font-weight:800; margin:2px 0; letter-spacing:-1px; font-variant-numeric:tabular-nums;}
+  .bigscore small{display:block; font-size:12px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:1px;}
+  .btn{
+    appearance:none; border:0; cursor:pointer;
+    background:var(--mint); color:#062a22; font-weight:800; font-size:17px;
+    padding:15px 34px; border-radius:14px; letter-spacing:.3px;
+    box-shadow:0 6px 0 var(--mint-600); transition:transform .06s, box-shadow .06s;
+  }
+  .btn:active{transform:translateY(4px); box-shadow:0 2px 0 var(--mint-600);}
+  .hintrow{margin-top:16px; font-size:13px; color:var(--muted); line-height:1.6;}
+  .kbd{display:inline-block; border:1px solid var(--line); border-bottom-width:2px; border-radius:6px;
+    padding:1px 7px; font-weight:700; font-size:12px; background:#fafafa; margin:0 1px;}
+  @media (prefers-reduced-motion:reduce){ .btn{transition:none;} }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="cv"></canvas>
+
+  <div id="hud">
+    <div id="score">0<small>Höhe</small></div>
+    <div id="best">Best<br><b id="bestval">0</b></div>
+  </div>
+  <div id="zoneL" class="zonehint">◄ Links</div>
+  <div id="zoneR" class="zonehint">Rechts ►</div>
+
+  <!-- Start-Overlay -->
+  <div id="startOverlay" class="overlay">
+    <div class="goaticon" id="goatStart"></div>
+    <h1>UniGoat — Ziegen-Sprung</h1>
+    <p>Die Ziege springt von allein. Halte sie am Steigen — sonst fällt sie!</p>
+    <button class="btn" id="startBtn">Los geht's</button>
+    <div class="hintrow">
+      Bildschirm-Hälften antippen/halten oder<br>
+      <span class="kbd">◄</span> <span class="kbd">►</span> bzw. <span class="kbd">A</span> <span class="kbd">D</span>
+    </div>
+  </div>
+
+  <!-- Game-Over-Overlay -->
+  <div id="overOverlay" class="overlay hidden">
+    <div class="goaticon" id="goatOver"></div>
+    <h1>Game Over</h1>
+    <div class="bigscore" id="finalScore">0<small>Höhe erreicht</small></div>
+    <p id="overMsg">Die Ziege ist gefallen.</p>
+    <button class="btn" id="retryBtn">Nochmal</button>
+  </div>
+</div>
+
+<!-- Reihenfolge wichtig: erst Avatar, dann Core, dann Spiel-Logik -->
+<script src="../../avatar.js"></script>
+<script src="doodle.js"></script>
+<script>
+'use strict';
+(function () {
+  const Core = window.DoodleCore;
+  const U = Core.U;
+
+  // ---- DOM ----
+  const wrap = document.getElementById('wrap');
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const scoreEl = document.getElementById('score');
+  const bestEl = document.getElementById('bestval');
+  const startOverlay = document.getElementById('startOverlay');
+  const overOverlay = document.getElementById('overOverlay');
+  const startBtn = document.getElementById('startBtn');
+  const retryBtn = document.getElementById('retryBtn');
+  const finalScoreEl = document.getElementById('finalScore');
+  const overMsgEl = document.getElementById('overMsg');
+
+  // Ziegen-Avatar als Icon in den Overlays (mint Ziege)
+  const goatCfg = { fur: 'mint', bg: 'gold' };
+  if (window.GoatAvatar) {
+    const svg = window.GoatAvatar.renderGoatAvatar(goatCfg, 96);
+    document.getElementById('goatStart').innerHTML = svg;
+    document.getElementById('goatOver').innerHTML = svg;
+  }
+
+  // ---- Canvas / Skalierung: logische Welt (VIEW_W x VIEW_H) auf Screen mappen ----
+  let dpr = 1, scale = 1, offX = 0, offY = 0, cssW = 0, cssH = 0;
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    cssW = wrap.clientWidth; cssH = wrap.clientHeight;
+    cv.width = Math.round(cssW * dpr);
+    cv.height = Math.round(cssH * dpr);
+    // Welt-Seitenverhaeltnis erhalten, zentriert einpassen (contain)
+    const worldAspect = Core.VIEW_W / Core.VIEW_H;
+    const screenAspect = cssW / cssH;
+    if (screenAspect > worldAspect) {
+      scale = cssH / (Core.VIEW_H / U);
+      offX = (cssW - (Core.VIEW_W / U) * scale) / 2;
+      offY = 0;
+    } else {
+      scale = cssW / (Core.VIEW_W / U);
+      offX = 0;
+      offY = (cssH - (Core.VIEW_H / U) * scale) / 2;
+    }
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // Welt-units -> CSS-px (X)
+  function wx(u) { return offX + (u / U) * scale; }
+  // Welt-units (Weltkoordinate) -> CSS-px (Y), abhaengig von Kamera
+  function wy(u, camY) { return offY + ((u - camY) / U) * scale; }
+  function ws(u) { return (u / U) * scale; } // Groesse
+
+  // ---- Eingabe ----
+  // Frame-Input: -1 links, 0 keiner, 1 rechts. Tastatur + Touch getrennt tracken.
+  let keyLeft = false, keyRight = false;
+  let touchLeft = false, touchRight = false;
+  function currentInput() {
+    const left = keyLeft || touchLeft;
+    const right = keyRight || touchRight;
+    if (left && !right) return -1;
+    if (right && !left) return 1;
+    return 0;
+  }
+
+  // Tastatur
+  window.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { keyLeft = true; }
+    else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { keyRight = true; }
+    else if (e.key === ' ' || e.key === 'Enter') {
+      if (!running && !startOverlay.classList.contains('hidden')) startGame();
+      else if (!running && !overOverlay.classList.contains('hidden')) startGame();
+    }
+  });
+  window.addEventListener('keyup', function (e) {
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keyLeft = false;
+    else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keyRight = false;
+  });
+
+  // Touch/Pointer: linke Haelfte = links, rechte Haelfte = rechts.
+  // Mehrere Pointer werden gemeinsam ausgewertet.
+  const activePointers = new Map(); // id -> 'L'|'R'
+  function evalPointers() {
+    let l = false, r = false;
+    activePointers.forEach(side => { if (side === 'L') l = true; else r = true; });
+    touchLeft = l; touchRight = r;
+  }
+  function sideFor(clientX) {
+    const rect = cv.getBoundingClientRect();
+    return (clientX - rect.left) < rect.width / 2 ? 'L' : 'R';
+  }
+  cv.addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    activePointers.set(e.pointerId, sideFor(e.clientX));
+    evalPointers();
+  });
+  cv.addEventListener('pointermove', function (e) {
+    if (!activePointers.has(e.pointerId)) return;
+    activePointers.set(e.pointerId, sideFor(e.clientX));
+    evalPointers();
+  });
+  function endPointer(e) {
+    if (activePointers.delete(e.pointerId)) evalPointers();
+  }
+  cv.addEventListener('pointerup', endPointer);
+  cv.addEventListener('pointercancel', endPointer);
+  cv.addEventListener('pointerleave', endPointer);
+  // Kontextmenue auf lange Beruehrung unterdruecken
+  cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+  // ---- Spiel-Zustand ----
+  let state = null;
+  let seed = 0;
+  let inputLog = [];
+  let running = false;
+  let best = 0;
+  try { best = parseInt(localStorage.getItem('unigoat_doodle_best') || '0', 10) || 0; } catch (_) {}
+  bestEl.textContent = best;
+
+  const reduceMotion = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Renderer-Nebenzustand (nur Optik, NICHT im Core!)
+  let particles = [];   // kleine Feedback-Partikel
+  let lastEvents = null;
+
+  function newSeed() {
+    // Seed nur beim Start gewuerfelt (danach fest gespeichert). Sichtbarer Zufall
+    // ist erlaubt, weil er NUR den seed setzt — der Core selbst nutzt ausschliesslich mulberry32(seed).
+    return (Math.floor(Math.random() * 0x7fffffff)) | 0;
+  }
+
+  function startGame() {
+    seed = newSeed();
+    state = Core.create(seed);
+    inputLog = [];
+    particles = [];
+    running = true;
+    startOverlay.classList.add('hidden');
+    overOverlay.classList.add('hidden');
+    scoreEl.firstChild.nodeValue = '0';
+    lastTime = 0; acc = 0;
+    requestAnimationFrame(loop);
+  }
+
+  function endGame() {
+    running = false;
+    if (state.score > best) {
+      best = state.score;
+      try { localStorage.setItem('unigoat_doodle_best', String(best)); } catch (_) {}
+    }
+    bestEl.textContent = best;
+    finalScoreEl.childNodes[0].nodeValue = String(state.score);
+    overMsgEl.textContent = lastEvents && lastEvents.enemy
+      ? 'Ein Gegner hat die Ziege erwischt.'
+      : 'Die Ziege ist gefallen.';
+    overOverlay.classList.remove('hidden');
+
+    // Score-Submit (entkoppelter Platzhalter — Backend-Verdrahtung macht der Haupt-Entwickler)
+    if (window.__submit) {
+      window.__submit({
+        game_key: 'doodle',
+        seed: seed,
+        score: state.score,
+        input_log: inputLog,
+        mode: 'high',
+      });
+    }
+  }
+
+  // ---- Fixed-Step-Schleife: exakt 60 Hz Simulation, unabhaengig von der Frame-Rate ----
+  const STEP_MS = 1000 / 60;
+  let lastTime = 0, acc = 0;
+
+  function loop(now) {
+    if (!running) return;
+    if (!lastTime) lastTime = now;
+    let dt = now - lastTime;
+    lastTime = now;
+    if (dt > 250) dt = 250; // nach Tab-Wechsel nicht hunderte Frames nachholen
+    acc += dt;
+
+    while (acc >= STEP_MS && running) {
+      const inp = currentInput();
+      inputLog.push(inp);
+      const ev = Core.step(state, inp);
+      lastEvents = ev;
+      if (ev.bounce || ev.spring) spawnBouncePfx(ev.spring);
+      if (ev.over) { endGame(); break; }
+      acc -= STEP_MS;
+    }
+
+    scoreEl.firstChild.nodeValue = String(state.score);
+    render();
+    if (running) requestAnimationFrame(loop);
+  }
+
+  // ---- Optik-Partikel (rein kosmetisch) ----
+  function spawnBouncePfx(isSpring) {
+    if (reduceMotion) return;
+    const n = isSpring ? 10 : 5;
+    const cx = state.goatX + Core.GOAT_W / 2;
+    const cy = state.goatY + Core.GOAT_H;
+    for (let i = 0; i < n; i++) {
+      particles.push({
+        x: cx, y: cy,
+        vx: (Math.random() - 0.5) * 3 * U,
+        vy: (Math.random() * 1.5 + 0.5) * U,
+        life: 1,
+        spring: !!isSpring,
+      });
+    }
+  }
+  function updateParticles() {
+    for (const p of particles) {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.15 * U; p.life -= 0.06;
+    }
+    particles = particles.filter(p => p.life > 0);
+  }
+
+  // ---- Zeichnen ----
+  function render() {
+    const camY = state.camY;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // Hintergrund: dezentes Papier mit feinem Raster
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, cssW, cssH);
+    drawGrid(camY);
+
+    // Plattformen
+    for (const p of state.platforms) {
+      drawPlatform(p, camY);
+    }
+    // Gegner
+    for (const e of state.enemies) {
+      drawEnemy(e, camY);
+    }
+    // Partikel
+    if (!reduceMotion) {
+      updateParticles();
+      for (const p of particles) {
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.spring ? '#F4B740' : '#12B489';
+        const s = ws(4 * U);
+        ctx.fillRect(wx(p.x) - s / 2, wy(p.y, camY) - s / 2, s, s);
+      }
+      ctx.globalAlpha = 1;
+    }
+    // Ziege
+    drawGoat(camY);
+  }
+
+  function drawGrid(camY) {
+    ctx.strokeStyle = '#f0f2f5';
+    ctx.lineWidth = 1;
+    const stepPx = ws(64 * U);
+    if (stepPx < 8) return;
+    // vertikale Linien
+    for (let gx = 0; gx <= Core.VIEW_W; gx += 64 * U) {
+      const x = wx(gx);
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, cssH); ctx.stroke();
+    }
+    // horizontale Linien (in Weltraster, scrollen mit)
+    const worldTop = camY;
+    const first = Math.floor(worldTop / (64 * U)) * (64 * U);
+    for (let gy = first; gy < camY + Core.VIEW_H + 64 * U; gy += 64 * U) {
+      const y = wy(gy, camY);
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(cssW, y); ctx.stroke();
+    }
+  }
+
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function drawPlatform(p, camY) {
+    if (p.broken) return;
+    const x = wx(p.x), y = wy(p.y, camY);
+    const w = ws(Core.PLAT_W), h = ws(Core.PLAT_H);
+    let fill = '#21D0A1', edge = '#12B489';
+    if (p.type === Core.P_MOVING) { fill = '#12B489'; edge = '#0e9b76'; }
+    else if (p.type === Core.P_BREAK) { fill = '#e5e7eb'; edge = '#c9ccd6'; }
+    else if (p.type === Core.P_SPRING) { fill = '#21D0A1'; edge = '#12B489'; }
+    // Schatten-Kante unten
+    ctx.fillStyle = edge;
+    roundRect(x, y + 2, w, h, h / 2); ctx.fill();
+    ctx.fillStyle = fill;
+    roundRect(x, y, w, h, h / 2); ctx.fill();
+    // Sprungfeder als kleiner Gold-Aufsatz
+    if (p.type === Core.P_SPRING) {
+      const sw = ws(14 * U), sh = ws(12 * U);
+      ctx.fillStyle = '#F4B740';
+      roundRect(x + w / 2 - sw / 2, y - sh, sw, sh, ws(3 * U)); ctx.fill();
+      ctx.fillStyle = '#0e1116';
+      const cw = ws(9 * U);
+      ctx.fillRect(x + w / 2 - cw / 2, y - sh + ws(4 * U), cw, ws(2 * U));
+    }
+    // Break-Plattform: gestrichelte Andeutung
+    if (p.type === Core.P_BREAK) {
+      ctx.strokeStyle = '#9aa0aa';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x + w * 0.5, y + 1); ctx.lineTo(x + w * 0.5, y + h - 1);
+      ctx.stroke();
+    }
+  }
+
+  function drawEnemy(e, camY) {
+    const x = wx(e.x), y = wy(e.y, camY);
+    const w = ws(Core.ENEMY_W), h = ws(Core.ENEMY_H);
+    // dunkler Kobold-Block mit Augen (kontrastreich, kein Lila)
+    ctx.fillStyle = '#0e1116';
+    roundRect(x, y, w, h, ws(8 * U)); ctx.fill();
+    // Zacken oben
+    ctx.fillStyle = '#0e1116';
+    // Augen (mint)
+    ctx.fillStyle = '#21D0A1';
+    const er = ws(4 * U);
+    ctx.beginPath(); ctx.arc(x + w * 0.34, y + h * 0.42, er, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + w * 0.66, y + h * 0.42, er, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#0e1116';
+    ctx.beginPath(); ctx.arc(x + w * 0.34, y + h * 0.42, ws(1.6 * U), 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + w * 0.66, y + h * 0.42, ws(1.6 * U), 0, Math.PI * 2); ctx.fill();
+    // Zaehne
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x + w * 0.32, y + h * 0.66, w * 0.36, ws(3 * U));
+  }
+
+  // Ziege als kompakte SVG-artige Figur direkt auf Canvas (im UniGoat-Stil).
+  function drawGoat(camY) {
+    const gx = wx(state.goatX), gy = wy(state.goatY, camY);
+    const w = ws(Core.GOAT_W), h = ws(Core.GOAT_H);
+    const cx = gx + w / 2, cy = gy + h / 2;
+    const face = state.facing >= 0 ? 1 : -1;
+    const bodyCol = '#bfece0', shadeCol = '#8fd6c4', muzzle = '#e3f7f1';
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(face, 1); // spiegeln je nach Blickrichtung
+
+    const rx = w * 0.42, ry = h * 0.42;
+    // Hoerner
+    ctx.fillStyle = shadeCol;
+    ctx.beginPath(); ctx.moveTo(-w * 0.18, -ry * 0.9);
+    ctx.quadraticCurveTo(-w * 0.30, -ry * 1.5, -w * 0.14, -ry * 1.55);
+    ctx.quadraticCurveTo(-w * 0.12, -ry * 1.1, -w * 0.08, -ry * 0.85);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(w * 0.18, -ry * 0.9);
+    ctx.quadraticCurveTo(w * 0.30, -ry * 1.5, w * 0.14, -ry * 1.55);
+    ctx.quadraticCurveTo(w * 0.12, -ry * 1.1, w * 0.08, -ry * 0.85);
+    ctx.closePath(); ctx.fill();
+    // Ohren
+    ctx.fillStyle = bodyCol;
+    ctx.beginPath(); ctx.ellipse(-rx * 0.95, -ry * 0.1, w * 0.16, h * 0.09, -0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(rx * 0.95, -ry * 0.1, w * 0.16, h * 0.09, 0.5, 0, Math.PI * 2); ctx.fill();
+    // Kopf/Koerper
+    ctx.fillStyle = bodyCol;
+    ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+    // Schnauze
+    ctx.fillStyle = muzzle;
+    ctx.beginPath(); ctx.ellipse(0, ry * 0.35, rx * 0.6, ry * 0.42, 0, 0, Math.PI * 2); ctx.fill();
+    // Augen
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.ellipse(-rx * 0.32, -ry * 0.15, w * 0.09, h * 0.11, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(rx * 0.32, -ry * 0.15, w * 0.09, h * 0.11, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#2b2f38';
+    ctx.beginPath(); ctx.arc(-rx * 0.28, -ry * 0.12, w * 0.045, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(rx * 0.36, -ry * 0.12, w * 0.045, 0, Math.PI * 2); ctx.fill();
+    // Nasenloecher
+    ctx.fillStyle = '#8a6b5e';
+    ctx.beginPath(); ctx.arc(-rx * 0.12, ry * 0.34, w * 0.02, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(rx * 0.12, ry * 0.34, w * 0.02, 0, Math.PI * 2); ctx.fill();
+    // Ziegenbart
+    ctx.fillStyle = shadeCol;
+    ctx.beginPath(); ctx.moveTo(-w * 0.06, ry * 0.7);
+    ctx.quadraticCurveTo(0, ry * 1.25, w * 0.06, ry * 0.7); ctx.closePath(); ctx.fill();
+
+    ctx.restore();
+  }
+
+  // ---- Overlay-Buttons ----
+  startBtn.addEventListener('click', startGame);
+  retryBtn.addEventListener('click', startGame);
+  // Sichtbarkeit bei Tab-Wechsel: Fixed-Step-Timer sauber halten
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) lastTime = 0;
+  });
+
+  // erste Zeichnung (Start-Bildschirm zeigt statisch die Welt nicht — nur Overlay)
+})();
+</script>
+</body>
+</html>

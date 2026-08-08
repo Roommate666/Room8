@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>UniGoat — Ziegen-Sprung</title>
+<style>
+  :root{
+    --ink:#111417; --paper:#ffffff; --line:#e6e8ec;
+    --mint:#21D0A1; --mint-600:#12B489; --gold:#F4B740;
+    --muted:#6b7280;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ height:100%; margin:0; }
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink); background:#f4f6f8;
+    display:flex; align-items:center; justify-content:center;
+    overscroll-behavior:none; touch-action:none;
+    user-select:none; -webkit-user-select:none;
+  }
+  #wrap{
+    position:relative; width:100%; max-width:820px;
+    aspect-ratio:800 / 450; background:var(--paper);
+    border:1px solid var(--line); border-radius:16px; overflow:hidden;
+    box-shadow:0 10px 40px rgba(17,20,23,.08);
+  }
+  canvas{ display:block; width:100%; height:100%; touch-action:none; }
+
+  /* HUD */
+  #hud{
+    position:absolute; top:12px; left:14px; right:14px;
+    display:flex; justify-content:space-between; align-items:flex-start;
+    pointer-events:none; font-weight:800; letter-spacing:.2px;
+  }
+  #hud .box{ background:rgba(255,255,255,.82); border:1px solid var(--line);
+    border-radius:12px; padding:6px 12px; backdrop-filter:blur(6px); }
+  #score{ font-size:clamp(18px,4.4vw,26px); }
+  #sub{ font-size:clamp(11px,2.6vw,13px); color:var(--muted); font-weight:700; }
+  #collect{ display:flex; gap:10px; font-size:clamp(12px,3vw,15px); }
+  #collect span{ display:inline-flex; align-items:center; gap:4px; }
+  .dot{ width:12px; height:12px; border-radius:3px; display:inline-block; }
+  .dot.cheese{ background:var(--gold); }
+  .dot.coin{ background:var(--mint-600); border-radius:50%; }
+
+  /* Overlays */
+  .overlay{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:14px; text-align:center;
+    background:rgba(255,255,255,.9); backdrop-filter:blur(3px); padding:24px;
+  }
+  .overlay h1{ margin:0; font-size:clamp(24px,7vw,42px); letter-spacing:-.5px; }
+  .overlay p{ margin:0; color:var(--muted); font-size:clamp(13px,3.4vw,16px); max-width:34ch; line-height:1.5; }
+  .goat-badge svg{ width:96px; height:96px; filter:drop-shadow(0 8px 18px rgba(18,180,137,.25)); }
+  .btn{
+    appearance:none; border:none; cursor:pointer;
+    background:var(--mint); color:#06231c; font-weight:800;
+    font-size:clamp(15px,4vw,18px); padding:14px 28px; border-radius:999px;
+    box-shadow:0 8px 22px rgba(33,208,161,.35); transition:transform .08s ease;
+  }
+  .btn:active{ transform:scale(.96); }
+  .hint{ font-size:13px; color:var(--muted); }
+  .final{ font-size:clamp(28px,9vw,54px); font-weight:900; color:var(--mint-600); letter-spacing:-1px; }
+  .hidden{ display:none !important; }
+  .kbd{ display:inline-block; padding:2px 8px; border:1px solid var(--line);
+    border-bottom-width:2px; border-radius:6px; font-weight:800; font-size:12px; background:#fff; }
+
+  @media (prefers-reduced-motion:reduce){
+    .btn{ transition:none; }
+  }
+</style>
+</head>
+<body>
+  <div id="wrap">
+    <canvas id="cv" width="800" height="450"></canvas>
+
+    <div id="hud" class="hidden">
+      <div class="box">
+        <div id="score">0</div>
+        <div id="sub">Meter</div>
+      </div>
+      <div class="box" id="collect">
+        <span><i class="dot cheese"></i><b id="cCheese">0</b></span>
+        <span><i class="dot coin"></i><b id="cCoin">0</b></span>
+      </div>
+    </div>
+
+    <!-- Start -->
+    <div id="startScreen" class="overlay">
+      <div class="goat-badge" id="startGoat"></div>
+      <h1>Ziegen&#8209;Sprung</h1>
+      <p>Deine Ziege l&auml;uft los. <b>Tippen</b> zum Springen &mdash; nochmal tippen f&uuml;r den <b>Doppelsprung</b>.
+         Sammle <b style="color:var(--gold)">K&auml;se</b> und <b style="color:var(--mint-600)">M&uuml;nzen</b>, weiche allem anderen aus.</p>
+      <button class="btn" id="startBtn">Los geht&rsquo;s</button>
+      <div class="hint">Am Rechner: <span class="kbd">Leertaste</span> oder <span class="kbd">&uarr;</span></div>
+    </div>
+
+    <!-- Game Over -->
+    <div id="overScreen" class="overlay hidden">
+      <div class="goat-badge" id="overGoat"></div>
+      <h1>Aua! Kollision</h1>
+      <div class="final" id="finalScore">0</div>
+      <p id="overBreak">&nbsp;</p>
+      <button class="btn" id="againBtn">Nochmal</button>
+    </div>
+  </div>
+
+  <!-- Ziegen-Avatar (SVG) fuer die Overlays. Relativer Pfad von games/jumprun/ -->
+  <script src="../../avatar.js"></script>
+  <!-- Deterministischer Core (Single Source of Truth) -->
+  <script src="./jumprun.js"></script>
+  <script>
+  'use strict';
+  (function () {
+    const Core = window.JumpRunCore;
+    const SCALE = Core.SCALE;
+
+    const cv = document.getElementById('cv');
+    const ctx = cv.getContext('2d');
+
+    // Logische Zeichenflaeche (entspricht WORLD in Weltpixeln, ohne SCALE)
+    const VW = Core.WORLD_W / SCALE;   // 800
+    const VH = Core.WORLD_H / SCALE;   // 450
+    const GROUND = Core.GROUND_Y / SCALE;
+
+    // HiDPI-Backing skalieren
+    function fitCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = Math.round(VW * dpr);
+      cv.height = Math.round(VH * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    fitCanvas();
+    window.addEventListener('resize', fitCanvas);
+
+    // ---- DOM ----
+    const hud = document.getElementById('hud');
+    const elScore = document.getElementById('score');
+    const elCheese = document.getElementById('cCheese');
+    const elCoin = document.getElementById('cCoin');
+    const startScreen = document.getElementById('startScreen');
+    const overScreen = document.getElementById('overScreen');
+    const finalScore = document.getElementById('finalScore');
+    const overBreak = document.getElementById('overBreak');
+
+    // Ziegen-Avatar in die Overlays rendern (falls avatar.js geladen)
+    (function paintGoats() {
+      if (!window.GoatAvatar) return;
+      const svg = window.GoatAvatar.renderGoatAvatar({ fur: 'mint', bg: 'gold' }, 96);
+      const s = document.getElementById('startGoat');
+      const o = document.getElementById('overGoat');
+      if (s) s.innerHTML = svg;
+      if (o) o.innerHTML = svg;
+    })();
+
+    // ---- Lauf-Zustand ----
+    let state = null;        // Core-State
+    let inputLog = [];       // Frame-Input-Log (Array pro Frame)
+    let seed = 0;
+    let running = false;
+    let rafId = 0;
+
+    // Sprung-Anforderungen fuer den NAECHSTEN Frame (aus Touch/Tastatur)
+    let jumpQueued = false;
+
+    // Feste Zeitschritt-Akkumulation (60 Hz), entkoppelt vom Bildschirm-Refresh
+    const STEP_MS = 1000 / Core.FPS;
+    let lastTime = 0;
+    let acc = 0;
+
+    // dezente Wolken-Parallax (rein visuell, NICHT im Core)
+    let cloudOffset = 0;
+
+    function newSeed() {
+      // Seed einmal fuer die Runde ziehen und festhalten (wird mitsubmitted).
+      return (Math.floor(Math.random() * 0x7fffffff)) | 0;
+    }
+
+    function startRun() {
+      seed = newSeed();
+      state = Core.create(seed);
+      inputLog = [];
+      jumpQueued = false;
+      running = true;
+      lastTime = 0;
+      acc = 0;
+      startScreen.classList.add('hidden');
+      overScreen.classList.add('hidden');
+      hud.classList.remove('hidden');
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(loop);
+    }
+
+    function endRun() {
+      running = false;
+      hud.classList.add('hidden');
+      finalScore.textContent = state.score.toLocaleString('de-DE');
+      overBreak.innerHTML = 'K&auml;se ' + state.cheese + ' &middot; M&uuml;nzen ' + state.coins +
+        ' &middot; Distanz ' + Math.floor(state.dist / SCALE) + ' m';
+      overScreen.classList.remove('hidden');
+
+      // Score an die Plattform melden (entkoppelter Platzhalter; Main-Dev verdrahtet ihn).
+      try {
+        if (window.__submit) {
+          window.__submit({
+            game_key: 'jumprun',
+            seed: seed,
+            score: state.score,
+            input_log: inputLog,
+            mode: 'high',
+          });
+        }
+      } catch (e) { /* Standalone-Betrieb: still ignorieren */ }
+    }
+
+    // ---- Eingabe ----
+    function requestJump() {
+      if (!running) return;
+      jumpQueued = true;
+    }
+
+    // Touch / Pointer
+    cv.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      requestJump();
+    }, { passive: false });
+
+    // Overlays: Tap auf Buttons (kein Konflikt mit Canvas)
+    document.getElementById('startBtn').addEventListener('click', startRun);
+    document.getElementById('againBtn').addEventListener('click', startRun);
+
+    // Tastatur
+    window.addEventListener('keydown', function (e) {
+      if (e.code === 'Space' || e.code === 'ArrowUp' || e.key === ' ') {
+        e.preventDefault();
+        if (!running) { startRun(); return; }
+        requestJump();
+      }
+    });
+
+    // ---- Fixed-Step-Loop ----
+    function loop(now) {
+      if (!running) return;
+      if (!lastTime) lastTime = now;
+      let dt = now - lastTime;
+      lastTime = now;
+      if (dt > 250) dt = 250; // nach Tab-Wechsel nicht "aufholen"
+      acc += dt;
+
+      while (acc >= STEP_MS) {
+        // Input dieses Frames einsammeln und ins Log schreiben (Anti-Cheat).
+        const frameInput = jumpQueued ? ['jump'] : [];
+        jumpQueued = false;
+        inputLog.push(frameInput);
+        Core.step(state, frameInput);
+        acc -= STEP_MS;
+        if (state.over) break;
+      }
+
+      cloudOffset = (cloudOffset + dt * 0.01) % (VW + 200);
+      render();
+
+      // HUD
+      elScore.textContent = state.score.toLocaleString('de-DE');
+      elCheese.textContent = state.cheese;
+      elCoin.textContent = state.coins;
+
+      if (state.over) { endRun(); return; }
+      rafId = requestAnimationFrame(loop);
+    }
+
+    // ---- Rendering (spiegelt nur den Core, keine Spiellogik) ----
+    function px(v) { return v / SCALE; } // fixed-point -> Bildschirmpixel
+
+    function render() {
+      // Himmel
+      const g = ctx.createLinearGradient(0, 0, 0, VH);
+      g.addColorStop(0, '#ffffff');
+      g.addColorStop(1, '#eef7f4');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, VW, VH);
+
+      drawClouds();
+
+      // Boden
+      ctx.fillStyle = '#111417';
+      ctx.fillRect(0, GROUND, VW, VH - GROUND);
+      // Mint-Kante am Boden
+      ctx.fillStyle = '#21D0A1';
+      ctx.fillRect(0, GROUND, VW, 5);
+      // laufende Bodenstriche (visuelle Geschwindigkeit)
+      ctx.fillStyle = 'rgba(255,255,255,.14)';
+      const stride = 60;
+      const shift = (px(state.dist) % stride);
+      for (let x = -shift; x < VW; x += stride) {
+        ctx.fillRect(x, GROUND + 16, 26, 4);
+      }
+
+      // Objekte
+      for (const o of state.objects) {
+        if (o.collected) continue;
+        const x = px(o.x), y = px(o.y), w = px(o.w), h = px(o.h);
+        if (x > VW + 10 || x + w < -10) continue;
+        if (o.type === Core.T_OBSTACLE_GROUND) drawObstacle(x, y, w, h, false);
+        else if (o.type === Core.T_OBSTACLE_AIR) drawObstacle(x, y, w, h, true);
+        else if (o.type === Core.T_CHEESE) drawCheese(x, y, w, h);
+        else if (o.type === Core.T_COIN) drawCoin(x, y, w, h);
+      }
+
+      // Ziege
+      drawGoat(px(Core.GOAT_X), px(state.goatY), px(Core.GOAT_W), px(Core.GOAT_H));
+    }
+
+    function drawClouds() {
+      ctx.fillStyle = 'rgba(18,180,137,.08)';
+      const positions = [80, 300, 560, 720];
+      for (let i = 0; i < positions.length; i++) {
+        const cx = ((positions[i] - cloudOffset * (0.5 + i * 0.12)) % (VW + 200) + (VW + 200)) % (VW + 200) - 100;
+        const cy = 50 + (i % 2) * 34;
+        roundedCloud(cx, cy);
+      }
+    }
+    function roundedCloud(cx, cy) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, 20, 0, Math.PI * 2);
+      ctx.arc(cx + 22, cy + 6, 16, 0, Math.PI * 2);
+      ctx.arc(cx - 20, cy + 8, 14, 0, Math.PI * 2);
+      ctx.arc(cx + 6, cy + 12, 18, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function rr(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function drawObstacle(x, y, w, h, isAir) {
+      // Hindernis = dunkler Block mit Warn-Kante (Schwarz-Weiss + dezent, kein Lila)
+      ctx.fillStyle = '#111417';
+      rr(x, y, w, h, 6); ctx.fill();
+      ctx.fillStyle = isAir ? '#F4B740' : '#21D0A1';
+      rr(x, isAir ? y : y, w, 6, 3); ctx.fill();
+      // kleine Stachel-Andeutung oben bei Boden-Hindernissen
+      if (!isAir) {
+        ctx.fillStyle = '#2a2f36';
+        const spikes = Math.max(2, Math.floor(w / 12));
+        for (let i = 0; i < spikes; i++) {
+          const sx = x + (i + 0.5) * (w / spikes);
+          ctx.beginPath();
+          ctx.moveTo(sx - 4, y);
+          ctx.lineTo(sx, y - 7);
+          ctx.lineTo(sx + 4, y);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+    }
+
+    function drawCheese(x, y, w, h) {
+      // Kaese-Dreieck in Gold
+      ctx.fillStyle = '#F4B740';
+      ctx.beginPath();
+      ctx.moveTo(x, y + h);
+      ctx.lineTo(x + w, y + h);
+      ctx.lineTo(x + w, y + h * 0.25);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#d99a1f'; ctx.lineWidth = 1.5; ctx.stroke();
+      // Loecher
+      ctx.fillStyle = 'rgba(255,255,255,.55)';
+      ctx.beginPath(); ctx.arc(x + w * 0.55, y + h * 0.62, 2.4, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + w * 0.78, y + h * 0.5, 1.8, 0, 7); ctx.fill();
+    }
+
+    function drawCoin(x, y, w, h) {
+      const cx = x + w / 2, cy = y + h / 2, r = Math.min(w, h) / 2;
+      ctx.fillStyle = '#12B489';
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#0e9b76';
+      ctx.beginPath(); ctx.arc(cx, cy, r * 0.62, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#e9fbf5';
+      ctx.font = 'bold ' + (r) + 'px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('€', cx, cy + 0.5);
+      ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
+    }
+
+    // Simple, suesse Ziege im avatar.js-Stil (Canvas-Version, animierte Beine)
+    function drawGoat(x, y, w, h) {
+      const legPhase = state.onGround ? Math.sin(px(state.dist) * 0.25) : 0;
+      ctx.save();
+      ctx.translate(x, y);
+
+      // leichter Squash beim Springen
+      const stretch = state.onGround ? 1 : 1.05;
+      ctx.translate(w / 2, h);
+      ctx.scale(1, stretch);
+      ctx.translate(-w / 2, -h);
+
+      // Beine
+      ctx.strokeStyle = '#c9ccd6'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+      const lg = state.onGround ? legPhase * 5 : 3;
+      ctx.beginPath(); ctx.moveTo(w * 0.32, h * 0.72); ctx.lineTo(w * 0.30 - lg, h); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(w * 0.66, h * 0.72); ctx.lineTo(w * 0.68 + lg, h); ctx.stroke();
+
+      // Koerper
+      ctx.fillStyle = '#bfece0';
+      rr(w * 0.14, h * 0.34, w * 0.72, h * 0.42, 12); ctx.fill();
+      // Bauch-Schatten
+      ctx.fillStyle = 'rgba(143,214,196,.5)';
+      rr(w * 0.18, h * 0.5, w * 0.5, h * 0.24, 8); ctx.fill();
+
+      // Kopf
+      ctx.fillStyle = '#e3f7f1';
+      rr(w * 0.5, h * 0.14, w * 0.5, h * 0.42, 12); ctx.fill();
+      // Horn
+      ctx.fillStyle = '#8fd6c4';
+      ctx.beginPath();
+      ctx.moveTo(w * 0.58, h * 0.16);
+      ctx.quadraticCurveTo(w * 0.52, h * -0.02, w * 0.66, h * 0.04);
+      ctx.quadraticCurveTo(w * 0.66, h * 0.12, w * 0.62, h * 0.18);
+      ctx.closePath(); ctx.fill();
+      // Ohr
+      ctx.fillStyle = '#bfece0';
+      ctx.beginPath(); ctx.ellipse(w * 0.56, h * 0.3, w * 0.12, h * 0.07, -0.4, 0, 7); ctx.fill();
+      // Auge
+      ctx.fillStyle = '#2b2f38';
+      ctx.beginPath(); ctx.arc(w * 0.86, h * 0.32, 3.1, 0, 7); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(w * 0.87, h * 0.31, 1, 0, 7); ctx.fill();
+      // Schnauze
+      ctx.fillStyle = '#ffffff';
+      rr(w * 0.82, h * 0.4, w * 0.18, h * 0.14, 6); ctx.fill();
+      ctx.fillStyle = '#8a6b5e';
+      ctx.beginPath(); ctx.arc(w * 0.98, h * 0.46, 1.4, 0, 7); ctx.fill();
+      // Ziegenbart
+      ctx.fillStyle = '#8fd6c4';
+      ctx.beginPath();
+      ctx.moveTo(w * 0.84, h * 0.54);
+      ctx.lineTo(w * 0.9, h * 0.7);
+      ctx.lineTo(w * 0.96, h * 0.54);
+      ctx.closePath(); ctx.fill();
+
+      ctx.restore();
+    }
+
+    // Erst-Render (Startbildschirm zeigt statisch Boden/Himmel)
+    (function idleFrame() {
+      state = Core.create(0);
+      render();
+      state = null;
+    })();
+
+  })();
+  </script>
+</body>
+</html>
