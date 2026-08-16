@@ -8,7 +8,7 @@
     var id = opts.id || new URLSearchParams(window.location.search).get('id');
     var typeQuery = opts.type ? ('?t=' + encodeURIComponent(opts.type)) : '';
     var shareUrl = id
-      ? ('https://www.room8.club/s/' + encodeURIComponent(id) + typeQuery)
+      ? ('https://unigoat.de/s/' + encodeURIComponent(id) + typeQuery)
       : (opts.url || window.location.href);
     var data = { title: opts.title || 'UniGoat', text: opts.text || '', url: shareUrl };
 

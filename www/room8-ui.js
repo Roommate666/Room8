@@ -499,6 +499,7 @@
     // BETA BADGE (Fixed-Pill oben mittig, blockt keine Taps)
     // ==========================================
     function injectBetaBadge() {
+        return; // BETA-Badge deaktiviert (14.08.2026, UniGoat-Rebrand) - kein "Beta" mehr oben
         if (document.getElementById('app-beta-badge')) return;
         if (!document.body) return;
         // Badge-Farbe an die jeweilige Seite anpassen

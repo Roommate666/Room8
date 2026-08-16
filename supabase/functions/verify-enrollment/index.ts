@@ -40,10 +40,34 @@ const ALLOWED_MEDIA = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
 const ANTHROPIC_MODEL = 'claude-3-5-sonnet-20241022'
 
+// Bilinguale Nutzer-Meldungen: reason_code (maschinenlesbar) + DE + EN.
+const REASONS: Record<string, { de: string; en: string }> = {
+  UNAUTHORIZED:      { de: 'Bitte logg dich ein.', en: 'Please log in.' },
+  NO_IMAGE:          { de: 'Kein gueltiges Bild.', en: 'No valid image.' },
+  IMAGE_TOO_LARGE:   { de: 'Bild zu gross (max 6 MB).', en: 'Image too large (max 6 MB).' },
+  UNREADABLE:        { de: 'Dokument konnte nicht gelesen werden.', en: 'The document could not be read.' },
+  NOT_ENROLLMENT:    { de: 'Das Bild wurde nicht als Immatrikulationsbescheinigung erkannt.', en: 'The image was not recognised as an enrollment certificate.' },
+  NO_UNIVERSITY:     { de: 'Hochschule konnte nicht erkannt werden.', en: 'The university could not be identified.' },
+  NO_VALID_DATE:     { de: 'Gueltigkeitsdatum konnte nicht erkannt werden.', en: 'The validity date could not be identified.' },
+  EXPIRED:           { de: 'Die Bescheinigung ist abgelaufen (Gueltigkeit liegt in der Vergangenheit).', en: 'The certificate has expired (validity is in the past).' },
+  OK:                { de: 'Verifizierung erfolgreich.', en: 'Verification successful.' },
+  SERVER_ERROR:      { de: 'Serverfehler. Bitte spaeter erneut versuchen.', en: 'Server error. Please try again later.' },
+}
+
 function json(body: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(body), {
     status, headers: { 'Content-Type': 'application/json', ...corsHeaders },
   })
+}
+
+// Antwort mit reason_code + bilingualen Texten bauen (reason bleibt DE fuer Rueckwaerts-Kompat).
+function reply(
+  code: keyof typeof REASONS,
+  extra: Record<string, unknown> = {},
+  status = 200,
+) {
+  const r = REASONS[code] || REASONS.SERVER_ERROR
+  return json({ reason_code: code, reason: r.de, reason_en: r.en, ...extra }, status)
 }
 
 // Data-URL-Prefix ("data:image/png;base64,....") abtrennen und Media-Type ableiten.
@@ -96,18 +120,24 @@ function parseValidUntil(v: unknown): Date | null {
   return isNaN(dt.getTime()) ? null : dt
 }
 
+// Bilingualer Prompt (DE + EN). Liest deutsche UND englische Immatrikulations-/
+// Enrollment-Dokumente und leitet das Semester-Enddatum sprachunabhaengig ab.
 const EXTRACT_PROMPT =
-  'Du bist ein praeziser Dokument-Parser fuer deutsche und internationale ' +
-  'Immatrikulationsbescheinigungen (Studienbescheinigungen). Lies ausschliesslich, was ' +
-  'auf dem Bild steht. Erfinde nichts. Antworte NUR mit einem einzigen JSON-Objekt, ' +
-  'ohne Markdown, ohne Erklaerung, exakt in diesem Schema:\n' +
+  'You are a precise document parser for university enrollment documents in ANY language, ' +
+  'especially GERMAN and ENGLISH. Recognise German documents such as ' +
+  '"Immatrikulationsbescheinigung", "Studienbescheinigung", "Bescheinigung nach ' +
+  '§9 BAfoeG", "Semesterbescheinigung", AND English documents such as ' +
+  '"Certificate of Enrollment", "Confirmation of Enrollment", "Enrollment Verification", ' +
+  '"Proof of Enrollment", "Matriculation Certificate", "Student Status Certificate", ' +
+  '"Verification of Student Status". Read ONLY what is on the image. Invent nothing. ' +
+  'Reply with a SINGLE JSON object only, no markdown, no explanation, exactly this schema:\n' +
   '{\n' +
-  '  "is_enrollment_document": boolean,   // true nur wenn es klar eine Immatrikulations-/Studienbescheinigung ist\n' +
-  '  "name": string|null,                 // vollstaendiger Name der Person\n' +
-  '  "university": string|null,           // Name der Hochschule/Universitaet\n' +
-  '  "semester": string|null,             // z.B. "Sommersemester 2026" oder "WS 2025/26"\n' +
-  '  "valid_until": string|null,          // Enddatum der Gueltigkeit im Format YYYY-MM-DD (Semester-Enddatum). Wenn nur ein Semester genannt ist, leite das uebliche Enddatum ab (Sommersemester -> 30.09. des Jahres, Wintersemester -> 31.03. des Folgejahres).\n' +
-  '  "confidence": number                 // 0..1 wie sicher die Extraktion ist\n' +
+  '  "is_enrollment_document": boolean,   // true only if it is clearly a university enrollment/student-status certificate\n' +
+  '  "name": string|null,                 // full name of the person\n' +
+  '  "university": string|null,           // name of the university / higher-education institution\n' +
+  '  "semester": string|null,             // e.g. "Sommersemester 2026", "WS 2025/26", "Fall 2025", "Spring Term 2026", "Academic Year 2025/26"\n' +
+  '  "valid_until": string|null,          // validity END date as YYYY-MM-DD. If only a term/semester is given, derive the usual end date: German Sommersemester -> 30.09. of that year; German Wintersemester -> 31.03. of the following year; English/US Fall/Autumn term -> 31.01. of following year; Spring term -> 31.07. of that year; full academic year 20XX/YY -> 30.09. of the later year. Parse any date format (e.g. "31.03.2026", "March 31, 2026", "31 Mar 2026") and normalise to YYYY-MM-DD.\n' +
+  '  "confidence": number                 // 0..1 how confident the extraction is\n' +
   '}'
 
 async function callClaudeVision(media: string, data: string): Promise<Record<string, unknown> | null> {
@@ -147,20 +177,20 @@ serve(async (req) => {
 
   try {
     if (!ANTHROPIC_API_KEY) {
-      return json({ ok: false, verified: false, reason: 'server misconfigured' }, 500)
+      return reply('SERVER_ERROR', { ok: false, verified: false }, 500)
     }
 
     // 1. User aus dem Bearer-JWT holen (nur eingeloggte Nutzer)
     const authHeader = req.headers.get('Authorization') || ''
     if (!authHeader.startsWith('Bearer ')) {
-      return json({ ok: false, verified: false, reason: 'unauthorized' }, 401)
+      return reply('UNAUTHORIZED', { ok: false, verified: false }, 401)
     }
     const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: { headers: { Authorization: authHeader } },
     })
     const { data: userData, error: userErr } = await userClient.auth.getUser()
     if (userErr || !userData?.user) {
-      return json({ ok: false, verified: false, reason: 'unauthorized' }, 401)
+      return reply('UNAUTHORIZED', { ok: false, verified: false }, 401)
     }
     const userId = userData.user.id
 
@@ -168,16 +198,16 @@ serve(async (req) => {
     const payload = await req.json().catch(() => ({}))
     const img = parseImage(payload?.image_base64)
     if (!img) {
-      return json({ ok: false, verified: false, reason: 'kein gueltiges Bild' }, 400)
+      return reply('NO_IMAGE', { ok: false, verified: false }, 400)
     }
     if (base64Bytes(img.data) > MAX_IMAGE_BYTES) {
-      return json({ ok: false, verified: false, reason: 'Bild zu gross (max 6 MB)' }, 400)
+      return reply('IMAGE_TOO_LARGE', { ok: false, verified: false }, 400)
     }
 
     // 3. Claude Vision aufrufen -> striktes JSON
     const parsed = await callClaudeVision(img.media, img.data)
     if (!parsed) {
-      return json({ ok: false, verified: false, reason: 'Dokument konnte nicht gelesen werden' }, 502)
+      return reply('UNREADABLE', { ok: false, verified: false }, 502)
     }
 
     const isDoc = parsed.is_enrollment_document === true
@@ -187,23 +217,19 @@ serve(async (req) => {
     const validUntilIso = validUntilDate ? validUntilDate.toISOString().slice(0, 10) : null
 
     if (!isDoc) {
-      return json({ ok: true, verified: false, university, valid_until: validUntilIso,
-        reason: 'Das Bild wurde nicht als Immatrikulationsbescheinigung erkannt.' })
+      return reply('NOT_ENROLLMENT', { ok: true, verified: false, university, valid_until: validUntilIso })
     }
     if (!university) {
-      return json({ ok: true, verified: false, university: null, valid_until: validUntilIso,
-        reason: 'Hochschule konnte nicht erkannt werden.' })
+      return reply('NO_UNIVERSITY', { ok: true, verified: false, university: null, valid_until: validUntilIso })
     }
     if (!validUntilDate) {
-      return json({ ok: true, verified: false, university, valid_until: null,
-        reason: 'Gueltigkeitsdatum konnte nicht erkannt werden.' })
+      return reply('NO_VALID_DATE', { ok: true, verified: false, university, valid_until: null })
     }
 
     // 4. Gueltigkeit pruefen: Enddatum muss in der Zukunft liegen
     const now = new Date()
     if (validUntilDate.getTime() <= now.getTime()) {
-      return json({ ok: true, verified: false, university, valid_until: validUntilIso,
-        reason: 'Die Bescheinigung ist abgelaufen (Gueltigkeit liegt in der Vergangenheit).' })
+      return reply('EXPIRED', { ok: true, verified: false, university, valid_until: validUntilIso })
     }
 
     // 5. Bei Erfolg: NUR das eigene Profil (auth.uid()) via Service Role setzen.
@@ -217,19 +243,20 @@ serve(async (req) => {
       enrollment_valid_until: validUntilIso,
     }).eq('id', userId)
     if (updErr) {
-      return json({ ok: false, verified: false, reason: updErr.message }, 500)
+      // Technische DB-Fehler NICHT im Klartext an den Client (nur loggen).
+      console.error('profile update error', updErr.message)
+      return reply('SERVER_ERROR', { ok: false, verified: false }, 500)
     }
 
+    // Referral-Belohnung ausschuetten, falls dieser (jetzt verifizierte) Nutzer geworben wurde.
+    // Fehler hier duerfen die Verifizierung NICHT scheitern lassen.
+    try { await admin.rpc('reward_pending_referral', { p_user: userId }) }
+    catch (e) { console.error('referral reward error', String((e as Error)?.message || e)) }
+
     // Name wird bewusst NICHT gespeichert (Datensparsamkeit), nur zurueckgegeben.
-    return json({
-      ok: true,
-      verified: true,
-      university,
-      valid_until: validUntilIso,
-      name,
-      reason: 'Verifizierung erfolgreich.',
-    })
+    return reply('OK', { ok: true, verified: true, university, valid_until: validUntilIso, name })
   } catch (e) {
-    return json({ ok: false, verified: false, reason: String((e as Error)?.message || e) }, 500)
+    console.error('verify-enrollment error', String((e as Error)?.message || e))
+    return reply('SERVER_ERROR', { ok: false, verified: false }, 500)
   }
 })

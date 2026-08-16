@@ -1,0 +1,2 @@
+id,title,severity,timestamp,file
+vuln-0001,Reflected XSS in User Rendered Content,HIGH,2026-08-13 10:34:53 UTC,vulnerabilities/vuln-0001.md

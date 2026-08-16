@@ -689,7 +689,7 @@
 
             let imageHtml;
             if (imgUrl) {
-                imageHtml = `<img src="${imgUrl}" class="mini-card-img" onerror="this.outerHTML='<div class=\\'mini-card-img\\' style=\\'display:flex;align-items:center;justify-content:center;background:#EBEBEB;\\'><div style=\\'text-align:center;color:#929292;\\'><div style=\\'font-size:1.5rem;\\'>${placeholderIcon}</div><div style=\\'font-size:0.6rem;font-weight:600;color:#929292;\\'>${placeholderLabel}</div></div></div>'">`;
+                imageHtml = `<img src="${escapeHtml(imgUrl)}" class="mini-card-img" onerror="this.outerHTML='<div class=\\'mini-card-img\\' style=\\'display:flex;align-items:center;justify-content:center;background:#EBEBEB;\\'><div style=\\'text-align:center;color:#929292;\\'><div style=\\'font-size:1.5rem;\\'>${placeholderIcon}</div><div style=\\'font-size:0.6rem;font-weight:600;color:#929292;\\'>${placeholderLabel}</div></div></div>'">`;
             } else {
                 imageHtml = `<div class="mini-card-img" style="display:flex;align-items:center;justify-content:center;background:#EBEBEB;"><div style="text-align:center;color:#929292;"><div style="font-size:1.5rem;">${placeholderIcon}</div><div style="font-size:0.6rem;font-weight:600;color:#929292;">${placeholderLabel}</div></div></div>`;
             }
@@ -701,8 +701,8 @@
             item.innerHTML = `
                 ${imageHtml}
                 <div class="mini-card-body">
-                    <h4 class="mini-card-title">${l.title}</h4>
-                    <div class="mini-card-price">${price}</div>
+                    <h4 class="mini-card-title">${escapeHtml(l.title)}</h4>
+                    <div class="mini-card-price">${escapeHtml(price)}</div>
                 </div>
             `;
             container.appendChild(item);

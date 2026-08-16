@@ -3,6 +3,7 @@ import Capacitor
 import Firebase
 import FirebaseMessaging
 import WebKit
+import AVFoundation
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate, UNUserNotificationCenterDelegate {
@@ -19,6 +20,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate, UNUser
 
         // UN UserNotificationCenter delegate fuer Foreground-Push
         UNUserNotificationCenter.current().delegate = self
+
+        // Spiel-Sound auch im Lautlos-Modus (Stummschalter am Rand) abspielen.
+        // .playback ignoriert den Silent-Switch, .mixWithOthers laesst fremde Musik weiterlaufen.
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, options: [.mixWithOthers])
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            NSLog("AudioSession setup failed: \(error.localizedDescription)")
+        }
 
         return true
     }

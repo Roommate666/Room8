@@ -1,969 +1,123 @@
 <!DOCTYPE html>
 <html lang="de" data-page="profile">
 <head>
-    <script src="sentry-init.js"></script>
-    <script src="features.js"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-    <title>Mein Profil - UniGoat</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico?v61">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v61">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v61">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v61">
-  <link rel="stylesheet" href="style.css">
-    <style>
-        /* Pattern: Magic UI BlurFade */
-        @keyframes blurFadeIn {
-            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
-            to { opacity: 1; filter: blur(0); transform: translateY(0); }
-        }
-
-        .verified-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-            background-color: #3b82f6;
-            border-radius: 50%;
-            margin-left: 0.5rem;
-            position: relative;
-        }
-        .verified-badge svg {
-            width: 14px;
-            height: 14px;
-            stroke: white;
-            stroke-width: 3;
-        }
-
-        /* Feature Highlight Banner */
-        .feature-banner {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin: 1rem 1.5rem;
-            color: white;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
-            animation: blurFadeIn 0.5s 0.3s ease-out both;
-        }
-
-        .feature-banner::before {
-            content: '';
-            position: absolute;
-            font-size: 6rem;
-            opacity: 0.1;
-            right: -1rem;
-            top: -1rem;
-        }
-
-        .feature-banner-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-        }
-
-        .feature-icon {
-            width: 40px;
-            height: 40px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        .feature-banner h3 {
-            margin: 0;
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-
-        .feature-banner p {
-            margin: 0 0 1rem 0;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            opacity: 0.95;
-        }
-
-        .feature-list {
-            list-style: none;
-            padding: 0;
-            margin: 0 0 1rem 0;
-        }
-
-        .feature-list li {
-            padding: 0.2rem 0;
-            padding-left: 1.5rem;
-            position: relative;
-            font-size: 0.9rem;
-        }
-
-        .feature-list li::before {
-            content: '✓';
-            position: absolute;
-            left: 0;
-            font-weight: bold;
-        }
-
-        .feature-buttons {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .feature-btn {
-            padding: 0.6rem 1.2rem;
-            border-radius: 999px;
-            font-weight: 700;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-            display: inline-block;
-        }
-
-        .feature-btn-primary {
-            background: white;
-            color: #059669;
-        }
-
-        .feature-btn-secondary {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.3);
-        }
-
-        .close-banner {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
-
-        /* CUSTOM MODAL - Glasmorphismus */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 99999;
-            padding: 1rem;
-        }
-
-        .modal-box {
-            background: rgba(255,255,255,0.95);
-            padding: 1.5rem;
-            border-radius: 20px;
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8);
-            border: 1px solid rgba(0,0,0,0.04);
-            animation: blurFadeIn 0.3s ease-out both;
-        }
-
-        .modal-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
-        .modal-text { color: var(--text-muted); margin-bottom: 1.5rem; }
-
-        .modal-actions { display: flex; gap: 1rem; justify-content: center; }
-        .modal-btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 999px;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            flex: 1;
-            transition: transform 0.2s;
-        }
-        .modal-btn:active { transform: scale(0.97); }
-        .btn-cancel { background: #F3F4F6; color: var(--text-main); }
-        .btn-confirm { background: #EF4444; color: white; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
-
-        /* Meine Aktivitaet - Sektion */
-        .activity-section {
-            padding: 0.5rem 1.5rem 1.5rem;
-            animation: blurFadeIn 0.5s 0.2s ease-out both;
-        }
-        .activity-section h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #111827;
-            margin: 1.25rem 0 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .activity-tabs {
-            display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem;
-            margin-bottom: 0.9rem; scrollbar-width: none;
-        }
-        .activity-tabs::-webkit-scrollbar { display: none; }
-        .activity-tab {
-            flex: 0 0 auto; padding: 0.5rem 0.95rem; border-radius: 999px;
-            border: 1.5px solid #E5E7EB; background: #fff; color: #6B7280;
-            font-weight: 700; font-size: 0.85rem; cursor: pointer; white-space: nowrap;
-            transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-        }
-        .activity-tab.active { background: #3B82F6; color: #fff; border-color: #3B82F6; }
-        .activity-panel { animation: blurFadeIn 0.3s ease-out both; }
-        .activity-block { margin-bottom: 1rem; }
-        .activity-block-head {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 0.6rem;
-        }
-        .activity-block-head h4 {
-            margin: 0; font-size: 0.95rem; font-weight: 700; color: #374151;
-            display: flex; align-items: center; gap: 0.4rem;
-        }
-        .activity-link {
-            font-size: 0.8rem; font-weight: 600; color: #3B82F6; text-decoration: none;
-        }
-        .activity-list { display: flex; flex-direction: column; gap: 0.6rem; }
-        .activity-card {
-            display: flex; gap: 0.75rem; align-items: center; padding: 0.75rem 0.9rem;
-            background: white; border: 1px solid #EEF0F3; border-radius: 14px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04); text-decoration: none; color: inherit;
-            transition: transform 0.15s ease;
-        }
-        .activity-card:active { transform: scale(0.99); }
-        .activity-thumb {
-            flex: 0 0 44px; width: 44px; height: 44px; border-radius: 11px;
-            background: #EEF2FF; display: flex; align-items: center; justify-content: center;
-            font-size: 1.3rem; overflow: hidden;
-        }
-        .activity-body { flex: 1; min-width: 0; }
-        .activity-title-text {
-            font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 0.1rem;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .activity-sub {
-            font-size: 0.78rem; color: #6B7280;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .activity-empty {
-            font-size: 0.85rem; color: #9CA3AF; padding: 0.75rem 0.9rem;
-            background: #F9FAFB; border-radius: 12px; text-align: center;
-        }
-        .activity-loading { font-size: 0.85rem; color: #9CA3AF; padding: 0.75rem; }
-        .saved-cta {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0.9rem 1rem; background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
-            border: 1px solid #C7D2FE; border-radius: 14px; text-decoration: none; color: #3730A3;
-            font-weight: 600; font-size: 0.9rem;
-        }
-
-        /* Barrierefreiheit */
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-        }
-    </style>
+<script src="sentry-init.js"></script>
+<script src="features.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Profil — UniGoat</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="unigoat.css">
 </head>
-<body>
+<body class="ug">
+<div class="ug-app">
+  <div class="ug-hd">
+    <div class="brand"><b>Profil</b></div>
+    <a href="einstellungen.html" aria-label="Einstellungen"><svg class="li" viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--ink);fill:none;stroke-width:1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a>
+  </div>
 
-<div class="app-container">
-    <header class="app-header" style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
-        <a href="javascript:void(0)" onclick="goBackFromProfile()" id="profileBackBtn" style="display:flex; align-items:center; justify-content:center; width:36px; height:36px; background:white; border-radius:50%; color:#3B82F6; text-decoration:none; box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-        </a>
-        <h1 data-i18n="profile_title" style="margin: 0; flex-shrink: 0; font-size: 1.25rem; color: #3B82F6;">Mein Profil</h1>
-        <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
-            <!-- Notification Bell -->
-            <a href="notifications.html" title="Benachrichtigungen" style="position: relative; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: white; border-radius: 50%; color: #3B82F6; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
-                    <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
-                </svg>
-                <span id="notificationBadge" style="display:none; position:absolute; top:-2px; right:-2px; background:#ef4444; color:white; border-radius:50%; min-width:16px; height:16px; font-size:0.6rem; font-weight:bold; align-items:center; justify-content:center; padding: 0 4px;"></span>
-            </a>
-            <!-- Gespeichert -->
-            <a href="saved.html" title="Gespeichert" data-i18n-aria="nav_saved" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: white; border-radius: 50%; color: #3B82F6; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-            </a>
-            <!-- Settings -->
-            <a href="settings.html" title="Einstellungen" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: white; border-radius: 50%; color: #3B82F6; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-            </a>
-            <!-- New Listing (versteckt in reduzierter App via features.js) -->
-            <a href="choose-listing.html" data-feature="housing" data-i18n="profile_new_listing" style="white-space: nowrap; padding: 0.5rem 0.75rem; background: white; color: #3B82F6; border-radius: 18px; font-weight: 700; font-size: 0.8rem; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">+ Inserat</a>
-        </div>
-    </header>
+  <div class="pcard">
+    <div class="av" id="av"></div>
+    <div class="nm" id="nm">…</div>
+    <div class="un" id="un"></div>
+    <div class="tier"><span class="tb" id="tierA">BRONZE</span><div class="tbar"><i id="tbar" style="width:0%"></i></div><span class="tb off" id="tierB">SILBER</span></div>
+    <div class="tnote" id="tnote"></div>
+  </div>
 
-    <!-- Profil-Begrüßung -->
-    <div class="profile-greeting">
-        <a href="#" id="public-profile-link-avatar">
-            <div id="avatar-container" class="avatar-display">
-                <img src="placeholder.png" alt="Avatar" id="avatar-img" onerror="this.src='https://via.placeholder.com/100?text=User'">
-            </div>
-        </a>
-        <div class="greeting-text">
-            <h2 id="welcome-message" style="display: flex; align-items: center;">
-                Hallo, ...!
-                <span id="verified-badge" style="display: none;" class="verified-badge">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                </span>
-            </h2>
-            <div class="profile-actions">
-                <a href="edit-profile.html" class="profile-btn" data-i18n="profile_edit">Profil bearbeiten</a>
-                <a href="#" id="public-profile-link-text" class="profile-btn secondary" data-i18n="profile_public">Öffentliches Profil</a>
-            </div>
-        </div>
-    </div>
+  <div class="pgrid">
+    <div class="pstat"><div class="n" id="sCoins">0</div><div class="k">G-Coins</div></div>
+    <div class="pstat"><div class="n" id="sStreak">0</div><div class="k">Tage Streak</div></div>
+    <div class="pstat"><div class="n" id="sCoupons">0</div><div class="k">Coupons eingelöst</div></div>
+    <div class="pstat"><div class="n" id="sFriends">0</div><div class="k">Freunde geworben</div></div>
+  </div>
 
-    <!-- MODE-SWITCHER (nur fuer Partner-User sichtbar) -->
-    <div id="modeSwitcher" style="display:none; padding: 1rem 1.5rem; background:white; border-bottom:1px solid var(--border-color);">
-        <div style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border-radius:12px; padding: 1rem; border:2px solid #BFDBFE;">
-            <div style="font-size:0.75rem; font-weight:700; color:#1D4ED8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.6rem;">Konto-Ansicht wechseln</div>
-            <div style="display:flex; gap:0.5rem;">
-                <a href="partner-dashboard.html" style="flex:1; text-align:center; padding:0.7rem; background:#3B82F6; color:white; border-radius:10px; text-decoration:none; font-weight:600; font-size:0.85rem; box-shadow:0 2px 8px rgba(59,130,246,0.3);">
-                    🏪 Partner-Ansicht
-                </a>
-                <a href="coupons.html" style="flex:1; text-align:center; padding:0.7rem; background:white; color:#3B82F6; border-radius:10px; text-decoration:none; font-weight:600; font-size:0.85rem; border:1.5px solid #3B82F6;">
-                    🎓 Studenten-Ansicht
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- NEUE FEATURES BANNER -->
-    <div class="feature-banner" id="featureBanner" style="display: none;">
-        <button class="close-banner" onclick="closeBanner()">&#215;</button>
-        <div class="feature-banner-header">
-            <div class="feature-icon">&#127881;</div>
-            <h3 data-i18n="profile_new_features">Neu bei UniGoat!</h3>
-        </div>
-        <p data-i18n="profile_new_features_desc">Entdecke die neuen Möglichkeiten:</p>
-        <ul class="feature-list">
-            <li data-i18n="profile_feature_1">Personalisierte Benachrichtigungen</li>
-            <li data-i18n="profile_feature_2">Gespeicherte Suchen</li>
-            <li data-i18n="profile_feature_3">Verifizierung für mehr Vertrauen</li>
-        </ul>
-        <div class="feature-buttons">
-            <a href="verify-options.html" class="feature-btn feature-btn-primary" data-i18n="profile_setup_now">Verifizieren</a>
-            <a href="coupons.html" class="feature-btn feature-btn-secondary">Rabatte entdecken</a>
-        </div>
-    </div>
-
-    <!-- FAVORITES LINK (versteckt in reduzierter App via features.js) -->
-    <div data-feature="marketplace" style="padding: 1rem 1.5rem; background-color: white; border-bottom: 1px solid var(--border-color);">
-        <a href="favorites.html" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 12px; text-decoration: none; color: #991b1b; border: 2px solid #fecaca; transition: all 0.2s;">
-            <div style="display: flex; align-items: center; gap: 1rem;">
-                <div style="width: 48px; height: 48px; background-color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                    </svg>
-                </div>
-                <div>
-                    <h4 style="margin: 0; font-size: 1.1rem; color: #7f1d1d;" data-i18n="profile_favorites">Meine Favoriten</h4>
-                    <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #991b1b;" data-i18n="profile_favorites_desc">Gespeicherte Inserate ansehen</p>
-                </div>
-            </div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-        </a>
-    </div>
-
-    <main class="app-content" style="padding: 0;">
-        <!-- Meine Inserate (versteckt in reduzierter App via features.js) -->
-        <div class="my-listings-header" data-feature="marketplace">
-            <h3><span data-i18n="profile_my_listings">Meine Inserate</span> <span id="listing-count"></span></h3>
-        </div>
-        <div id="my-listings-container" class="listings-grid" data-feature="marketplace">
-            <div class="skeleton-card"><div class="skeleton-image"></div><div style="flex:1;padding:0.75rem;display:flex;flex-direction:column;gap:0.5rem"><div class="skeleton-line" style="width:70%"></div><div class="skeleton-line short" style="width:40%"></div></div></div>
-            <div class="skeleton-card"><div class="skeleton-image"></div><div style="flex:1;padding:0.75rem;display:flex;flex-direction:column;gap:0.5rem"><div class="skeleton-line" style="width:60%"></div><div class="skeleton-line short" style="width:50%"></div></div></div>
-        </div>
-
-        <!-- MEINE AKTIVITAET -->
-        <section class="activity-section" id="activitySection" style="display:none;">
-            <h3>📋 <span data-i18n="profile_activity_title">Meine Aktivität</span></h3>
-
-            <div class="activity-tabs" id="activityTabs">
-                <button class="activity-tab active" type="button" data-tab="coupons">🎟️ <span data-i18n="saves_tab_coupons">Coupons</span></button>
-                <button class="activity-tab" type="button" data-tab="jobs">💼 <span data-i18n="saves_tab_jobs">Jobs</span></button>
-                <button class="activity-tab" type="button" data-tab="events">📅 <span data-i18n="saves_tab_events">Events</span></button>
-                <button class="activity-tab" type="button" data-tab="saved">🔖 <span data-i18n="profile_activity_saved">Gespeichert</span></button>
-            </div>
-
-            <div class="activity-panel" data-panel="coupons">
-                <div class="activity-list" id="activityCoupons"><div class="activity-loading" data-i18n="common_loading">Lade...</div></div>
-            </div>
-            <div class="activity-panel" data-panel="jobs" style="display:none;">
-                <div class="activity-list" id="activityJobs"><div class="activity-loading" data-i18n="common_loading">Lade...</div></div>
-            </div>
-            <div class="activity-panel" data-panel="events" style="display:none;">
-                <div class="activity-list" id="activityEvents"><div class="activity-loading" data-i18n="common_loading">Lade...</div></div>
-            </div>
-            <div class="activity-panel" data-panel="saved" style="display:none;">
-                <div class="activity-list" id="activitySaved"><div class="activity-loading" data-i18n="common_loading">Lade...</div></div>
-            </div>
-        </section>
-    </main>
-
-    <div id="app-footer-nav"></div>
+  <a class="prow" href="avatar-edit.html"><svg class="ic" viewBox="0 0 24 24"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 15.4 7.2 17l.9-5.4L4.2 7.7l5.4-.8z"/></svg>Goat-Shop — Goat anpassen<span class="ch">›</span></a>
+  <div class="prow" id="cardRow" style="cursor:pointer"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h6M7 13h4"/></svg>Meine Visitenkarte<span class="ch">›</span></div>
+  <div class="prow" id="freezeRow" style="cursor:pointer"><svg class="ic" viewBox="0 0 24 24"><path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/></svg><span id="freezeTxt">Streak-Retter</span><span class="ch">›</span></div>
+  <a class="prow" href="verify-options.html"><svg class="ic" viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg>Verifizierung<span class="ch" id="verifyCh">›</span></a>
+  <a class="prow" href="challenge.html"><svg class="ic" viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>Monats-Challenge<span class="ch">›</span></a>
+  <div class="prow" id="inviteRow" style="cursor:pointer"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12h8M12 8v8"/></svg>Freunde einladen<span class="ch" id="inviteCh">›</span></div>
+  <a class="prow" href="edit-profile.html"><svg class="ic" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Profil bearbeiten<span class="ch">›</span></a>
+  <a class="prow" href="https://instagram.com/unigoat.de" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>Instagram: @unigoat.de<span class="ch">›</span></a>
+  <a class="prow" href="#" id="logoutRow"><svg class="ic" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Abmelden<span class="ch"></span></a>
 </div>
 
-<!-- Custom Modal für Lösch-Bestätigung (AUSSERHALB app-container für korrektes z-index) -->
-<div id="deleteModal" class="modal-overlay">
-    <div class="modal-box">
-        <h3 class="modal-title" data-i18n="profile_delete_listing">Inserat löschen?</h3>
-        <p class="modal-text" data-i18n="profile_delete_listing_desc">Dies kann nicht rückgängig gemacht werden.</p>
-        <div class="modal-actions">
-            <button class="modal-btn btn-cancel" onclick="closeDeleteModal()" data-i18n="common_cancel">Abbrechen</button>
-            <button class="modal-btn btn-confirm" id="confirmDeleteBtn" data-i18n="common_delete">Löschen</button>
-        </div>
-    </div>
-</div>
+<div class="vkbg" id="vkbg"></div>
+
+<nav class="ugnav">
+  <a href="dashboard.html"><svg viewBox="0 0 24 24"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1Z"/></svg>Hub</a>
+  <a href="coupons.html"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>Coupons</a>
+  <a href="game/index.html"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="3"/><path d="M8 12h3M9.5 10.5v3M15 11h.01M17 13h.01"/></svg>Game</a>
+  <a href="challenge.html"><svg viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>Rang</a>
+  <a class="on" href="profile.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>Profil</a>
+</nav>
 
 <script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
 <script src="onboarding-gate.js"></script>
-<script src="session-cache.js"></script>
-<script src="room8-ui.js"></script>
-<script src="navigation.js"></script>
-<script src="translations.js"></script>
-<script src="room8-utils.js"></script>
+<script src="game/avatar.js"></script>
 <script>
-    // Supabase Client - Direkte Initialisierung
-    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  function nf(n){return (n||0).toLocaleString('de-DE');}
+  var ME=null;
+  function openMyCard(){ if(!ME||!window.GoatAvatar)return; var bg=$('vkbg'); bg.innerHTML=GoatAvatar.renderVisitenkarte({username:ME.username,full_name:ME.full_name,city:ME.city,is_champion:ME.is_champion,coins:ME.coins,streak:ME.streak_days,avatar_config:ME.avatar_config}); bg.classList.add('show'); }
+  // Streak-Retter (Freeze): Anzeige + Kauf (50 G-Coins, max 2)
+  function renderFreezeRow(){ var el=$('freezeTxt'); if(!el||!ME)return; var f=ME.streak_freezes||0; el.textContent='Streak-Retter · '+f+'/2'+(f<2?' · gewinn im Spiel (alle 3 Daily-Quests)':' (voll)'); }
+  async function buyFreeze(){
+    if(!ME)return; if((ME.streak_freezes||0)>=2){ if(window.Room8UI&&Room8UI.info)Room8UI.info('Du hast schon 2 Streak-Retter.'); return; }
+    if((ME.coins||0)<50){ if(window.Room8UI&&Room8UI.warning)Room8UI.warning('Du brauchst 50 G-Coins für einen Streak-Retter.'); return; }
+    try{ var r=await sb.rpc('buy_streak_freeze'); if(r.error||!(r.data&&r.data.ok)) throw (r.error||new Error('fail'));
+      ME.streak_freezes=r.data.freezes; ME.coins=r.data.coins; $('sCoins').textContent=nf(ME.coins); renderFreezeRow();
+      if(window.Room8UI&&Room8UI.success)Room8UI.success('Streak-Retter gekauft! 🛡️');
+    }catch(e){ if(window.Room8UI&&Room8UI.error)Room8UI.error('Kauf hat nicht geklappt.'); }
+  }
+  var TIERS=[['Bronze',0],['Silber',1000],['Gold',3000],['Platin',8000]];
+  function tierInfo(c){var i=0;for(var k=0;k<TIERS.length;k++){if(c>=TIERS[k][1])i=k;}var cur=TIERS[i],next=TIERS[i+1];
+    var pct=next?Math.min(100,Math.round((c-cur[1])/(next[1]-cur[1])*100)):100;
+    return{cur:cur[0],next:next?next[0]:'MAX',pct:pct,toNext:next?(next[1]-c):0};}
 
-    // Helper: Navigation
-    function navigateTo(url) {
-        try { window.location.href = url; } catch(e) { console.warn(e); }
-    }
+  async function load(){
+    if(!window.sb){ location.href='login.html'; return; }
+    var u; try{u=(await sb.auth.getUser()).data.user;}catch(e){}
+    if(!u){ location.href='login.html'; return; }
+    var p={}; try{var r=await sb.from('my_profile').select('full_name,username,university,city,coins,streak_days,streak_freezes,is_student_verified,is_champion,avatar_config').maybeSingle(); if(r.data)p=r.data;}catch(e){}
+    ME=p;
+    renderFreezeRow();
+    $('nm').textContent=(p.full_name||p.username||'Goat');
+    $('un').textContent='@'+(p.username||'goat')+(p.university?' · '+p.university:'');
+    $('sCoins').textContent=nf(p.coins); $('sStreak').textContent=(p.streak_days||0);
+    try{ if(window.GoatAvatar) $('av').innerHTML=GoatAvatar.renderGoatAvatar(p.avatar_config||{},88); }catch(e){}
+    var ti=tierInfo(p.coins||0);
+    $('tierA').textContent=ti.cur.toUpperCase(); $('tierB').textContent=ti.next.toUpperCase(); $('tbar').style.width=ti.pct+'%';
+    $('tnote').textContent=ti.toNext>0?('Noch '+nf(ti.toNext)+' G-Coins bis '+ti.next+' — schaltet neue Goat-Kostüme frei.'):'Höchstes Tier erreicht — alle Kostüme frei 🎉';
+    if(p.is_student_verified){ $('verifyCh').textContent='Verifiziert ✓'; $('verifyCh').style.color='var(--green)'; }
 
-    // XSS Protection
-    function escapeHtml(text) {
-        if (text === null || text === undefined) return '';
-        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
+    // Stats: eingeloeste Coupons + geworbene Freunde
+    try{ var c=await sb.from('coupon_redemptions').select('id',{count:'exact',head:true}); $('sCoupons').textContent=(c.count||0); }catch(e){}
+    try{ var f=await sb.from('coin_transactions').select('id',{count:'exact',head:true}).eq('reason','referral'); $('sFriends').textContent=(f.count||0); }catch(e){}
 
-    var listingsContainer = document.getElementById('my-listings-container');
-    var welcomeMessage = document.getElementById('welcome-message');
-    var avatarImg = document.getElementById('avatar-img');
-    var listingCount = document.getElementById('listing-count');
-    var verifiedBadge = document.getElementById('verified-badge');
-    var publicProfileLinkAvatar = document.getElementById('public-profile-link-avatar');
-    var publicProfileLinkText = document.getElementById('public-profile-link-text');
-    
-    // Modal Variables
-    var deleteModal = document.getElementById('deleteModal');
-    var confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-    var listingToDelete = null;
-    var cardToDelete = null;
-
-    async function initProfile() {
-        if (!sb) return;
-
-        const { data: { user } } = await sb.auth.getUser();
-        if (!user) {
-            navigateTo('login.html');
-            return;
-        }
-
-        loadProfileData(user.id);
-        checkFeatureBanner(user.id);
-        updateNotificationBadge(user.id);
-        loadActivity(user.id);
-    }
-
-    // ===== Meine Aktivitaet =====
-    // i18n-Helper mit DE-Fallback (echte Umlaute in UI-Texten erlaubt)
-    function ti(key, fallback) {
-        return (window.Room8i18n && Room8i18n.t) ? Room8i18n.t(key) : fallback;
-    }
-
-    function activityCard(href, icon, title, sub) {
-        var subHtml = sub ? '<div class="activity-sub">' + escapeHtml(sub) + '</div>' : '';
-        return '<a class="activity-card" href="' + escapeHtml(href) + '">' +
-            '<div class="activity-thumb">' + icon + '</div>' +
-            '<div class="activity-body">' +
-            '<div class="activity-title-text">' + escapeHtml(title) + '</div>' +
-            subHtml +
-            '</div></a>';
-    }
-
-    var _savedLoaded = false;
-    async function loadActivity(userId) {
-        var section = document.getElementById('activitySection');
-        if (section) section.style.display = 'block';
-        // Defensiv: Fehler in einem Block darf andere nicht crashen
-        loadRedeemedCoupons(userId);
-        loadAppliedJobs(userId);
-        loadGoingEvents(userId);
-
-        // Tab-Umschaltung
-        var tabs = document.querySelectorAll('.activity-tab');
-        tabs.forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                var tab = btn.getAttribute('data-tab');
-                tabs.forEach(function(b) { b.classList.remove('active'); });
-                btn.classList.add('active');
-                document.querySelectorAll('.activity-panel').forEach(function(p) {
-                    p.style.display = (p.getAttribute('data-panel') === tab) ? 'block' : 'none';
-                });
-                // Gespeichert lazy laden (erst beim ersten Oeffnen)
-                if (tab === 'saved' && !_savedLoaded) { _savedLoaded = true; loadSavedItems(userId); }
-            });
-        });
-    }
-
-    // Gespeicherte Items (saved_items -> coupons/listings/events)
-    async function loadSavedItems(userId) {
-        var el = document.getElementById('activitySaved');
-        if (!el) return;
-        try {
-            var res = await sb.from('saved_items').select('item_type, item_id').eq('user_id', userId);
-            var rows = res.data || [];
-            if (!rows.length) {
-                el.innerHTML = '<div class="activity-empty">' + escapeHtml(ti('saves_empty', 'Noch nichts gespeichert.')) + '</div>';
-                return;
-            }
-            var byType = { coupon: [], job: [], event: [] };
-            rows.forEach(function(r) { if (byType[r.item_type]) byType[r.item_type].push(r.item_id); });
-            var cards = [];
-            if (byType.coupon.length) {
-                var c = await sb.from('coupons').select('id,title,business_name,city').in('id', byType.coupon);
-                (c.data || []).forEach(function(x) { cards.push(activityCard('coupon-detail.html?id=' + encodeURIComponent(x.id), '🎟️', x.title || x.business_name || 'Coupon', [x.business_name, x.city].filter(Boolean).join(' · '))); });
-            }
-            if (byType.job.length) {
-                var j = await sb.from('listings').select('id,title,company_name,city').eq('type', 'job').in('id', byType.job);
-                (j.data || []).forEach(function(x) { cards.push(activityCard('job-detail.html?id=' + encodeURIComponent(x.id), '💼', x.title || 'Job', [x.company_name, x.city].filter(Boolean).join(' · '))); });
-            }
-            if (byType.event.length) {
-                var e = await sb.from('events').select('id,title,start_at,city').in('id', byType.event);
-                (e.data || []).forEach(function(x) {
-                    var d = x.start_at ? new Date(x.start_at).toLocaleDateString('de-DE', { day:'2-digit', month:'short' }) : '';
-                    cards.push(activityCard('event-detail.html?id=' + encodeURIComponent(x.id), '📅', x.title || 'Event', [d, x.city].filter(Boolean).join(' · ')));
-                });
-            }
-            el.innerHTML = cards.length ? cards.join('') : ('<div class="activity-empty">' + escapeHtml(ti('saves_empty', 'Noch nichts gespeichert.')) + '</div>');
-        } catch (e) {
-            el.innerHTML = '<div class="activity-empty">' + escapeHtml(ti('saves_empty', 'Noch nichts gespeichert.')) + '</div>';
-        }
-    }
-
-    // Beworbene Jobs (job_applications -> listings)
-    async function loadAppliedJobs(userId) {
-        var el = document.getElementById('activityJobs');
-        if (!el) return;
-        try {
-            var res = await sb
-                .from('job_applications')
-                .select('listing_id, applied_at, listings(id, title, company_name, city)')
-                .eq('user_id', userId)
-                .order('applied_at', { ascending: false })
-                .limit(10);
-            if (res.error) throw res.error;
-            var rows = (res.data || []).filter(function(r) { return r.listings; });
-            if (!rows.length) {
-                el.innerHTML = '<div class="activity-empty">' +
-                    escapeHtml(ti('profile_activity_jobs_empty', 'Noch auf keinen Job beworben.')) + '</div>';
-                return;
-            }
-            el.innerHTML = rows.map(function(r) {
-                var j = r.listings;
-                var sub = [j.company_name, j.city].filter(Boolean).join(' · ');
-                return activityCard('job-detail.html?id=' + encodeURIComponent(j.id),
-                    '💼', j.title || 'Job', sub);
-            }).join('');
-        } catch (e) {
-            console.warn('Aktivitaet Jobs:', e);
-            el.innerHTML = '<div class="activity-empty">' +
-                escapeHtml(ti('profile_activity_jobs_empty', 'Noch auf keinen Job beworben.')) + '</div>';
-        }
-    }
-
-    // 1. Eingeloeste Coupons (coupon_redemptions -> coupons)
-    async function loadRedeemedCoupons(userId) {
-        var el = document.getElementById('activityCoupons');
-        if (!el) return;
-        try {
-            var res = await sb
-                .from('coupon_redemptions')
-                .select('id, redeemed_at, coupons(id, title, business_name, city)')
-                .eq('user_id', userId)
-                .order('redeemed_at', { ascending: false })
-                .limit(10);
-
-            if (res.error) throw res.error;
-            var rows = (res.data || []).filter(function(r) { return r.coupons; });
-            if (!rows.length) {
-                el.innerHTML = '<div class="activity-empty">' +
-                    escapeHtml(ti('profile_activity_coupons_empty', 'Noch keine Coupons eingelöst.')) + '</div>';
-                return;
-            }
-            var html = rows.map(function(r) {
-                var c = r.coupons;
-                var sub = [c.business_name, c.city].filter(Boolean).join(' · ');
-                return activityCard('coupon-detail.html?id=' + encodeURIComponent(c.id),
-                    '🎟️', c.title || c.business_name || 'Coupon', sub);
-            }).join('');
-            el.innerHTML = html;
-        } catch (e) {
-            console.warn('Aktivitaet Coupons:', e);
-            el.innerHTML = '<div class="activity-empty">' +
-                escapeHtml(ti('profile_activity_coupons_empty', 'Noch keine Coupons eingelöst.')) + '</div>';
-        }
-    }
-
-    // 2. Events mit Status "going" (event_interests -> events)
-    async function loadGoingEvents(userId) {
-        var el = document.getElementById('activityEvents');
-        if (!el) return;
-        try {
-            var res = await sb
-                .from('event_interests')
-                .select('event_id, events(id, title, start_at, location, city, cover_image_path)')
-                .eq('user_id', userId)
-                .eq('status', 'going')
-                .limit(10);
-
-            if (res.error) throw res.error;
-            var rows = (res.data || []).filter(function(r) { return r.events; });
-            // Nach Start-Datum sortieren (kommende zuerst)
-            rows.sort(function(a, b) {
-                var da = a.events.start_at ? new Date(a.events.start_at).getTime() : 0;
-                var db = b.events.start_at ? new Date(b.events.start_at).getTime() : 0;
-                return da - db;
-            });
-            if (!rows.length) {
-                el.innerHTML = '<div class="activity-empty">' +
-                    escapeHtml(ti('profile_activity_events_empty', 'Du nimmst noch an keinem Event teil.')) + '</div>';
-                return;
-            }
-            var html = rows.map(function(r) {
-                var ev = r.events;
-                var date = ev.start_at
-                    ? new Date(ev.start_at).toLocaleDateString('de-DE', { day: '2-digit', month: 'short' })
-                    : '';
-                var sub = [date, ev.location || ev.city].filter(Boolean).join(' · ');
-                // Event-Cover als verkleinertes Thumbnail statt Kalender-Emoji
-                var icon = '📅';
-                if (ev.cover_image_path && window.Room8 && Room8.getOptimizedImageUrl) {
-                    var url = Room8.getOptimizedImageUrl('event-images', ev.cover_image_path, { width: 200, height: 200, quality: 88 });
-                    if (url) icon = '<img src="' + encodeURI(url) + '" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;">';
-                }
-                return activityCard('event-detail.html?id=' + encodeURIComponent(ev.id),
-                    icon, ev.title || 'Event', sub);
-            }).join('');
-            el.innerHTML = html;
-        } catch (e) {
-            console.warn('Aktivitaet Events:', e);
-            el.innerHTML = '<div class="activity-empty">' +
-                escapeHtml(ti('profile_activity_events_empty', 'Du nimmst noch an keinem Event teil.')) + '</div>';
-        }
-    }
-
-    async function loadProfileData(userId) {
-        // Profil (eigenes) via my_profile-View statt select('*') direkt auf profiles
-        const { data: profile } = await sb.from('my_profile').select('*').eq('id', userId).single();
-        if (profile) {
-            var username = profile.username || 'User';
-            welcomeMessage.childNodes[0].textContent = 'Hallo, ' + username + '! ';
-            
-            if (profile.avatar_url) avatarImg.src = profile.avatar_url;
-            if (profile.is_verified || profile.is_student_verified) verifiedBadge.style.display = 'inline-flex';
-
-            publicProfileLinkAvatar.onclick = () => navigateTo('public-profile.html?id=' + userId);
-            publicProfileLinkText.onclick = () => navigateTo('public-profile.html?id=' + userId);
-        }
-
-        // Inserate
-        console.log("Loading listings for user:", userId);
-        const { data: listings, error } = await sb
-            .from('listings')
-            .select('id, title, city, type, listing_mode, view_count, listing_photos(storage_path)')
-            .eq('owner_id', userId)
-            .eq('is_active', true);
-
-        if (error) {
-            console.error("Error loading listings:", error);
-            listingsContainer.innerHTML = '<p style="padding:1.5rem; color:red;">Fehler beim Laden: ' + error.message + '</p>';
-            return;
-        }
-
-        listingsContainer.innerHTML = '';
-        if (listings && listings.length > 0) {
-            listingCount.textContent = '(' + listings.length + ')';
-            listings.forEach(function(listing) {
-                var card = createListingCard(listing);
-                if (card) listingsContainer.appendChild(card);
-            });
-        } else {
-            listingCount.textContent = '(0)';
-            listingsContainer.innerHTML = `
-                <div class="empty-state">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line>
-                    </svg>
-                    <h3>${(window.Room8i18n&&Room8i18n.t)?Room8i18n.t('profile_no_listings'):'Noch keine Inserate'}</h3>
-                    <p>${(window.Room8i18n&&Room8i18n.t)?Room8i18n.t('profile_create_first'):'Erstelle dein erstes Inserat!'}</p>
-                    <a href="choose-listing.html" class="submit-btn" style="width:auto; display:inline-block;">+ ${(window.Room8i18n&&Room8i18n.t)?Room8i18n.t('profile_create_first_btn'):'Erstes Inserat erstellen'}</a>
-                </div>`;
-        }
-    }
-
-    function createListingCard(listing) {
-        // Skip listings ohne gültige ID
-        if (!listing || !listing.id) {
-            console.warn("Listing ohne ID übersprungen:", listing);
-            return null;
-        }
-        console.log("Creating card for listing:", listing.id, listing.title);
-        var card = document.createElement('div');
-        card.className = 'listing-card';
-        card.dataset.listingId = String(listing.id); // ID als String speichern
-        
-        var imageUrl = null;
-        if (listing.listing_photos && listing.listing_photos.length > 0) {
-            var urlData = sb.storage.from('listing-images').getPublicUrl(listing.listing_photos[0].storage_path);
-            if (urlData.data) imageUrl = urlData.data.publicUrl;
-        }
-        var placeholderIcon = listing.type === 'wohnung' ? '🏠' : '📦';
-        var placeholderLabel = listing.type === 'wohnung' ? 'Wohnung' : 'Gegenstand';
-        if (listing.listing_mode === 'search') { placeholderIcon = '🔍'; placeholderLabel = 'Suchinserat'; }
-
-        var editPage = listing.type === 'wohnung' ? 'wohnung.html' : 'gegenstand.html';
-
-        // B9-Fix: Card per createElement bauen statt verschachtelter onerror-Strings.
-        // URL-Sanitize gegen javascript:/data: + Apostroph-Injection.
-        function safeImg(url) {
-            if (!url) return '';
-            var lower = String(url).toLowerCase().trim();
-            if (lower.indexOf('javascript:') === 0 || lower.indexOf('data:text') === 0
-                || lower.indexOf('vbscript:') === 0) return '';
-            try { return encodeURI(url); } catch (_) { return ''; }
-        }
-
-        function buildPlaceholder() {
-            var ph = document.createElement('div');
-            ph.style.cssText = 'height:160px;display:flex;align-items:center;justify-content:center;background:#EBEBEB;';
-            var inner = document.createElement('div');
-            inner.style.cssText = 'text-align:center;color:#929292;';
-            var icon = document.createElement('div');
-            icon.style.cssText = 'font-size:2rem;';
-            icon.textContent = placeholderIcon;
-            var label = document.createElement('div');
-            label.style.cssText = 'font-size:0.7rem;font-weight:600;color:#929292;';
-            label.textContent = placeholderLabel;
-            inner.appendChild(icon); inner.appendChild(label);
-            ph.appendChild(inner);
-            return ph;
-        }
-
-        var imageLink = document.createElement('a');
-        imageLink.href = 'javascript:void(0)';
-        imageLink.className = 'card-image-link';
-        imageLink.addEventListener('click', function() {
-            navigateTo('detail.html?id=' + encodeURIComponent(String(listing.id)));
-        });
-
-        if (imageUrl) {
-            var img = document.createElement('img');
-            img.src = safeImg(imageUrl);
-            img.alt = listing.title || '';
-            img.addEventListener('error', function() {
-                img.replaceWith(buildPlaceholder());
-            });
-            imageLink.appendChild(img);
-        } else {
-            imageLink.appendChild(buildPlaceholder());
-        }
-
-        var content = document.createElement('div');
-        content.className = 'card-content';
-        var h4 = document.createElement('h4');
-        h4.textContent = listing.title || '';
-        var meta = document.createElement('p');
-        meta.className = 'card-meta';
-        meta.textContent = (listing.city || 'N/A') + ' - ' + (listing.type || '');
-        var actions = document.createElement('div');
-        actions.className = 'card-actions';
-        var editBtn = document.createElement('button');
-        editBtn.className = 'btn-small btn-edit';
-        editBtn.textContent = 'Bearbeiten';
-        editBtn.addEventListener('click', function() {
-            navigateTo(editPage + '?id=' + encodeURIComponent(String(listing.id)));
-        });
-        var deleteBtn = document.createElement('button');
-        deleteBtn.className = 'btn-small btn-delete';
-        deleteBtn.textContent = 'Löschen';
-        deleteBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            openDeleteModal(card.dataset.listingId, card);
-        });
-        actions.appendChild(editBtn);
-        actions.appendChild(deleteBtn);
-        content.appendChild(h4);
-        content.appendChild(meta);
-        content.appendChild(actions);
-
-        card.appendChild(imageLink);
-        card.appendChild(content);
-
-        return card;
-    }
-
-    // Modal Logic
-    function openDeleteModal(id, card) {
-        console.log("Delete ID:", id, typeof id);
-        if (!id || id === 'null' || id === 'undefined') {
-            Room8UI.error((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('profile_invalid_listing'):"Ungültige Inserat-ID");
-            return;
-        }
-        listingToDelete = id;
-        cardToDelete = card;
-        deleteModal.style.display = 'flex';
-    }
-
-    window.closeDeleteModal = function() {
-        deleteModal.style.display = 'none';
-        listingToDelete = null;
-        cardToDelete = null;
-    }
-
-    confirmDeleteBtn.onclick = async function() {
-        if (!listingToDelete || listingToDelete === 'null' || listingToDelete === 'undefined') {
-            Room8UI.error((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('profile_invalid_listing'):"Keine gültige Inserat-ID");
-            closeDeleteModal();
-            return;
-        }
-
-        // ID und Card LOKAL speichern bevor closeDeleteModal sie nullt
-        var idToDelete = listingToDelete;
-        var cardToRemove = cardToDelete;
-
-        // Modal schließen
-        closeDeleteModal();
-
-        // Optimistisch entfernen
-        cardToRemove.style.opacity = '0.5';
-
-        console.log("Deleting listing with ID:", idToDelete);
-        const { error } = await sb.from('listings').delete().eq('id', idToDelete);
-
-        if (error) {
-            console.error("Delete error:", error);
-            Room8UI.error(((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('common_error_prefix'):"Fehler: ") + error.message);
-            cardToRemove.style.opacity = '1';
-        } else {
-            cardToRemove.remove();
-            Room8UI.success((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('profile_listing_deleted'):"Inserat gelöscht!");
-            // Count update (quick fix regex)
-            var count = parseInt(listingCount.textContent.replace(/\D/g,'')) - 1;
-            listingCount.textContent = '(' + Math.max(0, count) + ')';
-        }
-    };
-
-    // Feature Banner - dynamisch basierend auf User-Status
-    async function checkFeatureBanner(userId) {
-        // Check ob User schon verifiziert ist
-        var { data: profile } = await sb.from('profiles').select('is_verified, is_student_verified').eq('id', userId).single();
-        var isVerified = profile && (profile.is_verified || profile.is_student_verified);
-
-        // Check ob User schon Suchaufträge hat
-        var { count: searchCount } = await sb.from('saved_searches').select('*', { count: 'exact', head: true }).eq('user_id', userId);
-        var hasSearches = (searchCount || 0) > 0;
-
-        // Wenn alles erledigt → Banner nicht zeigen
-        if (isVerified && hasSearches) return;
-
-        // Banner manuell geschlossen?
-        var bannerSeen = localStorage.getItem('feature_banner_seen_' + userId);
-        if (bannerSeen) return;
-
-        // Einzelne Punkte / Buttons ausblenden wenn erledigt
-        var banner = document.getElementById('featureBanner');
-        if (isVerified) {
-            var verifyBtn = banner.querySelector('a[href="verify-options.html"]');
-            if (verifyBtn) verifyBtn.style.display = 'none';
-            // Verifizierungs-Feature-Punkt ausblenden
-            var items = banner.querySelectorAll('.feature-list li');
-            if (items[2]) items[2].style.display = 'none';
-        }
-        if (hasSearches) {
-            var searchBtn = banner.querySelector('a[href="saved-searches.html"]');
-            if (searchBtn) searchBtn.style.display = 'none';
-            var items = banner.querySelectorAll('.feature-list li');
-            if (items[1]) items[1].style.display = 'none';
-        }
-
-        setTimeout(function() { banner.style.display = 'block'; }, 500);
-    }
-
-    window.closeBanner = function() {
-        sb.auth.getUser().then(({data}) => {
-            if(data.user) localStorage.setItem('feature_banner_seen_' + data.user.id, 'true');
-        });
-        document.getElementById('featureBanner').style.display = 'none';
-    };
-
-    // Badge update
-    async function updateNotificationBadge(userId) {
-        const { count } = await sb
-            .from('notifications')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', userId)
-            .eq('is_read', false);
-        
-        const badge = document.getElementById('notificationBadge');
-        if (count > 0) {
-            badge.textContent = count > 99 ? '99+' : count;
-            badge.style.display = 'flex';
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', initProfile);
-</script>
-<script>
-    // Back-Button: history.back wenn moeglich, sonst zum richtigen Dashboard
-    function goBackFromProfile() {
-        var params = new URLSearchParams(window.location.search);
-        var fromPartner = params.get('from') === 'partner';
-        if (fromPartner) {
-            window.location.href = 'partner-dashboard.html';
-            return;
-        }
-        if (window.history && window.history.length > 1) {
-            window.history.back();
-        } else {
-            window.location.href = 'dashboard.html';
-        }
-    }
-
-    // Mode-Switcher (Partner <-> Student) sichtbar machen wenn user is_partner
-    // ODER is_admin (Admins testen/verwalten den Partner-Bereich und brauchen
-    // den Zugang zum Partner-Dashboard genauso).
-    (function() {
-        if (typeof sb === 'undefined') return;
-        sb.auth.getUser().then(function(res) {
-            if (!res || !res.data || !res.data.user) return;
-            return sb.from('profiles').select('is_partner, is_admin').eq('id', res.data.user.id).maybeSingle();
-        }).then(function(r) {
-            if (!r || !r.data || (!r.data.is_partner && !r.data.is_admin)) return;
-            var box = document.getElementById('modeSwitcher');
-            if (box) box.style.display = 'block';
-        }).catch(function() {});
-    })();
+    // Freunde einladen -> Code holen + teilen
+    $('inviteRow').addEventListener('click',async function(){
+      try{
+        var rr=await sb.rpc('ensure_referral_code'); var code=rr.data&&rr.data.code; if(!code)return;
+        // Interim unigoat.pages.dev (unigoat.de haengt am netcup-Hold) -> spaeter zurueck auf unigoat.de
+        var link='https://unigoat.de/register?ref='+code;
+        if(navigator.share){ navigator.share({title:'UniGoat',text:'Komm auf UniGoat — Studentenrabatte, Games & G-Coins! 🐐',url:link}).catch(function(){}); }
+        else { try{navigator.clipboard.writeText(link);}catch(e){} $('inviteCh').textContent='Link kopiert ✓'; }
+      }catch(e){}
+    });
+  }
+  $('logoutRow').addEventListener('click',async function(e){ e.preventDefault(); try{ localStorage.removeItem('ug_saved_email'); await sb.auth.signOut(); }catch(e){} location.href='login.html'; });
+  // Visitenkarte oeffnen/schliessen
+  var _cr=$('cardRow'); if(_cr) _cr.addEventListener('click',openMyCard);
+  var _fr=$('freezeRow'); if(_fr) _fr.addEventListener('click',function(){ location.href='game/index.html'; });
+  var _vk=$('vkbg'); if(_vk) _vk.addEventListener('click',function(e){ if(e.target===this||e.target.classList.contains('close')) this.classList.remove('show'); });
+  load();
+})();
 </script>
 </body>
 </html>

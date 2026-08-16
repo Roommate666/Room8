@@ -1,904 +1,451 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <script src="sentry-init.js"></script>
-    <meta charset="UTF-8">
-    <meta name="robots" content="noindex, nofollow, noarchive">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">    <title>Coupon - UniGoat</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico?v61">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v61">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v61">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v61">
-  <link rel="stylesheet" href="style.css">
-    <script src="lib/qrcode.min.js"></script>
-    <style>
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        body { background: #F9FAFB; }
-        .app-container { background: #F9FAFB; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-
-        /* HEADER — KEIN Blur, KEIN Background. Foto soll bis ganz oben durchgehen. */
-        .app-header {
-            background: transparent !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
-        /* Notification-Bell ohne Blur, mit dezenter Schatten-Pille */
-        .notification-bell-container.overlay-style .notification-bell-btn,
-        .notification-bell-container .notification-bell-btn {
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-            background: rgba(0,0,0,0.45) !important;
-            color: white !important;
-        }
-        .notification-bell-container .notification-bell-btn svg { color: white !important; stroke: white !important; }
-
-        /* HERO mit Gradient-Overlay — Foto geht bis ganz oben, kein dunkler Block */
-        .coupon-hero {
-            position: relative;
-            height: calc(320px + env(safe-area-inset-top, 0px));
-            background: #1F2937;
-            overflow: hidden;
-            cursor: zoom-in;
-        }
-        .coupon-hero img {
-            width: 100%; height: 100%;
-            object-fit: cover; object-position: center;
-        }
-        .coupon-hero::after {
-            content: '';
-            position: absolute; left: 0; right: 0; bottom: 0;
-            height: 55%;
-            background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.75) 100%);
-            pointer-events: none;
-        }
-        .hero-overlay {
-            position: absolute;
-            left: 1.25rem; right: 1.25rem; bottom: 1.5rem;
-            color: white;
-            z-index: 3;
-        }
-        .hero-business { font-size: 1.55rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; text-shadow: 0 2px 8px rgba(0,0,0,0.4); }
-        .hero-city { font-size: 0.92rem; font-weight: 500; opacity: 0.95; margin-top: 0.3rem; display: flex; align-items: center; gap: 0.35rem; text-shadow: 0 1px 4px rgba(0,0,0,0.4); }
-
-        /* Discount-Sticker — kompakter, kein Overlap */
-        .discount-sticker {
-            position: relative;
-            margin: -1.5rem 1.25rem 0;
-            background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%);
-            color: white;
-            border-radius: 18px;
-            padding: 0.95rem 1.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.75rem;
-            box-shadow: 0 14px 30px -8px rgba(234,88,12,0.5), 0 4px 8px rgba(0,0,0,0.1);
-            z-index: 4;
-            animation: fadeInUp 0.4s 0.1s ease-out both;
-        }
-        .discount-amount { font-size: 1.65rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1; }
-        .discount-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.92; margin-top: 0.2rem; }
-        .discount-right { text-align: right; }
-        .discount-tag {
-            background: rgba(255,255,255,0.2);
-            border-radius: 999px;
-            padding: 0.32rem 0.7rem;
-            font-size: 0.72rem;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-
-        /* MAIN-CARD */
-        .coupon-card-main {
-            background: white;
-            margin: 1rem 1.25rem 0;
-            border-radius: 18px;
-            padding: 1.5rem 1.25rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            animation: fadeInUp 0.4s 0.15s ease-out both;
-        }
-        .deal-title {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: #111827;
-            margin: 0 0 0.65rem;
-            letter-spacing: -0.02em;
-            line-height: 1.25;
-        }
-        .deal-desc {
-            color: #4B5563;
-            line-height: 1.55;
-            font-size: 0.93rem;
-            margin: 0;
-        }
-
-        /* CODE-TICKET — Ticket-Optik mit Notches */
-        .code-ticket {
-            position: relative;
-            margin: 1.5rem 1.25rem 0;
-            background: white;
-            border-radius: 16px;
-            padding: 1.25rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-            transition: transform 0.15s ease;
-        }
-        .code-ticket:active { transform: scale(0.985); }
-        .code-ticket::before, .code-ticket::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: 16px; height: 16px;
-            background: #F9FAFB;
-            border-radius: 50%;
-            transform: translateY(-50%);
-        }
-        .code-ticket::before { left: -8px; }
-        .code-ticket::after { right: -8px; }
-        .code-label {
-            font-size: 0.68rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #9CA3AF;
-            margin-bottom: 0.35rem;
-        }
-        .code-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.75rem;
-        }
-        .code-value {
-            font-family: 'SF Mono', Menlo, monospace;
-            font-size: 1.35rem;
-            font-weight: 800;
-            color: #111827;
-            letter-spacing: 0.08em;
-        }
-        .code-copy-btn {
-            background: #F3F4F6;
-            color: #374151;
-            border: none;
-            padding: 0.5rem 0.9rem;
-            border-radius: 10px;
-            font-size: 0.82rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* REDEEM-BUTTON */
-        .redeem-btn {
-            display: block;
-            width: calc(100% - 2.5rem);
-            margin: 1.25rem 1.25rem 0;
-            background: linear-gradient(135deg, #EA580C 0%, #DC2626 100%);
-            color: #fff;
-            border: none;
-            padding: 1.15rem 1.5rem;
-            border-radius: 14px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 8px 16px -4px rgba(234,88,12,0.4);
-            transition: transform 0.15s ease;
-        }
-        .redeem-btn:active { transform: scale(0.985); }
-        .redeem-btn[disabled] { background: #9CA3AF; cursor: not-allowed; box-shadow: none; }
-        .redeemed-badge {
-            background: #ECFDF5;
-            color: #047857;
-            border: 1px solid #A7F3D0;
-            border-radius: 12px;
-            padding: 0.85rem 1rem;
-            margin: 1.25rem 1.25rem 0;
-            font-weight: 600;
-            font-size: 0.95rem;
-            text-align: center;
-        }
-        .valid-row {
-            margin: 0.75rem 1.25rem 0;
-            text-align: center;
-            color: #9CA3AF;
-            font-size: 0.78rem;
-        }
-
-        /* ABOUT-CARD */
-        .about-card {
-            background: white;
-            margin: 1rem 1.25rem 0;
-            border-radius: 18px;
-            padding: 1.25rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            animation: fadeInUp 0.4s 0.2s ease-out both;
-        }
-        .section-label {
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #9CA3AF;
-            margin-bottom: 0.5rem;
-        }
-        .about-text {
-            margin: 0;
-            color: #374151;
-            line-height: 1.55;
-            font-size: 0.93rem;
-        }
-
-        /* INFO-CARD */
-        .info-card {
-            background: white;
-            margin: 1rem 1.25rem 1.5rem;
-            border-radius: 18px;
-            padding: 0.5rem 1.25rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            animation: fadeInUp 0.4s 0.25s ease-out both;
-        }
-        .info-row {
-            display: flex;
-            align-items: center;
-            gap: 0.9rem;
-            padding: 0.95rem 0;
-            border-bottom: 1px solid #F3F4F6;
-            text-decoration: none;
-            color: inherit;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .info-row:last-child { border-bottom: none; }
-        .info-row:active { opacity: 0.6; }
-        .info-icon {
-            flex-shrink: 0;
-            width: 38px; height: 38px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
-            color: #EA580C;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem;
-        }
-        .info-body { flex: 1; min-width: 0; }
-        .info-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #9CA3AF;
-            font-weight: 700;
-            margin-bottom: 0.1rem;
-        }
-        .info-value {
-            font-size: 0.93rem;
-            color: #111827;
-            font-weight: 500;
-            white-space: pre-line;
-            word-break: break-word;
-            line-height: 1.4;
-        }
-        .info-chevron { color: #D1D5DB; font-size: 1.2rem; }
-
-        /* Hours-Tabelle */
-        .hours-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-            margin-top: 0.15rem;
-        }
-        .hours-table tr + tr td { padding-top: 0.3rem; }
-        .hours-table .hours-day {
-            color: #6B7280;
-            font-weight: 500;
-            white-space: nowrap;
-            padding-right: 1rem;
-            vertical-align: top;
-        }
-        .hours-table .hours-time {
-            color: #111827;
-            font-weight: 600;
-            font-variant-numeric: tabular-nums;
-            text-align: right;
-        }
-        .hours-table .hours-closed {
-            color: #9CA3AF;
-            font-weight: 500;
-            font-style: italic;
-        }
-
-        /* LIGHTBOX */
-        .hero-lightbox {
-            display: none;
-            position: fixed; inset: 0; z-index: 999;
-            background: rgba(0,0,0,0.92);
-            align-items: center; justify-content: center;
-            padding: 1rem;
-        }
-        .hero-lightbox.open { display: flex; }
-        .hero-lightbox img { max-width: 100%; max-height: 100vh; object-fit: contain; }
-        .hero-lightbox-close {
-            position: absolute; top: 1rem; right: 1rem;
-            background: rgba(255,255,255,0.18); color: white;
-            width: 40px; height: 40px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; cursor: pointer; border: none;
-        }
-
-        /* QR-MODAL — KEIN BLUR */
-        .qr-overlay {
-            position: fixed; inset: 0;
-            background: rgba(17,24,39,0.72);
-            display: none; align-items: center; justify-content: center;
-            z-index: 1000; padding: 1rem;
-        }
-        .qr-overlay.open { display: flex; animation: fadeInUp 0.25s ease-out both; }
-        .qr-card {
-            background: #fff; border-radius: 24px; padding: 2rem 1.5rem;
-            max-width: 360px; width: 100%; text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        .qr-card h3 { margin: 0 0 0.5rem; font-size: 1.2rem; }
-        .qr-card .sub { color: #6B7280; font-size: 0.9rem; margin-bottom: 1.25rem; }
-        .qr-canvas {
-            display: inline-block; padding: 16px; background: #fff;
-            border: 4px solid #F3F4F6; border-radius: 16px;
-            margin: 0.5rem 0 1rem;
-        }
-        .qr-canvas img, .qr-canvas canvas { display: block; }
-        .qr-meta { font-size: 0.85rem; color: #4B5563; margin: 0.5rem 0; }
-        .qr-meta strong { color: #111827; }
-        .qr-close {
-            background: #F3F4F6; color: #111827; border: none;
-            padding: 0.85rem 1.5rem; border-radius: 12px;
-            font-weight: 600; cursor: pointer; margin-top: 1rem; width: 100%;
-        }
-
-        /* Einheitliche Meta-Chip-Zeile (identisch auf Job/Coupon/Event-Detail) */
-        .r8-meta-chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0}
-        .r8-chip{display:inline-flex;align-items:center;gap:.35rem;background:#F3F4F6;
-            color:#374151;padding:.4rem .7rem;border-radius:999px;font-size:.85rem;
-            font-weight:600;line-height:1}
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-        }
-    </style>
-</head>
-<body>
-<div class="app-container">
-    <header class="app-header" style="position:absolute; top:env(safe-area-inset-top, 0px); left:0; width:100%; background:transparent; border:none; box-shadow:none; z-index:10; padding-top:0.5rem; display:flex; justify-content:space-between; align-items:center;">
-        <a href="javascript:history.back()" class="back-arrow" style="background:rgba(0,0,0,0.45); border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; color:white;">&#8592;</a>
-        <div style="display:flex; align-items:center; gap:0.5rem;">
-            <button id="couponSaveBtn" class="save-btn" type="button" aria-label="Speichern" style="background:rgba(0,0,0,0.45); color:white; box-shadow:none; width:36px; height:36px;"></button>
-            <button onclick="Room8Share({ type: 'coupon' })" title="Teilen" style="background:rgba(0,0,0,0.45); border:none; border-radius:999px; height:36px; padding:0 0.85rem; display:flex; align-items:center; gap:0.4rem; color:white; cursor:pointer; font-weight:600; font-size:0.9rem;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                Teilen
-            </button>
-        </div>
-    </header>
-
-    <div class="coupon-hero" onclick="openLightbox()">
-        <img id="heroImg" src="no-image.svg" alt="Deal">
-        <div class="hero-overlay">
-            <div class="hero-business" id="companyName">Lade…</div>
-            <div class="hero-city" id="heroCity" style="display:none;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span id="heroCityText"></span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Hero-Lightbox -->
-    <div id="heroLightbox" class="hero-lightbox" onclick="closeLightbox()">
-        <button class="hero-lightbox-close" onclick="event.stopPropagation(); closeLightbox();">&times;</button>
-        <img id="lightboxImg" src="" alt="">
-    </div>
-
-    <!-- Discount-Sticker schwebt -->
-    <div class="discount-sticker">
-        <div>
-            <div class="discount-amount" id="discountValue">--</div>
-            <div class="discount-label" id="discountLabel">Rabatt</div>
-        </div>
-        <div class="discount-right">
-            <span class="discount-tag" id="discountTag">Studi-Deal</span>
-        </div>
-    </div>
-
-    <!-- Main-Card: Title + Description -->
-    <div class="coupon-card-main">
-        <h1 class="deal-title" id="dealTitle"></h1>
-        <div class="r8-meta-chips" id="r8MetaChips"></div>
-        <p class="deal-desc" id="description"></p>
-    </div>
-
-    <!-- Code-Ticket -->
-    <div class="code-ticket" onclick="copyCode()">
-        <div class="code-label" data-i18n="coupon_online_code_hint">Online-Code · zum Kopieren tippen</div>
-        <div class="code-row">
-            <span class="code-value" id="couponCode">CODE</span>
-            <button class="code-copy-btn" onclick="event.stopPropagation(); copyCode();">Kopieren</button>
-        </div>
-    </div>
-
-    <!-- Primary CTA: Redeem -->
-    <button id="redeemBtn" class="redeem-btn" onclick="openRedeemQR()" data-i18n="coupon_redeem_btn">QR-Code zum Einlösen anzeigen</button>
-    <div id="redeemedBadge" class="redeemed-badge" style="display:none;" data-i18n="coupon_already_redeemed">Bereits eingelöst ✓</div>
-
-    <div class="valid-row">Gültig bis <span id="validDate">-</span></div>
-
-    <!-- About-Card -->
-    <div id="aboutBox" class="about-card" style="display:none;">
-        <div class="section-label">Über den Laden</div>
-        <p class="about-text" id="aboutText"></p>
-    </div>
-
-    <!-- Info-Card: Adresse, Maps, Website, Instagram, Phone, Hours -->
-    <div class="info-card" id="infoSection" style="display:none;">
-        <a id="addressRow" class="info-row" target="_blank" rel="noopener" style="display:none;">
-            <span class="info-icon">📍</span>
-            <div class="info-body">
-                <div class="info-label">Adresse · In Karten öffnen</div>
-                <div class="info-value" id="addressValue"></div>
-            </div>
-            <span class="info-chevron">›</span>
-        </a>
-        <a id="phoneRow" class="info-row" style="display:none;">
-            <span class="info-icon">📞</span>
-            <div class="info-body">
-                <div class="info-label">Anrufen</div>
-                <div class="info-value" id="phoneValue"></div>
-            </div>
-            <span class="info-chevron">›</span>
-        </a>
-        <a id="websiteRow" class="info-row" target="_blank" rel="noopener" style="display:none;">
-            <span class="info-icon">🌐</span>
-            <div class="info-body">
-                <div class="info-label">Website</div>
-                <div class="info-value" id="websiteValue"></div>
-            </div>
-            <span class="info-chevron">›</span>
-        </a>
-        <a id="instagramRow" class="info-row" target="_blank" rel="noopener" style="display:none;">
-            <span class="info-icon">📷</span>
-            <div class="info-body">
-                <div class="info-label">Instagram</div>
-                <div class="info-value" id="instagramValue"></div>
-            </div>
-            <span class="info-chevron">›</span>
-        </a>
-        <div id="hoursRow" class="info-row" style="display:none;">
-            <span class="info-icon">🕐</span>
-            <div class="info-body">
-                <div class="info-label">Öffnungszeiten</div>
-                <div class="info-value" id="hoursValue"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- QR-Einlöse-Modal mit Live-Status -->
-<div id="qrOverlay" class="qr-overlay" onclick="closeRedeemQR(event)">
-    <!-- View 1: QR wartet -->
-    <div class="qr-card" id="qrViewWaiting" onclick="event.stopPropagation()">
-        <h3 data-i18n="coupon_modal_title">Vor Ort einlösen</h3>
-        <p class="sub" data-i18n="coupon_modal_sub">Lass den Partner den QR-Code scannen.</p>
-        <div class="qr-canvas" id="qrCanvas"></div>
-        <p class="qr-meta"><span data-i18n="coupon_label_coupon">Coupon:</span> <strong id="qrCouponTitle">—</strong></p>
-        <p class="qr-meta" id="qrLimitInfo" style="display:none;">Pro Konto nur <strong>1× einlösbar</strong>.</p>
-        <p class="qr-meta" id="qrLiveDot" style="color:#10B981;">
-            <span style="display:inline-block; width:8px; height:8px; background:#10B981; border-radius:50%; margin-right:6px; animation:pulseDot 1.4s ease-in-out infinite;"></span>
-            <span data-i18n="coupon_modal_waiting">Warte auf Partner-Scan…</span>
-        </p>
-        <button class="qr-close" onclick="closeRedeemQR()" data-i18n="coupon_modal_close">Schließen</button>
-    </div>
-    <!-- View 2: Erfolg -->
-    <div class="qr-card" id="qrViewSuccess" style="display:none; border:3px solid #10B981;" onclick="event.stopPropagation()">
-        <div style="font-size:3.5rem; margin-bottom:0.25rem;">✅</div>
-        <h3 style="color:#047857;" data-i18n="coupon_success_title">Erfolgreich eingelöst!</h3>
-        <p class="sub" data-i18n="coupon_success_sub">Der Partner hat deinen Coupon bestätigt.</p>
-        <div style="background:#ECFDF5; border:2px dashed #6EE7B7; border-radius:14px; padding:1rem; margin:1rem 0;">
-            <div style="font-size:0.7rem; color:#047857; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.25rem;" data-i18n="coupon_success_code_label">Bestätigungs-Code</div>
-            <div id="successCode" style="font-family:monospace; font-size:1.6rem; font-weight:800; color:#065F46; letter-spacing:3px;">—</div>
-        </div>
-        <p class="qr-meta"><span data-i18n="coupon_label_coupon">Coupon:</span> <strong id="successCouponTitle">—</strong></p>
-        <p class="qr-meta" id="successTimestamp"></p>
-        <button class="qr-close" style="background:#047857; color:white;" onclick="closeRedeemQR()" data-i18n="coupon_success_done">Fertig</button>
-    </div>
-</div>
+<script src="sentry-init.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Coupon — UniGoat</title>
 <style>
-    @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(0.7);} }
+  :root{--mint:#21D0A1;--mint6:#12B489;--mint-pill:#E7F8F1;--ink:#0E0E10;--mut:#8b8f96;--line:#ecedf0;--dark:#141416;}
+  *{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent;}
+  body{background:#fff;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;padding-bottom:7rem;}
+  .serif{font-family:'Georgia','Times New Roman',serif;}
+  .wrap{max-width:480px;margin:0 auto;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:calc(1.6rem + env(safe-area-inset-top)) 1.1rem .9rem;position:sticky;top:0;z-index:20;}
+  .rnd{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.9);backdrop-filter:blur(6px);border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;font-size:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+  /* HERO / Galerie */
+  .hero{position:relative;height:260px;background:var(--dark);}
+  .gal{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;height:100%;scrollbar-width:none;}
+  .gal::-webkit-scrollbar{display:none;}
+  .gal img{min-width:100%;width:100%;height:100%;object-fit:cover;scroll-snap-align:center;display:block;}
+  .dots{position:absolute;left:0;right:0;bottom:56px;display:flex;gap:6px;justify-content:center;}
+  .dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.5);}
+  .dots i.on{background:#fff;width:18px;border-radius:3px;}
+  .status{position:absolute;left:14px;top:14px;display:inline-flex;align-items:center;gap:.4rem;background:rgba(20,20,22,.72);backdrop-filter:blur(6px);color:#fff;font-weight:700;font-size:.78rem;padding:.4rem .7rem;border-radius:999px;}
+  .status .dot{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 3px rgba(33,208,161,.25);}
+  .status.closed .dot{background:#ff5a5a;box-shadow:0 0 0 3px rgba(255,90,90,.25);}
+  .badge{display:inline-block;background:var(--mint);color:#04231a;font-weight:800;font-size:1.3rem;padding:.3rem .75rem;border-radius:12px;vertical-align:middle;}
+  .brand{position:absolute;right:14px;bottom:14px;width:52px;height:52px;border-radius:14px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.2);overflow:hidden;display:grid;place-items:center;font-weight:800;color:var(--ink);}
+  .brand img{width:100%;height:100%;object-fit:cover;}
+  /* Rabatt + Kategorie (unter dem Bild, NICHT aufs Bild) */
+  .discrow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 10px;}
+  .vbadge{display:inline-flex;align-items:center;gap:5px;background:rgba(33,208,161,.14);color:var(--mint);font-weight:700;font-size:.85rem;padding:.35rem .7rem;border-radius:999px;}
+  .menubtn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--dark);color:#fff;border:none;border-radius:14px;padding:14px;font-weight:700;font-size:1rem;margin-top:14px;cursor:pointer;}
+  .menubtn:active{transform:scale(.98);}
+  /* Menue-Overlay: horizontal swipebar */
+  .menuov{position:fixed;inset:0;z-index:300;background:rgba(10,14,16,.94);display:none;flex-direction:column;}
+  .menuov.open{display:flex;}
+  .menuov .mhead{display:flex;justify-content:space-between;align-items:center;padding:16px;color:#fff;font-weight:800;font-size:1.05rem;}
+  .menuov .mclose{background:none;border:none;color:#fff;font-size:2rem;line-height:1;cursor:pointer;}
+  .menuov .mstrip{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;}
+  .menuov .mstrip>.mslide{min-width:100%;scroll-snap-align:center;display:grid;place-items:center;padding:0 16px;box-sizing:border-box;}
+  .menuov .mstrip img{max-width:100%;max-height:76vh;border-radius:14px;object-fit:contain;}
+  .menuov .mtext{color:#e6efee;line-height:1.6;font-size:1rem;max-width:520px;}
+  .menuov .mtext h3{color:#fff;margin:0 0 10px;}
+  .menuov .mdots{display:flex;gap:6px;justify-content:center;padding:16px;min-height:14px;}
+  .menuov .mdots span{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.35);}
+  .menuov .mdots span.on{background:var(--mint);}
+  /* Action-Karte (schwebend, A) */
+  .actcard{margin:-30px 1.1rem 0;position:relative;z-index:5;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 14px 34px rgba(0,0,0,.08);padding:.8rem;display:grid;grid-template-columns:repeat(var(--n,4),1fr);gap:.5rem;}
+  .act{display:flex;flex-direction:column;align-items:center;gap:.35rem;text-decoration:none;color:var(--ink);font-size:.72rem;font-weight:700;}
+  .act .ic{width:40px;height:40px;border-radius:13px;background:var(--mint);display:grid;place-items:center;}
+  .act .ic svg{width:20px;height:20px;stroke:#04231a;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .act .ic.ig{background:linear-gradient(45deg,#f9ce34,#ee2a7b 45%,#6228d7);}
+  .act .ic.ig svg{stroke:#fff;}
+  /* Body (B: editorial) */
+  .p{padding:1.2rem 1.2rem 0;}
+  .biz{color:var(--mut);font-weight:700;letter-spacing:.03em;text-transform:uppercase;font-size:.72rem;}
+  h1{font-size:1.9rem;line-height:1.12;margin:.4rem 0 .8rem;letter-spacing:-.01em;}
+  .desc{color:#3d4148;line-height:1.6;font-size:.98rem;}
+  .coin{display:flex;align-items:center;gap:.55rem;background:var(--mint-pill);border:1px solid #cdeee0;border-radius:14px;padding:.8rem .9rem;color:var(--mint6);font-weight:700;margin:1.1rem 0;}
+  .coin .g{width:24px;height:24px;border-radius:50%;background:var(--mint);color:#04231a;display:grid;place-items:center;font-weight:800;font-size:.8rem;flex:0 0 24px;}
+  .hoursrow{display:flex;gap:.75rem;align-items:flex-start;border-top:1px solid var(--line);padding:1rem 0;color:#3d4148;}
+  .hoursrow .ic{width:34px;height:34px;border-radius:10px;background:#f5f6f8;display:grid;place-items:center;flex:0 0 34px;}
+  .hoursrow small{color:var(--mut);white-space:pre-line;}
+  /* CTA */
+  .cta{position:fixed;left:0;right:0;bottom:0;padding:.9rem 1.1rem calc(.9rem + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(255,255,255,0),#fff 34%);}
+  .cta .inner{max-width:480px;margin:0 auto;}
+  .btn{width:100%;padding:1.05rem;border:none;border-radius:16px;background:var(--mint);color:#04231a;font-size:1.05rem;font-weight:800;cursor:pointer;box-shadow:0 10px 26px rgba(33,208,161,.38);}
+  .btn:active{transform:scale(.99);}
+  .btn.gray{background:#e9eaed;color:#8a8f96;box-shadow:none;}
+  .valid{text-align:center;color:var(--mut);font-size:.8rem;margin-top:.6rem;}
+  /* Sheets */
+  .ov{position:fixed;inset:0;z-index:60;background:rgba(14,14,16,.55);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);display:none;align-items:flex-end;}
+  .ov.open{display:flex;}
+  .sheet{background:#fff;border-radius:26px 26px 0 0;width:100%;max-width:480px;margin:0 auto;padding:1.6rem 1.3rem calc(1.6rem + env(safe-area-inset-bottom));text-align:center;animation:up .25s ease;}
+  @keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .sheet h2{font-size:1.4rem;margin:.2rem 0 .4rem;}
+  .sheet p{color:var(--mut);line-height:1.5;margin-bottom:1.1rem;}
+  .warn{background:#fff6 e6;background:#FFF7E6;color:#8a5a00;border-radius:12px;padding:.7rem;font-size:.85rem;font-weight:600;margin-bottom:1rem;}
+  .bigcode{border:2px dashed #bfe0cd;border-radius:16px;background:var(--mint-pill);padding:1.1rem;margin:1rem 0;}
+  .bigcode small{display:block;color:var(--mint6);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;}
+  .bigcode b{font-size:2rem;letter-spacing:.14em;color:var(--mint6);}
+  .succ-ico{width:72px;height:72px;border-radius:20px;background:var(--mint);display:grid;place-items:center;margin:0 auto .7rem;color:#04231a;font-size:2.2rem;}
+  .ghost{width:100%;padding:.9rem;border:none;border-radius:14px;background:#f0f1f3;font-weight:700;cursor:pointer;margin-top:.5rem;}
+  /* Swipe-to-redeem */
+  .swipe{position:relative;height:62px;border-radius:16px;background:#eef0f2;overflow:hidden;margin:.4rem 0 .3rem;user-select:none;touch-action:pan-y;}
+  .swipe .fill{position:absolute;inset:0;background:var(--mint);width:62px;transition:width .05s;}
+  .swipe .lbl{position:absolute;inset:0;padding-left:52px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem;color:#5a5f66;pointer-events:none;z-index:2;}
+  .swipe .knob{position:absolute;top:5px;left:5px;width:52px;height:52px;border-radius:12px;background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.18);display:grid;place-items:center;font-size:1.3rem;color:var(--mint6);z-index:3;touch-action:none;}
+  .swipe.done .knob{color:#04231a;}
+  /* Gutschein-Ticket im Einloesen-Sheet */
+  .ticket{position:relative;background:#F2FBF7;border:1.5px solid var(--mint);border-radius:18px;overflow:hidden;margin:.2rem 0 1rem;}
+  .ticket-top{padding:1.5rem 1.2rem 1.1rem;text-align:center;}
+  .ticket-biz{font-size:.76rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mint6);}
+  .ticket-val{font-size:3rem;line-height:1;color:var(--ink);margin:.35rem 0 .2rem;}
+  .ticket-title{font-size:1.02rem;color:#3d4148;}
+  .ticket-valid{font-size:.76rem;color:var(--mut);margin-top:.55rem;}
+  .ticket-perf{position:relative;height:0;border-top:2px dashed var(--mint);}
+  .ticket-perf::before,.ticket-perf::after{content:'';position:absolute;top:-11px;width:22px;height:22px;border-radius:50%;background:#fff;}
+  .ticket-perf::before{left:-12px;}
+  .ticket-perf::after{right:-12px;}
+  .ticket-bottom{padding:1.1rem 1.1rem 1.2rem;}
+  .ticket-hint{text-align:center;font-size:.78rem;color:var(--mut);margin-top:.6rem;}
+  /* Fullscreen-Lightbox */
+  .lb{position:fixed;inset:0;z-index:80;background:#000;display:none;flex-direction:column;}
+  .lb.open{display:flex;}
+  .lb .close{position:absolute;top:calc(12px + env(safe-area-inset-top));right:14px;z-index:3;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;border:none;font-size:1.4rem;cursor:pointer;}
+  .lb .strip{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;}
+  .lb .strip::-webkit-scrollbar{display:none;}
+  .lb .strip img{min-width:100vw;width:100vw;height:100%;object-fit:contain;scroll-snap-align:center;}
+  .lb .cnt{position:absolute;bottom:calc(18px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:#fff;font-weight:700;font-size:.9rem;z-index:3;text-shadow:0 1px 4px rgba(0,0,0,.6);}
 </style>
-
 <script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
-<script src="translations.js"></script>
-<script src="session-cache.js"></script>
-<script src="room8-ui.js"></script>
-<script src="room8-share.js"></script>
-<script src="room8-saves.js"></script>
+<link rel="icon" type="image/x-icon" href="favicon.ico?v133"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133"><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
+</head>
+<body>
+<div class="topbar">
+  <div class="rnd" onclick="history.length>1?history.back():location.href='coupons.html'">‹</div>
+  <div class="rnd" title="Speichern">♡</div>
+</div>
+<div class="wrap">
+  <div class="hero">
+    <div class="gal" id="gal"></div>
+    <div class="dots" id="dots"></div>
+    <div class="status" id="status"><span class="dot"></span><span id="statusText">…</span></div>
+    <div class="brand" id="brand"></div>
+  </div>
+  <div class="actcard" id="actcard"></div>
+  <div class="p">
+    <div class="discrow">
+      <span class="badge serif" id="badge">–</span>
+      <span class="vbadge" id="vbadge" style="display:none;"></span>
+    </div>
+    <div class="biz" id="biz">Lade…</div>
+    <h1 class="serif" id="title"></h1>
+    <p class="desc" id="desc"></p>
+    <button class="menubtn" id="menuBtn" style="display:none;" onclick="openMenu()">📋 Menü &amp; Angebot ansehen</button>
+    <div class="coin"><span class="g">G</span><span>+100 G-Coins, sobald du einlöst</span></div>
+    <div class="hoursrow" id="hoursRow" style="display:none;">
+      <div class="ic">🕒</div>
+      <div><b>Öffnungszeiten</b><br><small id="hoursText"></small></div>
+    </div>
+  </div>
+</div>
+<div class="cta"><div class="inner">
+  <button class="btn" id="redeemBtn" onclick="step1()">Jetzt einlösen</button>
+  <div class="valid">Gültig bis <span id="validDate">–</span></div>
+</div></div>
+
+<!-- Einloesen (Sicherheitsabfrage + Swipe) -->
+<div class="ov" id="ov" onclick="if(event.target===this)closeSheet()">
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<!-- Fullscreen-Bildergalerie -->
+<div class="lb" id="lb">
+  <button class="close" onclick="closeLB()">&times;</button>
+  <div class="strip" id="lbStrip"></div>
+  <div class="cnt" id="lbCnt"></div>
+</div>
+
+<!-- Menue-/Angebots-Ansicht (swipebar) -->
+<div class="menuov" id="menuOv" onclick="if(event.target===this)closeMenu()">
+  <div class="mhead"><span id="menuTitle">Menü &amp; Angebot</span><button class="mclose" onclick="closeMenu()">&times;</button></div>
+  <div class="mstrip" id="menuStrip"></div>
+  <div class="mdots" id="menuDots"></div>
+</div>
+
 <script>
-    // Supabase Client - Direkte Initialisierung
-    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    const id = new URLSearchParams(window.location.search).get('id');
-    let coupon = null;
-    let userId = null;
-    let alreadyRedeemed = false;
-
-    // Hero-Lightbox
-    function openLightbox() {
-        var lb = document.getElementById('heroLightbox');
-        if (lb) lb.classList.add('open');
+(function(){
+  "use strict";
+  var params=new URLSearchParams(location.search); var id=params.get('id');
+  var coupon=null,userId=null,already=false,galUrls=[],menuSlides=[];
+  var $=function(x){return document.getElementById(x);};
+  function fmtDate(d){if(!d)return '—';try{return new Date(d).toLocaleDateString('de-DE');}catch(e){return d;}}
+  function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function bucketUrl(path){try{return sb.storage.from('listing-images').getPublicUrl(path).data.publicUrl;}catch(e){return null;}}
+  function svg(p){return '<svg viewBox="0 0 24 24">'+p+'</svg>';}
+  var IC={
+    call:svg('<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>'),
+    map:svg('<path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'),
+    ig:svg('<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none"/>'),
+    web:svg('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z"/>')
+  };
+  function parseClose(oh){ if(!oh)return null; var m=oh.match(/(\d{1,2}[:.]\d{2})(?!.*\d{1,2}[:.]\d{2})/); return m?m[1].replace('.',':'):null; }
+  // Live-Oeffnungsstatus: nutzt strukturierte hours-JSON ({mon:[["09:00","18:00"]],...}),
+  // faellt sonst auf Freitext-opening_hours zurueck. Gibt {open, text, hasData} zurueck.
+  var DAYKEYS=['sun','mon','tue','wed','thu','fri','sat'];
+  var DAYLBL=['So','Mo','Di','Mi','Do','Fr','Sa'];
+  function hm(s){var m=/^(\d{1,2}):(\d{2})$/.exec(String(s).trim());return m?(+m[1])*60+(+m[2]):null;}
+  function computeStatus(){
+    var h=coupon.hours;
+    var valid=h&&typeof h==='object'&&DAYKEYS.some(function(k){return Array.isArray(h[k])&&h[k].length;});
+    if(valid){
+      var now=new Date(),dow=now.getDay(),nowMin=now.getHours()*60+now.getMinutes();
+      var today=Array.isArray(h[DAYKEYS[dow]])?h[DAYKEYS[dow]]:[];
+      for(var i=0;i<today.length;i++){var a=hm(today[i][0]),b=hm(today[i][1]);if(a!=null&&b!=null&&nowMin>=a&&nowMin<b){return {open:true,hasData:true,text:'Geöffnet · schließt '+today[i][1]};}}
+      // heute spaeter?
+      var nextToday=null;
+      for(var j=0;j<today.length;j++){var aa=hm(today[j][0]);if(aa!=null&&aa>nowMin&&(nextToday==null||aa<nextToday)){nextToday=today[j][0];}}
+      if(nextToday)return {open:false,hasData:true,text:'Geschlossen · öffnet '+nextToday};
+      // naechster Tag mit Zeiten
+      for(var d=1;d<=7;d++){var key=DAYKEYS[(dow+d)%7];var arr=Array.isArray(h[key])?h[key]:[];if(arr.length){return {open:false,hasData:true,text:'Geschlossen · öffnet '+DAYLBL[(dow+d)%7]+' '+arr[0][0]};}}
+      return {open:false,hasData:true,text:'Geschlossen'};
     }
-    function closeLightbox() {
-        var lb = document.getElementById('heroLightbox');
-        if (lb) lb.classList.remove('open');
+    // Fallback Freitext (nicht wirklich live -> weich als geoeffnet mit Schliesszeit)
+    if(coupon.opening_hours){var c=parseClose(coupon.opening_hours);return {open:true,hasData:true,text:c?('Geöffnet · bis '+c):'Geöffnet'};}
+    return {hasData:false};
+  }
+  function renderStatus(){
+    var st=computeStatus();
+    if(!st.hasData){$('status').style.display='none';return;}
+    $('statusText').textContent=st.text;
+    $('status').classList.toggle('closed',!st.open);
+  }
+  function weeklyText(){
+    var h=coupon.hours;
+    if(h&&typeof h==='object'){
+      var lines=[];
+      for(var d=1;d<=7;d++){var idx=d%7;var arr=Array.isArray(h[DAYKEYS[idx]])?h[DAYKEYS[idx]]:[];
+        lines.push(DAYLBL[idx]+': '+(arr.length?arr.map(function(iv){return iv[0]+'–'+iv[1];}).join(', '):'geschlossen'));}
+      return lines.join('\n');
     }
+    return coupon.opening_hours||'';
+  }
 
-    // Maps-Link: iOS oeffnet Apple Maps, Android/Desktop Google Maps
-    function buildMapsUrl(addr) {
-        var q = encodeURIComponent(addr);
-        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        return isIOS
-            ? 'https://maps.apple.com/?q=' + q
-            : 'https://www.google.com/maps/search/?api=1&query=' + q;
+  async function init(){
+    if(!window.sb||!id){$('biz').textContent='Coupon nicht ladbar';return;}
+    try{var u=await sb.auth.getUser();userId=u&&u.data&&u.data.user?u.data.user.id:null;}catch(e){}
+    var r=await sb.from('coupons').select('*, coupon_photos(storage_path,photo_type,display_order)').eq('id',id).single();
+    if(r.error||!r.data){$('biz').textContent='Coupon nicht gefunden';return;}
+    coupon=r.data;render();
+    if(userId){try{var red=await sb.from('coupon_redemptions').select('id').eq('coupon_id',id).eq('user_id',userId).maybeSingle();if(red.data&&coupon.usage_limit_per_user===1){already=true;markDone();}}catch(e){}}
+  }
+  function render(){
+    document.title=(coupon.title||'Coupon')+' — UniGoat';
+    $('biz').textContent=(coupon.business_name||'')+(coupon.city?(' · '+coupon.city):'');
+    $('title').textContent=coupon.title||'';
+    $('desc').textContent=coupon.description||'';
+    var dv=(coupon.discount_value||'').toString().trim(); if(/^\d+$/.test(dv))dv=dv+'%';
+    $('badge').textContent=dv||'–';
+    $('validDate').textContent=fmtDate(coupon.valid_until);
+    // Kategorie-Badge (Restaurant / Laden / Supermarkt / Freizeit)
+    var vl=venueLabel(coupon);
+    if(vl){$('vbadge').textContent=vl;$('vbadge').style.display='inline-flex';}
+    // Menue-Fotos (photo_type='menu') vorbereiten
+    menuSlides=(coupon.coupon_photos||[])
+      .filter(function(p){return p.photo_type==='menu';})
+      .sort(function(a,b){return (a.display_order||0)-(b.display_order||0);})
+      .map(function(p){return bucketUrl(p.storage_path);})
+      .filter(Boolean);
+    if(menuSlides.length || (coupon.description&&coupon.description.trim())){
+      $('menuBtn').style.display='inline-flex';
     }
+    // Galerie: alle Fotos ausser logo
+    var photos=(coupon.coupon_photos||[]).slice().sort(function(a,b){return (a.display_order||0)-(b.display_order||0);});
+    var logo=photos.filter(function(p){return p.photo_type==='logo';})[0];
+    var gal=photos.filter(function(p){return p.photo_type!=='logo';});
+    if(!gal.length&&logo)gal=[logo];
+    var g=$('gal'),d=$('dots');g.innerHTML='';d.innerHTML='';
+    galUrls=gal.map(function(p){return bucketUrl(p.storage_path);});
+    if(gal.length){gal.forEach(function(p,i){var im=document.createElement('img');im.src=galUrls[i];im.loading='lazy';im.style.cursor='zoom-in';im.onclick=function(){openLB(i);};g.appendChild(im);var dot=document.createElement('i');if(i===0)dot.className='on';d.appendChild(dot);});}
+    else {g.style.background='var(--dark)';}
+    if(gal.length>1){g.addEventListener('scroll',function(){var i=Math.round(g.scrollLeft/g.clientWidth);[].forEach.call(d.children,function(el,k){el.className=k===i?'on':'';});});} else {d.style.display='none';}
+    if(logo){$('brand').innerHTML='<img src="'+bucketUrl(logo.storage_path)+'">';}else{$('brand').textContent=(coupon.business_name||'?').trim().slice(0,2).toUpperCase();}
+    // Status + Schliesszeit (LIVE, aktualisiert jede Minute)
+    var wt=weeklyText();
+    if(wt){$('hoursRow').style.display='flex';$('hoursText').textContent=wt;}
+    renderStatus();
+    if(window.__statusTimer)clearInterval(window.__statusTimer);
+    window.__statusTimer=setInterval(renderStatus,60000);
+    // Action-Buttons (nur vorhandene)
+    var acts=[];
+    if(coupon.phone)acts.push('<a class="act" href="tel:'+coupon.phone+'"><span class="ic">'+IC.call+'</span>Anrufen</a>');
+    if(coupon.address)acts.push('<a class="act" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(coupon.address+' '+(coupon.city||''))+'" target="_blank"><span class="ic">'+IC.map+'</span>Karte</a>');
+    if(coupon.instagram){var h=coupon.instagram.replace('@','').replace(/^https?:\/\/(www\.)?instagram\.com\//,'');acts.push('<a class="act" href="https://instagram.com/'+h+'" target="_blank"><span class="ic ig">'+IC.ig+'</span>Instagram</a>');}
+    if(coupon.website){var w=coupon.website.match(/^https?:/)?coupon.website:('https://'+coupon.website);acts.push('<a class="act" href="'+w+'" target="_blank"><span class="ic">'+IC.web+'</span>Website</a>');}
+    var ac=$('actcard');ac.style.setProperty('--n',acts.length||1);ac.innerHTML=acts.join('')||'<div style="color:var(--mut);font-size:.85rem;padding:.4rem;text-align:center;grid-column:1/-1">Keine Kontaktdaten</div>';
+  }
+  function markDone(){var b=$('redeemBtn');b.textContent='Bereits eingelöst ✓';b.classList.add('gray');b.onclick=null;}
 
-    // Info-Section: Adresse, Phone, Web, Insta, Hours
-    function fillInfoSection(c) {
-        var section = document.getElementById('infoSection');
-        var anyShown = false;
-
-        // Adresse mit Maps-Link
-        if (c.address) {
-            var fullAddr = c.address + (c.zip_code ? ', ' + c.zip_code : '') + (c.city ? ' ' + c.city : '');
-            var row = document.getElementById('addressRow');
-            document.getElementById('addressValue').textContent = fullAddr;
-            row.href = buildMapsUrl(fullAddr);
-            row.style.display = 'flex';
-            anyShown = true;
-        }
-        // Phone
-        if (c.phone) {
-            var row = document.getElementById('phoneRow');
-            document.getElementById('phoneValue').textContent = c.phone;
-            row.href = 'tel:' + c.phone.replace(/[^\d+]/g, '');
-            row.style.display = 'flex';
-            anyShown = true;
-        }
-        // Website
-        if (c.website) {
-            var row = document.getElementById('websiteRow');
-            var displayUrl = c.website.replace(/^https?:\/\//, '').replace(/\/$/, '');
-            document.getElementById('websiteValue').textContent = displayUrl;
-            row.href = c.website.startsWith('http') ? c.website : 'https://' + c.website;
-            row.style.display = 'flex';
-            anyShown = true;
-        }
-        // Instagram
-        if (c.instagram) {
-            var handle = c.instagram.replace(/^@/, '');
-            var row = document.getElementById('instagramRow');
-            document.getElementById('instagramValue').textContent = '@' + handle;
-            row.href = 'https://www.instagram.com/' + handle + '/';
-            row.style.display = 'flex';
-            anyShown = true;
-        }
-        // Hours — als Tabelle parsen. Format "Tag: Zeit1 / Zeit2\nTag: Zeit"
-        // Mehrere Zeit-Slots pro Tag (mit " / " getrennt) werden UNTEREINANDER gerendert.
-        if (c.opening_hours) {
-            var lines = c.opening_hours.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
-            var rows = '';
-            lines.forEach(function(line) {
-                var m = line.match(/^(.+?):\s+(.+)$/);
-                if (!m) { rows += '<tr><td colspan="2">' + escapeHtml(line) + '</td></tr>'; return; }
-                var day = escapeHtml(m[1]);
-                var timeStr = m[2].replace(/\s*Uhr$/i, '').trim();
-                var slots = timeStr.split(/\s*\/\s*/);
-                var isClosed = /geschlossen|closed/i.test(timeStr);
-                slots.forEach(function(slot, idx) {
-                    var dayCell = idx === 0 ? day : '';
-                    var cls = isClosed ? 'hours-time hours-closed' : 'hours-time';
-                    rows += '<tr><td class="hours-day">' + dayCell + '</td><td class="' + cls + '">' + escapeHtml(slot.trim()) + '</td></tr>';
-                });
-            });
-            document.getElementById('hoursValue').innerHTML = '<table class="hours-table">' + rows + '</table>';
-            document.getElementById('hoursRow').style.display = 'flex';
-            anyShown = true;
-        }
-
-        if (anyShown) section.style.display = 'block';
+  // ---- Kategorie + Menue-/Angebots-Ansicht ----
+  function venueLabel(c){
+    var vt=(c.venue_type||'').toString().toLowerCase().trim();
+    var map={restaurant:'🍽️ Restaurant',laden:'🛍️ Laden',shop:'🛍️ Laden',supermarkt:'🛒 Supermarkt',markt:'🛒 Supermarkt',freizeit:'🎉 Freizeitaktivität'};
+    if(map[vt])return map[vt];
+    var cat=(c.category||'').toString().toLowerCase();
+    if(cat==='food')return '🍽️ Restaurant';
+    if(cat==='leisure')return '🎉 Freizeitaktivität';
+    if(cat==='retail'||cat==='shop')return '🛍️ Laden';
+    if(cat==='grocery')return '🛒 Supermarkt';
+    return '';
+  }
+  window.openMenu=function(){
+    var strip=$('menuStrip'),dots=$('menuDots');strip.innerHTML='';dots.innerHTML='';
+    if(menuSlides.length){
+      menuSlides.forEach(function(u,i){
+        var s=document.createElement('div');s.className='mslide';
+        var im=document.createElement('img');im.src=u;im.loading='lazy';s.appendChild(im);strip.appendChild(s);
+        var dt=document.createElement('span');if(i===0)dt.className='on';dots.appendChild(dt);
+      });
+      if(menuSlides.length>1){strip.onscroll=function(){var i=Math.round(strip.scrollLeft/strip.clientWidth);[].forEach.call(dots.children,function(el,k){el.className=k===i?'on':'';});};}
+    } else {
+      var s=document.createElement('div');s.className='mslide';
+      var box=document.createElement('div');box.className='mtext';
+      var h=document.createElement('h3');h.textContent=venueLabel(coupon)||'Angebot';box.appendChild(h);
+      var p=document.createElement('p');p.textContent=coupon.description||'Bald mehr Infos hier.';box.appendChild(p);
+      s.appendChild(box);strip.appendChild(s);
     }
+    $('menuOv').classList.add('open');
+  };
+  window.closeMenu=function(){$('menuOv').classList.remove('open');};
 
-    function escapeHtml(s) {
-        return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  // ---- Fullscreen-Bildergalerie ----
+  window.openLB=function(startIdx){
+    if(!galUrls.length)return;
+    var strip=$('lbStrip');strip.innerHTML='';
+    galUrls.forEach(function(u){var im=document.createElement('img');im.src=u;strip.appendChild(im);});
+    $('lb').classList.add('open');
+    // auf gewaehltes Bild springen (nach Layout)
+    requestAnimationFrame(function(){strip.scrollLeft=startIdx*strip.clientWidth;updateLBCnt();});
+    strip.onscroll=updateLBCnt;
+  };
+  function updateLBCnt(){var strip=$('lbStrip');var i=Math.round(strip.scrollLeft/strip.clientWidth);$('lbCnt').textContent=(galUrls.length>1)?((i+1)+' / '+galUrls.length):'';}
+  window.closeLB=function(){$('lb').classList.remove('open');};
+
+  // ---- Einloesen: Sicherheitsabfrage + Swipe-to-redeem ----
+  function open(html){$('sheet').innerHTML=html;$('ov').classList.add('open');}
+  window.closeSheet=function(){$('ov').classList.remove('open');};
+  window.step1=function(){ // Gutschein-Ticket + Swipe-to-redeem
+    if(already)return;
+    var dv=(coupon.discount_value||'').toString();if(/^\d+$/.test(dv))dv=dv+'%';
+    var validTxt=coupon.valid_until?('Gültig bis '+fmtDate(coupon.valid_until)):'';
+    open('<h2 class="serif" style="text-align:center">Dein Gutschein</h2>'+
+      '<div class="ticket">'+
+        '<div class="ticket-top">'+
+          '<div class="ticket-biz">'+escapeHtml(coupon.business_name||'')+'</div>'+
+          '<div class="ticket-val serif">'+escapeHtml(dv||coupon.title||'')+'</div>'+
+          '<div class="ticket-title">'+escapeHtml(coupon.title||'')+'</div>'+
+          (validTxt?'<div class="ticket-valid">'+validTxt+'</div>':'')+
+        '</div>'+
+        '<div class="ticket-perf"></div>'+
+        '<div class="ticket-bottom">'+
+          '<div class="swipe" id="swipe"><div class="fill" id="swFill"></div><div class="lbl" id="swLbl">Zum Einlösen nach rechts wischen</div><div class="knob" id="swKnob">→</div></div>'+
+          '<div class="ticket-hint">⚠️ '+(coupon.usage_limit_per_user===1?'Einmalig — erst an der Kasse einlösen.':'Erst an der Kasse einlösen.')+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<button class="ghost" onclick="closeSheet()">Abbrechen</button>');
+    mountSwipe();
+  };
+  function mountSwipe(){ // Slider: Knopf ganz nach rechts ziehen -> finish()
+    var track=$('swipe'),knob=$('swKnob'),fill=$('swFill'),lbl=$('swLbl');
+    var dragging=false,startX=0,x=0,max=0;
+    function maxX(){return track.clientWidth-knob.offsetWidth-10;}
+    function set(px){x=Math.max(0,Math.min(maxX(),px));knob.style.left=(5+x)+'px';fill.style.width=(knob.offsetWidth+10+x)+'px';lbl.style.opacity=String(1-x/maxX()*1.4);}
+    function down(e){dragging=true;startX=(e.touches?e.touches[0].clientX:e.clientX)-x;knob.style.transition='none';fill.style.transition='none';}
+    function move(e){if(!dragging)return;e.preventDefault();set((e.touches?e.touches[0].clientX:e.clientX)-startX);}
+    function up(){if(!dragging)return;dragging=false;max=maxX();
+      if(x>=max-4){ // vollstaendig gewischt -> einloesen
+        track.classList.add('done');lbl.textContent='';set(max);finish();
+      } else { // zurueckschnappen
+        knob.style.transition='left .18s';fill.style.transition='width .18s';set(0);
+      }
     }
-
-    // Einheitliche Meta-Chip-Zeile: 📍 Ort · 🕒 Zeit · 💶 Wert · 🏢 Anbieter
-    // Chip wird weggelassen wenn die Daten fehlen/leer sind. Feste Reihenfolge.
-    function renderMetaChips(c, discountDisplay) {
-        var el = document.getElementById('r8MetaChips');
-        if (!el) return;
-        var chips = [];
-
-        // 1. Ort -> Stadt bzw. Adresse
-        var ort = c.city || c.address || '';
-        if (ort) chips.push({ icon: '📍', text: ort });
-
-        // 2. Zeit -> Coupon: gueltig bis <Datum>
-        if (c.valid_until) {
-            var d = new Date(c.valid_until);
-            if (!isNaN(d)) chips.push({ icon: '🕒', text: 'gültig bis ' + d.toLocaleDateString('de-DE') });
-        }
-
-        // 3. Wert -> Rabatt (bereits formatierter Anzeige-Wert, z.B. "20%" / "Gratis")
-        var wert = (discountDisplay || '').trim();
-        if (wert && wert !== '–' && wert !== '--') chips.push({ icon: '💶', text: wert });
-
-        // 4. Anbieter -> Geschaeft / Business-Name
-        if (c.business_name) chips.push({ icon: '🏢', text: c.business_name });
-
-        el.innerHTML = chips.map(function(ch) {
-            return '<span class="r8-chip">' + ch.icon + ' ' + escapeHtml(ch.text) + '</span>';
-        }).join('');
+    knob.addEventListener('mousedown',down);knob.addEventListener('touchstart',down,{passive:false});
+    document.addEventListener('mousemove',move);document.addEventListener('touchmove',move,{passive:false});
+    document.addEventListener('mouseup',up);document.addEventListener('touchend',up);
+  }
+  var ERR_MSG={
+    NOT_AUTHENTICATED:'Bitte logg dich ein, um einzulösen.',
+    COUPON_NOT_FOUND:'Coupon nicht gefunden.',
+    COUPON_INACTIVE:'Dieser Coupon ist nicht mehr aktiv.',
+    COUPON_EXPIRED:'Dieser Coupon ist abgelaufen.',
+    COUPON_MAX_REACHED:'Dieser Coupon ist leider ausgebucht.',
+    ALREADY_REDEEMED:'Diesen Coupon hast du bereits eingelöst.',
+    ALREADY_REDEEMED_TODAY:'Diesen Coupon hast du heute schon eingelöst — morgen wieder!',
+    NOT_ENOUGH_COINS:'Dein erster Coupon heute war gratis. Für weitere brauchst du G-Coins — spiel Goat Blast und sammle welche!',
+    GEO_REQUIRED:'Für diesen Coupon musst du vor Ort sein. Bitte erlaube den Standortzugriff und versuch es direkt beim Laden.',
+    TOO_FAR:'Du bist noch nicht nah genug am Laden. Löse den Coupon direkt vor Ort ein.'
+  };
+  function failSheet(msg){
+    open('<div class="succ-ico" style="background:#ffe2e2;color:#d33">!</div>'+
+      '<h2 class="serif" style="color:#d33">Klappt gerade nicht</h2>'+
+      '<p>'+msg+'</p>'+
+      '<button class="ghost" onclick="closeSheet()">Schließen</button>');
+  }
+  // Standort einmalig holen (nur zur Verifizierung; wird NICHT gespeichert). Verweigerung -> null.
+  function getPos(){ return new Promise(function(resolve){
+    if(!navigator.geolocation) return resolve(null);
+    var done=false;
+    navigator.geolocation.getCurrentPosition(
+      function(p){ if(done)return; done=true; resolve({lat:p.coords.latitude,lng:p.coords.longitude}); },
+      function(){ if(done)return; done=true; resolve(null); },
+      { enableHighAccuracy:true, timeout:8000, maximumAge:60000 });
+  }); }
+  // Priming: EINMALIG erklaeren warum Standort, bevor der System-Dialog kommt (nur Geo-Coupons)
+  function geoPriming(){
+    return new Promise(function(resolve){
+      try{ if(localStorage.getItem('ug_geo_primed')==='1'){ resolve(true); return; } }catch(e){}
+      open('<div class="succ-ico" style="background:#eef6ff;color:#2563eb">📍</div>'+
+        '<h2 class="serif">Kurz: dein Standort</h2>'+
+        '<p>Damit wir dir die G-Coins gutschreiben können, prüfen wir <b>einmalig</b>, ob du gerade beim Laden bist. '+
+        'Dein Standort wird <b>nicht gespeichert</b> – nur „bestätigt: ja/nein".</p>'+
+        '<button class="btn" id="geoOk">Standort erlauben & einlösen</button>'+
+        '<button class="ghost" id="geoLater" style="margin-top:8px">Abbrechen</button>');
+      var ok=document.getElementById('geoOk'), later=document.getElementById('geoLater');
+      if(ok) ok.onclick=function(){ try{localStorage.setItem('ug_geo_primed','1');}catch(e){} resolve(true); };
+      if(later) later.onclick=function(){ resolve(null); };
+    });
+  }
+  window.finish=async function(){ // echter Server-Redeem via self_redeem RPC
+    var pos=null, isGeo=(coupon.lat!=null && coupon.lng!=null);
+    if(isGeo){
+      var okGeo=await geoPriming();
+      if(okGeo!==true){ closeSheet(); return; } // abgebrochen
+      pos=await getPos();
+      if(!pos){ failSheet('Standort nicht verfügbar. Bitte erlaube den Standortzugriff (Einstellungen → UniGoat → Standort) und versuch es direkt beim Laden erneut.'); return; }
     }
-
-    async function load() {
-        if(!id) return;
-
-        // Auth-State holen (fuer Redeem-Button)
-        const { data: sess } = await sb.auth.getSession();
-        userId = sess && sess.session && sess.session.user ? sess.session.user.id : null;
-
-        const { data: c } = await sb.from('coupons').select('*, coupon_photos(storage_path, photo_type, display_order)').eq('id', id).single();
-        coupon = c;
-        if(!coupon) return;
-
-        // Speichern-Button verdrahten
-        if (window.Room8Saves) {
-            try { await Room8Saves.load(); } catch (e) {}
-            Room8Saves.wire(document.getElementById('couponSaveBtn'), 'coupon', id);
-        }
-
-        document.getElementById('companyName').textContent = coupon.business_name || '';
-        document.getElementById('dealTitle').textContent = coupon.title || '';
-        document.getElementById('description').textContent = coupon.description || '';
-        document.getElementById('couponCode').textContent = coupon.discount_code || '';
-        if(coupon.valid_until) document.getElementById('validDate').textContent = new Date(coupon.valid_until).toLocaleDateString('de-DE');
-
-        // Hero: Stadt einblenden
-        if (coupon.city) {
-            document.getElementById('heroCityText').textContent = coupon.city;
-            document.getElementById('heroCity').style.display = 'flex';
-        }
-
-        // Discount-Sticker robust gegen das Eingabeformat: discount_value ist Freitext
-        // (coupon-create laesst "-20%", "GRATIS" etc. zu), war aber als Zahl behandelt
-        // -> ergab "-20%%" oder traf 'Gratis' nie. Jetzt formatabhaengig rendern.
-        var dv = coupon.discount_value;
-        var dAmount = document.getElementById('discountValue');
-        var dLabel = document.getElementById('discountLabel');
-        var dTag = document.getElementById('discountTag');
-        if (!dv && dv !== 0) {
-            dAmount.textContent = '–';
-            dLabel.textContent = 'Studi-Deal';
-        } else {
-            var dvStr = String(dv).trim();
-            if (/gratis|free/i.test(dvStr) || dvStr === '100') {
-                dAmount.textContent = 'Gratis';
-                dAmount.style.fontSize = '1.8rem';
-                dLabel.textContent = 'Rabatt für Studis';
-            } else if (/^\d+$/.test(dvStr)) {
-                // reine Zahl -> Prozent anhaengen
-                dAmount.textContent = dvStr + '%';
-                dLabel.textContent = 'Rabatt für Studis';
-            } else {
-                // Freitext ("-20%", "2 fuer 1") unveraendert anzeigen, kein doppeltes %
-                dAmount.textContent = dvStr;
-                dLabel.textContent = 'Rabatt für Studis';
-            }
-        }
-        // Tag: Einmalig vs Mehrfach
-        dTag.textContent = coupon.usage_limit_per_user === 1 ? '1× pro Konto' : 'Mehrfach';
-
-        // Einheitliche Meta-Chip-Zeile (Ort / Zeit / Wert / Anbieter)
-        renderMetaChips(coupon, dAmount.textContent);
-
-        if (coupon.coupon_photos && coupon.coupon_photos.length > 0) {
-            var photo = coupon.coupon_photos.find(function(p){ return p.photo_type === 'cover' || p.photo_type === 'hero'; }) || coupon.coupon_photos[0];
-            // Bucket aus dem Pfad: Partner-Einreichungen liegen in event-images/partner-uploads/.
-            var couponBkt = (photo.storage_path && photo.storage_path.indexOf('partner-uploads/') === 0) ? 'event-images' : 'listing-images';
-            var optimized = window.Room8 && Room8.getOptimizedImageUrl
-                ? Room8.getOptimizedImageUrl(couponBkt, photo.storage_path, { width: 1200, quality: 80 })
-                : null;
-            var fallbackUrl = sb.storage.from(couponBkt).getPublicUrl(photo.storage_path).data.publicUrl;
-            document.getElementById('heroImg').src = optimized || fallbackUrl;
-            // Lightbox-Bild fuer Vollansicht
-            var fullUrl = window.Room8 && Room8.getOptimizedImageUrl
-                ? Room8.getOptimizedImageUrl(couponBkt, photo.storage_path, { width: 2000, quality: 90 })
-                : fallbackUrl;
-            document.getElementById('lightboxImg').src = fullUrl;
-        }
-
-        // About-Box (business_description)
-        if (coupon.business_description) {
-            document.getElementById('aboutText').textContent = coupon.business_description;
-            document.getElementById('aboutBox').style.display = 'block';
-        }
-
-        // Info-Section befuellen
-        fillInfoSection(coupon);
-
-        // Redeem-Button-Status: schon eingeloest?
-        const btn = document.getElementById('redeemBtn');
-        const badge = document.getElementById('redeemedBadge');
-
-        // Anmelde-Modus (koordinierte Aktionen, z.B. Kurs): kein QR, sondern Selbst-Anmeldung
-        if (coupon.signup_notify_email) { await setupSignupMode(); return; }
-
-        if (!userId) {
-            btn.setAttribute('data-i18n', 'coupon_redeem_login');
-            btn.textContent = (window.Room8i18n && Room8i18n.t('coupon_redeem_login')) || 'Zum Einlösen einloggen';
-            btn.onclick = function() { window.location.href = 'login.html'; };
-            return;
-        }
-        if (coupon.usage_limit_per_user) {
-            const { count } = await sb.from('coupon_redemptions')
-                .select('id', { count: 'exact', head: true })
-                .eq('coupon_id', id).eq('user_id', userId);
-            if ((count || 0) >= coupon.usage_limit_per_user) {
-                alreadyRedeemed = true;
-                btn.style.display = 'none';
-                badge.style.display = 'block';
-            }
-        }
-    }
-
-    // Anmelde-Modus: Selbst-Anmeldung statt QR-Einloesung
-    async function setupSignupMode() {
-        const btn = document.getElementById('redeemBtn');
-        const badge = document.getElementById('redeemedBadge');
-        if (!userId) {
-            btn.textContent = (window.Room8i18n && Room8i18n.t('coupon_signup_login')) || 'Zum Anmelden einloggen';
-            btn.onclick = function() { window.location.href = 'login.html'; };
-            return;
-        }
-        try {
-            const { data: mine } = await sb.from('coupon_signups')
-                .select('id').eq('coupon_id', id).eq('user_id', userId).maybeSingle();
-            if (mine) {
-                btn.style.display = 'none';
-                badge.textContent = (window.Room8i18n && Room8i18n.t('coupon_signup_done')) || 'Angemeldet ✓ - wir melden uns bei dir';
-                badge.style.display = 'block';
-                return;
-            }
-        } catch (e) {}
-        btn.textContent = (window.Room8i18n && Room8i18n.t('coupon_signup_btn')) || 'Für den Kurs anmelden';
-        btn.onclick = signupForCourse;
-    }
-
-    async function signupForCourse() {
-        if (!userId) { window.location.href = 'login.html'; return; }
-        const btn = document.getElementById('redeemBtn');
-        const badge = document.getElementById('redeemedBadge');
-        btn.disabled = true;
-        const { error } = await sb.from('coupon_signups').insert({ coupon_id: id, user_id: userId });
-        if (!error) {
-            btn.style.display = 'none';
-            badge.textContent = (window.Room8i18n && Room8i18n.t('coupon_signup_done')) || 'Angemeldet ✓ - wir melden uns bei dir';
-            badge.style.display = 'block';
-            if (window.Room8UI) Room8UI.success((window.Room8i18n && Room8i18n.t('coupon_signup_success')) || 'Anmeldung erfolgreich! Wir melden uns per E-Mail.');
-        } else if (error.code === '23505') {
-            if (window.Room8UI) Room8UI.error('Du bist bereits angemeldet.');
-            btn.disabled = false;
-        } else if (error.code === '23514' || (error.message || '').indexOf('SIGNUP_LIMIT') >= 0 || (error.message || '').indexOf('check') >= 0) {
-            btn.textContent = (window.Room8i18n && Room8i18n.t('coupon_signup_full')) || 'Leider ausgebucht';
-            btn.disabled = true;
-            if (window.Room8UI) Room8UI.error('Dieser Kurs ist leider schon ausgebucht.');
-        } else {
-            if (window.Room8UI) Room8UI.error('Anmeldung fehlgeschlagen. Versuch es spaeter nochmal.');
-            btn.disabled = false;
-        }
-    }
-
-    let realtimeChannel = null;
-
-    function openRedeemQR() {
-        if (!coupon || !userId) return;
-        if (alreadyRedeemed) {
-            Room8UI.error((window.Room8i18n && Room8i18n.t('coupon_already_alert')) || 'Du hast diesen Coupon bereits eingelöst.');
-            return;
-        }
-        // QR-Payload: room8:redeem:<coupon_id>:<user_id>
-        const payload = 'room8:redeem:' + coupon.id + ':' + userId;
-        const canvas = document.getElementById('qrCanvas');
-        canvas.innerHTML = '';
-        new QRCode(canvas, {
-            text: payload, width: 220, height: 220,
-            colorDark: '#111827', colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.M
-        });
-        document.getElementById('qrCouponTitle').textContent = coupon.title || '—';
-        var limitEl = document.getElementById('qrLimitInfo');
-        limitEl.innerHTML = (window.Room8i18n && Room8i18n.t('coupon_modal_limit_1x')) || 'Pro Konto nur <strong>1× einlösbar</strong>.';
-        limitEl.style.display = coupon.usage_limit_per_user === 1 ? 'block' : 'none';
-        // Reset Views
-        document.getElementById('qrViewWaiting').style.display = 'block';
-        document.getElementById('qrViewSuccess').style.display = 'none';
-        document.getElementById('qrOverlay').classList.add('open');
-        // Realtime-Subscription auf coupon_redemptions starten
-        startRealtimeWatch();
-    }
-
-    function startRealtimeWatch() {
-        if (realtimeChannel) return;
-        realtimeChannel = sb.channel('coupon-redeem-' + coupon.id)
-            .on('postgres_changes', {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'coupon_redemptions',
-                filter: 'user_id=eq.' + userId
-            }, function(payload) {
-                if (payload && payload.new && payload.new.coupon_id === coupon.id) {
-                    onRedemptionLive(payload.new);
-                }
-            })
-            .subscribe();
-    }
-
-    function stopRealtimeWatch() {
-        if (realtimeChannel) {
-            try { sb.removeChannel(realtimeChannel); } catch (e) {}
-            realtimeChannel = null;
-        }
-    }
-
-    function onRedemptionLive(redemption) {
-        document.getElementById('successCode').textContent = redemption.verification_code || '—';
-        document.getElementById('successCouponTitle').textContent = coupon.title || '—';
-        const ts = redemption.redeemed_at ? new Date(redemption.redeemed_at) : new Date();
-        document.getElementById('successTimestamp').textContent = 'Eingelöst am ' + ts.toLocaleString('de-DE');
-        // View-Switch QR → Erfolg
-        document.getElementById('qrViewWaiting').style.display = 'none';
-        document.getElementById('qrViewSuccess').style.display = 'block';
-        // Haptic Feedback (falls verfuegbar)
-        if (navigator.vibrate) navigator.vibrate([60, 40, 80]);
-        // Lokalen State updaten
-        alreadyRedeemed = true;
-        // Subscription kann jetzt zu (zweiter Insert wäre eh trigger-blocked)
-        stopRealtimeWatch();
-    }
-
-    function closeRedeemQR(ev) {
-        if (ev && ev.target && !ev.target.classList.contains('qr-overlay') && ev.currentTarget !== ev.target) {
-            if (ev.target.closest('.qr-card') && !ev.target.classList.contains('qr-close')) return;
-        }
-        document.getElementById('qrOverlay').classList.remove('open');
-        stopRealtimeWatch();
-        // Wenn redeemed: Page-State updaten (Badge zeigen, Button weg)
-        if (alreadyRedeemed) {
-            const btn = document.getElementById('redeemBtn');
-            const badge = document.getElementById('redeemedBadge');
-            if (btn) btn.style.display = 'none';
-            if (badge) badge.style.display = 'block';
-        }
-    }
-
-    function copyCode() {
-        const code = document.getElementById('couponCode').textContent;
-        navigator.clipboard.writeText(code);
-        Room8UI.success('Code kopiert: ' + code);
-        // Hinweis: increment_coupon_redemptions wird NICHT mehr aufgerufen.
-        // Zaehler wird ausschliesslich von redeem_coupon RPC gesetzt (Partner-Scan).
-    }
-
-    load();
+    var res;
+    try{ res=await sb.rpc('self_redeem',{p_coupon_id:coupon.id, p_lat: pos?pos.lat:null, p_lng: pos?pos.lng:null}); }
+    catch(e){ failSheet('Netzwerkfehler. Bitte nochmal versuchen.'); return; }
+    var d=res&&res.data;
+    if(res&&res.error){ failSheet('Serverfehler. Bitte nochmal versuchen.'); return; }
+    if(!d||!d.ok){
+      var em=ERR_MSG[d&&d.error]||'Einlösen nicht möglich.';
+      if((d&&d.error)==='TOO_FAR' && d.distance_m!=null){ em='Du bist noch ~'+d.distance_m+' m entfernt (erlaubt: '+(d.radius||100)+' m). Bitte löse den Coupon direkt vor Ort ein.'; }
+      failSheet(em); if((d&&d.error)==='ALREADY_REDEEMED'){already=true;markDone();} return; }
+    var code=d.verification_code||'—';
+    var earned=d.coins_earned||0;
+    var geoMiss=(d.geo_required && d.geo_verified===false);
+    var pointsLine = geoMiss
+      ? '<p style="color:#b45309;font-weight:700;">📍 Sei direkt beim Laden, um +100 G-Coins zu bekommen.</p>'
+      : (earned>0 ? '<p style="color:var(--mint6);font-weight:800;">+'+earned+' G-Coins! 🪙</p>' : '');
+    open('<div class="succ-ico">✓</div><h2 class="serif" style="color:var(--mint6)">Erfolgreich eingelöst!</h2>'+
+      '<p>Zeig der Kasse zur Sicherheit diesen Screen.</p>'+ pointsLine +
+      '<div class="bigcode"><small>Bestätigungs-Code</small><b>'+code+'</b></div>'+
+      '<button class="btn" onclick="closeSheet();'+(coupon.usage_limit_per_user===1?'location.reload()':'')+'">Fertig</button>');
+    if(coupon.usage_limit_per_user===1){already=true;markDone();}
+  };
+  init();
+})();
 </script>
-<script src="notificationBell.js"></script>
+<script src="verifyGate.js"></script>
+<script>
+(function(){var n=0;(function w(){var s=(typeof sb!=='undefined'&&sb)||window.sb;
+  if(s){try{verifyGate({blur:['.wrap'],message:'Verifiziere dich als Student, um diesen Coupon zu sehen und einzulösen.'});}catch(e){}return;}
+  if(n++>60)return;setTimeout(w,100);})();})();
+</script>
 </body>
 </html>

@@ -66,7 +66,7 @@
     var hashedNonce = await sha256Hex(rawNonce);
     var res = await AppleSignIn.authorize({
       clientId: 'club.room8.app',
-      redirectURI: 'https://room8.club/auth/callback',
+      redirectURI: 'https://unigoat.de/auth/callback',
       scopes: 'email name',
       state: '12345',
       nonce: hashedNonce

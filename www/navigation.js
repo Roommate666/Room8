@@ -87,7 +87,9 @@
             message: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>',
             user: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>',
             plus: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
-            calendar: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>'
+            calendar: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>',
+            game: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="12" x2="10" y2="12"></line><line x1="8" y1="10" x2="8" y2="14"></line><line x1="15" y1="13" x2="15.01" y2="13"></line><line x1="18" y1="11" x2="18.01" y2="11"></line><rect x="2" y="6" width="20" height="12" rx="2"></rect></svg>',
+            trophy: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>'
         };
         return icons[iconName] || icons.grid;
     }
@@ -115,10 +117,13 @@
         // Reduzierte App (05.06.2026): nur single-sided Features. Reihenfolge =
         // Mentor-Strategie Coupons -> Jobs -> Events. Profil als 4. Tab.
         // Housing/Marketplace/Chat sind hinter features.js-Flags versteckt.
+        // UniGoat-Nav (angeglichen an die neue Bottom-Bar der Hauptseiten):
+        // Hub / Coupons / Game / Rang / Profil. Jobs/Events raus (alter Stand).
         var navItems = [
+            { id: 'hub', href: 'dashboard.html', icon: 'home', label: 'Hub' },
             { id: 'coupons', href: 'coupons.html', icon: 'tag', label: _t('nav_tab_coupons') || 'Coupons' },
-            { id: 'jobs', href: 'jobs.html', icon: 'briefcase', label: _t('nav_tab_jobs') || 'Jobs' },
-            { id: 'events', href: 'events.html', icon: 'calendar', label: _t('nav_tab_events') || 'Events' },
+            { id: 'game', href: 'game/index.html', icon: 'game', label: 'Game' },
+            { id: 'rang', href: 'challenge.html', icon: 'trophy', label: 'Rang' },
             { id: 'profile', href: 'profile.html', icon: 'user', label: _t('nav_tab_profile') || 'Profil' }
         ];
 
@@ -350,6 +355,18 @@
                 background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
                 color: white;
                 box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+            }
+
+            /* UniGoat-Theme: ALLE aktiven Tabs = Mint (ueberschreibt die bunten Defaults oben) */
+            .bottom-nav-item.active, .bottom-nav-item.active-housing, .bottom-nav-item.active-marketplace,
+            .bottom-nav-item.active-jobs, .bottom-nav-item.active-coupons, .bottom-nav-item.active-events,
+            .bottom-nav-item.active-messages { color: #12B489; }
+            .bottom-nav-item.active .bottom-nav-icon, .bottom-nav-item.active-housing .bottom-nav-icon,
+            .bottom-nav-item.active-marketplace .bottom-nav-icon, .bottom-nav-item.active-jobs .bottom-nav-icon,
+            .bottom-nav-item.active-coupons .bottom-nav-icon, .bottom-nav-item.active-events .bottom-nav-icon,
+            .bottom-nav-item.active-messages .bottom-nav-icon {
+                background: linear-gradient(135deg,#21D0A1 0%,#12B489 100%); color:#fff;
+                box-shadow:0 2px 8px rgba(33,208,161,.4);
             }
 
             .bottom-nav-icon {

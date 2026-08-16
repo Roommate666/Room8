@@ -34,7 +34,7 @@
         if (!window.Sentry) return;
 
         var hostname = (typeof location !== 'undefined' && location.hostname) || '';
-        var isProd = hostname === 'www.room8.club' || hostname === 'room8.club';
+        var isProd = hostname === 'www.unigoat.de' || hostname === 'unigoat.de';
         var env = isProd ? 'production'
                 : hostname === 'localhost' || hostname === '127.0.0.1' ? 'dev'
                 : 'preview';

@@ -7,13 +7,15 @@
 	<key>CFBundleDisplayName</key>
         <string>UniGoat</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Room8 nutzt die Kamera nur wenn du selbst ein Foto für dein Profil oder Inserat aufnehmen willst.</string>
+	<string>UniGoat nutzt die Kamera nur wenn du selbst ein Foto für dein Profil aufnehmen willst.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Room8 greift auf die Fotomediathek zu, damit du Bilder für dein Profil oder Inserat auswählen kannst.</string>
+	<string>UniGoat greift auf die Fotomediathek zu, damit du Bilder für dein Profil auswählen kannst.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Room8 speichert nur Bilder in deiner Fotomediathek, die du explizit aus der App heraus sichern willst.</string>
+	<string>UniGoat speichert nur Bilder in deiner Fotomediathek, die du explizit aus der App heraus sichern willst.</string>
 	<key>NSUserNotificationsUsageDescription</key>
-	<string>Room8 sendet Push-Benachrichtigungen für neue Chats, Inserate in deiner Stadt und Coupon-Einlösungen.</string>
+	<string>UniGoat sendet Push-Benachrichtigungen für neue Coupons in deiner Stadt, den Wettkampf und deine Streak.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>UniGoat prüft beim Einlösen einmalig deinen Standort, um zu bestätigen, dass du beim Laden bist. Dein Standort wird nicht gespeichert.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>CFBundleExecutable</key>

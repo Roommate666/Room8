@@ -112,6 +112,22 @@ if (typeof window !== 'undefined') {
                 window.SessionCache.clear();
             }
         });
+
+        // Taeglicher Streak-Ping (App geoeffnet) — 1x pro Browser-Session, Server dedupt pro Tag.
+        (function () {
+            try {
+                var key = 'ug_streak_' + new Date().toISOString().slice(0, 10);
+                if (sessionStorage.getItem(key)) return;
+                window.sb.auth.getSession().then(function (r) {
+                    if (r && r.data && r.data.session) {
+                        sessionStorage.setItem(key, '1');
+                        window.sb.rpc('touch_streak').then(function (r) {
+                            try { if (r && r.data && r.data.freeze_used) localStorage.setItem('ug_freeze_saved', String(r.data.streak || '')); } catch (e) {}
+                        }).catch(function () {});
+                    }
+                }).catch(function () {});
+            } catch (e) {}
+        })();
     }
 
     // Service Worker registrieren

@@ -22,6 +22,7 @@
   }
   .wrap{max-width:520px;margin:0 auto;padding:20px 18px 48px}
   header.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  header.top .backbtn{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:24px;line-height:1;color:var(--ink);text-decoration:none;font-weight:700}
   header.top .goat{width:52px;height:52px;flex:0 0 auto}
   header.top h1{font-size:1.28rem;margin:0;letter-spacing:-.01em}
   header.top p{margin:2px 0 0;font-size:.86rem;color:var(--ink-soft)}
@@ -110,6 +111,7 @@
 <div class="wrap">
 
   <header class="top">
+    <a href="verify-options.html" class="backbtn" aria-label="Zurück">‹</a>
     <div class="goat" id="goatMascot" aria-hidden="true"></div>
     <div>
       <h1>Studierenden-Verifizierung</h1>
@@ -251,11 +253,21 @@
     }
   }
 
+  // App-Sprache (DE/EN) aus dem gleichen Speicher wie der Rest der App.
+  function isEN() {
+    try {
+      var l = localStorage.getItem('room8_language');
+      if (l) return String(l).toLowerCase().indexOf('en') === 0;
+    } catch (e) {}
+    return (navigator.language || 'de').toLowerCase().indexOf('en') === 0;
+  }
+
   function renderResult(res) {
     uploadCard.style.display = 'none';
     resultCard.style.display = '';
     resultCard.classList.add('show');
     var ok = !!(res && res.verified);
+    var en = isEN();
     resultCard.classList.toggle('ok', ok);
     resultCard.classList.toggle('fail', !ok);
 
@@ -263,16 +275,22 @@
       ? '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
       : '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>';
 
-    var headline = ok ? 'Verifiziert! Du bist jetzt bestätigte:r Studierende:r.'
-                      : 'Verifizierung nicht möglich.';
+    var headline = ok
+      ? (en ? 'Verified! You are now a confirmed student.' : 'Verifiziert! Du bist jetzt bestätigte:r Studierende:r.')
+      : (en ? 'Verification not possible.' : 'Verifizierung nicht möglich.');
+    // Bilinguale Begruendung: reason_en bei EN, sonst reason (DE).
+    var reasonText = en ? (res && (res.reason_en || res.reason)) : (res && res.reason);
     resultBadge.innerHTML = icon + '<div>' + escapeHtml(headline) +
-      (res && res.reason ? '<div style="font-weight:400;font-size:.85rem;margin-top:2px;opacity:.9">' + escapeHtml(res.reason) + '</div>' : '') +
+      (reasonText ? '<div style="font-weight:400;font-size:.85rem;margin-top:2px;opacity:.9">' + escapeHtml(reasonText) + '</div>' : '') +
       '</div>';
 
+    var lUni = en ? 'University' : 'Hochschule';
+    var lName = en ? 'Name' : 'Name';
+    var lValid = en ? 'Valid until' : 'Gültig bis';
     var rows = '';
-    if (res && res.university) rows += '<div>Hochschule: <b>' + escapeHtml(res.university) + '</b></div>';
-    if (res && res.name)       rows += '<div>Name: <b>' + escapeHtml(res.name) + '</b></div>';
-    if (res && res.valid_until)rows += '<div>Gültig bis: <b>' + escapeHtml(res.valid_until) + '</b></div>';
+    if (res && res.university) rows += '<div>' + lUni + ': <b>' + escapeHtml(res.university) + '</b></div>';
+    if (res && res.name)       rows += '<div>' + lName + ': <b>' + escapeHtml(res.name) + '</b></div>';
+    if (res && res.valid_until)rows += '<div>' + lValid + ': <b>' + escapeHtml(res.valid_until) + '</b></div>';
     resultMeta.innerHTML = rows;
   }
 

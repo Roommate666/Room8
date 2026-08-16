@@ -288,6 +288,21 @@
                 </div>
             </div>
 
+            <!-- 7. E-Mail-Benachrichtigungen -->
+            <div class="settings-section">
+                <div class="section-header">✉️ E-Mails von UniGoat</div>
+                <div class="setting-item">
+                    <div class="setting-text">
+                        <h4>Wettkampf, Rabatte & Neuigkeiten</h4>
+                        <p>Rang-Updates, Coupon-Tipps und dein Wochenüberblick per E-Mail. Wichtige Konto-Mails (Verifizierung, Passwort) bekommst du weiterhin.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="email_marketing" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
             <!-- Inline Save-Button (Fallback für iOS wo position:fixed unsichtbar bleibt) -->
             <div style="margin-top: 1.5rem; padding: 0 0 6rem 0;">
                 <button id="saveBtnInline" class="save-btn" style="width:100%;">Einstellungen speichern</button>
@@ -303,6 +318,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.14"></script>
 <script src="config.js"></script>
+<script src="ug-toast.js"></script>
 <script src="room8-ui.js"></script>
 <script src="push-logic.js"></script>
 <script>
@@ -356,6 +372,15 @@
                 if (ta) ta.value = settings.extra_email_recipients.join('\n');
             }
         }
+
+        // E-Mail-Marketing-Toggle aus dem Profil laden
+        try {
+            const prof = await sb.from('my_profile').select('email_marketing').maybeSingle();
+            const em = document.getElementById('email_marketing');
+            if (em && prof.data && prof.data.email_marketing !== undefined && prof.data.email_marketing !== null) {
+                em.checked = prof.data.email_marketing;
+            }
+        } catch (e) { /* silent */ }
 
         // Admin-Section nur zeigen wenn User is_admin
         try {
@@ -437,6 +462,12 @@
             newSettings.extra_email_recipients = emails;
         }
 
+        // E-Mail-Marketing-Praeferenz separat via RPC (eigene profiles-Spalte)
+        try {
+            const emEl = document.getElementById('email_marketing');
+            if (emEl) await sb.rpc('set_email_marketing', { p_on: emEl.checked });
+        } catch (e) { console.warn('email_marketing save failed', e); }
+
         const { error } = await sb
             .from('notification_settings')
             .upsert(newSettings, { onConflict: 'user_id' });
@@ -455,6 +486,7 @@
             setBoth("Einstellungen speichern", null, false);
         } else {
             setBoth("Gespeichert! ✓", "#10B981", true);
+            if(window.ugToast) ugToast('Einstellungen gespeichert','success');
             setTimeout(() => {
                 setBoth("Einstellungen speichern", "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)", false);
             }, 2000);

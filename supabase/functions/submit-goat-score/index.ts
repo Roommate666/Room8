@@ -101,7 +101,7 @@ serve(async (req) => {
 
     // 4. Schreiben via Service Role (umgeht RLS; einzige erlaubte Schreibstelle)
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
-    const { error: insErr } = await admin.from('goat_scores').insert({
+    const { data: insRow, error: insErr } = await admin.from('goat_scores').insert({
       user_id: userId,
       mode,
       score: finalScore,
@@ -111,7 +111,7 @@ serve(async (req) => {
       event_id: eventId,
       verified,
       replay_validated: replayValidated,
-    })
+    }).select('id').single()
     if (insErr) return json({ success: false, error: insErr.message }, 500)
 
     // 5. Rang im jeweiligen Modus (nur verifizierte, hoehere Scores zaehlen)
@@ -122,6 +122,76 @@ serve(async (req) => {
       .eq('verified', true)
       .gt('score', finalScore)
     const rank = (count ?? 0) + 1
+
+    // 6. Wettkampf-Anreiz: wenn dieser Score ein neuer persoenlicher Bestwert ist und
+    //    dabei einen Rivalen ueberholt hat -> den naechstliegenden ueberholten Spieler
+    //    per Push benachrichtigen ("X hat dich ueberholt"). Best-effort, nie blockierend.
+    if (mode === 'high' && verified) {
+      try {
+        // Vorheriger Bestwert des Users (ohne die gerade eingefuegte Zeile)
+        const { data: prevRows } = await admin
+          .from('goat_scores')
+          .select('score')
+          .eq('user_id', userId)
+          .eq('mode', 'high')
+          .neq('id', insRow?.id ?? '')
+          .order('score', { ascending: false })
+          .limit(1)
+        const prevBest = prevRows && prevRows.length ? Number(prevRows[0].score) : 0
+
+        // Nur wenn wirklich geklettert (neuer Bestwert ueber dem alten)
+        if (finalScore > prevBest) {
+          // Kandidaten: Bestwerte oberhalb meines ALTEN Bestwerts -> dedupe pro User -> best je User
+          const { data: cand } = await admin
+            .from('goat_leaderboard')
+            .select('user_id, username, score')
+            .eq('mode', 'high')
+            .gt('score', prevBest)
+            .order('score', { ascending: false })
+            .limit(60)
+          const bestByUser: Record<string, { username: string; score: number }> = {}
+          for (const r of (cand ?? [])) {
+            const uid = String((r as { user_id: string }).user_id)
+            if (uid === userId) continue
+            const sc = Number((r as { score: number }).score)
+            if (!bestByUser[uid] || sc > bestByUser[uid].score) {
+              bestByUser[uid] = { username: String((r as { username?: string }).username || 'Ein Spieler'), score: sc }
+            }
+          }
+          // Ueberholt = Rivalen, deren Bestwert jetzt UNTER meinem neuen Score liegt.
+          // Der naechstliegende (hoechster solcher Score) wird benachrichtigt.
+          let victimId: string | null = null
+          let victimBest = -1
+          for (const uid in bestByUser) {
+            const s = bestByUser[uid].score
+            if (s < finalScore && s > victimBest) { victimBest = s; victimId = uid }
+          }
+          // Spiel-Push-Toggle des Opfers respektieren (Einstellungen -> Spiel aus)
+          let victimWantsGame = true
+          if (victimId) {
+            const { data: vset } = await admin
+              .from('notification_settings').select('game_push').eq('user_id', victimId).maybeSingle()
+            if (vset && (vset as { game_push?: boolean }).game_push === false) victimWantsGame = false
+          }
+          if (victimId && victimWantsGame) {
+            // Name des Ueberholers holen
+            let myName = 'Ein Rivale'
+            const { data: meRow } = await admin
+              .from('public_profiles').select('username').eq('id', userId).maybeSingle()
+            if (meRow && (meRow as { username?: string }).username) myName = String((meRow as { username: string }).username)
+            await admin.rpc('notify_user_push', {
+              p_user_id: victimId,
+              p_channel: 'leaderboard_rival',
+              p_title: 'Überholt! 🐐',
+              p_body: myName + ' hat dich in der Rangliste überholt — hol dir deinen Platz zurück!',
+              p_data: { url: '/game/index.html' },
+            })
+          }
+        }
+      } catch (_e) {
+        // Push-Fehler ignorieren: Score-Submit bleibt erfolgreich.
+      }
+    }
 
     return json({ success: true, score: finalScore, verified, replay_validated: replayValidated, rank })
   } catch (e) {

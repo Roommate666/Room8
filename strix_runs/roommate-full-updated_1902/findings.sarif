@@ -1,0 +1,95 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Strix",
+          "informationUri": "https://strix.ai",
+          "rules": [
+            {
+              "id": "CWE-79",
+              "name": "Reflected XSS in User Rendered Content",
+              "shortDescription": {
+                "text": "Reflected XSS in User Rendered Content"
+              },
+              "fullDescription": {
+                "text": "Instances of unescaped user-generated content were found in `innerHTML` assignments resulting in potential XSS vulnerabilities."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "help": {
+                "text": "Instances of unescaped user-generated content were found in `innerHTML` assignments resulting in potential XSS vulnerabilities.\n\nAn attacker can execute arbitrary JavaScript in the context of the user's session, which could lead to data theft, credential compromise, or malware distribution.\n\nImplement proper output encoding and sanitization for all user-generated content. Utilize libraries like DOMPurify to prevent script injections. Ensure proper Content Security Policy (CSP) is enforced to mitigate XSS attempts.",
+                "markdown": "Instances of unescaped user-generated content were found in `innerHTML` assignments resulting in potential XSS vulnerabilities.\n\nAn attacker can execute arbitrary JavaScript in the context of the user's session, which could lead to data theft, credential compromise, or malware distribution.\n\nImplement proper output encoding and sanitization for all user-generated content. Utilize libraries like DOMPurify to prevent script injections. Ensure proper Content Security Policy (CSP) is enforced to mitigate XSS attempts."
+              },
+              "properties": {
+                "security-severity": "8.1",
+                "tags": [
+                  "security",
+                  "CWE-79",
+                  "stride:T",
+                  "stride:I"
+                ]
+              },
+              "helpUri": "https://cwe.mitre.org/data/definitions/79.html"
+            }
+          ],
+          "version": "1.5.3"
+        }
+      },
+      "results": [
+        {
+          "ruleId": "CWE-79",
+          "ruleIndex": 0,
+          "level": "error",
+          "message": {
+            "text": "Reflected XSS in User Rendered Content\n\nInstances of unescaped user-generated content were found in `innerHTML` assignments resulting in potential XSS vulnerabilities."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "www/public-profile.html"
+                },
+                "region": {
+                  "startLine": 1,
+                  "endLine": 1,
+                  "snippet": {
+                    "text": "document.getElementById('loading').innerHTML = 'Nutzer nicht gefunden.';"
+                  }
+                }
+              },
+              "message": {
+                "text": "Unsafe assignment of innerHTML"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "primaryLocationLineHash": "5f28768ac70edb297f5f259712d4f0b1f388871b87e9d5305b540a781c2efa53"
+          },
+          "properties": {
+            "security-severity": "8.1",
+            "strix_vuln_class_hash": "841d192a59e6812ef6a771cf84fa82963f628884ed58037aa16b7e6cdd3695f8",
+            "strix": {
+              "id": "vuln-0001",
+              "severity": "high",
+              "cvss": 8.1,
+              "timestamp": "2026-08-13 10:34:53 UTC",
+              "target": "/workspace/roommate_full_updated",
+              "cwe": "CWE-79",
+              "impact": "An attacker can execute arbitrary JavaScript in the context of the user's session, which could lead to data theft, credential compromise, or malware distribution.",
+              "technical_analysis": "The application returns user-generated content directly without proper sanitization, allowing the execution of attacker-controlled scripts when inserted into the DOM through unsafe methods like `innerHTML`.",
+              "remediation_steps": "Implement proper output encoding and sanitization for all user-generated content. Utilize libraries like DOMPurify to prevent script injections. Ensure proper Content Security Policy (CSP) is enforced to mitigate XSS attempts.",
+              "poc": {
+                "description": "1. Navigate to the affected page (e.g., public-profile.html).\n2. Inject the payload: `<script>alert(1)</script>` in user input fields.\n3. Observe that the alert is executed, confirming a successful XSS vulnerability.",
+                "script_available": true
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

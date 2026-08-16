@@ -4,10 +4,12 @@
     <script src="sentry-init.js"></script>
     <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">    <title>Admin Panel - UniGoat</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico?v61">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v61">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v61">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v61">
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
     <style>
         /* Admin-Spezifische Styles */
@@ -284,6 +286,19 @@
         }
         .approve-modal-foot .btn-mini { padding: 0.7rem 1.5rem; font-size: 0.9rem; }
 
+        /* === UniGoat-Look Angleichung (14.08.2026) — nur Optik, Logik unberuehrt === */
+        body { font-family: 'Sora', system-ui, -apple-system, sans-serif; background: #f4f7f6; }
+        h1, h2, h3, .admin-header h1 { font-family: 'Fraunces', Georgia, serif; }
+        .admin-header {
+            background: linear-gradient(135deg, #12B489 0%, #0c8a68 100%);
+            border-radius: 0 0 22px 22px;
+        }
+        .admin-tab { border-radius: 999px; }
+        .admin-tab.active { background: #12B489; border-color: #12B489; color: #fff; }
+        .filter-btn.active { background: #12B489; border-color: #12B489; color: #fff; }
+        .preview-card-badge { background: #12B489; }
+        .back-link { border-radius: 999px; }
+
         /* Cover-Bild-Bereich im Approve-Editor */
         .approve-cover-box {
             border: 1px solid #E5E7EB; border-radius: 12px; padding: 0.9rem;
@@ -318,6 +333,7 @@
             <p>Angemeldet als: <span id="adminEmail">...</span></p>
         </div>
         <div style="display:flex; gap:1rem; align-items:center;">
+            <a href="admin-menu.html" class="back-link" style="font-size:0.85rem;">📋 Menü-Fotos</a>
             <a href="admin-debug.html" class="back-link" style="font-size:0.85rem;">🔧 Debug</a>
             <a href="dashboard.html" class="back-link">← Zur App</a>
         </div>
@@ -774,16 +790,23 @@
         const container = document.getElementById('reportsList');
         const { data: reports, error } = await sb
             .from('reports')
-            .select(`
-                *,
-                reporter:reporter_id(email, full_name, username)
-            `)
+            .select('*')
             .eq('status', 'open')
             .order('created_at', { ascending: false });
 
         if (error) {
             container.innerHTML = `<p style="color:red">Fehler: ${error.message}</p>`;
             return;
+        }
+
+        // Reporter-Infos (inkl. E-Mail) sicher ueber admin_profiles nachladen.
+        // Direkter profiles-Embed mit email scheitert (email column-level gesperrt -> 42501).
+        var repIds = Array.from(new Set((reports || []).map(function(r){ return r.reporter_id; }).filter(Boolean)));
+        if (repIds.length) {
+            const { data: reps } = await sb.from('admin_profiles').select('id, email, full_name, username').in('id', repIds);
+            var repMap = {};
+            (reps || []).forEach(function(p){ repMap[p.id] = p; });
+            reports.forEach(function(r){ r.reporter = repMap[r.reporter_id] || null; });
         }
 
         if (reports.length === 0) {
@@ -929,6 +952,18 @@
         renderVerifications();
     }
 
+    // Erkennt echte Hochschul-Domains (gleiche Logik wie Edge Function verify-uni-token).
+    // Nicht-Treffer -> Admin sieht ein Verdaechtig-Flag (Anti-Missbrauch bei eigenen Domains).
+    function isUniDomainClient(domain) {
+        if (!domain) return false;
+        var BLOCK = ['gmail.com','googlemail.com','yahoo.com','yahoo.de','hotmail.com','hotmail.de','outlook.com','outlook.de','live.com','live.de','msn.com','icloud.com','me.com','mac.com','aol.com','aol.de','gmx.de','gmx.net','gmx.at','gmx.ch','gmx.com','web.de','freenet.de','mail.com','email.com','zoho.com','yandex.com','yandex.ru','mail.ru','proton.me','protonmail.com','protonmail.ch','pm.me','tutanota.com','tutamail.com','tuta.io','posteo.de','posteo.net','mailbox.org','t-online.de','vodafone.de','o2online.de'];
+        if (BLOCK.indexOf(domain) >= 0) return false;
+        var ALLOW = ['tum.de','lmu.de','rwth-aachen.de','kit.edu','charite.de','hhu.de','wwu.de','ovgu.de','b-tu.de','leuphana.de','hpi.de','whu.edu','ebs.edu','zhaw.ch','ethz.ch','epfl.ch','uzh.ch','unibe.ch','unibas.ch','unisg.ch','hslu.ch','phbern.ch','ku.de','ph-weingarten.de','hnee.de','htw-berlin.de','htwk-leipzig.de','htwg-konstanz.de','beuth-hochschule.de','bht-berlin.de','code.berlin','constructor.university','jacobs-university.de'];
+        if (ALLOW.indexOf(domain) >= 0) return true;
+        var P = [/\.edu$/,/\.edu\.[a-z]{2,3}$/,/\.ac\.[a-z]{2,3}$/,/(^|\.)uni-[a-z0-9-]+\.[a-z]{2,3}$/,/(^|\.)tu-[a-z0-9-]+\.de$/,/(^|\.)fu-[a-z0-9-]+\.de$/,/(^|\.)hu-[a-z0-9-]+\.de$/,/(^|\.)fh-[a-z0-9-]+\.de$/,/(^|\.)hs-[a-z0-9-]+\.de$/,/(^|\.)th-[a-z0-9-]+\.de$/,/(^|\.)dh[bw]?-[a-z0-9-]+\.de$/,/hochschule/,/universit(y|ae|e|a|aet)/,/(^|\.)uni\.[a-z]{2,3}$/,/(^|\.)stud\.|(^|\.)student\./];
+        return P.some(function (re) { return re.test(domain); });
+    }
+
     function renderVerifications() {
         const container = document.getElementById('verificationsList');
         let filtered = allVerificationProfiles;
@@ -947,7 +982,10 @@
             let proofHtml = 'Kein Beweis angegeben';
 
             if (p.verification_method === 'uni-email' && p.uni_email) {
-                proofHtml = `<span style="color:#059669;">✅ Uni-Mail: <strong>${escapeHtml(p.uni_email)}</strong></span>`;
+                var _dom = (p.uni_email.split('@')[1] || '').toLowerCase();
+                var _susp = !isUniDomainClient(_dom);
+                proofHtml = `<span style="color:#059669;">✅ Uni-Mail: <strong>${escapeHtml(p.uni_email)}</strong></span>`
+                    + (_susp ? `<div style="margin-top:0.5rem;padding:0.5rem 0.7rem;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;font-size:0.8rem;color:#B91C1C;font-weight:700;">⚠️ Verdächtige Domain (<strong>${escapeHtml(_dom)}</strong>) — keine bekannte Uni. Prüfen &amp; ggf. ABLEHNEN.</div>` : '');
             } else if (p.enrollment_certificate_url) {
                 proofHtml = `<button class="btn-mini btn-blue" onclick="viewDoc('${p.enrollment_certificate_url}', 'enrollment-certificates')">📄 Immatrikulationsbescheinigung öffnen</button>`;
             } else if (p.verification_document_url) {
@@ -2049,7 +2087,7 @@
 
                 var emailPayload = approve
                     ? { to: (profile && profile.email) || null, userId: id, type: 'account_verified', data: { userName: userName } }
-                    : { to: (profile && profile.email) || null, userId: id, type: 'verification_rejected', data: { verificationLink: 'https://room8.club/verify-options.html' } };
+                    : { to: (profile && profile.email) || null, userId: id, type: 'verification_rejected', data: { verificationLink: 'https://unigoat.pages.dev/verify-options.html' } };
 
                 // invoke sendet automatisch den Admin-Session-Token mit (send-notification
                 // verlangt jetzt einen eingeloggten Admin fuer diese Mail-Typen).

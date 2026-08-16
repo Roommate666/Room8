@@ -16,11 +16,11 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  const SIZE = 6;
+  const SIZE = 8;
   const LINES_PER_LEVEL = 6, MAX_LEVEL = 15;
   const GOATMODE_AT = 4;
-  const HEAT_MS = 6000, HEAT_MS_GOAT = 7500;
-  const GOLD_CHANCE = 0.11, CHILI_CHANCE = 0.1;
+  const HEAT_MS = 15000, HEAT_MS_GOAT = 15000;   // laengeres Kombo-Fenster (keine Timeline im UI)
+  const GOLD_CHANCE = 0, CHILI_CHANCE = 0;        // Specials raus (kein Gold/Chili)
   const COLOR_COUNT = 6; // Anzahl Kaese-Farben (Wert egal fuers Scoring, aber rng-Zug zaehlt)
 
   const SHAPES = [
@@ -68,14 +68,19 @@
     for (let c = 0; c < SIZE; c++) { let f = true; for (let r = 0; r < SIZE; r++) if (!grid[r][c]) { f = false; break; } if (f) cols.push(c); }
     return { rows, cols };
   }
+  // Gewichtung nach Groesse: selten 1-/2-Zeller, viele 3-5er + regelmaessig das 3x3.
+  // -> schnelleres Fuellen, mehr Linien, mehr Spass (wie im Genre ueblich).
   function piecePool(level) {
     const pool = [];
     for (const s of SHAPES) {
-      let w = 0;
-      if (s.t === 1) w = level < 3 ? 5 : (level < 6 ? 3 : 2);
-      else if (s.t === 2) w = level < 2 ? 1 : 4;
-      else if (s.t === 3) w = level < 3 ? 0 : (level < 6 ? 2 : 4);
-      else w = level < 4 ? 0 : (level < 7 ? 1 : 2);
+      const n = s.c.length;
+      let w;
+      if (n === 1) w = 2;                 // Einzelblock: flexibelster Stein -> etwas haeufiger (leichter)
+      else if (n === 2) w = 4;            // Domino: sehr flexibel
+      else if (n === 3) w = 6;            // Tromino: haeufigster Stein
+      else if (n === 4) w = 5;            // 4er: haeufig
+      else if (n === 5) w = 3;            // 5er: seltener (schwer zu platzieren)
+      else w = level < 3 ? 1 : 2;         // 3x3 (9 Zellen): selten (killt oft das Feld)
       for (let i = 0; i < w; i++) pool.push(s);
     }
     return pool;
@@ -93,16 +98,45 @@
   // ev(e) mit e={lines,gold,chili,streakNow}. Reihenfolge = Anzeige-Reihenfolge im Spiel.
   const QUESTS = [
     { goal: 1, ev: e => (e.lines >= 2 ? 1 : 0) },
-    { goal: 2, ev: e => e.gold },
     { goal: 4, ev: e => e.lines },
-    { goal: 1, ev: e => e.chili },
     { goal: 1, ev: e => (e.streakNow >= 3 ? 1 : 0) },
     { goal: 1, ev: e => (e.lines >= 3 ? 1 : 0) },
+    { goal: 6, ev: e => e.lines },
+    { goal: 1, ev: e => (e.streakNow >= 5 ? 1 : 0) },
   ];
-  function moldCadence(level) { return level >= 6 ? 5 : level >= 4 ? 6 : level >= 2 ? 8 : 0; }
-  function bombCadence(level) { return level >= 5 ? 7 : level >= 3 ? 9 : 0; }
+  function moldCadence(level) { return 0; }   // kein Schimmel mehr
+  function bombCadence(level) { return 0; }    // keine Bombe mehr
   function heatDur(streak) { return streak >= GOATMODE_AT ? HEAT_MS_GOAT : HEAT_MS; }
   function mult(streak) { return Math.min(1 + streak * 0.5, 5); }
+
+  // Startfeld freundlich vorbefuellen: WENIG (~26-36%) und in ZUSAMMENHAENGENDEN Clustern
+  // in EINER Haelfte (mal oben, mal unten, seeded) -> die andere Haelfte bleibt frei,
+  // damit man die ersten Zuege locker platzieren kann. Deterministisch via seed.
+  function prefillGrid(st) {
+    const total = SIZE * SIZE;
+    const target = Math.floor(total * (0.16 + st._rng() * 0.10)); // 16-26 % (leichter: mehr Startplatz)
+    const h = (SIZE / 2) | 0;
+    const topHalf = st._rng() < 0.5;             // mal obere, mal untere Haelfte befuellen (variiert)
+    const rMin = topHalf ? 0 : h, rMax = topHalf ? h : SIZE; // andere Haelfte bleibt frei
+    let filled = 0, guard = 0;
+    while (filled < target && guard < 3000) {
+      guard++;
+      const r0 = rMin + Math.floor(st._rng() * (rMax - rMin));
+      const c0 = Math.floor(st._rng() * SIZE);
+      const len = 2 + Math.floor(st._rng() * 4);   // Cluster-Laenge 2-5
+      const horiz = st._rng() < 0.5;
+      for (let k = 0; k < len && filled < target; k++) {
+        const rr = r0 + (horiz ? 0 : k), cc = c0 + (horiz ? k : 0);
+        if (rr >= rMin && cc >= 0 && rr < rMax && cc < SIZE && !st.grid[rr][cc]) { // in gewaehlter Haelfte bleiben
+          st.grid[rr][cc] = { c: Math.floor(st._rng() * COLOR_COUNT), t: 'n' };
+          filled++;
+        }
+      }
+    }
+    // keine komplette Zeile/Spalte am Start (sonst Auto-Clear)
+    for (let r = 0; r < SIZE; r++) if (st.grid[r].every(v => v)) st.grid[r][Math.floor(st._rng() * SIZE)] = null;
+    for (let c = 0; c < SIZE; c++) { let full = true; for (let r = 0; r < SIZE; r++) if (!st.grid[r][c]) { full = false; break; } if (full) st.grid[Math.floor(st._rng() * SIZE)][c] = null; }
+  }
 
   function create(seed, mode) {
     const st = {
@@ -114,14 +148,52 @@
       tray: null, nextTray: [], over: false,
       _rng: mulberry32(seed | 0),
     };
+    prefillGrid(st);
     refillTray(st);
     return st;
   }
+  // ---- Loesbarkeits-Garantie ----------------------------------------------
+  // Ziehe den Tray so, dass ALLE 3 Steine (in irgendeiner Reihenfolge, mit Zeilen-Clear
+  // zwischendurch) aufs aktuelle Feld passen. -> Wer richtig kombiniert, kommt IMMER weiter;
+  // man verliert nur durch eigene Fehlplatzierung, nie durch Pech. Deterministisch (st._rng+st.grid),
+  // daher server-replay-sicher. budget = Knoten-Limit gegen Lag (fail-open bei sehr teuren Boards).
+  function cloneApply(grid, cells, R, C) {
+    const g = grid.map(row => row.slice());
+    for (const [r, c] of cells) g[R + r][C + c] = { t: 'n', c: 0 };
+    const fl = findFullLines(g);
+    for (const r of fl.rows) for (let c = 0; c < SIZE; c++) g[r][c] = null;
+    for (const c of fl.cols) for (let r = 0; r < SIZE; r++) g[r][c] = null;
+    return g;
+  }
+  function solveTray(grid, pieces, budget) {
+    if (pieces.length === 0) return true;
+    for (let i = 0; i < pieces.length; i++) {
+      const p = pieces[i];
+      const rest = pieces.slice(0, i).concat(pieces.slice(i + 1));
+      for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) {
+        if (budget.n <= 0) return true;            // Zeit-Limit -> fail-open (Responsivitaet)
+        budget.n--;
+        if (canPlaceAt(grid, p.cells, r, c) && solveTray(cloneApply(grid, p.cells, r, c), rest, budget)) return true;
+      }
+    }
+    return false;
+  }
+  function trayPlaceable(grid, pieces) { return solveTray(grid, pieces, { n: 9000 }); }
+  function dealSolvable(st) {
+    let trio, guard = 0;
+    do {
+      trio = [newPiece(st._rng, st.level), newPiece(st._rng, st.level), newPiece(st._rng, st.level)];
+      guard++;
+    } while (!trayPlaceable(st.grid, trio) && guard < 20);
+    return trio;
+  }
   function refillTray(st) {
-    st.tray = (st.nextTray && st.nextTray.length === 3)
-      ? st.nextTray
-      : [newPiece(st._rng, st.level), newPiece(st._rng, st.level), newPiece(st._rng, st.level)];
-    st.nextTray = [newPiece(st._rng, st.level), newPiece(st._rng, st.level), newPiece(st._rng, st.level)];
+    // Vorschau (nextTray) uebernehmen, ABER gegen das AKTUELLE Feld auf Loesbarkeit pruefen;
+    // wenn sie nicht (mehr) passt, frisch loesbar ziehen.
+    let t = (st.nextTray && st.nextTray.length === 3) ? st.nextTray : null;
+    if (!t || !trayPlaceable(st.grid, t)) t = dealSolvable(st);
+    st.tray = t;
+    st.nextTray = dealSolvable(st);
   }
   function updateLevel(st) {
     const nl = Math.min(MAX_LEVEL, Math.floor(st.linesTotal / LINES_PER_LEVEL) + 1);

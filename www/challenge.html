@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="de" data-page="challenge">
+<head>
+<script src="sentry-init.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rang — UniGoat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="unigoat.css">
+<style>
+  .pod, .lrow{cursor:pointer;}
+  .vkbg{position:fixed;inset:0;z-index:300;background:rgba(20,24,28,.55);display:none;align-items:center;justify-content:center;padding:22px;}
+  .vkbg.show{display:flex;}
+  .vk{background:#fff;border-radius:22px;padding:24px 20px 20px;max-width:330px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);position:relative;animation:vkin .3s cubic-bezier(.2,.9,.3,1);}
+  @keyframes vkin{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}
+  .vk .close{position:absolute;top:10px;right:12px;background:none;border:none;font-size:20px;color:#9aa;cursor:pointer;}
+  .vk .goat{width:150px;height:180px;margin:0 auto 4px;}
+  .vk .goat .ug-av{width:150px !important;height:180px !important;}
+  .vk .vkname{font-family:var(--fh),serif;font-size:24px;font-weight:700;color:var(--ink);line-height:1.15;}
+  .vk .vkcity{font-size:13px;color:var(--w4);font-weight:600;margin-top:3px;}
+  .vk .vkrow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+  .vk .pill{font-size:12px;font-weight:800;padding:6px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink);}
+  .vk .pill.champ{background:#F4B740;border-color:#F4B740;color:#3a2a05;}
+  .vk.champion{background:linear-gradient(180deg,#fffaf0,#fff);border:2px solid #F4B740;box-shadow:0 20px 60px rgba(244,183,64,.35);}
+  .vk .vktitle{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#C79415;margin-bottom:8px;}
+  .infocard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:8px 0 14px;}
+  .infocard h3{margin:0 0 8px;font-size:.95rem;font-weight:800;}
+  .infocard ul{margin:0;padding-left:18px;}
+  .infocard li{font-size:.85rem;line-height:1.55;color:var(--w4,#5b6a67);margin-bottom:5px;}
+  .infocard b{color:var(--ink);}
+</style>
+<link rel="icon" type="image/x-icon" href="favicon.ico?v133"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133"><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
+</head>
+<body class="ug">
+<div class="ug-app">
+  <div class="ug-hd">
+    <div class="brand"><b>Leaderboard</b></div>
+    <span class="ug-coins" style="border-color:var(--green);color:var(--green)" id="reset">Monats-Reset</span>
+  </div>
+  <div class="ug-sub">Monats-Challenge · <span id="month"></span></div>
+
+  <div class="infocard">
+    <h3>🏆 So läuft die Monats-Challenge</h3>
+    <ul>
+      <li>Sammle diesen Monat <b>G-Coins</b>: <b>+100</b> pro eingelöstem Coupon, dazu Coins fürs tägliche Goat-Spiel.</li>
+      <li>Nur die <b>Top 3 global</b> gewinnen jeden Monat <b>echte Geschenke</b> 🎁. Die Besten an deiner Uni bekommen G-Coins-Boni.</li>
+      <li>Am Monatsende wird die Rangliste <b>zurückgesetzt</b> — jeder startet neu bei 0.</li>
+      <li><b>Heb deine G-Coins auf!</b> Bald kannst du damit echte Sachen ergattern — nicht verschwenden.</li>
+      <li>Die Gewinner werden auf <b>Instagram</b> bekannt gegeben.</li>
+    </ul>
+  </div>
+
+  <div class="podium" id="podium"></div>
+  <a href="https://instagram.com/unigoat.de" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;white-space:normal;line-height:1.35;font-size:13px;font-weight:800;color:#fff;background:linear-gradient(180deg,#E1306C,#C13584);border-radius:14px;padding:12px 14px;margin:-4px 0 16px;box-shadow:0 3px 10px rgba(193,53,132,.3);">🏆 Du kannst was gewinnen!<br>Alle Infos auf Instagram →</a>
+  <div id="rows"></div>
+  <div class="ug-empty" id="empty" style="display:none;">Noch keine G-Coins diesen Monat.<br>Sei der Erste — Coupons einlösen & Daily spielen! 🐐</div>
+</div>
+
+<div class="vkbg" id="vkbg"></div>
+
+<nav class="ugnav">
+  <a href="dashboard.html"><svg viewBox="0 0 24 24"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1Z"/></svg>Hub</a>
+  <a href="coupons.html"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>Coupons</a>
+  <a href="game/index.html"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="3"/><path d="M8 12h3M9.5 10.5v3M15 11h.01M17 13h.01"/></svg>Game</a>
+  <a class="on" href="challenge.html"><svg viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>Rang</a>
+  <a href="profile.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>Profil</a>
+</nav>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="game/avatar.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function nf(n){return (n||0).toLocaleString('de-DE');}
+  var MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  var now=new Date(); $('month').textContent=MONTHS[now.getMonth()]+' '+now.getFullYear();
+  var last=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(); var left=last-now.getDate();
+  $('reset').textContent='Reset in '+left+' Tg';
+  function av(cfg){try{if(window.GoatAvatar)return GoatAvatar.renderGoatAvatar(cfg||{},44);}catch(e){}return'';}
+  function tierName(c){try{return window.GoatAvatar?GoatAvatar.tierLabel(Number(c||0)):'Bronze';}catch(e){return'Bronze';}}
+
+  // Store-safe: KEINE Geldbetraege in der App (sonst Google-Play Gewinnspiel-Policy).
+  // Preise/Contest laufen extern ueber Instagram -> hier nur Rangliste + Medaillen.
+  var LB=[]; // Leaderboard-Daten fuer die Visitenkarte
+  function openCard(x){
+    if(!x)return;
+    var bg=$('vkbg'); bg.innerHTML=window.GoatAvatar?GoatAvatar.renderVisitenkarte(x):''; bg.classList.add('show');
+  }
+  $('vkbg').addEventListener('click',function(e){ if(e.target===this||e.target.classList.contains('close')) this.classList.remove('show'); });
+  function cardClick(e){ var el=e.target.closest('[data-uid]'); if(!el)return; for(var i=0;i<LB.length;i++){ if(String(LB[i].user_id)===el.getAttribute('data-uid')){ openCard(LB[i]); break; } } }
+
+  async function load(){
+    if(!window.sb) return;
+    var meId=null; try{meId=(await sb.auth.getUser()).data.user.id;}catch(e){}
+    var rows=[]; try{ var r=await sb.rpc('get_challenge_leaderboard',{p_limit:50}); rows=r.data||[]; }catch(e){}
+    LB=rows;
+    if(!rows.length){ $('empty').style.display='block'; return; }
+    var top=rows.slice(0,3), rest=rows.slice(3);
+    var order=[1,0,2]; // p2, p1, p3 Anordnung
+    $('podium').innerHTML=order.map(function(idx){var x=top[idx];if(!x)return'';var rk=Number(x.rank);
+      var MEDAL={1:'🥇',2:'🥈',3:'🥉'};
+      // Preise laufen extern ueber Instagram -> App zeigt nur Medaille (Play-safe, keine Betraege im Bundle)
+      var prize=MEDAL[rk]||(rk+'.');
+      return '<div class="pod'+(rk===1?' p1':'')+'" data-uid="'+esc(x.user_id)+'"><div class="av">'+av(x.avatar_config)+'</div><div class="nm r'+rk+'">'+(rk===1?'👑 ':'')+esc(x.username||'Anonym')+'</div><div class="pt">'+nf(x.coins_month)+'</div><div class="pz">'+prize+'</div></div>';
+    }).join('');
+    $('rows').innerHTML=rest.map(function(x){var mine=meId&&x.user_id===meId;
+      return '<div class="lrow'+(mine?' me':'')+'" data-uid="'+esc(x.user_id)+'"><span class="r">'+x.rank+'</span><span class="n">'+(x.is_champion?'👑 ':'')+esc(x.username||'Anonym')+(mine?' (du)':'')+'</span><span class="s">'+nf(x.coins_month)+'</span></div>';
+    }).join('');
+    $('podium').onclick=cardClick; $('rows').onclick=cardClick;
+  }
+  load();
+})();
+</script>
+</body>
+</html>

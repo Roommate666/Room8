@@ -17,7 +17,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
 }
 
-const FROM_ADDRESS = 'UniGoat <noreply@unigoat.de>'
+const FROM_ADDRESS = 'UniGoat <noreply@room8.club>'
 
 // Jugendliches, buntes UniGoat-Mail-Template. Bettet den uebergebenen HTML-Body
 // in einen Brand-Wrapper (bunter Gradient-Header, weisse Card, freundlicher Footer).

@@ -8,7 +8,7 @@
   :root{ --mint:#21D0A1; --mint-600:#12B489; --ink:#15181C; }
   *{box-sizing:border-box;}
   body{margin:0;font-family:'Nunito',system-ui,sans-serif;background:#f4f6f8;color:var(--ink);}
-  header{background:var(--ink);color:#fff;padding:1rem 1.25rem;display:flex;align-items:center;gap:.6rem;}
+  header{background:var(--ink);color:#fff;padding:calc(1rem + env(safe-area-inset-top)) 1.25rem 1rem;display:flex;align-items:center;gap:.6rem;position:sticky;top:0;z-index:20;}
   header a{color:#9fb;text-decoration:none;font-weight:700;font-size:.9rem;margin-left:auto;}
   h1{font-size:1.2rem;margin:0;font-family:'Fredoka',sans-serif;}
   .wrap{max-width:460px;margin:0 auto;padding:1rem 1.1rem 3rem;}
@@ -16,9 +16,15 @@
   .preview svg{height:200px;width:auto;filter:drop-shadow(0 10px 24px rgba(0,0,0,.20));border-radius:18px;}
   .flagchip{padding:.35rem .4rem;line-height:0;}
   .gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;}
-  .avcell{border:2px solid #e5e7eb;background:#fff;border-radius:14px;padding:.35rem;cursor:pointer;display:flex;justify-content:center;}
+  .avcell{position:relative;border:2px solid #e5e7eb;background:#fff;border-radius:14px;padding:.35rem;cursor:pointer;display:flex;justify-content:center;}
   .avcell.active{border-color:var(--mint);background:#e9fbf5;}
   .avcell .ug-av{width:60px !important;}
+  .avcell.locked .ug-av{filter:grayscale(1) opacity(.45);}
+  .avcell.locked .lockbadge{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);white-space:nowrap;background:rgba(20,26,30,.82);color:#fff;font-size:.6rem;font-weight:800;padding:2px 6px;border-radius:8px;}
+  .avcell.champ{border-color:#F4B740;background:#fffaf0;box-shadow:0 0 0 1px #F4B740 inset;}
+  .avcell.champ .lockbadge{background:#F4B740;color:#3a2a05;}
+  .avcell.streak{border-color:#F1543F;background:#fff5f3;box-shadow:0 0 0 1px #F1543F inset;}
+  .avcell.streak .lockbadge{background:#F1543F;color:#fff;}
   .grp{margin-bottom:1.1rem;}
   .grp h3{font-size:.95rem;margin:0 0 .5rem;color:#374151;font-family:'Fredoka',sans-serif;}
   .chips{display:flex;flex-wrap:wrap;gap:.5rem;}
@@ -52,10 +58,14 @@
 <script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
 <script src="game/avatar.js"></script>
+<script src="ug-toast.js"></script>
 <script>
 (function(){
   "use strict";
   var cfg = Object.assign({}, GoatAvatar.DEFAULTS);
+  var myCoins = 0;
+  var iAmChampion = false;
+  var myBest = 0;
 
   function drawPreview(){ document.getElementById('preview').innerHTML = GoatAvatar.renderGoatAvatar(cfg,190); }
   function buildControls(){
@@ -65,10 +75,28 @@
     g1.innerHTML='<h3>Ziege waehlen</h3>';
     var gal=document.createElement('div'); gal.className='gallery';
     GoatAvatar.AVATARS.forEach(function(id){
-      var b=document.createElement('button'); b.className='avcell'+(cfg.avatar===id?' active':'');
-      b.title=GoatAvatar.AV_LABELS[id]||id;
-      b.innerHTML=GoatAvatar.renderGoatAvatar({avatar:id,bg:'grey',flag:'none'},60);
-      b.onclick=function(){ cfg.avatar=id; drawPreview(); buildControls(); };
+      var champOnly=!!(GoatAvatar.AVATAR_CHAMPION&&GoatAvatar.AVATAR_CHAMPION[id]);
+      var streakMin=(GoatAvatar.AVATAR_STREAK&&GoatAvatar.AVATAR_STREAK[id])||0;
+      var streakOnly=streakMin>0;
+      var min=GoatAvatar.AVATAR_MIN[id]||0;
+      var tier=GoatAvatar.tierForCoins(min);
+      var locked = champOnly ? !iAmChampion : streakOnly ? (myBest<streakMin) : (myCoins<min);
+      var special = champOnly || streakOnly;
+      var badge = champOnly ? '👑 Champion' : streakOnly ? ('🔥 '+streakMin+' Tage') : ('🔒 '+tier);
+      var b=document.createElement('button'); b.className='avcell'+(cfg.avatar===id?' active':'')+(locked?' locked':'')+(champOnly?' champ':'')+(streakOnly?' streak':'');
+      b.title=(GoatAvatar.AV_LABELS[id]||id)+(locked?(champOnly?' — nur fuer Monats-Gewinner':streakOnly?(' — ab '+streakMin+'-Tage-Streak'):(' — ab '+tier)):'');
+      b.innerHTML=GoatAvatar.renderGoatAvatar({avatar:id,bg:'grey',flag:'none'},60)
+        +((locked||special)?'<span class="lockbadge">'+badge+'</span>':'');
+      b.onclick=function(){
+        if(locked){
+          var m=document.getElementById('msg');
+          if(champOnly){ m.textContent='👑 Das Champion-Kostüm bekommt nur, wer den Monats-Wettkampf auf Platz 1 gewinnt.'; }
+          else if(streakOnly){ m.textContent='🔥 Das '+(GoatAvatar.AV_LABELS[id]||id)+'-Kostüm schaltest du mit einer '+streakMin+'-Tage-Streak frei.'; }
+          else { m.textContent='🔒 '+(GoatAvatar.AV_LABELS[id]||id)+' schaltest du ab '+tier+' frei ('+min.toLocaleString('de-DE')+' G-Coins).'; }
+          m.style.color='#b45309'; return;
+        }
+        cfg.avatar=id; drawPreview(); buildControls();
+      };
       gal.appendChild(b);
     });
     g1.appendChild(gal); host.appendChild(g1);
@@ -105,17 +133,22 @@
         cfg=Object.assign({}, GoatAvatar.DEFAULTS, r.data.avatar_config);
       }
     }catch(e){}
+    try{ var pc=await sb.from('my_profile').select('coins,is_champion,streak_best').maybeSingle(); if(pc.data){ myCoins=pc.data.coins||0; iAmChampion=!!pc.data.is_champion; myBest=pc.data.streak_best||0; } }catch(e){}
     document.getElementById('app').style.display='block';
     drawPreview(); buildControls();
     document.getElementById('saveBtn').onclick=save;
   }
   async function save(){
-    var msg=document.getElementById('msg'); msg.textContent='Speichere...'; msg.style.color='#6b7280';
+    var msg=document.getElementById('msg'); if(msg) msg.textContent='';
     try{
       var r=await sb.rpc('set_my_avatar',{p_config:cfg});
       if(r.error) throw r.error;
-      msg.textContent='✅ Gespeichert! Deine Ziege erscheint jetzt im Board.'; msg.style.color='#12B489';
-    }catch(e){ msg.textContent='❌ '+(e.message||'Fehler'); msg.style.color='#ef4444'; }
+      if(window.ugToast) ugToast('Gespeichert – deine Ziege ist im Board 🐐','success');
+      else if(msg){ msg.textContent='Gespeichert!'; msg.style.color='#12B489'; }
+    }catch(e){
+      if(window.ugToast) ugToast('Speichern hat nicht geklappt. Versuch es nochmal.','error');
+      else if(msg){ msg.textContent='Fehler'; msg.style.color='#ef4444'; }
+    }
   }
   init();
 })();

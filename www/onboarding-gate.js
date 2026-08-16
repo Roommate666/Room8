@@ -20,11 +20,13 @@
       var user = res && res.data && res.data.user;
       if (!user) return; // nicht eingeloggt -> Seite regelt Login selbst
       // Eigen-Read ueber my_profile-View (zuverlaessiger als profiles direkt).
-      sb.from('my_profile').select('username, full_name, city').maybeSingle().then(function (p) {
+      sb.from('my_profile').select('username, full_name, city, university, is_partner').maybeSingle().then(function (p) {
         // FAIL-OPEN: Read-Fehler ODER kein Datensatz -> NICHT umleiten.
         if (!p || p.error || !p.data) return;
         var prof = p.data;
-        var incomplete = !prof.username || !prof.full_name || !prof.city ||
+        // Uni ist NUR fuer Studenten Pflicht, NICHT fuer Partner (Cafes/Shops).
+        var needsUni = !prof.is_partner && !prof.university;
+        var incomplete = !prof.username || !prof.full_name || !prof.city || needsUni ||
           /^user[_-]?[0-9a-f]{4,}/i.test(prof.username || '');
         if (incomplete) {
           try { sessionStorage.setItem('og_redirected', '1'); } catch (e) {}

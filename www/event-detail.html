@@ -6,8 +6,8 @@
     <meta name="robots" content="noindex, nofollow, noarchive">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Event - UniGoat</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico?v61">
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v61">
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
     <link rel="stylesheet" href="style.css">
     <style>
         .app-container { background-color: #f3f4f6; padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
@@ -570,7 +570,7 @@
         // Geteilt wird /s/<id>?t=event -> Server-Side-OG-Vorschau (Bild+Titel) -> App
         var id = new URLSearchParams(window.location.search).get('id');
         var title = currentEvent ? currentEvent.title : 'UniGoat Event';
-        var url = id ? ('https://www.room8.club/s/' + encodeURIComponent(id) + '?t=event') : window.location.href;
+        var url = id ? ('https://unigoat.pages.dev/s/' + encodeURIComponent(id) + '?t=event') : window.location.href;
         if (navigator.share) {
             navigator.share({ title: title, url: url }).catch(function(){});
         } else {
@@ -667,6 +667,11 @@
     }
 </script>
     <script src="room8-ui.js"></script>
-
+<script src="verifyGate.js"></script>
+<script>
+(function(){var n=0;(function w(){var s=(typeof sb!=='undefined'&&sb)||window.sb;
+  if(s){try{verifyGate({blur:['#eventContent'],message:'Verifiziere dich als Student, um dieses Event zu sehen.'});}catch(e){}return;}
+  if(n++>60)return;setTimeout(w,100);})();})();
+</script>
 </body>
 </html>

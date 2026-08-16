@@ -28,9 +28,9 @@
         'background:white; border-radius:18px; box-shadow:0 8px 40px rgba(0,0,0,0.15); padding:1.25rem;' +
         'z-index:99999; max-width:520px; margin:0 auto; border:1px solid rgba(0,0,0,0.06); font-family:-apple-system, sans-serif; line-height:1.5;">' +
         '<div id="r8-cc-title" style="font-weight:800; font-size:1rem; color:#111827; margin-bottom:0.4rem;">🍪 Datenschutz-Einstellungen</div>' +
-        '<p style="font-size:0.88rem; color:#4B5563; margin:0 0 0.85rem;">Wir nutzen technisch notwendige Cookies für Login und Sprache. Optional helfen uns Fehler-Tracking (Sentry) und Push-Notifications, die Plattform zu verbessern. Du entscheidest. <a href="datenschutz.html" style="color:#2563EB; text-decoration:underline;">Mehr</a></p>' +
+        '<p style="font-size:0.88rem; color:#4B5563; margin:0 0 0.85rem;">Wir nutzen technisch notwendige Cookies für Login und Sprache. Optional helfen uns Fehler-Tracking (Sentry) und Push-Notifications, die Plattform zu verbessern. Du entscheidest. <a href="datenschutz.html" style="color:#0E9E77; text-decoration:underline;">Mehr</a></p>' +
         '<div style="display:flex; gap:0.5rem; flex-wrap:wrap;">' +
-          '<button id="r8-cc-all"  style="flex:1; min-width:140px; background:linear-gradient(135deg,#3B82F6,#2563EB); color:white; border:none; padding:0.85rem 1rem; border-radius:12px; font-weight:700; font-size:0.92rem; cursor:pointer;">Alle akzeptieren</button>' +
+          '<button id="r8-cc-all"  style="flex:1; min-width:140px; background:linear-gradient(135deg,#12B489,#0E9E77); color:white; border:none; padding:0.85rem 1rem; border-radius:12px; font-weight:700; font-size:0.92rem; cursor:pointer;">Alle akzeptieren</button>' +
           '<button id="r8-cc-min"  style="flex:1; min-width:140px; background:#F3F4F6; color:#374151; border:none; padding:0.85rem 1rem; border-radius:12px; font-weight:600; font-size:0.92rem; cursor:pointer;">Nur notwendige</button>' +
         '</div>' +
         '<button id="r8-cc-cust" style="margin-top:0.5rem; background:transparent; color:#6B7280; border:none; font-size:0.82rem; text-decoration:underline; cursor:pointer; padding:0.25rem;">Einzeln auswählen</button>' +
@@ -63,7 +63,7 @@
           '<span style="font-size:0.88rem;"><strong>Push-Benachrichtigungen</strong><br><span style="color:#6B7280; font-size:0.8rem;">FCM-Token-Speicherung für Push. Native Dialog erfolgt zusätzlich.</span></span>' +
         '</label>' +
         '<div style="display:flex; gap:0.5rem; margin-top:0.85rem;">' +
-          '<button id="r8-cc-save" style="flex:1; background:linear-gradient(135deg,#3B82F6,#2563EB); color:white; border:none; padding:0.85rem 1rem; border-radius:12px; font-weight:700; font-size:0.92rem; cursor:pointer;">Auswahl speichern</button>' +
+          '<button id="r8-cc-save" style="flex:1; background:linear-gradient(135deg,#12B489,#0E9E77); color:white; border:none; padding:0.85rem 1rem; border-radius:12px; font-weight:700; font-size:0.92rem; cursor:pointer;">Auswahl speichern</button>' +
         '</div>' +
       '</div>';
     var wrap = document.createElement('div');

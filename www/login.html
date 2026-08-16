@@ -7,6 +7,10 @@
   <title>Anmelden - UniGoat</title>
   <link rel="stylesheet" href="style.css">
   <style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Sora:wght@400;500;600;700;800&display=swap');
+/* UniGoat-Look Fonts (14.08.2026) - nur Optik */
+body{font-family:'Sora',system-ui,-apple-system,sans-serif !important;}
+h1,h2,h3{font-family:'Fraunces',Georgia,serif !important;}
     .app-container {
       padding-bottom: 0;
     }
@@ -18,18 +22,15 @@
     }
 
     .login-logo {
-      width: 80px;
-      height: 80px;
+      width: 96px;
+      height: 96px;
       margin: 0 auto 1rem;
-      border-radius: 18px;
-      overflow: hidden;
-      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.25);
     }
 
     .login-logo img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       display: block;
     }
 
@@ -37,7 +38,7 @@
       font-size: 1.6rem;
       font-weight: 700;
       margin-bottom: 0.5rem;
-      background: linear-gradient(135deg, #3B82F6, #2563EB);
+      background: linear-gradient(135deg, #12B489, #0E9E77);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -53,7 +54,7 @@
       text-align: right;
       margin-top: 0.5rem;
       font-size: 0.85rem;
-      color: #3B82F6;
+      color: #12B489;
       text-decoration: none;
       font-weight: 600;
       transition: opacity 0.2s;
@@ -76,7 +77,7 @@
     }
 
     .register-hint a {
-      color: #3B82F6;
+      color: #12B489;
       font-weight: 700;
       text-decoration: none;
     }
@@ -86,11 +87,11 @@
     }
     /* Override: Einloggen-Button bleibt blau (statt coral aus style.css) */
     .submit-btn {
-      background: linear-gradient(135deg, #3B82F6, #2563EB) !important;
-      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.35) !important;
+      background: linear-gradient(135deg, #12B489, #0E9E77) !important;
+      box-shadow: 0 4px 20px rgba(33,208,161, 0.35) !important;
     }
     .submit-btn:hover {
-      box-shadow: 0 8px 30px rgba(59, 130, 246, 0.45) !important;
+      box-shadow: 0 8px 30px rgba(33,208,161, 0.45) !important;
     }
     .submit-btn:disabled {
       background: var(--text-muted) !important;
@@ -143,8 +144,10 @@
     .social-btn.apple-btn { background: #000; color: #fff; border-color: #000; }
     .social-btn.apple-btn:hover { background: #1a1a1a; }
   </style>
+<link rel="icon" type="image/x-icon" href="favicon.ico?v133"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133"><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
 </head>
 <body>
+<script>try{var _r=new URLSearchParams(location.search).get("ref");if(_r)localStorage.setItem("ug_ref",_r.trim().toUpperCase());}catch(e){}</script>
 
   <div class="app-container">
     <header class="app-header">
@@ -159,7 +162,7 @@
 
       <div class="login-header">
         <div class="login-logo">
-          <img src="splash-logo.jpg?v61" alt="UniGoat Logo">
+          <img src="logo-goat.png?v90" alt="UniGoat Logo">
         </div>
         <h1 data-i18n="auth_login_title">Willkommen zurück!</h1>
         <p data-i18n="login_subtitle">Logge dich ein, um fortzufahren.</p>
@@ -177,7 +180,12 @@
           <a href="forgot-password.html" class="forgot-password-link" data-i18n="login_forgot">Passwort vergessen?</a>
         </div>
 
-        <button type="submit" class="submit-btn" id="loginBtn" style="margin-top: 1.5rem;" data-i18n="auth_btn_login">Einloggen</button>
+        <label style="display:flex;align-items:center;gap:0.6rem;margin-top:1rem;font-size:0.9rem;color:#4b5563;cursor:pointer;">
+          <input type="checkbox" id="stayLoggedIn" checked style="width:20px;height:20px;accent-color:#12B489;cursor:pointer;flex-shrink:0;">
+          <span>Angemeldet bleiben</span>
+        </label>
+
+        <button type="submit" class="submit-btn" id="loginBtn" style="margin-top: 1.25rem;" data-i18n="auth_btn_login">Einloggen</button>
       </form>
 
       <!-- Social Login -->
@@ -226,6 +234,9 @@
 
     var loginBtn = document.getElementById('loginBtn');
     
+    // Saved-Login: zuletzt genutzte E-Mail vorausfuellen
+    try { var _se=localStorage.getItem('ug_saved_email'); if(_se){ var _el=document.getElementById('loginEmail'); if(_el&&!_el.value){ _el.value=_se; document.getElementById('loginPassword')&&document.getElementById('loginPassword').focus(); } } } catch(e){}
+
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
       
@@ -247,6 +258,13 @@
           if (response.error) {
             throw response.error;
           }
+          // Saved-Login: E-Mail merken (Session bleibt eh via persistSession erhalten)
+          try { localStorage.setItem('ug_saved_email', email); } catch(e) {}
+          // "Angemeldet bleiben": steuert Auto-Weiterleitung beim naechsten App-Start (intro.html)
+          try {
+            var _stay = document.getElementById('stayLoggedIn');
+            localStorage.setItem('ug_persist', (_stay && !_stay.checked) ? '0' : '1');
+          } catch(e) {}
           // Rolle pruefen: Partner -> partner-dashboard, sonst -> dashboard
           var uid = response.data.user.id;
           var profileRes = await sb.from('profiles').select('is_partner').eq('id', uid).maybeSingle();
@@ -258,10 +276,14 @@
         })
         .catch(function(err) {
           console.error("Login Error:", err);
-          var msg = err.message;
-          if (msg === 'Invalid login credentials') msg = T('login_invalid_credentials', 'Falsches Passwort oder E-Mail.');
-          Room8UI.error(T('login_failed_prefix', 'Login fehlgeschlagen: ') + msg);
-          
+          var raw = (err && err.message) ? err.message : '';
+          var msg;
+          if (/invalid login credentials/i.test(raw)) msg = 'E-Mail oder Passwort ist falsch.';
+          else if (/email not confirmed/i.test(raw)) msg = 'Bitte bestätige zuerst deine E-Mail — der Link ist in deinem Postfach (auch im Spam schauen).';
+          else if (/rate limit|too many/i.test(raw)) msg = 'Zu viele Versuche. Warte kurz und versuch es dann nochmal.';
+          else if (/network|fetch|connection/i.test(raw)) msg = 'Keine Verbindung. Prüfe dein Internet und versuch es nochmal.';
+          else msg = 'Da ist leider was schiefgelaufen. Versuch es nochmal — wenn es weiter klemmt, melde dich beim UniGoat-Team unter info@unigoat.de.';
+          Room8UI.error(msg);
           loginBtn.disabled = false;
           loginBtn.textContent = originalText;
         });
@@ -278,7 +300,8 @@
         await window.signInWithGoogle();
       } catch(err) {
         console.error('Google Login Error:', err);
-        if (window.Room8UI) Room8UI.error(((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('login_google_failed'):'Google-Anmeldung fehlgeschlagen') + ': ' + (err.message || ''));
+        var c=(err&&err.message||'').toLowerCase();
+        if (!/cancel|abbruch|dismiss|closed/.test(c) && window.Room8UI) Room8UI.error('Die Google-Anmeldung hat nicht geklappt. Versuch es nochmal — oder melde dich beim UniGoat-Team unter info@unigoat.de.');
         btn.disabled = false; btn.style.opacity = '1';
       }
     });
@@ -289,7 +312,8 @@
         await window.signInWithApple();
       } catch(err) {
         console.error('Apple Login Error:', err);
-        if (window.Room8UI) Room8UI.error(((window.Room8i18n&&Room8i18n.t)?Room8i18n.t('login_apple_failed'):'Apple-Anmeldung fehlgeschlagen') + ': ' + (err.message || ''));
+        var c=(err&&err.message||'').toLowerCase();
+        if (!/cancel|abbruch|dismiss|closed|1001/.test(c) && window.Room8UI) Room8UI.error('Die Apple-Anmeldung hat nicht geklappt. Versuch es nochmal — oder melde dich beim UniGoat-Team unter info@unigoat.de.');
         btn.disabled = false; btn.style.opacity = '1';
       }
     });

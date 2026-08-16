@@ -5,10 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>E-Mail wird verifiziert - UniGoat</title>
-  <link rel="icon" type="image/x-icon" href="favicon.ico?v61">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v61">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v61">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v61">
+  <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
   <link rel="stylesheet" href="style.css">
   <style>
     /* Pattern: Magic UI BlurFade */
@@ -56,14 +56,14 @@
     .verify-button {
       display: inline-block;
       padding: 1rem 2.5rem;
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      background: linear-gradient(135deg, #12B489, #0E9E77);
       color: white;
       text-decoration: none;
       border-radius: 999px;
       font-weight: 700;
       font-size: 1rem;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      box-shadow: 0 4px 12px rgba(33,208,161, 0.3);
     }
     .verify-button.success {
       background: linear-gradient(135deg, #10b981, #059669);
@@ -148,9 +148,9 @@
         msg.replaceWith(successBox);
 
         var button = document.createElement('a');
-        button.href = 'https://room8.club/wohnungen.html';
+        button.href = 'https://unigoat.pages.dev/dashboard.html';
         button.className = 'verify-button success';
-        button.textContent = '\uD83C\uDFE0 Wohnungen entdecken';
+        button.textContent = 'Los geht\u2019s \uD83D\uDC10';
         container.appendChild(button);
 
       } catch (error) {
@@ -168,7 +168,7 @@
         msg.replaceWith(errorBox);
 
         var button = document.createElement('a');
-        button.href = 'https://room8.club/verify-options.html';
+        button.href = 'https://unigoat.pages.dev/verify-options.html';
         button.className = 'verify-button';
         button.textContent = 'Erneut versuchen';
         container.appendChild(button);

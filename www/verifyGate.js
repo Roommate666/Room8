@@ -26,7 +26,7 @@
         '  animation: vgSlideUp 0.5s ease;',
         '}',
         '.vg-card-top {',
-        '  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);',
+        '  background: linear-gradient(135deg, #21D0A1 0%, #12B489 100%);',
         '  padding: 2rem 2rem 1.5rem;',
         '  text-align: center;',
         '  position: relative;',
@@ -63,22 +63,22 @@
         '}',
         '.vg-btn {',
         '  display: inline-flex; align-items: center; gap: 0.5rem;',
-        '  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);',
-        '  color: white; padding: 0.9rem 2.5rem;',
+        '  background: linear-gradient(135deg, #21D0A1 0%, #12B489 100%);',
+        '  color: #083b2f; padding: 0.9rem 2.5rem;',
         '  border-radius: 99px; text-decoration: none;',
-        '  font-weight: 600; font-size: 1rem;',
-        '  box-shadow: 0 4px 20px rgba(102,126,234,0.4);',
+        '  font-weight: 700; font-size: 1rem;',
+        '  box-shadow: 0 4px 20px rgba(18,180,137,0.4);',
         '  transition: transform 0.2s, box-shadow 0.2s;',
         '}',
         '.vg-btn:active {',
         '  transform: scale(0.97);',
-        '  box-shadow: 0 2px 10px rgba(102,126,234,0.3);',
+        '  box-shadow: 0 2px 10px rgba(18,180,137,0.3);',
         '}',
     ].join('\n');
     document.head.appendChild(style);
 
     // Hilfsfunktion: Overlay via DOM erstellen (kein innerHTML)
-    function buildOverlay(message) {
+    function buildOverlay(message, href, label) {
         var overlay = document.createElement('div');
         overlay.className = 'vg-overlay';
 
@@ -95,7 +95,9 @@
 
         var _t = (typeof Room8i18n !== 'undefined') ? Room8i18n.t : function(k) { return k; };
         var h3 = document.createElement('h3');
-        h3.textContent = _t('verify_required');
+        var _title = _t('verify_required');
+        if (!_title || _title === 'verify_required') _title = 'Nur für verifizierte Studenten';
+        h3.textContent = _title;
 
         cardTop.appendChild(iconWrap);
         cardTop.appendChild(h3);
@@ -108,7 +110,7 @@
         p.textContent = message;
 
         var btn = document.createElement('a');
-        btn.href = 'verify-options.html';
+        btn.href = href || 'verify-options.html';
         btn.className = 'vg-btn';
 
         var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -127,12 +129,25 @@
         svg.appendChild(path1);
         svg.appendChild(path2);
 
-        var btnText = document.createTextNode(' ' + _t('verify_now'));
+        var btnText = document.createTextNode(' ' + (label || 'Jetzt verifizieren'));
         btn.appendChild(svg);
         btn.appendChild(btnText);
 
         cardBody.appendChild(p);
         cardBody.appendChild(btn);
+
+        // Ausweg, damit niemand haengen bleibt (zurueck zur sichtbaren Liste / zum Hub)
+        var back = document.createElement('a');
+        back.href = '#';
+        back.textContent = '← Zurück';
+        back.style.cssText = 'display:block;margin-top:1rem;color:#6b7280;font-size:0.9rem;font-weight:700;text-decoration:none;';
+        back.onclick = function (e) {
+            e.preventDefault();
+            var pth = (location.pathname || '');
+            if (pth.indexOf('/game') >= 0) { location.href = '/dashboard.html'; return; }
+            if (history.length > 1) { history.back(); } else { location.href = '/coupons.html'; }
+        };
+        cardBody.appendChild(back);
 
         card.appendChild(cardTop);
         card.appendChild(cardBody);
@@ -145,36 +160,40 @@
         opts = opts || {};
         var blurSelectors = opts.blur || [];
         var _t2 = (typeof Room8i18n !== 'undefined') ? Room8i18n.t : function(k) { return k; };
-        var message = opts.message || _t2('verify_default_message');
+        var message = opts.message || 'Verifiziere dich als Student, um alles freizuschalten.';
 
         if (typeof sb === 'undefined' || !sb) return false;
 
         try {
             var result = await sb.auth.getUser();
             var user = result.data ? result.data.user : null;
-            if (!user) return false;
+            if (!user) {
+                // Ausgeloggt = auch "nicht verifiziert" -> Blur + Anmelde-CTA
+                showVerifyOverlay(blurSelectors, opts.loggedOutMessage || 'Melde dich an und verifiziere dich als Student, um alles zu sehen.', 'register.html', 'Anmelden & verifizieren');
+                return true;
+            }
 
-            var profResult = await sb.from('profiles').select('is_verified, is_student_verified').eq('id', user.id).single();
+            var profResult = await sb.from('my_profile').select('is_verified, is_student_verified').maybeSingle();
             var profile = profResult.data;
             var isVerified = profile && (profile.is_verified || profile.is_student_verified);
 
             if (isVerified) return false; // Kein Gate noetig
 
             // Overlay erstellen und anzeigen (blur wird in showVerifyOverlay gemacht)
-            showVerifyOverlay(blurSelectors, message);
+            showVerifyOverlay(blurSelectors, message, 'verify-options.html', 'Jetzt verifizieren');
             return true; // Gate aktiv
         } catch (err) {
             console.error('verifyGate error:', err);
             if (window.Room8Sentry) window.Room8Sentry.captureException(err);
             // Fail-CLOSED: bei Fehler (Netzwerk/Auth) Gate AKTIV lassen statt still
             // durchzulassen. Verifizierte User koennen per Reload erneut pruefen.
-            showVerifyOverlay(blurSelectors, _t2('verify_check_failed') || message);
+            showVerifyOverlay(blurSelectors, message, 'verify-options.html', 'Jetzt verifizieren');
             return true;
         }
     };
 
     // Nur Overlay anzeigen (fuer Seiten mit eigener Logik wie Owner-Check)
-    function showVerifyOverlay(blurSelectors, message) {
+    function showVerifyOverlay(blurSelectors, message, href, label) {
         blurSelectors.forEach(function(sel) {
             var el = document.querySelector(sel);
             if (el) {
@@ -184,7 +203,7 @@
                 el.style.transition = 'filter 0.5s ease';
             }
         });
-        var overlay = buildOverlay(message);
+        var overlay = buildOverlay(message, href, label);
         // Overlay in app-container einfuegen statt body,
         // damit Header (z-index:100) darueber bleibt
         var container = document.querySelector('.app-container');

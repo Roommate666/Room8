@@ -6,7 +6,10 @@
 // Auth: nur eingeloggte Admins (profiles.is_admin). Deploy MIT JWT-Pruefung.
 //   npx supabase functions deploy notify-broadcast
 //
-// Body: { title: string, body?: string, url?: string, max?: number }
+// Body: { title: string, body?: string, url?: string, max?: number, inApp?: boolean, pushOnly?: boolean }
+//   inApp (default true): schreibt zusaetzlich in JEDES User-Postfach (Tabelle notifications,
+//     type 'admin_message') -> erscheint in notifications.html + Glocken-Badge, auch ohne Push-Token.
+//   pushOnly: true -> nur Push, kein Postfach-Eintrag.
 // E-Mail-Broadcast bewusst NICHT hier: Marketing-Mail an alle braucht sauberes
 // Opt-in/Abmeldung (DSGVO/UWG). Push ist bereits Opt-in (App-Erlaubnis).
 
@@ -50,9 +53,30 @@ serve(async (req) => {
     const bodyText = (payload?.body ? String(payload.body) : '').slice(0, 240)
     const url = payload?.url ? String(payload.url) : null
     const max = Number.isFinite(+payload?.max) ? Math.min(+payload.max, 20000) : 20000
+    const pushOnly = payload?.pushOnly === true
+    const doInApp = !pushOnly && payload?.inApp !== false
     if (!title) return json({ success: false, error: 'title required' }, 400)
 
-    // 3. Zielgruppe: eindeutige user_ids mit FCM-Token
+    // 2b. In-App-Postfach: eine Notification pro Nutzer (alle Profile, nicht nur Push-faehige).
+    //     Service-Role umgeht RLS. Erscheint in notifications.html + Glocken-Badge.
+    let inAppInserted = 0
+    if (doInApp) {
+      const { data: profRows, error: profErr } = await admin
+        .from('profiles').select('id').limit(50000)
+      if (profErr) return json({ success: false, error: 'inapp: ' + profErr.message }, 500)
+      const ids = (profRows || []).map((r: { id: string }) => r.id)
+      const CHUNK = 500
+      for (let i = 0; i < ids.length; i += CHUNK) {
+        const rows = ids.slice(i, i + CHUNK).map((uid: string) => ({
+          user_id: uid, type: 'admin_message', title, message: bodyText, link: url, is_read: false,
+        }))
+        const { error: insErr } = await admin.from('notifications').insert(rows)
+        if (insErr) return json({ success: false, error: 'inapp insert: ' + insErr.message }, 500)
+        inAppInserted += rows.length
+      }
+    }
+
+    // 3. Zielgruppe Push: eindeutige user_ids mit FCM-Token
     const { data: tokRows, error: tokErr } = await admin.from('fcm_tokens').select('user_id').limit(50000)
     if (tokErr) return json({ success: false, error: tokErr.message }, 500)
     const userIds = Array.from(new Set((tokRows || []).map((r: { user_id: string }) => r.user_id))).slice(0, max)
@@ -75,7 +99,7 @@ serve(async (req) => {
       results.forEach((ok) => ok ? sent++ : failed++)
     }
 
-    return json({ success: true, candidates: userIds.length, sent, failed })
+    return json({ success: true, candidates: userIds.length, sent, failed, inApp: inAppInserted })
   } catch (e) {
     return json({ success: false, error: String((e as Error)?.message || e) }, 500)
   }

@@ -17,6 +17,41 @@ const BLOCKED_DOMAINS = [
   'vodafone.de','o2online.de'
 ]
 
+// Positive Uni-Erkennung: nur echte Hochschul-Domains werden per Mail akzeptiert.
+// Wer nicht matcht (z.B. eigene Domain), muss die Immatrikulationsbescheinigung nutzen.
+// Starke internationale Muster + kuratierte Allowlist grosser Unis mit untypischer Domain.
+const UNI_PATTERNS = [
+  /\.edu$/,                          // USA
+  /\.edu\.[a-z]{2,3}$/,              // .edu.au, .edu.cn, .edu.tr ...
+  /\.ac\.[a-z]{2,3}$/,              // .ac.uk, .ac.jp, .ac.at ...
+  /(^|\.)uni-[a-z0-9-]+\.[a-z]{2,3}$/, // uni-muenchen.de, mail.uni-koeln.de
+  /(^|\.)tu-[a-z0-9-]+\.de$/,       // tu-berlin.de, tu-dresden.de
+  /(^|\.)fu-[a-z0-9-]+\.de$/,       // fu-berlin.de
+  /(^|\.)hu-[a-z0-9-]+\.de$/,       // hu-berlin.de
+  /(^|\.)fh-[a-z0-9-]+\.de$/,       // fh-aachen.de
+  /(^|\.)hs-[a-z0-9-]+\.de$/,       // hs-mannheim.de
+  /(^|\.)th-[a-z0-9-]+\.de$/,       // th-koeln.de
+  /(^|\.)dh[bw]?-[a-z0-9-]+\.de$/,  // dhbw-*.de
+  /hochschule/,                      // *hochschule*.de
+  /universit(y|ae|e|a|aet)/,        // university/universite/universitaet...
+  /(^|\.)uni\.[a-z]{2,3}$/,         // uni.lu ...
+  /(^|\.)stud\.|(^|\.)student\./    // stud./student. Subdomains
+]
+const UNI_ALLOW = new Set([
+  'tum.de','lmu.de','rwth-aachen.de','kit.edu','charite.de','hhu.de','wwu.de',
+  'ovgu.de','b-tu.de','leuphana.de','hpi.de','whu.edu','ebs.edu','zhaw.ch',
+  'ethz.ch','epfl.ch','uzh.ch','unibe.ch','unibas.ch','unisg.ch','hslu.ch',
+  'phbern.ch','ku.de','ph-weingarten.de','hnee.de','htw-berlin.de',
+  'htwk-leipzig.de','htwg-konstanz.de','beuth-hochschule.de','bht-berlin.de',
+  'code.berlin','constructor.university','jacobs-university.de'
+])
+function isUniDomain(domain: string | undefined): boolean {
+  if (!domain) return false
+  if (BLOCKED_DOMAINS.includes(domain)) return false
+  if (UNI_ALLOW.has(domain)) return true
+  return UNI_PATTERNS.some((re) => re.test(domain))
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -58,12 +93,12 @@ serve(async (req) => {
       }
     }
 
-    // Server-seitige Domain-Validierung (verhindert Umgehung des Frontend-Checks)
+    // Server-seitige Uni-Domain-Validierung (Allowlist/Muster). Eigene Domains kommen NICHT durch.
     if (profile.uni_email) {
       const domain = profile.uni_email.split('@')[1]?.toLowerCase()
-      if (!domain || BLOCKED_DOMAINS.includes(domain)) {
+      if (!isUniDomain(domain)) {
         await supabase.from('profiles').update({ uni_email_verification_token: null }).eq('id', profile.id)
-        throw new Error('Private E-Mail-Adressen (Gmail, GMX, etc.) sind nicht erlaubt. Bitte verwende deine offizielle Uni-E-Mail.')
+        throw new Error('Diese E-Mail sieht nicht nach einer offiziellen Uni-Adresse aus. Bitte nutze deine offizielle Hochschul-Mail-Adresse (z. B. name@uni-stadt.de).')
       }
     }
 

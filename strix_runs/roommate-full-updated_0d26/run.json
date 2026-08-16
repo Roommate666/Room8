@@ -1,0 +1,56 @@
+{
+  "run_id": "roommate-full-updated_0d26",
+  "run_name": "roommate-full-updated_0d26",
+  "start_time": "2026-08-13T10:01:39.132892+00:00",
+  "end_time": "2026-08-13T10:12:36.579725+00:00",
+  "status": "failed",
+  "auth_mode": "api_key",
+  "targets_info": [
+    {
+      "type": "local_code",
+      "details": {
+        "target_path": "/Users/yusufcash/Dev/roommate_full_updated",
+        "workspace_subdir": "roommate_full_updated"
+      },
+      "original": "/Users/yusufcash/Dev/roommate_full_updated"
+    }
+  ],
+  "llm_usage": {
+    "requests": 0,
+    "input_tokens": 0,
+    "input_tokens_details": [
+      {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      }
+    ],
+    "output_tokens": 0,
+    "output_tokens_details": [
+      {
+        "reasoning_tokens": 0
+      }
+    ],
+    "total_tokens": 0,
+    "request_usage_entries": [],
+    "cost": 0.0,
+    "agents": []
+  },
+  "scan_mode": "quick",
+  "instruction": "Authorized security audit of the owner's OWN app (UniGoat: static HTML/JS/Capacitor + Supabase backend). Focus on: Supabase RLS/authorization gaps in supabase/migrations, exposed secrets or service_role keys in www/ client code, auth bypass, IDOR in coupon redemption (public.self_redeem) and www/admin.html admin functions, XSS in user-rendered content. Prioritize real, exploitable findings.",
+  "user_instruction": "Authorized security audit of the owner's OWN app (UniGoat: static HTML/JS/Capacitor + Supabase backend). Focus on: Supabase RLS/authorization gaps in supabase/migrations, exposed secrets or service_role keys in www/ client code, auth bypass, IDOR in coupon redemption (public.self_redeem) and www/admin.html admin functions, XSS in user-rendered content. Prioritize real, exploitable findings.",
+  "non_interactive": true,
+  "local_sources": [
+    {
+      "source_path": "/Users/yusufcash/Dev/roommate_full_updated",
+      "workspace_subdir": "roommate_full_updated",
+      "protect_metadata": true
+    }
+  ],
+  "workspace_mount": null,
+  "diff_scope": {
+    "active": false,
+    "mode": "auto"
+  },
+  "scope_mode": "auto",
+  "diff_base": null
+}

@@ -5,12 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Profil bearbeiten - UniGoat</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico?v61">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v61">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v61">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v61">
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
   <link rel="stylesheet" href="style.css">
     <style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Sora:wght@400;500;600;700;800&display=swap');
+/* UniGoat-Look Fonts (14.08.2026) - nur Optik */
+body{font-family:'Sora',system-ui,-apple-system,sans-serif !important;}
+h1,h2,h3{font-family:'Fraunces',Georgia,serif !important;}
         /* Pattern: Magic UI BlurFade */
         @keyframes blurFadeIn {
             from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
@@ -46,8 +50,8 @@
         .status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
         .status-unverified { background: rgba(239,68,68,0.1); color: #DC2626; border: 1px solid rgba(239,68,68,0.15); }
         .status-unverified::before { background: #EF4444; box-shadow: 0 0 4px rgba(239,68,68,0.5); }
-        .status-pending { background: rgba(245,158,11,0.1); color: #D97706; border: 1px solid rgba(245,158,11,0.15); }
-        .status-pending::before { background: #F59E0B; box-shadow: 0 0 4px rgba(245,158,11,0.5); }
+        .status-pending { background: rgba(245,158,11,0.1); color: #12B489; border: 1px solid rgba(245,158,11,0.15); }
+        .status-pending::before { background: #21D0A1; box-shadow: 0 0 4px rgba(245,158,11,0.5); }
         .status-verified { background: rgba(16,185,129,0.1); color: #059669; border: 1px solid rgba(16,185,129,0.15); }
         .status-verified::before { background: #10B981; box-shadow: 0 0 4px rgba(16,185,129,0.5); }
 
@@ -78,8 +82,8 @@
         #editProfileForm .form-group input:focus,
         #editProfileForm .form-group select:focus,
         #editProfileForm .form-group textarea:focus {
-            border-color: #3B82F6;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.06);
+            border-color: #12B489;
+            box-shadow: 0 0 0 4px rgba(33,208,161, 0.06);
             background: white;
         }
         #editProfileForm .form-group label {
@@ -205,7 +209,7 @@
                             Prüfe Verifizierungsstatus...
                         </p>
                     </div>
-                    <a href="verify-options.html" id="verify-btn" class="submit-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); margin: 0; padding: 0.75rem 1.5rem; text-decoration: none; display: inline-block; white-space: nowrap; width: auto;" data-i18n="edit_profile_verify_btn">
+                    <a href="verify-options.html" id="verify-btn" class="submit-btn" style="background: linear-gradient(135deg, #12B489 0%, #1e40af 100%); margin: 0; padding: 0.75rem 1.5rem; text-decoration: none; display: inline-block; white-space: nowrap; width: auto;" data-i18n="edit_profile_verify_btn">
                         Jetzt verifizieren &#8594;
                     </a>
                 </div>
@@ -276,11 +280,11 @@
             }
             currentUser = user;
 
+            // Eigen-Read ueber my_profile-View (direkter profiles-Read wird von RLS geblockt)
             var profileResult = await sb
-                .from('profiles')
+                .from('my_profile')
                 .select('*')
-                .eq('id', currentUser.id)
-                .single();
+                .maybeSingle();
 
             var profile = profileResult.data;
             var error = profileResult.error;
@@ -383,12 +387,12 @@
                 updates.avatar_url = data.publicUrl;
             }
             
-            var { error } = await sb
-                .from('profiles')
-                .update(updates)
-                .eq('id', currentUser.id);
-
-            if (error) throw error;
+            // Speichern ueber SECURITY-DEFINER-RPC (authenticated darf profiles nicht direkt updaten)
+            var saveRes = await sb.rpc('update_my_profile', { p_data: updates });
+            if (saveRes.error) throw saveRes.error;
+            if (saveRes.data && saveRes.data.ok === false) {
+                throw new Error(saveRes.data.error === 'USERNAME_TAKEN' ? 'Dieser Benutzername ist bereits vergeben.' : 'Speichern nicht möglich. Bitte versuch es nochmal.');
+            }
             
             msgContainer.style.color = 'green';
             msgContainer.innerHTML = '&#10004; Profil erfolgreich aktualisiert!';

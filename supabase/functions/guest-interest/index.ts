@@ -74,12 +74,12 @@ Deno.serve(async (req: Request) => {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'UniGoat <hallo@unigoat.de>',
+        from: 'UniGoat <noreply@room8.club>',
         to: [gl.contact_email],
         subject: 'Interesse an deiner Wohnung auf Room8',
         html,
         text: `Ein Student interessiert sich für "${gl.title}". Name: ${name}. Kontakt: ${contact}. Nachricht: ${message}`,
-        headers: { 'List-Unsubscribe': '<mailto:hallo@unigoat.de?subject=unsubscribe>' },
+        headers: { 'List-Unsubscribe': '<mailto:info@unigoat.de?subject=unsubscribe>' },
       }),
     })
     if (!r.ok) return json({ error: 'mail_failed', detail: (await r.text()).slice(0, 300) }, 502)

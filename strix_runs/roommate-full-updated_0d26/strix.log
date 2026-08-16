@@ -1,0 +1,356 @@
+2026-08-13 12:01:40.213 INFO    roommate-full-updated_0d26 - strix.core.runner: Starting Strix scan roommate-full-updated_0d26 (image=ghcr.io/usestrix/strix-sandbox:1.3.0, max_turns=500, interactive=False, run_dir=/Users/yusufcash/Dev/roommate_full_updated/strix_runs/roommate-full-updated_0d26)
+2026-08-13 12:01:40.213 INFO    roommate-full-updated_0d26 - strix.core.runner: LLM model resolved: openai/gpt-4o
+2026-08-13 12:01:40.213 INFO    roommate-full-updated_0d26 - strix.core.runner: Bringing up sandbox session for scan roommate-full-updated_0d26
+2026-08-13 12:01:40.213 DEBUG   roommate-full-updated_0d26 - strix.runtime.backends: Selected sandbox backend: docker
+2026-08-13 12:01:40.213 INFO    roommate-full-updated_0d26 - strix.runtime.session_manager: Creating sandbox session for scan roommate-full-updated_0d26 (backend=docker, image=ghcr.io/usestrix/strix-sandbox:1.3.0)
+2026-08-13 12:01:40.369 DEBUG   roommate-full-updated_0d26 - strix.runtime.docker_client: Creating sandbox container: image=ghcr.io/usestrix/strix-sandbox:1.3.0 caps=['NET_ADMIN', 'NET_RAW'] exposed_ports=[48080]
+2026-08-13 12:01:40.540 INFO    roommate-full-updated_0d26 - strix.runtime.docker_client: Sandbox container created: id=874b5216fe08 image=ghcr.io/usestrix/strix-sandbox:1.3.0
+2026-08-13 12:01:40.852 DEBUG   roommate-full-updated_0d26 - strix.runtime.session_manager: Caido host endpoint resolved: http://127.0.0.1:32768
+2026-08-13 12:01:40.853 INFO    roommate-full-updated_0d26 - strix.runtime.caido_bootstrap: Bootstrapping Caido client (host=http://127.0.0.1:32768, container=http://127.0.0.1:48080)
+2026-08-13 12:01:40.956 INFO    roommate-full-updated_0d26 - strix.runtime.caido_bootstrap: Caido project selected: 2566bc17-2a44-44c4-8896-987df6e0bd0b
+2026-08-13 12:01:40.956 INFO    roommate-full-updated_0d26 - strix.runtime.session_manager: Sandbox session for scan roommate-full-updated_0d26 ready and cached
+2026-08-13 12:01:40.956 INFO    roommate-full-updated_0d26 - strix.core.runner: Sandbox ready for scan roommate-full-updated_0d26
+2026-08-13 12:01:40.959 DEBUG   roommate-full-updated_0d26 - strix.skills: Loaded skill: scan_modes/quick -> quick
+2026-08-13 12:01:40.961 DEBUG   roommate-full-updated_0d26 - strix.skills: Loaded skill: tooling/agent_browser -> agent_browser
+2026-08-13 12:01:40.965 DEBUG   roommate-full-updated_0d26 - strix.skills: Loaded skill: tooling/python -> python
+2026-08-13 12:01:40.967 DEBUG   roommate-full-updated_0d26 - strix.skills: Loaded skill: coordination/root_agent -> root_agent
+2026-08-13 12:01:40.968 DEBUG   roommate-full-updated_0d26 - strix.skills: Loaded skill: coordination/source_aware_whitebox -> source_aware_whitebox
+2026-08-13 12:01:40.970 DEBUG   roommate-full-updated_0d26 - strix.skills: Loaded skill: custom/source_aware_sast -> source_aware_sast
+2026-08-13 12:01:40.970 DEBUG   roommate-full-updated_0d26 - strix.skills: load_skills: 6 skill(s) resolved
+2026-08-13 12:01:41.002 DEBUG   roommate-full-updated_0d26 - strix.agents.prompt: render_system_prompt: scan_mode=quick root=True whitebox=True skills=6 prompt_len=81500
+2026-08-13 12:01:41.002 INFO    roommate-full-updated_0d26 - strix.agents.factory: Built root agent 'Root Agent' (skills=0, tools=30, scan_mode=quick, whitebox=True)
+2026-08-13 12:01:41.002 INFO    roommate-full-updated_0d26 - strix.core.agents: agent.register 908a1d97 (Root Agent) parent=-
+2026-08-13 12:01:41.012 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating trace
+2026-08-13 12:01:41.013 DEBUG   roommate-full-updated_0d26 - openai.agents: Setting current trace: no-op
+2026-08-13 12:01:41.013 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:01:41.020 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:01:41.020 DEBUG   roommate-full-updated_0d26 - openai.agents: Starting turn 1, current_agent=Root Agent
+2026-08-13 12:01:41.020 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:01:41.023 DEBUG   roommate-full-updated_0d26 - openai.agents: No conversation_id available for request
+2026-08-13 12:01:41.023 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:01:41.024 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:01:41.414 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-08-13 12:01:41.419 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-08-13 12:01:41.419 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-08-13 12:01:41.421 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-08-13 12:01:41.421 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-08-13 12:01:41.425 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-08-13 12:01:41.502 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-08-13 12:01:41.502 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-08-13 12:01:41.506 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-08-13 12:01:41.509 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-08-13 12:01:41.516 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-08-13 12:01:43.487 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-08-13 12:01:48.196 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:01:48.197 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 2.0s (attempt 1/5).
+2026-08-13 12:01:50.198 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:01:50.200 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:01:57.190 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:01:57.192 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 4.0s (attempt 2/5).
+2026-08-13 12:02:01.194 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:02:01.196 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:02:07.847 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:02:07.848 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 8.0s (attempt 3/5).
+2026-08-13 12:02:15.849 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:02:15.852 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:02:23.388 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:02:23.389 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 16.0s (attempt 4/5).
+2026-08-13 12:02:39.390 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:02:39.395 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:02:46.148 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:02:46.152 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 32.0s (attempt 5/5).
+2026-08-13 12:03:18.155 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:03:18.159 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:03:23.098 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:03:23.099 DEBUG   roommate-full-updated_0d26 - openai.agents: Resetting current trace
+2026-08-13 12:03:23.100 WARNING roommate-full-updated_0d26 - strix.core.execution: transient model/provider error for 908a1d97; replaying turn (attempt 1/5, backoff 2.0s): APIError('Request too large for gpt-4o in organization org-cfM4Qod156TYPewRWBzirqVd on tokens per min (TPM): Limit 30000, Requested 37186. The input or output tokens must be reduced in order to run successfully. Visit https://platform.openai.com/account/rate-limits to learn more.')
+2026-08-13 12:03:25.107 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating trace
+2026-08-13 12:03:25.108 DEBUG   roommate-full-updated_0d26 - openai.agents: Setting current trace: no-op
+2026-08-13 12:03:25.108 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:03:25.126 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:03:25.126 DEBUG   roommate-full-updated_0d26 - openai.agents: Starting turn 1, current_agent=Root Agent
+2026-08-13 12:03:25.126 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:03:25.128 DEBUG   roommate-full-updated_0d26 - openai.agents: No conversation_id available for request
+2026-08-13 12:03:25.128 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:03:25.131 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:03:31.268 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:03:31.270 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 2.0s (attempt 1/5).
+2026-08-13 12:03:33.271 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:03:33.273 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:03:40.274 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:03:40.275 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 4.0s (attempt 2/5).
+2026-08-13 12:03:44.275 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:03:44.277 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:03:52.335 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:03:52.339 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 8.0s (attempt 3/5).
+2026-08-13 12:04:00.340 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:04:00.344 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:04:05.761 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:04:05.763 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 16.0s (attempt 4/5).
+2026-08-13 12:04:21.764 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:04:21.766 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:04:28.114 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:04:28.115 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 32.0s (attempt 5/5).
+2026-08-13 12:05:00.116 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:05:00.120 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:05:06.807 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:05:06.811 DEBUG   roommate-full-updated_0d26 - openai.agents: Resetting current trace
+2026-08-13 12:05:06.812 WARNING roommate-full-updated_0d26 - strix.core.execution: transient model/provider error for 908a1d97; replaying turn (attempt 2/5, backoff 4.0s): APIError('Request too large for gpt-4o in organization org-cfM4Qod156TYPewRWBzirqVd on tokens per min (TPM): Limit 30000, Requested 37186. The input or output tokens must be reduced in order to run successfully. Visit https://platform.openai.com/account/rate-limits to learn more.')
+2026-08-13 12:05:10.818 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating trace
+2026-08-13 12:05:10.820 DEBUG   roommate-full-updated_0d26 - openai.agents: Setting current trace: no-op
+2026-08-13 12:05:10.820 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:05:10.838 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:05:10.838 DEBUG   roommate-full-updated_0d26 - openai.agents: Starting turn 1, current_agent=Root Agent
+2026-08-13 12:05:10.838 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:05:10.840 DEBUG   roommate-full-updated_0d26 - openai.agents: No conversation_id available for request
+2026-08-13 12:05:10.840 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:05:10.842 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:05:16.878 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:05:16.880 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 2.0s (attempt 1/5).
+2026-08-13 12:05:18.882 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:05:18.883 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:05:25.133 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:05:25.136 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 4.0s (attempt 2/5).
+2026-08-13 12:05:29.137 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:05:29.138 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:05:34.430 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:05:34.431 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 8.0s (attempt 3/5).
+2026-08-13 12:05:42.432 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:05:42.433 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:05:47.783 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:05:47.783 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 16.0s (attempt 4/5).
+2026-08-13 12:06:03.785 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:06:03.791 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:06:09.751 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:06:09.753 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 32.0s (attempt 5/5).
+2026-08-13 12:06:41.755 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:06:41.760 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:06:47.230 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:06:47.231 DEBUG   roommate-full-updated_0d26 - openai.agents: Resetting current trace
+2026-08-13 12:06:47.232 WARNING roommate-full-updated_0d26 - strix.core.execution: transient model/provider error for 908a1d97; replaying turn (attempt 3/5, backoff 8.0s): APIError('Request too large for gpt-4o in organization org-cfM4Qod156TYPewRWBzirqVd on tokens per min (TPM): Limit 30000, Requested 37186. The input or output tokens must be reduced in order to run successfully. Visit https://platform.openai.com/account/rate-limits to learn more.')
+2026-08-13 12:06:55.238 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating trace
+2026-08-13 12:06:55.240 DEBUG   roommate-full-updated_0d26 - openai.agents: Setting current trace: no-op
+2026-08-13 12:06:55.240 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:06:55.257 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:06:55.257 DEBUG   roommate-full-updated_0d26 - openai.agents: Starting turn 1, current_agent=Root Agent
+2026-08-13 12:06:55.257 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:06:55.258 DEBUG   roommate-full-updated_0d26 - openai.agents: No conversation_id available for request
+2026-08-13 12:06:55.258 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:06:55.259 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:07:00.561 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:07:00.562 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 2.0s (attempt 1/5).
+2026-08-13 12:07:02.564 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:07:02.566 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:07:08.149 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:07:08.150 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 4.0s (attempt 2/5).
+2026-08-13 12:07:12.152 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:07:12.153 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:07:18.528 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:07:18.530 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 8.0s (attempt 3/5).
+2026-08-13 12:07:26.532 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:07:26.534 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:07:32.370 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:07:32.371 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 16.0s (attempt 4/5).
+2026-08-13 12:07:48.374 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:07:48.378 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:07:54.862 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:07:54.863 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 32.0s (attempt 5/5).
+2026-08-13 12:08:26.867 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:08:26.870 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:08:31.862 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:08:31.865 DEBUG   roommate-full-updated_0d26 - openai.agents: Resetting current trace
+2026-08-13 12:08:31.866 WARNING roommate-full-updated_0d26 - strix.core.execution: transient model/provider error for 908a1d97; replaying turn (attempt 4/5, backoff 16.0s): APIError('Request too large for gpt-4o in organization org-cfM4Qod156TYPewRWBzirqVd on tokens per min (TPM): Limit 30000, Requested 37186. The input or output tokens must be reduced in order to run successfully. Visit https://platform.openai.com/account/rate-limits to learn more.')
+2026-08-13 12:08:47.877 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating trace
+2026-08-13 12:08:47.880 DEBUG   roommate-full-updated_0d26 - openai.agents: Setting current trace: no-op
+2026-08-13 12:08:47.880 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:08:47.903 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:08:47.903 DEBUG   roommate-full-updated_0d26 - openai.agents: Starting turn 1, current_agent=Root Agent
+2026-08-13 12:08:47.903 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:08:47.905 DEBUG   roommate-full-updated_0d26 - openai.agents: No conversation_id available for request
+2026-08-13 12:08:47.905 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:08:47.906 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:08:54.527 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:08:54.528 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 2.0s (attempt 1/5).
+2026-08-13 12:08:56.529 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:08:56.531 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:09:02.609 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:09:02.611 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 4.0s (attempt 2/5).
+2026-08-13 12:09:06.614 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:09:06.615 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:09:12.431 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:09:12.431 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 8.0s (attempt 3/5).
+2026-08-13 12:09:20.434 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:09:20.437 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:09:27.431 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:09:27.432 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 16.0s (attempt 4/5).
+2026-08-13 12:09:43.435 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:09:43.439 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:09:49.043 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:09:49.043 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 32.0s (attempt 5/5).
+2026-08-13 12:10:21.046 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:10:21.049 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:10:27.123 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:10:27.125 DEBUG   roommate-full-updated_0d26 - openai.agents: Resetting current trace
+2026-08-13 12:10:27.125 WARNING roommate-full-updated_0d26 - strix.core.execution: transient model/provider error for 908a1d97; replaying turn (attempt 5/5, backoff 32.0s): APIError('Request too large for gpt-4o in organization org-cfM4Qod156TYPewRWBzirqVd on tokens per min (TPM): Limit 30000, Requested 37186. The input or output tokens must be reduced in order to run successfully. Visit https://platform.openai.com/account/rate-limits to learn more.')
+2026-08-13 12:10:59.145 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating trace
+2026-08-13 12:10:59.148 DEBUG   roommate-full-updated_0d26 - openai.agents: Setting current trace: no-op
+2026-08-13 12:10:59.148 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:10:59.173 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:10:59.173 DEBUG   roommate-full-updated_0d26 - openai.agents: Starting turn 1, current_agent=Root Agent
+2026-08-13 12:10:59.173 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:10:59.175 DEBUG   roommate-full-updated_0d26 - openai.agents: No conversation_id available for request
+2026-08-13 12:10:59.175 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:10:59.176 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:11:04.131 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:11:04.134 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 2.0s (attempt 1/5).
+2026-08-13 12:11:06.136 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:11:06.137 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:11:11.699 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:11:11.701 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 4.0s (attempt 2/5).
+2026-08-13 12:11:15.704 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:11:15.705 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:11:22.530 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:11:22.530 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 8.0s (attempt 3/5).
+2026-08-13 12:11:30.533 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:11:30.535 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:11:35.632 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:11:35.632 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 16.0s (attempt 4/5).
+2026-08-13 12:11:51.634 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:11:51.636 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:11:56.664 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:11:56.665 DEBUG   roommate-full-updated_0d26 - openai.agents: Retrying failed streamed model request in 32.0s (attempt 5/5).
+2026-08-13 12:12:28.668 DEBUG   roommate-full-updated_0d26 - openai.agents: Tracing is disabled. Not creating span
+2026-08-13 12:12:28.674 DEBUG   roommate-full-updated_0d26 - openai.agents: Calling LLM
+2026-08-13 12:12:35.295 ERROR   roommate-full-updated_0d26 - openai.agents: Error streaming response
+2026-08-13 12:12:35.296 DEBUG   roommate-full-updated_0d26 - openai.agents: Resetting current trace
+2026-08-13 12:12:35.301 ERROR   roommate-full-updated_0d26 - strix.core.execution: agent run failed for 908a1d97; marking failed
+Traceback (most recent call last):
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/strix/core/execution.py", line 676, in _run_cycle
+    async for event in stream.stream_events():
+    ...<4 lines>...
+                logger.exception("stream event sink failed for %s", agent_id)
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/agents/result.py", line 931, in stream_events
+    raise self._stored_exception
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/agents/result.py", line 1021, in _await_task_safely
+    await task
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/agents/result.py", line 695, in _await_run_and_cleanup
+    result = await original_task
+             ^^^^^^^^^^^^^^^^^^^
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/agents/run_internal/run_loop.py", line 1226, in start_streaming
+    turn_result = await run_single_turn_streamed(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<15 lines>...
+    )
+    ^
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/agents/run_internal/run_loop.py", line 1712, in run_single_turn_streamed
+    async for event in model_run_context_stream(retry_stream, tool_use_tracker):
+    ...<142 lines>...
+                    )
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/agents/models/_run_context.py", line 31, in model_run_context_stream
+    async for item in stream:
+        yield item
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/agents/run_internal/model_retry.py", line 560, in stream_response_with_retry
+    event = await stream.__anext__()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/strix/config/models.py", line 354, in stream_response
+    async for event in _with_idle_timeout(stream, self._stream_idle_timeout):
+    ...<2 lines>...
+            yield guarded
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/strix/config/models.py", line 378, in _with_idle_timeout
+    event = await asyncio.wait_for(iterator.__anext__(), timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/tasks.py", line 488, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/agents/models/openai_responses.py", line 591, in stream_response
+    async for chunk in stream:
+    ...<38 lines>...
+        yield chunk
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/agents/models/openai_responses.py", line 258, in __anext__
+    event = await self._stream.__anext__()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/openai/_streaming.py", line 155, in __anext__
+    return await self._iterator.__anext__()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/openai/_streaming.py", line 205, in __stream__
+    raise APIError(
+    ...<3 lines>...
+    )
+openai.APIError: Request too large for gpt-4o in organization org-cfM4Qod156TYPewRWBzirqVd on tokens per min (TPM): Limit 30000, Requested 37186. The input or output tokens must be reduced in order to run successfully. Visit https://platform.openai.com/account/rate-limits to learn more.
+2026-08-13 12:12:35.309 INFO    roommate-full-updated_0d26 - strix.core.agents: agent.status 908a1d97=failed
+2026-08-13 12:12:35.310 ERROR   roommate-full-updated_0d26 - strix.core.runner: Strix scan roommate-full-updated_0d26 failed
+Traceback (most recent call last):
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/strix/core/runner.py", line 395, in run_strix_scan
+    result = await run_agent_loop(
+             ^^^^^^^^^^^^^^^^^^^^^
+    ...<12 lines>...
+    )
+    ^
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/strix/core/execution.py", line 212, in run_agent_loop
+    result = await _run_until_lifecycle(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/strix/core/execution.py", line 485, in _run_until_lifecycle
+    result = await _run_cycle(
+             ^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/strix/core/execution.py", line 676, in _run_cycle
+    async for event in stream.stream_events():
+    ...<4 lines>...
+                logger.exception("stream event sink failed for %s", agent_id)
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/agents/result.py", line 931, in stream_events
+    raise self._stored_exception
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/agents/result.py", line 1021, in _await_task_safely
+    await task
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/agents/result.py", line 695, in _await_run_and_cleanup
+    result = await original_task
+             ^^^^^^^^^^^^^^^^^^^
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/agents/run_internal/run_loop.py", line 1226, in start_streaming
+    turn_result = await run_single_turn_streamed(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<15 lines>...
+    )
+    ^
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/agents/run_internal/run_loop.py", line 1712, in run_single_turn_streamed
+    async for event in model_run_context_stream(retry_stream, tool_use_tracker):
+    ...<142 lines>...
+                    )
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/agents/models/_run_context.py", line 31, in model_run_context_stream
+    async for item in stream:
+        yield item
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/agents/run_internal/model_retry.py", line 560, in stream_response_with_retry
+    event = await stream.__anext__()
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/strix/config/models.py", line 354, in stream_response
+    async for event in _with_idle_timeout(stream, self._stream_idle_timeout):
+    ...<2 lines>...
+            yield guarded
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/strix/config/models.py", line 378, in _with_idle_timeout
+    event = await asyncio.wait_for(iterator.__anext__(), timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/tasks.py", line 488, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/agents/models/openai_responses.py", line 591, in stream_response
+    async for chunk in stream:
+    ...<38 lines>...
+        yield chunk
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/agents/models/openai_responses.py", line 258, in __anext__
+    event = await self._stream.__anext__()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/openai/_streaming.py", line 155, in __anext__
+    return await self._iterator.__anext__()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yusufcash/Library/Application Support/pipx/venvs/strix-agent/lib/python3.14/site-packages/openai/_streaming.py", line 205, in __stream__
+    raise APIError(
+    ...<3 lines>...
+    )
+openai.APIError: Request too large for gpt-4o in organization org-cfM4Qod156TYPewRWBzirqVd on tokens per min (TPM): Limit 30000, Requested 37186. The input or output tokens must be reduced in order to run successfully. Visit https://platform.openai.com/account/rate-limits to learn more.
+2026-08-13 12:12:35.314 INFO    roommate-full-updated_0d26 - strix.core.agents: agent.status 908a1d97=failed
+2026-08-13 12:12:35.314 INFO    roommate-full-updated_0d26 - strix.core.runner: Tearing down sandbox session for scan roommate-full-updated_0d26
+2026-08-13 12:12:35.493 INFO    roommate-full-updated_0d26 - strix.runtime.session_manager: Cleaned up sandbox session for scan roommate-full-updated_0d26
+2026-08-13 12:12:35.493 INFO    roommate-full-updated_0d26 - strix.core.runner: Strix scan roommate-full-updated_0d26 done

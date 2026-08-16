@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="sentry-init.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Abmelden - UniGoat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#F7F4EE;color:#1A1613;font-family:'Sora',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .card{background:#fff;border-radius:20px;padding:36px 28px;max-width:420px;width:100%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.08);}
+  .logo{width:80px;height:80px;margin:0 auto 18px;background:center/contain no-repeat url('logo-goat.png?v90');}
+  h1{font-family:'Fraunces',serif;font-size:24px;font-weight:700;margin-bottom:12px;}
+  p{font-size:14.5px;line-height:1.6;color:#6B6459;margin-bottom:18px;}
+  .btn{display:inline-block;background:#1B9E5F;color:#fff;text-decoration:none;font-weight:700;padding:13px 26px;border-radius:12px;font-size:15px;border:none;cursor:pointer;font-family:inherit;}
+  .btn.ghost{background:transparent;color:#1B9E5F;border:1.5px solid #D8E8DE;margin-top:10px;}
+  .muted{font-size:12px;color:#9C9284;margin-top:20px;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo"></div>
+    <div id="content">
+      <h1>Einen Moment…</h1>
+      <p>Wir melden dich gerade ab.</p>
+    </div>
+  </div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+  "use strict";
+  var content = document.getElementById('content');
+  function show(title, text, extra){
+    content.innerHTML = '<h1>'+title+'</h1><p>'+text+'</p>'+(extra||'');
+  }
+  var token = new URLSearchParams(location.search).get('t');
+  if(!token){
+    show('Link ungültig', 'Dieser Abmelde-Link ist leider nicht vollständig. Du kannst dich auch direkt in der App unter Einstellungen abmelden.');
+    return;
+  }
+  var client = window.sb || (window.supabase && window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
+  if(!client){
+    show('Fehler', 'Wir konnten dich gerade nicht abmelden. Bitte versuch es später nochmal.');
+    return;
+  }
+  client.rpc('unsubscribe_by_token', { p_token: token }).then(function(res){
+    if(res.error || res.data !== true){
+      show('Schon abgemeldet?', 'Wir konnten diese Abmeldung nicht zuordnen — vielleicht bist du schon abgemeldet. Alles gut, du bekommst keine Werbe-Mails mehr.');
+    } else {
+      show('Du bist abgemeldet ✓',
+        'Du bekommst von UniGoat keine Wettkampf- und Rabatt-Mails mehr. Wichtige Konto-Mails (z. B. Passwort zurücksetzen) senden wir weiterhin.',
+        '<a href="notification-settings.html" class="btn ghost">Wieder anmelden (in der App)</a>');
+    }
+  }).catch(function(){
+    show('Fehler', 'Wir konnten dich gerade nicht abmelden. Bitte versuch es später nochmal.');
+  });
+})();
+</script>
+<div class="muted" style="text-align:center;">UniGoat</div>
+</body>
+</html>

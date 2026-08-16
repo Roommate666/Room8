@@ -4,10 +4,10 @@
     <script src="sentry-init.js"></script>
     <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">    <title>Coupon erstellen - Admin</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico?v61">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v61">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v61">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v61">
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
   <link rel="stylesheet" href="style.css">
     <style>
         .app-container { --primary-color: #111827; }
@@ -159,6 +159,16 @@
                     <option value="leisure">🎮 Freizeit</option>
                     <option value="beauty">💅 Beauty & Wellness</option>
                     <option value="education">📚 Bildung</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Art des Ladens</label>
+                <select id="venueType">
+                    <option value="restaurant">🍽️ Restaurant</option>
+                    <option value="laden">🛍️ Laden</option>
+                    <option value="supermarkt">🛒 Supermarkt</option>
+                    <option value="freizeit">🎉 Freizeitaktivität</option>
                 </select>
             </div>
 
@@ -432,6 +442,7 @@
                 business_name: document.getElementById('businessName').value,
                 title: document.getElementById('title').value,
                 category: document.getElementById('category').value,
+                venue_type: (document.getElementById('venueType') ? document.getElementById('venueType').value : null),
                 discount_value: document.getElementById('discountValue').value,
                 discount_code: document.getElementById('code').value.toUpperCase(),
                 valid_until: document.getElementById('validUntil').value || null,

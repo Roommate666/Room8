@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Block-Designs - UniGoat</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Nunito',system-ui,sans-serif;background:#eef1f4;color:#15202b;padding:16px 14px calc(40px + env(safe-area-inset-bottom));}
+  h1{font-size:22px;font-weight:900;margin-bottom:4px;}
+  .lead{font-size:13.5px;color:#5b6675;margin-bottom:18px;line-height:1.4;}
+  .card{background:#f7f8fb;border-radius:18px;padding:16px;margin-bottom:16px;box-shadow:0 3px 12px rgba(0,0,0,.06);}
+  .ttl{font-size:16px;font-weight:900;margin-bottom:2px;}
+  .desc{font-size:12px;color:#6b7684;margin-bottom:12px;}
+  .row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .mini{--c:#2f6bff;display:grid;grid-template-columns:repeat(4,42px);grid-template-rows:repeat(4,42px);gap:3px;}
+  .mini .e{background:rgba(150,165,185,.16);border-radius:9px;}
+  .swatches{display:flex;gap:8px;}
+  .sw{--c:#2f6bff;width:34px;height:34px;}
+
+  /* 1 */
+  .s1 .f,.s1 .sw{border-radius:20%;background:linear-gradient(150deg,color-mix(in srgb,var(--c) 60%,#fff 40%),var(--c) 44%,color-mix(in srgb,var(--c) 78%,#000 22%));box-shadow:inset 3px 3px 2px rgba(255,255,255,.6),inset -5px -6px 4px rgba(0,0,0,.34),0 3px 0 color-mix(in srgb,var(--c) 60%,#000 40%),0 5px 6px rgba(0,0,0,.24);position:relative;}
+  .s1 .f::before,.s1 .sw::before{content:"";position:absolute;left:13%;top:10%;width:42%;height:28%;border-radius:45%;background:linear-gradient(135deg,rgba(255,255,255,.7),rgba(255,255,255,0));}
+  /* 2 */
+  .s2 .f,.s2 .sw{border-radius:28%;background:var(--c);box-shadow:inset 0 -3px 0 color-mix(in srgb,var(--c) 82%,#000 18%),inset 0 2px 0 color-mix(in srgb,var(--c) 78%,#fff 22%);}
+  /* 3 */
+  .s3 .f,.s3 .sw{border-radius:26%;background:radial-gradient(120% 90% at 30% 22%,color-mix(in srgb,var(--c) 30%,#fff 70%) 0%,var(--c) 45%,color-mix(in srgb,var(--c) 75%,#000 25%) 100%);box-shadow:inset 2px 3px 6px rgba(255,255,255,.55),inset -3px -5px 8px rgba(0,0,0,.28),0 3px 8px rgba(0,0,0,.2);position:relative;}
+  .s3 .f::before,.s3 .sw::before{content:"";position:absolute;left:16%;top:9%;width:50%;height:34%;border-radius:50%;background:linear-gradient(160deg,rgba(255,255,255,.85),rgba(255,255,255,0));}
+  /* 4 */
+  .s4wrap{background:#12151c;border-radius:12px;padding:10px;}
+  .s4wrap .desc{color:#9aa7b8;}
+  .s4 .e{background:rgba(255,255,255,.04);}
+  .s4 .f,.s4 .sw{border-radius:22%;background:color-mix(in srgb,var(--c) 30%,#12151c 70%);box-shadow:inset 0 0 0 2px var(--c),0 0 10px color-mix(in srgb,var(--c) 70%,transparent),inset 0 0 12px color-mix(in srgb,var(--c) 45%,transparent);}
+  /* 5 */
+  .s5 .f,.s5 .sw{border-radius:24%;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 88%,#fff 12%),color-mix(in srgb,var(--c) 94%,#000 6%));box-shadow:inset 0 2px 3px rgba(255,255,255,.3),inset 0 -2px 4px rgba(0,0,0,.14),0 2px 3px rgba(0,0,0,.1);}
+  /* 6 */
+  .s6 .f,.s6 .sw{border-radius:16%;background:conic-gradient(from 210deg at 50% 40%,color-mix(in srgb,var(--c) 55%,#fff 45%),var(--c) 90deg,color-mix(in srgb,var(--c) 70%,#000 30%) 200deg,color-mix(in srgb,var(--c) 40%,#fff 60%) 320deg,color-mix(in srgb,var(--c) 55%,#fff 45%));box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.35),0 3px 6px rgba(0,0,0,.22);position:relative;}
+  .s6 .f::before,.s6 .sw::before{content:"";position:absolute;inset:0;border-radius:16%;background:linear-gradient(135deg,rgba(255,255,255,.5) 0%,transparent 40%);}
+  /* 7 Sticker */
+  .s7 .f,.s7 .sw{border-radius:24%;background:var(--c);box-shadow:0 0 0 3px #fff,0 3px 6px rgba(0,0,0,.25);position:relative;}
+  .s7 .f::before,.s7 .sw::before{content:"";position:absolute;left:14%;top:12%;width:40%;height:26%;border-radius:50%;background:rgba(255,255,255,.4);}
+  /* 8 Plastic Stud */
+  .s8 .f,.s8 .sw{border-radius:20%;background:linear-gradient(160deg,color-mix(in srgb,var(--c) 72%,#fff 28%),var(--c) 55%,color-mix(in srgb,var(--c) 82%,#000 18%));box-shadow:inset 0 2px 2px rgba(255,255,255,.5),0 3px 5px rgba(0,0,0,.2);position:relative;}
+  .s8 .f::after,.s8 .sw::after{content:"";position:absolute;left:50%;top:50%;width:38%;height:38%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 40% 35%,color-mix(in srgb,var(--c) 60%,#fff 40%),color-mix(in srgb,var(--c) 85%,#000 15%));box-shadow:inset 0 1px 2px rgba(255,255,255,.6),inset 0 -1px 2px rgba(0,0,0,.25);}
+  /* 9 Frosted Glass */
+  .s9 .f,.s9 .sw{border-radius:26%;background:linear-gradient(160deg,color-mix(in srgb,var(--c) 45%,#fff 55%),color-mix(in srgb,var(--c) 62%,#fff 38%));box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.6),inset 0 -3px 6px color-mix(in srgb,var(--c) 40%,transparent),0 2px 5px rgba(0,0,0,.12);}
+  /* 10 Deep 3D */
+  .s10 .f,.s10 .sw{border-radius:18%;background:linear-gradient(150deg,color-mix(in srgb,var(--c) 55%,#fff 45%),var(--c) 42%,color-mix(in srgb,var(--c) 72%,#000 28%));box-shadow:inset 4px 4px 3px rgba(255,255,255,.55),inset -6px -8px 5px rgba(0,0,0,.4),0 6px 0 color-mix(in srgb,var(--c) 55%,#000 45%),0 9px 10px rgba(0,0,0,.3);}
+</style>
+</head>
+<body>
+<h1>🎨 Block-Designs</h1>
+<p class="lead">10 Stile fuer die Spielbloecke. Jeweils als Mini-Feld (Blau) + in mehreren Farben. Sag mir einfach die <b>Nummer</b>, die dir am besten gefaellt — dann bau ich sie ins Spiel ein.</p>
+<div id="app"></div>
+
+<script>
+var COLORS=['#2f6bff','#22b463','#ff8c1a','#ff5d8f','#e4483b','#f2b90c'];
+var PATTERN=[1,1,0,1, 0,1,1,1, 1,0,0,1, 1,1,1,0];
+var STYLES=[
+  ['s1','1 · 3D Bevel','Der aktuelle Stil: erhabener Button, heller Deckel, dunkle Fase.',false],
+  ['s2','2 · Flat Candy 2D','Flach & clean, weiche Kanten, minimaler Glanz. Modern.',false],
+  ['s3','3 · Glossy Jelly','Glaenzend/gummiartig mit fettem Highlight. Am "suessesten".',false],
+  ['s4','4 · Neon Glow','Leuchtender Rand auf dunklem Feld. Arcade/Gaming-Look.',true],
+  ['s5','5 · Soft Matte','Matt & gedaempft, kein Glanz. Ruhig, edel.',false],
+  ['s6','6 · Crystal Gem','Facettiert wie ein Edelstein/Diamant.',false],
+  ['s7','7 · Sticker','Weisser Rand rundherum wie ein Aufkleber. Verspielt.',false],
+  ['s8','8 · Plastic Stud','Kunststoff mit Noppe in der Mitte (Lego-Vibe).',false],
+  ['s9','9 · Frosted Glass','Milchglas/pastellig, soft und hell.',false],
+  ['s10','10 · Deep 3D','Wie #1, aber mit viel staerkerer Tiefe/Extrusion.',false]
+];
+var app=document.getElementById('app');
+STYLES.forEach(function(s){
+  var card=document.createElement('div');card.className='card'+(s[3]?' s4wrap':'');
+  card.innerHTML='<div class="ttl">'+s[1]+'</div><div class="desc">'+s[2]+'</div>';
+  var row=document.createElement('div');row.className='row';
+  var m=document.createElement('div');m.className='mini '+s[0];
+  PATTERN.forEach(function(v){var c=document.createElement('div');c.className=v?'f':'e';m.appendChild(c);});
+  row.appendChild(m);
+  var sw=document.createElement('div');sw.className='swatches '+s[0];
+  COLORS.forEach(function(col){var d=document.createElement('div');d.className='sw';d.style.setProperty('--c',col);sw.appendChild(d);});
+  row.appendChild(sw);
+  card.appendChild(row);
+  app.appendChild(card);
+});
+</script>
+</body>
+</html>

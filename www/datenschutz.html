@@ -6,10 +6,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title data-i18n="privacy_page_title">Datenschutz - UniGoat</title>
     <meta name="description" content="Datenschutzerklaerung der UniGoat Studenten-Plattform. Erfahre, wie wir deine Daten schuetzen und verarbeiten.">
-    <link rel="icon" type="image/x-icon" href="favicon.ico?v61">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v61">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v61">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v61">
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
     <style>
         /* Pattern: Magic UI BlurFade */
@@ -96,6 +98,16 @@
 
         a { color: var(--primary-color); text-decoration: none; }
         a:hover { text-decoration: underline; }
+
+        /* --- UniGoat-Look Angleichung (14.08.2026): Fonts + Mint-Akzent --- */
+        :root { --primary-color: #12B489; --text-main: #0c2b24; }
+        body { font-family: 'Sora', system-ui, -apple-system, sans-serif; background: #f4f7f6; }
+        h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; }
+        .app-header h1 { font-family: 'Fraunces', serif; }
+        h2 { border-bottom-color: rgba(18,180,137,.18); }
+        .info-box { background: rgba(18,180,137,.08); border-left-color: #12B489; color: #0c5c46; }
+        .highlight-box { background: rgba(18,180,137,.10); border-left-color: #0e9e79; color: #0c5c46; }
+        .email-link { background: rgba(18,180,137,.12); color: #0e8f6c; }
     </style>
 </head>
 <body>
@@ -143,7 +155,7 @@
                 Am Silbermannpark 13<br>
                 86161 Augsburg<br>
                 <span data-i18n="privacy_country">Deutschland</span><br><br>
-                <span data-i18n="privacy_email_label">E-Mail:</span> <a href="mailto:hallo@unigoat.de" class="email-link">hallo@unigoat.de</a>
+                <span data-i18n="privacy_email_label">E-Mail:</span> <a href="mailto:info@unigoat.de" class="email-link">info@unigoat.de</a>
             </div>
             
             <h2 data-i18n="privacy_data_title">2. Welche Daten wir erheben</h2>
@@ -164,7 +176,8 @@
                 <li>Uni-E-Mail-Adresse (zur E-Mail-Verifizierung)</li>
                 <li>Optional: Immatrikulationsbescheinigung oder Foto des Studierendenausweises. Diese Dokumente dienen ausschließlich der einmaligen Prüfung deines Studierendenstatus und werden nach Abschluss der Prüfung gelöscht. Du kannst einen laufenden Verifizierungsantrag jederzeit selbst zurückziehen; das hochgeladene Dokument wird dabei entfernt.</li>
             </ul>
-            
+            <p><strong>Automatisierte Prüfung durch KI (Immatrikulations-Scan):</strong> Wenn du dein Dokument über die automatische Prüfung hochlädst, wird das Bild zur reinen Text-Erkennung (Hochschule, Name, Gültigkeitszeitraum) an unseren Auftragsverarbeiter <strong>Anthropic PBC (USA)</strong> übermittelt und dort verarbeitet. Das Bild wird dabei <strong>nur flüchtig im Arbeitsspeicher</strong> verarbeitet und <strong>weder bei uns noch bei Anthropic dauerhaft gespeichert</strong> und nicht zum Training von KI-Modellen verwendet. Dauerhaft gespeichert werden ausschließlich die Ergebnis-Angaben an deinem Profil (Hochschule, Ablaufdatum, Zeitpunkt der Prüfung); dein Klarname wird nicht gespeichert. Rechtsgrundlage ist deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die du vor dem Upload aktiv erteilst. Die Übermittlung in die USA erfolgt auf Basis der EU-Standardvertragsklauseln. Du kannst deinen Status alternativ manuell (ohne KI) prüfen lassen – schreib uns dazu an info@unigoat.de.</p>
+
             <h3>2.3 Inseratsdaten</h3>
             <p data-i18n="privacy_listings_intro">Wenn du ein Inserat erstellst, speichern wir:</p>
             <ul>
@@ -211,6 +224,18 @@
                 Schutz vor Mehrfach-Einlösung: die eingelöste Coupon-ID, deine Nutzer-ID, Zeitpunkt der
                 Einlösung und einen Bestätigungscode. Diese Daten sind für den jeweiligen Partner zur
                 Prüfung der Einlösung sichtbar.
+            </p>
+
+            <h3>2.9 Standort-Prüfung beim Einlösen</h3>
+            <p>
+                Bei manchen Coupons prüfen wir beim Einlösen <strong>einmalig deinen ungefähren Standort</strong>,
+                um zu bestätigen, dass du dich beim Partner-Laden befindest (Schutz vor Missbrauch). Die
+                Standort-Abfrage erfolgt <strong>nur in diesem Moment und nur mit deiner Freigabe</strong> – kein
+                Hintergrund-Tracking, kein Bewegungsprofil. <strong>Deine Koordinaten werden nicht gespeichert.</strong>
+                Gespeichert wird ausschließlich das Ergebnis der Prüfung (bestätigt: ja/nein). Verweigerst du die
+                Standort-Freigabe, kannst du den Coupon trotzdem einlösen; für die G-Coins-Gutschrift ist bei diesen
+                Coupons aber die Standort-Bestätigung nötig. Rechtsgrundlage: deine Einwilligung (Art. 6 Abs. 1 lit. a)
+                sowie unser berechtigtes Interesse an der Missbrauchsvermeidung (Art. 6 Abs. 1 lit. f DSGVO).
             </p>
 
             <h2 data-i18n="privacy_not_title">3. Was wir NICHT tun</h2>
@@ -304,7 +329,7 @@
                 Du kannst dein Konto in der App UniGoat jederzeit unter Profil → Einstellungen → Konto löschen. Dabei werden alle deine personenbezogenen Daten, Inserate und Nachrichten unwiderruflich entfernt.
             </p>
             <p>
-                Alternativ kannst du die Löschung deines Kontos und aller zugehörigen Daten per E-Mail an <a href="mailto:hallo@unigoat.de" class="email-link">hallo@unigoat.de</a> beantragen (Betreff: „Kontolöschung UniGoat"). Wir löschen dein Konto und die damit verbundenen Daten dann innerhalb von 30 Tagen.
+                Alternativ kannst du die Löschung deines Kontos und aller zugehörigen Daten per E-Mail an <a href="mailto:info@unigoat.de" class="email-link">info@unigoat.de</a> beantragen (Betreff: „Kontolöschung UniGoat"). Wir löschen dein Konto und die damit verbundenen Daten dann innerhalb von 30 Tagen.
             </p>
 
             <h2>9. Minderjährigenschutz</h2>
@@ -313,7 +338,7 @@
             <h2>10. Kontakt</h2>
             <p>
                 <span data-i18n="privacy_contact_text">Bei Fragen zum Datenschutz:</span><br>
-                <a href="mailto:hallo@unigoat.de" class="email-link">hallo@unigoat.de</a>
+                <a href="mailto:info@unigoat.de" class="email-link">info@unigoat.de</a>
             </p>
 
         </div>

@@ -14,6 +14,8 @@ PODS:
   - CapacitorCommunityAppleSignIn (7.1.0):
     - Capacitor
   - CapacitorCordova (7.6.2)
+  - CapacitorHaptics (7.0.5):
+    - Capacitor
   - CapacitorPushNotifications (7.0.4):
     - Capacitor
   - CapgoCapacitorSocialLogin (7.20.0):
@@ -91,6 +93,7 @@ DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorCommunityAppleSignIn (from `../../node_modules/@capacitor-community/apple-sign-in`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
   - "CapacitorPushNotifications (from `../../node_modules/@capacitor/push-notifications`)"
   - "CapgoCapacitorSocialLogin (from `../../node_modules/@capgo/capacitor-social-login`)"
   - Firebase/Messaging
@@ -119,6 +122,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor-community/apple-sign-in"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
+  CapacitorHaptics:
+    :path: "../../node_modules/@capacitor/haptics"
   CapacitorPushNotifications:
     :path: "../../node_modules/@capacitor/push-notifications"
   CapgoCapacitorSocialLogin:
@@ -130,6 +135,7 @@ SPEC CHECKSUMS:
   Capacitor: 5d4e6523047feb0e4755e5e922ded0372c2dde24
   CapacitorCommunityAppleSignIn: 271cb2860576fd2961508bbfa7a82117d93eadca
   CapacitorCordova: 8214697bed435f6e7c5e3ed86d1632a8c42f7d77
+  CapacitorHaptics: 1b145fa83c622e5383a3bac04ea81e2514f0b0f5
   CapacitorPushNotifications: 7604512af53bbfdf1dd8fb2256b9ef1e8a69cdc2
   CapgoCapacitorSocialLogin: c0e138419bb46a0f95eb0c89f2d9a2d2f7bb21c0
   Firebase: d99ac19b909cd2c548339c2241ecd0d1599ab02e
@@ -145,6 +151,6 @@ SPEC CHECKSUMS:
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
 
-PODFILE CHECKSUM: ffbfd43edb85bb52b79c4e1375a5a39669e00418
+PODFILE CHECKSUM: fec1cf5efe5d7ee5a860a04f2bcff534c26ab8ab
 
 COCOAPODS: 1.16.2
