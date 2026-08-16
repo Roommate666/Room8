@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UniGoat · Live-Rangliste</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;box-sizing:border-box}
+  body{font-family:'Sora',system-ui,sans-serif;background:#0a0a0b;color:#fff;min-height:100vh;overflow:hidden;}
+  .wrap{max-width:1000px;margin:0 auto;padding:3vh 4vw;}
+  .head{text-align:center;margin-bottom:3vh;}
+  .head .goat{width:9vh;height:9vh;filter:invert(1);}
+  .head h1{font-family:'Fraunces',serif;font-size:5vh;line-height:1;margin-top:1vh;}
+  .head .sub{font-weight:700;color:#12B489;font-size:2.4vh;margin-top:1vh;letter-spacing:1px;text-transform:uppercase;}
+  .head .prize{color:rgba(255,255,255,.75);font-size:2.1vh;margin-top:.6vh;}
+  .row{display:flex;align-items:center;gap:2vw;background:rgba(255,255,255,.05);border-radius:16px;padding:1.4vh 2vw;margin-bottom:1.2vh;font-size:3vh;}
+  .row.top1{background:linear-gradient(90deg,rgba(244,183,64,.22),rgba(244,183,64,.05));border:1px solid rgba(244,183,64,.5);}
+  .row.top2{background:rgba(255,255,255,.09);}
+  .row .rk{font-family:'Fraunces',serif;font-weight:700;width:2.5ch;text-align:center;}
+  .row.top1 .rk{color:#F4B740;}
+  .row .av{width:6vh;height:6vh;border-radius:14px;overflow:hidden;flex:0 0 auto;background:#1a1a1c;}
+  .row .nm{flex:1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .row .uni{color:rgba(255,255,255,.5);font-weight:600;font-size:2.1vh;}
+  .row .sc{font-family:'Fraunces',serif;font-weight:700;color:#12B489;}
+  .row.top1 .sc{color:#F4B740;}
+  .empty{text-align:center;color:rgba(255,255,255,.6);font-size:3vh;margin-top:10vh;}
+  .foot{position:fixed;bottom:2.5vh;width:100%;text-align:center;color:rgba(255,255,255,.55);font-weight:700;font-size:2.3vh;left:0;}
+  .foot b{color:#12B489;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <img class="goat" id="goat" alt="">
+    <h1>UniGoat</h1>
+    <div class="sub" id="evtitle">Live-Rangliste</div>
+    <div class="prize" id="prize"></div>
+  </div>
+  <div id="list"><div class="empty">Lade…</div></div>
+</div>
+<div class="foot">📲 App laden, verifizieren &amp; mitspielen — <b>unigoat.de</b></div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="game/avatar.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var params=new URLSearchParams(location.search);
+  var GKEY=params.get('event')||null;   // ?event=campus_ulm -> Event-Rangliste; sonst globale High
+  function nf(n){return (+n||0).toLocaleString('de-DE');}
+  function esc(s){return String(s==null?'':s);}
+  // weisse Ziege als Header (aus dem Favicon)
+  $('goat').src='favicon-192x192.png?v133';
+
+  async function loadMeta(){
+    if(!window.sb)return;
+    try{
+      var r=await sb.from('current_game_event').select('*').limit(1);
+      var ev=(r.data&&r.data[0])||null;
+      if(ev){
+        if(!GKEY)GKEY=ev.game_key||'goat_blast';
+        $('evtitle').textContent=(ev.title||'Live-Rangliste');
+        if(ev.prize_text)$('prize').textContent='🏆 '+ev.prize_text;
+      } else if(!GKEY){ GKEY='goat_blast'; }
+    }catch(e){ if(!GKEY)GKEY='goat_blast'; }
+  }
+
+  async function render(){
+    if(!window.sb){ setTimeout(render,500); return; }
+    try{
+      var r=await sb.from('goat_leaderboard').select('username,university,score,user_id,avatar_config,game_key').eq('game_key',GKEY).eq('mode','high').order('score',{ascending:false}).limit(60);
+      var seen={},rows=[];(r.data||[]).forEach(function(x){if(!seen[x.user_id]){seen[x.user_id]=1;rows.push(x);}});
+      rows=rows.slice(0,12);
+      var host=$('list');
+      if(!rows.length){host.innerHTML='<div class="empty">Noch keine Scores — sei der Erste! 🐐</div>';return;}
+      host.innerHTML='';
+      rows.forEach(function(x,i){
+        var d=document.createElement('div');d.className='row'+(i===0?' top1':(i<3?' top2':''));
+        var medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+        var rk=document.createElement('div');rk.className='rk';rk.textContent=medal;
+        var av=document.createElement('div');av.className='av';
+        try{ if(window.GoatAvatar) av.innerHTML=GoatAvatar.renderGoatAvatar(x.avatar_config||{},0); }catch(e){}
+        var nm=document.createElement('div');nm.className='nm';
+        nm.textContent=esc(x.username||'Anonym');
+        if(x.university){var u=document.createElement('span');u.className='uni';u.textContent=' · '+esc(x.university);nm.appendChild(u);}
+        var sc=document.createElement('div');sc.className='sc';sc.textContent=nf(x.score);
+        d.appendChild(rk);d.appendChild(av);d.appendChild(nm);d.appendChild(sc);host.appendChild(d);
+      });
+    }catch(e){}
+  }
+  async function boot(){ await loadMeta(); await render(); setInterval(render, 8000); }
+  if(window.sb)boot(); else setTimeout(boot,300);
+})();
+</script>
+</body>
+</html>

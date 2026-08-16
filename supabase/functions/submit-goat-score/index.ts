@@ -101,6 +101,18 @@ serve(async (req) => {
 
     // 4. Schreiben via Service Role (umgeht RLS; einzige erlaubte Schreibstelle)
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+
+    // Event-Modus: max 3 Leben (Versuche) pro Spieler pro Event. Normales Spiel (kein event_id) bleibt unbegrenzt.
+    if (eventId) {
+      const { count: tries } = await admin
+        .from('goat_scores')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('event_id', eventId)
+      if ((tries ?? 0) >= 3) {
+        return json({ success: false, error: 'event_no_lives_left', message: 'Alle 3 Leben fuer dieses Event sind aufgebraucht.' }, 200)
+      }
+    }
     const { data: insRow, error: insErr } = await admin.from('goat_scores').insert({
       user_id: userId,
       mode,

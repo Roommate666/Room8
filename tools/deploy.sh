@@ -8,7 +8,7 @@ cd "$(dirname "$0")/.."
 
 SW=www/sw.js
 CUR=$(grep -oE "room8-v[0-9]+" "$SW" | head -1)
-NUM=$(echo "$CUR" | grep -oE "[0-9]+")
+NUM=$(echo "$CUR" | sed 's/room8-v//')
 NEXT="room8-v$((NUM+1))"
 echo "==> SW-Cache $CUR -> $NEXT"
 sed -i '' "s/$CUR/$NEXT/" "$SW"
