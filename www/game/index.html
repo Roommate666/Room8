@@ -165,6 +165,8 @@ body.goatmode #multBadge{display:block;animation:pulse .45s infinite alternate;}
   box-shadow: inset 0 2px 0 rgba(255,255,255,.38), inset 0 -3px 5px rgba(0,0,0,.16);
   transition:background .2s ease;}
 .cell.filled.tn::after,.cell.filled.tn::before{content:none;}
+/* Normale Bloecke = deine gerenderten Block-Grafiken (premium), Bild wird inline gesetzt */
+.cell.filled.tn{background-size:cover;background-position:center;background-repeat:no-repeat;box-shadow:none;}
 /* SATISFYING: geteilte Kanten mit Nachbar = eckig -> gleichfarbige Bloecke verschmelzen nahtlos
    zu EINER Masse, nur die Aussenkanten der Form bleiben gerundet. */
 .cell.filled.nT{border-top-left-radius:0;border-top-right-radius:0;}
@@ -213,6 +215,7 @@ body.shake .board-card{animation:shake .3s;}
 /* Mini-Vorschau: hauchduenner Bevel, sonst werden die 9px-Zellen dunkle Kloetze */
 .pvpiece .pc{border-width:1px 1px 1.5px 1px;border-radius:20%;}
 .piece .pc.empty{background:transparent;box-shadow:none;border:none;}
+.piece .pc.img{background-size:cover;background-position:center;background-repeat:no-repeat;box-shadow:none;border:none;}
 .slot.used{opacity:0;pointer-events:none;}
 #dragLayer{position:fixed;inset:0;pointer-events:none;z-index:50;}
 #dragPiece{position:absolute;transform:translate(-50%,-50%);filter:drop-shadow(0 10px 14px rgba(0,0,0,.28));}
@@ -532,8 +535,11 @@ const SIZE=8;
 const COLORS=['var(--gouda)','var(--cheddar)','var(--emmental)','var(--berg)','var(--chevre)','var(--kraeuter)'];
 // Eine Block-Farbe pro Runde (wechselt je Spiel; bei Daily fest via seed) — Block-Blast-Look
 // Kein Lila/Violett (harte Regel) — Blau/Gruen/Tuerkis/Orange/Pink/Rot/Gelb
-const ROUND_COLORS=['#2f6bff','#22b463','#12b5c9','#ff8c1a','#ff5d8f','#e4483b','#f2b90c','#0ea5e9'];
+const ROUND_COLORS=['#2f6bff','#22b463','#8b5cf6','#ff8c1a','#f2b90c','#e4483b'];
+const ROUND_IMGS=['blau','gruen','lila','orange','gelb','rot'];
 var roundColor='#2f6bff';
+function roundImg(){var i=ROUND_COLORS.indexOf(roundColor);return ROUND_IMGS[i<0?0:i];}
+function pieceImgUrl(){return "url('assets/block-"+roundImg()+".webp')";}
 const LINES_PER_LEVEL=6, MAX_LEVEL=15;
 const GOATMODE_AT=4, HYPED_AT=2, CURIOUS_AT=1;
 const HEAT_MS=6000, HEAT_MS_GOAT=7500;
@@ -688,9 +694,9 @@ function cellEl(r,c){return cells[r*SIZE+c];}
 function renderBoard(){
   for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
     const el=cellEl(r,c),v=grid[r][c];
-    el.className='cell';el.textContent='';el.style.removeProperty('--c');
+    el.className='cell';el.textContent='';el.style.removeProperty('--c');el.style.backgroundImage='';
     if(v){el.classList.add('filled','t'+v.t);
-      if(v.t==='n'){el.style.setProperty('--c',roundColor);
+      if(v.t==='n'){el.style.setProperty('--c',roundColor);el.style.backgroundImage=pieceImgUrl();
         // Nachbar-abhaengiger Schatten: nur Kanten MIT Nachbar bekommen Schatten, freie Aussenkanten bleiben clean
         if(r>0&&grid[r-1][c])el.classList.add('nT');
         if(r<SIZE-1&&grid[r+1][c])el.classList.add('nB');
@@ -746,7 +752,7 @@ function buildPieceEl(p,px){
     const idx=map.get(r+','+c);
     if(idx===undefined){d.className='pc empty';}
     else{
-      d.className='pc';d.style.setProperty('--c',roundColor);
+      d.className='pc img';d.style.setProperty('--c',roundColor);d.style.backgroundImage=pieceImgUrl();
       // Nachbar-Schatten innerhalb der Figur (gleiche Logik wie auf dem Feld)
       if(map.has((r-1)+','+c))d.classList.add('nT');
       if(map.has((r+1)+','+c))d.classList.add('nB');

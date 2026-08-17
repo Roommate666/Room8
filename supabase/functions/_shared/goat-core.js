@@ -75,12 +75,12 @@
     for (const s of SHAPES) {
       const n = s.c.length;
       let w;
-      if (n === 1) w = 2;                 // Einzelblock: flexibelster Stein -> etwas haeufiger (leichter)
-      else if (n === 2) w = 4;            // Domino: sehr flexibel
-      else if (n === 3) w = 6;            // Tromino: haeufigster Stein
-      else if (n === 4) w = 5;            // 4er: haeufig
-      else if (n === 5) w = 3;            // 5er: seltener (schwer zu platzieren)
-      else w = level < 3 ? 1 : 2;         // 3x3 (9 Zellen): selten (killt oft das Feld)
+      if (n === 1) w = 1;                 // Einzelblock: nur selten (Notausgang wenn Feld eng)
+      else if (n === 2) w = 1;            // Domino: selten
+      else if (n === 3) w = 2;            // Tromino: eher selten
+      else if (n === 4) w = 7;            // 4er (2x2-Quadrat, grosse Ls, I): haeufigster Stein
+      else if (n === 5) w = 5;            // 5er (grosse Ls/Pentominoes): haeufig
+      else w = level < 3 ? 3 : 4;         // 3x3 (9 Zellen): regelmaessig (grosses Fuellen)
       for (let i = 0; i < w; i++) pool.push(s);
     }
     return pool;
