@@ -149,7 +149,7 @@ body.goatmode #multBadge{display:block;animation:pulse .45s infinite alternate;}
 /* Board 7x7 */
 .board-card{position:relative;background:var(--card);border:1.5px solid var(--card-edge);border-radius:16px;padding:2px;
   box-shadow:0 6px 0 rgba(0,0,0,.12);backdrop-filter:blur(4px);}
-#board{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;aspect-ratio:1;touch-action:none;}
+#board{display:grid;grid-template-columns:repeat(8,1fr);gap:0;aspect-ratio:1;touch-action:none;}
 .cell{background:rgba(232,222,198,.75);border-radius:3px;position:relative;transition:background .1s;
   display:flex;align-items:center;justify-content:center;font-size:0;}
 /* Vorschau (wie im Video): heller, halbtransparenter Block in ECHTER Farbe am Zielort */
@@ -160,16 +160,17 @@ body.goatmode #multBadge{display:block;animation:pulse .45s infinite alternate;}
 .cell.ghost-bad{border-radius:4px;background:rgba(255,110,110,.26);box-shadow:inset 0 0 0 2px var(--bad);}
 @keyframes ghostPulse{0%,100%{opacity:.76;}50%{opacity:.98;}}
 /* Model 10 (Deep 3D): gerundet, heller Deckel oben-links, dunkle Fase + starke Extrusions-Wand unten. */
-.cell.filled{position:relative;border-radius:4px;
-  background:linear-gradient(150deg, color-mix(in srgb,var(--c) 55%,#fff 45%), var(--c) 42%, color-mix(in srgb,var(--c) 72%,#000 28%));
-  box-shadow:
-    inset 4px 4px 3px rgba(255,255,255,.55),
-    inset -6px -8px 5px rgba(0,0,0,.4),
-    0 6px 0 color-mix(in srgb,var(--c) 55%,#000 45%),
-    0 9px 10px rgba(0,0,0,.3);
+.cell.filled{position:relative;border-radius:7px;
+  background:linear-gradient(160deg, color-mix(in srgb,var(--c) 74%,#fff 26%), var(--c) 52%, color-mix(in srgb,var(--c) 82%,#000 18%));
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.38), inset 0 -3px 5px rgba(0,0,0,.16);
   transition:background .2s ease;}
 .cell.filled.tn::after,.cell.filled.tn::before{content:none;}
-/* Nachbar-Klassen bleiben ungenutzt (jeder Block ist selbst gefast -> Naht entsteht automatisch) */
+/* SATISFYING: geteilte Kanten mit Nachbar = eckig -> gleichfarbige Bloecke verschmelzen nahtlos
+   zu EINER Masse, nur die Aussenkanten der Form bleiben gerundet. */
+.cell.filled.nT{border-top-left-radius:0;border-top-right-radius:0;}
+.cell.filled.nB{border-bottom-left-radius:0;border-bottom-right-radius:0;}
+.cell.filled.nL{border-top-left-radius:0;border-bottom-left-radius:0;}
+.cell.filled.nR{border-top-right-radius:0;border-bottom-right-radius:0;}
 .cell.filled.tg{background:url('assets/block-gold.webp') center/cover no-repeat !important;
   box-shadow:none !important;font-size:0;animation:goldpulse 1.4s ease-in-out infinite;}
 .cell.filled.tg::after{content:none;}
