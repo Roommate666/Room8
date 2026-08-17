@@ -149,18 +149,18 @@ body.goatmode #multBadge{display:block;animation:pulse .45s infinite alternate;}
 /* Board 7x7 */
 .board-card{position:relative;background:var(--card);border:1.5px solid var(--card-edge);border-radius:16px;padding:2px;
   box-shadow:0 6px 0 rgba(0,0,0,.12);backdrop-filter:blur(4px);}
-#board{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;aspect-ratio:1;touch-action:none;}
-.cell{background:rgba(232,222,198,.75);border-radius:8px;position:relative;transition:background .1s;
+#board{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;aspect-ratio:1;touch-action:none;}
+.cell{background:rgba(232,222,198,.75);border-radius:3px;position:relative;transition:background .1s;
   display:flex;align-items:center;justify-content:center;font-size:0;}
 /* Vorschau (wie im Video): heller, halbtransparenter Block in ECHTER Farbe am Zielort */
-.cell.ghost-ok{border-radius:16%;opacity:.9;
+.cell.ghost-ok{border-radius:4px;opacity:.9;
   background:linear-gradient(150deg,color-mix(in srgb,var(--c) 32%,#fff 68%) 0%,color-mix(in srgb,var(--c) 52%,#fff 48%) 55%,color-mix(in srgb,var(--c) 58%,#fff 42%) 100%);
   box-shadow:inset 3px 3px 2px rgba(255,255,255,.6),inset -3px -4px 3px color-mix(in srgb,var(--c) 32%,transparent);
   animation:ghostPulse 1s ease-in-out infinite;}
-.cell.ghost-bad{border-radius:16%;background:rgba(255,110,110,.26);box-shadow:inset 0 0 0 2px var(--bad);}
+.cell.ghost-bad{border-radius:4px;background:rgba(255,110,110,.26);box-shadow:inset 0 0 0 2px var(--bad);}
 @keyframes ghostPulse{0%,100%{opacity:.76;}50%{opacity:.98;}}
 /* Model 10 (Deep 3D): gerundet, heller Deckel oben-links, dunkle Fase + starke Extrusions-Wand unten. */
-.cell.filled{position:relative;border-radius:18%;
+.cell.filled{position:relative;border-radius:4px;
   background:linear-gradient(150deg, color-mix(in srgb,var(--c) 55%,#fff 45%), var(--c) 42%, color-mix(in srgb,var(--c) 72%,#000 28%));
   box-shadow:
     inset 4px 4px 3px rgba(255,255,255,.55),

@@ -1,0 +1,16 @@
+import { chromium } from 'playwright';
+const b=await chromium.launch({channel:'chrome'});
+const c=await b.newContext({viewport:{width:430,height:932},deviceScaleFactor:2,isMobile:true,hasTouch:true});
+const p=await c.newPage();
+await p.goto('https://unigoat.de/login.html',{waitUntil:'domcontentloaded'});
+await p.fill('#loginEmail','redbull-demo@unigoat.de');await p.fill('#loginPassword','RedBull2026!');await p.click('#loginBtn');
+await p.waitForTimeout(4000);
+await p.goto('https://unigoat.de/game/index.html',{waitUntil:'networkidle'});await p.waitForTimeout(2500);
+await p.click('#btnHigh').catch(()=>{});await p.waitForTimeout(1400);
+await p.click('#helpClose').catch(()=>{});
+await p.evaluate(()=>{var hp=document.getElementById('helpPanel');if(hp)hp.hidden=true;});
+await p.waitForTimeout(400);
+await p.evaluate(()=>{const cells=document.querySelectorAll('#board .cell');const t=['tg','tx','tm'];cells.forEach((c,i)=>{const r=Math.floor(i/8),col=i%8;if(r>=2&&col<=r-1){c.className='cell filled '+t[(r+col)%t.length];c.textContent='';}});var s=document.getElementById('score');if(s)s.textContent='12.480';});
+await p.waitForTimeout(600);
+await p.screenshot({path:process.env.HOME+'/Desktop/game-eckig.png'});
+await b.close();console.log('shot ok');
