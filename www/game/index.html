@@ -101,15 +101,15 @@ body.phase-night .fly{opacity:1;}
 @keyframes flash{0%{opacity:.35}100%{opacity:0}}
 
 /* ============ Layout ============ */
-#app{position:relative;z-index:3;width:min(560px,100vw);max-height:100dvh;padding:4px 2px 8px;
-  display:flex;flex-direction:column;gap:4px;}
+#app{position:relative;z-index:3;width:min(620px,100vw);max-height:100dvh;padding:3px 0 6px;
+  display:flex;flex-direction:column;gap:3px;}
 .topbar{display:flex;align-items:flex-end;gap:8px;}
 /* Immer sichtbarer Zurueck-Pfeil oben-links (wie im Video) */
 #backTop{position:absolute;top:calc(8px + env(safe-area-inset-top));left:10px;z-index:40;width:40px;height:40px;
   border:none;border-radius:50%;background:rgba(255,255,255,.82);color:#43351f;font-size:22px;font-weight:900;
   line-height:1;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.16);display:flex;align-items:center;justify-content:center;}
 #backTop:active{transform:scale(.92);}
-.goat-wrap{position:relative;width:62px;flex:0 0 62px;}
+.goat-wrap{position:relative;width:52px;flex:0 0 52px;}
 .stats{flex:1;display:flex;gap:7px;}
 .stat{flex:1;background:var(--card);border:2px solid var(--card-edge);border-radius:var(--r);
   padding:5px 6px;text-align:center;box-shadow:0 3px 0 rgba(0,0,0,.10);backdrop-filter:blur(3px);}
@@ -201,7 +201,7 @@ body.shake .board-card{animation:shake .3s;}
 #tray{display:flex;gap:4px;justify-content:space-between;min-height:96px;}
 /* Grosse Greifflaeche: der ganze Slot aktiviert den Stein (auch daneben antippen) */
 .slot{flex:1;background:rgba(255,255,255,.4);border:1px solid rgba(67,53,31,.08);border-radius:var(--r);
-  display:flex;align-items:center;justify-content:center;padding:14px 8px;min-height:100px;touch-action:none;}
+  display:flex;align-items:center;justify-content:center;padding:8px 6px;min-height:82px;touch-action:none;}
 .piece{display:grid;gap:3px;cursor:grab;transition:none;}
 /* Tray-Steine solide (Basis .piece .pc mit Bevel) statt Kaese-Bild */
 .piece .pc{width:var(--s,17px);height:var(--s,17px);border-radius:18%;position:relative;
