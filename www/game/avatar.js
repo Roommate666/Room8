@@ -11,7 +11,7 @@
   var AVATARS = ['classic','hoodie','suit','jersey','dress','lab','graduate','king','cool','gamer','winter','chef','superhero','astronaut','ninja','dino','pirate','rockstar','cowboy'];
   var AV_LABELS = {
     classic:'Klassisch', hoodie:'Hoodie', suit:'Anzug', jersey:'Trikot', dress:'Kleid',
-    lab:'Kittel', graduate:'Absolvent', king:'Koenig', cool:'Cool', gamer:'Gamer', winter:'Winter', chef:'Koch',
+    lab:'Kittel', graduate:'Absolvent', king:'K&ouml;nig', cool:'Cool', gamer:'Gamer', winter:'Winter', chef:'Koch',
     superhero:'Superheld', astronaut:'Astronaut', ninja:'Ninja', dino:'Dino',
     pirate:'Pirat', rockstar:'Rockstar', cowboy:'Cowboy'
   };

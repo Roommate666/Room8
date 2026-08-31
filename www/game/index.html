@@ -13,7 +13,7 @@
 <link rel="preload" href="avatar.js" as="script">
 <style>
 :root{
-  --card:rgba(255,253,246,.92); --card-edge:#ece1c6;
+  --card:#FDFBF4; --card-edge:#ece1c6;
   --ink:#43351f; --ink-soft:#8a7a63;
   --gouda:#ffc53d; --cheddar:#ff9430; --emmental:#ffe38a;
   --berg:#e8a857; --chevre:#fff3d6; --kraeuter:#cfe0a0;
@@ -156,7 +156,7 @@ body.goatmode #multBadge{display:block;animation:pulse .45s infinite alternate;}
 /* FIX Verzerrung: Zeilen EXPLIZIT gleich wie Spalten -> echte Quadrate -> Steine 1:1 platziert.
    minmax(0,1fr) verhindert, dass Zell-Inhalt/Border die Zeile aufblaeht (war Ursache: Zeilen 63px, Spalten 55px). */
 #board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));gap:0;aspect-ratio:1;touch-action:none;}
-.cell{background:rgba(232,222,198,.75);border-radius:3px;position:relative;transition:background .1s;
+.cell{background:#E9E0CB;border-radius:3px;position:relative;
   box-shadow:inset 0 0 0 1px rgba(120,100,60,.06);
   display:flex;align-items:center;justify-content:center;font-size:0;}
 /* Vorschau (wie im Video): heller, halbtransparenter Block in ECHTER Farbe am Zielort */

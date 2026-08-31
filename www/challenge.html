@@ -33,14 +33,22 @@
   .infocard li{position:relative;font-size:.85rem;line-height:1.55;color:var(--w4,#5b6a67);margin-bottom:7px;padding-left:16px;}
   .infocard li::before{content:'';position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;background:var(--green);}
   .infocard b{color:var(--ink);}
-  /* Top-3-Podium: Gold/Silber/Bronze, 1. Platz erhoeht + Glow */
-  .podium{align-items:flex-end;gap:8px;}
-  .pod{position:relative;transition:transform .2s;}
-  .pod.prk1{background:linear-gradient(180deg,#FFF8E1,#FFEFC0);border:1.5px solid #F4B740;box-shadow:0 12px 26px rgba(244,183,64,.38);transform:translateY(-10px) scale(1.06);z-index:2;}
-  .pod.prk2{background:linear-gradient(180deg,#F7F8FA,#EBEEF1);border:1.5px solid #C6CCD4;}
-  .pod.prk3{background:linear-gradient(180deg,#FCF0E5,#F3E1CF);border:1.5px solid #D9A876;}
-  .pod.prk1 .pz,.pod.prk1 .nm{color:#8a5a06;}
-  .pod .pz{font-size:1.5rem;line-height:1;}
+  /* Top-3 als echte Olympia-Treppe: 1. Mitte hoch, 2. links, 3. rechts. Ziege steht auf der Stufe. */
+  .podium{display:flex;align-items:flex-end;justify-content:center;gap:6px;margin:10px 0 22px;}
+  .pod{flex:1;max-width:33.3%;display:flex;flex-direction:column;align-items:center;background:none;border:none;box-shadow:none;padding:0;cursor:pointer;transform:none;}
+  .pod.empty{visibility:hidden;}
+  .pod .pod-medal{font-size:19px;line-height:1;margin-bottom:1px;}
+  .pod .pod-goat{width:52px;height:62px;display:flex;align-items:flex-end;justify-content:center;overflow:visible;}
+  .pod.prk1 .pod-goat{width:66px;height:78px;}
+  .pod .pod-goat svg,.pod .pod-goat img,.pod .pod-goat .ug-av{width:100%!important;height:100%!important;object-fit:contain;}
+  .pod .pod-name{font-family:var(--fh),serif;font-weight:700;font-size:12px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;margin-top:2px;}
+  .pod .pod-coins{font-size:11px;font-weight:800;color:var(--green);margin:1px 0 5px;}
+  .pod .poddual{border:none;background:var(--green);color:#fff;font-weight:800;font-size:13px;width:30px;height:30px;border-radius:50%;cursor:pointer;margin-bottom:5px;box-shadow:0 2px 6px rgba(18,180,137,.3);padding:0;}
+  .pod .pod-step{width:100%;border-radius:10px 10px 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:9px;}
+  .pod .pod-rank{font-family:var(--fh),serif;font-weight:900;font-size:26px;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.22);}
+  .pod.prk1 .pod-step{height:92px;background:linear-gradient(180deg,#FFD54A,#E9A400);box-shadow:inset 0 3px 0 rgba(255,255,255,.45),0 8px 18px rgba(233,164,0,.35);}
+  .pod.prk2 .pod-step{height:66px;background:linear-gradient(180deg,#D8DDE4,#AAB2BD);box-shadow:inset 0 3px 0 rgba(255,255,255,.5);}
+  .pod.prk3 .pod-step{height:46px;background:linear-gradient(180deg,#E3A877,#C17E45);box-shadow:inset 0 3px 0 rgba(255,255,255,.35);}
   .seg{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px;margin:2px 0 14px;}
   .seg button{flex:1;border:none;background:none;font-family:var(--fb),sans-serif;font-size:13px;font-weight:800;color:var(--w4);padding:9px 6px;border-radius:999px;cursor:pointer;transition:background .18s,color .18s;}
   .seg button.on{background:var(--green);color:#fff;box-shadow:0 2px 8px rgba(18,180,137,.28);}
@@ -96,7 +104,7 @@
       <li>Sammle diesen Monat <b>G-Coins</b>: <b>+100</b> pro eingelöstem Coupon, dazu Coins fürs tägliche Goat-Spiel.</li>
       <li>Nur die <b>Top 3 global</b> gewinnen jeden Monat <b>echte Geschenke</b> 🎁. Die Besten an deiner Uni bekommen G-Coins-Boni.</li>
       <li>Am Monatsende wird die Rangliste <b>zurückgesetzt</b> — jeder startet neu bei 0.</li>
-      <li><b>Heb deine G-Coins auf!</b> Bald kannst du damit echte Sachen ergattern — nicht verschwenden.</li>
+      <li>Es zählt nur <b>eins</b>: Wer am Monatsende die <b>meisten G-Coins</b> hat, gewinnt. Kämpf dich nach oben. 💪</li>
       <li>Die Gewinner werden auf <b>Instagram</b> bekannt gegeben.</li>
     </ul>
   </div>
@@ -252,13 +260,19 @@
     $('empty').style.display='none';
     var top=rows.slice(0,3), rest=rows.slice(3);
     var order=[1,0,2]; // p2, p1, p3 Anordnung
-    $('podium').innerHTML=order.map(function(idx){var x=top[idx];if(!x)return'';var rk=Number(x.rank);
+    $('podium').innerHTML=order.map(function(idx){var x=top[idx];if(!x)return'<div class="pod empty"></div>';var rk=Number(x.rank);
       var MEDAL={1:'🥇',2:'🥈',3:'🥉'};
-      // Preise laufen extern ueber Instagram -> App zeigt nur Medaille (Play-safe, keine Betraege im Bundle)
-      var prize=MEDAL[rk]||(rk+'.');
       var canDuel=MEID && x.user_id!==MEID;
-      var duelBtn=canDuel?'<button class="poddual" data-uid="'+esc(x.user_id)+'" data-uname="'+esc(x.username||'Anonym')+'">⚔️ Duell</button>':'';
-      return '<div class="pod prk'+rk+(rk===1?' p1':'')+'" data-uid="'+esc(x.user_id)+'"><div class="av">'+av(x.avatar_config)+'</div><div class="nm r'+rk+'">'+(rk===1?'👑 ':'')+esc(x.username||'Anonym')+'</div><div class="pt">'+nf(x.coins_month)+'</div><div class="pz">'+prize+'</div>'+duelBtn+'</div>';
+      var duelBtn=canDuel?'<button class="poddual" data-uid="'+esc(x.user_id)+'" data-uname="'+esc(x.username||'Anonym')+'" title="Herausfordern">⚔️</button>':'';
+      var goat=(window.GoatAvatar?GoatAvatar.renderGoatAvatar(x.avatar_config||{}, rk===1?66:52):'');
+      return '<div class="pod prk'+rk+'" data-uid="'+esc(x.user_id)+'">'+
+        '<div class="pod-medal">'+(MEDAL[rk]||'')+'</div>'+
+        '<div class="pod-goat">'+goat+'</div>'+
+        '<div class="pod-name">'+(rk===1?'👑 ':'')+esc(x.username||'Anonym')+'</div>'+
+        '<div class="pod-coins">'+nf(x.coins_month)+' 🪙</div>'+
+        duelBtn+
+        '<div class="pod-step"><span class="pod-rank">'+rk+'</span></div>'+
+      '</div>';
     }).join('');
     $('rows').innerHTML=rest.map(function(x){var mine=MEID&&x.user_id===MEID;
       var duelBtn=(MEID && !mine)?'<button class="duelbtn" data-uid="'+esc(x.user_id)+'" data-uname="'+esc(x.username||'Anonym')+'">⚔️ Duell</button>':'';

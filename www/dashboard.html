@@ -77,7 +77,7 @@
   <div class="sub">Deine Daily wartet — hol dir die G-Coins.</div>
 
   <div class="stats">
-    <div class="stat"><div class="k">Streak</div><div class="v"><svg class="li" viewBox="0 0 24 24"><path d="M12 3c1 4 5 5 5 9a5 5 0 1 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 1-1-1-4-1-8Z"/></svg><span id="streak">0</span> Tage</div></div>
+    <div class="stat" id="streakInfo" style="cursor:pointer" title="Tippen: was ist die Streak?"><div class="k">Streak ›</div><div class="v"><svg class="li" viewBox="0 0 24 24"><path d="M12 3c1 4 5 5 5 9a5 5 0 1 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 1-1-1-4-1-8Z"/></svg><span id="streak">0</span> Tage</div></div>
     <div class="stat" id="tierStat" style="cursor:pointer" title="Tippen: was du freischaltest"><div class="k">Tier ›</div><div class="v"><svg class="li" viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="10" rx="1.5"/><path d="M4 12h16M12 7v10"/></svg><span id="tier">Bronze</span></div></div>
   </div>
 
@@ -95,11 +95,6 @@
     <span style="margin-left:auto">›</span>
   </a>
 
-  <a href="store.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;background:linear-gradient(90deg,#21D0A1,#12B489);border-radius:14px;padding:12px 14px;margin-bottom:10px;color:#fff;font-weight:800;font-size:13.5px;box-shadow:0 3px 10px rgba(18,180,137,.28);">
-    <span style="font-size:18px;line-height:1">🎁</span>
-    <span>Coin-Store — G-Coins gegen echte Preise verlosen</span>
-    <span style="margin-left:auto">›</span>
-  </a>
 
   <a href="game/index.html" id="dqHint" style="display:flex;align-items:center;gap:8px;text-decoration:none;background:#fff;border:1.5px solid rgba(0,0,0,.06);border-radius:14px;padding:11px 14px;margin-bottom:10px;color:var(--ink);font-weight:700;font-size:13.5px;box-shadow:0 2px 8px rgba(0,0,0,.05);">
     <span id="dqHintTxt">🎯 Daily-Quests im Spiel</span>
@@ -220,6 +215,20 @@
     card.querySelector('#tb-close').onclick=close;
   }
   var _tierStat=$('tierStat'); if(_tierStat) _tierStat.addEventListener('click', showTierBenefits);
+  // Streak antippbar: kurze Erklaerung (Entities -> echte Umlaute, .js-Hook-safe)
+  var _streakStat=$('streakInfo'); if(_streakStat) _streakStat.addEventListener('click', function(){
+    var ov=document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(20,26,30,.55);display:flex;align-items:flex-end;justify-content:center;';
+    ov.innerHTML='<div style="background:#fff;width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:22px 18px calc(22px + env(safe-area-inset-bottom));text-align:center">'+
+      '<div style="font-size:42px;line-height:1">🔥</div>'+
+      '<h3 style="font-family:var(--fh),serif;font-size:1.3rem;margin:6px 0 8px">Deine Streak</h3>'+
+      '<p style="color:#6b7280;font-size:.92rem;line-height:1.6;margin-bottom:16px">Spiel <b>jeden Tag</b> mindestens einmal Goat Blast, dann w&auml;chst deine Streak &mdash; sie z&auml;hlt, wie viele Tage du in Folge dabei bist.<br><br>Je l&auml;nger die Streak, desto mehr <b>Prestige</b> und exklusive <b>Streak-Kost&uuml;me</b>. Verpasst du einen Tag, f&auml;ngt sie wieder bei 0 an &mdash; also dranbleiben! 🐐</p>'+
+      '<button id="_streakClose" style="width:100%;padding:13px;border:none;border-radius:14px;background:#151a1e;color:#fff;font-weight:800;font-size:1rem;cursor:pointer">Verstanden</button></div>';
+    document.body.appendChild(ov);
+    function close(){ ov.remove(); }
+    ov.addEventListener('click',function(e){ if(e.target===ov) close(); });
+    ov.querySelector('#_streakClose').onclick=close;
+  });
 
   // Persoenliche Begruessung: oben ein kleines Banner "Willkommen zurueck, {Name}"
   // + der eigene Charakter (transparent, nur die Ziege). 1x pro Session.
