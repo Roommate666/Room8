@@ -25,7 +25,10 @@
   .lob{text-align:center;padding-top:26px;}
   .lob .goat{width:76px;height:76px;object-fit:contain;margin:0 auto 8px;display:block;}
   .lob h1{font-size:30px;margin-bottom:4px;}
-  .lob .sub{color:var(--w4);font-weight:600;font-size:14px;margin-bottom:26px;line-height:1.5;}
+  .lob .sub{color:var(--w4);font-weight:600;font-size:14px;margin-bottom:10px;line-height:1.5;}
+  .bilanz{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:700;color:var(--w4);margin-bottom:22px;box-shadow:var(--sh);}
+  .bilanz b{color:var(--mint-d);}
+  .bilanz .l{color:var(--danger);}
   .btn{display:block;width:100%;border:none;border-radius:16px;padding:16px;font-family:var(--fb);font-size:16px;font-weight:800;cursor:pointer;margin:10px 0;}
   .btn.primary{background:var(--grad);color:#fff;box-shadow:var(--sh-mint);}
   .btn.ghost{background:var(--card);color:var(--ink);border:1.5px solid var(--line);box-shadow:var(--sh);}
@@ -67,6 +70,8 @@
   .chrow .cact{display:flex;gap:6px;flex-shrink:0;}
 
   /* Duell-Screen */
+  .coinbar{display:flex;justify-content:center;margin-bottom:8px;}
+  .coinbar .cp{display:inline-flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:800;color:var(--ink);box-shadow:var(--sh);}
   .topbar{display:flex;align-items:stretch;gap:10px;margin-bottom:10px;}
   .pcard{flex:1;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 12px;box-shadow:var(--sh);}
   .pcard.me{border-color:var(--mint);padding-left:42px;}
@@ -105,13 +110,16 @@
   .gad[disabled]{opacity:.4;pointer-events:none;}
   .gad .ic{font-size:20px;display:block;margin-bottom:2px;}
   .gad .n{font-size:10px;color:var(--w4);font-weight:700;}
+  .gad .n b{color:var(--gold);font-weight:800;}
 
   /* Gegner-Angriff-Effekte auf MICH */
   #fogOverlay{position:fixed;inset:0;background:rgba(210,225,235,.55);backdrop-filter:blur(3px);z-index:60;display:none;align-items:flex-start;justify-content:center;padding-top:30vh;font-family:var(--fh);font-size:30px;color:#3a5566;font-weight:700;pointer-events:none;}
   #rushBanner{position:fixed;top:calc(env(safe-area-inset-top) + 8px);left:12px;right:12px;background:var(--danger);color:#fff;font-weight:800;text-align:center;padding:11px;border-radius:14px;z-index:61;display:none;animation:rp 1s infinite;}
   @keyframes rp{0%,100%{box-shadow:0 0 0 0 rgba(229,83,60,.5)}50%{box-shadow:0 0 0 8px rgba(229,83,60,0)}}
-  #discoBanner{position:fixed;top:calc(env(safe-area-inset-top) + 8px);left:12px;right:12px;background:#3a5566;color:#fff;font-weight:800;text-align:center;padding:11px;border-radius:14px;z-index:61;display:none;}
-  #discoBanner .db-act{display:inline-block;margin-left:8px;background:#fff;color:#3a5566;border-radius:10px;padding:4px 10px;font-size:12px;cursor:pointer;}
+  #discoBanner{position:fixed;top:calc(env(safe-area-inset-top) + 8px);left:12px;right:12px;background:#3a5566;color:#fff;font-weight:800;text-align:center;padding:11px 12px;border-radius:14px;z-index:61;display:none;}
+  #discoBanner .db-txt{display:block;margin-bottom:8px;}
+  #discoBanner .db-act{display:inline-block;margin:0 4px;background:#fff;color:#3a5566;border-radius:10px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;}
+  #discoBanner .db-act.win{background:var(--gold);color:#5a3d00;}
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);font-weight:700;font-size:13px;padding:11px 18px;border-radius:14px;opacity:0;transition:.25s;z-index:80;max-width:90%;text-align:center;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
@@ -126,10 +134,11 @@
   .result .scores{display:flex;justify-content:center;gap:24px;margin:14px 0 10px;}
   .result .scores .s{font-family:var(--fh);font-size:30px;font-weight:700;}
   .result .scores .l{font-size:11px;color:var(--w4);font-weight:700;text-transform:uppercase;}
-  .result .coins{font-weight:800;font-size:15px;margin:6px 0 14px;min-height:20px;}
+  .result .coins{font-weight:800;font-size:15px;margin:6px 0 4px;min-height:20px;}
   .result .coins.up{color:var(--mint-d);}
   .result .coins.down{color:var(--danger);}
   .result .coins.neutral{color:var(--w4);}
+  .result .elo{font-size:12.5px;font-weight:800;color:var(--w4);min-height:16px;margin-bottom:12px;}
   .result .verify{display:inline-flex;align-items:center;gap:6px;color:var(--w4);font-size:11.5px;font-weight:700;min-height:18px;margin-bottom:8px;}
 </style>
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png?v133">
@@ -143,6 +152,7 @@
     <img class="goat" src="../logo-goat.png?v90" alt="">
     <h1>Duell</h1>
     <div class="sub">Fordere einen Freund heraus — gleiches Puzzle, wer mehr Punkte holt, gewinnt. 🐐</div>
+    <div class="bilanz" id="bilanz">Deine Duell-Bilanz: <b id="bilanzW">0</b> Siege / <span class="l" id="bilanzL">0</span> Niederlagen</div>
 
     <div id="lobbyChoice">
       <button class="btn primary" id="btnCreate">Duell erstellen</button>
@@ -205,6 +215,7 @@
 
   <!-- ===== DUELL ===== -->
   <div id="game" class="hidden">
+    <div class="coinbar"><span class="cp">🪙 <span id="coinBar">0</span> G-Coins</span></div>
     <div class="wagerpill hidden" id="gameWager">🪙 <span id="gameWagerN">0</span> G-Coins im Pot</div>
     <div class="topbar">
       <div class="pcard me"><div class="nm" id="meName">Du</div><div class="sc" id="meScore">0</div></div>
@@ -218,8 +229,8 @@
     <div class="board-card"><div id="board"></div></div>
     <div id="tray"></div>
     <div class="gadgets">
-      <button class="gad" id="gadFog"><span class="ic">🌫️</span>Nebel<span class="n" id="fogN">3×</span></button>
-      <button class="gad" id="gadRush"><span class="ic">⏱️</span>Zeitdruck<span class="n" id="rushN">3×</span></button>
+      <button class="gad" id="gadFog"><span class="ic">🌫️</span>Nebel<span class="n" id="fogN"><b>15</b> G-Coins</span></button>
+      <button class="gad" id="gadRush"><span class="ic">⏱️</span>Zeitdruck<span class="n" id="rushN"><b>20</b> G-Coins</span></button>
     </div>
     <div style="text-align:center;color:var(--w4);font-size:11.5px;font-weight:600;margin-top:12px">Gleiches Puzzle für beide · wer bis zum Ende mehr Punkte hat, gewinnt</div>
   </div>
@@ -228,7 +239,11 @@
 
 <div id="fogOverlay">🌫️ Nebel!</div>
 <div id="rushBanner">⏱️ Zeitdruck! Dein Gegner setzt dich unter Druck!</div>
-<div id="discoBanner">🔌 Gegner offline – warte auf Verbindung…<span class="db-act" id="discoAbort">Abbrechen</span></div>
+<div id="discoBanner">
+  <span class="db-txt">🔌 Gegner offline – warte auf Verbindung…</span>
+  <span class="db-act win hidden" id="discoForfeit">Gegner weg — Sieg beanspruchen</span>
+  <span class="db-act" id="discoAbort">Abbrechen</span>
+</div>
 <div class="cd" id="countdown"><div class="n" id="cdNum">3</div></div>
 <div class="result" id="result"><div class="card">
   <div class="emoji" id="resEmoji">🏆</div>
@@ -236,6 +251,7 @@
   <div class="verify" id="resVerify"><span class="dot"></span> Ergebnis wird geprüft…</div>
   <div class="scores"><div><div class="s" id="resMe">0</div><div class="l">Du</div></div><div><div class="s" id="resOpp">0</div><div class="l">Gegner</div></div></div>
   <div class="coins neutral" id="resCoins"></div>
+  <div class="elo" id="resElo"></div>
   <button class="btn primary" id="btnAgain">Nochmal</button>
   <button class="btn ghost" id="btnMenu">Zum Menü</button>
 </div></div>
@@ -253,16 +269,27 @@
   var matchId=null, seed=null, mode='high', role=null, code=null, ch=null, wager=0;
   var myCoins=0, hostId=null;
   var st=null, selIdx=-1, startMs=0, myScore=0, oppScore=0, myOver=false, oppOver=false, oppPresent=false, started=false;
-  var fogLeft=3, rushLeft=3;
+  // Gadget-Kosten (Vertrag: fog=15, rush=20). Client zeigt sie an; die Wahrheit
+  // (Abbuchung + Cap) liegt serverseitig in spend_match_gadget().
+  var GAD_COST={fog:15, rush:20};
+  var gadBusy=false;              // Doppelklick-Schutz waehrend spend_match_gadget-RPC
   var moveLog=[];                 // Zug-Log fuer Server-Replay [{idx,r,c,t}]
   var chosenWager=0;              // in der Wett-Auswahl gewaehlter Einsatz
   var oppLastBoard='';            // letzter bekannter Gegner-Board-Snapshot (fuer Resync-Antwort)
   var subscribed=false, reconnecting=false;
   var lastOppSeen=0, gapTimer=null, resyncIv=null;
+  var forfeiting=false;           // laeuft gerade ein forfeit_match-RPC?
 
   function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('show');},2400);}
   function show(id){['lobby','game'].forEach(function(x){$(x).classList.toggle('hidden',x!==id);});}
   function nf(n){return (n||0).toLocaleString('de-DE');}
+
+  // Eigene Coin-Anzeige (oben im Duell + Wett-Auswahl) synchron halten
+  function setCoins(n){
+    myCoins=Math.max(0, +n||0);
+    var cb=$('coinBar'); if(cb) cb.textContent=nf(myCoins);
+    var bo=$('balOut'); if(bo) bo.textContent=nf(myCoins);
+  }
 
   // ---------- Realtime (mit Auto-Reconnect) ----------
   function connect(){
@@ -303,15 +330,22 @@
   function markOppSeen(){
     lastOppSeen=Date.now();
     var d=$('discoBanner'); if(d) d.style.display='none';
+    var f=$('discoForfeit'); if(f) f.classList.add('hidden');
   }
   function startGapWatch(){
     lastOppSeen=Date.now();
     if(gapTimer) clearInterval(gapTimer);
     gapTimer=setInterval(function(){
       if(myOver || oppOver || resultShown){ clearInterval(gapTimer); gapTimer=null; return; }
-      if(Date.now()-lastOppSeen>20000){
+      var gap=Date.now()-lastOppSeen;
+      if(gap>20000){
         var d=$('discoBanner'); if(d) d.style.display='block';
         bc('resync-req',{});   // aktiv nachfragen
+      }
+      // Forfeit-Option erst ab >25s Funkstille (server-seitiger Anti-Instant-Abuse:
+      // match.created_at muss ohnehin > 25s alt sein). Nur waehrend aktivem Spiel.
+      if(gap>25000 && started && !myOver && !oppOver){
+        var f=$('discoForfeit'); if(f) f.classList.remove('hidden');
       }
     },5000);
   }
@@ -491,6 +525,7 @@
   function beginGame(atTs){
     if(started) return; started=true;
     show('game');
+    setCoins(myCoins);   // Coin-Bar im Duell mit aktuellem Stand fuellen
     if(wager>0){ $('gameWager').classList.remove('hidden'); $('gameWagerN').textContent=(wager*2); }
     var cdEl=$('countdown'); cdEl.style.display='flex';
     // Rest-Wartezeit bis zum synchronisierten Start (at - jetzt), dann sichtbarer 3-2-1.
@@ -569,13 +604,86 @@
     for(var i=0;i<SIZE*SIZE;i++){ m.children[i].className=(b[i]==='1'?'on':''); }
   }
 
-  // ---------- Gadgets ----------
-  $('gadFog').onclick=function(){ if(fogLeft<=0)return; fogLeft--; $('fogN').textContent=fogLeft+'×'; if(fogLeft<=0)this.disabled=true; bc('gadget',{kind:'fog'}); toast('🌫️ Nebel an Gegner geschickt!'); };
-  $('gadRush').onclick=function(){ if(rushLeft<=0)return; rushLeft--; $('rushN').textContent=rushLeft+'×'; if(rushLeft<=0)this.disabled=true; bc('gadget',{kind:'rush'}); toast('⏱️ Zeitdruck an Gegner geschickt!'); };
+  // ---------- Gadgets (kosten G-Coins: server-autoritativ via spend_match_gadget) ----------
+  // Ablauf: erst RPC (bucht Coins ab + prueft Cap), NUR bei ok broadcasten + Coin-Anzeige
+  // aktualisieren. Bei NOT_ENOUGH_COINS/GADGET_CAP_REACHED/Fehler -> Toast, KEIN Senden.
+  async function useGadget(kind, btn){
+    if(gadBusy || !matchId || myOver || resultShown) return;
+    var cost=GAD_COST[kind]||0;
+    if(myCoins<cost){ toast('Nicht genug G-Coins ('+cost+' nötig).'); return; }
+    gadBusy=true; if(btn) btn.disabled=true;
+    try{
+      var r=await sb.rpc('spend_match_gadget',{p_match_id:matchId, p_kind:kind});
+      var d=(r&&r.data)||{};
+      if(r&&r.error){ toast('Gadget fehlgeschlagen.'); return; }
+      if(!d.ok){
+        var map={
+          NOT_ENOUGH_COINS:'Nicht genug G-Coins ('+cost+' nötig).',
+          GADGET_CAP_REACHED:'Limit für dieses Gadget erreicht.',
+          BAD_KIND:'Unbekanntes Gadget.',
+          NOT_A_PLAYER:'Du bist kein Spieler dieses Duells.',
+          MATCH_NOT_ACTIVE:'Duell ist nicht aktiv.'
+        };
+        toast(map[d.error]||'Gadget fehlgeschlagen.');
+        return;
+      }
+      // Erfolg: Coin-Stand aus Server-Antwort uebernehmen, dann an Gegner senden
+      if(typeof d.coins==='number') setCoins(d.coins); else setCoins(myCoins-cost);
+      bc('gadget',{kind:kind});
+      toast(kind==='fog' ? '🌫️ Nebel an Gegner geschickt!' : '⏱️ Zeitdruck an Gegner geschickt!');
+    }catch(e){
+      toast('Gadget fehlgeschlagen.');
+    }finally{
+      gadBusy=false; if(btn) btn.disabled=false;
+    }
+  }
+  $('gadFog').onclick=function(){ useGadget('fog', this); };
+  $('gadRush').onclick=function(){ useGadget('rush', this); };
   function recvGadget(kind){
     if(kind==='fog'){ var f=$('fogOverlay'); f.style.display='flex'; setTimeout(function(){f.style.display='none';},8000); }
     else if(kind==='rush'){ var r=$('rushBanner'); r.style.display='block'; setTimeout(function(){r.style.display='none';},6000); }
   }
+
+  // ---------- Forfeit: Gegner weg -> Sieg beanspruchen ----------
+  $('discoForfeit').onclick=async function(){
+    if(forfeiting || !matchId) return;
+    forfeiting=true; this.classList.add('hidden');
+    try{
+      var r=await sb.rpc('forfeit_match',{p_match_id:matchId});
+      var d=(r&&r.data)||{};
+      if(r&&r.error){ toast('Konnte Sieg nicht beanspruchen.'); forfeiting=false; return; }
+      if(!d.ok){
+        var map={
+          OPPONENT_STILL_PLAYING:'Dein Gegner spielt noch — kein Sieg per Aufgabe möglich.',
+          TOO_EARLY:'Noch zu früh — kurz warten und erneut versuchen.',
+          ALREADY_FINISHED:'Das Duell ist schon entschieden.',
+          NOT_A_PLAYER:'Du bist kein Spieler dieses Duells.',
+          MATCH_NOT_ACTIVE:'Duell ist nicht aktiv.'
+        };
+        toast(map[d.error]||'Konnte Sieg nicht beanspruchen.');
+        // Button bei nachholbaren Faellen (TOO_EARLY) wieder anbieten
+        if(d.error==='TOO_EARLY'){ this.classList.remove('hidden'); }
+        forfeiting=false; return;
+      }
+      // Sieg per Aufgabe: Ergebnis-Screen erzwingen
+      var d2=$('discoBanner'); if(d2) d2.style.display='none';
+      if(gapTimer){ clearInterval(gapTimer); gapTimer=null; }
+      myOver=true;
+      showResultShell();
+      var gained = (d.wager>0) ? 2*d.wager : 0;
+      $('resVerify').innerHTML='✓ Server-geprüft';
+      $('resEmoji').textContent='🏆';
+      $('resTitle').textContent='Gewonnen (Aufgabe)!';
+      $('resMe').textContent=nf(myScore); $('resOpp').textContent=nf(oppScore);
+      var cEl=$('resCoins');
+      if(gained>0){ cEl.className='coins up'; cEl.textContent='+'+gained+' G-Coins 🪙'; setCoins(myCoins+gained); }
+      else { cEl.className='coins neutral'; cEl.textContent='Dein Gegner hat aufgegeben.'; }
+      loadEloIntoResult();
+      refreshBilanz();
+    }catch(e){
+      toast('Konnte Sieg nicht beanspruchen.'); forfeiting=false;
+    }
+  };
 
   // ---------- Ende / Ergebnis (Server-verifiziert via submit-duel) ----------
   var submitting=false, submitResult=null;
@@ -623,6 +731,7 @@
     $('resTitle').textContent='Ergebnis';
     $('resEmoji').textContent='⏳';
     $('resCoins').textContent='';
+    $('resElo').textContent='';
     $('result').style.display='flex';
   }
   function applyResult(d){
@@ -653,6 +762,14 @@
     var win = d.winner_id && meId && d.winner_id===meId;
     var tie = !d.winner_id;
     concludeVisual(my,opp,w, {win:win, tie:tie});
+    // Coin-Bar nachziehen: bei Sieg Pot (2*w), bei Niederlage 0, bei Unentschieden Einsatz zurueck.
+    if(w>0){
+      if(win) setCoins(myCoins + 2*w);
+      else if(tie) setCoins(myCoins + w);
+    }
+    // ELO im Ergebnis nachladen (best-effort) + Lobby-Bilanz aktualisieren
+    loadEloIntoResult();
+    refreshBilanz();
   }
   function concludeVisual(my,opp,w,outcome){
     var win, tie;
@@ -668,6 +785,25 @@
     } else {
       cEl.className='coins neutral'; cEl.textContent='';
     }
+  }
+
+  // ---------- Duell-Bilanz + ELO (aus pvp_rating / pvp_leaderboard) ----------
+  async function refreshBilanz(){
+    if(!MYID) return;
+    try{
+      var r=await sb.from('pvp_rating').select('wins,losses,elo').eq('user_id',MYID).maybeSingle();
+      var d=(r&&r.data)||null;
+      var w=d?(+d.wins||0):0, l=d?(+d.losses||0):0;
+      $('bilanzW').textContent=w; $('bilanzL').textContent=l;
+    }catch(e){ /* kein Eintrag -> 0/0 bleibt stehen */ }
+  }
+  async function loadEloIntoResult(){
+    if(!MYID) return;
+    try{
+      var r=await sb.from('pvp_rating').select('elo').eq('user_id',MYID).maybeSingle();
+      var d=(r&&r.data)||null;
+      if(d && typeof d.elo==='number'){ $('resElo').textContent='🏅 ELO '+nf(d.elo); }
+    }catch(e){}
   }
 
   $('discoAbort').onclick=async function(){
@@ -697,10 +833,12 @@
       sb.from('my_profile').select('username,full_name,coins').maybeSingle().then(function(p){
         if(p.data){
           var n=(p.data.username||(p.data.full_name||'').split(' ')[0]||'Du'); $('meName').textContent=n;
-          myCoins=+p.data.coins||0; $('balOut').textContent=nf(myCoins);
+          setCoins(+p.data.coins||0);
           refreshWagerChips();
         }
       }).catch(function(){});
+      // Duell-Bilanz in der Lobby anzeigen (0/0 wenn kein pvp_rating-Eintrag)
+      refreshBilanz();
       // Deep-Links
       var q=new URLSearchParams(location.search), pc=q.get('code'), mm=q.get('match');
       if(mm){ showAcceptForMatch(mm); }
