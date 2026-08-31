@@ -24,11 +24,23 @@
   .vk .pill.champ{background:#F4B740;border-color:#F4B740;color:#3a2a05;}
   .vk.champion{background:linear-gradient(180deg,#fffaf0,#fff);border:2px solid #F4B740;box-shadow:0 20px 60px rgba(244,183,64,.35);}
   .vk .vktitle{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#C79415;margin-bottom:8px;}
-  .infocard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:8px 0 14px;}
-  .infocard h3{margin:0 0 8px;font-size:.95rem;font-weight:800;}
-  .infocard ul{margin:0;padding-left:18px;}
-  .infocard li{font-size:.85rem;line-height:1.55;color:var(--w4,#5b6a67);margin-bottom:5px;}
+  .infocard{background:var(--card);border:1px solid var(--line);border-radius:16px;margin:8px 0 14px;overflow:hidden;}
+  .info-head{width:100%;background:none;border:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;font-family:var(--fb),sans-serif;font-size:.95rem;font-weight:800;color:var(--ink);cursor:pointer;text-align:left;}
+  .info-head .chev{color:var(--green);font-size:1.4rem;line-height:1;transition:transform .25s;flex-shrink:0;}
+  .infocard.open .info-head .chev{transform:rotate(90deg);}
+  .infocard ul{margin:0;padding:0 16px;max-height:0;opacity:0;transition:max-height .3s ease,opacity .25s,padding .3s;list-style:none;}
+  .infocard.open ul{max-height:360px;opacity:1;padding:2px 16px 14px;}
+  .infocard li{position:relative;font-size:.85rem;line-height:1.55;color:var(--w4,#5b6a67);margin-bottom:7px;padding-left:16px;}
+  .infocard li::before{content:'';position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;background:var(--green);}
   .infocard b{color:var(--ink);}
+  /* Top-3-Podium: Gold/Silber/Bronze, 1. Platz erhoeht + Glow */
+  .podium{align-items:flex-end;gap:8px;}
+  .pod{position:relative;transition:transform .2s;}
+  .pod.prk1{background:linear-gradient(180deg,#FFF8E1,#FFEFC0);border:1.5px solid #F4B740;box-shadow:0 12px 26px rgba(244,183,64,.38);transform:translateY(-10px) scale(1.06);z-index:2;}
+  .pod.prk2{background:linear-gradient(180deg,#F7F8FA,#EBEEF1);border:1.5px solid #C6CCD4;}
+  .pod.prk3{background:linear-gradient(180deg,#FCF0E5,#F3E1CF);border:1.5px solid #D9A876;}
+  .pod.prk1 .pz,.pod.prk1 .nm{color:#8a5a06;}
+  .pod .pz{font-size:1.5rem;line-height:1;}
   .seg{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px;margin:2px 0 14px;}
   .seg button{flex:1;border:none;background:none;font-family:var(--fb),sans-serif;font-size:13px;font-weight:800;color:var(--w4);padding:9px 6px;border-radius:999px;cursor:pointer;transition:background .18s,color .18s;}
   .seg button.on{background:var(--green);color:#fff;box-shadow:0 2px 8px rgba(18,180,137,.28);}
@@ -78,8 +90,8 @@
     <button type="button" data-scope="friends">Freunde</button>
   </div>
 
-  <div class="infocard">
-    <h3>🏆 So läuft die Monats-Challenge</h3>
+  <div class="infocard" id="infoCard">
+    <button class="info-head" id="infoToggle" type="button"><span>🏆 So läuft die Monats-Challenge</span><span class="chev">›</span></button>
     <ul>
       <li>Sammle diesen Monat <b>G-Coins</b>: <b>+100</b> pro eingelöstem Coupon, dazu Coins fürs tägliche Goat-Spiel.</li>
       <li>Nur die <b>Top 3 global</b> gewinnen jeden Monat <b>echte Geschenke</b> 🎁. Die Besten an deiner Uni bekommen G-Coins-Boni.</li>
@@ -138,6 +150,8 @@
   var now=new Date(); $('month').textContent=MONTHS[now.getMonth()]+' '+now.getFullYear();
   var last=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(); var left=last-now.getDate();
   $('reset').textContent='Reset in '+left+' Tg';
+  // Challenge-Erklaerung einklappbar (standardmaessig zu -> Rangliste sofort im Fokus)
+  (function(){ var it=$('infoToggle'), ic=$('infoCard'); if(it&&ic) it.addEventListener('click',function(){ ic.classList.toggle('open'); }); })();
   function av(cfg){try{if(window.GoatAvatar)return GoatAvatar.renderGoatAvatar(cfg||{},44);}catch(e){}return'';}
   function tierName(c){try{return window.GoatAvatar?GoatAvatar.tierLabel(Number(c||0)):'Bronze';}catch(e){return'Bronze';}}
 
@@ -244,7 +258,7 @@
       var prize=MEDAL[rk]||(rk+'.');
       var canDuel=MEID && x.user_id!==MEID;
       var duelBtn=canDuel?'<button class="poddual" data-uid="'+esc(x.user_id)+'" data-uname="'+esc(x.username||'Anonym')+'">⚔️ Duell</button>':'';
-      return '<div class="pod'+(rk===1?' p1':'')+'" data-uid="'+esc(x.user_id)+'"><div class="av">'+av(x.avatar_config)+'</div><div class="nm r'+rk+'">'+(rk===1?'👑 ':'')+esc(x.username||'Anonym')+'</div><div class="pt">'+nf(x.coins_month)+'</div><div class="pz">'+prize+'</div>'+duelBtn+'</div>';
+      return '<div class="pod prk'+rk+(rk===1?' p1':'')+'" data-uid="'+esc(x.user_id)+'"><div class="av">'+av(x.avatar_config)+'</div><div class="nm r'+rk+'">'+(rk===1?'👑 ':'')+esc(x.username||'Anonym')+'</div><div class="pt">'+nf(x.coins_month)+'</div><div class="pz">'+prize+'</div>'+duelBtn+'</div>';
     }).join('');
     $('rows').innerHTML=rest.map(function(x){var mine=MEID&&x.user_id===MEID;
       var duelBtn=(MEID && !mine)?'<button class="duelbtn" data-uid="'+esc(x.user_id)+'" data-uname="'+esc(x.username||'Anonym')+'">⚔️ Duell</button>':'';

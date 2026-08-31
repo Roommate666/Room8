@@ -115,7 +115,7 @@ body.dragging #bg *,body.dragging #nature *,body.dragging #deco *{animation-play
 .goat-wrap{position:relative;width:52px;flex:0 0 52px;}
 .stats{flex:1;display:flex;gap:7px;}
 .stat{flex:1;background:var(--card);border:2px solid var(--card-edge);border-radius:var(--r);
-  padding:5px 6px;text-align:center;box-shadow:0 3px 0 rgba(0,0,0,.10);backdrop-filter:blur(3px);}
+  padding:5px 6px;text-align:center;box-shadow:0 3px 0 rgba(0,0,0,.10);}
 .stat .lbl{font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft);font-weight:800;}
 .stat .val{font-family:'Fredoka';font-size:19px;font-weight:600;line-height:1.1;}
 .stat.score .val{font-size:21px;}
@@ -152,7 +152,7 @@ body.goatmode #multBadge{display:block;animation:pulse .45s infinite alternate;}
 /* Board 7x7 */
 /* Board 7x7 (heller Original-Look wiederhergestellt) */
 .board-card{position:relative;background:var(--card);border:1.5px solid var(--card-edge);border-radius:16px;padding:2px;
-  box-shadow:0 6px 0 rgba(0,0,0,.12);backdrop-filter:blur(4px);}
+  box-shadow:0 6px 0 rgba(0,0,0,.12);}
 /* FIX Verzerrung: Zeilen EXPLIZIT gleich wie Spalten -> echte Quadrate -> Steine 1:1 platziert.
    minmax(0,1fr) verhindert, dass Zell-Inhalt/Border die Zeile aufblaeht (war Ursache: Zeilen 63px, Spalten 55px). */
 #board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));gap:0;aspect-ratio:1;touch-action:none;}
@@ -160,11 +160,8 @@ body.goatmode #multBadge{display:block;animation:pulse .45s infinite alternate;}
   box-shadow:inset 0 0 0 1px rgba(120,100,60,.06);
   display:flex;align-items:center;justify-content:center;font-size:0;}
 /* Vorschau (wie im Video): heller, halbtransparenter Block in ECHTER Farbe am Zielort */
-.cell.ghost-ok{border-radius:4px;opacity:.9;
-  background:linear-gradient(150deg,color-mix(in srgb,var(--c) 32%,#fff 68%) 0%,color-mix(in srgb,var(--c) 52%,#fff 48%) 55%,color-mix(in srgb,var(--c) 58%,#fff 42%) 100%);
-  box-shadow:inset 3px 3px 2px rgba(255,255,255,.6),inset -3px -4px 3px color-mix(in srgb,var(--c) 32%,transparent);
-  animation:ghostPulse 1s ease-in-out infinite;}
-.cell.ghost-bad{border-radius:4px;background:rgba(255,110,110,.26);box-shadow:inset 0 0 0 2px var(--bad);}
+.cell.ghost-ok{border-radius:4px;transition:none;background:rgba(33,208,161,.4);box-shadow:inset 0 0 0 2px rgba(18,180,137,.85);}
+.cell.ghost-bad{border-radius:4px;transition:none;background:rgba(255,110,110,.26);box-shadow:inset 0 0 0 2px var(--bad);}
 @keyframes ghostPulse{0%,100%{opacity:.76;}50%{opacity:.98;}}
 /* Model 10 (Deep 3D): gerundet, heller Deckel oben-links, dunkle Fase + starke Extrusions-Wand unten. */
 .cell.filled{position:relative;border-radius:7px;
@@ -218,13 +215,11 @@ body.goatmode #multBadge{display:block;animation:pulse .45s infinite alternate;}
 .cell.filled.tb::after{content:none;}
 .cell.filled.tb.bombhot{animation:bombhot .5s infinite alternate;}
 @keyframes bombhot{from{filter:brightness(1)}to{filter:brightness(1.5) drop-shadow(0 0 7px var(--chili))}}
-.cell.clearing{animation:popOut .24s forwards;}
+.cell.clearing{animation:popOut .2s ease-out forwards;}
 @keyframes popOut{
-  0%{transform:scale(1) translate(0,0)}
-  12%{transform:scale(1.16) translate(2px,-2px);filter:brightness(2.6) saturate(.2);box-shadow:0 0 16px rgba(255,255,255,.95)}
-  24%{transform:scale(1.18) translate(-3px,2px);filter:brightness(2.2)}
-  36%{transform:scale(1.2) translate(3px,1px);filter:brightness(1.8)}
-  100%{transform:scale(0) rotate(18deg);opacity:0}}
+  0%{transform:scale(1);opacity:1}
+  35%{transform:scale(1.14);filter:brightness(1.6)}
+  100%{transform:scale(0);opacity:0}}
 .cell.boom{animation:boom .28s forwards;}
 @keyframes boom{40%{transform:scale(1.3);filter:brightness(1.8) hue-rotate(-20deg)}100%{transform:scale(0);opacity:0}}
 @keyframes goPop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:1}}
@@ -367,7 +362,7 @@ body.shake .board-card{animation:shake .3s;}
   animation:praisePop .95s cubic-bezier(.2,1.5,.4,1) forwards;}
 .praise.small{top:52%;font-size:min(8vw,40px);color:#21D0A1;}
 @keyframes praisePop{0%{opacity:0;transform:translate(-50%,-50%) rotate(-10deg) scale(.3)}22%{opacity:1;transform:translate(-50%,-50%) rotate(-6deg) scale(1.18)}52%{transform:translate(-50%,-50%) rotate(-4deg) scale(1)}100%{opacity:0;transform:translate(-50%,-58%) rotate(-4deg) scale(1.05)}}
-.overlay{position:fixed;inset:0;z-index:100;background:rgba(50,40,22,.4);backdrop-filter:blur(5px);
+.overlay{position:fixed;inset:0;z-index:100;background:rgba(50,40,22,.4);
   display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;
   padding:calc(20px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));}
 .overlay.hidden{display:none;}
