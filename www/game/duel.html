@@ -90,6 +90,7 @@
   #board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));gap:0;aspect-ratio:1;touch-action:none;}
   .cell{background:rgba(232,222,198,.6);border-radius:3px;box-shadow:inset 0 0 0 1px rgba(120,100,60,.06);transition:background .08s;}
   .cell.filled{border-radius:2px;background:var(--mint);box-shadow:inset 0 2px 0 rgba(255,255,255,.28),inset 0 -2px 0 rgba(0,0,0,.14);}
+  .cell.junk{border-radius:2px;background:repeating-linear-gradient(45deg,#8a8f96,#8a8f96 4px,#6f747b 4px,#6f747b 8px);box-shadow:inset 0 0 0 1px rgba(0,0,0,.18);}
   .cell.ghost-ok{background:rgba(33,208,161,.45);}
   .cell.ghost-bad{background:rgba(229,83,60,.35);}
   body.shake .board-card{animation:shk .3s;}
@@ -153,6 +154,7 @@
     <h1>Duell</h1>
     <div class="sub">Fordere einen Freund heraus — gleiches Puzzle, wer mehr Punkte holt, gewinnt. 🐐</div>
     <div class="bilanz" id="bilanz">Deine Duell-Bilanz: <b id="bilanzW">0</b> Siege / <span class="l" id="bilanzL">0</span> Niederlagen</div>
+    <a href="duel-rank.html" style="display:inline-block;text-decoration:none;color:var(--mint-d);font-weight:800;font-size:13px;margin:2px 0 14px;">🏆 Duell-Rangliste ansehen ›</a>
 
     <div id="lobbyChoice">
       <button class="btn primary" id="btnCreate">Duell erstellen</button>
@@ -231,6 +233,7 @@
     <div class="gadgets">
       <button class="gad" id="gadFog"><span class="ic">🌫️</span>Nebel<span class="n" id="fogN"><b>15</b> G-Coins</span></button>
       <button class="gad" id="gadRush"><span class="ic">⏱️</span>Zeitdruck<span class="n" id="rushN"><b>20</b> G-Coins</span></button>
+      <button class="gad hidden" id="gadTrash"><span class="ic">💥</span>Müll-Block<span class="n" id="trashN"><b>3</b> übrig</span></button>
     </div>
     <div style="text-align:center;color:var(--w4);font-size:11.5px;font-weight:600;margin-top:12px">Gleiches Puzzle für beide · wer bis zum Ende mehr Punkte hat, gewinnt</div>
   </div>
@@ -527,6 +530,7 @@
     show('game');
     setCoins(myCoins);   // Coin-Bar im Duell mit aktuellem Stand fuellen
     if(wager>0){ $('gameWager').classList.remove('hidden'); $('gameWagerN').textContent=(wager*2); }
+    var _gtb=$('gadTrash'); if(_gtb) _gtb.classList.toggle('hidden', wager>0); // Muell-Block nur in Spass-Duellen (kein Coin-Risiko)
     var cdEl=$('countdown'); cdEl.style.display='flex';
     // Rest-Wartezeit bis zum synchronisierten Start (at - jetzt), dann sichtbarer 3-2-1.
     var now=Date.now();
@@ -559,7 +563,7 @@
   boardEl.addEventListener('click',function(e){ var c=e.target.closest('.cell'); if(c) tapCell(+c.dataset.i); });
 
   function renderBoard(){
-    for(var r=0;r<SIZE;r++)for(var c=0;c<SIZE;c++){ var el=cells[r*SIZE+c]; el.className='cell'+(st.grid[r][c]?' filled':''); }
+    for(var r=0;r<SIZE;r++)for(var c=0;c<SIZE;c++){ var v=st.grid[r][c]; cells[r*SIZE+c].className='cell'+(v?(v.t==='j'?' junk':' filled'):''); }
   }
   function pieceDims(p){var mr=0,mc=0;p.cells.forEach(function(rc){mr=Math.max(mr,rc[0]);mc=Math.max(mc,rc[1]);});return[mr+1,mc+1];}
   function renderTray(){
@@ -639,9 +643,29 @@
   }
   $('gadFog').onclick=function(){ useGadget('fog', this); };
   $('gadRush').onclick=function(){ useGadget('rush', this); };
+  // Muell-Block (nur Spass-Duelle, wager==0): GRATIS + limitiert. Kein Coin-Vektor ->
+  // keine serverseitige Kreuzpruefung noetig. Deterministisch via GoatCore (im Zug-Log als {j}).
+  var trashLeft=3;
+  function sendTrash(btn){
+    if(!matchId||myOver||resultShown||(st&&st.over)) return;
+    if(wager>0){ toast('Müll-Block gibt es nur in Spaß-Duellen.'); return; }
+    if(trashLeft<=0){ toast('Keine Müll-Blöcke mehr.'); return; }
+    trashLeft--; var n=$('trashN'); if(n) n.innerHTML='<b>'+trashLeft+'</b> übrig'; if(trashLeft<=0 && btn) btn.disabled=true;
+    bc('gadget',{kind:'trash'});
+    toast('💥 Müll-Block an Gegner geschickt!');
+  }
+  var _gt=$('gadTrash'); if(_gt) _gt.onclick=function(){ sendTrash(this); };
   function recvGadget(kind){
     if(kind==='fog'){ var f=$('fogOverlay'); f.style.display='flex'; setTimeout(function(){f.style.display='none';},8000); }
     else if(kind==='rush'){ var r=$('rushBanner'); r.style.display='block'; setTimeout(function(){r.style.display='none';},6000); }
+    else if(kind==='trash'){
+      if(!st||st.over) return;
+      // Deterministisch 3 Muell-Zellen ins EIGENE Feld (Live == Server-Replay, gleiche rng-Reihenfolge)
+      GoatCore.injectJunk(st, GoatCore.pickJunkCells(st, 3));
+      moveLog.push({j:3, t:Date.now()-startMs});   // im Zug-Log -> submit-duel reproduziert es
+      renderBoard(); broadcastState();
+      toast('💥 Müll-Block kassiert — 3 Blöcke im Feld!');
+    }
   }
 
   // ---------- Forfeit: Gegner weg -> Sieg beanspruchen ----------

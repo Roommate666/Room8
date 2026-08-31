@@ -343,12 +343,34 @@
     return res;
   }
 
+  // ---- Muell-Block (Duell-Gadget) --------------------------------------------
+  // Waehlt n leere Zellen deterministisch (st._rng + aktuelles Feld) und fuellt sie
+  // mit Junk {t:'j'}. Junk BLOCKT Platzierungen (canPlaceAt sieht truthy) und wird
+  // beim Linien-Clear normal mitgeraeumt. NUR im Duell aktiv (im Zug-Log als {j:n}).
+  // Determinismus: Live-Client UND Server-Replay wenden identisch injectJunk(pickJunkCells)
+  // an denselben Sequenzpunkten an -> gleiche rng-Reihenfolge -> gleicher Score.
+  // Single-Player enthaelt NIE {j}-Eintraege -> replay unveraendert (rng unangetastet).
+  function pickJunkCells(st, n) {
+    const empty = [];
+    for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) if (!st.grid[r][c]) empty.push([r, c]);
+    const out = [];
+    for (let i = 0; i < n && empty.length; i++) { const k = Math.floor(st._rng() * empty.length); out.push(empty.splice(k, 1)[0]); }
+    return out;
+  }
+  function injectJunk(st, cells) {
+    for (const rc of (cells || [])) {
+      const r = rc[0], c = rc[1];
+      if (r >= 0 && c >= 0 && r < SIZE && c < SIZE && !st.grid[r][c]) st.grid[r][c] = { t: 'j' };
+    }
+  }
+
   /* Server-Replay: Runde aus seed + Zug-Liste nachrechnen. moves = [{idx,r,c,t}].
-     Gibt {score, over, moves, valid} zurueck. valid=false wenn ein Zug illegal war. */
+     Duell-Junk als {j:n} (n Muell-Zellen, deterministisch injiziert). valid=false wenn illegal. */
   function replay(seed, mode, moves) {
     const st = create(seed, mode);
     let applied = 0;
     for (const mv of (moves || [])) {
+      if (mv && mv.j) { injectJunk(st, pickJunkCells(st, mv.j)); continue; } // Muell-Injektion, keine Platzierung
       const r = place(st, mv.idx, mv.r, mv.c, mv.t);
       if (!r.ok) return { score: st.score, over: st.over, moves: applied, valid: false, reason: r.reason };
       applied++;
@@ -358,7 +380,7 @@
   }
 
   return { SIZE, MAX_LEVEL, SHAPES, mulberry32, create, place, replay,
-    advanceTime, igniteHeat,
+    advanceTime, igniteHeat, pickJunkCells, injectJunk,
     // fuer Tests/Renderer exportiert:
     canPlaceAt, anyPlacement, findFullLines, piecePool, mult, _internal: { newPiece, moldCadence, bombCadence } };
 });

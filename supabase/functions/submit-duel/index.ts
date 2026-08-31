@@ -62,7 +62,9 @@ serve(async (req) => {
     if (!moves) return json({ ok: false, error: 'missing moves' }, 400)
     if (moves.length > MAX_MOVES) return json({ ok: false, error: 'too many moves' }, 400)
     for (const mv of moves) {
-      if (!mv || !Number.isFinite(+mv.idx) || !Number.isFinite(+mv.r) || !Number.isFinite(+mv.c))
+      if (!mv) return json({ ok: false, error: 'malformed moves' }, 400)
+      if (mv.j) continue // Muell-Injektion (Duell-Gadget): {j:n}, hat kein idx/r/c -> ok
+      if (!Number.isFinite(+mv.idx) || !Number.isFinite(+mv.r) || !Number.isFinite(+mv.c))
         return json({ ok: false, error: 'malformed moves' }, 400)
     }
 
