@@ -29,6 +29,38 @@
   .infocard ul{margin:0;padding-left:18px;}
   .infocard li{font-size:.85rem;line-height:1.55;color:var(--w4,#5b6a67);margin-bottom:5px;}
   .infocard b{color:var(--ink);}
+  .seg{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px;margin:2px 0 14px;}
+  .seg button{flex:1;border:none;background:none;font-family:var(--fb),sans-serif;font-size:13px;font-weight:800;color:var(--w4);padding:9px 6px;border-radius:999px;cursor:pointer;transition:background .18s,color .18s;}
+  .seg button.on{background:var(--green);color:#fff;box-shadow:0 2px 8px rgba(18,180,137,.28);}
+
+  /* Herausfordern-Button pro Zeile */
+  .lrow{display:flex;align-items:center;gap:8px;}
+  .lrow .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .duelbtn{flex-shrink:0;border:none;background:var(--green);color:#fff;font-family:var(--fb),sans-serif;font-weight:800;font-size:11px;padding:6px 10px;border-radius:999px;cursor:pointer;box-shadow:0 2px 8px rgba(18,180,137,.25);}
+  .duelbtn:active{transform:scale(.95);}
+  .pod .poddual{margin-top:8px;border:none;background:var(--green);color:#fff;font-family:var(--fb),sans-serif;font-weight:800;font-size:11px;padding:6px 12px;border-radius:999px;cursor:pointer;box-shadow:0 2px 8px rgba(18,180,137,.25);}
+
+  /* Wett-Auswahl-Modal fuer Herausforderung */
+  .dwbg{position:fixed;inset:0;z-index:320;background:rgba(20,24,28,.55);display:none;align-items:center;justify-content:center;padding:22px;}
+  .dwbg.show{display:flex;}
+  .dw{background:#fff;border-radius:22px;padding:22px 20px 18px;max-width:340px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:vkin .3s cubic-bezier(.2,.9,.3,1);position:relative;}
+  .dw .close{position:absolute;top:10px;right:12px;background:none;border:none;font-size:20px;color:#9aa;cursor:pointer;}
+  .dw h3{font-family:var(--fh),serif;font-size:20px;font-weight:700;color:var(--ink);margin:0 0 2px;}
+  .dw .who{font-size:13px;color:var(--w4);font-weight:600;margin-bottom:4px;}
+  .dw .bal{font-size:12px;color:var(--w4);font-weight:600;margin-bottom:14px;}
+  .dw .bal b{color:var(--ink);}
+  .dwchips{display:flex;gap:8px;margin-bottom:16px;}
+  .dwchip{flex:1;border:1.5px solid var(--line);background:var(--card);border-radius:14px;padding:12px 4px;text-align:center;font-family:var(--fh),serif;font-size:20px;font-weight:700;color:var(--ink);cursor:pointer;transition:all .12s;}
+  .dwchip .cn{display:block;font-family:var(--fb),sans-serif;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--w4);margin-top:2px;}
+  .dwchip.sel{border-color:var(--green);background:rgba(18,180,137,.1);color:var(--green);box-shadow:0 2px 8px rgba(18,180,137,.25);}
+  .dwchip.sel .cn{color:var(--green);}
+  .dwchip[disabled]{opacity:.35;pointer-events:none;}
+  .dwgo{width:100%;border:none;background:linear-gradient(180deg,#21D0A1,#12B489);color:#fff;font-family:var(--fb),sans-serif;font-weight:800;font-size:15px;padding:14px;border-radius:14px;cursor:pointer;box-shadow:0 10px 22px rgba(18,180,137,.28);}
+  .dwgo:active{transform:scale(.98);}
+  .dwgo[disabled]{opacity:.5;pointer-events:none;}
+
+  .cw-toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(16px);background:#1A1613;color:#F7F4EE;font-family:var(--fb),sans-serif;font-weight:700;font-size:13px;padding:11px 18px;border-radius:14px;opacity:0;transition:.25s;z-index:340;max-width:90%;text-align:center;}
+  .cw-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 <link rel="icon" type="image/x-icon" href="favicon.ico?v133"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133"><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
 </head>
@@ -39,6 +71,12 @@
     <span class="ug-coins" style="border-color:var(--green);color:var(--green)" id="reset">Monats-Reset</span>
   </div>
   <div class="ug-sub">Monats-Challenge · <span id="month"></span></div>
+
+  <div class="seg" id="seg">
+    <button type="button" data-scope="global" class="on">Global</button>
+    <button type="button" data-scope="uni">Uni</button>
+    <button type="button" data-scope="friends">Freunde</button>
+  </div>
 
   <div class="infocard">
     <h3>🏆 So läuft die Monats-Challenge</h3>
@@ -54,10 +92,29 @@
   <div class="podium" id="podium"></div>
   <a href="https://instagram.com/unigoat.de" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;white-space:normal;line-height:1.35;font-size:13px;font-weight:800;color:#fff;background:linear-gradient(180deg,#E1306C,#C13584);border-radius:14px;padding:12px 14px;margin:-4px 0 16px;box-shadow:0 3px 10px rgba(193,53,132,.3);">🏆 Du kannst was gewinnen!<br>Alle Infos auf Instagram →</a>
   <div id="rows"></div>
-  <div class="ug-empty" id="empty" style="display:none;">Noch keine G-Coins diesen Monat.<br>Sei der Erste — Coupons einlösen & Daily spielen! 🐐</div>
+  <div class="ug-empty" id="empty" style="display:none;"></div>
 </div>
 
 <div class="vkbg" id="vkbg"></div>
+
+<!-- Wett-Auswahl-Modal fuer Herausforderung -->
+<div class="dwbg" id="dwbg">
+  <div class="dw">
+    <button class="close" id="dwClose" type="button">×</button>
+    <h3>⚔️ Herausfordern</h3>
+    <div class="who" id="dwWho">Spieler</div>
+    <div class="bal">Dein Kontostand: <b id="dwBal">–</b> G-Coins</div>
+    <div class="dwchips" id="dwChips">
+      <div class="dwchip sel" data-wager="0">0<span class="cn">Spaß</span></div>
+      <div class="dwchip" data-wager="25">25<span class="cn">G-Coins</span></div>
+      <div class="dwchip" data-wager="50">50<span class="cn">G-Coins</span></div>
+      <div class="dwchip" data-wager="100">100<span class="cn">G-Coins</span></div>
+    </div>
+    <button class="dwgo" id="dwGo" type="button">Herausforderung senden</button>
+  </div>
+</div>
+
+<div class="cw-toast" id="cwToast"></div>
 
 <nav class="ugnav">
   <a href="dashboard.html"><svg viewBox="0 0 24 24"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1Z"/></svg>Hub</a>
@@ -76,6 +133,7 @@
   var $=function(id){return document.getElementById(id);};
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function nf(n){return (n||0).toLocaleString('de-DE');}
+  function cwToast(m){var t=$('cwToast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('show');},2600);}
   var MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
   var now=new Date(); $('month').textContent=MONTHS[now.getMonth()]+' '+now.getFullYear();
   var last=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(); var left=last-now.getDate();
@@ -86,33 +144,140 @@
   // Store-safe: KEINE Geldbetraege in der App (sonst Google-Play Gewinnspiel-Policy).
   // Preise/Contest laufen extern ueber Instagram -> hier nur Rangliste + Medaillen.
   var LB=[]; // Leaderboard-Daten fuer die Visitenkarte
+  var SCOPE='global'; // global | uni | friends
+  var MEID=null; var MYUNI=null; var MYCOINS=0;
+  var EMPTY_MSG={
+    global:'Noch keine G-Coins diesen Monat.<br>Sei der Erste — Coupons einlösen & Daily spielen! 🐐',
+    uni:'An deiner Uni hat diesen Monat noch niemand G-Coins gesammelt.<br>Mach den Anfang! 🐐',
+    friends:'Du hast noch keine Freunde in der Rangliste.<br>Lad Freunde über deinen Einladungs-Code ein! 🐐'
+  };
   function openCard(x){
     if(!x)return;
     var bg=$('vkbg'); bg.innerHTML=window.GoatAvatar?GoatAvatar.renderVisitenkarte(x):''; bg.classList.add('show');
   }
   $('vkbg').addEventListener('click',function(e){ if(e.target===this||e.target.classList.contains('close')) this.classList.remove('show'); });
-  function cardClick(e){ var el=e.target.closest('[data-uid]'); if(!el)return; for(var i=0;i<LB.length;i++){ if(String(LB[i].user_id)===el.getAttribute('data-uid')){ openCard(LB[i]); break; } } }
+  function cardClick(e){
+    if(e.target.closest('.duelbtn')||e.target.closest('.poddual')) return; // Duell-Button faengt eigenen Klick ab
+    var el=e.target.closest('[data-uid]'); if(!el)return;
+    for(var i=0;i<LB.length;i++){ if(String(LB[i].user_id)===el.getAttribute('data-uid')){ openCard(LB[i]); break; } }
+  }
 
-  async function load(){
-    if(!window.sb) return;
-    var meId=null; try{meId=(await sb.auth.getUser()).data.user.id;}catch(e){}
-    var rows=[]; try{ var r=await sb.rpc('get_challenge_leaderboard',{p_limit:50}); rows=r.data||[]; }catch(e){}
-    LB=rows;
-    if(!rows.length){ $('empty').style.display='block'; return; }
+  // ---------- Herausfordern: Wett-Auswahl-Modal ----------
+  var dwTargetId=null, dwWager=0;
+  function openDuelModal(uid, uname){
+    dwTargetId=uid; dwWager=0;
+    $('dwWho').textContent='gegen '+(uname||'Spieler');
+    $('dwBal').textContent=nf(MYCOINS);
+    // Chips reset + Kontostand-Gate
+    var chips=$('dwChips').querySelectorAll('.dwchip');
+    for(var i=0;i<chips.length;i++){
+      var w=+chips[i].getAttribute('data-wager');
+      chips[i].classList.toggle('sel', w===0);
+      chips[i].disabled=(w>MYCOINS);
+    }
+    $('dwGo').disabled=false;
+    $('dwbg').classList.add('show');
+  }
+  $('dwClose').onclick=function(){ $('dwbg').classList.remove('show'); };
+  $('dwbg').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
+  $('dwChips').addEventListener('click',function(e){
+    var c=e.target.closest('.dwchip'); if(!c||c.disabled)return;
+    dwWager=+c.getAttribute('data-wager');
+    var chips=this.querySelectorAll('.dwchip');
+    for(var i=0;i<chips.length;i++) chips[i].classList.toggle('sel', chips[i]===c);
+  });
+  $('dwGo').onclick=async function(){
+    if(!dwTargetId){ return; }
+    if(dwWager>0 && MYCOINS<dwWager){ cwToast('Nicht genug G-Coins für diesen Einsatz.'); return; }
+    this.disabled=true;
+    try{
+      var r=await sb.rpc('create_match',{p_mode:'high', p_wager:dwWager, p_challenged_id:dwTargetId});
+      var d=r.data||{};
+      if(!d.ok){
+        var map={NOT_ENOUGH_COINS:'Nicht genug G-Coins für diesen Einsatz.',CANNOT_CHALLENGE_SELF:'Du kannst dich nicht selbst herausfordern.',NOT_AUTHENTICATED:'Bitte einloggen.'};
+        cwToast(map[d.error]||'Herausforderung fehlgeschlagen.');
+        this.disabled=false; return;
+      }
+      $('dwbg').classList.remove('show');
+      cwToast('Herausforderung gesendet ⚔️');
+    }catch(e){ cwToast('Fehler beim Senden.'); this.disabled=false; }
+  };
+
+  // Duell-Button-Klick (Podium + Liste)
+  function duelClick(e){
+    var b=e.target.closest('.duelbtn, .poddual'); if(!b)return;
+    e.stopPropagation();
+    var uid=b.getAttribute('data-uid'), uname=b.getAttribute('data-uname');
+    if(!MEID){ cwToast('Bitte einloggen.'); return; }
+    if(uid===MEID) return;
+    openDuelModal(uid, uname);
+  }
+
+  // Holt die Rangliste je nach aktivem Segment.
+  //  - global:  komplette Monats-Rangliste (get_challenge_leaderboard)
+  //  - uni:     dieselbe Liste, client-seitig auf meine Universitaet gefiltert + neu gerankt
+  //  - friends: eigener Freundeskreis via get_friends_leaderboard (serverseitig aus auth.uid())
+  async function fetchRows(scope){
+    if(scope==='friends'){
+      try{ var rf=await sb.rpc('get_friends_leaderboard'); return rf.data||[]; }catch(e){ return []; }
+    }
+    var rows=[]; try{ var r=await sb.rpc('get_challenge_leaderboard',{p_limit:200}); rows=r.data||[]; }catch(e){}
+    if(scope==='uni'){
+      if(!MYUNI) return [];
+      rows=rows.filter(function(x){ return (x.university||'')===MYUNI; });
+      var rk=0, prev=null;
+      rows=rows.map(function(x,i){ if(prev===null||x.coins_month!==prev){ rk=i+1; prev=x.coins_month; } return Object.assign({},x,{rank:rk}); });
+    }
+    return rows;
+  }
+
+  function render(rows){
+    LB=rows||[];
+    $('podium').innerHTML=''; $('rows').innerHTML='';
+    if(!rows||!rows.length){ $('empty').innerHTML=EMPTY_MSG[SCOPE]||EMPTY_MSG.global; $('empty').style.display='block'; return; }
+    $('empty').style.display='none';
     var top=rows.slice(0,3), rest=rows.slice(3);
     var order=[1,0,2]; // p2, p1, p3 Anordnung
     $('podium').innerHTML=order.map(function(idx){var x=top[idx];if(!x)return'';var rk=Number(x.rank);
       var MEDAL={1:'🥇',2:'🥈',3:'🥉'};
       // Preise laufen extern ueber Instagram -> App zeigt nur Medaille (Play-safe, keine Betraege im Bundle)
       var prize=MEDAL[rk]||(rk+'.');
-      return '<div class="pod'+(rk===1?' p1':'')+'" data-uid="'+esc(x.user_id)+'"><div class="av">'+av(x.avatar_config)+'</div><div class="nm r'+rk+'">'+(rk===1?'👑 ':'')+esc(x.username||'Anonym')+'</div><div class="pt">'+nf(x.coins_month)+'</div><div class="pz">'+prize+'</div></div>';
+      var canDuel=MEID && x.user_id!==MEID;
+      var duelBtn=canDuel?'<button class="poddual" data-uid="'+esc(x.user_id)+'" data-uname="'+esc(x.username||'Anonym')+'">⚔️ Duell</button>':'';
+      return '<div class="pod'+(rk===1?' p1':'')+'" data-uid="'+esc(x.user_id)+'"><div class="av">'+av(x.avatar_config)+'</div><div class="nm r'+rk+'">'+(rk===1?'👑 ':'')+esc(x.username||'Anonym')+'</div><div class="pt">'+nf(x.coins_month)+'</div><div class="pz">'+prize+'</div>'+duelBtn+'</div>';
     }).join('');
-    $('rows').innerHTML=rest.map(function(x){var mine=meId&&x.user_id===meId;
-      return '<div class="lrow'+(mine?' me':'')+'" data-uid="'+esc(x.user_id)+'"><span class="r">'+x.rank+'</span><span class="n">'+(x.is_champion?'👑 ':'')+esc(x.username||'Anonym')+(mine?' (du)':'')+'</span><span class="s">'+nf(x.coins_month)+'</span></div>';
+    $('rows').innerHTML=rest.map(function(x){var mine=MEID&&x.user_id===MEID;
+      var duelBtn=(MEID && !mine)?'<button class="duelbtn" data-uid="'+esc(x.user_id)+'" data-uname="'+esc(x.username||'Anonym')+'">⚔️ Duell</button>':'';
+      return '<div class="lrow'+(mine?' me':'')+'" data-uid="'+esc(x.user_id)+'"><span class="r">'+x.rank+'</span><span class="n">'+(x.is_champion?'👑 ':'')+esc(x.username||'Anonym')+(mine?' (du)':'')+'</span><span class="s">'+nf(x.coins_month)+'</span>'+duelBtn+'</div>';
     }).join('');
-    $('podium').onclick=cardClick; $('rows').onclick=cardClick;
+    $('podium').onclick=function(e){ duelClick(e); cardClick(e); };
+    $('rows').onclick=function(e){ duelClick(e); cardClick(e); };
   }
-  load();
+
+  async function load(){
+    if(!window.sb) return;
+    render(await fetchRows(SCOPE));
+  }
+
+  $('seg').addEventListener('click',function(e){
+    var b=e.target.closest('button[data-scope]'); if(!b)return;
+    var sc=b.getAttribute('data-scope'); if(sc===SCOPE)return;
+    SCOPE=sc;
+    var btns=this.querySelectorAll('button');
+    for(var i=0;i<btns.length;i++){ btns[i].classList.toggle('on', btns[i]===b); }
+    $('podium').innerHTML=''; $('rows').innerHTML=''; $('empty').style.display='none';
+    load();
+  });
+
+  async function init(){
+    if(!window.sb) return;
+    try{ MEID=(await sb.auth.getUser()).data.user.id; }catch(e){}
+    if(MEID){
+      try{ var mp=await sb.from('my_profile').select('university,coins').maybeSingle(); if(mp.data){ MYUNI=mp.data.university||null; MYCOINS=+mp.data.coins||0; } }catch(e){}
+    }
+    load();
+  }
+  init();
 })();
 </script>
 </body>

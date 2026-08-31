@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="de" data-page="duel">
+<head>
+<script src="../sentry-init.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Duell — UniGoat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1A1613; --paper:#F7F4EE; --card:#FFFFFF; --w4:#9C9284; --line:#E7DFD2;
+    --mint:#12B489; --mint2:#21D0A1; --mint-d:#0E9673; --mintL:#E4FBF3; --gold:#F4B740; --danger:#E5533C;
+    --grad:linear-gradient(180deg,#21D0A1,#12B489); --sh:0 1px 2px rgba(40,30,15,.05),0 14px 34px rgba(40,30,15,.09); --sh-mint:0 10px 22px rgba(18,180,137,.32);
+    --fh:'Fraunces',serif; --fb:'Sora',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:var(--fb);background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;letter-spacing:-.01em;overflow-x:hidden;}
+  .wrap{max-width:480px;margin:0 auto;min-height:100vh;padding:calc(env(safe-area-inset-top) + 14px) 16px calc(20px + env(safe-area-inset-bottom));}
+  h1,h2,h3,.serif{font-family:var(--fh);font-weight:700;}
+  .back{position:absolute;top:calc(env(safe-area-inset-top) + 12px);left:12px;width:38px;height:38px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;font-size:20px;color:var(--ink);cursor:pointer;z-index:5;box-shadow:var(--sh);}
+  .hidden{display:none!important;}
+
+  /* Lobby */
+  .lob{text-align:center;padding-top:26px;}
+  .lob .goat{width:76px;height:76px;object-fit:contain;margin:0 auto 8px;display:block;}
+  .lob h1{font-size:30px;margin-bottom:4px;}
+  .lob .sub{color:var(--w4);font-weight:600;font-size:14px;margin-bottom:26px;line-height:1.5;}
+  .btn{display:block;width:100%;border:none;border-radius:16px;padding:16px;font-family:var(--fb);font-size:16px;font-weight:800;cursor:pointer;margin:10px 0;}
+  .btn.primary{background:var(--grad);color:#fff;box-shadow:var(--sh-mint);}
+  .btn.ghost{background:var(--card);color:var(--ink);border:1.5px solid var(--line);box-shadow:var(--sh);}
+  .btn.small{padding:10px 12px;font-size:13.5px;border-radius:12px;margin:0;width:auto;}
+  .btn.danger{background:var(--danger);color:#fff;box-shadow:0 10px 22px rgba(229,83,60,.28);}
+  .btn:active{transform:scale(.98);}
+  .btn[disabled]{opacity:.5;pointer-events:none;}
+  .codebox{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;margin:18px 0;box-shadow:var(--sh);}
+  .codebox .lbl{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--w4);}
+  .codebox .code{font-family:var(--fh);font-size:44px;font-weight:700;letter-spacing:.16em;color:var(--mint-d);margin:6px 0 2px;}
+  .codebox .hint{font-size:12.5px;color:var(--w4);font-weight:600;}
+  .waiting{display:inline-flex;align-items:center;gap:8px;color:var(--mint-d);font-weight:700;font-size:13.5px;margin-top:12px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--mint);animation:blink 1s infinite;}
+  @keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+  .join-in{width:100%;text-align:center;font-family:var(--fh);font-size:30px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;border:2px solid var(--line);border-radius:16px;padding:14px;margin:12px 0;background:var(--card);color:var(--ink);outline:none;}
+  .join-in:focus{border-color:var(--mint);}
+  .err{color:var(--danger);font-weight:700;font-size:13px;min-height:18px;margin-top:4px;}
+
+  /* Wett-Auswahl */
+  .wagerbox{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:16px 0;box-shadow:var(--sh);text-align:left;}
+  .wagerbox .lbl{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--w4);margin-bottom:4px;}
+  .wagerbox .bal{font-size:12.5px;color:var(--w4);font-weight:600;margin-bottom:12px;}
+  .wagerbox .bal b{color:var(--ink);}
+  .chips{display:flex;gap:8px;}
+  .chip{flex:1;border:1.5px solid var(--line);background:var(--paper);border-radius:14px;padding:12px 4px;text-align:center;font-family:var(--fh);font-size:20px;font-weight:700;color:var(--ink);cursor:pointer;transition:all .12s;}
+  .chip .cn{display:block;font-family:var(--fb);font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--w4);margin-top:2px;}
+  .chip.sel{border-color:var(--mint);background:var(--mintL);color:var(--mint-d);box-shadow:var(--sh-mint);}
+  .chip.sel .cn{color:var(--mint-d);}
+  .chip[disabled]{opacity:.35;pointer-events:none;}
+
+  /* Challenge-Inbox */
+  .section-t{font-family:var(--fh);font-size:17px;font-weight:700;text-align:left;margin:26px 2px 10px;}
+  .chlist{display:flex;flex-direction:column;gap:10px;}
+  .chrow{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:var(--sh);display:flex;align-items:center;gap:10px;text-align:left;}
+  .chrow .ci{flex:1;min-width:0;}
+  .chrow .cn{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chrow .cw{font-size:12px;color:var(--w4);font-weight:600;margin-top:1px;}
+  .chrow .cw .g{color:var(--gold);font-weight:800;}
+  .chrow .cact{display:flex;gap:6px;flex-shrink:0;}
+
+  /* Duell-Screen */
+  .topbar{display:flex;align-items:stretch;gap:10px;margin-bottom:10px;}
+  .pcard{flex:1;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 12px;box-shadow:var(--sh);}
+  .pcard.me{border-color:var(--mint);padding-left:42px;}
+  .pcard .nm{font-size:11px;font-weight:800;color:var(--w4);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pcard .sc{font-family:var(--fh);font-size:26px;font-weight:700;line-height:1.1;}
+  .pcard.me .sc{color:var(--mint-d);}
+  .oppmini{margin-left:auto;}
+  .mini{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);gap:1px;width:64px;height:64px;background:#efece5;border-radius:6px;padding:2px;}
+  .mini i{background:#efece5;border-radius:1px;}
+  .mini i.on{background:var(--mint);}
+  .oppwrap{display:flex;align-items:center;gap:10px;}
+  .oppwrap .oi{flex:1;min-width:0;}
+  .wagerpill{display:inline-flex;align-items:center;gap:5px;background:var(--mintL);color:var(--mint-d);font-weight:800;font-size:12px;padding:6px 12px;border-radius:999px;margin:0 auto 10px;}
+
+  .board-card{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:4px;box-shadow:var(--sh);position:relative;}
+  #board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));gap:0;aspect-ratio:1;touch-action:none;}
+  .cell{background:rgba(232,222,198,.6);border-radius:3px;box-shadow:inset 0 0 0 1px rgba(120,100,60,.06);transition:background .08s;}
+  .cell.filled{border-radius:2px;background:var(--mint);box-shadow:inset 0 2px 0 rgba(255,255,255,.28),inset 0 -2px 0 rgba(0,0,0,.14);}
+  .cell.ghost-ok{background:rgba(33,208,161,.45);}
+  .cell.ghost-bad{background:rgba(229,83,60,.35);}
+  body.shake .board-card{animation:shk .3s;}
+  @keyframes shk{0%,100%{transform:translate(0,0)}25%{transform:translate(-4px,1px)}75%{transform:translate(4px,-1px)}}
+
+  #tray{display:flex;gap:8px;justify-content:space-around;margin-top:12px;min-height:74px;}
+  .slot{flex:1;display:flex;align-items:center;justify-content:center;padding:6px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);min-height:70px;cursor:pointer;transition:border-color .12s,transform .12s;}
+  .slot.sel{border-color:var(--mint);background:var(--mintL);transform:translateY(-2px);box-shadow:var(--sh-mint);}
+  .slot.used{opacity:.28;}
+  .piece{display:grid;gap:2px;}
+  .pc{width:13px;height:13px;border-radius:2px;}
+  .pc.on{background:var(--mint);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);}
+  .pc.off{background:transparent;}
+
+  .gadgets{display:flex;gap:8px;margin-top:12px;}
+  .gad{flex:1;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:9px 6px;text-align:center;cursor:pointer;font-weight:700;font-size:12px;color:var(--ink);box-shadow:var(--sh);}
+  .gad:active{transform:scale(.96);}
+  .gad[disabled]{opacity:.4;pointer-events:none;}
+  .gad .ic{font-size:20px;display:block;margin-bottom:2px;}
+  .gad .n{font-size:10px;color:var(--w4);font-weight:700;}
+
+  /* Gegner-Angriff-Effekte auf MICH */
+  #fogOverlay{position:fixed;inset:0;background:rgba(210,225,235,.55);backdrop-filter:blur(3px);z-index:60;display:none;align-items:flex-start;justify-content:center;padding-top:30vh;font-family:var(--fh);font-size:30px;color:#3a5566;font-weight:700;pointer-events:none;}
+  #rushBanner{position:fixed;top:calc(env(safe-area-inset-top) + 8px);left:12px;right:12px;background:var(--danger);color:#fff;font-weight:800;text-align:center;padding:11px;border-radius:14px;z-index:61;display:none;animation:rp 1s infinite;}
+  @keyframes rp{0%,100%{box-shadow:0 0 0 0 rgba(229,83,60,.5)}50%{box-shadow:0 0 0 8px rgba(229,83,60,0)}}
+  #discoBanner{position:fixed;top:calc(env(safe-area-inset-top) + 8px);left:12px;right:12px;background:#3a5566;color:#fff;font-weight:800;text-align:center;padding:11px;border-radius:14px;z-index:61;display:none;}
+  #discoBanner .db-act{display:inline-block;margin-left:8px;background:#fff;color:#3a5566;border-radius:10px;padding:4px 10px;font-size:12px;cursor:pointer;}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);font-weight:700;font-size:13px;padding:11px 18px;border-radius:14px;opacity:0;transition:.25s;z-index:80;max-width:90%;text-align:center;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* Countdown + Ergebnis */
+  .cd{position:fixed;inset:0;background:rgba(20,20,22,.7);z-index:90;display:none;align-items:center;justify-content:center;}
+  .cd .n{font-family:var(--fh);font-size:120px;font-weight:700;color:#fff;animation:cdp .9s ease;}
+  @keyframes cdp{0%{transform:scale(.4);opacity:0}40%{transform:scale(1);opacity:1}100%{transform:scale(1.2);opacity:0}}
+  .result{position:fixed;inset:0;background:rgba(20,20,22,.6);z-index:95;display:none;align-items:center;justify-content:center;padding:20px;}
+  .result .card{background:var(--card);border-radius:24px;padding:28px 22px;width:100%;max-width:360px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+  .result .emoji{font-size:56px}
+  .result h2{font-size:30px;margin:6px 0 4px;}
+  .result .scores{display:flex;justify-content:center;gap:24px;margin:14px 0 10px;}
+  .result .scores .s{font-family:var(--fh);font-size:30px;font-weight:700;}
+  .result .scores .l{font-size:11px;color:var(--w4);font-weight:700;text-transform:uppercase;}
+  .result .coins{font-weight:800;font-size:15px;margin:6px 0 14px;min-height:20px;}
+  .result .coins.up{color:var(--mint-d);}
+  .result .coins.down{color:var(--danger);}
+  .result .coins.neutral{color:var(--w4);}
+  .result .verify{display:inline-flex;align-items:center;gap:6px;color:var(--w4);font-size:11.5px;font-weight:700;min-height:18px;margin-bottom:8px;}
+</style>
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png?v133">
+</head>
+<body class="goat-idle">
+<div class="back" id="backBtn" title="Zurück">‹</div>
+<div class="wrap">
+
+  <!-- ===== LOBBY ===== -->
+  <div id="lobby" class="lob">
+    <img class="goat" src="../logo-goat.png?v90" alt="">
+    <h1>Duell</h1>
+    <div class="sub">Fordere einen Freund heraus — gleiches Puzzle, wer mehr Punkte holt, gewinnt. 🐐</div>
+
+    <div id="lobbyChoice">
+      <button class="btn primary" id="btnCreate">Duell erstellen</button>
+      <button class="btn ghost" id="btnJoinView">Mit Code beitreten</button>
+
+      <!-- Offene Herausforderungen -->
+      <div id="challengeInbox" class="hidden">
+        <div class="section-t">Offene Herausforderungen</div>
+        <div class="chlist" id="chList"></div>
+      </div>
+    </div>
+
+    <div id="createView" class="hidden">
+      <div class="wagerbox">
+        <div class="lbl">Einsatz wählen</div>
+        <div class="bal">Dein Kontostand: <b id="balOut">–</b> G-Coins</div>
+        <div class="chips" id="wagerChips">
+          <div class="chip sel" data-wager="0">0<span class="cn">Spaß</span></div>
+          <div class="chip" data-wager="25">25<span class="cn">G-Coins</span></div>
+          <div class="chip" data-wager="50">50<span class="cn">G-Coins</span></div>
+          <div class="chip" data-wager="100">100<span class="cn">G-Coins</span></div>
+        </div>
+      </div>
+      <button class="btn primary" id="btnCreateGo">Duell-Code erzeugen</button>
+
+      <div id="createReady" class="hidden">
+        <div class="codebox">
+          <div class="lbl">Dein Duell-Code</div>
+          <div class="code" id="codeOut">------</div>
+          <div class="hint" id="codeHint">Schick den Code deinem Freund. Sobald er beitritt, geht's los.</div>
+        </div>
+        <button class="btn ghost" id="btnShare">Code teilen</button>
+        <div class="waiting" id="waitHost"><span class="dot"></span> Warte auf Gegner…</div>
+        <button class="btn primary hidden" id="btnStart">Gegner da — Start! 🎮</button>
+      </div>
+    </div>
+
+    <div id="joinView" class="hidden">
+      <div class="codebox" style="padding:16px">
+        <div class="lbl">Code vom Freund eingeben</div>
+        <input class="join-in" id="codeIn" maxlength="6" placeholder="ABC123" autocomplete="off" autocapitalize="characters">
+        <div class="err" id="joinErr"></div>
+      </div>
+      <button class="btn primary" id="btnJoin">Beitreten</button>
+      <div class="waiting hidden" id="waitGuest"><span class="dot"></span> Verbunden — warte auf Start durch den Host…</div>
+    </div>
+
+    <!-- Direkt-Annahme via Deep-Link / Challenge -->
+    <div id="acceptView" class="hidden">
+      <div class="codebox">
+        <div class="lbl">Herausforderung</div>
+        <div class="code" style="font-size:24px;letter-spacing:0" id="accFrom">Ein Spieler</div>
+        <div class="hint" id="accWager">fordert dich zum Duell heraus.</div>
+      </div>
+      <button class="btn primary" id="btnAccept">Annehmen</button>
+      <button class="btn ghost" id="btnDecline">Ablehnen</button>
+      <div class="waiting hidden" id="waitAccept"><span class="dot"></span> Angenommen — warte auf Start durch den Host…</div>
+    </div>
+  </div>
+
+  <!-- ===== DUELL ===== -->
+  <div id="game" class="hidden">
+    <div class="wagerpill hidden" id="gameWager">🪙 <span id="gameWagerN">0</span> G-Coins im Pot</div>
+    <div class="topbar">
+      <div class="pcard me"><div class="nm" id="meName">Du</div><div class="sc" id="meScore">0</div></div>
+      <div class="pcard oppmini">
+        <div class="oppwrap">
+          <div class="oi"><div class="nm" id="oppName">Gegner</div><div class="sc" id="oppScore">0</div></div>
+          <div class="mini" id="oppMini"></div>
+        </div>
+      </div>
+    </div>
+    <div class="board-card"><div id="board"></div></div>
+    <div id="tray"></div>
+    <div class="gadgets">
+      <button class="gad" id="gadFog"><span class="ic">🌫️</span>Nebel<span class="n" id="fogN">3×</span></button>
+      <button class="gad" id="gadRush"><span class="ic">⏱️</span>Zeitdruck<span class="n" id="rushN">3×</span></button>
+    </div>
+    <div style="text-align:center;color:var(--w4);font-size:11.5px;font-weight:600;margin-top:12px">Gleiches Puzzle für beide · wer bis zum Ende mehr Punkte hat, gewinnt</div>
+  </div>
+
+</div>
+
+<div id="fogOverlay">🌫️ Nebel!</div>
+<div id="rushBanner">⏱️ Zeitdruck! Dein Gegner setzt dich unter Druck!</div>
+<div id="discoBanner">🔌 Gegner offline – warte auf Verbindung…<span class="db-act" id="discoAbort">Abbrechen</span></div>
+<div class="cd" id="countdown"><div class="n" id="cdNum">3</div></div>
+<div class="result" id="result"><div class="card">
+  <div class="emoji" id="resEmoji">🏆</div>
+  <h2 id="resTitle">Gewonnen!</h2>
+  <div class="verify" id="resVerify"><span class="dot"></span> Ergebnis wird geprüft…</div>
+  <div class="scores"><div><div class="s" id="resMe">0</div><div class="l">Du</div></div><div><div class="s" id="resOpp">0</div><div class="l">Gegner</div></div></div>
+  <div class="coins neutral" id="resCoins"></div>
+  <button class="btn primary" id="btnAgain">Nochmal</button>
+  <button class="btn ghost" id="btnMenu">Zum Menü</button>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script src="../lib/supabase.min.js"></script>
+<script src="../config.js"></script>
+<script src="core.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var SIZE=8;
+  var sb=window.sb;
+  var matchId=null, seed=null, mode='high', role=null, code=null, ch=null, wager=0;
+  var myCoins=0, hostId=null;
+  var st=null, selIdx=-1, startMs=0, myScore=0, oppScore=0, myOver=false, oppOver=false, oppPresent=false, started=false;
+  var fogLeft=3, rushLeft=3;
+  var moveLog=[];                 // Zug-Log fuer Server-Replay [{idx,r,c,t}]
+  var chosenWager=0;              // in der Wett-Auswahl gewaehlter Einsatz
+  var oppLastBoard='';            // letzter bekannter Gegner-Board-Snapshot (fuer Resync-Antwort)
+  var subscribed=false, reconnecting=false;
+  var lastOppSeen=0, gapTimer=null, resyncIv=null;
+
+  function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('show');},2400);}
+  function show(id){['lobby','game'].forEach(function(x){$(x).classList.toggle('hidden',x!==id);});}
+  function nf(n){return (n||0).toLocaleString('de-DE');}
+
+  // ---------- Realtime (mit Auto-Reconnect) ----------
+  function connect(){
+    if(ch){ try{ sb.removeChannel(ch); }catch(e){} ch=null; }
+    ch=sb.channel('match:'+matchId,{config:{broadcast:{self:false}}});
+    ch.on('broadcast',{event:'hello'},function(){ oppPresent=true; onOppPresent(); bc('hello-ack',{}); });
+    ch.on('broadcast',{event:'hello-ack'},function(){ oppPresent=true; onOppPresent(); });
+    ch.on('broadcast',{event:'start'},function(m){ if(!started) beginGame(m.payload.at); });
+    ch.on('broadcast',{event:'move'},function(m){ markOppSeen(); oppScore=m.payload.score||0; $('oppScore').textContent=oppScore; oppLastBoard=m.payload.b||oppLastBoard; renderMini(m.payload.b); if(m.payload.over) oppDone(); });
+    ch.on('broadcast',{event:'gadget'},function(m){ recvGadget(m.payload.kind); });
+    ch.on('broadcast',{event:'over'},function(m){ markOppSeen(); oppScore=m.payload.score||0; $('oppScore').textContent=oppScore; oppDone(); });
+    ch.on('broadcast',{event:'resync-req'},function(){ sendResync(); });
+    ch.on('broadcast',{event:'resync'},function(m){ markOppSeen(); if(typeof m.payload.score==='number'){ oppScore=m.payload.score; $('oppScore').textContent=oppScore; } if(m.payload.b){ oppLastBoard=m.payload.b; renderMini(m.payload.b); } if(m.payload.over) oppDone(); });
+    ch.subscribe(function(status){
+      if(status==='SUBSCRIBED'){
+        subscribed=true; reconnecting=false;
+        bc('hello',{role:role});
+        if(started){ bc('resync-req',{}); }   // nach Rejoin: Gegenstand abgleichen
+      } else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+        subscribed=false; scheduleReconnect();
+      }
+    });
+  }
+  function scheduleReconnect(){
+    if(reconnecting || myOver || resultShown) return;
+    reconnecting=true;
+    setTimeout(function(){ if(!subscribed && !myOver && !resultShown && matchId){ connect(); } }, 1200);
+  }
+  function onOppPresent(){
+    if(role==='host'){ $('waitHost').classList.add('hidden'); $('btnStart').classList.remove('hidden'); }
+  }
+  function bc(event,payload){ if(ch) ch.send({type:'broadcast',event:event,payload:payload||{}}); }
+
+  // ---------- Reconnect / Resync ----------
+  function sendResync(){
+    bc('resync',{score:myScore, b:st?compactBoard():'', over:myOver});
+  }
+  function markOppSeen(){
+    lastOppSeen=Date.now();
+    var d=$('discoBanner'); if(d) d.style.display='none';
+  }
+  function startGapWatch(){
+    lastOppSeen=Date.now();
+    if(gapTimer) clearInterval(gapTimer);
+    gapTimer=setInterval(function(){
+      if(myOver || oppOver || resultShown){ clearInterval(gapTimer); gapTimer=null; return; }
+      if(Date.now()-lastOppSeen>20000){
+        var d=$('discoBanner'); if(d) d.style.display='block';
+        bc('resync-req',{});   // aktiv nachfragen
+      }
+    },5000);
+  }
+
+  // ---------- Wett-Auswahl (create) ----------
+  function refreshWagerChips(){
+    var chips=$('wagerChips').querySelectorAll('.chip');
+    for(var i=0;i<chips.length;i++){
+      var w=+chips[i].getAttribute('data-wager');
+      chips[i].disabled=(w>myCoins);
+    }
+  }
+  $('wagerChips').addEventListener('click',function(e){
+    var c=e.target.closest('.chip'); if(!c||c.disabled)return;
+    chosenWager=+c.getAttribute('data-wager');
+    var chips=this.querySelectorAll('.chip');
+    for(var i=0;i<chips.length;i++) chips[i].classList.toggle('sel', chips[i]===c);
+  });
+
+  // ---------- Lobby: erstellen / beitreten ----------
+  $('btnCreate').onclick=function(){
+    $('lobbyChoice').classList.add('hidden'); $('createView').classList.remove('hidden');
+    $('balOut').textContent=nf(myCoins);
+    refreshWagerChips();
+  };
+  $('btnCreateGo').onclick=async function(){
+    this.disabled=true;
+    try{
+      var r=await sb.rpc('create_match',{p_mode:'high', p_wager:chosenWager}); var d=r.data||{};
+      if(!d.ok){
+        if(d.error==='NOT_ENOUGH_COINS'){ toast('Nicht genug G-Coins für diesen Einsatz.'); }
+        else { toast('Konnte kein Duell erstellen.'); }
+        this.disabled=false; return;
+      }
+      matchId=d.match_id; seed=d.seed; mode=d.mode||'high'; role='host'; code=d.join_code; wager=d.wager||0;
+      $('codeOut').textContent=code||'------';
+      $('codeHint').textContent = wager>0
+        ? 'Schick den Code deinem Freund. Einsatz je '+wager+' G-Coins — Gewinner holt alles.'
+        : 'Schick den Code deinem Freund. Sobald er beitritt, geht’s los.';
+      $('btnCreateGo').classList.add('hidden');
+      $('wagerChips').parentElement.classList.add('hidden');
+      $('createReady').classList.remove('hidden');
+      connect();
+    }catch(e){ toast('Fehler beim Erstellen.'); this.disabled=false; }
+  };
+  $('btnJoinView').onclick=function(){ $('lobbyChoice').classList.add('hidden'); $('joinView').classList.remove('hidden'); $('codeIn').focus(); };
+  $('btnShare').onclick=function(){
+    var txt='Duell mich auf UniGoat! 🐐 Code: '+code+' — im Spiel unter Duell eingeben.';
+    if(navigator.share) navigator.share({title:'UniGoat Duell',text:txt}).catch(function(){});
+    else { try{navigator.clipboard.writeText(code);}catch(e){} toast('Code kopiert: '+code); }
+  };
+  $('btnJoin').onclick=async function(){
+    var c=($('codeIn').value||'').trim().toUpperCase(); $('joinErr').textContent='';
+    if(c.length<4){ $('joinErr').textContent='Code eingeben.'; return; }
+    this.disabled=true;
+    try{
+      // Einsatz VOR dem Abbuchen bestaetigen: Vor-Read der Lobby (RLS erlaubt SELECT
+      // auf 'lobby'-Matches). Bei wager>0 Hinweis + confirm bevor join_match abbucht.
+      var ok=await confirmedJoin(c);
+      if(!ok){ this.disabled=false; return; }
+      var r=await sb.rpc('join_match',{p_code:c}); var d=r.data||{};
+      if(!d.ok){
+        var map={MATCH_NOT_FOUND:'Kein Duell mit diesem Code.',CANNOT_JOIN_OWN:'Das ist dein eigenes Duell.',NOT_AUTHENTICATED:'Bitte einloggen.',NOT_ENOUGH_COINS:'Nicht genug G-Coins für den Einsatz dieses Duells.'};
+        $('joinErr').textContent=map[d.error]||'Beitritt fehlgeschlagen.'; this.disabled=false; return;
+      }
+      matchId=d.match_id; seed=d.seed; mode=d.mode||'high'; role='guest'; code=c; wager=d.wager||0; hostId=d.host_id||null;
+      $('btnJoin').classList.add('hidden');
+      var wg=$('waitGuest');
+      wg.innerHTML='<span class="dot"></span> '+(wager>0?('Einsatz '+wager+' G-Coins gesetzt — warte auf Start durch den Host…'):'Verbunden — warte auf Start durch den Host…');
+      wg.classList.remove('hidden');
+      connect();
+    }catch(e){ $('joinErr').textContent='Fehler. Nochmal versuchen.'; this.disabled=false; }
+  };
+  $('btnStart').onclick=function(){ var at=Date.now()+3500; bc('start',{at:at}); beginGame(at); };
+
+  // ---------- Beitreten mit Einsatz-Bestaetigung ----------
+  // Wenn der Code ein Wett-Duell ist, will der Nutzer den Abzug vorher bestaetigen.
+  // Da join_match direkt abbucht, klaeren wir den Einsatz per Vor-Read (RLS erlaubt
+  // dem beitretenden Nutzer nicht das Lesen fremder Lobby -> daher: Bestaetigung nach
+  // Klick, aber VOR RPC via confirm() sobald wager unbekannt >0 moeglich).
+  // Praktisch: wir versuchen zuerst einen leichten Read; scheitert der, join direkt.
+  async function confirmedJoin(c){
+    var previewWager=null;
+    try{
+      var pr=await sb.from('match').select('wager,status').eq('join_code',c).eq('status','lobby').maybeSingle();
+      if(pr.data) previewWager=pr.data.wager||0;
+    }catch(e){}
+    if(previewWager && previewWager>0){
+      if(myCoins<previewWager){ $('joinErr').textContent='Nicht genug G-Coins ('+previewWager+' nötig).'; return false; }
+      if(!confirm('Einsatz '+previewWager+' G-Coins — Gewinner holt den ganzen Pot. Beitreten?')) return false;
+    }
+    return true;
+  }
+
+  // ---------- Challenge-Inbox ----------
+  async function loadChallenges(){
+    try{
+      var r=await sb.rpc('list_my_challenges'); var rows=r.data||[];
+      var box=$('challengeInbox'), list=$('chList');
+      if(!rows.length){ box.classList.add('hidden'); list.innerHTML=''; return; }
+      box.classList.remove('hidden');
+      list.innerHTML=rows.map(function(x){
+        var nm=esc(x.host_username||'Ein Spieler');
+        var w=+x.wager||0;
+        var wtxt=w>0?('<span class="g">🪙 '+w+' G-Coins</span> Einsatz'):'Spaß-Duell';
+        return '<div class="chrow" data-mid="'+esc(x.match_id)+'" data-wager="'+w+'" data-host="'+esc(nm)+'">'
+          +'<div class="ci"><div class="cn">'+nm+' fordert dich heraus</div><div class="cw">'+wtxt+'</div></div>'
+          +'<div class="cact"><button class="btn small primary act-acc">Annehmen</button><button class="btn small ghost act-dec">Ablehnen</button></div></div>';
+      }).join('');
+    }catch(e){}
+  }
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  $('chList').addEventListener('click',async function(e){
+    var row=e.target.closest('.chrow'); if(!row)return;
+    var mid=row.getAttribute('data-mid'), w=+row.getAttribute('data-wager'), host=row.getAttribute('data-host');
+    if(e.target.closest('.act-acc')){
+      if(w>0){ if(myCoins<w){ toast('Nicht genug G-Coins ('+w+' nötig).'); return; } if(!confirm('Einsatz '+w+' G-Coins — Gewinner holt den ganzen Pot. Annehmen?')) return; }
+      e.target.disabled=true;
+      await doAccept(mid, host);
+    } else if(e.target.closest('.act-dec')){
+      e.target.disabled=true;
+      try{ await sb.rpc('decline_challenge',{p_match_id:mid}); }catch(err){}
+      row.remove();
+      if(!$('chList').children.length) $('challengeInbox').classList.add('hidden');
+      toast('Herausforderung abgelehnt.');
+    }
+  });
+
+  async function doAccept(mid, hostName){
+    try{
+      var r=await sb.rpc('accept_challenge',{p_match_id:mid}); var d=r.data||{};
+      if(!d.ok){
+        var map={NOT_ENOUGH_COINS:'Nicht genug G-Coins.',NOT_INVITED:'Diese Herausforderung ist nicht mehr offen.',NOT_CHALLENGED:'Du bist nicht der Herausgeforderte.',MATCH_NOT_FOUND:'Herausforderung nicht gefunden.'};
+        toast(map[d.error]||'Annehmen fehlgeschlagen.');
+        loadChallenges(); return;
+      }
+      matchId=d.match_id||mid; seed=d.seed; mode=d.mode||'high'; role='guest'; wager=d.wager||0; hostId=d.host_id||null;
+      // In Warteansicht wechseln
+      $('lobbyChoice').classList.add('hidden');
+      $('joinView').classList.add('hidden'); $('createView').classList.add('hidden');
+      $('acceptView').classList.remove('hidden');
+      $('accFrom').textContent=(hostName||'Ein Spieler');
+      $('accWager').textContent = wager>0 ? ('Einsatz '+wager+' G-Coins gesetzt.') : 'Spaß-Duell.';
+      $('btnAccept').classList.add('hidden'); $('btnDecline').classList.add('hidden');
+      $('waitAccept').classList.remove('hidden');
+      connect();
+    }catch(e){ toast('Fehler beim Annehmen.'); }
+  }
+
+  // ---------- Deep-Link ?match=<id> -> Direkt-Annahme-Ansicht ----------
+  async function showAcceptForMatch(mid){
+    // passende offene Challenge suchen (fuer Name + Einsatz)
+    var row=null;
+    try{ var r=await sb.rpc('list_my_challenges'); var rows=r.data||[]; for(var i=0;i<rows.length;i++){ if(String(rows[i].match_id)===String(mid)){ row=rows[i]; break; } } }catch(e){}
+    if(!row){ toast('Diese Herausforderung ist nicht mehr offen.'); return; }
+    matchId=mid; wager=+row.wager||0;
+    $('lobbyChoice').classList.add('hidden');
+    $('acceptView').classList.remove('hidden');
+    $('accFrom').textContent=(row.host_username||'Ein Spieler');
+    $('accWager').textContent = wager>0
+      ? ((row.host_username||'Ein Spieler')+' fordert dich um '+wager+' G-Coins heraus.')
+      : ((row.host_username||'Ein Spieler')+' fordert dich zum Duell heraus.');
+    $('btnAccept').onclick=async function(){
+      if(wager>0){ if(myCoins<wager){ toast('Nicht genug G-Coins ('+wager+' nötig).'); return; } if(!confirm('Einsatz '+wager+' G-Coins — Gewinner holt den ganzen Pot. Annehmen?')) return; }
+      this.disabled=true; await doAccept(mid, row.host_username);
+    };
+    $('btnDecline').onclick=async function(){
+      this.disabled=true;
+      try{ await sb.rpc('decline_challenge',{p_match_id:mid}); }catch(e){}
+      toast('Herausforderung abgelehnt.');
+      $('acceptView').classList.add('hidden'); $('lobbyChoice').classList.remove('hidden');
+      loadChallenges();
+    };
+  }
+
+  // ---------- Countdown + Spielstart (synchronisiert via 'at') ----------
+  function beginGame(atTs){
+    if(started) return; started=true;
+    show('game');
+    if(wager>0){ $('gameWager').classList.remove('hidden'); $('gameWagerN').textContent=(wager*2); }
+    var cdEl=$('countdown'); cdEl.style.display='flex';
+    // Rest-Wartezeit bis zum synchronisierten Start (at - jetzt), dann sichtbarer 3-2-1.
+    var now=Date.now();
+    var wait=Math.max(0, (atTs||now) - now);
+    // Aus der Rest-Wartezeit die aktuelle Countdown-Zahl ableiten, damit beide
+    // Clients dieselbe Zahl zur selben Wanduhr-Zeit zeigen.
+    setTimeout(runCountdown, Math.max(0, wait-3000)); // 3s sichtbarer Countdown vor 'at'
+    function runCountdown(){
+      var n=3; $('cdNum').textContent=n; bumpCd();
+      var iv=setInterval(function(){
+        n--;
+        if(n<=0){ clearInterval(iv); cdEl.style.display='none'; runGame(); }
+        else { $('cdNum').textContent=n; bumpCd(); }
+      },1000);
+    }
+    function bumpCd(){ var el=$('cdNum'); el.style.animation='none'; void el.offsetWidth; el.style.animation='cdp .9s ease'; }
+  }
+  function runGame(){
+    st=GoatCore.create(seed, mode);
+    startMs=Date.now();
+    moveLog=[];
+    renderBoard(); renderTray();
+    broadcastState();
+    startGapWatch();
+  }
+
+  // ---------- Board / Tray Rendering ----------
+  var boardEl=$('board'), cells=[];
+  (function build(){ for(var i=0;i<SIZE*SIZE;i++){ var d=document.createElement('div'); d.className='cell'; d.dataset.i=i; boardEl.appendChild(d); cells.push(d); } })();
+  boardEl.addEventListener('click',function(e){ var c=e.target.closest('.cell'); if(c) tapCell(+c.dataset.i); });
+
+  function renderBoard(){
+    for(var r=0;r<SIZE;r++)for(var c=0;c<SIZE;c++){ var el=cells[r*SIZE+c]; el.className='cell'+(st.grid[r][c]?' filled':''); }
+  }
+  function pieceDims(p){var mr=0,mc=0;p.cells.forEach(function(rc){mr=Math.max(mr,rc[0]);mc=Math.max(mc,rc[1]);});return[mr+1,mc+1];}
+  function renderTray(){
+    var t=$('tray'); t.innerHTML='';
+    st.tray.forEach(function(p,i){
+      var slot=document.createElement('div'); slot.className='slot'+(p?'':' used')+(i===selIdx?' sel':'');
+      if(p){ slot.appendChild(buildPiece(p)); slot.onclick=function(){ selIdx=(selIdx===i?-1:i); renderTray(); clearGhost(); }; }
+      t.appendChild(slot);
+    });
+  }
+  function buildPiece(p){
+    var d=pieceDims(p), rows=d[0], cols=d[1];
+    var el=document.createElement('div'); el.className='piece'; el.style.gridTemplateColumns='repeat('+cols+',13px)';
+    var set={}; p.cells.forEach(function(rc){set[rc[0]+','+rc[1]]=1;});
+    for(var r=0;r<rows;r++)for(var c=0;c<cols;c++){ var x=document.createElement('div'); x.className='pc '+(set[r+','+c]?'on':'off'); el.appendChild(x); }
+    return el;
+  }
+  function clearGhost(){cells.forEach(function(c){c.classList.remove('ghost-ok','ghost-bad');});}
+
+  function tapCell(i){
+    if(!st||st.over||selIdx<0) return;
+    var p=st.tray[selIdx]; if(!p) return;
+    var R=(i/SIZE)|0, C=i%SIZE;
+    if(!GoatCore.canPlaceAt(st.grid,p.cells,R,C)){ document.body.classList.add('shake'); setTimeout(function(){document.body.classList.remove('shake');},300); return; }
+    var tMs=Date.now()-startMs;
+    var res=GoatCore.place(st, selIdx, R, C, tMs);
+    if(!res.ok){ return; }
+    // Zug-Log fuer Server-Replay (t = ms seit Rundenstart, exakt wie an place() uebergeben)
+    moveLog.push({idx:selIdx, r:R, c:C, t:tMs});
+    selIdx=-1; clearGhost(); renderBoard(); renderTray();
+    myScore=st.score; $('meScore').textContent=myScore;
+    broadcastState();
+    if(st.over){ endMyGame(); }
+  }
+
+  function compactBoard(){ var s=''; for(var r=0;r<SIZE;r++)for(var c=0;c<SIZE;c++) s+=(st.grid[r][c]?'1':'0'); return s; }
+  function broadcastState(){ bc('move',{score:st.score, over:st.over, b:compactBoard()}); }
+  function renderMini(b){
+    var m=$('oppMini'); if(!m) return;
+    if(m.children.length!==SIZE*SIZE){ m.innerHTML=''; for(var k=0;k<SIZE*SIZE;k++) m.appendChild(document.createElement('i')); }
+    if(!b) return;
+    for(var i=0;i<SIZE*SIZE;i++){ m.children[i].className=(b[i]==='1'?'on':''); }
+  }
+
+  // ---------- Gadgets ----------
+  $('gadFog').onclick=function(){ if(fogLeft<=0)return; fogLeft--; $('fogN').textContent=fogLeft+'×'; if(fogLeft<=0)this.disabled=true; bc('gadget',{kind:'fog'}); toast('🌫️ Nebel an Gegner geschickt!'); };
+  $('gadRush').onclick=function(){ if(rushLeft<=0)return; rushLeft--; $('rushN').textContent=rushLeft+'×'; if(rushLeft<=0)this.disabled=true; bc('gadget',{kind:'rush'}); toast('⏱️ Zeitdruck an Gegner geschickt!'); };
+  function recvGadget(kind){
+    if(kind==='fog'){ var f=$('fogOverlay'); f.style.display='flex'; setTimeout(function(){f.style.display='none';},8000); }
+    else if(kind==='rush'){ var r=$('rushBanner'); r.style.display='block'; setTimeout(function(){r.style.display='none';},6000); }
+  }
+
+  // ---------- Ende / Ergebnis (Server-verifiziert via submit-duel) ----------
+  var submitting=false, submitResult=null;
+  async function endMyGame(){
+    if(myOver) return; myOver=true;
+    bc('over',{score:myScore});
+    if(gapTimer){ clearInterval(gapTimer); gapTimer=null; }
+    // sofort Ergebnis-Screen (mit "wird geprueft"), dann Server-Auswertung
+    showResultShell();
+    await submitDuel();
+  }
+  function oppDone(){ oppOver=true; }
+
+  async function submitDuel(){
+    if(submitting) return; submitting=true;
+    try{
+      var r=await sb.functions.invoke('submit-duel',{body:{match_id:matchId, moves:moveLog}});
+      var d=(r&&r.data)||{};
+      if(!d.ok){ applyResult(null); submitting=false; return; }
+      submitResult=d;
+      if(d.status==='finished'){ applyResult(d); }
+      else { applyResult(d); pollResult(); }   // Gegner noch nicht submitted -> anzeigen + pollen
+    }catch(e){ applyResult(null); }
+    submitting=false;
+  }
+  var pollTries=0;
+  function pollResult(){
+    if(submitResult && submitResult.status==='finished') return;
+    if(pollTries++>=20){ return; }               // ~40s Timeout
+    setTimeout(async function(){
+      try{
+        var r=await sb.functions.invoke('submit-duel',{body:{match_id:matchId, moves:moveLog}});
+        var d=(r&&r.data)||{};
+        if(d.ok){ submitResult=d; applyResult(d); if(d.status==='finished') return; }
+      }catch(e){}
+      pollResult();
+    }, 2000);
+  }
+
+  var resultShown=false;
+  function showResultShell(){
+    if(resultShown) return; resultShown=true;
+    $('resMe').textContent=myScore; $('resOpp').textContent=oppScore;
+    $('resVerify').classList.remove('hidden');
+    $('resTitle').textContent='Ergebnis';
+    $('resEmoji').textContent='⏳';
+    $('resCoins').textContent='';
+    $('result').style.display='flex';
+  }
+  function applyResult(d){
+    // d kann null sein (Server-Fehler) -> Fallback auf lokale Scores
+    var my = d && typeof d.my_vscore==='number' ? d.my_vscore : myScore;
+    var opp = d && typeof d.opp_vscore==='number' ? d.opp_vscore : oppScore;
+    $('resMe').textContent=nf(my); $('resOpp').textContent=nf(opp);
+
+    var finished = d && d.status==='finished';
+    var w = d ? (d.wager||0) : wager;
+
+    if(!d){
+      $('resVerify').innerHTML='⚠️ Konnte Ergebnis nicht prüfen';
+      concludeVisual(my,opp,0,false);
+      return;
+    }
+    if(!finished){
+      // Nur wir sind fertig -> auf Gegner warten
+      $('resVerify').innerHTML='<span class="dot"></span> Warte auf Gegner…';
+      $('resTitle').textContent='Fertig!'; $('resEmoji').textContent='⏳';
+      $('resCoins').className='coins neutral';
+      $('resCoins').textContent = w>0 ? ('Einsatz '+w+' G-Coins im Pot') : '';
+      return;
+    }
+    // finished: verifizierter Ausgang
+    $('resVerify').innerHTML='✓ Server-geprüft';
+    var meId=MYID;
+    var win = d.winner_id && meId && d.winner_id===meId;
+    var tie = !d.winner_id;
+    concludeVisual(my,opp,w, {win:win, tie:tie});
+  }
+  function concludeVisual(my,opp,w,outcome){
+    var win, tie;
+    if(outcome){ win=outcome.win; tie=outcome.tie; }
+    else { win=my>opp; tie=my===opp; }
+    $('resEmoji').textContent=win?'🏆':(tie?'🤝':'😤');
+    $('resTitle').textContent=win?'Gewonnen!':(tie?'Unentschieden':'Knapp verloren');
+    var cEl=$('resCoins');
+    if(w>0){
+      if(tie){ cEl.className='coins neutral'; cEl.textContent='Einsatz zurück · ±0 G-Coins'; }
+      else if(win){ cEl.className='coins up'; cEl.textContent='+'+w+' G-Coins 🪙'; }
+      else { cEl.className='coins down'; cEl.textContent='-'+w+' G-Coins'; }
+    } else {
+      cEl.className='coins neutral'; cEl.textContent='';
+    }
+  }
+
+  $('discoAbort').onclick=async function(){
+    if(!matchId)return;
+    if(!confirm('Duell abbrechen? Einsätze werden zurückerstattet.')) return;
+    try{ await sb.rpc('abort_match',{p_match_id:matchId}); }catch(e){}
+    location.href='index.html';
+  };
+  $('btnAgain').onclick=function(){ location.href='duel.html'; };
+  $('btnMenu').onclick=function(){ location.href='index.html'; };
+  $('backBtn').onclick=async function(){
+    if(started && !myOver){
+      if(!confirm('Duell verlassen? Bei Wett-Duellen wird abgebrochen und der Einsatz zurückerstattet.'))return;
+      try{ if(matchId) await sb.rpc('abort_match',{p_match_id:matchId}); }catch(e){}
+    }
+    location.href='index.html';
+  };
+
+  // ---------- Auth-Gate + Init ----------
+  var MYID=null;
+  (function init(){
+    if(!sb){ toast('Verbindungsfehler.'); return; }
+    sb.auth.getUser().then(function(r){
+      if(!r.data||!r.data.user){ location.href='../login.html'; return; }
+      MYID=r.data.user.id;
+      // Profil: Name + Kontostand (coins)
+      sb.from('my_profile').select('username,full_name,coins').maybeSingle().then(function(p){
+        if(p.data){
+          var n=(p.data.username||(p.data.full_name||'').split(' ')[0]||'Du'); $('meName').textContent=n;
+          myCoins=+p.data.coins||0; $('balOut').textContent=nf(myCoins);
+          refreshWagerChips();
+        }
+      }).catch(function(){});
+      // Deep-Links
+      var q=new URLSearchParams(location.search), pc=q.get('code'), mm=q.get('match');
+      if(mm){ showAcceptForMatch(mm); }
+      else if(pc){ $('btnJoinView').click(); $('codeIn').value=pc.toUpperCase(); }
+      else { loadChallenges(); }
+    });
+  })();
+})();
+</script>
+</body>
+</html>

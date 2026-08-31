@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="sentry-init.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bonus einlösen — UniGoat</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;box-sizing:border-box}
+  body{font-family:'Sora',system-ui,sans-serif;background:#0a0a0b;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .card{max-width:420px;width:100%;text-align:center;}
+  .goat{width:88px;height:88px;filter:invert(1);}
+  h1{font-family:'Fraunces',serif;font-size:2rem;margin:14px 0 6px;}
+  .coins{font-family:'Fraunces',serif;font-size:3.4rem;color:#12B489;line-height:1;margin:18px 0 6px;}
+  p{color:rgba(255,255,255,.72);line-height:1.55;font-size:1rem;}
+  .btn{display:block;width:100%;background:#12B489;color:#04231a;font-weight:800;text-decoration:none;padding:16px;border-radius:14px;margin-top:22px;font-size:1.05rem;border:none;cursor:pointer;}
+  .btn.ghost{background:transparent;color:#12B489;border:1.5px solid #12B489;}
+  .spin{margin:30px auto;width:34px;height:34px;border:4px solid rgba(255,255,255,.2);border-top-color:#12B489;border-radius:50%;animation:s 1s linear infinite;}
+  @keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <img class="goat" src="favicon-192x192.png?v133" alt="">
+  <div class="spin" id="spin"></div>
+  <div id="content" style="display:none;"></div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var code=(new URLSearchParams(location.search)).get('code')||'';
+  code=code.trim();
+  function show(html){ $('spin').style.display='none'; var el=$('content'); el.innerHTML=html; el.style.display='block'; }
+
+  async function run(){
+    if(!code){ show('<h1>Kein Code</h1><p>Dieser Link enthält keinen Bonus-Code.</p><a class="btn" href="coupons.html">Zu UniGoat</a>'); return; }
+    if(!window.sb){ setTimeout(run,200); return; }
+    var user=null; try{ user=(await sb.auth.getUser()).data.user; }catch(e){}
+    if(!user){
+      // Nicht eingeloggt -> Code merken, zum Registrieren; nach Signup schreibt der Hub den Bonus gut.
+      try{ localStorage.setItem('ug_promo_pending', code); }catch(e){}
+      show('<h1>Fast geschafft! 🐐</h1><p>Registrier dich kostenlos mit deiner Uni-Mail — dein Bonus wird dir dann sofort gutgeschrieben.</p><a class="btn" href="register.html">Kostenlos registrieren</a><a class="btn ghost" href="login.html">Ich habe schon einen Account</a>');
+      return;
+    }
+    // Eingeloggt -> direkt einloesen
+    try{
+      var r=await sb.rpc('redeem_promo',{p_code:code});
+      var d=r.data||{};
+      if(d.ok){
+        try{ localStorage.removeItem('ug_promo_pending'); }catch(e){}
+        show('<div class="coins">+'+(d.coins||0)+'</div><h1>G-Coins! 🎉</h1><p>'+(d.label||'Bonus')+' ist deinem Konto gutgeschrieben. Sammle weiter und gewinn jeden Monat echte Preise.</p><a class="btn" href="coupons.html">Los geht\'s</a>');
+      } else if(d.error==='already_redeemed'){
+        show('<h1>Schon eingelöst ✓</h1><p>Diesen Bonus hast du bereits erhalten. Spiel weiter und sammle G-Coins!</p><a class="btn" href="game/index.html">Zum Spiel</a>');
+      } else if(d.error==='expired'||d.error==='inactive'){
+        show('<h1>Aktion beendet</h1><p>Dieser Bonus-Code ist leider nicht mehr gültig.</p><a class="btn" href="coupons.html">Zu UniGoat</a>');
+      } else {
+        show('<h1>Code ungültig</h1><p>Dieser Bonus-Code wurde nicht erkannt.</p><a class="btn" href="coupons.html">Zu UniGoat</a>');
+      }
+    }catch(e){ show('<h1>Hoppla</h1><p>Konnte gerade nicht einlösen. Versuch es gleich nochmal.</p><a class="btn" href="promo.html?code='+encodeURIComponent(code)+'">Nochmal</a>'); }
+  }
+  run();
+})();
+</script>
+</body>
+</html>

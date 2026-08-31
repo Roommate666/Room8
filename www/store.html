@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="de" data-page="store">
+<head>
+<script src="sentry-init.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Coin-Store — UniGoat</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="unigoat.css">
+<style>
+  /* Verlosungs-Karten im Coupon-Card-Stil */
+  .rf{background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;margin-bottom:14px;box-shadow:var(--sh);}
+  .rf .top{padding:16px 16px 12px;}
+  .rf .prize{display:inline-block;background:var(--greenL);border:1px solid var(--green);color:var(--greenD);font-weight:800;font-size:11.5px;border-radius:999px;padding:4px 11px;margin-bottom:9px;}
+  .rf .ti{font-family:var(--fh),serif;font-size:18px;font-weight:600;color:var(--ink);line-height:1.2;}
+  .rf .de{font-size:12.5px;color:var(--w4);margin-top:5px;line-height:1.45;}
+  .rf .metarow{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap;}
+  .rf .chip{font-size:11px;font-weight:700;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:4px 10px;}
+  .rf .chip.mine{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  .rf .foot{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding:13px 16px;}
+  .rf .cost{display:flex;align-items:center;gap:7px;font-weight:800;font-size:15px;color:var(--ink);font-family:var(--fh),serif;}
+  .rf .cost .cd{width:19px;height:19px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;}
+  .rf .buy{border:none;background:var(--mint-grad);color:#fff;font-weight:800;font-size:13px;border-radius:999px;padding:10px 18px;box-shadow:var(--sh-mint);cursor:pointer;font-family:var(--fb),sans-serif;}
+  .rf .buy:disabled{opacity:.5;box-shadow:none;cursor:not-allowed;}
+  .rf .buy:active:not(:disabled){transform:scale(.96);}
+  .rf.closed{opacity:.62;}
+  .rf .ends{font-size:11px;color:var(--w4);font-weight:600;}
+  .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);font-weight:700;font-size:13px;padding:12px 18px;border-radius:14px;box-shadow:var(--shLg);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:400;max-width:90%;text-align:center;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+<link rel="icon" type="image/x-icon" href="favicon.ico?v133"><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
+</head>
+<body class="ug">
+<div class="ug-app">
+  <div class="ug-hd">
+    <div class="brand"><b>Coin-Store</b></div>
+    <a class="ug-coins" href="challenge.html"><span class="cd">G</span><span id="coins">–</span></a>
+  </div>
+  <div class="ug-sub">Gib deine G-Coins aus — Lose fuer echte Preise sichern.</div>
+
+  <div class="ug-banner" id="infoBanner">
+    <h3>🎁 So funktioniert die Verlosung</h3>
+    <p>Kaufe mit deinen G-Coins Lose fuer eine aktive Verlosung. Am Ende wird unter allen Losen gezogen. Je mehr Lose, desto groesser deine Chance. Die Gewinner werden auf Instagram bekannt gegeben.</p>
+    <a class="act" href="https://instagram.com/unigoat.de" target="_blank" rel="noopener">Auf Instagram ansehen</a>
+  </div>
+
+  <div id="list">
+    <div class="cpn-skel"><div class="sk img"></div><div class="sk l1"></div><div class="sk l2"></div><div class="sk l3"></div></div>
+    <div class="cpn-skel"><div class="sk img"></div><div class="sk l1"></div><div class="sk l2"></div><div class="sk l3"></div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<nav class="ugnav">
+  <a href="dashboard.html"><svg viewBox="0 0 24 24"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1Z"/></svg>Hub</a>
+  <a href="coupons.html"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>Coupons</a>
+  <a href="game/index.html"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="3"/><path d="M8 12h3M9.5 10.5v3M15 11h.01M17 13h.01"/></svg>Game</a>
+  <a href="challenge.html"><svg viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>Rang</a>
+  <a href="profile.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>Profil</a>
+</nav>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="onboarding-gate.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function nf(n){return (Number(n)||0).toLocaleString('de-DE');}
+  var myCoins=0, raffles=[];
+
+  function showToast(msg){var t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('show');},2600);}
+
+  function endsTxt(iso){
+    if(!iso)return '';
+    var end=new Date(iso), now=new Date(), ms=end-now;
+    if(ms<=0)return 'Beendet';
+    var d=Math.floor(ms/86400000);
+    if(d>=1)return 'Endet in '+d+' '+(d===1?'Tag':'Tagen');
+    var h=Math.max(1,Math.floor(ms/3600000));
+    return 'Endet in '+h+' Std';
+  }
+  function isClosed(r){ if(r.active===false)return true; if(r.ends_at&&new Date(r.ends_at)<=new Date())return true; return false; }
+
+  function render(){
+    if($('coins'))$('coins').textContent=nf(myCoins);
+    if(!raffles.length){ $('list').innerHTML='<div class="ug-empty">Aktuell keine aktive Verlosung.<br>Sammle weiter G-Coins — bald gibt es wieder Preise! 🐐</div>'; return; }
+    $('list').innerHTML=raffles.map(function(r){
+      var closed=isClosed(r);
+      var cost=Number(r.ticket_cost)||0;
+      var canAfford=myCoins>=cost;
+      var mine=Number(r.my_tickets)||0;
+      var disabled=closed||!canAfford;
+      var btnLabel=closed?'Beendet':(canAfford?(nf(cost)+' G · Los kaufen'):'Zu wenig G-Coins');
+      return '<div class="rf'+(closed?' closed':'')+'" data-id="'+esc(r.id)+'">'+
+        '<div class="top">'+
+          (r.prize?'<span class="prize">🎁 '+esc(r.prize)+'</span>':'')+
+          '<div class="ti">'+esc(r.title||'')+'</div>'+
+          (r.description?'<div class="de">'+esc(r.description)+'</div>':'')+
+          '<div class="metarow">'+
+            '<span class="chip'+(mine>0?' mine':'')+'">Deine Lose: '+nf(mine)+'</span>'+
+            (r.ends_at?'<span class="ends">'+esc(endsTxt(r.ends_at))+'</span>':'')+
+          '</div>'+
+        '</div>'+
+        '<div class="foot">'+
+          '<div class="cost"><span class="cd">G</span>'+nf(cost)+'</div>'+
+          '<button class="buy" data-id="'+esc(r.id)+'"'+(disabled?' disabled':'')+'>'+esc(btnLabel)+'</button>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+
+  async function buy(id){
+    var btn=document.querySelector('.buy[data-id="'+id.replace(/"/g,'')+'"]');
+    if(btn){btn.disabled=true;btn.textContent='…';}
+    try{
+      var r=await sb.rpc('buy_raffle_ticket',{p_raffle_id:id});
+      var res=r.data||{}; if(r.error){throw r.error;}
+      if(!res.ok){
+        var map={NOT_AUTHENTICATED:'Bitte einloggen.',RAFFLE_NOT_FOUND:'Verlosung nicht gefunden.',RAFFLE_INACTIVE:'Diese Verlosung ist nicht mehr aktiv.',RAFFLE_ENDED:'Diese Verlosung ist beendet.',NOT_ENOUGH_COINS:'Du hast nicht genug G-Coins.'};
+        showToast(map[res.error]||'Kauf fehlgeschlagen.');
+      }else{
+        myCoins=Number(res.coins)||myCoins;
+        showToast('Los gekauft! Viel Glueck 🍀');
+        for(var i=0;i<raffles.length;i++){ if(String(raffles[i].id)===String(id)){ raffles[i].my_tickets=Number(res.my_tickets)||((Number(raffles[i].my_tickets)||0)+1); break; } }
+      }
+    }catch(e){ showToast('Kauf fehlgeschlagen. Versuch es spaeter.'); }
+    render();
+  }
+
+  async function load(){
+    if(!window.sb){ $('list').innerHTML='<div class="ug-empty">Bitte einloggen.</div>'; return; }
+    try{ var u=(await sb.auth.getUser()).data.user; if(!u){ $('list').innerHTML='<div class="ug-empty">Bitte einloggen.</div>'; return; } }catch(e){ $('list').innerHTML='<div class="ug-empty">Bitte einloggen.</div>'; return; }
+    try{ var pr=await sb.from('my_profile').select('coins').maybeSingle(); if(pr.data)myCoins=Number(pr.data.coins)||0; }catch(e){}
+    try{ var r=await sb.rpc('list_active_raffles'); raffles=(r.data||[]); }catch(e){ raffles=[]; }
+    render();
+  }
+
+  document.addEventListener('click',function(e){ var b=e.target.closest('.buy'); if(!b||b.disabled)return; var id=b.getAttribute('data-id'); if(id)buy(id); });
+  load();
+})();
+</script>
+</body>
+</html>

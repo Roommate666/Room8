@@ -1,9 +1,12 @@
 /* ===== UniGoat Mockup-Design (Creme / Schwarz / Gruen · Fraunces + Sora) ===== */
 :root{
-  --ink:#1A1613; --paper:#F7F4EE; --card:#FFFFFF; --w2:#E4DCCF; --w4:#9C9284; --line:#DED5C7;
-  --green:#1B9E5F; --greenD:#17854F; --greenL:#DCF3E7;
-  --fh:'Fraunces'; --fb:'Sora'; --sh:0 1px 2px rgba(40,30,15,.04),0 12px 30px rgba(40,30,15,.07);
+  --ink:#1A1613; --paper:#F7F4EE; --card:#FFFFFF; --w2:#E4DCCF; --w4:#9C9284; --line:#E7DFD2;
+  /* Akzent = Mint (app-weit vereinheitlicht mit Spiel/Landing/Coupon-Detail) */
+  --green:#12B489; --greenD:#0E9673; --greenL:#E4FBF3;
+  --mint-grad:linear-gradient(180deg,#21D0A1,#12B489);
+  --fh:'Fraunces'; --fb:'Sora'; --sh:0 1px 2px rgba(40,30,15,.04),0 14px 34px rgba(40,30,15,.08);
   --shLg:0 4px 10px rgba(30,22,10,.1),0 28px 60px rgba(30,22,10,.2);
+  --sh-mint:0 10px 24px rgba(18,180,137,.34);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{overflow-x:hidden;max-width:100%;}
@@ -29,10 +32,12 @@ a{color:inherit;text-decoration:none;}
 .ug-chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink);}
 
 /* Coupon card */
-.cpn{background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;margin-bottom:14px;box-shadow:var(--sh);cursor:pointer;display:block;}
-.cpn .img{height:120px;background:linear-gradient(135deg,#33302b,#1a1613);background-size:cover;background-position:center;display:flex;align-items:flex-end;justify-content:flex-end;padding:12px;color:#fff;position:relative;}
-.cpn .disc{background:var(--green);color:#fff;font-weight:800;font-size:15px;border-radius:10px;padding:6px 11px;font-family:var(--fh),serif;}
-.cpn .openrow{position:absolute;top:12px;left:12px;font-size:10px;font-weight:700;background:rgba(255,255,255,.16);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:4px 9px;display:flex;align-items:center;gap:5px;}
+.cpn{background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;margin-bottom:14px;box-shadow:var(--sh);cursor:pointer;display:block;transition:transform .12s ease;}
+.cpn:active{transform:scale(.985);}
+.cpn .img{height:124px;background:linear-gradient(135deg,#33302b,#1a1613);background-size:cover;background-position:center;display:flex;align-items:flex-end;justify-content:flex-end;padding:12px;color:#fff;position:relative;}
+.cpn .img::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.28),transparent 42%,transparent 58%,rgba(0,0,0,.42));pointer-events:none;}
+.cpn .disc{position:relative;z-index:1;background:var(--mint-grad);color:#fff;font-weight:800;font-size:15px;border-radius:11px;padding:6px 11px;font-family:var(--fh),serif;box-shadow:var(--sh-mint);}
+.cpn .openrow{position:absolute;top:12px;left:12px;z-index:1;font-size:10px;font-weight:700;background:rgba(255,255,255,.16);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:4px 9px;display:flex;align-items:center;gap:5px;}
 .cpn .openrow .d{width:6px;height:6px;border-radius:50%;background:#57d977;}
 .cpn .openrow.closed{background:rgba(255,120,90,.25);border-color:rgba(255,120,90,.4);}
 .cpn .openrow.closed .d{background:#ff8a5c;}
@@ -41,13 +46,23 @@ a{color:inherit;text-decoration:none;}
 .cpn .ti{font-size:16px;font-weight:600;font-family:var(--fh),serif;margin-top:2px;color:var(--ink);}
 .cpn .foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
 .cpn .tag2{font-size:11px;font-weight:600;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:3px 9px;}
-.cpn .reward{font-size:11.5px;font-weight:700;color:var(--green);border:1.5px solid var(--green);border-radius:999px;padding:3px 9px;}
+.cpn .reward{font-size:11.5px;font-weight:700;color:var(--greenD);background:var(--greenL);border:1px solid var(--green);border-radius:999px;padding:3px 10px;}
 
 .ug-empty{text-align:center;color:var(--w4);padding:2.5rem 1rem;font-size:14px;}
+
+/* Skeleton-Loader (gefuehlte Geschwindigkeit: Karten-Geruest sofort, statt leerem Screen) */
+.cpn-skel{background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;margin-bottom:14px;box-shadow:var(--sh);}
+.cpn-skel .sk{background:linear-gradient(90deg,#efeae1 25%,#f7f3ec 37%,#efeae1 63%);background-size:400% 100%;animation:skm 1.4s ease infinite;}
+.cpn-skel .sk.img{height:124px;}
+.cpn-skel .sk.l1{height:12px;width:38%;margin:14px 15px 0;border-radius:6px;}
+.cpn-skel .sk.l2{height:16px;width:72%;margin:10px 15px 0;border-radius:6px;}
+.cpn-skel .sk.l3{height:12px;width:50%;margin:10px 15px 15px;border-radius:6px;}
+@keyframes skm{0%{background-position:100% 0}100%{background-position:-100% 0}}
+@media(prefers-reduced-motion:reduce){.cpn-skel .sk{animation:none}}
 .ug-banner{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin-bottom:16px;box-shadow:var(--sh);}
 .ug-banner h3{font-family:var(--fh),serif;font-size:15px;font-weight:600;margin-bottom:4px;}
 .ug-banner p{font-size:12.5px;color:var(--w4);margin-bottom:10px;line-height:1.4;}
-.ug-banner a.act{display:inline-block;background:var(--green);color:#fff;font-weight:700;font-size:12.5px;padding:8px 14px;border-radius:999px;}
+.ug-banner a.act{display:inline-block;background:var(--mint-grad);color:#fff;font-weight:700;font-size:12.5px;padding:9px 16px;border-radius:999px;box-shadow:var(--sh-mint);}
 
 /* Profil */
 .pcard{background:var(--ink);color:var(--paper);border-radius:24px;padding:22px;text-align:center;margin-bottom:16px;position:relative;overflow:hidden;}

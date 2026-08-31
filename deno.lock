@@ -22,10 +22,12 @@
         "npm:@capacitor/assets@^3.0.5",
         "npm:@capacitor/cli@^7.4.4",
         "npm:@capacitor/core@^7.4.4",
+        "npm:@capacitor/haptics@^7.0.5",
         "npm:@capacitor/ios@^7.6.2",
         "npm:@capacitor/push-notifications@^7.0.4",
         "npm:@capgo/capacitor-social-login@^7.20.0",
         "npm:jsonwebtoken@^9.0.3",
+        "npm:playwright@^1.62.1",
         "npm:puppeteer@^24.37.3"
       ]
     }

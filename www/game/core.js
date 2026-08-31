@@ -77,10 +77,10 @@
       let w;
       if (n === 1) w = 1;                 // Einzelblock: nur selten (Notausgang wenn Feld eng)
       else if (n === 2) w = 1;            // Domino: selten
-      else if (n === 3) w = 2;            // Tromino: eher selten
-      else if (n === 4) w = 7;            // 4er (2x2-Quadrat, grosse Ls, I): haeufigster Stein
-      else if (n === 5) w = 5;            // 5er (grosse Ls/Pentominoes): haeufig
-      else w = level < 3 ? 3 : 4;         // 3x3 (9 Zellen): regelmaessig (grosses Fuellen)
+      else if (n === 3) w = 1;            // Tromino: selten (leichter: mehr grosse Steine)
+      else if (n === 4) w = 9;            // 4er (2x2-Quadrat, grosse Ls, I): haeufigster Stein
+      else if (n === 5) w = 6;            // 5er (grosse Ls/Pentominoes): sehr haeufig
+      else w = level < 3 ? 2 : 3;         // 3x3 (9 Zellen): sparsam (erdrueckt sonst)
       for (let i = 0; i < w; i++) pool.push(s);
     }
     return pool;
@@ -114,7 +114,7 @@
   // damit man die ersten Zuege locker platzieren kann. Deterministisch via seed.
   function prefillGrid(st) {
     const total = SIZE * SIZE;
-    const target = Math.floor(total * (0.16 + st._rng() * 0.10)); // 16-26 % (leichter: mehr Startplatz)
+    const target = Math.floor(total * (0.10 + st._rng() * 0.10)); // 10-20 % (leichter: mehr Startplatz)
     const h = (SIZE / 2) | 0;
     const topHalf = st._rng() < 0.5;             // mal obere, mal untere Haelfte befuellen (variiert)
     const rMin = topHalf ? 0 : h, rMax = topHalf ? h : SIZE; // andere Haelfte bleibt frei

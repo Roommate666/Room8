@@ -5,27 +5,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <title>Coupon — UniGoat</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
 <style>
   :root{--mint:#21D0A1;--mint6:#12B489;--mint-pill:#E7F8F1;--ink:#0E0E10;--mut:#8b8f96;--line:#ecedf0;--dark:#141416;}
   *{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent;}
   body{background:#fff;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;padding-bottom:7rem;}
-  .serif{font-family:'Georgia','Times New Roman',serif;}
+  .serif{font-family:'Fraunces','Georgia',serif;}
   .wrap{max-width:480px;margin:0 auto;}
   .topbar{display:flex;align-items:center;justify-content:space-between;padding:calc(1.6rem + env(safe-area-inset-top)) 1.1rem .9rem;position:sticky;top:0;z-index:20;}
-  .rnd{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.9);backdrop-filter:blur(6px);border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;font-size:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+  .rnd{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.9);backdrop-filter:blur(6px);border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;font-size:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,.08);transition:transform .12s;}
+  .rnd:active{transform:scale(.9);}
+  .rnd.saved{color:#e2557a;border-color:#f3b8c6;background:#fff0f4;}
   /* HERO / Galerie */
   .hero{position:relative;height:260px;background:var(--dark);}
+  .hero::after{content:'';position:absolute;top:0;left:0;right:0;height:100px;background:linear-gradient(180deg,rgba(0,0,0,.4),transparent);pointer-events:none;z-index:1;}
   .gal{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;height:100%;scrollbar-width:none;}
   .gal::-webkit-scrollbar{display:none;}
   .gal img{min-width:100%;width:100%;height:100%;object-fit:cover;scroll-snap-align:center;display:block;}
   .dots{position:absolute;left:0;right:0;bottom:56px;display:flex;gap:6px;justify-content:center;}
   .dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.5);}
   .dots i.on{background:#fff;width:18px;border-radius:3px;}
-  .status{position:absolute;left:14px;top:14px;display:inline-flex;align-items:center;gap:.4rem;background:rgba(20,20,22,.72);backdrop-filter:blur(6px);color:#fff;font-weight:700;font-size:.78rem;padding:.4rem .7rem;border-radius:999px;}
+  .status{position:absolute;left:14px;top:14px;z-index:2;display:inline-flex;align-items:center;gap:.4rem;background:rgba(20,20,22,.72);backdrop-filter:blur(6px);color:#fff;font-weight:700;font-size:.78rem;padding:.4rem .7rem;border-radius:999px;}
   .status .dot{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 3px rgba(33,208,161,.25);}
   .status.closed .dot{background:#ff5a5a;box-shadow:0 0 0 3px rgba(255,90,90,.25);}
-  .badge{display:inline-block;background:var(--mint);color:#04231a;font-weight:800;font-size:1.3rem;padding:.3rem .75rem;border-radius:12px;vertical-align:middle;}
-  .brand{position:absolute;right:14px;bottom:14px;width:52px;height:52px;border-radius:14px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.2);overflow:hidden;display:grid;place-items:center;font-weight:800;color:var(--ink);}
+  .badge{display:inline-block;background:linear-gradient(180deg,#21D0A1,#12B489);color:#fff;font-weight:800;font-size:1.3rem;padding:.32rem .8rem;border-radius:12px;vertical-align:middle;box-shadow:0 8px 18px rgba(18,180,137,.35);}
+  .brand{position:absolute;right:14px;bottom:14px;z-index:2;width:52px;height:52px;border-radius:14px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.2);overflow:hidden;display:grid;place-items:center;font-weight:800;color:var(--ink);}
   .brand img{width:100%;height:100%;object-fit:cover;}
   /* Rabatt + Kategorie (unter dem Bild, NICHT aufs Bild) */
   .discrow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 10px;}
@@ -65,7 +70,7 @@
   /* CTA */
   .cta{position:fixed;left:0;right:0;bottom:0;padding:.9rem 1.1rem calc(.9rem + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(255,255,255,0),#fff 34%);}
   .cta .inner{max-width:480px;margin:0 auto;}
-  .btn{width:100%;padding:1.05rem;border:none;border-radius:16px;background:var(--mint);color:#04231a;font-size:1.05rem;font-weight:800;cursor:pointer;box-shadow:0 10px 26px rgba(33,208,161,.38);}
+  .btn{width:100%;padding:1.05rem;border:none;border-radius:16px;background:linear-gradient(180deg,#21D0A1,#12B489);color:#fff;font-size:1.05rem;font-weight:800;cursor:pointer;box-shadow:0 12px 28px rgba(18,180,137,.42);}
   .btn:active{transform:scale(.99);}
   .btn.gray{background:#e9eaed;color:#8a8f96;box-shadow:none;}
   .valid{text-align:center;color:var(--mut);font-size:.8rem;margin-top:.6rem;}
@@ -82,25 +87,41 @@
   .bigcode b{font-size:2rem;letter-spacing:.14em;color:var(--mint6);}
   .succ-ico{width:72px;height:72px;border-radius:20px;background:var(--mint);display:grid;place-items:center;margin:0 auto .7rem;color:#04231a;font-size:2.2rem;}
   .ghost{width:100%;padding:.9rem;border:none;border-radius:14px;background:#f0f1f3;font-weight:700;cursor:pointer;margin-top:.5rem;}
-  /* Swipe-to-redeem */
-  .swipe{position:relative;height:62px;border-radius:16px;background:#eef0f2;overflow:hidden;margin:.4rem 0 .3rem;user-select:none;touch-action:pan-y;}
-  .swipe .fill{position:absolute;inset:0;background:var(--mint);width:62px;transition:width .05s;}
-  .swipe .lbl{position:absolute;inset:0;padding-left:52px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem;color:#5a5f66;pointer-events:none;z-index:2;}
-  .swipe .knob{position:absolute;top:5px;left:5px;width:52px;height:52px;border-radius:12px;background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.18);display:grid;place-items:center;font-size:1.3rem;color:var(--mint6);z-index:3;touch-action:none;}
-  .swipe.done .knob{color:#04231a;}
+  /* Swipe-to-redeem (premium) */
+  .swipe{position:relative;height:64px;border-radius:999px;overflow:hidden;margin:.5rem 0 .3rem;user-select:none;touch-action:pan-y;
+    background:linear-gradient(180deg,#eef1f3,#e5e9ed);
+    box-shadow:inset 0 2px 6px rgba(0,0,0,.10),inset 0 -1px 0 rgba(255,255,255,.7);}
+  .swipe .fill{position:absolute;inset:0;width:64px;border-radius:999px;transition:width .05s;
+    background:linear-gradient(90deg,#12B489,#21D0A1);box-shadow:0 0 20px rgba(33,208,161,.5);}
+  .swipe .lbl{position:absolute;inset:0;padding-left:58px;display:flex;align-items:center;justify-content:center;gap:.45rem;
+    font-weight:800;font-size:.92rem;color:#6b7178;pointer-events:none;z-index:2;letter-spacing:.01em;}
+  .swipe .lbl .chev{display:inline-flex;color:var(--mint6);animation:swhint 1.5s ease-in-out infinite;}
+  .swipe .lbl .chev svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;}
+  @keyframes swhint{0%,100%{opacity:.35;transform:translateX(0)}50%{opacity:1;transform:translateX(5px)}}
+  .swipe .knob{position:absolute;top:6px;left:6px;width:52px;height:52px;border-radius:50%;z-index:3;touch-action:none;
+    display:grid;place-items:center;color:var(--mint6);background:linear-gradient(180deg,#fff,#f2f5f7);
+    box-shadow:0 4px 12px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.95);}
+  .swipe .knob svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+  .swipe.done .fill{width:100%!important;}
+  .swipe.done .knob{color:#04231a;background:#fff;animation:knobpop .4s ease;}
+  @keyframes knobpop{0%{transform:scale(.82)}55%{transform:scale(1.16)}100%{transform:scale(1)}}
   /* Gutschein-Ticket im Einloesen-Sheet */
-  .ticket{position:relative;background:#F2FBF7;border:1.5px solid var(--mint);border-radius:18px;overflow:hidden;margin:.2rem 0 1rem;}
-  .ticket-top{padding:1.5rem 1.2rem 1.1rem;text-align:center;}
-  .ticket-biz{font-size:.76rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mint6);}
-  .ticket-val{font-size:3rem;line-height:1;color:var(--ink);margin:.35rem 0 .2rem;}
-  .ticket-title{font-size:1.02rem;color:#3d4148;}
-  .ticket-valid{font-size:.76rem;color:var(--mut);margin-top:.55rem;}
-  .ticket-perf{position:relative;height:0;border-top:2px dashed var(--mint);}
-  .ticket-perf::before,.ticket-perf::after{content:'';position:absolute;top:-11px;width:22px;height:22px;border-radius:50%;background:#fff;}
+  .ticket{position:relative;background:#fff;border-radius:22px;overflow:hidden;margin:.2rem 0 1rem;
+    box-shadow:0 20px 44px rgba(18,180,137,.22),0 2px 0 rgba(0,0,0,.04);}
+  .ticket-top{padding:1.7rem 1.2rem 1.4rem;text-align:center;position:relative;color:#fff;
+    background:linear-gradient(150deg,#21D0A1,#12B489 72%);}
+  .ticket-top::after{content:'';position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(130% 90% at 82% 0,rgba(255,255,255,.28),transparent 58%);}
+  .ticket-biz{font-size:.74rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.92);position:relative;}
+  .ticket-val{font-size:3.4rem;line-height:1;color:#fff;margin:.28rem 0 .22rem;position:relative;text-shadow:0 2px 10px rgba(0,0,0,.14);}
+  .ticket-title{font-size:1rem;color:rgba(255,255,255,.96);position:relative;}
+  .ticket-valid{font-size:.74rem;color:rgba(255,255,255,.82);margin-top:.55rem;position:relative;}
+  .ticket-perf{position:relative;height:0;border-top:2px dashed #d6e6df;}
+  .ticket-perf::before,.ticket-perf::after{content:'';position:absolute;top:-11px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1px #edf0f2;}
   .ticket-perf::before{left:-12px;}
   .ticket-perf::after{right:-12px;}
-  .ticket-bottom{padding:1.1rem 1.1rem 1.2rem;}
-  .ticket-hint{text-align:center;font-size:.78rem;color:var(--mut);margin-top:.6rem;}
+  .ticket-bottom{padding:1.2rem 1.1rem 1.3rem;background:#fff;}
+  .ticket-hint{text-align:center;font-size:.78rem;color:var(--mut);margin-top:.7rem;}
   /* Fullscreen-Lightbox */
   .lb{position:fixed;inset:0;z-index:80;background:#000;display:none;flex-direction:column;}
   .lb.open{display:flex;}
@@ -117,7 +138,7 @@
 <body>
 <div class="topbar">
   <div class="rnd" onclick="history.length>1?history.back():location.href='coupons.html'">‹</div>
-  <div class="rnd" title="Speichern">♡</div>
+  <div class="rnd" id="saveBtn" title="Speichern" onclick="toggleSave()">♡</div>
 </div>
 <div class="wrap">
   <div class="hero">
@@ -230,7 +251,7 @@
     try{var u=await sb.auth.getUser();userId=u&&u.data&&u.data.user?u.data.user.id:null;}catch(e){}
     var r=await sb.from('coupons').select('*, coupon_photos(storage_path,photo_type,display_order)').eq('id',id).single();
     if(r.error||!r.data){$('biz').textContent='Coupon nicht gefunden';return;}
-    coupon=r.data;render();
+    coupon=r.data;render();checkSaved();
     if(userId){try{var red=await sb.from('coupon_redemptions').select('id').eq('coupon_id',id).eq('user_id',userId).maybeSingle();if(red.data&&coupon.usage_limit_per_user===1){already=true;markDone();}}catch(e){}}
   }
   function render(){
@@ -279,6 +300,22 @@
     var ac=$('actcard');ac.style.setProperty('--n',acts.length||1);ac.innerHTML=acts.join('')||'<div style="color:var(--mut);font-size:.85rem;padding:.4rem;text-align:center;grid-column:1/-1">Keine Kontaktdaten</div>';
   }
   function markDone(){var b=$('redeemBtn');b.textContent='Bereits eingelöst ✓';b.classList.add('gray');b.onclick=null;}
+
+  // ---- Speichern / Favorit (saved_items, item_type='coupon') ----
+  var saved=false;
+  async function checkSaved(){
+    if(!userId)return;
+    try{var s=await sb.from('saved_items').select('id').eq('user_id',userId).eq('item_type','coupon').eq('item_id',String(id)).maybeSingle();saved=!!(s&&s.data);updateSaveUI();}catch(e){}
+  }
+  function updateSaveUI(){var b=$('saveBtn');if(!b)return;b.textContent=saved?'♥':'♡';b.classList.toggle('saved',saved);b.title=saved?'Gespeichert':'Speichern';}
+  window.toggleSave=async function(){
+    if(!userId){location.href='login.html';return;}
+    saved=!saved;updateSaveUI(); // optimistisch
+    try{
+      if(saved){await sb.from('saved_items').insert({user_id:userId,item_type:'coupon',item_id:String(id)});}
+      else{await sb.from('saved_items').delete().eq('user_id',userId).eq('item_type','coupon').eq('item_id',String(id));}
+    }catch(e){saved=!saved;updateSaveUI();} // Rollback bei Fehler
+  };
 
   // ---- Kategorie + Menue-/Angebots-Ansicht ----
   function venueLabel(c){
@@ -342,7 +379,7 @@
         '</div>'+
         '<div class="ticket-perf"></div>'+
         '<div class="ticket-bottom">'+
-          '<div class="swipe" id="swipe"><div class="fill" id="swFill"></div><div class="lbl" id="swLbl">Zum Einlösen nach rechts wischen</div><div class="knob" id="swKnob">→</div></div>'+
+          '<div class="swipe" id="swipe"><div class="fill" id="swFill"></div><div class="lbl" id="swLbl">Zum Einlösen wischen <span class="chev"><svg viewBox="0 0 24 24"><path d="M8 6l6 6-6 6M13 6l6 6-6 6"/></svg></span></div><div class="knob" id="swKnob"><svg viewBox="0 0 24 24"><path d="M8 6l6 6-6 6M13 6l6 6-6 6"/></svg></div></div>'+
           '<div class="ticket-hint">⚠️ '+(coupon.usage_limit_per_user===1?'Einmalig — erst an der Kasse einlösen.':'Erst an der Kasse einlösen.')+'</div>'+
         '</div>'+
       '</div>'+
@@ -358,7 +395,10 @@
     function move(e){if(!dragging)return;e.preventDefault();set((e.touches?e.touches[0].clientX:e.clientX)-startX);}
     function up(){if(!dragging)return;dragging=false;max=maxX();
       if(x>=max-4){ // vollstaendig gewischt -> einloesen
-        track.classList.add('done');lbl.textContent='';set(max);finish();
+        track.classList.add('done');lbl.textContent='';set(max);
+        knob.innerHTML='<svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>';
+        try{navigator.vibrate&&navigator.vibrate(30);}catch(e){}
+        finish();
       } else { // zurueckschnappen
         knob.style.transition='left .18s';fill.style.transition='width .18s';set(0);
       }

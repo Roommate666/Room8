@@ -10,8 +10,9 @@
 <style>
   *{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;}
   :root{
-    --ink:#1A1613; --paper:#F7F4EE; --card:#FFFFFF; --w2:#E4DCCF; --w4:#9C9284; --line:#DED5C7;
-    --green:#1B9E5F; --greenD:#17854F; --greenL:#DCF3E7;
+    --ink:#1A1613; --paper:#F7F4EE; --card:#FFFFFF; --w2:#E4DCCF; --w4:#9C9284; --line:#E7DFD2;
+    --green:#12B489; --greenD:#0E9673; --greenL:#E4FBF3;
+    --mint-grad:linear-gradient(180deg,#21D0A1,#12B489); --sh:0 1px 2px rgba(40,30,15,.04),0 14px 34px rgba(40,30,15,.08); --sh-mint:0 10px 24px rgba(18,180,137,.34);
     --fh:'Fraunces'; --fb:'Sora'; --shLg:0 4px 10px rgba(30,22,10,.1),0 28px 60px rgba(30,22,10,.2);
   }
   body{font-family:var(--fb),sans-serif;background:var(--paper);color:var(--ink);letter-spacing:-.01em;}
@@ -26,7 +27,7 @@
 
   .hello{font-size:24px;font-weight:600;margin:6px 0 2px;}.sub{font-size:13px;color:var(--w4);font-weight:500;margin-bottom:14px;}
   .stats{display:flex;gap:10px;margin-bottom:16px;}
-  .stat{flex:1;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 14px;}
+  .stat{flex:1;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 14px;box-shadow:var(--sh);}
   .stat .k{font-size:10px;color:var(--w4);font-weight:700;text-transform:uppercase;letter-spacing:.1em;}
   .stat .v{font-size:19px;font-weight:700;margin-top:4px;display:flex;align-items:center;gap:7px;}
   .li{width:15px;height:15px;stroke:var(--ink);fill:none;stroke-width:1.6;}
@@ -36,18 +37,18 @@
   .hero .tag{font-size:10px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;opacity:.6;}
   .hero h2{font-size:17px;font-weight:500;opacity:.92;margin:10px 0 2px;color:var(--paper);}
   .hero .big{display:flex;align-items:baseline;gap:8px;margin:6px 0 16px;}.hero .big .n{font-size:46px;font-weight:600;color:var(--green);line-height:1;}.hero .big .l{font-size:11.5px;opacity:.6;max-width:120px;}
-  .cta{width:100%;background:var(--green);color:#fff;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .cta{width:100%;background:var(--mint-grad);color:#fff;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:var(--sh-mint);}
   .tri{width:0;height:0;border-left:9px solid currentColor;border-top:6px solid transparent;border-bottom:6px solid transparent;}
   .hline{display:inline-flex;align-items:center;gap:6px;font-size:9.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;opacity:.75;margin-top:12px;}.hline .d{width:5px;height:5px;border-radius:50%;background:var(--green);}
 
   .sect{display:flex;align-items:center;justify-content:space-between;margin:2px 2px 10px;}.sect h3{font-size:16px;font-weight:600;}.sect a{font-size:12px;font-weight:600;color:var(--green);}
-  .rank{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:20px;}
+  .rank{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:20px;box-shadow:var(--sh);}
   .rank .pos{font-size:26px;font-weight:600;}.rank .pos small{font-size:13px;color:var(--w4);}.rank .info{flex:1;min-width:0;}.rank .info .t{font-size:13px;font-weight:700;}.rank .info .s{font-size:11.5px;color:var(--green);margin-top:1px;font-weight:600;}
   .go{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--ink);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
 
-  .quest{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px;}
+  .quest{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px;box-shadow:var(--sh);}
   .quest .t2{display:flex;align-items:center;justify-content:space-between;gap:8px;}.quest .t{font-size:13px;font-weight:600;}
-  .reward{flex-shrink:0;font-size:11.5px;font-weight:700;color:var(--green);border:1.5px solid var(--green);border-radius:999px;padding:3px 9px;}
+  .reward{flex-shrink:0;font-size:11.5px;font-weight:700;color:var(--greenD);background:var(--greenL);border:1px solid var(--green);border-radius:999px;padding:3px 10px;}
   .bar2{height:6px;background:var(--w2);border-radius:99px;margin-top:11px;overflow:hidden;}.bar2>i{display:block;height:100%;background:var(--green);border-radius:99px;}
   .quest .p{font-size:10.5px;color:var(--w4);font-weight:600;margin-top:6px;}
   .quest.done .reward{background:var(--green);color:#fff;}
@@ -89,8 +90,14 @@
     <div class="hline"><span class="d"></span>Jeden Monat neu · Top 3 diesen Monat</div>
   </a>
 
-  <a href="https://instagram.com/unigoat.de" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;text-decoration:none;background:linear-gradient(90deg,#E1306C,#C13584);border-radius:14px;padding:11px 14px;margin-bottom:10px;color:#fff;font-weight:800;font-size:13.5px;box-shadow:0 2px 8px rgba(193,53,132,.25);">
-    <span>🏆 Du kannst was gewinnen — Infos auf Instagram</span>
+  <a href="https://instagram.com/unigoat.de" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;text-decoration:none;background:var(--greenL);border:1px solid #bfe6d7;border-radius:14px;padding:11px 14px;margin-bottom:10px;color:var(--greenD);font-weight:700;font-size:13px;">
+    <span>🏆 Gewinner &amp; echte Preise auf Instagram</span>
+    <span style="margin-left:auto">›</span>
+  </a>
+
+  <a href="store.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;background:linear-gradient(90deg,#21D0A1,#12B489);border-radius:14px;padding:12px 14px;margin-bottom:10px;color:#fff;font-weight:800;font-size:13.5px;box-shadow:0 3px 10px rgba(18,180,137,.28);">
+    <span style="font-size:18px;line-height:1">🎁</span>
+    <span>Coin-Store — G-Coins gegen echte Preise verlosen</span>
     <span style="margin-left:auto">›</span>
   </a>
 
@@ -286,6 +293,21 @@
     if(!window.sb) return;
     var u; try{ u=(await sb.auth.getUser()).data.user; }catch(e){}
     if(!u){ location.href='login.html'; return; }
+    // Ausstehenden Flyer-/Promo-Code (aus promo.html gemerkt) nach Registrierung automatisch gutschreiben
+    try{
+      var pend=localStorage.getItem('ug_promo_pending');
+      if(pend){
+        localStorage.removeItem('ug_promo_pending');
+        var pr=await sb.rpc('redeem_promo',{p_code:pend}); var pd=pr&&pr.data;
+        if(pd&&pd.ok){
+          var pe=document.createElement('div');
+          pe.textContent='🎉 +'+pd.coins+' G-Coins: '+(pd.label||'Bonus');
+          pe.style.cssText='position:fixed;top:calc(env(safe-area-inset-top) + 10px);left:12px;right:12px;z-index:10001;background:#12B489;color:#04231a;font-weight:800;font-size:14px;padding:13px 14px;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.2);text-align:center;';
+          document.body.appendChild(pe);
+          setTimeout(function(){ pe.style.transition='opacity .4s'; pe.style.opacity='0'; setTimeout(function(){pe.remove();},420); },4800);
+        }
+      }
+    }catch(e){}
     var p={};
     try{ var r=await sb.from('my_profile').select('full_name,username,coins,streak_days,avatar_config').maybeSingle(); if(r.data)p=r.data; }catch(e){}
     var first=((p.full_name||'').trim().split(/\s+/)[0])||p.username||'Goat';

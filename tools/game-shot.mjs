@@ -10,24 +10,20 @@ await p.click('#btnHigh').catch(()=>{});await p.waitForTimeout(1400);
 await p.click('#helpClose').catch(()=>{});
 await p.evaluate(()=>{var hp=document.getElementById('helpPanel');if(hp)hp.hidden=true;});
 await p.waitForTimeout(400);
+// echte Block-Grafiken injizieren (Treppe aus gruen)
 await p.evaluate(()=>{
   const N=8, cells=document.querySelectorAll('#board .cell');
-  // Fuellmuster: eine fast-volle Reihe unten + ein Bergsegment (gleiche Farbe) -> nahtlose Masse
   const g=Array.from({length:N},()=>Array(N).fill(0));
-  for(let x=0;x<7;x++)g[7][x]=1;            // fast fertige Reihe
-  for(let x=0;x<6;x++)g[6][x]=1;
-  for(let x=0;x<4;x++)g[5][x]=1;
-  for(let x=0;x<2;x++)g[4][x]=1;
-  const col='#22b463';
+  for(let x=0;x<7;x++)g[7][x]=1; for(let x=0;x<6;x++)g[6][x]=1;
+  for(let x=0;x<4;x++)g[5][x]=1; for(let x=0;x<2;x++)g[4][x]=1;
   for(let r=0;r<N;r++)for(let x=0;x<N;x++){ if(!g[r][x])continue;
-    const el=cells[r*N+x]; el.className='cell filled tn'; el.style.setProperty('--c',col); el.textContent='';
-    if(r>0&&g[r-1][x])el.classList.add('nT');
-    if(r<N-1&&g[r+1][x])el.classList.add('nB');
-    if(x>0&&g[r][x-1])el.classList.add('nL');
-    if(x<N-1&&g[r][x+1])el.classList.add('nR');
+    const el=cells[r*N+x]; el.className='cell filled tn';
+    el.style.backgroundImage="url('assets/block-gruen.webp')"; el.textContent='';
+    if(r>0&&g[r-1][x])el.classList.add('nT'); if(r<N-1&&g[r+1][x])el.classList.add('nB');
+    if(x>0&&g[r][x-1])el.classList.add('nL'); if(x<N-1&&g[r][x+1])el.classList.add('nR');
   }
   var s=document.getElementById('score');if(s)s.textContent='12.480';
 });
-await p.waitForTimeout(600);
-await p.screenshot({path:process.env.HOME+'/Desktop/game-eckig.png'});
-await b.close();console.log('shot ok');
+await p.waitForTimeout(800);
+await p.screenshot({path:process.env.HOME+'/Desktop/game-blocks.png'});
+await b.close();console.log('shot -> Desktop/game-blocks.png');

@@ -265,6 +265,7 @@ serve(async (req) => {
         const isDeadToken =
           errCode === 'UNREGISTERED' ||
           errCode === 'NOT_FOUND' ||
+          errCode === 'PERMISSION_DENIED' ||   // Sender-/Projekt-Mismatch (v.a. alte Web-Tokens) -> tot fuer dieses Projekt. Global-Creds-Fehler wuerde schon in getAccessToken werfen.
           (errCode === 'INVALID_ARGUMENT' && /registration|token/i.test(errMsg))
 
         if (isDeadToken) {
