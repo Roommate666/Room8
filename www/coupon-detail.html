@@ -86,6 +86,30 @@
   .bigcode small{display:block;color:var(--mint6);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;}
   .bigcode b{font-size:2rem;letter-spacing:.14em;color:var(--mint6);}
   .succ-ico{width:72px;height:72px;border-radius:20px;background:var(--mint);display:grid;place-items:center;margin:0 auto .7rem;color:#04231a;font-size:2.2rem;}
+  /* ===== Feier-Moment nach dem Einloesen ===== */
+  .checkwrap{width:88px;height:88px;margin:0 auto .5rem;position:relative;}
+  .checkwrap::before{content:'';position:absolute;inset:-10px;border-radius:50%;background:radial-gradient(circle,rgba(33,208,161,.3),transparent 68%);animation:glowpulse 1.2s ease-out;}
+  .checkmark{width:88px;height:88px;position:relative;}
+  .ck-ring{fill:none;stroke:var(--mint);stroke-width:3;stroke-dasharray:151;stroke-dashoffset:151;animation:ringdraw .5s cubic-bezier(.65,0,.45,1) forwards;}
+  .ck-tick{fill:none;stroke:var(--mint6);stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:tickdraw .32s .45s cubic-bezier(.65,0,.45,1) forwards;}
+  @keyframes ringdraw{to{stroke-dashoffset:0}}
+  @keyframes tickdraw{to{stroke-dashoffset:0}}
+  @keyframes glowpulse{0%{transform:scale(.6);opacity:0}40%{opacity:1}100%{transform:scale(1.55);opacity:0}}
+  .succ-h{font-size:1.6rem;color:var(--ink);margin:.1rem 0 .5rem;}
+  .coinwin{display:inline-flex;align-items:center;gap:.5rem;background:var(--mint-pill);border:1px solid #cdeee0;border-radius:999px;padding:.5rem 1.1rem;margin-bottom:1rem;animation:cpop .45s .5s both;}
+  .coinwin .ccoin{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#FFE7AE,#F4B740 55%,#C88A12);color:#8a5a06;font-weight:900;display:grid;place-items:center;font-size:.82rem;font-family:'Fraunces',serif;box-shadow:inset 0 -2px 3px rgba(0,0,0,.15);}
+  .coinwin .cnum{font-weight:800;font-size:1.35rem;color:#C88A12;font-family:'Fraunces',serif;}
+  .coinwin .clbl{font-weight:700;color:var(--mint6);font-size:.85rem;}
+  @keyframes cpop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+  .stampbox{position:relative;border:2px dashed var(--mint);border-radius:16px;background:linear-gradient(180deg,#F2FBF7,#fff);padding:1rem 1.1rem;margin:.3rem 0 1rem;animation:stampin .4s .7s both;}
+  .stampbox .stamp-lbl{display:block;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);font-weight:800;}
+  .stampbox .stamp-code{display:block;font-family:'Courier New',ui-monospace,monospace;font-size:2rem;font-weight:800;letter-spacing:.14em;color:var(--mint6);margin:.15rem 0;}
+  .stampbox .stamp-ok{position:absolute;top:9px;right:10px;font-size:.6rem;font-weight:800;color:var(--mint6);border:1.5px solid var(--mint);border-radius:6px;padding:2px 6px;transform:rotate(9deg);text-transform:uppercase;letter-spacing:.05em;}
+  @keyframes stampin{0%{transform:scale(1.28) rotate(-2deg);opacity:0}70%{transform:scale(.97) rotate(.5deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+  .succ-p{color:var(--mut);font-size:.88rem;margin-bottom:1rem;}
+  .confetti{position:fixed;top:32vh;width:9px;height:13px;border-radius:2px;z-index:100;pointer-events:none;opacity:.95;animation:confall 2s cubic-bezier(.3,.7,.4,1) forwards;}
+  @keyframes confall{0%{transform:translateY(0) translateX(0) rotate(0);opacity:1}100%{transform:translateY(64vh) translateX(var(--dx)) rotate(var(--dr));opacity:0}}
+  @media(prefers-reduced-motion:reduce){.ck-ring,.ck-tick,.coinwin,.stampbox,.confetti,.checkwrap::before{animation:none!important;}.ck-ring,.ck-tick{stroke-dashoffset:0;}}
   .ghost{width:100%;padding:.9rem;border:none;border-radius:14px;background:#f0f1f3;font-weight:700;cursor:pointer;margin-top:.5rem;}
   /* Swipe-to-redeem (premium) */
   .swipe{position:relative;height:64px;border-radius:999px;overflow:hidden;margin:.5rem 0 .3rem;user-select:none;touch-action:pan-y;
@@ -449,6 +473,24 @@
       if(later) later.onclick=function(){ resolve(null); };
     });
   }
+  // Konfetti-Regen (Mint/Gold/Weiss) beim erfolgreichen Einloesen
+  function fireConfetti(){ try{
+    var cols=['#21D0A1','#12B489','#F4B740','#ffffff','#7CE9C9'];
+    for(var i=0;i<34;i++){ var d=document.createElement('div'); d.className='confetti';
+      d.style.left=(50+(Math.random()*44-22))+'vw'; d.style.background=cols[i%cols.length];
+      d.style.setProperty('--dx',(Math.random()*180-90)+'px');
+      d.style.setProperty('--dr',(Math.random()*720-360)+'deg');
+      d.style.animationDelay=(Math.random()*0.18)+'s';
+      if(i%3===0){ d.style.width='7px'; d.style.height='7px'; d.style.borderRadius='50%'; }
+      document.body.appendChild(d);
+      (function(el){ setTimeout(function(){ el.remove(); }, 2300); })(d);
+    }
+  }catch(e){} }
+  // Zahl von 0 hochzaehlen (ease-out)
+  function countUp(el,to){ if(!el)return; var s=performance.now(),dur=900;
+    function step(t){ var p=Math.min(1,(t-s)/dur); el.textContent='+'+Math.round(to*(1-Math.pow(1-p,3))); if(p<1)requestAnimationFrame(step); }
+    requestAnimationFrame(step);
+  }
   window.finish=async function(){ // echter Server-Redeem via self_redeem RPC
     var pos=null, isGeo=(coupon.lat!=null && coupon.lng!=null);
     if(isGeo){
@@ -469,13 +511,20 @@
     var code=d.verification_code||'—';
     var earned=d.coins_earned||0;
     var geoMiss=(d.geo_required && d.geo_verified===false);
-    var pointsLine = geoMiss
-      ? '<p style="color:#b45309;font-weight:700;">📍 Sei direkt beim Laden, um +100 G-Coins zu bekommen.</p>'
-      : (earned>0 ? '<p style="color:var(--mint6);font-weight:800;">+'+earned+' G-Coins! 🪙</p>' : '');
-    open('<div class="succ-ico">✓</div><h2 class="serif" style="color:var(--mint6)">Erfolgreich eingelöst!</h2>'+
-      '<p>Zeig der Kasse zur Sicherheit diesen Screen.</p>'+ pointsLine +
-      '<div class="bigcode"><small>Bestätigungs-Code</small><b>'+code+'</b></div>'+
-      '<button class="btn" onclick="closeSheet();'+(coupon.usage_limit_per_user===1?'location.reload()':'')+'">Fertig</button>');
+    var coinBlock = geoMiss
+      ? '<p style="color:#b45309;font-weight:700;margin-bottom:1rem;">📍 Sei direkt beim Laden, um +100 G-Coins zu bekommen.</p>'
+      : (earned>0 ? '<div class="coinwin"><span class="ccoin">G</span><span class="cnum" id="coinCount">+0</span><span class="clbl">G-Coins</span></div>' : '');
+    open('<div class="celebrate">'+
+        '<div class="checkwrap"><svg class="checkmark" viewBox="0 0 52 52"><circle class="ck-ring" cx="26" cy="26" r="24"/><path class="ck-tick" d="M14 27l8 8 16-18"/></svg></div>'+
+        '<h2 class="serif succ-h">Eingelöst! 🎉</h2>'+
+        coinBlock +
+        '<div class="stampbox"><span class="stamp-lbl">An der Kasse vorzeigen</span><b class="stamp-code">'+code+'</b><span class="stamp-ok">✓ gültig</span></div>'+
+        '<p class="succ-p">Zeig der Kasse einfach diesen Screen.</p>'+
+        '<button class="btn" onclick="closeSheet();'+(coupon.usage_limit_per_user===1?'location.reload()':'')+'">Fertig</button>'+
+      '</div>');
+    try{ if(navigator.vibrate) navigator.vibrate([18,40,28]); }catch(e){}
+    fireConfetti();
+    if(earned>0) countUp(document.getElementById('coinCount'), earned);
     if(coupon.usage_limit_per_user===1){already=true;markDone();}
   };
   init();
