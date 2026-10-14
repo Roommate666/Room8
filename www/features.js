@@ -13,10 +13,17 @@
 (function() {
     'use strict';
 
+    // Duell + Verlosung sind Apple-konform umgebaut (kein Einsatz/Wetten mehr:
+    // Duell = Skill-Wettkampf um Elo + begrenzte Belohnung; Verlosung = Gratis-
+    // Gewinnspiel, Lose nur durch Werben). Daher auf ALLEN Plattformen an.
+    window.IOS_NATIVE = false;
+
     window.ROOM8_FEATURES = {
         coupons: true,
         jobs: true,
         events: true,
+        duel: true,    // Duell (Skill-Wettkampf um Elo, kein Einsatz)
+        raffle: true,  // Verlosung (Gratis-Gewinnspiel, Lose nur durch Werben)
         // --- Spaeter-Phase (two-sided, aktuell versteckt) ---
         housing: false,      // Wohnungen (wohnungen/wohnung/upload/saved-searches)
         marketplace: false,  // Gegenstaende (gegenstaende/gegenstand/detail/listing-details)
@@ -57,7 +64,9 @@
     var file = currentFile();
     var needed = PAGE_FEATURE[file];
     if (needed && window.ROOM8_FEATURES[needed] === false) {
-        window.location.replace('coupons.html');
+        // game/-Seiten liegen im Unterordner -> relativer Weg zurueck zum Root
+        var inGame = window.location.pathname.indexOf('/game/') !== -1;
+        window.location.replace(inGame ? '../coupons.html' : 'coupons.html');
     }
 
     // DOM-Guard: blendet Elemente mit data-feature="X" aus, wenn Flag X aus ist.

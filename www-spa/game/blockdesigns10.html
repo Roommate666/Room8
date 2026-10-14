@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Deep-3D Variationen - UniGoat</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Nunito',system-ui,sans-serif;background:#eef1f4;color:#15202b;padding:16px 14px calc(40px + env(safe-area-inset-bottom));}
+  h1{font-size:22px;font-weight:900;margin-bottom:4px;}
+  .lead{font-size:13.5px;color:#5b6675;margin-bottom:18px;line-height:1.4;}
+  .card{background:#f7f8fb;border-radius:18px;padding:16px;margin-bottom:16px;box-shadow:0 3px 12px rgba(0,0,0,.06);}
+  .ttl{font-size:16px;font-weight:900;margin-bottom:2px;}
+  .desc{font-size:12px;color:#6b7684;margin-bottom:14px;}
+  .row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .mini{--c:#2f6bff;display:grid;grid-template-columns:repeat(4,42px);grid-template-rows:repeat(4,42px);gap:4px;}
+  .mini .e{background:rgba(150,165,185,.16);border-radius:9px;}
+  .swatches{display:flex;gap:10px;}
+  .sw{--c:#2f6bff;width:34px;height:34px;position:relative;}
+  .f{position:relative;}
+
+  /* A Basis Deep 3D */
+  .a .f,.a .sw{border-radius:18%;background:linear-gradient(150deg,color-mix(in srgb,var(--c) 55%,#fff 45%),var(--c) 42%,color-mix(in srgb,var(--c) 72%,#000 28%));box-shadow:inset 4px 4px 3px rgba(255,255,255,.55),inset -6px -8px 5px rgba(0,0,0,.4),0 6px 0 color-mix(in srgb,var(--c) 55%,#000 45%),0 9px 10px rgba(0,0,0,.3);}
+  /* B Extra tief (hohe Wand) */
+  .b .f,.b .sw{border-radius:18%;background:linear-gradient(150deg,color-mix(in srgb,var(--c) 55%,#fff 45%),var(--c) 42%,color-mix(in srgb,var(--c) 72%,#000 28%));box-shadow:inset 4px 4px 3px rgba(255,255,255,.55),inset -6px -9px 6px rgba(0,0,0,.42),0 9px 0 color-mix(in srgb,var(--c) 52%,#000 48%),0 13px 12px rgba(0,0,0,.32);}
+  /* C Rund (Bonbon-Tiefe) */
+  .c .f,.c .sw{border-radius:30%;background:linear-gradient(150deg,color-mix(in srgb,var(--c) 58%,#fff 42%),var(--c) 44%,color-mix(in srgb,var(--c) 74%,#000 26%));box-shadow:inset 4px 4px 3px rgba(255,255,255,.6),inset -5px -7px 5px rgba(0,0,0,.36),0 6px 0 color-mix(in srgb,var(--c) 55%,#000 45%),0 9px 10px rgba(0,0,0,.28);}
+  /* D Kantig (technisch) */
+  .d .f,.d .sw{border-radius:8%;background:linear-gradient(150deg,color-mix(in srgb,var(--c) 55%,#fff 45%),var(--c) 42%,color-mix(in srgb,var(--c) 72%,#000 28%));box-shadow:inset 4px 4px 3px rgba(255,255,255,.5),inset -6px -8px 5px rgba(0,0,0,.42),0 6px 0 color-mix(in srgb,var(--c) 52%,#000 48%),0 9px 10px rgba(0,0,0,.3);}
+  /* E Glanz-Deckel (Sheen-Band oben) */
+  .e2 .f,.e2 .sw{border-radius:18%;background:linear-gradient(150deg,color-mix(in srgb,var(--c) 55%,#fff 45%),var(--c) 42%,color-mix(in srgb,var(--c) 72%,#000 28%));box-shadow:inset 4px 4px 3px rgba(255,255,255,.55),inset -6px -8px 5px rgba(0,0,0,.4),0 6px 0 color-mix(in srgb,var(--c) 55%,#000 45%),0 9px 10px rgba(0,0,0,.3);}
+  .e2 .f::before,.e2 .sw::before{content:"";position:absolute;left:10%;right:10%;top:8%;height:34%;border-radius:40%;background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,0));}
+  /* F Matt-Deckel (nur Tiefe, kein Glanz) */
+  .f2 .f,.f2 .sw{border-radius:18%;background:linear-gradient(150deg,color-mix(in srgb,var(--c) 80%,#fff 20%),var(--c) 55%,color-mix(in srgb,var(--c) 78%,#000 22%));box-shadow:inset 0 2px 2px rgba(255,255,255,.28),inset -4px -6px 5px rgba(0,0,0,.34),0 6px 0 color-mix(in srgb,var(--c) 55%,#000 45%),0 9px 10px rgba(0,0,0,.3);}
+  /* G Heller Umriss (Rim-Light) */
+  .g .f,.g .sw{border-radius:18%;background:linear-gradient(150deg,color-mix(in srgb,var(--c) 55%,#fff 45%),var(--c) 42%,color-mix(in srgb,var(--c) 72%,#000 28%));box-shadow:inset 0 0 0 1.6px rgba(255,255,255,.65),inset 4px 4px 3px rgba(255,255,255,.5),inset -6px -8px 5px rgba(0,0,0,.4),0 6px 0 color-mix(in srgb,var(--c) 55%,#000 45%),0 9px 10px rgba(0,0,0,.3);}
+  /* H Klobig (dicke Wand + starke Fase) */
+  .h .f,.h .sw{border-radius:16%;background:linear-gradient(150deg,color-mix(in srgb,var(--c) 52%,#fff 48%),var(--c) 40%,color-mix(in srgb,var(--c) 70%,#000 30%));box-shadow:inset 5px 5px 3px rgba(255,255,255,.6),inset -8px -10px 6px rgba(0,0,0,.45),0 8px 0 color-mix(in srgb,var(--c) 50%,#000 50%),0 12px 12px rgba(0,0,0,.34);}
+  /* I Candy-Deep (rund + Glanzpunkt) */
+  .i .f,.i .sw{border-radius:26%;background:linear-gradient(150deg,color-mix(in srgb,var(--c) 58%,#fff 42%),var(--c) 44%,color-mix(in srgb,var(--c) 74%,#000 26%));box-shadow:inset 4px 4px 3px rgba(255,255,255,.6),inset -5px -7px 5px rgba(0,0,0,.36),0 6px 0 color-mix(in srgb,var(--c) 55%,#000 45%),0 9px 10px rgba(0,0,0,.28);}
+  .i .f::before,.i .sw::before{content:"";position:absolute;left:15%;top:11%;width:44%;height:30%;border-radius:50%;background:linear-gradient(150deg,rgba(255,255,255,.85),rgba(255,255,255,0));}
+</style>
+</head>
+<body>
+<h1>🧱 Deep-3D · 9 Variationen</h1>
+<p class="lead">Alles Abwandlungen von #10 (Deep 3D) — unterschiedliche Tiefe, Rundung, Glanz und Kanten. Jeweils Mini-Feld + Farben. Sag mir den <b>Buchstaben</b> (A-I), den du willst.</p>
+<div id="app"></div>
+<script>
+var COLORS=['#2f6bff','#22b463','#ff8c1a','#ff5d8f','#e4483b','#f2b90c'];
+var PATTERN=[1,1,0,1, 0,1,1,1, 1,0,0,1, 1,1,1,0];
+var STYLES=[
+  ['a','A · Basis Deep 3D','Der #10-Look: kraeftige Tiefe, heller Deckel.'],
+  ['b','B · Extra tief','Noch hoehere Seitenwand — sehr plastisch.'],
+  ['c','C · Rund','Weiche Bonbon-Ecken mit voller Tiefe.'],
+  ['d','D · Kantig','Fast eckig, technischer/haerter Look.'],
+  ['e2','E · Glanz-Deckel','Breites Licht-Band oben — glaenzt richtig.'],
+  ['f2','F · Matt-Deckel','Nur Tiefe, kein Glanz. Edel/ruhig.'],
+  ['g','G · Heller Umriss','Feiner heller Rand rundherum — "pops".'],
+  ['h','H · Klobig','Dicke Wand + starke Fase. Sehr wuchtig.'],
+  ['i','I · Candy-Deep','Rund + Glanzpunkt oben. Am "suessesten".']
+];
+var app=document.getElementById('app');
+STYLES.forEach(function(s){
+  var card=document.createElement('div');card.className='card';
+  card.innerHTML='<div class="ttl">'+s[1]+'</div><div class="desc">'+s[2]+'</div>';
+  var row=document.createElement('div');row.className='row';
+  var m=document.createElement('div');m.className='mini '+s[0];
+  PATTERN.forEach(function(v){var c=document.createElement('div');c.className=v?'f':'e';m.appendChild(c);});
+  row.appendChild(m);
+  var sw=document.createElement('div');sw.className='swatches '+s[0];
+  COLORS.forEach(function(col){var d=document.createElement('div');d.className='sw';d.style.setProperty('--c',col);sw.appendChild(d);});
+  row.appendChild(sw);
+  card.appendChild(row);app.appendChild(card);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UniGoat holen — App oder Web</title>
+<meta name="description" content="UniGoat: die Studenten-App fuer deine Stadt. Jetzt im App Store, bei Google Play oder direkt im Browser.">
+<link rel="icon" href="logo-goat.png?v90">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,900&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --paper:#FBF7EF; --ink:#1E1B16; --muted:#6E675B; --mint:#12B489; --mint-dark:#0E9673; --edge:rgba(30,27,22,.10); }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{ font-family:'Sora',sans-serif; background:var(--paper); color:var(--ink); min-height:100vh;
+    display:flex; align-items:center; justify-content:center; padding:24px; -webkit-font-smoothing:antialiased; }
+  .card{ width:100%; max-width:420px; text-align:center; }
+  .goat{ width:88px; height:88px; border-radius:22px; object-fit:cover; box-shadow:0 14px 34px rgba(30,27,22,.14);
+    border:3px solid #fff; margin:0 auto 18px; display:block; transform:rotate(-3deg); }
+  h1{ font-family:'Fraunces',serif; font-weight:800; font-size:34px; letter-spacing:-.02em; line-height:1.05; }
+  .sub{ color:var(--muted); font-size:15px; margin:10px 0 26px; line-height:1.5; }
+  .btn{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%;
+    padding:16px 18px; border-radius:16px; font-weight:800; font-size:16px; text-decoration:none;
+    margin-bottom:12px; border:2px solid var(--ink); color:var(--ink); background:#fff; transition:.15s; }
+  .btn:hover{ transform:translateY(-1px); box-shadow:0 8px 20px rgba(30,27,22,.10); }
+  .btn.primary{ background:var(--mint); border-color:var(--mint); color:#04231a; }
+  .btn.primary:hover{ background:var(--mint-dark); }
+  .btn .em{ font-size:20px; }
+  .hint{ font-size:12px; color:var(--muted); margin-top:6px; }
+  .divider{ display:flex; align-items:center; gap:12px; color:var(--muted); font-size:12px; margin:16px 0; }
+  .divider::before,.divider::after{ content:""; flex:1; height:1px; background:var(--edge); }
+  .foot{ margin-top:22px; font-size:12px; color:var(--muted); }
+  .foot a{ color:var(--mint-dark); text-decoration:none; font-weight:700; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="goat" src="logo-goat.png?v90" alt="UniGoat">
+    <h1>UniGoat</h1>
+    <p class="sub">Die Studenten-App fuer deine Stadt: lokale Deals einloesen, sparen &amp; das Goat-Game spielen. Verifiziert ueber die Uni-Mail.</p>
+
+    <a id="appstore" class="btn" href="https://apps.apple.com/app/id6757254250">
+      <span class="em"></span> App Store (iPhone)
+    </a>
+    <a id="playstore" class="btn" href="https://play.google.com/store/apps/details?id=club.room8.app">
+      <span class="em">&#9654;</span> Google Play (Android)
+    </a>
+
+    <div class="divider">oder ohne Installation</div>
+
+    <a class="btn" href="https://unigoat.de/login.html">
+      &#127760; Im Browser oeffnen (Web-Version)
+    </a>
+    <p class="hint">Funktioniert sofort — kein Download noetig.</p>
+
+    <p class="foot">unigoat.de &middot; <a href="https://instagram.com/unigoat.de">@unigoat.de</a></p>
+  </div>
+
+<script>
+  // Plattform erkennen: passenden Store nach oben + als Haupt-Button hervorheben.
+  (function(){
+    var ua = navigator.userAgent || '';
+    var isIOS = /iPhone|iPad|iPod/i.test(ua);
+    var isAndroid = /Android/i.test(ua);
+    var apple = document.getElementById('appstore');
+    var play = document.getElementById('playstore');
+    if(isIOS){ apple.classList.add('primary'); apple.parentNode.insertBefore(apple, play); }
+    else if(isAndroid){ play.classList.add('primary'); }
+    // Desktop: beide neutral lassen (User entscheidet).
+  })();
+</script>
+</body>
+</html>

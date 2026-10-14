@@ -3,35 +3,59 @@
 <head>
     <script src="sentry-init.js"></script>
   <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">  <title>Disclaimer &ndash; UniGoat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Disclaimer &ndash; UniGoat</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="unigoat-v2.css">
   <style>
-    /* Pattern: Magic UI BlurFade */
-    @keyframes blurFadeIn {
-      from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
-      to { opacity: 1; filter: blur(0); transform: translateY(0); }
+    /* Alias: altes Token-Vokabular -> v2, damit bestehendes JS + inline-styles in v2-Farben laufen */
+    :root{
+      --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+      --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+      --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+      --fh:var(--font-heading); --fb:var(--font-body);
     }
-    .disclaimer-card {
-      background: rgba(255,255,255,0.92);
-      border-radius: 20px;
-      padding: 2rem;
-      max-width: 800px;
-      margin: 1rem auto;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
-      border: 1px solid rgba(0,0,0,0.04);
-      animation: blurFadeIn 0.5s ease-out both;
-      line-height: 1.8;
-      color: #374151;
+
+    /* Back-Chrome (kein tabbar auf dieser Seite) */
+    .topbar{
+      display:flex; align-items:center; gap:12px;
+      padding:16px 20px; border-bottom:2px solid var(--ink);
     }
-    .disclaimer-card h1 {
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-top: 0;
+    .topbar .brand-line{
+      display:flex; align-items:center; gap:10px;
+      font-family:var(--fh); font-weight:800; letter-spacing:-0.01em;
+      font-size:18px; color:var(--ink); text-decoration:none;
     }
+    .topbar .brand-line img{ width:28px; height:28px; display:block; }
+    .topbar-nav{ margin-left:auto; display:flex; gap:18px; }
+    .topbar-nav a{
+      font-family:var(--fb); font-size:13px; font-weight:600; text-transform:uppercase;
+      letter-spacing:0.04em; color:var(--w4); text-decoration:none;
+    }
+    .topbar-nav a:hover{ color:var(--ink); }
+
+    /* Prosa-Rechtstext */
+    .legal-body{ padding:8px 20px 32px; }
+    .legal-body p{
+      font-family:var(--fb); font-size:16px; line-height:1.8;
+      color:var(--ink); margin:0 0 18px;
+      max-width:680px;
+    }
+    .legal-body p:last-child{ margin-bottom:0; }
+
+    .legal-footer{
+      border-top:1px solid var(--line);
+      padding:20px; display:flex; flex-wrap:wrap; gap:20px;
+    }
+    .legal-footer a{
+      font-family:var(--fb); font-size:13px; font-weight:600; text-transform:uppercase;
+      letter-spacing:0.04em; color:var(--w4); text-decoration:none;
+    }
+    .legal-footer a:hover{ color:var(--ink); }
+
     /* Barrierefreiheit */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
@@ -39,32 +63,42 @@
   </style>
 </head>
 <body>
-  <header>
-     <a href="index.html" class="brand">
-    <img src="logo.png?v133" alt="UniGoat Logo" class="logo">
-    UniGoat
-  </a>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="wohnungen.html">Wohnungen</a>
-    <a href="gegenstaende.html">Gegenstände</a>
-    <a href="login.html">Login/Registrieren</a>
-  </nav>
-  </header>
-  <main>
-    <div class="disclaimer-card">
-    <h1 data-i18n="disclaimer_title">Disclaimer</h1>
-    <p data-i18n="disclaimer_p1">Die Plattform UniGoat dient ausschließlich als Vermittlungsplattform für private Inserate. Wir stellen lediglich die technische Möglichkeit bereit, Inserate zu veröffentlichen und zu suchen.</p>
-    <p data-i18n="disclaimer_p2">Alle Vereinbarungen über die Nutzung von Wohnraum, die Zahlung von Miete oder die Übergabe von Gegenständen werden ausschließlich zwischen den jeweiligen Nutzern getroffen. UniGoat übernimmt keine Haftung für die Richtigkeit der gemachten Angaben oder für Schäden, die aus Absprachen oder Transaktionen zwischen den Nutzern entstehen.</p>
-    <p data-i18n="disclaimer_p3">UniGoat steht in keinerlei Verbindung zu Universitäten, Studentenwerken oder Wohnheimen und ist kein offizielles Angebot dieser Einrichtungen. Wir übernehmen keine Verantwortung für Schlüsselübergaben, Zahlungen oder sonstige Verpflichtungen, die aus der Nutzung der Plattform resultieren.</p>
-    <p data-i18n="disclaimer_p4">Durch die Nutzung dieser Webseite erkennen Sie an, dass Sie für sämtliche Inhalte und Handlungen selbst verantwortlich sind.</p>
+  <div class="screen">
+
+    <header class="topbar">
+      <a href="index.html" class="brand-line">
+        <img src="logo.png?v133" alt="UniGoat Logo">
+        UniGoat
+      </a>
+      <nav class="topbar-nav">
+        <a href="index.html">Home</a>
+        <a href="wohnungen.html">Wohnungen</a>
+        <a href="gegenstaende.html">Gegenstände</a>
+        <a href="login.html">Login/Registrieren</a>
+      </nav>
+    </header>
+
+    <div class="screen-body">
+
+      <div class="dateline">UniGoat &middot; Rechtliches</div>
+      <h1 class="masthead masthead-sm" data-i18n="disclaimer_title">Disclaimer</h1>
+
+      <div class="legal-body">
+        <p data-i18n="disclaimer_p1">Die Plattform UniGoat dient ausschließlich als Vermittlungsplattform für private Inserate. Wir stellen lediglich die technische Möglichkeit bereit, Inserate zu veröffentlichen und zu suchen.</p>
+        <p data-i18n="disclaimer_p2">Alle Vereinbarungen über die Nutzung von Wohnraum, die Zahlung von Miete oder die Übergabe von Gegenständen werden ausschließlich zwischen den jeweiligen Nutzern getroffen. UniGoat übernimmt keine Haftung für die Richtigkeit der gemachten Angaben oder für Schäden, die aus Absprachen oder Transaktionen zwischen den Nutzern entstehen.</p>
+        <p data-i18n="disclaimer_p3">UniGoat steht in keinerlei Verbindung zu Universitäten, Studentenwerken oder Wohnheimen und ist kein offizielles Angebot dieser Einrichtungen. Wir übernehmen keine Verantwortung für Schlüsselübergaben, Zahlungen oder sonstige Verpflichtungen, die aus der Nutzung der Plattform resultieren.</p>
+        <p data-i18n="disclaimer_p4">Durch die Nutzung dieser Webseite erkennen Sie an, dass Sie für sämtliche Inhalte und Handlungen selbst verantwortlich sind.</p>
+      </div>
+
+      <footer class="legal-footer">
+        <a href="disclaimer.html">Disclaimer</a>
+        <a href="impressum.html">Impressum</a>
+        <a href="datenschutz.html">Datenschutz</a>
+      </footer>
+
     </div>
-  </main>
-  <footer>
-    <a href="disclaimer.html">Disclaimer</a>
-    <a href="impressum.html">Impressum</a>
-    <a href="datenschutz.html">Datenschutz</a>
-  </footer>
+  </div>
+
   <script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
 <script src="session-cache.js"></script>

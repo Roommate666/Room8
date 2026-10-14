@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="de" data-page="admin-menu">
+<head>
+<script src="sentry-init.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Menü-Fotos verwalten — UniGoat Admin</title>
+<link rel="stylesheet" href="unigoat-v2.css">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+<style>
+  /* Alias: altes Token-Vokabular auf v2 mappen, damit bestehendes JS
+     + inline-styles in v2-Farben weiterlaufen. */
+  :root{
+    --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+    --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+    --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+    --fh:var(--font-heading); --fb:var(--font-body);
+    --mint:var(--color-accent); --mut:var(--text-muted);
+  }
+  .icn{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; display:block; }
+
+  /* Coupon-Auswahl (Select) im v2-Look (eckig, Tinte-Rahmen) */
+  .csel{ width:100%; padding:13px 14px; border-radius:0; border:2px solid color-mix(in srgb,var(--color-text) 30%,transparent);
+    font-family:var(--font-body); font-size:16px; color:var(--color-text); background:var(--color-bg); margin-bottom:0;
+    caret-color:var(--color-accent); }
+  .csel:focus-visible{ border-color:var(--color-accent); outline:none; }
+
+  /* Panel = Karten-Block mit v2-Rules statt Schatten */
+  .mpanel{ background:var(--color-bg); border-top:var(--rule); padding:16px 0 0; box-shadow:none; }
+
+  /* Foto-Grid: Coupon-Bilder bleiben FARBIG (kein grayscale) */
+  .mgrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:14px 0; }
+  .mthumb{ position:relative; aspect-ratio:3/4; border-radius:0; overflow:hidden; background:var(--color-neutral-100); border:1px solid var(--color-divider); }
+  .mthumb img{ width:100%; height:100%; object-fit:cover; }
+  .mthumb button{ position:absolute; top:6px; right:6px; width:26px; height:26px; border-radius:0; border:none;
+    background:#C43A22; color:#fff; font-weight:800; cursor:pointer; line-height:1; }
+
+  /* Upload-Flaeche */
+  .uparea{ display:flex; align-items:center; justify-content:center; gap:8px; border:2px dashed color-mix(in srgb,var(--color-text) 30%,transparent);
+    border-radius:0; padding:22px; text-align:center; color:var(--text-muted); cursor:pointer;
+    font-family:var(--font-heading); font-weight:800; font-size:14px; }
+  .uparea:hover{ border-color:var(--color-accent); color:var(--color-text); }
+  .uparea input{ display:none; }
+
+  .msg{ text-align:center; padding:10px; font-weight:600; color:var(--color-text); }
+  .muted{ color:var(--text-muted); font-size:13px; }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="screen-body">
+    <div class="topbar" style="padding-top:14px">
+      <a class="btn btn-icon backbtn" href="admin.html" style="margin-left:8px" aria-label="Zurück"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--color-text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M15 18l-6-6 6-6"/></svg></a>
+      <div class="masthead" style="font-size:30px;padding:0 8px 0 2px">Admin</div>
+      <span style="width:40px"></span>
+    </div>
+    <div class="hr"></div>
+
+    <div style="padding:16px 20px 24px;max-width:640px;margin:0 auto;">
+      <div class="kicker" style="margin-bottom:4px">UniGoat · Admin</div>
+      <div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-.02em;margin-bottom:14px;">Menü-Fotos verwalten</div>
+
+      <div id="gate" class="msg">Prüfe Zugriff…</div>
+      <div id="app" style="display:none;">
+        <select id="couponSel" class="csel"><option value="">— Coupon wählen —</option></select>
+        <div id="panel" class="mpanel" style="display:none;">
+          <div id="bizName" style="font-family:var(--font-heading);font-weight:800;font-size:18px;margin-bottom:6px;"></div>
+          <div class="muted">Lade Menü-/Angebots-Fotos hoch. Sie erscheinen swipebar auf der Coupon-Detailseite unter „Menü &amp; Angebot ansehen".</div>
+          <div class="mgrid" id="mgrid"></div>
+          <label class="uparea" id="uparea">
+            <svg class="icn" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Fotos auswählen (mehrere möglich)
+            <input type="file" id="fileInput" accept="image/*" multiple>
+          </label>
+          <div id="upmsg" class="msg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var curCoupon=null;
+  function bucketUrl(path){try{return sb.storage.from('listing-images').getPublicUrl(path).data.publicUrl;}catch(e){return '';}}
+
+  // Bild verkleinern (max 1600px Kante, JPEG) fuer schlanke Uploads
+  function resize(file){
+    return new Promise(function(resolve){
+      var img=new Image();
+      img.onload=function(){
+        var max=1600,w=img.width,h=img.height;
+        if(w>max||h>max){if(w>h){h=Math.round(h*max/w);w=max;}else{w=Math.round(w*max/h);h=max;}}
+        var c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        c.toBlob(function(b){resolve(b||file);},'image/jpeg',0.85);
+      };
+      img.onerror=function(){resolve(file);};
+      img.src=URL.createObjectURL(file);
+    });
+  }
+
+  async function loadCoupons(){
+    var r=await sb.from('coupons').select('id,title,business_name,city').eq('status','active').order('created_at',{ascending:false});
+    var sel=$('couponSel');
+    (r.data||[]).forEach(function(c){
+      var o=document.createElement('option');o.value=c.id;
+      o.textContent=(c.business_name||'?')+' — '+(c.title||'')+(c.city?(' ('+c.city+')'):'');
+      sel.appendChild(o);
+    });
+  }
+
+  async function loadMenu(couponId){
+    var grid=$('mgrid');grid.innerHTML='';
+    var r=await sb.from('coupon_photos').select('id,storage_path,display_order').eq('coupon_id',couponId).eq('photo_type','menu').order('display_order',{ascending:true});
+    var rows=(r.data||[]);
+    if(!rows.length){grid.innerHTML='<div class="muted" style="grid-column:1/-1">Noch keine Menü-Fotos.</div>';return;}
+    rows.forEach(function(p){
+      var d=document.createElement('div');d.className='mthumb';
+      var im=document.createElement('img');im.src=bucketUrl(p.storage_path);d.appendChild(im);
+      var b=document.createElement('button');b.textContent='×';b.title='Löschen';
+      b.onclick=function(){delPhoto(p.id,p.storage_path);};
+      d.appendChild(b);grid.appendChild(d);
+    });
+  }
+
+  async function delPhoto(id,path){
+    if(!confirm('Dieses Menü-Foto löschen?'))return;
+    try{
+      await sb.from('coupon_photos').delete().eq('id',id);
+      try{await sb.storage.from('listing-images').remove([path]);}catch(e){}
+      loadMenu(curCoupon);
+    }catch(e){alert('Fehler beim Löschen: '+(e.message||e));}
+  }
+
+  async function uploadFiles(files){
+    if(!curCoupon){return;}
+    var msg=$('upmsg');
+    // aktuellen Max-display_order holen
+    var ex=await sb.from('coupon_photos').select('display_order').eq('coupon_id',curCoupon).eq('photo_type','menu').order('display_order',{ascending:false}).limit(1);
+    var ord=(ex.data&&ex.data.length)?(ex.data[0].display_order||0)+1:0;
+    var ok=0;
+    for(var i=0;i<files.length;i++){
+      msg.textContent='Lade '+(i+1)+' / '+files.length+' …';
+      try{
+        var blob=await resize(files[i]);
+        var path='menu/'+curCoupon+'/'+Date.now()+'-'+i+'.jpg';
+        var up=await sb.storage.from('listing-images').upload(path,blob,{contentType:'image/jpeg',upsert:true});
+        if(up.error)throw up.error;
+        var ins=await sb.from('coupon_photos').insert({coupon_id:curCoupon,storage_path:path,photo_type:'menu',display_order:ord+i});
+        if(ins.error)throw ins.error;
+        ok++;
+      }catch(e){msg.textContent='Fehler: '+(e.message||e);}
+    }
+    msg.textContent=ok+' Foto(s) hochgeladen ✓';
+    loadMenu(curCoupon);
+    setTimeout(function(){msg.textContent='';},2500);
+  }
+
+  async function init(){
+    var s=await sb.auth.getUser();
+    if(!s||!s.data||!s.data.user){$('gate').textContent='Bitte einloggen.';location.href='login.html';return;}
+    // Admin-Check ueber my_profile
+    var adm=false;
+    try{var p=await sb.from('my_profile').select('is_admin').maybeSingle();adm=!!(p.data&&p.data.is_admin);}catch(e){}
+    if(!adm){$('gate').textContent='Kein Admin-Zugriff.';return;}
+    $('gate').style.display='none';$('app').style.display='block';
+    await loadCoupons();
+    $('couponSel').addEventListener('change',function(){
+      curCoupon=this.value||null;
+      if(!curCoupon){$('panel').style.display='none';return;}
+      $('bizName').textContent=this.options[this.selectedIndex].textContent;
+      $('panel').style.display='block';loadMenu(curCoupon);
+    });
+    $('fileInput').addEventListener('change',function(){if(this.files&&this.files.length)uploadFiles(this.files);this.value='';});
+  }
+  function boot(){if(window.sb)init();else setTimeout(boot,120);}
+  boot();
+})();
+</script>
+</body>
+</html>

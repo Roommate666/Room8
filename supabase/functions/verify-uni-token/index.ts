@@ -38,12 +38,31 @@ const UNI_PATTERNS = [
   /(^|\.)stud\.|(^|\.)student\./    // stud./student. Subdomains
 ]
 const UNI_ALLOW = new Set([
+  'hnu.de','student.hnu.de','thu.de','student.thu.de', // Ulm/Neu-Ulm Launch-Schulen (HNU, THU)
   'tum.de','lmu.de','rwth-aachen.de','kit.edu','charite.de','hhu.de','wwu.de',
   'ovgu.de','b-tu.de','leuphana.de','hpi.de','whu.edu','ebs.edu','zhaw.ch',
   'ethz.ch','epfl.ch','uzh.ch','unibe.ch','unibas.ch','unisg.ch','hslu.ch',
   'phbern.ch','ku.de','ph-weingarten.de','hnee.de','htw-berlin.de',
   'htwk-leipzig.de','htwg-konstanz.de','beuth-hochschule.de','bht-berlin.de',
-  'code.berlin','constructor.university','jacobs-university.de'
+  'code.berlin','constructor.university','jacobs-university.de',
+  // Deutschland komplett (Hochschul-Datensatz 22.09.2026)
+  'akad.de', 'asfh-berlin.de', 'augustana.de', 'b-tu.de', 'ba-bautzen.de', 'bethel.de', 'bits-iserlohn.de', 'campus-m-university.de',
+  'campusm21.de', 'cbs.de', 'dhv-speyer.de', 'diploma.de', 'dshs-koeln.de', 'eba-muenchen.de', 'ebs.de', 'ecla.de',
+  'efh-bochum.de', 'efh-freiburg.de', 'efh-hannover.de', 'efh-reutlingen-ludwigsburg.de', 'efhlu.de', 'eh-darmstadt.de', 'ehs-dresden.de', 'ems-mainz.de',
+  'eufh.de', 'europa-uni.de', 'euv-frankfurt-o.de', 'evfh-berlin.de', 'evfh-nuernberg.de', 'fern-fh.de', 'fernuni-hagen.de', 'fhdw.bib.de',
+  'fhdw.de', 'fhkt.de', 'fhm-mittelstand.de', 'fhnon.de', 'fhoebb.de', 'fhs-mannheim.de', 'fhs-moritzburg.de', 'fht-stuttgart.de',
+  'fhtw-berlin.de', 'fhvr.berlin.de', 'fhw-berlin.de', 'fhwt.de', 'fom.de', 'fs-students.de', 'fs.de', 'h-brs.de',
+  'h-da.de', 'hanseuni.de', 'hdm-stuttgart.de', 'hertie-school.org', 'hfb.de', 'hff-muenchen.de', 'hfg-gmuend.de', 'hfk-bremen.de',
+  'hfk2020.de', 'hfm-detmold.de', 'hfmdd.de', 'hfmt-koeln.de', 'hfp.mhn.de', 'hfph.mwn.de', 'hhl.de', 'hhu.de',
+  'himh.de', 'hmdk-stuttgart.de', 'hmt-leipzig.de', 'hmtm-hannover.de', 'hmtm.de', 'hochschule-bonn-rhein-sieg.de', 'hwg-lu.de', 'hwp-hamburg.de',
+  'i-u.de', 'ihi-zittau.de', 'ism-dortmund.de', 'isnm.de', 'ist-hochschule.de', 'iubh-fernstudium.de', 'karlshochschule.de', 'kath-fh-nord.de',
+  'kfb-berlin.de', 'kfh-freiburg.de', 'kfh-mainz.de', 'kfhnw.de', 'kh-berlin.de', 'khsa.de', 'ksbk-do.de', 'ksfh.de',
+  'ku-eichstaett.de', 'kunstakademie-duesseldorf.de', 'merkur-fh.org', 'merz-akademie.de', 'mfh-iserlohn.de', 'mh-hannover.de', 'mh-luebeck.de', 'mh-trossingen.de',
+  'mu-luebeck.de', 'musikhochschule-muenchen.de', 'muthesius.de', 'nordakademie.de', 'ostfalia.de', 'oth-aw.de', 'paderborn.de', 'pfh-goettingen.de',
+  'philtheol-augustin.de', 'popakademie.de', 'privatfh-da.de', 'pth-bb.de', 'pth-muenster.de', 'pthv.de', 'rauheshaus.de', 'rfh-koeln.de',
+  'ruhr-uni-bochum.de', 'selk.de', 'siewerth-akademie.de', 'siu-heidelberg.de', 'srh-berlin.de', 'stw.de', 'tfh-berlin.de', 'tfh-bochum.de',
+  'tfh-wildau.de', 'tha.de', 'thh-friedensau.de', 'thi.de', 'thm.de', 'tiho-hannover.de', 'tuhh.de', 'udk-berlin.de',
+  'unibw-hamburg.de', 'unibw-muenchen.de', 'uol.de', 'w-hs.de', 'whu-koblenz.de', 'wwu.de',
 ])
 function isUniDomain(domain: string | undefined): boolean {
   if (!domain) return false

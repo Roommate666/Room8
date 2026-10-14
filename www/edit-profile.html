@@ -3,222 +3,242 @@
 <head>
     <script src="sentry-init.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Profil bearbeiten - UniGoat</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="unigoat-v2.css">
     <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Sora:wght@400;500;600;700;800&display=swap');
-/* UniGoat-Look Fonts (14.08.2026) - nur Optik */
-body{font-family:'Sora',system-ui,-apple-system,sans-serif !important;}
-h1,h2,h3{font-family:'Fraunces',Georgia,serif !important;}
-        /* Pattern: Magic UI BlurFade */
-        @keyframes blurFadeIn {
-            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
-            to { opacity: 1; filter: blur(0px); transform: translateY(0); }
-        }
+    /* Alias: altes Token-Vokabular auf v2 mappen, damit bestehendes JS
+       + inline-styles in v2-Farben weiterlaufen. */
+    :root{
+      --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+      --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+      --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+      --fh:var(--font-heading); --fb:var(--font-body);
+      /* Alt-Aliasse aus style.css, die inline-styles noch lesen */
+      --text-main:var(--color-text); --text-color:var(--color-text); --text-light:var(--text-muted);
+    }
+        .icn{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; display:block; }
 
-        .avatar-upload-container {
-            text-align: center; margin-bottom: 2rem;
-            animation: blurFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
-        }
-        .avatar-preview {
-            width: 110px; height: 110px; border-radius: 50%; object-fit: cover;
-            background-color: #EFF6FF;
-            border: 3px solid white;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .avatar-preview:active { transform: scale(0.96); }
-        #avatarFile { display: none; }
+        /* Kopf mit Zurueck-Chrome (kein Tabbar) */
+        .topbar{ display:flex; align-items:center; justify-content:space-between; padding:14px 20px 12px; }
+        .backbtn{ width:40px; height:40px; display:grid; place-items:center; border:1px solid var(--color-text); background:transparent; cursor:pointer; }
+        .backbtn svg{ width:22px; height:22px; stroke:var(--color-text); fill:none; stroke-width:2; }
+        .head-title{ font-family:var(--font-heading); font-weight:800; font-size:22px; letter-spacing:-.02em; }
 
-        .verification-section {
-            background: rgba(255,255,255,0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 1.5rem; border-radius: 18px; margin-top: 2rem;
-            border: 1px solid rgba(255,255,255,0.6);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+        main{ padding:0 0 32px; }
+
+        /* Avatar-Vorschau — bleibt FARBIG (kein grayscale), rund wie im Original */
+        .avatar-upload-container{ text-align:center; padding:22px 20px 6px; }
+        .avatar-preview{
+            width:110px; height:110px; border-radius:50%; object-fit:cover;
+            background:var(--color-surface);
+            border:2px solid var(--color-text);
+            cursor:pointer;
         }
+        .avatar-preview:active{ transform:scale(.97); }
+        #avatarFile{ display:none; }
+        .avatar-hint{ margin-top:10px; font-size:13px; color:var(--text-muted); font-weight:600; }
 
-        /* Pattern: Kibo UI Pill fuer Status */
-        .status-badge { font-weight: 700; padding: 0.35rem 0.85rem; border-radius: 999px; color: white; display: inline-flex; align-items: center; gap: 4px; font-size: 0.8rem; }
-        .status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-        .status-unverified { background: rgba(239,68,68,0.1); color: #DC2626; border: 1px solid rgba(239,68,68,0.15); }
-        .status-unverified::before { background: #EF4444; box-shadow: 0 0 4px rgba(239,68,68,0.5); }
-        .status-pending { background: rgba(245,158,11,0.1); color: #12B489; border: 1px solid rgba(245,158,11,0.15); }
-        .status-pending::before { background: #21D0A1; box-shadow: 0 0 4px rgba(245,158,11,0.5); }
-        .status-verified { background: rgba(16,185,129,0.1); color: #059669; border: 1px solid rgba(16,185,129,0.15); }
-        .status-verified::before { background: #10B981; box-shadow: 0 0 4px rgba(16,185,129,0.5); }
-
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        @media (max-width: 600px) {
-            .form-row { grid-template-columns: 1fr; }
+        /* Sektionen: Zeitungs-Regel + Kicker */
+        .section-title{
+            font-family:var(--font-heading); font-weight:800; font-size:11px;
+            letter-spacing:.1em; text-transform:uppercase; color:var(--color-accent-700);
+            padding:22px 20px 0; margin:0;
         }
+        .form-block{ padding:12px 20px 0; }
 
-        .section-title {
-            font-size: 1rem; font-weight: 700; margin: 1.75rem 0 0.85rem 0;
-            padding-bottom: 0.4rem;
-            border-bottom: 1.5px solid rgba(0,0,0,0.06);
-            color: var(--text-main);
-            letter-spacing: -0.01em;
+        /* Felder im v2-Look (mappt .form-group -> .field/.input) */
+        #editProfileForm .form-group{ margin-bottom:14px; }
+        #editProfileForm .form-group label{
+            display:block; font-family:var(--font-heading); font-weight:800;
+            font-size:13px; margin-bottom:6px; color:var(--color-text);
         }
-
-        /* Formfelder verschoenern */
         #editProfileForm .form-group input,
         #editProfileForm .form-group select,
-        #editProfileForm .form-group textarea {
-            border-radius: 14px;
-            padding: 0.85rem 1rem;
-            border: 1.5px solid #E5E7EB;
-            font-size: 0.92rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            background: #FAFAFA;
+        #editProfileForm .form-group textarea{
+            width:100%; min-height:48px; padding:8px 12px; font:inherit; font-size:16px;
+            color:var(--color-text); caret-color:var(--color-accent);
+            background:var(--color-surface); border:1px solid var(--color-divider); border-radius:0;
         }
+        #editProfileForm .form-group textarea{ min-height:auto; resize:vertical; }
+        #editProfileForm .form-group input::placeholder,
+        #editProfileForm .form-group textarea::placeholder{ color:var(--text-muted); }
         #editProfileForm .form-group input:focus,
         #editProfileForm .form-group select:focus,
-        #editProfileForm .form-group textarea:focus {
-            border-color: #12B489;
-            box-shadow: 0 0 0 4px rgba(33,208,161, 0.06);
-            background: white;
+        #editProfileForm .form-group textarea:focus{
+            border-color:var(--color-accent); outline:none;
         }
-        #editProfileForm .form-group label {
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: #374151;
-        }
+        #editProfileForm .form-group small{ display:block; margin-top:6px; }
 
-        @media (prefers-reduced-motion: reduce) {
-            .avatar-upload-container { animation: none; opacity: 1; }
+        .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+        @media (max-width: 600px){ .form-row{ grid-template-columns:1fr; } }
+
+        /* Speichern-Button (v2 btn-primary btn-block) */
+        .submit-btn{
+            width:100%; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+            min-height:54px; padding:14px 16px; cursor:pointer; text-decoration:none;
+            font-family:var(--font-heading); font-weight:800; font-size:16px; line-height:1.2;
+            background:var(--color-accent); color:var(--on-accent);
+            border:1px solid var(--color-accent); border-radius:0;
         }
+        .submit-btn:hover{ background:var(--color-accent-600); }
+        .submit-btn:disabled{ opacity:.45; cursor:not-allowed; }
+
+        /* Verifizierungs-Sektion (der eine Mint-Poster-Moment) */
+        .verification-section{ background:var(--color-accent); color:var(--on-accent); padding:20px; margin-top:26px; }
+        .verification-section h3{ margin:0 0 12px 0; font-family:var(--font-heading); font-weight:800; font-size:20px; letter-spacing:-.02em; }
+
+        /* Status-Badge — eckig, auf Poster lesbar */
+        .status-badge{ font-family:var(--font-heading); font-weight:800; padding:4px 10px; border-radius:0; display:inline-flex; align-items:center; gap:6px; font-size:12px; }
+        .status-badge::before{ content:''; width:7px; height:7px; flex-shrink:0; background:currentColor; }
+        .status-unverified{ background:var(--color-text); color:var(--color-bg); }
+        .status-pending{ background:var(--color-bg); color:var(--color-text); }
+        .status-verified{ background:var(--color-bg); color:var(--accent-small); }
+
+        /* Verify-Button auf dem Poster: Tinte-auf-Papier */
+        #verify-btn{
+            background:var(--color-text); color:var(--color-bg);
+            border:1px solid var(--color-text);
+        }
+        #verify-btn:hover{ background:var(--color-neutral-800); }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <header class="app-header">
-        <a href="javascript:history.back()" class="back-arrow">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+<div class="screen">
+  <div class="screen-body">
+    <div class="topbar">
+        <a href="javascript:history.back()" class="backbtn" aria-label="Zurück">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
-        <h1 data-i18n="edit_profile_title">Profil bearbeiten</h1>
-        <div style="width: 40px;"></div>
-    </header>
+        <h1 class="head-title" data-i18n="edit_profile_title">Profil bearbeiten</h1>
+        <span style="width: 40px;"></span>
+    </div>
+    <div class="hr"></div>
+
     <main class="app-content">
         <form id="editProfileForm">
-            <!-- Avatar Upload -->
+            <!-- Avatar Upload — bleibt farbig -->
             <div class="avatar-upload-container">
                 <label for="avatarFile">
                     <img src="placeholder.png" alt="Dein Avatar" id="avatar-preview" class="avatar-preview" onerror="this.src='https://via.placeholder.com/150'">
-                    <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-light);" data-i18n="edit_profile_change_photo">Klicke, um Bild zu ändern</p>
+                    <p class="avatar-hint" data-i18n="edit_profile_change_photo">Klicke, um Bild zu ändern</p>
                 </label>
                 <input type="file" id="avatarFile" accept="image/*">
             </div>
 
             <!-- Basis-Informationen -->
-            <h3 class="section-title" data-i18n="edit_profile_basic_info">📝 Basis-Informationen</h3>
-            
-            <div class="form-group">
-                <label for="username" data-i18n="edit_profile_username">Benutzername *</label>
-                <input type="text" id="username" required data-i18n-placeholder="edit_profile_username_placeholder" placeholder="Dein Benutzername">
-            </div>
+            <h3 class="section-title" data-i18n="edit_profile_basic_info">Basis-Informationen</h3>
 
-            <div class="form-group">
-                <label for="full_name" data-i18n="edit_profile_fullname">Vollständiger Name</label>
-                <input type="text" id="full_name" data-i18n-placeholder="edit_profile_fullname_placeholder" placeholder="z.B. Max Mustermann">
-            </div>
-
-            <div class="form-row">
+            <div class="form-block">
                 <div class="form-group">
-                    <label for="city" data-i18n="edit_profile_city">Stadt</label>
-                    <input type="text" id="city" data-i18n-placeholder="edit_profile_city_placeholder" placeholder="z.B. Berlin" list="citySuggestions" autocomplete="address-level2">
-                    <datalist id="citySuggestions"></datalist>
+                    <label for="username" data-i18n="edit_profile_username">Benutzername *</label>
+                    <input type="text" id="username" required data-i18n-placeholder="edit_profile_username_placeholder" placeholder="Dein Benutzername">
                 </div>
+
                 <div class="form-group">
-                    <label for="age" data-i18n="edit_profile_age">Alter</label>
-                    <input type="number" id="age" min="16" max="99" data-i18n-placeholder="edit_profile_age_placeholder" placeholder="z.B. 22">
+                    <label for="full_name" data-i18n="edit_profile_fullname">Vollständiger Name</label>
+                    <input type="text" id="full_name" data-i18n-placeholder="edit_profile_fullname_placeholder" placeholder="z.B. Max Mustermann">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="city" data-i18n="edit_profile_city">Stadt</label>
+                        <input type="text" id="city" data-i18n-placeholder="edit_profile_city_placeholder" placeholder="z.B. Berlin" list="citySuggestions" autocomplete="address-level2">
+                        <datalist id="citySuggestions"></datalist>
+                    </div>
+                    <div class="form-group">
+                        <label for="age" data-i18n="edit_profile_age">Alter</label>
+                        <input type="number" id="age" min="16" max="99" data-i18n-placeholder="edit_profile_age_placeholder" placeholder="z.B. 22">
+                    </div>
                 </div>
             </div>
 
             <!-- Studium -->
-            <h3 class="section-title" data-i18n="edit_profile_studies">🎓 Studium</h3>
+            <h3 class="section-title" data-i18n="edit_profile_studies">Studium</h3>
 
-            <div class="form-group">
-                <label for="university" data-i18n="edit_profile_university">Universität</label>
-                <input type="text" id="university" data-i18n-placeholder="edit_profile_university_placeholder" placeholder="z.B. TU Berlin">
-            </div>
-
-            <div class="form-row">
+            <div class="form-block">
                 <div class="form-group">
-                    <label for="study_field" data-i18n="edit_profile_field">Studienfach</label>
-                    <input type="text" id="study_field" data-i18n-placeholder="edit_profile_field_placeholder" placeholder="z.B. Informatik">
+                    <label for="university" data-i18n="edit_profile_university">Universität</label>
+                    <input type="text" id="university" data-i18n-placeholder="edit_profile_university_placeholder" placeholder="z.B. TU Berlin">
                 </div>
-                <div class="form-group">
-                    <label for="semester" data-i18n="edit_profile_semester">Semester</label>
-                    <select id="semester">
-                        <option value="" data-i18n="edit_profile_select">Bitte wählen</option>
-                        <option value="1">1. Semester</option>
-                        <option value="2">2. Semester</option>
-                        <option value="3">3. Semester</option>
-                        <option value="4">4. Semester</option>
-                        <option value="5">5. Semester</option>
-                        <option value="6">6. Semester</option>
-                        <option value="7">7. Semester</option>
-                        <option value="8">8. Semester</option>
-                        <option value="9">9. Semester</option>
-                        <option value="10">10. Semester</option>
-                        <option value="11">11. Semester</option>
-                        <option value="12">12. Semester</option>
-                    </select>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="study_field" data-i18n="edit_profile_field">Studienfach</label>
+                        <input type="text" id="study_field" data-i18n-placeholder="edit_profile_field_placeholder" placeholder="z.B. Informatik">
+                    </div>
+                    <div class="form-group">
+                        <label for="semester" data-i18n="edit_profile_semester">Semester</label>
+                        <select id="semester">
+                            <option value="" data-i18n="edit_profile_select">Bitte wählen</option>
+                            <option value="1">1. Semester</option>
+                            <option value="2">2. Semester</option>
+                            <option value="3">3. Semester</option>
+                            <option value="4">4. Semester</option>
+                            <option value="5">5. Semester</option>
+                            <option value="6">6. Semester</option>
+                            <option value="7">7. Semester</option>
+                            <option value="8">8. Semester</option>
+                            <option value="9">9. Semester</option>
+                            <option value="10">10. Semester</option>
+                            <option value="11">11. Semester</option>
+                            <option value="12">12. Semester</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
             <!-- Persönliches -->
-            <h3 class="section-title" data-i18n="edit_profile_about">💬 Über mich</h3>
+            <h3 class="section-title" data-i18n="edit_profile_about">Über mich</h3>
 
-            <div class="form-group">
-                <label for="bio" data-i18n="edit_profile_bio">Biografie</label>
-                <textarea id="bio" rows="4" data-i18n-placeholder="edit_profile_bio_placeholder" placeholder="Erzähl etwas über dich..."></textarea>
+            <div class="form-block">
+                <div class="form-group">
+                    <label for="bio" data-i18n="edit_profile_bio">Biografie</label>
+                    <textarea id="bio" rows="4" data-i18n-placeholder="edit_profile_bio_placeholder" placeholder="Erzähl etwas über dich..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="languages" data-i18n="edit_profile_languages">Sprachen</label>
+                    <input type="text" id="languages" data-i18n-placeholder="edit_profile_languages_placeholder" placeholder="z.B. Deutsch, Englisch, Spanisch">
+                    <small style="color: var(--text-muted); font-size: 0.8rem;" data-i18n="edit_profile_languages_hint">Mehrere Sprachen mit Komma trennen</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="interests" data-i18n="edit_profile_interests">Interessen & Hobbys</label>
+                    <textarea id="interests" rows="3" data-i18n-placeholder="edit_profile_interests_placeholder" placeholder="z.B. Fitness, Kochen, Reisen, Gaming..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" style="margin-top: 20px;" data-i18n="edit_profile_save">Änderungen speichern</button>
             </div>
 
-            <div class="form-group">
-                <label for="languages" data-i18n="edit_profile_languages">Sprachen</label>
-                <input type="text" id="languages" data-i18n-placeholder="edit_profile_languages_placeholder" placeholder="z.B. Deutsch, Englisch, Spanisch">
-                <small style="color: var(--text-light); font-size: 0.8rem;" data-i18n="edit_profile_languages_hint">Mehrere Sprachen mit Komma trennen</small>
-            </div>
-
-            <div class="form-group">
-                <label for="interests" data-i18n="edit_profile_interests">Interessen & Hobbys</label>
-                <textarea id="interests" rows="3" data-i18n-placeholder="edit_profile_interests_placeholder" placeholder="z.B. Fitness, Kochen, Reisen, Gaming..."></textarea>
-            </div>
-            
-            <button type="submit" class="submit-btn" style="margin-top: 2rem;" data-i18n="edit_profile_save">Änderungen speichern</button>
-            
-            <!-- Verifizierungs-Sektion -->
+            <!-- Verifizierungs-Sektion (Mint-Poster) -->
             <div class="verification-section">
-                <h3 style="margin: 0 0 1rem 0;" data-i18n="edit_profile_verification_title">🎓 Studenten-Verifizierung</h3>
+                <h3 data-i18n="edit_profile_verification_title">Studenten-Verifizierung</h3>
                 <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                     <div style="flex: 1;">
-                        <p style="margin: 0 0 0.5rem 0; color: var(--text-color); font-weight: 600;">
+                        <p style="margin: 0 0 0.5rem 0; font-weight: 700;">
                             <span data-i18n="edit_profile_status">Status:</span> <span id="verification-status" class="status-badge" data-i18n="general_loading">Lädt...</span>
                         </p>
-                        <p id="verification-info" style="margin: 0; color: var(--text-light); font-size: 0.9rem;" data-i18n="edit_profile_checking">
+                        <p id="verification-info" style="margin: 0; font-size: 0.9rem; opacity: .9;" data-i18n="edit_profile_checking">
                             Prüfe Verifizierungsstatus...
                         </p>
                     </div>
-                    <a href="verify-options.html" id="verify-btn" class="submit-btn" style="background: linear-gradient(135deg, #12B489 0%, #1e40af 100%); margin: 0; padding: 0.75rem 1.5rem; text-decoration: none; display: inline-block; white-space: nowrap; width: auto;" data-i18n="edit_profile_verify_btn">
+                    <a href="verify-options.html" id="verify-btn" class="submit-btn" style="margin: 0; padding: 0.75rem 1.5rem; text-decoration: none; display: inline-block; white-space: nowrap; width: auto;" data-i18n="edit_profile_verify_btn">
                         Jetzt verifizieren &#8594;
                     </a>
                 </div>
             </div>
-            
-            <div id="form-message" style="margin-top: 2rem; text-align: center; font-weight: 600;"></div>
+
+            <div id="form-message" style="margin-top: 20px; padding: 0 20px; text-align: center; font-family: var(--font-heading); font-weight: 800;"></div>
         </form>
     </main>
     <div id="app-footer-nav"></div>
+  </div>
 </div>
 
 <script src="lib/supabase.min.js"></script>
@@ -314,21 +334,21 @@ h1,h2,h3{font-family:'Fraunces',Georgia,serif !important;}
             bioInput.value = profile.bio || '';
             languagesInput.value = profile.languages || '';
             interestsInput.value = profile.interests || '';
-            
+
             if (profile.avatar_url) {
                 avatarPreview.src = profile.avatar_url;
             }
-            
+
             // Verifizierungs-Status anzeigen
             var isVerified = profile.is_verified;
             var verificationStatus = profile.verification_status || 'not_started';
             var uniEmail = profile.uni_email || profile.edu_email;
-            
+
             if (isVerified) {
                 statusBadge.innerHTML = '&#10004; Verifiziert';
                 statusBadge.className = 'status-badge status-verified';
-                verificationInfo.textContent = uniEmail 
-                    ? 'Verifiziert mit ' + uniEmail 
+                verificationInfo.textContent = uniEmail
+                    ? 'Verifiziert mit ' + uniEmail
                     : 'Dein Studentenstatus ist verifiziert';
                 verifyBtn.style.display = 'none';
             } else if (verificationStatus === 'pending') {
@@ -359,7 +379,7 @@ h1,h2,h3{font-family:'Fraunces',Georgia,serif !important;}
         submitBtn.disabled = true;
         submitBtn.textContent = 'Speichere...';
         msgContainer.textContent = '';
-        
+
         var updates = {
             username: usernameInput.value,
             full_name: fullNameInput.value,
@@ -376,27 +396,27 @@ h1,h2,h3{font-family:'Fraunces',Georgia,serif !important;}
 
         try {
             var file = avatarFileInput.files[0];
-            
+
             if (file) {
                 var filePath = currentUser.id + '/' + Date.now() + '_' + file.name;
                 var { error: uploadError } = await sb.storage.from('avatars').upload(filePath, file);
-                
+
                 if (uploadError) throw uploadError;
-                
+
                 var { data } = sb.storage.from('avatars').getPublicUrl(filePath);
                 updates.avatar_url = data.publicUrl;
             }
-            
+
             // Speichern ueber SECURITY-DEFINER-RPC (authenticated darf profiles nicht direkt updaten)
             var saveRes = await sb.rpc('update_my_profile', { p_data: updates });
             if (saveRes.error) throw saveRes.error;
             if (saveRes.data && saveRes.data.ok === false) {
                 throw new Error(saveRes.data.error === 'USERNAME_TAKEN' ? 'Dieser Benutzername ist bereits vergeben.' : 'Speichern nicht möglich. Bitte versuch es nochmal.');
             }
-            
+
             msgContainer.style.color = 'green';
             msgContainer.innerHTML = '&#10004; Profil erfolgreich aktualisiert!';
-            
+
             setTimeout(function() {
                 navigateTo('profile.html');
             }, 1500);

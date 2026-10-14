@@ -80,11 +80,10 @@
                 PushNotifications.addListener('pushNotificationActionPerformed', function(notification) {
                     console.log('Push: Nachricht geklickt:', notification);
                     var data = notification.notification.data;
-                    if (data && data.url) {
-                        window.location.href = data.url;
-                    } else {
-                        window.location.href = 'notifications.html';
-                    }
+                    var target = (data && data.url) ? data.url : 'notifications.html';
+                    // In der SPA-Shell -> Deeplink innerhalb der App aufloesen; sonst klassische Navigation.
+                    if (window.__ugDeepLink) { window.__ugDeepLink(target); }
+                    else { window.location.href = target; }
                 });
 
                 // Wichtig: erst checkPermissions, ggf. requestPermissions, DANN register

@@ -2,6 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
+<script src="../features.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Unigoat Blast 🐐🧀</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -149,6 +150,10 @@ body.goatmode #multBadge{display:block;animation:pulse .45s infinite alternate;}
   padding:0 8px;white-space:nowrap;overflow:hidden;box-shadow:0 3px 0 rgba(0,0,0,.08);}
 #quest.done{background:#d9f2c8;border-color:var(--good);animation:pulse .4s 3 alternate;}
 
+/* Simpel & schnell: alle ambienten Dauer-Animationen aus (Wolken-Drift/Strahlen-Rotation/Gras-Sway/Sterne).
+   Statischer, ruhiger Hintergrund -> kein dauerhaftes Compositing im Hintergrund waehrend man spielt. */
+#rays,.cloud,#grassline,#grassline i,#grassline .blade,#stars,#stars i{animation:none !important;}
+.flw,.bfly,.fly,.petal,.bfly2{display:none !important;}
 /* Board 7x7 */
 /* Board 7x7 (heller Original-Look wiederhergestellt) */
 .board-card{position:relative;background:var(--card);border:1.5px solid var(--card-edge);border-radius:16px;padding:2px;
@@ -163,11 +168,14 @@ body.goatmode #multBadge{display:block;animation:pulse .45s infinite alternate;}
 .cell.ghost-ok{border-radius:4px;transition:none;background:rgba(33,208,161,.4);box-shadow:inset 0 0 0 2px rgba(18,180,137,.85);}
 .cell.ghost-bad{border-radius:4px;transition:none;background:rgba(255,110,110,.26);box-shadow:inset 0 0 0 2px var(--bad);}
 @keyframes ghostPulse{0%,100%{opacity:.76;}50%{opacity:.98;}}
+/* Wenn die aktuelle Platzierung eine ganze Reihe/Spalte fuellt -> komplette Linie markieren,
+   damit der Spieler sofort sieht: "wenn ich hier setze, loest sich diese Reihe auf". */
+.cell.willclear{outline:3px solid rgba(255,205,60,.98);outline-offset:-3px;z-index:2;animation:willClearPulse .6s ease-in-out infinite;}
+@keyframes willClearPulse{0%,100%{filter:brightness(1);}50%{filter:brightness(1.35);}}
 /* Model 10 (Deep 3D): gerundet, heller Deckel oben-links, dunkle Fase + starke Extrusions-Wand unten. */
 .cell.filled{position:relative;border-radius:7px;
   background:linear-gradient(160deg, color-mix(in srgb,var(--c) 74%,#fff 26%), var(--c) 52%, color-mix(in srgb,var(--c) 82%,#000 18%));
-  box-shadow: inset 0 2px 0 rgba(255,255,255,.38), inset 0 -3px 5px rgba(0,0,0,.16);
-  transition:background .2s ease;}
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.38), inset 0 -3px 5px rgba(0,0,0,.16);}
 .cell.filled.tn::after,.cell.filled.tn::before{content:none;}
 /* Normale Bloecke = deine gerenderten Block-Grafiken (premium), Bild wird inline gesetzt */
 /* Neue Motiv-Kacheln haben ihren eigenen Bevel eingebrannt -> jede Zelle = eigener glossy Stein,
@@ -215,11 +223,20 @@ body.goatmode #multBadge{display:block;animation:pulse .45s infinite alternate;}
 .cell.filled.tb::after{content:none;}
 .cell.filled.tb.bombhot{animation:bombhot .5s infinite alternate;}
 @keyframes bombhot{from{filter:brightness(1)}to{filter:brightness(1.5) drop-shadow(0 0 7px var(--chili))}}
-.cell.clearing{animation:popOut .2s ease-out forwards;}
-@keyframes popOut{
-  0%{transform:scale(1);opacity:1}
-  35%{transform:scale(1.14);filter:brightness(1.6)}
-  100%{transform:scale(0);opacity:0}}
+/* Aufloesung: Reihe blitzt weiss auf und loest sich weg. Weiss via opacity eines Overlay-::after (GPU-composited),
+   NICHT via filter:brightness (das war der Paint-Verursacher). Zelle selbst nur transform+opacity -> fluessig. */
+/* will-change -> alle geraeumten Zellen werden SOFORT als GPU-Layer promoted (nicht lazy).
+   Ohne das verzoegerte sich unter Last (langes Spiel) die Layer-Promotion einzelner Zellen -> "1-2 Bloecke lecken". */
+.cell.clearing{animation:popScale .3s ease-out forwards;z-index:1;will-change:transform,opacity;}
+.cell.clearing::after{content:''!important;position:absolute;inset:0;border-radius:inherit;background:#fff;opacity:0;animation:whiteFlash .3s ease-out forwards;pointer-events:none;}
+@keyframes popScale{
+  0%{transform:scale(1)}
+  28%{transform:scale(1.08)}
+  100%{transform:scale(.16);opacity:0}}
+@keyframes whiteFlash{
+  0%{opacity:0}
+  28%{opacity:.94}
+  100%{opacity:0}}
 .cell.boom{animation:boom .28s forwards;}
 @keyframes boom{40%{transform:scale(1.3);filter:brightness(1.8) hue-rotate(-20deg)}100%{transform:scale(0);opacity:0}}
 @keyframes goPop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:1}}
@@ -228,10 +245,11 @@ body.shake .board-card{animation:shake .3s;}
   60%{transform:translate(-4px,-2px)}80%{transform:translate(4px,2px)}}
 
 /* Tray */
-#tray{display:flex;gap:4px;justify-content:space-between;min-height:96px;}
+/* FESTE Hoehe -> Board aendert NIE seine Groesse (grosse Teile skalieren stattdessen kleiner) */
+#tray{display:flex;gap:4px;justify-content:space-between;height:100px;flex:none;}
 /* Grosse Greifflaeche: der ganze Slot aktiviert den Stein (auch daneben antippen) */
 .slot{flex:1;background:rgba(255,255,255,.4);border:1px solid rgba(67,53,31,.08);border-radius:var(--r);
-  display:flex;align-items:center;justify-content:center;padding:8px 6px;min-height:82px;touch-action:none;}
+  display:flex;align-items:center;justify-content:center;padding:8px 6px;height:100%;overflow:hidden;touch-action:none;}
 .piece{display:grid;gap:3px;cursor:grab;transition:none;}
 /* Tray-Steine solide (Basis .piece .pc mit Bevel) statt Kaese-Bild */
 .piece .pc{width:var(--s,17px);height:var(--s,17px);border-radius:18%;position:relative;
@@ -253,7 +271,8 @@ body.shake .board-card{animation:shake .3s;}
 .piece .pc.img[data-horn]::before{content:"";position:absolute;left:12%;top:9%;width:26%;height:38%;background:#fff;opacity:.92;border-radius:62% 6% 62% 6%;transform:rotate(-14deg);pointer-events:none;}
 .slot.used{opacity:0;pointer-events:none;}
 #dragLayer{position:fixed;inset:0;pointer-events:none;z-index:50;}
-#dragPiece{position:absolute;transform:translate(-50%,-50%);filter:drop-shadow(0 10px 14px rgba(0,0,0,.28));}
+/* Drag: rein per transform bewegt (GPU-Layer) + KEIN drop-shadow-Filter -> kein nachziehender Schatten/Schliere. */
+#dragPiece{position:absolute;left:0;top:0;will-change:transform;}
 
 /* Vorschau naechste Steine (Look-Ahead = Skill-Ceiling) */
 #previewWrap{display:flex;align-items:center;gap:8px;padding:0 2px;}
@@ -380,6 +399,7 @@ body.shake .board-card{animation:shake .3s;}
 .btn.primary{background:linear-gradient(180deg,#ffca3a,#ff9430);}
 .btn.daily{background:linear-gradient(180deg,#8ed16f,#5aa93c);}
 .btn.camp{background:linear-gradient(180deg,#5b8cff,#3a5fe0);}
+.btn.duel{background:linear-gradient(180deg,#22c3d8,#0b8ba8);}
 /* Startscreen neu: grosser PLAY + Daily-Karte + Menue-Icon */
 .cornerbtn{position:absolute;top:12px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.85);
   color:#43351f;font-size:20px;font-weight:900;line-height:40px;text-align:center;border:none;cursor:pointer;
@@ -501,8 +521,8 @@ body.shake .board-card{animation:shake .3s;}
     <button class="pow" data-pow="shuffle"><span class="pi">🔀</span><span class="pn" id="powShuffle">0</span></button>
     <button class="pow" data-pow="life"><span class="pi">❤️</span><span class="pn" id="powLife">0</span></button>
   </div>
-  <div id="previewWrap"><span class="plabel">Nächste 🧀</span><div id="preview"></div></div>
-  <button id="exitGame" aria-label="Zurück zum Menü" style="margin-top:4px;padding:11px;border:none;border-radius:14px;background:rgba(255,255,255,.7);color:#43351f;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.1);">← Zurück zum Menü</button>
+  <div id="previewWrap" style="display:none"><span class="plabel">Nächste 🧀</span><div id="preview"></div></div>
+  <button id="exitGame" aria-label="Zurück zum Menü" style="display:none;margin-top:4px;padding:11px;border:none;border-radius:14px;background:rgba(255,255,255,.7);color:#43351f;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.1);">← Zurück zum Menü</button>
 </div>
 
 <div id="dragLayer"><div id="dragPiece"></div></div>
@@ -520,6 +540,7 @@ body.shake .board-card{animation:shake .3s;}
       <span class="dc-main">📅 Daily Challenge</span>
       <span class="dc-badge" id="dailyBadge">+50 🪙 · heute offen</span>
     </button>
+    <a class="btn duel" href="duel.html" data-feature="duel" style="text-decoration:none;">🆚 Freund herausfordern <span style="opacity:.85;font-size:12px;font-weight:600;">Beta</span></a>
     <div class="menu-hint">Kampagne, Rangliste, Regeln &amp; mehr im ☰-Menü oben rechts</div>
   </div>
 </div>
@@ -531,7 +552,7 @@ body.shake .board-card{animation:shake .3s;}
       <button class="cornerbtn" id="menuClose" aria-label="Schliessen" title="Schliessen" style="position:static;">✕</button>
     </div>
     <button class="btn camp" id="btnCamp">🗺️ Kampagne <span id="campBtnLvl" style="opacity:.85;font-size:12px;"></span></button>
-    <a class="btn daily" href="duel.html" style="display:block;text-decoration:none;text-align:center;">🆚 Duell gegen Freund <span style="opacity:.85;font-size:11px;">Beta</span></a>
+    <a class="btn daily" href="duel.html" data-feature="duel" style="display:block;text-decoration:none;text-align:center;">🆚 Duell gegen Freund <span style="opacity:.85;font-size:11px;">Beta</span></a>
     <button class="btn ghost" id="btnBoard">🏆 Rangliste (Spiel)</button>
     <a class="btn ghost" id="lnkChallenge" href="../challenge.html" style="display:block;text-decoration:none;text-align:center;">🏆 Monats-Challenge</a>
     <a class="btn ghost" id="btnAvatar" href="../avatar-edit.html" style="display:block;text-decoration:none;text-align:center;">🐐 Deine Ziege</a>
@@ -669,20 +690,47 @@ function beep(f,d,type,vol){
     if(audioCtx.state==='suspended')audioCtx.resume(); // iOS: sonst stumm
     const t=audioCtx.currentTime, v=vol||.14;
     const o=audioCtx.createOscillator(),g=audioCtx.createGain(),lp=audioCtx.createBiquadFilter();
-    lp.type='lowpass';lp.frequency.value=2800;lp.Q.value=.6;
+    lp.type='lowpass';lp.frequency.value=1900;lp.Q.value=.5;
     o.type=type||'sine';o.frequency.value=f;
     g.gain.setValueAtTime(.0001,t);
     g.gain.exponentialRampToValueAtTime(v,t+.012);   // weicher Attack
     g.gain.exponentialRampToValueAtTime(.0001,t+d);  // sanftes Ausklingen
     o.connect(lp);lp.connect(g);g.connect(audioCtx.destination);
     o.start(t);o.stop(t+d+.03);
+    o.onended=function(){try{o.disconnect();g.disconnect();lp.disconnect();}catch(e){}}; // Audio-Graph aufraeumen -> kein Node-Stau ueber lange Spiele
   }catch(e){}}
+// Frequenz-Glide (aufsteigender/absteigender Whoosh) -> moderner als diskrete Toene
+function sweep(f0,f1,d,type,vol,lpHz){
+  if(muted)return;
+  try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended')audioCtx.resume();
+    const t=audioCtx.currentTime, v=vol||.1;
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain(),lp=audioCtx.createBiquadFilter();
+    lp.type='lowpass';lp.frequency.value=lpHz||3600;lp.Q.value=.6;
+    o.type=type||'triangle';
+    o.frequency.setValueAtTime(Math.max(20,f0),t);
+    o.frequency.exponentialRampToValueAtTime(Math.max(20,f1),t+d);
+    g.gain.setValueAtTime(.0001,t);
+    g.gain.exponentialRampToValueAtTime(v,t+.01);
+    g.gain.exponentialRampToValueAtTime(.0001,t+d);
+    o.connect(lp);lp.connect(g);g.connect(audioCtx.destination);
+    o.start(t);o.stop(t+d+.04);
+    o.onended=function(){try{o.disconnect();g.disconnect();lp.disconnect();}catch(e){}};
+  }catch(e){}}
+// ===== Clear-Sound-Bibliothek: mehrere Presets, per Menue waehlbar (localStorage) =====
+const CLEAR_SOUNDS={
+  pop:{label:'Pop',play:function(n){beep(300,.08,'sine',.13);setTimeout(function(){beep(520,.07,'sine',.08);},38);}},
+  arcade:{label:'Arcade',play:function(n){var t=520+Math.min(3,n||1)*160;sweep(260,t,.16,'square',.05,5200);setTimeout(function(){sweep(t,t*1.4,.1,'square',.03,6200);},60);}},
+  crystal:{label:'Kristall',play:function(n){beep(1046,.3,'sine',.09);beep(1568,.22,'sine',.045);setTimeout(function(){beep(2093,.2,'sine',.03);},45);}},
+  bass:{label:'Bass-Impact',play:function(n){var top=900+Math.min(4,n||1)*260;beep(120,.14,'sine',.16);sweep(300,top,.22,'triangle',.09,3800);setTimeout(function(){sweep(top*0.9,top*1.5,.12,'sine',.05,4400);},70);}},
+  coin:{label:'Münze',play:function(n){beep(988,.06,'square',.09);setTimeout(function(){beep(1319,.17,'square',.08);},70);}},
+  soft:{label:'Soft',play:function(n){beep(360,.18,'sine',.1);setTimeout(function(){beep(540,.12,'sine',.05);},50);}}
+};
+var curClearSound=(function(){try{var v=store.get('ug_clearsound');return CLEAR_SOUNDS[v]?v:'pop';}catch(e){return 'pop';}})();
 const sfx={
-  place(){beep(392,.09,'sine',.12);setTimeout(()=>beep(523,.07,'sine',.07),38);hap('LIGHT');}, // sanftes Plop
-  clear(n){ // weiches glockiges Aufwaerts-Arpeggio (Pentatonik -> keine schrillen Halbtoene)
-    var pent=[523,659,784,988,1175,1319,1568];
-    var notes=Math.min(pent.length,3+n);
-    for(let i=0;i<notes;i++)setTimeout(()=>beep(pent[i],.24,'sine',.15),i*72);
+  place(){beep(210,.07,'sine',.11);setTimeout(()=>beep(560,.035,'sine',.04),16);hap('LIGHT');}, // weiches Holz-Plop (tief + leiser Tick)
+  clear(n){ // spielt das im Menue gewaehlte Sound-Preset
+    (CLEAR_SOUNDS[curClearSound]||CLEAR_SOUNDS.pop).play(n||1);
     hapBuzz(70);},
   combo(s){ // Klavier-artige aufsteigende Pentatonik, je hoeher desto hoeher
     var pent=[523,587,659,784,880,1047,1175,1319,1568,1760,2093];
@@ -698,27 +746,69 @@ const sfx={
     beep(440,.3,'sine',.16);setTimeout(()=>beep(349,.32,'sine',.15),250);
     setTimeout(()=>beep(262,.6,'sine',.17),520);vibrate([40,60,90]);},
 };
-$('muteBtn').onclick=()=>{muted=!muted;$('muteBtn').textContent=muted?'🔇':'🔊';};
+// Sound-Panel: Ton an/aus + Clear-Sound-Auswahl (antippen = vorhoeren, gespeichert in localStorage)
+function openSoundPanel(){
+  if(!document.getElementById('snd-style')){
+    var st=document.createElement('style');st.id='snd-style';
+    st.textContent='#snd-ov{position:fixed;inset:0;z-index:10001;background:rgba(20,26,30,.5);display:flex;align-items:flex-end;justify-content:center;}'
+      +'#snd-card{background:#fff;width:100%;max-width:460px;border-radius:22px 22px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));animation:sndUp .28s ease;}'
+      +'@keyframes sndUp{from{transform:translateY(100%)}to{transform:translateY(0)}}'
+      +'#snd-card h3{margin:2px 0 12px;font-size:1.12rem;color:#1d2a2f;}'
+      +'.snd-mute{display:flex;align-items:center;justify-content:space-between;background:#f2f5f6;border-radius:13px;padding:12px 14px;margin-bottom:12px;font-weight:800;color:#1d2a2f;cursor:pointer;}'
+      +'.snd-mute .pill{font-size:.82rem;font-weight:800;padding:4px 12px;border-radius:999px;background:#21D0A1;color:#fff;}'
+      +'.snd-mute.off .pill{background:#c3cbcf;}'
+      +'.snd-lbl{font-size:.8rem;color:#6b7280;font-weight:700;margin:0 2px 7px;}'
+      +'.snd-opt{display:flex;align-items:center;gap:11px;border:2px solid #e6eaec;border-radius:13px;padding:12px 14px;margin-bottom:8px;cursor:pointer;font-weight:800;color:#1d2a2f;}'
+      +'.snd-opt.on{border-color:#21D0A1;background:#f0fbf6;}'
+      +'.snd-opt .ico{width:30px;height:30px;border-radius:50%;background:#eef1f2;display:grid;place-items:center;font-size:15px;flex:none;}'
+      +'.snd-opt.on .ico{background:#21D0A1;color:#fff;}'
+      +'.snd-opt .chk{margin-left:auto;color:#12B489;font-weight:900;opacity:0;}'
+      +'.snd-opt.on .chk{opacity:1;}'
+      +'#snd-close{width:100%;margin-top:6px;padding:13px;border:none;border-radius:14px;background:#151a1e;color:#fff;font-weight:800;font-size:1rem;cursor:pointer;}';
+    document.head.appendChild(st);
+  }
+  var ICO={pop:'🫧',arcade:'🎮',crystal:'🔔',bass:'🔊',coin:'🪙',soft:'🍃'};
+  var ov=document.createElement('div');ov.id='snd-ov';
+  var card=document.createElement('div');card.id='snd-card';
+  var opts=Object.keys(CLEAR_SOUNDS).map(function(k){
+    return '<div class="snd-opt'+(k===curClearSound?' on':'')+'" data-k="'+k+'"><span class="ico">'+(ICO[k]||'🎵')+'</span>'
+      +CLEAR_SOUNDS[k].label+'<span class="chk">✓</span></div>';
+  }).join('');
+  card.innerHTML='<h3>🎵 Sound</h3>'
+    +'<div class="snd-mute'+(muted?' off':'')+'" id="snd-mute">Ton <span class="pill">'+(muted?'AUS':'AN')+'</span></div>'
+    +'<div class="snd-mute'+(heartbeatOn?'':' off')+'" id="snd-heart">🎚️ Spannungs-Sound <span class="pill">'+(heartbeatOn?'AN':'AUS')+'</span></div>'
+    +'<div class="snd-lbl">Auflös-Sound (antippen zum Anhören)</div>'+opts
+    +'<button id="snd-close">Fertig</button>';
+  ov.appendChild(card);document.body.appendChild(ov);
+  function close(){ov.remove();}
+  ov.addEventListener('click',function(e){if(e.target===ov)close();});
+  card.querySelector('#snd-close').onclick=close;
+  card.querySelector('#snd-mute').onclick=function(){
+    muted=!muted;$('muteBtn').textContent=muted?'🔇':'🔊';
+    this.classList.toggle('off',muted);this.querySelector('.pill').textContent=muted?'AUS':'AN';
+    if(!muted)sfx.clear(1);
+    updateTension();
+  };
+  card.querySelector('#snd-heart').onclick=function(){
+    heartbeatOn=!heartbeatOn;try{store.set('ug_heartbeat',heartbeatOn?'1':'0');}catch(e){}
+    this.classList.toggle('off',!heartbeatOn);this.querySelector('.pill').textContent=heartbeatOn?'AN':'AUS';
+    updateTension();
+  };
+  card.querySelectorAll('.snd-opt').forEach(function(o){o.onclick=function(){
+    var k=this.getAttribute('data-k');curClearSound=k;try{store.set('ug_clearsound',k);}catch(e){}
+    card.querySelectorAll('.snd-opt').forEach(function(x){x.classList.remove('on');});this.classList.add('on');
+    if(muted){muted=false;$('muteBtn').textContent='🔊';var mm=card.querySelector('#snd-mute');mm.classList.remove('off');mm.querySelector('.pill').textContent='AN';}
+    CLEAR_SOUNDS[k].play(2); // vorhoeren
+  };});
+}
+$('muteBtn').onclick=openSoundPanel;
 
 /* ================= Hintergrund-Deko ================= */
 (function buildScene(){
   // Performance: Ambient-Deko stark reduziert (war ~100 Dauer-Animationen -> Ruckeln
   // auf Handys). Grashalme + Bluetenblaetter (teuerste, kaum sichtbar) komplett raus.
-  const stars=$('stars');
-  for(let i=0;i<8;i++){const s=document.createElement('i');
-    s.style.left=Math.random()*100+'%';s.style.top=Math.random()*45+'%';
-    s.style.animationDelay=(Math.random()*3)+'s';stars.appendChild(s);}
-  const deco=$('deco');
-  const fl=['🌼','🌷','🌸'];
-  for(let i=0;i<2;i++){const f=document.createElement('div');f.className='flw';
-    f.textContent=fl[i%fl.length];f.style.left=(6+Math.random()*88)+'%';
-    f.style.bottom=(2+Math.random()*5)+'vh';f.style.animationDelay=(-Math.random()*3)+'s';deco.appendChild(f);}
-  for(let i=0;i<1;i++){const b=document.createElement('div');b.className='bfly';
-    b.textContent='🦋';b.style.left=(10+Math.random()*70)+'%';b.style.bottom=(12+Math.random()*20)+'vh';
-    b.style.animationDelay=(-Math.random()*10)+'s';deco.appendChild(b);}
-  for(let i=0;i<2;i++){const f=document.createElement('div');f.className='fly';
-    f.style.left=(5+Math.random()*90)+'%';f.style.bottom=(8+Math.random()*22)+'vh';
-    f.style.animationDelay=(-Math.random()*8)+'s';deco.appendChild(f);}
+  // Simpel & schnell: KEINE ambienten Dauer-Animationen mehr (Sterne/Blumen/Schmetterlinge/Gluehwuermchen raus).
+  // Ruhiger, statischer Hintergrund (Himmel + Sonne + Huegel + Gras) + lebendige Ziege -> maximal fluessig.
 })();
 function setPhase(){
   const ph=['phase-day','phase-sunset','phase-night'][(level-1)%3];
@@ -758,13 +848,16 @@ for(let i=0;i<SIZE*SIZE;i++){const d=document.createElement('div');d.className='
   boardEl.appendChild(d);cells.push(d);}
 function cellEl(r,c){return cells[r*SIZE+c];}
 // Kachelgroesse fuer die skalierende Fase (border-width = 16% von --cell)
-function updateCellSize(){var w=boardEl.clientWidth;if(w>0)boardEl.style.setProperty('--cell',(w/SIZE)+'px');}
-window.addEventListener('resize',updateCellSize);
+var _lastCellW=0;
+function updateCellSize(){var w=boardEl.clientWidth;if(w>0&&w!==_lastCellW){_lastCellW=w;boardEl.style.setProperty('--cell',(w/SIZE)+'px');}}
+// ResizeObserver setzt --cell automatisch (initial + bei Groessenaenderung) -> KEIN clientWidth-Lesen mehr im renderBoard-Hotpath (war ein erzwungener Reflow bei jedem Zug/Clear).
+if(window.ResizeObserver){try{new ResizeObserver(updateCellSize).observe(boardEl);}catch(e){window.addEventListener('resize',updateCellSize);}}
+else window.addEventListener('resize',updateCellSize);
 function renderBoard(){
-  updateCellSize();
+  // updateCellSize NICHT mehr hier (erzwang Reflow bei jedem Zug) -> laeuft jetzt via ResizeObserver.
   for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
     const el=cellEl(r,c),v=grid[r][c];
-    el.className='cell';el.textContent='';el.style.removeProperty('--c');el.style.backgroundImage='';
+    el.className='cell';el.textContent='';el.style.removeProperty('--c');el.style.backgroundImage='';el.style.removeProperty('animation-delay');
     if(v){el.classList.add('filled','t'+v.t);
       if(v.t==='n'){el.classList.add('uc'+((v.c||0)%6));
         // Nachbar-abhaengiger Schatten: nur Kanten MIT Nachbar bekommen Schatten, freie Aussenkanten bleiben clean
@@ -843,7 +936,11 @@ function renderTray(){
   trayEl.innerHTML='';
   tray.forEach((p,i)=>{
     const slot=document.createElement('div');slot.className='slot'+(p?'':' used');
-    if(p){const el=buildPieceEl(p,20);
+    if(p){
+      // Teil-Groesse an die groesste Dimension anpassen -> passt IMMER in die feste Slot-Hoehe (kein Board-Shift).
+      const[rows,cols]=pieceDims(p);const dim=Math.max(rows,cols);
+      const px=Math.max(13,Math.min(20,Math.floor((84-(dim-1)*3)/dim)));
+      const el=buildPieceEl(p,px);
       // Greifbereich = ganzer Slot (leichte Beruehrung reicht, kein exaktes Treffen des Steins noetig)
       slot.dataset.idx=i;slot.style.cursor='grab';el.style.pointerEvents='none';
       slot.addEventListener('pointerdown',startDrag);slot.appendChild(el);}
@@ -969,7 +1066,13 @@ const GoatRig={ready:false,img:null,ctx:null,cv:null,dpr:1,W:70,H:92,raf:null,
   look(dir){this.st.lookT=Math.max(-1,Math.min(1,dir));},
   jump(){this.st.jump=1;},
   mode(on){this.st.modeT=on?1:0;},
-  loop(){this.draw();this.raf=requestAnimationFrame(()=>this.loop());},
+  loop(){
+    // Perf: Idle -> nur ~30fps (breathe reicht das), Sprung/Blinzeln -> volle 60fps, App im Hintergrund -> gar nicht zeichnen.
+    // Ein dauerhafter 60fps-Canvas-Loop war Grund-Overhead und liess den Clear auf schwaecheren Geraeten rucken.
+    this._f=(this._f||0)+1;
+    if(!document.hidden && (this.st.jump>0 || this.st.blink>0 || (this._f&1))) this.draw();
+    this.raf=requestAnimationFrame(()=>this.loop());
+  },
   draw(){
     const c=this.ctx,img=this.img,W=this.W,H=this.H,s=this.st;if(!c||!img)return;
     s.t+=1/60;
@@ -1090,8 +1193,7 @@ function shardBurst(x,y,color,combo){ try{
 }catch(e){} }
 // Spiel verlassen -> zurueck zum Dashboard (bei laufendem Lauf kurz rueckfragen)
 (function(){function exit(){
-  if(gameActive&&G&&!G.over&&G.score>0){ if(!confirm('Spiel verlassen? Dein aktueller Lauf geht verloren.'))return; }
-  location.href='../dashboard.html';
+  leaveGuard(function(){ location.href='../dashboard.html'; });
 } ['exitGame','backTop'].forEach(function(id){var b=$(id);if(b)b.addEventListener('click',exit);});})();
 function boardMetrics(){
   const rect=boardEl.getBoundingClientRect();
@@ -1100,7 +1202,7 @@ function boardMetrics(){
   const cell=rect.width/SIZE;
   return{rect,cell,step:cell};
 }
-function clearGhost(){cells.forEach(c=>{c.classList.remove('ghost-ok','ghost-bad');});}
+function clearGhost(){cells.forEach(c=>{c.classList.remove('ghost-ok','ghost-bad','willclear');});}
 function startDrag(e){
   if(!gameActive)return;
   const idx=+e.currentTarget.dataset.idx,p=tray[idx];
@@ -1121,7 +1223,7 @@ function moveDrag(e){
   if(!dragging)return;
   const{p,lift,m}=dragging;
   const px=e.clientX,py=e.clientY-lift;
-  dragPieceEl.style.left=px+'px';dragPieceEl.style.top=py+'px';
+  dragPieceEl.style.transform='translate3d('+px+'px,'+py+'px,0) translate(-50%,-50%)';
   const[rows,cols]=pieceDims(p);
   const C=Math.round((px-(cols*m.cell)/2-m.rect.left)/m.step);
   const R=Math.round((py-(rows*m.cell)/2-m.rect.top)/m.step);
@@ -1132,7 +1234,14 @@ function moveDrag(e){
       if(rr>=0&&cc>=0&&rr<SIZE&&cc<SIZE){const el=cellEl(rr,cc);
         if(ok)el.style.setProperty('--c',ROUND_COLORS[(p.color||0)%ROUND_COLORS.length]); // Vorschau in Eigenfarbe
         el.classList.add(ok?'ghost-ok':'ghost-bad');}}
-    if(ok)dragging.anchor=[R,C];
+    if(ok){
+      dragging.anchor=[R,C];
+      // Reihen/Spalten markieren, die durch DIESE Platzierung komplett gefuellt (= aufgeloest) wuerden
+      var gset={};for(const[gr,gc]of p.cells)gset[(R+gr)+'_'+(C+gc)]=1;
+      const occ=(r,c)=>!!grid[r][c]||gset[r+'_'+c];
+      for(let r=0;r<SIZE;r++){let f=true;for(let c=0;c<SIZE;c++){if(!occ(r,c)){f=false;break;}}if(f){for(let c=0;c<SIZE;c++)cellEl(r,c).classList.add('willclear');}}
+      for(let c=0;c<SIZE;c++){let f=true;for(let r=0;r<SIZE;r++){if(!occ(r,c)){f=false;break;}}if(f){for(let r=0;r<SIZE;r++)cellEl(r,c).classList.add('willclear');}}
+    }
   }
 }
 function endDrag(e){
@@ -1162,6 +1271,44 @@ function paintPlaced(p,R,C){
     ],{duration:150,easing:'cubic-bezier(.34,1.56,.64,1)',delay:i*12});}catch(e){}
   });
 }
+// ===== Spannungs-Drone: KEIN Herzschlag mehr (war zu offensichtlich). Stattdessen ein sehr leiser, tiefer
+// Hintergrund-Ton, der mit der Feld-Fuelle unmerklich intensiver + hoeher wird -> erzeugt Anspannung
+// subliminal, ohne dass man ihn bewusst wahrnimmt. Ein Oszillator, kein Rhythmus, kein Timer. =====
+var _drone=null; // {osc, gain}
+var heartbeatOn=(function(){try{return store.get('ug_heartbeat')!=='0';}catch(e){return true;}})();
+function boardFillRatio(){var n=0;for(var r=0;r<SIZE;r++){var row=grid&&grid[r];if(!row)continue;for(var c=0;c<SIZE;c++)if(row[c])n++;}return n/(SIZE*SIZE);}
+function ensureDrone(){
+  if(_drone||muted)return _drone;
+  try{
+    audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended')audioCtx.resume();
+    var osc=audioCtx.createOscillator(), g=audioCtx.createGain(), lp=audioCtx.createBiquadFilter();
+    osc.type='sine'; osc.frequency.value=66;
+    lp.type='lowpass'; lp.frequency.value=210; lp.Q.value=.2;
+    g.gain.value=0.0001;
+    osc.connect(lp); lp.connect(g); g.connect(audioCtx.destination);
+    osc.start();
+    _drone={osc:osc, gain:g};
+  }catch(e){}
+  return _drone;
+}
+function setDrone(intensity){ // 0..1 -> Lautstaerke + Tonhoehe (beides sanft gerampt, kein hoerbares Einsetzen)
+  if(!_drone)return;
+  try{
+    var t=audioCtx.currentTime;
+    var vol  = intensity<=0 ? 0.0001 : (0.006 + intensity*0.04);  // sehr leise -> unterschwellig
+    var freq = 62 + intensity*44;                                  // 62..106 Hz, steigt mit Gefahr
+    _drone.gain.gain.setTargetAtTime(vol, t, 0.5);
+    _drone.osc.frequency.setTargetAtTime(freq, t, 0.6);
+  }catch(e){}
+}
+function updateTension(){
+  var on = heartbeatOn && !muted && gameActive && G && !G.over;
+  var intensity = on ? Math.max(0, Math.min(1, (boardFillRatio()-0.45)/0.45)) : 0;
+  if(intensity>0){ ensureDrone(); setDrone(intensity); }
+  else if(_drone){ setDrone(0); }
+}
+function stopTension(){ if(_drone) setDrone(0); }
 function commitPlacement(p,idx,[R,C],px,py){
   if(!G||G.over)return;
   const prev=G.streak;
@@ -1180,26 +1327,22 @@ function commitPlacement(p,idx,[R,C],px,py){
     var _hw=$('heatWrap'); if(_hw)_hw.classList.add('alive');
     var _combo=(G?G.streak:streak)||1;
     var clearColor=roundColor; // Farbe der zerplatzenden Bloecke (vor dem Farbwechsel)
-    // EXPLOSION: aus jeder geraeumten Zelle fliegen Schutt-Teilchen
-    res.clearSet.forEach(function(i){ var el=cells[i]; if(el){ var rb=el.getBoundingClientRect(); shardBurst(rb.left+rb.width/2, rb.top+rb.height/2, (el.style.getPropertyValue('--c')||clearColor), _combo); } });
-    res.clearSet.forEach(i=>{const el=cells[i];if(el)el.classList.add(res.boomSet.indexOf(i)>=0?'boom':'clearing');});
-    // Feld-Farbe wechseln bei jedem Clear (auffaellig) -> restliche Bloecke morphen weich
-    roundColor=ROUND_COLORS[(ROUND_COLORS.indexOf(roundColor)+1+(res.nLines%3))%ROUND_COLORS.length];
-    sfx.clear(res.nLines);        // enthaelt dezenten Haptik-Tick (Medium)
-    if(_combo>=2) sfx.combo(_combo);
-    // Comic-Lob, eskaliert mit Kombo/Linien
+    // ALLE geraeumten Zellen GLEICHZEITIG aufloesen (KEIN Stagger) -> verschwinden auf einen Schlag.
+    // Nur dieses billige Klassen-Setzen laeuft synchron -> der Aufloese-Frame bleibt leicht (kein Haenger).
+    res.clearSet.forEach(function(i){var el=cells[i];if(el)el.classList.add(res.boomSet.indexOf(i)>=0?'boom':'clearing');});
     var _pr=(_combo>=6||res.nLines>=4)?'UNGLAUBLICH!':(_combo>=4||res.nLines>=3)?'FANTASTISCH!':(_combo>=2||res.nLines>=2)?'WOW!':'STARK!';
-    showPraise(_pr);
-    if(_combo>=2) setTimeout(function(){ showPraise('KOMBO ×'+_combo,'#21D0A1',true); },150);
-    // groesserer, satterer Effekt (mehr mit Kombo/Linien)
-    particles(px,py-40, 12 + res.nLines*8 + _combo*4, ['🧀','✨','🌟','💥']);
-    particles(window.innerWidth/2, window.innerHeight*0.4, 6+_combo*3, ['🪙','✨']);
-    skyFlash();
-    goatJumpFX(res.nLines>=2||_combo>=GOATMODE_AT);
-    quake(true);
+    // Alles Schwere (Sound/Lob/Ziege/Farbwechsel) EINEN Frame spaeter -> blockiert das Aufloesen nicht.
+    requestAnimationFrame(function(){
+      roundColor=ROUND_COLORS[(ROUND_COLORS.indexOf(roundColor)+1+(res.nLines%3))%ROUND_COLORS.length];
+      sfx.clear(res.nLines);
+      if(_combo>=2) sfx.combo(_combo);
+      showPraise(_pr);
+      if(_combo>=2) setTimeout(function(){ showPraise('KOMBO ×'+_combo,'#21D0A1',true); },150);
+      goatJumpFX(res.nLines>=2||_combo>=GOATMODE_AT); // Ziege bleibt lebendig
+    });
     setTimeout(()=>{
       renderBoard();
-      if(res.perfect){say('PERFECT! ✨',1600);particles(window.innerWidth/2,window.innerHeight*0.42,22,['✨','🧀','🌟']);skyFlash();}
+      if(res.perfect){say('PERFECT! ✨',1600);}
       addScore(res.clearPts,px,py-72,res.chili>0||res.gold>0);
       updateLevel();
       if(res.levelUp){say('Level '+G.level+'! 🎓',1500);setPhase();}
@@ -1211,7 +1354,7 @@ function commitPlacement(p,idx,[R,C],px,py){
       if(res.spawnedMold)say('Igitt, Schimmel! 🦠',1300);
       if(res.spawnedBomb)say('Bombe! Räum die Reihe! 💣',1600);
       finishMove(res);
-    },210);
+    },330);
   }else{
     renderBoard();
     if(res.spawnedMold)say('Igitt, Schimmel! 🦠',1300);
@@ -1229,6 +1372,7 @@ function finishMove(res){
   renderTray();renderPreview();
   if(mode==='campaign'&&gameActive)campAfterMove(); // Ziel erreicht? -> Level geschafft
   if(res.over&&gameActive)gameOver();
+  updateTension(); // Herzschlag an die neue Feld-Fuelle anpassen
 }
 function tickBombs(){
   let boom=false;
@@ -1285,12 +1429,13 @@ function newGame(m){
   const days=bumpDayStreak();
   $('startOverlay').classList.add('hidden');
   $('overOverlay').classList.add('hidden');
+  { var _eg=$('exitGame'); if(_eg)_eg.style.display=''; } // Spiel-Zuruecktaste im Spiel sichtbar
   say(m==='daily'?'Daily Challenge! 📅':(days>1?days+' Tage Streak! 🔥':'Los geht\'s! 🧀'),1700);
   // Spielhilfe beim allerersten Start einmalig zeigen
   try{if(!localStorage.getItem('gb_help_seen')){var hp=$('helpPanel');if(hp)hp.hidden=false;localStorage.setItem('gb_help_seen','1');}}catch(e){}
 }
 function gameOver(){
-  gameActive=false;heat=0;
+  gameActive=false;heat=0;stopTension();
   if(mode==='campaign'){campGameOver();return;} // Kampagne = eigener Flow, NIE an Rangliste (Anti-Cheat)
   dqBump('best',score,true); // Daily-Quest: bester Score des Tages
   sfx.over();
@@ -1385,7 +1530,7 @@ if(boardEl)boardEl.addEventListener('pointerdown',function(e){if(!bombArmed||mod
   bombArmed=false;boardEl.classList.remove('bomb-armed');if(hit){pow.bomb--;campSave();}
   syncFromCore();renderBoard();renderPowBar();sfx.boom();quake(true);
   var rb=cell.getBoundingClientRect();particles(rb.left+rb.width/2,rb.top+rb.height/2,14,['💥','✨']);say('💥 BOOM!',1200);},true);
-(function(){var b=$('btnCamp');if(b)b.onclick=function(){ if(!confirmLeaveRun())return; var mp=$('menuPanel'); if(mp)mp.hidden=true; startCampaign(); };})();
+(function(){var b=$('btnCamp');if(b)b.onclick=function(){ leaveGuard(function(){ var mp=$('menuPanel'); if(mp)mp.hidden=true; startCampaign(); }); };})();
 
 /* ============ Verify-Teaser: nicht-verifizierte spielen nur ~30s, dann Blur+CTA ============ */
 var gVerified=false,gLoggedIn=false,gTeaserUsed=false,teaserTimer=null;
@@ -1441,6 +1586,7 @@ function showMenu(){
   $('dayStreak').textContent='🔥 '+ (d.n||0)+' Tag'+((d.n||0)===1?'':'e')+' in Folge';
   $('overOverlay').classList.add('hidden');
   $('startOverlay').classList.remove('hidden');
+  { var _eg=$('exitGame'); if(_eg)_eg.style.display='none'; } // im Menue kein durchscheinender toter Button (zurueck geht ueber das ← oben links)
   dqRender();
   renderHubRivals();
 }
@@ -1479,7 +1625,30 @@ $('btnDaily').onclick=()=>newGame('daily');
 $('btnRetry').onclick=()=>newGame(mode);
 $('btnMenu').onclick=showMenu;
 // ===== Menue (☰): Start-Screen + In-Game teilen dasselbe Panel =====
-function confirmLeaveRun(){ if(gameActive&&G&&!G.over&&(G.score>0)){ return confirm('Aktueller Lauf geht verloren. Trotzdem?'); } return true; }
+// Schoenes "Spiel verlassen?"-Modal statt nativem confirm()
+function showLeaveModal(onConfirm){
+  if(document.getElementById('leaveOv'))return;
+  if(!document.getElementById('leaveKf')){var st=document.createElement('style');st.id='leaveKf';st.textContent='@keyframes leaveUp{from{transform:translateY(100%)}to{transform:translateY(0)}}';document.head.appendChild(st);}
+  var ov=document.createElement('div'); ov.id='leaveOv';
+  ov.style.cssText='position:fixed;inset:0;z-index:100000;background:rgba(20,26,30,.55);display:flex;align-items:flex-end;justify-content:center;';
+  ov.innerHTML='<div id="leaveCard" style="background:#fff;width:100%;max-width:460px;border-radius:24px 24px 0 0;padding:24px 18px calc(20px + env(safe-area-inset-bottom));text-align:center;animation:leaveUp .28s ease">'+
+    '<div style="font-size:46px;line-height:1;margin-bottom:6px">🐐</div>'+
+    '<h3 style="font-weight:900;font-size:1.35rem;margin:0 0 7px;color:#1d2a2f">Spiel verlassen?</h3>'+
+    '<p style="color:#6b7280;font-size:.95rem;line-height:1.55;margin:0 0 18px">Dein aktueller Lauf und deine Punkte gehen dann <b>verloren</b>. Willst du wirklich raus?</p>'+
+    '<button id="leaveStay" style="width:100%;padding:15px;border:none;border-radius:15px;background:#21D0A1;color:#fff;font-weight:800;font-size:1.04rem;cursor:pointer;box-shadow:0 4px 12px rgba(33,208,161,.32);margin-bottom:10px">Weiterspielen 🎮</button>'+
+    '<button id="leaveGo" style="width:100%;padding:13px;border:none;border-radius:14px;background:none;color:#e0503a;font-weight:800;font-size:.95rem;cursor:pointer">Trotzdem verlassen</button>'+
+  '</div>';
+  document.body.appendChild(ov);
+  function close(){ if(ov.parentNode)ov.parentNode.removeChild(ov); }
+  ov.addEventListener('click',function(e){ if(e.target===ov) close(); });
+  document.getElementById('leaveStay').onclick=close;
+  document.getElementById('leaveGo').onclick=function(){ close(); onConfirm(); };
+}
+// Guard: fuehrt proceed() sofort aus, wenn kein aktiver Lauf laeuft -> sonst erst das schoene Modal
+function leaveGuard(proceed){
+  if(gameActive&&G&&!G.over&&G.score>0){ showLeaveModal(proceed); }
+  else proceed();
+}
 (function(){
   var mp=$('menuPanel'); if(!mp)return;
   function openMenu(){ try{dqRender();}catch(e){} mp.hidden=false; }
@@ -1490,7 +1659,9 @@ function confirmLeaveRun(){ if(gameActive&&G&&!G.over&&(G.score>0)){ return conf
   // Regeln -> Hilfe-Panel (liegt ueber dem Menue)
   var mr=$('menuRules'); if(mr)mr.onclick=function(){ var hp=$('helpPanel'); if(hp)hp.hidden=false; };
   // Nav-Links waehrend eines laufenden Spiels absichern (sonst geht der Lauf verloren)
-  ['lnkChallenge','btnAvatar'].forEach(function(id){var a=$(id);if(a)a.addEventListener('click',function(e){ if(!confirmLeaveRun())e.preventDefault(); });});
+  ['lnkChallenge','btnAvatar'].forEach(function(id){var a=$(id);if(a)a.addEventListener('click',function(e){
+    if(gameActive&&G&&!G.over&&G.score>0){ e.preventDefault(); var href=a.getAttribute('href')||a.href; leaveGuard(function(){ location.href=href; }); }
+  });});
 })();
 
 /* ===== Lokale Rangliste (Top 10). Online + Preisgeld folgt mit Server-Validierung. ===== */
@@ -1666,15 +1837,7 @@ try{var _h=(location.hash||'').toLowerCase();if(_h==='#play'||_h==='#high'||_h==
   var nat=document.getElementById('nature'); if(!nat)return;
   // Performance: fallende Bluetenblaetter (drop-shadow ueber den ganzen Screen, 16x)
   // + Zusatz-Schmetterlinge komplett entfernt. Nur wenige, dezente Blaetter bleiben.
-  var PET=['🌸','🌼','🍃'];
-  for(var i=0;i<3;i++){var e=document.createElement('div');e.className='petal';
-    e.textContent=PET[i%PET.length];
-    e.style.left=(Math.random()*100)+'vw';
-    e.style.fontSize=(11+Math.random()*13)+'px';
-    e.style.animationDuration=(9+Math.random()*11)+'s';
-    e.style.animationDelay=(-Math.random()*18)+'s';
-    e.style.setProperty('--sway',(20+Math.random()*46)+'px');
-    nat.appendChild(e);}
+  // Simpel & schnell: fallende Bluetenblaetter komplett raus (drop-shadow ueber ganzen Screen war teuer).
   // Ziege lebt, bleibt aber am Boden: alle ~3s Gewichts-Verlagerung ODER Kopf-Umschauen
   // (transform-origin ist an den Fuessen -> kein Schweben, sieht aus wie echtes Stehen+Bewegen)
   setInterval(function(){
@@ -1694,5 +1857,6 @@ try{var _h=(location.hash||'').toLowerCase();if(_h==='#play'||_h==='#high'||_h==
   hp.addEventListener('click',function(e){if(e.target===hp)close();});
 })();
 </script>
+<script src="../deeplink.js"></script>
 </body>
 </html>

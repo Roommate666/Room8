@@ -1,0 +1,6 @@
+{
+  "name": "room8-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Room8 Web (statische Site + dependency-freie Vercel-Functions). Capacitor nutzt das Root-package.json."
+}

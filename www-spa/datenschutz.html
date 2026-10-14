@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="de" data-page="privacy">
+<head>
+    <script src="sentry-init.js"></script>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title data-i18n="privacy_page_title">Datenschutz - UniGoat</title>
+    <meta name="description" content="Datenschutzerklaerung der UniGoat Studenten-Plattform. Erfahre, wie wir deine Daten schuetzen und verarbeiten.">
+    <link rel="stylesheet" href="unigoat-v2.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
+    <style>
+        /* Alias: altes Token-Vokabular auf v2 mappen, damit bestehendes JS +
+           inline-styles in v2-Farben weiterlaufen. */
+        :root{
+          --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+          --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+          --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+          --fh:var(--font-heading); --fb:var(--font-body);
+          /* Alias-Restwerte aus dem alten Seiten-Stylesheet */
+          --primary-color: var(--color-accent); --text-main: var(--color-text);
+        }
+
+        .icn{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; display:block; }
+        .masthead-sm{ font-size:54px; }
+
+        /* Chrome oben: Zurueck-Link, dann Titel + dateline */
+        .topbar{ display:flex; align-items:center; gap:12px; padding:12px var(--space-5) 0; }
+        .back-arrow{
+          display:inline-flex; align-items:center; justify-content:center;
+          width:var(--tap); height:var(--tap); margin-left:-8px;
+          color:var(--color-text); text-decoration:none;
+        }
+        .back-arrow:hover{ color:var(--accent-small); }
+
+        /* Lesekomfort fuer den Rechtstext: ein ruhiger Fliesstext-Block,
+           gute Zeilenlaenge, klare Hierarchie, kein Mint-Overkill. */
+        .legal-content{
+          max-width: 720px; margin: 0 auto;
+          padding: 8px var(--space-5) 64px;
+        }
+        .content-card{
+          line-height: 1.75; color: var(--color-text);
+          font-size: 15px;
+        }
+        .content-card h2{
+          font-family: var(--font-heading); font-weight: 800;
+          font-size: 22px; line-height: 1.15; letter-spacing: -0.02em;
+          margin-top: 40px; margin-bottom: 12px;
+          padding-bottom: 8px; border-bottom: var(--rule-thin);
+        }
+        .content-card h3{
+          font-family: var(--font-heading); font-weight: 800;
+          font-size: 16px; line-height: 1.25;
+          margin-top: 24px; margin-bottom: 8px;
+        }
+        .content-card p, .content-card li{ margin-bottom: 12px; }
+        .content-card ul{ padding-left: 20px; margin-bottom: 16px; }
+        .content-card li{ margin-bottom: 8px; }
+        .content-card a{ color: var(--accent-small); text-underline-offset: 3px; }
+        .content-card a:hover{ color: var(--color-accent-800); }
+
+        /* Kurzfassung: dezenter Mint-Akzent, KEIN Poster */
+        .info-box{
+          background: var(--color-accent-100);
+          border-left: 3px solid var(--color-accent);
+          padding: 14px 16px; margin: 0 0 28px 0;
+          color: var(--color-accent-900);
+        }
+        /* "Was wir NICHT tun": gleicher ruhiger Akzent-Block */
+        .highlight-box{
+          background: var(--color-accent-100);
+          border-left: 3px solid var(--color-accent);
+          padding: 14px 16px; margin: 16px 0;
+          color: var(--color-accent-900);
+        }
+        .highlight-box ul{ margin-bottom: 0; }
+
+        /* Kontakt-/Adressbloecke: neutrale Flaeche, eckig */
+        .contact-box{
+          background: var(--color-surface);
+          border: var(--rule-thin);
+          padding: 16px; margin: 16px 0;
+        }
+
+        .email-link{
+          background: var(--color-accent-100);
+          padding: 2px 8px;
+          color: var(--accent-small);
+          text-decoration: none; font-weight: 600;
+        }
+        .email-link:hover{ text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="screen">
+  <div class="screen-body">
+    <div class="topbar">
+        <a href="javascript:history.back()" class="back-arrow" aria-label="Zurück">
+            <svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+    </div>
+    <div class="masthead masthead-sm" data-i18n="privacy_title">Datenschutz</div>
+    <div class="dateline"><span>UniGoat</span><span>Stand: Mai 2026</span></div>
+
+    <main class="legal-content">
+        <div class="content-card">
+            <div id="legalBanner" style="display:none; background:#FEF3C7; border:1px solid #F59E0B; padding:1rem 1.25rem; margin-bottom:1.5rem; color:#78350F; font-size:0.9rem; line-height:1.5;">
+                <strong data-i18n="legal_banner_title">Rechtsverbindlich nur auf Deutsch</strong><br>
+                <span data-i18n="legal_banner_text">Diese rechtlichen Texte sind nur in der deutschen Originalfassung verbindlich.</span>
+            </div>
+            <script>
+                (function(){
+                    var lang = (window.Room8i18n && Room8i18n.getCurrentLanguage) ? Room8i18n.getCurrentLanguage() : (localStorage.getItem('room8_language') || 'de');
+                    if (lang === 'en') document.getElementById('legalBanner').style.display = 'block';
+                })();
+            </script>
+
+            <p style="margin-bottom:1.5rem;">Diese Datenschutzerklärung gilt für die App <strong>UniGoat</strong> (Google-Play-Paket <strong>club.room8.app</strong>) sowie die Website unigoat.de. Anbieter der App ist <strong>Yumita</strong> (Inhaber: Yusuf Albayrak). Sie beschreibt, wie deine Daten verarbeitet werden und wie du dein Konto und deine Daten löschen kannst (siehe Abschnitt zur Löschung).</p>
+
+            <div class="info-box">
+                <strong data-i18n="privacy_summary_label">Kurzfassung:</strong>
+                <span data-i18n="privacy_summary_text">Wir sammeln nur Daten, die für den Betrieb notwendig sind. Kein Verkauf, kein Tracking. Deine Sicherheit steht an erster Stelle.</span>
+            </div>
+
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 2rem;">
+                Stand: Mai 2026
+            </p>
+
+            <h2 data-i18n="privacy_responsible_title">1. Verantwortlicher</h2>
+            <p data-i18n="privacy_responsible_intro">Verantwortlich für die Datenverarbeitung auf dieser Website ist:</p>
+
+            <div class="contact-box">
+                <strong>Yusuf Albayrak</strong><br>
+                Yumita (Einzelunternehmen)<br>
+                Anbieter der App UniGoat (Google Play: club.room8.app)<br>
+                Am Silbermannpark 13<br>
+                86161 Augsburg<br>
+                <span data-i18n="privacy_country">Deutschland</span><br><br>
+                <span data-i18n="privacy_email_label">E-Mail:</span> <a href="mailto:info@unigoat.de" class="email-link">info@unigoat.de</a>
+            </div>
+
+            <h2 data-i18n="privacy_data_title">2. Welche Daten wir erheben</h2>
+
+            <h3 data-i18n="privacy_registration_title">2.1 Registrierungsdaten</h3>
+            <p data-i18n="privacy_registration_intro">Bei der Registrierung erheben wir:</p>
+            <ul>
+                <li data-i18n="privacy_registration_item1">E-Mail-Adresse</li>
+                <li data-i18n="privacy_registration_item2">Name (Vorname und Nachname)</li>
+                <li data-i18n="privacy_registration_item3">Passwort (verschlüsselt gespeichert)</li>
+                <li data-i18n="privacy_registration_item4">Optional: Profilbild</li>
+                <li data-i18n="privacy_registration_item5">Optional: Universität/Hochschule</li>
+            </ul>
+
+            <h3>2.2 Verifizierungsdaten</h3>
+            <p>Zur Verifikation deines Studierendenstatus erheben wir:</p>
+            <ul>
+                <li>Uni-E-Mail-Adresse (zur E-Mail-Verifizierung)</li>
+                <li>Optional: Immatrikulationsbescheinigung oder Foto des Studierendenausweises. Diese Dokumente dienen ausschließlich der einmaligen Prüfung deines Studierendenstatus und werden nach Abschluss der Prüfung gelöscht. Du kannst einen laufenden Verifizierungsantrag jederzeit selbst zurückziehen; das hochgeladene Dokument wird dabei entfernt.</li>
+            </ul>
+            <p><strong>Automatisierte Prüfung durch KI (Immatrikulations-Scan):</strong> Wenn du dein Dokument über die automatische Prüfung hochlädst, wird das Bild zur reinen Text-Erkennung (Hochschule, Name, Gültigkeitszeitraum) an unseren Auftragsverarbeiter <strong>Anthropic PBC (USA)</strong> übermittelt und dort verarbeitet. Das Bild wird dabei <strong>nur flüchtig im Arbeitsspeicher</strong> verarbeitet und <strong>weder bei uns noch bei Anthropic dauerhaft gespeichert</strong> und nicht zum Training von KI-Modellen verwendet. Dauerhaft gespeichert werden ausschließlich die Ergebnis-Angaben an deinem Profil (Hochschule, Ablaufdatum, Zeitpunkt der Prüfung); dein Klarname wird nicht gespeichert. Rechtsgrundlage ist deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die du vor dem Upload aktiv erteilst. Die Übermittlung in die USA erfolgt auf Basis der EU-Standardvertragsklauseln. Du kannst deinen Status alternativ manuell (ohne KI) prüfen lassen – schreib uns dazu an info@unigoat.de.</p>
+
+            <h3>2.3 Inseratsdaten</h3>
+            <p data-i18n="privacy_listings_intro">Wenn du ein Inserat erstellst, speichern wir:</p>
+            <ul>
+                <li data-i18n="privacy_listings_item1">Titel und Beschreibung</li>
+                <li data-i18n="privacy_listings_item2">Adresse/Standort</li>
+                <li data-i18n="privacy_listings_item3">Preisinformationen</li>
+                <li data-i18n="privacy_listings_item4">Hochgeladene Fotos</li>
+                <li data-i18n="privacy_listings_item5">Kontaktinformationen</li>
+            </ul>
+
+            <h3>2.4 Nachrichten</h3>
+            <p data-i18n="privacy_messages_text">
+                Nachrichten, die du über unsere Plattform sendest, werden verschlüsselt gespeichert, um die Kommunikation zwischen Nutzern zu ermöglichen.
+            </p>
+
+            <h3>2.5 Technische Daten</h3>
+            <p>Bei jedem Zugriff werden automatisch erfasst:</p>
+            <ul>
+                <li>IP-Adresse (anonymisiert)</li>
+                <li>Datum und Uhrzeit des Zugriffs</li>
+                <li>Browsertyp und -version</li>
+                <li>Gerätetyp und Betriebssystem</li>
+            </ul>
+
+            <h3>2.6 Push-Benachrichtigungen</h3>
+            <p>Wenn du Push-Benachrichtigungen aktivierst, speichern wir:</p>
+            <ul>
+                <li>Einen gerätegebundenen Push-Token (FCM-Token bzw. APNs-Token)</li>
+                <li>Dieser wird ausschließlich zum Versand von Benachrichtigungen verwendet</li>
+                <li>Du kannst Push-Benachrichtigungen jederzeit in den Geräteeinstellungen deaktivieren</li>
+            </ul>
+
+            <h3>2.7 Lokale Speicherung (LocalStorage/SessionStorage)</h3>
+            <p>Die App nutzt lokale Speichertechnologien deines Browsers/Geräts:</p>
+            <ul>
+                <li><strong>SessionStorage:</strong> Temporäre Zwischenspeicherung von Sitzungsdaten (z.B. Nutzer-Cache) zur Performance-Optimierung. Wird beim Schließen der App automatisch gelöscht.</li>
+                <li><strong>LocalStorage:</strong> Speicherung von Einstellungen (z.B. Sprache, Push-Präferenzen). Bleibt bis zur manuellen Löschung erhalten.</li>
+            </ul>
+            <p>Es werden keine Tracking-Cookies verwendet.</p>
+
+            <h3>2.8 Coupon-Einlösungen</h3>
+            <p>
+                Wenn du einen Coupon bei einem Partner einlöst, speichern wir zur Abwicklung und zum
+                Schutz vor Mehrfach-Einlösung: die eingelöste Coupon-ID, deine Nutzer-ID, Zeitpunkt der
+                Einlösung und einen Bestätigungscode. Diese Daten sind für den jeweiligen Partner zur
+                Prüfung der Einlösung sichtbar.
+            </p>
+
+            <h3>2.9 Standort-Prüfung beim Einlösen</h3>
+            <p>
+                Bei manchen Coupons prüfen wir beim Einlösen <strong>einmalig deinen ungefähren Standort</strong>,
+                um zu bestätigen, dass du dich beim Partner-Laden befindest (Schutz vor Missbrauch). Die
+                Standort-Abfrage erfolgt <strong>nur in diesem Moment und nur mit deiner Freigabe</strong> – kein
+                Hintergrund-Tracking, kein Bewegungsprofil. <strong>Deine Koordinaten werden nicht gespeichert.</strong>
+                Gespeichert wird ausschließlich das Ergebnis der Prüfung (bestätigt: ja/nein). Verweigerst du die
+                Standort-Freigabe, kannst du den Coupon trotzdem einlösen; für die G-Coins-Gutschrift ist bei diesen
+                Coupons aber die Standort-Bestätigung nötig. Rechtsgrundlage: deine Einwilligung (Art. 6 Abs. 1 lit. a)
+                sowie unser berechtigtes Interesse an der Missbrauchsvermeidung (Art. 6 Abs. 1 lit. f DSGVO).
+            </p>
+
+            <h3>2.10 Freunde-Verlosung („Party-Lostopf")</h3>
+            <p>
+                Wenn du an der Verlosung teilnimmst, verarbeiten wir zur Durchführung: deine Nutzer-ID
+                und die Zuordnung deiner Lose, die Einladungs-Beziehung (wer wen geworben hat) sowie – im
+                Gewinnfall – die zur Preisübergabe nötige Kontaktaufnahme über die App. Es werden dafür
+                keine zusätzlichen personenbezogenen Daten erhoben. Rechtsgrundlage ist die Durchführung
+                der Verlosung (Art. 6 Abs. 1 lit. b) sowie unser berechtigtes Interesse an einem
+                manipulationsfreien Ablauf (Art. 6 Abs. 1 lit. f DSGVO). Details siehe
+                <a href="nutzungsbedingungen.html#verlosung">Teilnahmebedingungen</a>.
+            </p>
+
+            <h2 data-i18n="privacy_not_title">3. Was wir NICHT tun</h2>
+            <div class="highlight-box">
+                <ul style="margin-bottom: 0;">
+                    <li><strong data-i18n="privacy_not_tracking_label">Kein Tracking:</strong> <span data-i18n="privacy_not_tracking_text">Wir verwenden kein Google Analytics</span></li>
+                    <li><strong data-i18n="privacy_not_sale_label">Kein Datenverkauf:</strong> <span data-i18n="privacy_not_sale_text">Wir verkaufen deine Daten niemals an Dritte</span></li>
+                    <li><strong data-i18n="privacy_not_ads_label">Keine Werbung:</strong> <span data-i18n="privacy_not_ads_text">Wir zeigen keine personalisierte Werbung</span></li>
+                </ul>
+            </div>
+
+            <h2 data-i18n="privacy_legal_title">4. Rechtsgrundlage</h2>
+            <p data-i18n="privacy_legal_intro">Die Verarbeitung erfolgt auf Grundlage von:</p>
+            <ul>
+                <li><strong>Art. 6 Abs. 1 lit. b DSGVO</strong> - <span data-i18n="privacy_legal_item1">Vertragserfüllung</span></li>
+                <li><strong>Art. 6 Abs. 1 lit. a DSGVO</strong> - <span data-i18n="privacy_legal_item2">Einwilligung</span></li>
+                <li><strong>Art. 6 Abs. 1 lit. f DSGVO</strong> - <span data-i18n="privacy_legal_item3">Berechtigtes Interesse</span></li>
+            </ul>
+
+            <h2 data-i18n="privacy_hosting_title">5. Hosting und Speicherung</h2>
+
+            <h3 data-i18n="privacy_database_title">5.1 Datenbank (Supabase)</h3>
+            <p>
+                <span data-i18n="privacy_database_text">Unsere Datenbank wird bei Supabase gehostet, mit Servern in der Europäischen Union (Frankfurt, Deutschland). Supabase erfüllt hohe Sicherheitsstandards.</span>
+                <br><a href="https://sb.com/privacy" target="_blank" style="font-size:0.9rem;">Supabase Datenschutz →</a>
+            </p>
+
+            <h3>5.2 Webhosting</h3>
+            <p>
+                Unsere Website und App-Inhalte werden über Vercel Inc. sowie Cloudflare, Inc. ausgeliefert
+                (Content-Delivery und Hosting). Dabei können technisch notwendige Verbindungsdaten (z. B.
+                IP-Adresse) verarbeitet werden, um die Inhalte auszuliefern und vor Angriffen zu schützen.
+                <br><a href="https://vercel.com/legal/privacy-policy" target="_blank" style="font-size:0.9rem;">Vercel Datenschutz →</a>
+                <br><a href="https://www.cloudflare.com/privacypolicy/" target="_blank" style="font-size:0.9rem;">Cloudflare Datenschutz →</a>
+            </p>
+
+            <h3>5.3 Push-Dienste</h3>
+            <p>Für den Versand von Push-Benachrichtigungen nutzen wir:</p>
+            <ul>
+                <li><strong>Firebase Cloud Messaging (FCM)</strong> von Google Ireland Limited – für die Zustellung auf Android- und iOS-Geräten. <br><a href="https://firebase.google.com/support/privacy" target="_blank" style="font-size:0.9rem;">Firebase Datenschutz →</a></li>
+                <li><strong>Apple Push Notification Service (APNs)</strong> von Apple Inc. – für die Zustellung auf iOS-Geräten. <br><a href="https://www.apple.com/legal/privacy/" target="_blank" style="font-size:0.9rem;">Apple Datenschutz →</a></li>
+            </ul>
+
+            <h3>5.4 E-Mail-Versand</h3>
+            <p>
+                Für den Versand von System- und Benachrichtigungs-E-Mails (z.B. Verifizierungs-Status,
+                Genehmigung oder Ablehnung von Partner-Einreichungen, wichtige Konto-Hinweise) nutzen wir
+                <strong>Resend (Resend, Inc., USA)</strong>. Dabei wird deine E-Mail-Adresse an Resend
+                übermittelt, um die jeweilige Nachricht zuzustellen.
+                <br><a href="https://resend.com/legal/privacy-policy" target="_blank" style="font-size:0.9rem;">Resend Datenschutz →</a>
+            </p>
+
+            <h3>5.5 Datentransfer in Drittländer</h3>
+            <p>Einige unserer Dienstleister haben ihren Sitz in den USA (Google/Firebase, Vercel, Cloudflare, Apple, Resend). Der Datentransfer erfolgt auf Grundlage von:</p>
+            <ul>
+                <li><strong>EU-US Data Privacy Framework</strong> – Google, Vercel und Apple sind unter dem Data Privacy Framework zertifiziert</li>
+                <li><strong>Standardvertragsklauseln (SCC)</strong> gemäß Art. 46 Abs. 2 lit. c DSGVO als zusätzliche Absicherung (u.a. für Resend)</li>
+            </ul>
+
+            <h2>6. Aufbewahrungsfristen</h2>
+            <p>Wir speichern deine Daten nur so lange, wie es für den jeweiligen Zweck erforderlich ist:</p>
+            <ul>
+                <li><strong>Kontodaten:</strong> Bis zur Löschung deines Kontos</li>
+                <li><strong>Inserate:</strong> Bis zur Löschung durch dich oder Deaktivierung des Kontos</li>
+                <li><strong>Nachrichten:</strong> Bis zur Kontolöschung durch einen der Gesprächspartner</li>
+                <li><strong>Verifizierungsdokumente:</strong> Werden nach erfolgreicher Prüfung umgehend gelöscht</li>
+                <li><strong>Technische Logs:</strong> Maximal 30 Tage</li>
+                <li><strong>Push-Token:</strong> Bis zur Deaktivierung von Push oder Kontolöschung</li>
+            </ul>
+            <p>Nach Löschung deines Kontos werden alle personenbezogenen Daten innerhalb von 30 Tagen unwiderruflich entfernt, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen.</p>
+
+            <h2>7. Deine Rechte</h2>
+            <p data-i18n="privacy_rights_intro">Du hast jederzeit das Recht auf:</p>
+            <ul>
+                <li><strong data-i18n="privacy_rights_access_label">Auskunft</strong> über deine gespeicherten Daten</li>
+                <li><strong data-i18n="privacy_rights_correction_label">Berichtigung</strong> falscher Daten</li>
+                <li><strong data-i18n="privacy_rights_deletion_label">Löschung</strong> deiner Daten</li>
+                <li><strong>Datenübertragbarkeit</strong> (Art. 20 DSGVO)</li>
+                <li><strong>Widerspruch</strong> gegen die Verarbeitung (Art. 21 DSGVO) – Du hast das Recht, aus Gründen, die sich aus deiner besonderen Situation ergeben, jederzeit gegen die Verarbeitung deiner Daten Widerspruch einzulegen, sofern diese auf Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse) basiert.</li>
+                <li><strong>Widerruf der Einwilligung</strong> (Art. 7 Abs. 3 DSGVO) – Eine erteilte Einwilligung kannst du jederzeit widerrufen. Die Rechtmäßigkeit der bis zum Widerruf erfolgten Verarbeitung bleibt unberührt.</li>
+            </ul>
+
+            <h3>Beschwerderecht bei der Aufsichtsbehörde</h3>
+            <p>Du hast das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu beschweren (Art. 77 DSGVO). Die für uns zuständige Aufsichtsbehörde ist:</p>
+            <div class="contact-box">
+                <strong>Bayerisches Landesamt für Datenschutzaufsicht (BayLDA)</strong><br>
+                Promenade 18<br>
+                91522 Ansbach<br>
+                <a href="https://www.lda.bayern.de" target="_blank">www.lda.bayern.de</a>
+            </div>
+
+            <h2 id="kontoloeschung">8. Konto- und Datenlöschung (App UniGoat)</h2>
+            <p data-i18n="privacy_deletion_text">
+                Du kannst dein Konto in der App UniGoat jederzeit unter Profil → Einstellungen → Konto löschen. Dabei werden alle deine personenbezogenen Daten, Inserate und Nachrichten unwiderruflich entfernt.
+            </p>
+            <p>
+                Alternativ kannst du die Löschung deines Kontos und aller zugehörigen Daten per E-Mail an <a href="mailto:info@unigoat.de" class="email-link">info@unigoat.de</a> beantragen (Betreff: „Kontolöschung UniGoat"). Wir löschen dein Konto und die damit verbundenen Daten dann innerhalb von 30 Tagen.
+            </p>
+
+            <h2>9. Minderjährigenschutz</h2>
+            <p>Die App richtet sich an Personen ab 16 Jahren. Wir erheben wissentlich keine Daten von Personen unter 16 Jahren. Sollten wir Kenntnis davon erlangen, dass personenbezogene Daten von Personen unter 16 Jahren erfasst wurden, werden wir diese umgehend löschen.</p>
+
+            <h2>10. Kontakt</h2>
+            <p>
+                <span data-i18n="privacy_contact_text">Bei Fragen zum Datenschutz:</span><br>
+                <a href="mailto:info@unigoat.de" class="email-link">info@unigoat.de</a>
+            </p>
+
+        </div>
+    </main>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="session-cache.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>

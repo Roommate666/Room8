@@ -2,123 +2,117 @@
 <html lang="de" data-page="dashboard">
 <head>
 <script src="sentry-init.js"></script>
+<script src="features.js"></script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>UniGoat</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="unigoat-v2.css">
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;}
+  /* Alias: altes Token-Vokabular auf v2 mappen, damit das bestehende JS
+     (Modals, Greet, Toasts, per inline-style) unveraendert weiterlaeuft. */
   :root{
-    --ink:#1A1613; --paper:#F7F4EE; --card:#FFFFFF; --w2:#E4DCCF; --w4:#9C9284; --line:#E7DFD2;
-    --green:#12B489; --greenD:#0E9673; --greenL:#E4FBF3;
-    --mint-grad:linear-gradient(180deg,#21D0A1,#12B489); --sh:0 1px 2px rgba(40,30,15,.04),0 14px 34px rgba(40,30,15,.08); --sh-mint:0 10px 24px rgba(18,180,137,.34);
-    --fh:'Fraunces'; --fb:'Sora'; --shLg:0 4px 10px rgba(30,22,10,.1),0 28px 60px rgba(30,22,10,.2);
+    --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+    --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+    --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+    --fh:var(--font-heading); --fb:var(--font-body);
   }
-  body{font-family:var(--fb),sans-serif;background:var(--paper);color:var(--ink);letter-spacing:-.01em;}
-  .app{max-width:480px;margin:0 auto;min-height:100vh;position:relative;padding:calc(env(safe-area-inset-top) + 8px) 18px 120px;}
-  h1,h2,h3,.serif,.big,.hello,.pos{font-family:var(--fh),serif;}
-  a{color:inherit;text-decoration:none;}
+  .icn{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; display:block; }
+  .tab .icn{ width:20px; height:20px; margin-bottom:2px; }
+  .ch{ color:var(--text-muted); font-weight:800; }
+  .masthead-sm{ font-size:54px; }
 
-  .hd{display:flex;align-items:center;justify-content:space-between;padding:6px 2px 12px;}
-  .brand{display:flex;align-items:center;gap:9px;}.brand img{width:34px;height:34px;}.brand b{font-family:var(--fh),serif;font-size:20px;font-weight:600;}
-  .coins{display:flex;align-items:center;gap:7px;border:1.5px solid var(--ink);border-radius:999px;padding:6px 12px 6px 8px;font-weight:700;font-size:13.5px;}
-  .coins .cd{width:17px;height:17px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;}
+  /* Poster (Hero, Goat Blast) — der eine Mint-Moment */
+  .poster .subline{ margin-top:10px; max-width:30ch; font-size:15px; }
+  .poster .cta2{ margin-top:16px; display:inline-flex; align-items:center; gap:8px; background:var(--on-accent); color:var(--color-accent); font-family:var(--font-heading); font-weight:800; font-size:15px; padding:12px 16px; border:none; cursor:pointer; }
+  /* Personalisierte Ziege: reines Bild rechts, HINTER der grossen Zahl (grosse Zahlen duerfen ueberdecken) */
+  .poster{ position:relative; overflow:hidden; }
+  .poster > img.hub-goat-bg{ position:absolute; right:-4px; bottom:-6px; height:120px; width:auto; z-index:0; pointer-events:none; }
+  .poster > img.hub-goat-bg[src=""]{ display:none; }
+  .poster > *:not(img.hub-goat-bg){ position:relative; z-index:1; }
 
-  .hello{font-size:24px;font-weight:600;margin:6px 0 2px;}.sub{font-size:13px;color:var(--w4);font-weight:500;margin-bottom:14px;}
-  .stats{display:flex;gap:10px;margin-bottom:16px;}
-  .stat{flex:1;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 14px;box-shadow:var(--sh);}
-  .stat .k{font-size:10px;color:var(--w4);font-weight:700;text-transform:uppercase;letter-spacing:.1em;}
-  .stat .v{font-size:19px;font-weight:700;margin-top:4px;display:flex;align-items:center;gap:7px;}
-  .li{width:15px;height:15px;stroke:var(--ink);fill:none;stroke-width:1.6;}
+  /* Streak/Tier-Kacheln (antippbar, IDs bleiben) */
+  .cell.tap{ cursor:pointer; }
 
-  .hero{position:relative;overflow:hidden;border-radius:26px;padding:20px;color:var(--paper);margin-bottom:18px;background:var(--ink);display:block;}
-  .hero .wm{position:absolute;right:-14px;top:-8px;width:120px;opacity:.12;filter:invert(1);}
-  .hero .tag{font-size:10px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;opacity:.6;}
-  .hero h2{font-size:17px;font-weight:500;opacity:.92;margin:10px 0 2px;color:var(--paper);}
-  .hero .big{display:flex;align-items:baseline;gap:8px;margin:6px 0 16px;}.hero .big .n{font-size:46px;font-weight:600;color:var(--green);line-height:1;}.hero .big .l{font-size:11.5px;opacity:.6;max-width:120px;}
-  .cta{width:100%;background:var(--mint-grad);color:#fff;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:var(--sh-mint);}
-  .tri{width:0;height:0;border-left:9px solid currentColor;border-top:6px solid transparent;border-bottom:6px solid transparent;}
-  .hline{display:inline-flex;align-items:center;gap:6px;font-size:9.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;opacity:.75;margin-top:12px;}.hline .d{width:5px;height:5px;border-radius:50%;background:var(--green);}
+  /* Tagesordnungs-Zeilen */
+  .row .ch{ font-size:20px; }
+  #dqHint{ text-decoration:none; color:var(--color-text); border-left:5px solid transparent; padding-left:15px; }
+  #dqHint .dq-kicker{ font-family:var(--font-heading); font-weight:800; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-small); margin-bottom:1px; }
+  #dqHint .row-title{ font-weight:800; }
+  #dqHint.done{ border-left-color:var(--color-accent); }
+  #dqHint.done .row-title{ color:var(--accent-small); }
+  /* urgent = roter Kant-Marker (Variante B): scharfe rote Kante + roter Kicker, flach, kein Glow */
+  #dqHint.urgent{ border-left-color:#E5533C; }
+  #dqHint.urgent .dq-kicker{ color:#C43A22; }
 
-  .sect{display:flex;align-items:center;justify-content:space-between;margin:2px 2px 10px;}.sect h3{font-size:16px;font-weight:600;}.sect a{font-size:12px;font-weight:600;color:var(--green);}
-  .rank{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:20px;box-shadow:var(--sh);}
-  .rank .pos{font-size:26px;font-weight:600;}.rank .pos small{font-size:13px;color:var(--w4);}.rank .info{flex:1;min-width:0;}.rank .info .t{font-size:13px;font-weight:700;}.rank .info .s{font-size:11.5px;color:var(--green);margin-top:1px;font-weight:600;}
-  .go{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--ink);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
-
-  .quest{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px;box-shadow:var(--sh);}
-  .quest .t2{display:flex;align-items:center;justify-content:space-between;gap:8px;}.quest .t{font-size:13px;font-weight:600;}
-  .reward{flex-shrink:0;font-size:11.5px;font-weight:700;color:var(--greenD);background:var(--greenL);border:1px solid var(--green);border-radius:999px;padding:3px 10px;}
-  .bar2{height:6px;background:var(--w2);border-radius:99px;margin-top:11px;overflow:hidden;}.bar2>i{display:block;height:100%;background:var(--green);border-radius:99px;}
-  .quest .p{font-size:10.5px;color:var(--w4);font-weight:600;margin-top:6px;}
-  .quest.done .reward{background:var(--green);color:#fff;}
-
-  .nav{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:448px;height:62px;background:var(--ink);border-radius:22px;display:flex;justify-content:space-around;align-items:center;box-shadow:var(--shLg);z-index:50;}
-  .nav a{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:9px;font-weight:600;color:rgba(247,244,238,.45);padding:6px 10px;}
-  .nav a.on{color:var(--paper);}.nav a.on svg{stroke:var(--green);}
-  .nav svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;}
-  #dqHint{backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);background:rgba(255,255,255,.72)!important;}
-  #dqHint.done{background:rgba(27,158,95,.12)!important;border-color:rgba(27,158,95,.38)!important;color:#0c5c3f!important;}
-  #dqHint.done span{color:#0c5c3f!important;}
-  #dqHint.urgent{background:#FEECEC !important;border-color:#F1543F !important;color:#B42318 !important;animation:dqPulse 1.4s ease-in-out infinite;}
-  #dqHint.urgent span{color:#B42318 !important;}
-  @keyframes dqPulse{0%,100%{box-shadow:0 0 0 0 rgba(241,84,63,.45);}50%{box-shadow:0 0 0 7px rgba(241,84,63,0);}}
+  /* Quests (vom JS erzeugt) im v2-Look */
+  #quests{ border-top:var(--rule); }
+  .quest{ background:var(--color-bg); border-bottom:var(--rule-thin); border-radius:0; padding:13px 20px; margin:0; box-shadow:none; }
+  .quest .t2{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .quest .t{ font-family:var(--font-heading); font-weight:800; font-size:15px; }
+  .quest .reward{ font-family:var(--font-heading); font-weight:800; font-size:11px; color:var(--color-accent-800); background:var(--color-accent-100); border:none; border-radius:0; padding:3px 10px; }
+  .quest.done .reward{ background:var(--color-accent); color:var(--on-accent); }
+  .quest .bar2{ height:4px; background:color-mix(in srgb,var(--color-text) 15%,transparent); border-radius:0; margin-top:10px; overflow:hidden; }
+  .quest .bar2>i{ display:block; height:100%; background:var(--color-accent); border-radius:0; }
+  .quest .p{ font-size:13px; color:var(--text-muted); font-weight:600; margin-top:6px; }
 </style>
 <link rel="icon" type="image/x-icon" href="favicon.ico?v133"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133"><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
 </head>
 <body>
-<div class="app">
-  <div class="hd">
-    <div class="brand"><img src="logo-goat.png?v90" alt="UniGoat"><b>UniGoat</b></div>
-    <div class="coins"><span class="cd">G</span><span id="coins">–</span></div>
+<div class="screen">
+  <div class="screen-body">
+    <div class="masthead masthead-sm">UniGoat</div>
+    <div class="dateline"><span>Campus-Ausgabe</span><span id="dlDate">…</span><span><i class="sq"></i> <span id="coins">–</span></span></div>
+    <div class="ticker"><div id="tickerInner"><span>Deine Daily wartet — hol dir die G-Coins.</span><span>Deine Daily wartet — hol dir die G-Coins.</span></div></div>
+
+    <!-- Hero: Goat Blast (Poster = der eine Mint-Moment) -->
+    <a class="poster" href="game/index.html" style="display:block;position:relative;overflow:hidden">
+      <img class="hub-goat-bg" id="hubGoat" alt="" src="">
+      <div class="kicker">Tages-Challenge · Goat Blast</div>
+      <div class="display" id="heroNum" style="margin-top:12px">0</div>
+      <p class="subline">G-Coins diesen Monat — <span id="firstName">…</span>, rein in die Top 3?</p>
+      <div><span class="cta2"><svg class="icn" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/></svg> Goat Blast spielen</span></div>
+    </a>
+
+    <!-- Streak / Tier -->
+    <div class="cells cells-2">
+      <div class="cell tap" id="streakInfo" title="Tippen: was ist die Streak?">
+        <div class="kicker kicker-muted">Streak ›</div>
+        <div class="num-lg tnum" style="margin-top:8px"><span id="streak">0</span> <small style="font-size:13px;font-weight:400;letter-spacing:0">Tage</small></div>
+        <div class="row-sub">jeden Tag spielen</div>
+      </div>
+      <div class="cell tap" id="tierStat" title="Tippen: was du freischaltest">
+        <div class="kicker kicker-muted">Tier ›</div>
+        <div class="num-lg" style="margin-top:8px;font-size:22px"><span id="tier">Bronze</span></div>
+        <div class="row-sub">Battle-Pass</div>
+      </div>
+    </div>
+
+    <!-- Tagesordnung -->
+    <div class="kicker" style="padding:18px 20px 4px">Heute</div>
+    <a class="row" href="game/index.html" id="dqHint"><div><div class="dq-kicker" id="dqHintKicker" style="display:none"></div><div class="row-title" id="dqHintTxt">Daily-Quests im Spiel</div></div><span class="ch">›</span></a>
+    <a class="row" href="challenge.html"><div><div class="row-title"><span id="rankTitle">Sammle G-Coins, komm ins Ranking</span></div><div class="row-sub" id="rankSub">Coupons einlösen · Daily spielen · Freunde werben</div></div><div class="num-md tnum" id="rankPos">#–</div></a>
+    <a class="row" href="friends.html" id="raffleHubRow" data-feature="raffle"><div><div class="row-title">🎉 Party-Lostopf</div><div class="row-sub" id="raffleHubSub">Freund einladen · beide bekommen ein Los</div></div><span class="ch">›</span></a>
+
+    <!-- Schnellzugriff -->
+    <div class="kicker" style="padding:18px 20px 4px">Schnellzugriff</div>
+    <a class="row row-num" href="friends.html"><span class="tnum" style="font-weight:800;font-size:13px">01</span><div><div class="row-title">Freunde</div><div class="row-sub">einladen &amp; herausfordern</div></div><span class="ch">›</span></a>
+    <a class="row row-num" href="coupons.html"><span class="tnum" style="font-weight:800;font-size:13px">02</span><div><div class="row-title">Deals in der Nähe</div><div class="row-sub">Studenten-Rabatte einlösen</div></div><span class="ch">›</span></a>
+    <a class="row row-num" href="https://instagram.com/unigoat.de" target="_blank" rel="noopener"><span class="tnum" style="font-weight:800;font-size:13px">03</span><div><div class="row-title">Gewinner &amp; Preise</div><div class="row-sub">auf Instagram · @unigoat.de</div></div><span class="ch">›</span></a>
+
+    <!-- Quests -->
+    <div class="kicker" style="padding:18px 20px 4px">Deine Quests</div>
+    <div id="quests"></div>
+    <div style="height:20px"></div>
   </div>
 
-  <div class="hello">Was geht, <span id="firstName">…</span>.</div>
-  <div class="sub">Deine Daily wartet — hol dir die G-Coins.</div>
-
-  <div class="stats">
-    <div class="stat" id="streakInfo" style="cursor:pointer" title="Tippen: was ist die Streak?"><div class="k">Streak ›</div><div class="v"><svg class="li" viewBox="0 0 24 24"><path d="M12 3c1 4 5 5 5 9a5 5 0 1 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 1-1-1-4-1-8Z"/></svg><span id="streak">0</span> Tage</div></div>
-    <div class="stat" id="tierStat" style="cursor:pointer" title="Tippen: was du freischaltest"><div class="k">Tier ›</div><div class="v"><svg class="li" viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="10" rx="1.5"/><path d="M4 12h16M12 7v10"/></svg><span id="tier">Bronze</span></div></div>
-  </div>
-
-  <a class="hero" href="game/index.html">
-    <img class="wm" src="logo-goat.png?v90" alt="">
-    <div class="tag">Tages-Challenge · Goat Blast</div>
-    <h2>Heute spielen für Platz 1</h2>
-    <div class="big"><span class="n" id="heroNum">0</span><span class="l">G-Coins diesen Monat — rein in die Top 3?</span></div>
-    <button class="cta"><span class="tri"></span> Goat Blast spielen</button>
-    <div class="hline"><span class="d"></span>Jeden Monat neu · Top 3 diesen Monat</div>
-  </a>
-
-  <a href="https://instagram.com/unigoat.de" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;text-decoration:none;background:var(--greenL);border:1px solid #bfe6d7;border-radius:14px;padding:11px 14px;margin-bottom:10px;color:var(--greenD);font-weight:700;font-size:13px;">
-    <span>🏆 Gewinner &amp; echte Preise auf Instagram</span>
-    <span style="margin-left:auto">›</span>
-  </a>
-
-
-  <a href="game/index.html" id="dqHint" style="display:flex;align-items:center;gap:8px;text-decoration:none;background:#fff;border:1.5px solid rgba(0,0,0,.06);border-radius:14px;padding:11px 14px;margin-bottom:10px;color:var(--ink);font-weight:700;font-size:13.5px;box-shadow:0 2px 8px rgba(0,0,0,.05);">
-    <span id="dqHintTxt">🎯 Daily-Quests im Spiel</span>
-    <span style="margin-left:auto;color:var(--w4)">›</span>
-  </a>
-
-  <div class="sect"><h3>Leaderboard</h3><a href="challenge.html">Alle ›</a></div>
-  <a class="rank" href="challenge.html">
-    <div class="pos" id="rankPos">#–</div>
-    <div class="info"><div class="t" id="rankTitle">Sammle G-Coins, komm ins Ranking</div><div class="s" id="rankSub">Coupons einlösen · Daily spielen · Freunde werben</div></div>
-    <div class="go">›</div>
-  </a>
-
-  <div class="sect"><h3>Deine Quests</h3></div>
-  <div id="quests"></div>
+  <nav class="tabbar">
+    <a class="tab" href="dashboard.html" aria-current="page"><svg class="icn" viewBox="0 0 24 24"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1Z"/></svg>Hub</a>
+    <a class="tab" href="coupons.html"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="0"/><path d="M3 10h18"/></svg>Coupons</a>
+    <a class="tab" href="game/index.html"><svg class="icn" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="0"/><path d="M8 12h3M9.5 10.5v3M15 11h.01M17 13h.01"/></svg>Game</a>
+    <a class="tab" href="challenge.html"><svg class="icn" viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>Rang</a>
+    <a class="tab" href="profile.html"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>Profil</a>
+  </nav>
 </div>
-
-<nav class="nav">
-  <a class="on" href="dashboard.html"><svg viewBox="0 0 24 24"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1Z"/></svg>Hub</a>
-  <a href="coupons.html"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>Coupons</a>
-  <a href="game/index.html"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="3"/><path d="M8 12h3M9.5 10.5v3M15 11h.01M17 13h.01"/></svg>Game</a>
-  <a href="challenge.html"><svg viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>Rang</a>
-  <a href="profile.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>Profil</a>
-</nav>
 
 <script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
@@ -169,24 +163,50 @@
     var coins=window.__ugCoins||0, G=window.GoatAvatar;
     var tiers=(G&&G.TIERS)||[['Bronze',0],['Silber',1000],['Gold',3000],['Platin',8000]];
     var byMin={}; if(G&&G.AVATAR_MIN){Object.keys(G.AVATAR_MIN).forEach(function(id){var m=G.AVATAR_MIN[id]||0;(byMin[m]=byMin[m]||[]).push((G.AV_LABELS&&G.AV_LABELS[id])||id);});}
-    var cardStyle={Bronze:'schlicht & clean',Silber:'mit Farb-Rand',Gold:'goldener Rahmen + Glanz',Platin:'Premium-Design + Effekte'};
-    var cur='Bronze'; tiers.forEach(function(t){if(coins>=t[1])cur=t[0];});
-    var html='';
+    var meta={Bronze:{ic:'🥉',card:'schlicht & clean'},Silber:{ic:'🥈',card:'Farb-Rand'},Gold:{ic:'🥇',card:'goldener Rahmen + Glanz'},Platin:{ic:'💎',card:'Premium-Design + Effekte'}};
+    var n=tiers.length;
+    // aktuelles Tier + Fortschritt fuer den Fuellbalken berechnen
+    var reachedCount=0; tiers.forEach(function(t){if(coins>=t[1])reachedCount++;});
+    var fillPct;
+    if(reachedCount>=n){ fillPct=100; }
+    else {
+      var loMin=tiers[reachedCount-1][1], hiMin=tiers[reachedCount][1];
+      var within=(coins-loMin)/(hiMin-loMin||1);
+      var loPos=(reachedCount-1)/(n-1), hiPos=reachedCount/(n-1);
+      fillPct=Math.max(0,Math.min(1, loPos+within*(hiPos-loPos)))*100;
+    }
+    var nextMin = reachedCount<n ? tiers[reachedCount][1] : null;
+    var need = nextMin!=null ? Math.max(0,nextMin-coins) : 0;
+    // Kopf: aktueller Stand + Rest bis naechster Stufe
+    var head='<div class="bp-top"><div class="bp-coins">'+coins.toLocaleString('de-DE')+' <span>G-Coins</span></div>'
+      +(nextMin!=null
+          ? '<div class="bp-next">Noch <b>'+need.toLocaleString('de-DE')+'</b> bis '+tiers[reachedCount][0]+'</div>'
+          : '<div class="bp-next">🏆 Höchste Stufe erreicht!</div>')+'</div>';
+    // Battle-Pass-Bahn
+    var track='<div class="bp-track"><div class="bp-rail"><div class="bp-fill" style="height:'+fillPct.toFixed(1)+'%"></div></div>';
     tiers.forEach(function(t){
-      var name=t[0],min=t[1],reached=coins>=min,isCur=(name===cur),avs=(byMin[min]||[]);
-      html+='<div class="tb-tier'+(isCur?" cur":"")+'">'
-        +'<div class="tb-head"><b>'+name+'</b><span>'+(min===0?'Start':'ab '+min.toLocaleString('de-DE')+' G-Coins')+'</span>'
-        +(isCur?'<em>Dein Tier</em>':(reached?'<em class="ok">freigeschaltet</em>':''))+'</div><ul>'
-        +(avs.length?'<li>🐐 Kostüme: '+avs.join(', ')+'</li>':'')
-        +'<li>💳 Visitenkarte: '+(cardStyle[name]||'')+'</li></ul></div>';
+      var name=t[0],min=t[1],reached=coins>=min;
+      var cur=(reached && (reachedCount<n ? min===tiers[reachedCount-1][1] : min===tiers[n-1][1]));
+      var avs=(byMin[min]||[]);
+      var chips='';
+      if(avs.length) chips+='<span class="bp-chip">🐐 '+avs.join(', ')+'</span>';
+      chips+='<span class="bp-chip">💳 '+(meta[name]?meta[name].card:'')+'</span>';
+      track+='<div class="bp-node'+(reached?' on':' off')+(cur?' cur':'')+'">'
+        +'<div class="bp-dot">'+(reached?(meta[name]?meta[name].ic:'✓'):'🔒')+'</div>'
+        +'<div class="bp-body"><div class="bp-name">'+name+(cur?' <em>· hier</em>':'')
+        +'<span class="bp-thr">'+(min===0?'Start':min.toLocaleString('de-DE')+' G-Coins')+'</span></div>'
+        +'<div class="bp-chips">'+chips+'</div></div></div>';
     });
+    track+='</div>';
+    // Bonus-Stufe: Champion + Streak (nicht per Coins kaufbar)
     var champ=(G&&G.AVATAR_CHAMPION)?Object.keys(G.AVATAR_CHAMPION).map(function(id){return (G.AV_LABELS&&G.AV_LABELS[id])||id;}):[];
     var streak=(G&&G.AVATAR_STREAK)?Object.keys(G.AVATAR_STREAK).map(function(id){return ((G.AV_LABELS&&G.AV_LABELS[id])||id)+' ('+G.AVATAR_STREAK[id]+' Tage)';}):[];
-    html+='<div class="tb-tier special"><div class="tb-head"><b>👑 Champion & 🔥 Streak</b></div><ul>'
-      +(champ.length?'<li>👑 Monats-Sieger-Kostüm: '+champ.join(', ')+'</li>':'')
-      +(streak.length?'<li>🔥 Streak-Kostüme: '+streak.join(', ')+'</li>':'')
-      +'<li>Höheres Tier = mehr Prestige im Leaderboard + edlere Visitenkarte</li></ul></div>';
-    return html;
+    var bonus='<div class="bp-node special off"><div class="bp-dot">👑</div><div class="bp-body">'
+      +'<div class="bp-name">Bonus-Stufe<span class="bp-thr">nur über Wettkampf</span></div><div class="bp-chips">'
+      +(champ.length?'<span class="bp-chip gold">👑 Monats-Sieger: '+champ.join(', ')+'</span>':'')
+      +(streak.length?'<span class="bp-chip fire">🔥 Streak: '+streak.join(', ')+'</span>':'')
+      +'</div></div></div>';
+    return head+track+bonus;
   }
   function showTierBenefits(){
     if(!document.getElementById('tb-style')){
@@ -195,19 +215,33 @@
         +'#tb-card{background:#fff;width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom));max-height:86vh;overflow:auto;animation:tbUp .3s ease}'
         +'@keyframes tbUp{from{transform:translateY(100%)}to{transform:translateY(0)}}'
         +'#tb-card h3{margin:2px 0 2px;font-size:1.15rem}#tb-sub{color:#6b7280;font-size:.85rem;margin-bottom:12px}'
-        +'.tb-tier{border:1.5px solid #e6eaec;border-radius:14px;padding:11px 12px;margin-bottom:9px}'
-        +'.tb-tier.cur{border-color:#21D0A1;background:#f0fbf6;box-shadow:0 0 0 2px rgba(33,208,161,.18) inset}'
-        +'.tb-tier.special{border-color:#F4B740;background:#fffaf0}'
-        +'.tb-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.tb-head b{font-size:1rem}.tb-head span{color:#6b7280;font-size:.8rem}'
-        +'.tb-head em{margin-left:auto;font-style:normal;font-weight:800;font-size:.72rem;color:#12B489;background:#dff7ee;padding:2px 8px;border-radius:999px}'
-        +'.tb-head em.ok{color:#6b7280;background:#eef1f2}'
-        +'.tb-tier ul{margin:8px 0 0;padding-left:2px;list-style:none;font-size:.86rem;color:#374151;line-height:1.5}'
-        +'#tb-close{width:100%;margin-top:6px;padding:13px;border:none;border-radius:14px;background:#151a1e;color:#fff;font-weight:800;font-size:1rem;cursor:pointer}';
+        +'.bp-top{display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(120deg,#151a1e,#243038);color:#fff;border-radius:16px;padding:12px 15px;margin-bottom:14px}'
+        +'.bp-coins{font-size:1.4rem;font-weight:900;letter-spacing:-.5px}.bp-coins span{font-size:.72rem;font-weight:700;opacity:.7;letter-spacing:.5px}'
+        +'.bp-next{font-size:.82rem;text-align:right;opacity:.92}.bp-next b{color:#21D0A1}'
+        +'.bp-track{position:relative;padding-left:8px}'
+        +'.bp-rail{position:absolute;left:25px;top:14px;bottom:14px;width:5px;border-radius:3px;background:#e6eaec;overflow:hidden}'
+        +'.bp-fill{position:absolute;left:0;top:0;width:100%;background:linear-gradient(#21D0A1,#12B489);border-radius:3px;transition:height .6s ease}'
+        +'.bp-node{position:relative;display:flex;gap:13px;align-items:flex-start;padding:7px 0;min-height:44px}'
+        +'.bp-dot{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:1.15rem;background:#eef1f2;border:3px solid #fff;box-shadow:0 0 0 2px #e6eaec;z-index:1}'
+        +'.bp-node.on .bp-dot{background:#dff7ee;box-shadow:0 0 0 2px #21D0A1}'
+        +'.bp-node.cur .bp-dot{background:#21D0A1;box-shadow:0 0 0 3px rgba(33,208,161,.35);animation:bpPulse 1.6s infinite}'
+        +'@keyframes bpPulse{0%,100%{box-shadow:0 0 0 3px rgba(33,208,161,.35)}50%{box-shadow:0 0 0 7px rgba(33,208,161,.08)}}'
+        +'.bp-node.off .bp-dot{filter:grayscale(1);opacity:.85}'
+        +'.bp-node.special .bp-dot{background:#fff6e0;box-shadow:0 0 0 2px #F4B740;filter:none;opacity:1}'
+        +'.bp-body{flex:1;padding-top:1px}.bp-name{font-weight:800;font-size:.98rem;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}'
+        +'.bp-name em{font-style:normal;color:#12B489;font-weight:800;font-size:.74rem}'
+        +'.bp-thr{margin-left:auto;color:#9aa3ab;font-size:.74rem;font-weight:700}'
+        +'.bp-node.off .bp-name{color:#9aa3ab}'
+        +'.bp-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}'
+        +'.bp-chip{background:#f2f5f6;color:#374151;font-size:.76rem;padding:3px 9px;border-radius:999px;line-height:1.35}'
+        +'.bp-node.off .bp-chip{opacity:.6}'
+        +'.bp-chip.gold{background:#fff2d1;color:#8a6300}.bp-chip.fire{background:#ffe3d6;color:#a8431f}'
+        +'#tb-close{width:100%;margin-top:12px;padding:13px;border:none;border-radius:14px;background:#151a1e;color:#fff;font-weight:800;font-size:1rem;cursor:pointer}';
       document.head.appendChild(st);
     }
     var ov=document.createElement('div'); ov.id='tb-ov';
     var card=document.createElement('div'); card.id='tb-card';
-    card.innerHTML='<h3>🎖️ Deine Tier-Vorteile</h3><div id="tb-sub">Sammle G-Coins (Coupons einlösen, Daily spielen, Freunde werben) und schalte höhere Tiers frei:</div>'
+    card.innerHTML='<h3>🎖️ Dein Battle Pass</h3><div id="tb-sub">Sammle G-Coins (Coupons einlösen, Daily spielen, Freunde werben) und klettere die Stufen hoch:</div>'
       + tierBenefitsHtml() + '<button id="tb-close">Schließen</button>';
     ov.appendChild(card); document.body.appendChild(ov);
     function close(){ ov.remove(); }
@@ -222,7 +256,14 @@
     ov.innerHTML='<div style="background:#fff;width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:22px 18px calc(22px + env(safe-area-inset-bottom));text-align:center">'+
       '<div style="font-size:42px;line-height:1">🔥</div>'+
       '<h3 style="font-family:var(--fh),serif;font-size:1.3rem;margin:6px 0 8px">Deine Streak</h3>'+
-      '<p style="color:#6b7280;font-size:.92rem;line-height:1.6;margin-bottom:16px">Spiel <b>jeden Tag</b> mindestens einmal Goat Blast, dann w&auml;chst deine Streak &mdash; sie z&auml;hlt, wie viele Tage du in Folge dabei bist.<br><br>Je l&auml;nger die Streak, desto mehr <b>Prestige</b> und exklusive <b>Streak-Kost&uuml;me</b>. Verpasst du einen Tag, f&auml;ngt sie wieder bei 0 an &mdash; also dranbleiben! 🐐</p>'+
+      '<p style="color:#6b7280;font-size:.92rem;line-height:1.6;margin-bottom:14px">Spiel <b>jeden Tag</b> mindestens einmal Goat Blast, dann w&auml;chst deine Streak &mdash; sie z&auml;hlt, wie viele Tage du in Folge dabei bist. Verpasst du einen Tag, f&auml;ngt sie wieder bei 0 an.</p>'+
+      '<div style="font-weight:800;font-size:.82rem;color:#374151;text-align:left;margin:0 2px 8px">Das bringt dir Durchhalten:</div>'+
+      '<div style="display:flex;flex-direction:column;gap:7px;margin-bottom:16px;text-align:left">'+
+        '<div style="display:flex;align-items:center;gap:10px;background:#f0fbf6;border-radius:12px;padding:10px 12px"><span style="font-size:20px">🔥</span><span style="font-size:.9rem;color:#1d2a2f"><b>7 Tage</b> in Folge &rarr; <b style="color:#12B489">+25 G-Coins</b></span></div>'+
+        '<div style="display:flex;align-items:center;gap:10px;background:#fff6e0;border-radius:12px;padding:10px 12px"><span style="font-size:20px">👑</span><span style="font-size:.9rem;color:#1d2a2f"><b>30 Tage</b> in Folge &rarr; <b style="color:#C79415">+150 G-Coins</b></span></div>'+
+        '<div style="display:flex;align-items:center;gap:10px;background:#f2f5f6;border-radius:12px;padding:10px 12px"><span style="font-size:20px">🐐</span><span style="font-size:.9rem;color:#1d2a2f">danach <b>alle 30 Tage</b> wieder <b style="color:#12B489">+150 G-Coins</b> + exklusive <b>Streak-Kost&uuml;me</b></span></div>'+
+      '</div>'+
+      '<p style="color:#9aa3ab;font-size:.8rem;line-height:1.5;margin-bottom:16px">Mehr G-Coins = h&ouml;her im Battle-Pass und bessere Chance auf die Monats-Preise. Also dranbleiben! 🐐</p>'+
       '<button id="_streakClose" style="width:100%;padding:13px;border:none;border-radius:14px;background:#151a1e;color:#fff;font-weight:800;font-size:1rem;cursor:pointer">Verstanden</button></div>';
     document.body.appendChild(ov);
     function close(){ ov.remove(); }
@@ -284,12 +325,13 @@
       // lokal-erledigten Stand ueberschreiben -> rote Meldung geht sofort weg wenn hier geschafft.
       try{ if(window.sb){ var r=await sb.rpc('get_daily_quest_status'); if(r&&r.data&&typeof r.data.remaining==='number') open=Math.min(localOpen, r.data.remaining); } }catch(e){}
       var evening = hr>=17;                    // ab 17 Uhr = Abend-Dringlichkeit
-      var el=$('dqHint'), t=$('dqHintTxt');
-      var txt;
+      var el=$('dqHint'), t=$('dqHintTxt'), k=$('dqHintKicker');
+      var kicker='', txt;
       if(open<=0) txt='🎉 Heute alle Daily-Quests geschafft — stark!';
-      else if(evening) txt='🔥 Nur noch heute! '+open+' Daily-Quest'+(open===1?'':'s')+' offen — hol dir Platz 1';
+      else if(evening){ kicker='Nur noch heute'; txt=open+' Daily-Quest'+(open===1?'':'s')+' offen — hol dir Platz 1'; }
       else if(!s && open===3) txt='🎯 3 Daily-Quests warten im Spiel · je +25 🪙';
       else txt='🎯 '+open+' Daily-Quest'+(open===1?'':'s')+' offen · je +25 🪙';
+      if(k){ k.textContent=kicker; k.style.display=kicker?'block':'none'; }
       if(t) t.textContent=txt;
       if(el){
         if(open>0 && evening) el.classList.add('urgent'); else el.classList.remove('urgent');
@@ -300,8 +342,20 @@
 
   async function load(){
     if(!window.sb) return;
+    // Cache-First: letzte bekannte Werte SOFORT zeigen (VOR dem Auth/Profil-Roundtrip) -> kein "-" auf langsamem Netz
+    try{
+      var cc=JSON.parse(localStorage.getItem('ug_dash_cache')||'null');
+      if(cc){
+        if(cc.coins!=null){ window.__ugCoins=cc.coins; $('coins').textContent=nf(cc.coins); $('tier').textContent=tierOf(cc.coins); }
+        if(cc.streak_days!=null) $('streak').textContent=cc.streak_days;
+        if(cc.coins_month!=null) $('heroNum').textContent=nf(cc.coins_month);
+        if(cc.rank) $('rankPos').textContent='#'+cc.rank;
+      }
+    }catch(e){}
     var u; try{ u=(await sb.auth.getUser()).data.user; }catch(e){}
     if(!u){ location.href='login.html'; return; }
+    // v2: Dateline mit heutigem Datum
+    try{ var dd=new Date(),M=['Jan.','Feb.','März','Apr.','Mai','Juni','Juli','Aug.','Sept.','Okt.','Nov.','Dez.'],W=['So','Mo','Di','Mi','Do','Fr','Sa']; var de=$('dlDate'); if(de) de.textContent=W[dd.getDay()]+'. '+dd.getDate()+'. '+M[dd.getMonth()]+' '+dd.getFullYear(); }catch(e){}
     // Ausstehenden Flyer-/Promo-Code (aus promo.html gemerkt) nach Registrierung automatisch gutschreiben
     try{
       var pend=localStorage.getItem('ug_promo_pending');
@@ -317,7 +371,7 @@
         }
       }
     }catch(e){}
-    var p={};
+    var p={}, coinsMonth=null;
     try{ var r=await sb.from('my_profile').select('full_name,username,coins,streak_days,avatar_config').maybeSingle(); if(r.data)p=r.data; }catch(e){}
     var first=((p.full_name||'').trim().split(/\s+/)[0])||p.username||'Goat';
     $('firstName').textContent=first;
@@ -326,13 +380,28 @@
     $('streak').textContent=(p.streak_days||0);
     $('tier').textContent=tierOf(p.coins||0);
     greet(first, p.avatar_config);
+    // Personalisierte Ziege (nur das Bild, keine Flagge/kein Hintergrund) rechts im Hero
+    try{ var hg=$('hubGoat'); if(hg){ var gav=(p.avatar_config&&p.avatar_config.avatar)||'classic'; hg.src='/game/assets/avatars/'+gav+'.webp'; } }catch(e){}
 
     try{
       var rr=await sb.rpc('get_my_challenge_rank');
       if(rr.data&&rr.data.ok){
+        coinsMonth=rr.data.coins_month||0;
         $('heroNum').textContent=nf(rr.data.coins_month||0);
-        if(rr.data.rank){ $('rankPos').textContent='#'+rr.data.rank; $('rankTitle').textContent='Du bist auf Platz '+rr.data.rank+' diesen Monat'; $('rankSub').textContent=nf(rr.data.coins_month)+' G-Coins gesammelt'; }
+        if(rr.data.rank){ window.__ugRank=rr.data.rank; $('rankPos').textContent='#'+rr.data.rank; $('rankTitle').textContent='Du bist auf Platz '+rr.data.rank+' diesen Monat'; $('rankSub').textContent=nf(rr.data.coins_month)+' G-Coins gesammelt'; }
       }
+    }catch(e){}
+    // Frische Werte fuer den naechsten Kaltstart cachen (Cache-First)
+    try{ localStorage.setItem('ug_dash_cache', JSON.stringify({coins:p.coins||0, streak_days:p.streak_days||0, coins_month:coinsMonth, rank:window.__ugRank||null})); }catch(e){}
+
+    // v2: Ticker mit echten Fallback-Daten fuellen (nie leer)
+    try{
+      var tp=[nf(p.coins||0)+' G-Coins'];
+      if((p.streak_days||0)>0) tp.push('Streak '+p.streak_days+' Tage');
+      if(window.__ugRank) tp.push('Platz #'+window.__ugRank+' diesen Monat');
+      tp.push('Deine Daily wartet');
+      var tt='+++ '+tp.join(' +++ ')+' ';
+      var tel=$('tickerInner'); if(tel) tel.innerHTML='<span>'+tt+'</span><span>'+tt+'</span>';
     }catch(e){}
 
     var friends=0,coupons=0;
@@ -349,5 +418,6 @@
   load();
 })();
 </script>
+<script src="deeplink.js"></script>
 </body>
 </html>

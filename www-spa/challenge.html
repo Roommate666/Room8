@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="de" data-page="challenge">
+<head>
+<script src="sentry-init.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Rang — UniGoat</title>
+<link rel="stylesheet" href="unigoat-v2.css">
+<style>
+  /* Alias: altes Token-Vokabular auf v2 mappen, damit das bestehende JS
+     (Podium, Duell-Modal, Visitenkarte, Toasts) unveraendert weiterlaeuft. */
+  :root{
+    --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+    --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+    --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+    --fh:var(--font-heading); --fb:var(--font-body);
+  }
+  .icn{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; display:block; }
+  .masthead-sm{ font-size:54px; }
+
+  /* Segment Global/Uni/Freunde — v2 .seg gibt Rahmen+Radius0; Buttons flush, aktiv = Mint */
+  .seg{ margin:14px var(--space-5) 4px; }
+  .seg button{ flex:1; border:0; background:none; font-family:var(--font-heading); font-weight:800;
+    font-size:var(--fs-sm); letter-spacing:.04em; text-transform:uppercase; color:var(--text-muted);
+    padding:11px 6px; min-height:var(--tap); cursor:pointer; }
+  .seg button + button{ border-left:1px solid var(--color-divider); }
+  .seg button.on{ background:var(--color-accent); color:var(--on-accent); }
+
+  /* So-laeufts-Karte (einklappbar) */
+  .infocard{ border-top:var(--rule); border-bottom:var(--rule); background:var(--color-bg); margin-top:10px; }
+  .info-head{ width:100%; background:none; border:0; display:flex; align-items:center; justify-content:space-between;
+    gap:10px; padding:14px var(--space-5); font-family:var(--font-heading); font-weight:800; font-size:var(--fs-md);
+    color:var(--color-text); cursor:pointer; text-align:left; }
+  .info-head .chev{ color:var(--accent-small); font-size:20px; line-height:1; transition:transform .25s; flex:none; }
+  .infocard.open .info-head .chev{ transform:rotate(90deg); }
+  .infocard ul{ margin:0; padding:0 var(--space-5); max-height:0; opacity:0; overflow:hidden;
+    transition:max-height .3s ease,opacity .25s,padding .3s; list-style:none; }
+  .infocard.open ul{ max-height:460px; opacity:1; padding:2px var(--space-5) 16px; }
+  .infocard li{ position:relative; font-size:var(--fs-sm); line-height:1.55; color:var(--text-muted);
+    margin-bottom:8px; padding-left:16px; }
+  .infocard li::before{ content:''; position:absolute; left:0; top:8px; width:6px; height:6px; background:var(--color-accent); }
+  .infocard b{ color:var(--color-text); }
+
+  /* Contest-Banner (Instagram) — Tinte, eckig, Mint-Pfeil */
+  .win-banner{ display:block; text-decoration:none; margin:0 var(--space-5) 14px; background:var(--color-text);
+    color:var(--color-bg); padding:13px var(--space-5); font-family:var(--font-heading); font-weight:800;
+    font-size:var(--fs-sm); line-height:1.35; letter-spacing:.01em; }
+  .win-banner .arw{ color:var(--color-accent); }
+
+  /* Podium: Treppe (1. hoechster Sockel). Medaillen-Farben bleiben (semantisch), Sockel eckig. */
+  .podium{ display:flex; align-items:flex-start; justify-content:center; gap:10px; margin:16px var(--space-5) 20px; }
+  .pod{ flex:1; max-width:31%; display:flex; flex-direction:column; align-items:center; background:none; border:0;
+    padding:0; cursor:pointer; }
+  .pod.empty{ visibility:hidden; }
+  .pod .pod-stack{ width:100%; height:210px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; }
+  .pod .pod-medal{ font-size:22px; line-height:1; margin-bottom:2px; flex:none; }
+  .pod .pod-goat{ position:relative; width:72px; height:82px; display:flex; align-items:flex-end; justify-content:center; flex:none; }
+  .pod.prk1 .pod-goat{ width:84px; height:96px; }
+  .pod .pod-goat::after{ content:''; position:absolute; bottom:-1px; left:50%; transform:translateX(-50%);
+    width:54%; height:8px; background:radial-gradient(ellipse at center,rgba(0,0,0,.2),transparent 70%); }
+  .pod .pod-goat img{ position:relative; z-index:1; width:100%; height:100%; object-fit:contain;
+    object-position:bottom center; filter:drop-shadow(0 3px 3px rgba(0,0,0,.14)); }
+  .pod .pod-name{ font-family:var(--font-heading); font-weight:800; font-size:13px; color:var(--color-text);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; margin-top:8px; }
+  .pod .pod-coins{ font-size:11.5px; font-weight:800; color:var(--accent-small); margin:2px 0 0; font-feature-settings:'tnum' 1; }
+  .pod .poddual{ display:flex; align-items:center; justify-content:center; border:0; background:var(--color-text);
+    width:34px; height:34px; cursor:pointer; margin-top:9px; padding:0; flex:none; }
+  .pod .poddual svg{ width:16px; height:16px; display:block; }
+  .pod .pod-base{ width:100%; display:flex; align-items:center; justify-content:center; flex:none; border-radius:0;
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.5),inset 0 -4px 8px rgba(0,0,0,.12); }
+  .pod .pod-rank{ font-family:var(--font-heading); font-weight:800; font-size:26px; color:#fff; text-shadow:0 2px 4px rgba(0,0,0,.28); }
+  .pod.prk1 .pod-base{ height:88px; background:linear-gradient(180deg,#F9D24E,#DFA100); }
+  .pod.prk2 .pod-base{ height:64px; background:linear-gradient(180deg,#DBE1E9,#A6AFBA); }
+  .pod.prk3 .pod-base{ height:44px; background:linear-gradient(180deg,#E6B082,#BE7C3E); }
+
+  /* Rangliste-Zeilen (Rang | Name | Coins | Duell) */
+  .lrow{ display:grid; grid-template-columns:34px minmax(0,1fr) auto auto; gap:var(--space-3); align-items:center;
+    padding:0 var(--space-5); height:52px; border-top:var(--rule-thin); cursor:pointer; }
+  .lrow .r{ font-family:var(--font-heading); font-weight:800; font-size:var(--fs-md); color:var(--text-muted); font-feature-settings:'tnum' 1; }
+  .lrow .n{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:var(--font-heading); font-weight:800; font-size:var(--fs-md); }
+  .lrow .s{ font-family:var(--font-heading); font-weight:800; font-size:var(--fs-md); color:var(--accent-small); font-feature-settings:'tnum' 1; }
+  .lrow.me{ background:var(--color-text); color:var(--color-bg); border-top:0; }
+  .lrow.me .r, .lrow.me .s{ color:var(--color-bg); }
+  .duelbtn{ display:inline-flex; align-items:center; gap:5px; border:0; background:var(--color-text); color:var(--color-bg);
+    font-family:var(--font-heading); font-weight:800; font-size:11px; letter-spacing:.04em; text-transform:uppercase;
+    padding:7px 11px; min-height:0; cursor:pointer; border-radius:0; flex-shrink:0; }
+  .duelbtn svg{ width:13px; height:13px; display:block; }
+  .duelbtn:active{ transform:scale(.96); }
+
+  /* Leere Rangliste */
+  #empty{ text-align:center; color:var(--text-muted); font-size:var(--fs-sm); line-height:1.6; padding:36px var(--space-5); }
+
+  /* Visitenkarte-Modal (Inhalt kommt aus avatar.js) — eckig, Archivo, Mint */
+  .vkbg{position:fixed;inset:0;z-index:300;background:color-mix(in srgb,var(--color-neutral-900) 55%,transparent);display:none;align-items:center;justify-content:center;padding:22px;}
+  .vkbg.show{display:flex;}
+  .vk{background:var(--color-bg);border-radius:0;padding:24px 20px 20px;max-width:330px;width:100%;text-align:center;box-shadow:var(--shadow-lg);position:relative;animation:vkin .3s cubic-bezier(.2,.9,.3,1);border:2px solid var(--color-text);}
+  @keyframes vkin{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}
+  .vk .close{position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;color:var(--text-muted);cursor:pointer;}
+  .vk .goat{width:150px;height:180px;margin:0 auto 4px;}
+  .vk .goat .ug-av{width:150px !important;height:180px !important;}
+  .vk .vkname{font-family:var(--font-heading);font-size:24px;font-weight:800;color:var(--color-text);line-height:1.15;letter-spacing:-0.02em;}
+  .vk .vkcity{font-size:13px;color:var(--text-muted);font-weight:600;margin-top:3px;}
+  .vk .vkrow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+  .vk .pill{font-size:12px;font-weight:800;font-family:var(--font-heading);padding:6px 12px;border-radius:0;background:var(--color-surface);border:1px solid var(--color-divider);color:var(--color-text);}
+  .vk .pill.champ{background:#F4B740;border-color:#F4B740;color:#3a2a05;}
+  .vk.champion{background:var(--color-bg);border:2px solid #F4B740;box-shadow:0 12px 32px rgba(244,183,64,.35);}
+  .vk .vktitle{font-size:11px;font-weight:800;font-family:var(--font-heading);letter-spacing:.08em;text-transform:uppercase;color:#C79415;margin-bottom:8px;}
+
+  /* Wett-Auswahl-Modal (Herausforderung) — eckig, v2 */
+  .dwbg{position:fixed;inset:0;z-index:320;background:color-mix(in srgb,var(--color-neutral-900) 55%,transparent);display:none;align-items:center;justify-content:center;padding:22px;}
+  .dwbg.show{display:flex;}
+  .dw{background:var(--color-bg);border-radius:0;padding:22px 20px 18px;max-width:340px;width:100%;box-shadow:var(--shadow-lg);animation:vkin .3s cubic-bezier(.2,.9,.3,1);position:relative;border:2px solid var(--color-text);}
+  .dw .close{position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;color:var(--text-muted);cursor:pointer;}
+  .dw h3{font-family:var(--font-heading);font-size:22px;font-weight:800;color:var(--color-text);margin:0 0 2px;letter-spacing:-0.02em;}
+  .dw .who{font-size:13px;color:var(--text-muted);font-weight:600;margin-bottom:4px;}
+  .dw .bal{font-size:12px;color:var(--text-muted);font-weight:600;margin-bottom:14px;}
+  .dw .bal b{color:var(--color-text);}
+  .dwchips{display:flex;gap:8px;margin-bottom:16px;}
+  .dwchip{flex:1;border:1px solid var(--color-divider);background:var(--color-surface);border-radius:0;padding:12px 4px;text-align:center;font-family:var(--font-heading);font-size:20px;font-weight:800;color:var(--color-text);cursor:pointer;transition:all .12s;}
+  .dwchip .cn{display:block;font-family:var(--font-heading);font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-top:2px;}
+  .dwchip.sel{border-color:var(--color-accent);background:var(--color-accent);color:var(--on-accent);}
+  .dwchip.sel .cn{color:var(--on-accent);}
+  .dwchip[disabled]{opacity:.35;pointer-events:none;}
+  .dwgo{width:100%;border:none;background:var(--color-accent);color:var(--on-accent);font-family:var(--font-heading);font-weight:800;font-size:15px;padding:14px;border-radius:0;cursor:pointer;min-height:54px;}
+  .dwgo:hover{background:var(--color-accent-600);}
+  .dwgo:active{background:var(--color-accent-700);}
+  .dwgo[disabled]{opacity:.5;pointer-events:none;}
+
+  .cw-toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(16px);background:var(--color-text);color:var(--color-bg);font-family:var(--font-heading);font-weight:800;font-size:13px;padding:11px 18px;border-radius:0;opacity:0;transition:.25s;z-index:340;max-width:90%;text-align:center;box-shadow:var(--shadow-lg);}
+  .cw-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+<link rel="icon" type="image/x-icon" href="favicon.ico?v133"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133"><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
+</head>
+<body>
+<div class="screen">
+  <div class="screen-body">
+    <div class="masthead masthead-sm">Rang</div>
+    <div class="dateline"><span>Monats-Challenge</span><span id="month">…</span><span id="reset">Reset</span></div>
+
+    <div class="seg" id="seg">
+      <button type="button" data-scope="global" class="on">Global</button>
+      <button type="button" data-scope="uni">Uni</button>
+      <button type="button" data-scope="friends">Freunde</button>
+    </div>
+
+    <div class="infocard" id="infoCard">
+      <button class="info-head" id="infoToggle" type="button"><span>🏆 So läuft die Monats-Challenge</span><span class="chev">›</span></button>
+      <ul>
+        <li>Sammle diesen Monat <b>G-Coins</b>: <b>+100</b> pro eingelöstem Coupon, dazu Coins fürs tägliche Goat-Spiel.</li>
+        <li>Nur die <b>Top 3 global</b> gewinnen jeden Monat <b>echte Geschenke</b> 🎁. Die Besten an deiner Uni bekommen G-Coins-Boni.</li>
+        <li>Am Monatsende wird die Rangliste <b>zurückgesetzt</b> — jeder startet neu bei 0.</li>
+        <li>Es zählt nur <b>eins</b>: Wer am Monatsende die <b>meisten G-Coins</b> hat, gewinnt. Kämpf dich nach oben. 💪</li>
+        <li>Die Gewinner werden auf <b>Instagram</b> bekannt gegeben.</li>
+      </ul>
+    </div>
+
+    <div class="podium" id="podium"></div>
+    <a class="win-banner" href="https://instagram.com/unigoat.de" target="_blank" rel="noopener">Du kannst was gewinnen! Alle Infos auf Instagram <span class="arw">→</span></a>
+    <div id="rows"></div>
+    <div id="empty" style="display:none;"></div>
+    <div style="height:20px"></div>
+  </div>
+
+  <nav class="tabbar">
+    <a class="tab" href="dashboard.html"><svg class="icn" viewBox="0 0 24 24"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1Z"/></svg>Hub</a>
+    <a class="tab" href="coupons.html"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="0"/><path d="M3 10h18"/></svg>Coupons</a>
+    <a class="tab" href="game/index.html"><svg class="icn" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="0"/><path d="M8 12h3M9.5 10.5v3M15 11h.01M17 13h.01"/></svg>Game</a>
+    <a class="tab" href="challenge.html" aria-current="page"><svg class="icn" viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>Rang</a>
+    <a class="tab" href="profile.html"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>Profil</a>
+  </nav>
+</div>
+
+<div class="vkbg" id="vkbg"></div>
+
+<!-- Wett-Auswahl-Modal fuer Herausforderung -->
+<div class="dwbg" id="dwbg">
+  <div class="dw">
+    <button class="close" id="dwClose" type="button">×</button>
+    <h3>⚔️ Herausfordern</h3>
+    <div class="who" id="dwWho">Spieler</div>
+    <div class="bal">Dein Kontostand: <b id="dwBal">–</b> G-Coins</div>
+    <div class="dwchips" id="dwChips">
+      <div class="dwchip sel" data-wager="0">0<span class="cn">Spaß</span></div>
+      <div class="dwchip" data-wager="25">25<span class="cn">G-Coins</span></div>
+      <div class="dwchip" data-wager="50">50<span class="cn">G-Coins</span></div>
+      <div class="dwchip" data-wager="100">100<span class="cn">G-Coins</span></div>
+    </div>
+    <button class="dwgo" id="dwGo" type="button">Herausforderung senden</button>
+  </div>
+</div>
+
+<div class="cw-toast" id="cwToast"></div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="game/avatar.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function nf(n){return (n||0).toLocaleString('de-DE');}
+  function cwToast(m){var t=$('cwToast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('show');},2600);}
+  var MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  var now=new Date(); $('month').textContent=MONTHS[now.getMonth()]+' '+now.getFullYear();
+  var last=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(); var left=last-now.getDate();
+  $('reset').textContent='Reset in '+left+' Tg';
+  // Challenge-Erklaerung einklappbar (standardmaessig zu -> Rangliste sofort im Fokus)
+  (function(){ var it=$('infoToggle'), ic=$('infoCard'); if(it&&ic) it.addEventListener('click',function(){ ic.classList.toggle('open'); }); })();
+  function av(cfg){try{if(window.GoatAvatar)return GoatAvatar.renderGoatAvatar(cfg||{},44);}catch(e){}return'';}
+  // Freigestellte Ziege ohne Hintergrund-Kachel (nur das transparente webp) -> fuer das Podium
+  function goatImg(cfg){cfg=cfg||{};var a=(cfg.avatar||'classic');var V=(window.GoatAvatar&&GoatAvatar.AVATARS)||null;if(V&&V.indexOf(a)<0)a='classic';return '<img src="/game/assets/avatars/'+a+'.webp" alt="Ziege" loading="lazy" onerror="this.style.opacity=0">';}
+  // Symmetrisches Schwerter-Icon (statt schiefem Emoji) fuer den Duell-Button
+  var SWORDS='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" y1="14" x2="9" y2="18"/><line x1="7" y1="17" x2="4" y2="20"/><line x1="3" y1="19" x2="5" y2="21"/></svg>';
+  function tierName(c){try{return window.GoatAvatar?GoatAvatar.tierLabel(Number(c||0)):'Bronze';}catch(e){return'Bronze';}}
+
+  // Store-safe: KEINE Geldbetraege in der App (sonst Google-Play Gewinnspiel-Policy).
+  // Preise/Contest laufen extern ueber Instagram -> hier nur Rangliste + Medaillen.
+  var LB=[]; // Leaderboard-Daten fuer die Visitenkarte
+  var SCOPE='global'; // global | uni | friends
+  var MEID=null; var MYUNI=null; var MYCOINS=0;
+  var EMPTY_MSG={
+    global:'Noch keine G-Coins diesen Monat.<br>Sei der Erste — Coupons einlösen & Daily spielen! 🐐',
+    uni:'An deiner Uni hat diesen Monat noch niemand G-Coins gesammelt.<br>Mach den Anfang! 🐐',
+    friends:'Du hast noch keine Freunde in der Rangliste.<br>Lad Freunde über deinen Einladungs-Code ein! 🐐'
+  };
+  function openCard(x){
+    if(!x)return;
+    var bg=$('vkbg'); bg.innerHTML=window.GoatAvatar?GoatAvatar.renderVisitenkarte(x):''; bg.classList.add('show');
+  }
+  $('vkbg').addEventListener('click',function(e){ if(e.target===this||e.target.classList.contains('close')) this.classList.remove('show'); });
+  function cardClick(e){
+    if(e.target.closest('.duelbtn')||e.target.closest('.poddual')) return; // Duell-Button faengt eigenen Klick ab
+    var el=e.target.closest('[data-uid]'); if(!el)return;
+    for(var i=0;i<LB.length;i++){ if(String(LB[i].user_id)===el.getAttribute('data-uid')){ openCard(LB[i]); break; } }
+  }
+
+  // ---------- Herausfordern: Wett-Auswahl-Modal ----------
+  var dwTargetId=null, dwWager=0;
+  function openDuelModal(uid, uname){
+    dwTargetId=uid; dwWager=0;
+    $('dwWho').textContent='gegen '+(uname||'Spieler');
+    $('dwBal').textContent=nf(MYCOINS);
+    // Chips reset + Kontostand-Gate
+    var chips=$('dwChips').querySelectorAll('.dwchip');
+    for(var i=0;i<chips.length;i++){
+      var w=+chips[i].getAttribute('data-wager');
+      chips[i].classList.toggle('sel', w===0);
+      chips[i].disabled=(w>MYCOINS);
+    }
+    $('dwGo').disabled=false;
+    $('dwbg').classList.add('show');
+  }
+  $('dwClose').onclick=function(){ $('dwbg').classList.remove('show'); };
+  $('dwbg').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
+  $('dwChips').addEventListener('click',function(e){
+    var c=e.target.closest('.dwchip'); if(!c||c.disabled)return;
+    dwWager=+c.getAttribute('data-wager');
+    var chips=this.querySelectorAll('.dwchip');
+    for(var i=0;i<chips.length;i++) chips[i].classList.toggle('sel', chips[i]===c);
+  });
+  $('dwGo').onclick=async function(){
+    if(!dwTargetId){ return; }
+    if(dwWager>0 && MYCOINS<dwWager){ cwToast('Nicht genug G-Coins für diesen Einsatz.'); return; }
+    this.disabled=true;
+    try{
+      var r=await sb.rpc('create_match',{p_mode:'high', p_wager:dwWager, p_challenged_id:dwTargetId});
+      var d=r.data||{};
+      if(!d.ok){
+        var map={NOT_ENOUGH_COINS:'Nicht genug G-Coins für diesen Einsatz.',CANNOT_CHALLENGE_SELF:'Du kannst dich nicht selbst herausfordern.',NOT_AUTHENTICATED:'Bitte einloggen.'};
+        cwToast(map[d.error]||'Herausforderung fehlgeschlagen.');
+        this.disabled=false; return;
+      }
+      $('dwbg').classList.remove('show');
+      cwToast('Herausforderung gesendet ⚔️');
+    }catch(e){ cwToast('Fehler beim Senden.'); this.disabled=false; }
+  };
+
+  // Duell-Button-Klick (Podium + Liste)
+  function duelClick(e){
+    var b=e.target.closest('.duelbtn, .poddual'); if(!b)return;
+    e.stopPropagation();
+    var uid=b.getAttribute('data-uid'), uname=b.getAttribute('data-uname');
+    if(!MEID){ cwToast('Bitte einloggen.'); return; }
+    if(uid===MEID) return;
+    openDuelModal(uid, uname);
+  }
+
+  // Holt die Rangliste je nach aktivem Segment.
+  //  - global:  komplette Monats-Rangliste (get_challenge_leaderboard)
+  //  - uni:     dieselbe Liste, client-seitig auf meine Universitaet gefiltert + neu gerankt
+  //  - friends: eigener Freundeskreis via get_friends_leaderboard (serverseitig aus auth.uid())
+  async function fetchRows(scope){
+    if(scope==='friends'){
+      try{ var rf=await sb.rpc('get_friends_leaderboard'); return rf.data||[]; }catch(e){ return []; }
+    }
+    var rows=[]; try{ var r=await sb.rpc('get_challenge_leaderboard',{p_limit:200}); rows=r.data||[]; }catch(e){}
+    if(scope==='uni'){
+      if(!MYUNI) return [];
+      rows=rows.filter(function(x){ return (x.university||'')===MYUNI; });
+      var rk=0, prev=null;
+      rows=rows.map(function(x,i){ if(prev===null||x.coins_month!==prev){ rk=i+1; prev=x.coins_month; } return Object.assign({},x,{rank:rk}); });
+    }
+    return rows;
+  }
+
+  function render(rows){
+    LB=rows||[];
+    $('podium').innerHTML=''; $('rows').innerHTML='';
+    if(!rows||!rows.length){ $('empty').innerHTML=EMPTY_MSG[SCOPE]||EMPTY_MSG.global; $('empty').style.display='block'; return; }
+    $('empty').style.display='none';
+    var top=rows.slice(0,3), rest=rows.slice(3);
+    var order=[1,0,2]; // p2, p1, p3 Anordnung
+    $('podium').innerHTML=order.map(function(idx){var x=top[idx];if(!x)return'<div class="pod empty"></div>';var rk=Number(x.rank);
+      var MEDAL={1:'🥇',2:'🥈',3:'🥉'};
+      var canDuel=MEID && x.user_id!==MEID;
+      var duelBtn=canDuel?'<button class="poddual" data-uid="'+esc(x.user_id)+'" data-uname="'+esc(x.username||'Anonym')+'" title="Herausfordern" aria-label="Herausfordern">'+SWORDS+'</button>':'';
+      var goat=goatImg(x.avatar_config);
+      return '<div class="pod prk'+rk+'" data-uid="'+esc(x.user_id)+'">'+
+        '<div class="pod-stack">'+
+          '<div class="pod-medal">'+(MEDAL[rk]||'')+'</div>'+
+          '<div class="pod-goat">'+goat+'</div>'+
+          '<div class="pod-base"><span class="pod-rank">'+rk+'</span></div>'+
+        '</div>'+
+        '<div class="pod-name">'+(rk===1?'👑 ':'')+esc(x.username||'Anonym')+'</div>'+
+        '<div class="pod-coins">'+nf(x.coins_month)+' 🪙</div>'+
+        duelBtn+
+      '</div>';
+    }).join('');
+    $('rows').innerHTML=rest.map(function(x){var mine=MEID&&x.user_id===MEID;
+      var duelBtn=(MEID && !mine)?'<button class="duelbtn" data-uid="'+esc(x.user_id)+'" data-uname="'+esc(x.username||'Anonym')+'">'+SWORDS+'Duell</button>':'';
+      return '<div class="lrow'+(mine?' me':'')+'" data-uid="'+esc(x.user_id)+'"><span class="r">'+x.rank+'</span><span class="n">'+(x.is_champion?'👑 ':'')+esc(x.username||'Anonym')+(mine?' (du)':'')+'</span><span class="s">'+nf(x.coins_month)+'</span>'+duelBtn+'</div>';
+    }).join('');
+    $('podium').onclick=function(e){ duelClick(e); cardClick(e); };
+    $('rows').onclick=function(e){ duelClick(e); cardClick(e); };
+  }
+
+  async function load(){
+    if(!window.sb) return;
+    render(await fetchRows(SCOPE));
+  }
+
+  $('seg').addEventListener('click',function(e){
+    var b=e.target.closest('button[data-scope]'); if(!b)return;
+    var sc=b.getAttribute('data-scope'); if(sc===SCOPE)return;
+    SCOPE=sc;
+    var btns=this.querySelectorAll('button');
+    for(var i=0;i<btns.length;i++){ btns[i].classList.toggle('on', btns[i]===b); }
+    $('podium').innerHTML=''; $('rows').innerHTML=''; $('empty').style.display='none';
+    load();
+  });
+
+  async function init(){
+    if(!window.sb) return;
+    try{ MEID=(await sb.auth.getUser()).data.user.id; }catch(e){}
+    if(MEID){
+      try{ var mp=await sb.from('my_profile').select('university,coins').maybeSingle(); if(mp.data){ MYUNI=mp.data.university||null; MYCOINS=+mp.data.coins||0; } }catch(e){}
+    }
+    load();
+  }
+  init();
+})();
+</script>
+</body>
+</html>

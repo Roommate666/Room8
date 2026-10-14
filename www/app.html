@@ -1,105 +1,194 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-page="spa-shell">
 <head>
-    <script src="sentry-init.js"></script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UniGoat herunterladen</title>
-  <meta name="description" content="Lade UniGoat kostenlos herunter - die Studenten-Plattform für WG-Suche, Marktplatz, Jobs und Coupons.">
-  <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
-  <script>
-    // Smart Redirect: erkennt OS und leitet direkt in den Store
-    (function() {
-      var ua = navigator.userAgent || navigator.vendor || window.opera;
-      var playStore = 'https://play.google.com/store/apps/details?id=club.room8.app&pcampaignid=qr_sticker';
-      var appStore = 'https://apps.apple.com/de/app/room8-club/id6757254250';
-
-      // iOS erkennen
-      if (/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
-        window.location.replace(appStore);
-        return;
-      }
-
-      // Android erkennen
-      if (/android/i.test(ua)) {
-        window.location.replace(playStore);
-        return;
-      }
-
-      // Desktop/Unbekannt: Fallback-Seite zeigen (kein Redirect)
-    })();
-  </script>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-    }
-    .card {
-      background: white;
-      border-radius: 24px;
-      padding: 3rem 2rem;
-      max-width: 400px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.08);
-    }
-    .logo {
-      width: 72px; height: 72px;
-      background: linear-gradient(135deg, #3B82F6, #2563EB);
-      border-radius: 20px;
-      margin: 0 auto 1.5rem;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 8px 25px rgba(59,130,246,0.3);
-    }
-    .logo svg { width: 32px; height: 32px; color: white; }
-    h1 { font-size: 1.5rem; font-weight: 800; color: #1A1A2E; margin-bottom: 0.5rem; }
-    p { color: #6B7280; font-size: 0.95rem; line-height: 1.5; margin-bottom: 2rem; }
-    .buttons { display: flex; flex-direction: column; gap: 0.75rem; }
-    .btn {
-      display: flex; align-items: center; justify-content: center; gap: 0.75rem;
-      padding: 1rem; border-radius: 14px; text-decoration: none;
-      font-size: 1rem; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .btn:active { transform: scale(0.98); }
-    .btn svg { width: 24px; height: 24px; flex-shrink: 0; }
-    .btn-apple { background: #000; color: white; }
-    .btn-apple:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
-    .btn-google { background: white; color: #333; border: 1.5px solid #E5E7EB; }
-    .btn-google:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: #D1D5DB; }
-    .web-link {
-      display: block; margin-top: 1.5rem;
-      color: #3B82F6; font-size: 0.85rem; text-decoration: none; font-weight: 600;
-    }
-    .web-link:hover { text-decoration: underline; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>UniGoat</title>
+<link rel="icon" href="logo-goat.png?v90">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#12B489">
+<link rel="apple-touch-icon" href="logo-goat.png?v90">
+<style>
+  /* SPA-Shell: die echten Live-Seiten laufen unveraendert in iframes.
+     Nur EIN Tab-iframe ist sichtbar; Wechsel = Sichtbarkeit umschalten, KEIN Neuladen. */
+  html,body{ margin:0; height:100%; background:#FBF7EF; overflow:hidden; }
+  #frames{ position:fixed; inset:0; }
+  #frames iframe{
+    position:absolute; inset:0; width:100%; height:100%; border:0;
+    display:none; background:#FBF7EF;
+  }
+  #frames iframe.active{ display:block; }
+  /* Splash bis das erste iframe steht (kaschiert den Kaltstart, wie in der Live-App) */
+  #splash{
+    position:fixed; inset:0; z-index:10; background:#FBF7EF;
+    display:flex; align-items:center; justify-content:center;
+    transition:opacity .3s ease;
+  }
+  #splash img{
+    width:104px; height:104px; border-radius:24px;
+    box-shadow:0 12px 30px rgba(30,27,22,.16);
+    animation:splashPop .55s cubic-bezier(.2,.8,.3,1) both;
+  }
+  #splash.hide{ opacity:0; pointer-events:none; }
+  @keyframes splashPop{ 0%{transform:scale(.5);opacity:0} 60%{transform:scale(1.08);opacity:1} 100%{transform:scale(1);opacity:1} }
+</style>
 </head>
 <body>
-  <div class="card">
-    <div class="logo">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-      </svg>
-    </div>
-    <h1>UniGoat herunterladen</h1>
-    <p>Die Studenten-Plattform für WG-Suche, Marktplatz, Jobs und Coupons.</p>
-    <div class="buttons">
-      <a href="https://apps.apple.com/de/app/room8-club/id6757254250" class="btn btn-apple">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
-        App Store
-      </a>
-      <a href="https://play.google.com/store/apps/details?id=club.room8.app&pcampaignid=qr_sticker" class="btn btn-google">
-        <svg viewBox="0 0 24 24"><path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.199l2.302 2.302a1.004 1.004 0 0 1 0 1.38l-2.302 2.302L15.396 12l2.302-3.492zM5.864 2.658L16.8 8.99l-2.302 2.302-8.634-8.634z" fill="#333"/></svg>
-        Google Play
-      </a>
-    </div>
-    <a href="https://unigoat.pages.dev" class="web-link">Oder im Browser nutzen &rarr;</a>
+  <div id="splash"><img src="logo-goat.png?v90" alt="UniGoat"></div>
+
+  <div id="frames">
+    <!-- allow: Kamera (QR-Einloesen/Verify), Geolocation, Clipboard, Web-Share (Freund einladen) -->
+    <iframe data-tab="hub"     data-src="dashboard.html"  title="Hub"     allow="camera; microphone; geolocation; clipboard-write; web-share"></iframe>
+    <iframe data-tab="coupons" data-src="coupons.html"    title="Coupons" allow="camera; microphone; geolocation; clipboard-write; web-share"></iframe>
+    <iframe data-tab="game"    data-src="game/index.html" title="Game"    allow="camera; microphone; geolocation; clipboard-write; web-share; autoplay"></iframe>
+    <iframe data-tab="rang"    data-src="challenge.html"  title="Rang"    allow="camera; microphone; geolocation; clipboard-write; web-share"></iframe>
+    <iframe data-tab="profil"  data-src="profile.html"    title="Profil"  allow="camera; microphone; geolocation; clipboard-write; web-share"></iframe>
   </div>
+
+<!-- DSGVO/TTDSG Consent-Banner auf Shell-Ebene (greift IMMER, egal ueber welchen Einstieg) -->
+<script src="cookie-consent.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  // Welche Live-Seite gehoert zu welchem Haupt-Tab (fuer das Abfangen interner Tab-Links)
+  var TAB_BY_PAGE = {
+    'dashboard.html':'hub',
+    'coupons.html':'coupons',
+    'game/index.html':'game',
+    'challenge.html':'rang',
+    'profile.html':'profil'
+  };
+
+  var frames = {};
+  [].forEach.call(document.querySelectorAll('#frames iframe'), function(f){
+    frames[f.getAttribute('data-tab')] = f;
+  });
+  var loaded = {};
+  var currentTab = 'hub';
+  var splash = document.getElementById('splash');
+  var splashDone = false;
+
+  // href einer Seite -> Tab (oder null, wenn es keine Haupt-Seite ist -> normale Navigation im iframe)
+  function pageToTab(href){
+    if(!href) return null;
+    if(/^(https?:)?\/\//i.test(href) && href.indexOf(location.host)<0) return null; // externer Link
+    if(href.charAt(0)==='#' || /^(mailto:|tel:|javascript:)/i.test(href)) return null;
+    var h = href.replace(/^https?:\/\/[^/]+/i,'').replace(/[?#].*$/,'').replace(/^\.?\//,'');
+    if(TAB_BY_PAGE[h]) return TAB_BY_PAGE[h];
+    if(/^game\/(index\.html)?$/.test(h)) return 'game';
+    return null;
+  }
+
+  function ensureLoaded(tab){
+    var f = frames[tab];
+    if(f && !loaded[tab]){ loaded[tab]=true; f.src = f.getAttribute('data-src'); }
+  }
+
+  function show(tab){
+    if(!frames[tab]) tab='hub';
+    ensureLoaded(tab);
+    currentTab = tab;
+    for(var t in frames){ frames[t].classList.toggle('active', t===tab); }
+    if(location.hash !== '#'+tab){ history.replaceState(null,'','#'+tab); }
+  }
+
+  // Deeplink aus einer Push-Notification -> INNERHALB der SPA aufloesen (nicht die Shell wegnavigieren).
+  // Haupt-Seite -> Tab wechseln; sonst (z.B. notifications.html, coupon-detail.html?id=..) im aktiven Tab oeffnen.
+  window.__ugDeepLink = function(url){
+    try{
+      if(!url){ show('hub'); return; }
+      var tab = pageToTab(url);
+      if(tab){ show(tab); return; }
+      // Sicherheit: NUR eigene (same-origin) Ziele zulassen. javascript:/data:/externe URLs -> Hub.
+      var u;
+      try{ u = new URL(url, location.origin); }catch(e){ show('hub'); return; }
+      if(u.origin !== location.origin || !/^https?:$/.test(u.protocol)){ show('hub'); return; }
+      var rel = u.pathname.replace(/^\//,'') + u.search + u.hash;
+      ensureLoaded(currentTab);
+      var f = frames[currentTab] || frames.hub;
+      if(f && f.contentWindow){ f.contentWindow.location.href = rel; }
+    }catch(e){ show('hub'); }
+  };
+
+  function hideSplash(){
+    if(splashDone) return; splashDone=true;
+    splash.classList.add('hide');
+    setTimeout(function(){ splash.style.display='none'; }, 350);
+  }
+
+  // Beim Laden eines iframes: Login-Guard + interne Tab-Links abfangen
+  function onFrameLoad(f){
+    try{
+      var w = f.contentWindow, d = f.contentDocument;
+      var href = w.location.href;
+      if(/\/login\.html/.test(href) || /\/landing\.html/.test(href)){
+        // Session weg -> raus aus der Shell, Login als Vollseite
+        location.replace('login.html'); return;
+      }
+      // Klicks auf Links zu den 5 Haupt-Seiten in Tab-Wechsel uebersetzen (kein Neuladen)
+      d.addEventListener('click', function(e){
+        var a = e.target.closest ? e.target.closest('a') : null;
+        if(!a) return;
+        var tab = pageToTab(a.getAttribute('href'));
+        // Nur echten Tab-WECHSEL abfangen. Link zur eigenen Tab-Seite (z.B. Zurueck aus
+        // einer Unterseite ohne Tab-Bar) normal navigieren lassen -> iframe kehrt zur Startseite zurueck.
+        if(tab && tab !== currentTab){ e.preventDefault(); show(tab); }
+      }, true);
+      hideSplash();
+    }catch(err){ hideSplash(); }
+  }
+
+  [].forEach.call(document.querySelectorAll('#frames iframe'), function(f){
+    f.addEventListener('load', function(){ onFrameLoad(f); });
+  });
+
+  // Start: Deep-Link per Hash, sonst Hub
+  var start = (location.hash||'#hub').slice(1);
+  if(!frames[start]) start='hub';
+  show(start);
+
+  // Speed: Nachbar-Tabs im Hintergrund vorladen, NACHDEM der Start-Tab geladen ist ->
+  // auch der ERSTE Besuch von Coupons/Rang/Profil ist dann instant (Game bleibt lazy, da schwer).
+  (function preloadNeighbours(){
+    var startFrame = frames[start];
+    function go(){ ['coupons','rang','profil'].forEach(function(t,i){ if(t!==start) setTimeout(function(){ ensureLoaded(t); }, 700*(i+1)); }); }
+    if(startFrame){ startFrame.addEventListener('load', function(){ setTimeout(go, 1000); }, {once:true}); }
+    else { setTimeout(go, 2500); }
+  })();
+
+  // Sicherheitsnetz: Splash spaetestens nach 3.5s weg
+  setTimeout(hideSplash, 3500);
+
+  // Externe Hash-Aenderung (z.B. Zurueck-Geste)
+  window.addEventListener('hashchange', function(){
+    var t=(location.hash||'#hub').slice(1);
+    if(frames[t]) show(t);
+  });
+})();
+</script>
+
+<!-- Native Push: im OBERSTEN Fenster (hier lebt window.Capacitor, nicht in den iframes).
+     Supabase + config fuer window.sb (Token-Speicherung), dann push-logic. Auf Web = No-op. -->
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="push-logic.js"></script>
+<script>
+(function(){
+  "use strict";
+  function isNative(){ try{ return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }catch(e){ return false; } }
+  if(!isNative()) return; // im Web kein Push
+  // Push erst registrieren, wenn Supabase-Client + push-logic da sind UND ein User eingeloggt ist.
+  function tryInit(tries){
+    tries = tries || 0;
+    if(tries > 20) return;
+    if(!window.sb || !window.PushService){ return setTimeout(function(){ tryInit(tries+1); }, 800); }
+    window.sb.auth.getUser().then(function(r){
+      if(r && r.data && r.data.user){ window.PushService.init(); }
+    }).catch(function(){});
+  }
+  setTimeout(function(){ tryInit(0); }, 1500);
+})();
+</script>
 </body>
 </html>

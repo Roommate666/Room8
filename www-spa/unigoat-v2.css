@@ -1,0 +1,285 @@
+/* ============================================================================
+   UniGoat v2 — ein Stylesheet für App, Coupon-Detail, Spiel und Landing.
+   Ersetzt unigoat.css + die Inline-Tokens in coupon-detail.html + game/index.html.
+   Basis: Modernist-System (Archivo, 2px-Linien, Radius 0), Akzent = euer Mint.
+   Regeln: Text auf Mint immer in Tinte (--on-accent). Fotos durch .grayscale.
+   Goats bleiben farbig. Kein Emoji als Icon — Lucide (lucide.dev), 2px Stroke.
+   ============================================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;800&display=swap');
+
+/* ── 1. Tokens ─────────────────────────────────────────────────────────── */
+:root {
+  /* Grund */
+  --color-bg: #f3f2f2;            /* Paper */
+  --color-surface: #eae9e9;       /* Flächen, Inputs, Stage */
+  --color-text: #201e1d;          /* Tinte */
+  --color-divider: color-mix(in srgb, #201e1d 40%, transparent);
+
+  /* Akzent — Mint. Für Rot (#ec3013) oder Terracotta (#c67139) nur diesen Block tauschen. */
+  --color-accent: #12B489;
+  --color-accent-100: #E4FBF3;
+  --color-accent-200: #BDF3E1;
+  --color-accent-300: #86E4C6;
+  --color-accent-400: #47CFA6;
+  --color-accent-500: #12B489;
+  --color-accent-600: #0E9673;
+  --color-accent-700: #0B6B52;
+  --color-accent-800: #085240;
+  --color-accent-900: #063A2E;
+  --on-accent: var(--color-text); /* Mint ist hell → Tinte drauf (6:1). Bei Rot/Terracotta: var(--color-bg). */
+  --accent-text: #0E9673;         /* Akzent als Displayzahl auf Paper (≥3:1) */
+  --accent-small: #0B6B52;        /* Akzent für Kleintext/Links auf Paper (≥4.5:1) */
+
+  /* Neutral-Rampe */
+  --color-neutral-100: #f8f4f4;
+  --color-neutral-200: #eae7e7;
+  --color-neutral-300: #d7d3d3;
+  --color-neutral-400: #bab6b6;
+  --color-neutral-500: #9b9797;
+  --color-neutral-600: #7d7979;
+  --color-neutral-700: #605d5d;
+  --color-neutral-800: #444141;
+  --color-neutral-900: #2d2b2b;
+
+  /* Sekundärtext — statt #9C9284 (2,8:1) */
+  --text-muted: color-mix(in srgb, var(--color-text) 65%, transparent);
+  --text-soft: color-mix(in srgb, var(--color-text) 80%, transparent);
+
+  /* Spiel-Steine — nur im Spielfeld, nie in der UI */
+  --block-a: var(--color-accent);
+  --block-b: #F4B740;
+  --block-c: #E5533C;
+  --block-d: #4C9BE8;
+  --block-e: #C9A47A;
+  --block-f: #2A2624;
+  --block-garbage: #bab6b6;
+
+  /* Schrift */
+  --font-heading: "Archivo", system-ui, sans-serif;
+  --font-body: "Archivo", system-ui, sans-serif;
+  --font-heading-weight: 800;
+
+  /* Typo-Skala (7 Stufen statt 20) */
+  --fs-xs: 11px;   /* Kicker, Nav-Labels (uppercase, letter-spacing .1em) */
+  --fs-sm: 13px;   /* Meta, Sekundärzeilen */
+  --fs-md: 15px;   /* Body */
+  --fs-lg: 17px;   /* Zeilen-Titel */
+  --fs-xl: 22px;   /* Titelstory */
+  --fs-2xl: 36px;  /* Screen-Titel */
+  --fs-poster: 96px; /* Plakat-Zahl (72px auf kleinen Screens) */
+
+  /* Raum */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;  /* Screen-Rand */
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Radius: bewusst 0 */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+
+  /* Linien */
+  --rule: 2px solid var(--color-divider);
+  --rule-thin: 1px solid var(--color-divider);
+
+  /* Elevation — nur Sheets, Toasts, Dialoge */
+  --shadow-sm: 0 1px 2px color-mix(in srgb, #2d2b2b 14%, transparent);
+  --shadow-md: 0 3px 10px color-mix(in srgb, #2d2b2b 16%, transparent);
+  --shadow-lg: 0 12px 32px color-mix(in srgb, #2d2b2b 22%, transparent);
+
+  /* Mindestmaße */
+  --tap: 44px;
+}
+
+/* ── 2. Basis ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; touch-action: manipulation; }
+body {
+  margin: 0; background: var(--color-bg); color: var(--color-text);
+  font-family: var(--font-body); font-size: var(--fs-md); line-height: 1.45;
+  text-wrap: pretty; -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4 {
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  line-height: 1.08; letter-spacing: -0.02em; margin: 0;
+}
+h1 { font-size: var(--fs-2xl); letter-spacing: -0.03em; line-height: .95; margin-left: -0.03em; }
+h2 { font-size: var(--fs-xl); }
+h3 { font-size: var(--fs-lg); line-height: 1.2; }
+p { margin: 0; }
+a { color: var(--accent-small); text-underline-offset: 3px; }
+a:hover { color: var(--color-accent-800); }
+img, svg { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; }
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+::selection { background: color-mix(in srgb, var(--color-accent) 30%, transparent); }
+.tnum { font-feature-settings: 'tnum' 1; }
+.muted { color: var(--text-muted); }
+.grayscale { filter: grayscale(1) contrast(1.08); }   /* jedes Foto — nicht die Goats */
+
+/* ── 3. Text-Rollen ────────────────────────────────────────────────────── */
+.kicker {
+  font-family: var(--font-heading); font-weight: 800; font-size: var(--fs-xs);
+  letter-spacing: .1em; text-transform: uppercase; color: var(--color-accent-700);
+}
+.kicker-muted { color: var(--text-muted); }
+.display {  /* Plakat-Zahl */
+  font-family: var(--font-heading); font-weight: 800; font-size: var(--fs-poster);
+  line-height: .9; letter-spacing: -0.045em; margin-left: -0.04em; font-feature-settings: 'tnum' 1;
+}
+.num-lg { font-family: var(--font-heading); font-weight: 800; font-size: 36px; line-height: 1; letter-spacing: -0.03em; font-feature-settings: 'tnum' 1; }
+.num-md { font-family: var(--font-heading); font-weight: 800; font-size: 26px; line-height: 1; letter-spacing: -0.02em; font-feature-settings: 'tnum' 1; }
+
+/* ── 4. Linien & Raster ────────────────────────────────────────────────── */
+.hr { height: 2px; border: 0; margin: 0; background: var(--color-divider); }
+.hr-thin { height: 1px; border: 0; margin: 0; background: var(--color-divider); }
+/* Zellen-Raster: 1px-Fugen aus dem Divider, 2px-Rahmen oben/unten */
+.cells { display: grid; gap: 1px; background: var(--color-divider); border-top: var(--rule); border-bottom: var(--rule); }
+.cells-2 { grid-template-columns: 1fr 1fr; }
+.cells-3 { grid-template-columns: 1fr 1fr 1fr; }
+.cells-4 { grid-template-columns: repeat(4, 1fr); }
+.cell { background: var(--color-bg); padding: 14px var(--space-5) 16px; min-height: 100px; }
+.cell-sm { padding: 12px 14px 14px; min-height: 0; }
+/* Listenzeile: Nummer | Inhalt | Aktion */
+.row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: var(--space-3); align-items: center; padding: 13px var(--space-5); border-top: var(--rule-thin); min-height: 48px; }
+.row-num { grid-template-columns: 30px minmax(0,1fr) auto; }
+.row-rank { grid-template-columns: 40px minmax(0,1fr) auto; padding-block: 0; height: 50px; }
+.row-title { font-family: var(--font-heading); font-weight: 800; font-size: var(--fs-lg); line-height: 1.2; }
+.row-sub { font-size: var(--fs-sm); color: var(--text-muted); margin-top: 3px; }
+.row-me { background: var(--color-text); color: var(--color-bg); border-top: 0; }  /* eigene Position */
+
+/* ── 5. Plakat (ein Mint-Moment pro Screen) ────────────────────────────── */
+.poster { background: var(--color-accent); color: var(--on-accent); padding: 22px var(--space-5) 18px; }
+.poster .kicker { color: var(--on-accent); opacity: .92; }
+.poster .btn-ghost { color: var(--on-accent); border: 1px solid var(--on-accent); }
+.poster .bar { height: 6px; background: color-mix(in srgb, var(--on-accent) 22%, transparent); }
+.poster .bar > i { display: block; height: 100%; background: var(--on-accent); }
+.poster-ink { background: var(--color-text); color: var(--color-bg); }  /* Variante: Tinte */
+.poster-ink .kicker { color: var(--color-bg); opacity: .85; }
+
+/* ── 6. Buttons — Label flush left, kein Verlauf, kein farbiger Schatten ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: flex-start; gap: 8px;
+  cursor: pointer; text-decoration: none; text-align: left;
+  font-family: var(--font-heading); font-weight: 800; font-size: 15px; line-height: 1.2;
+  color: var(--color-text); background: transparent; border: 1px solid transparent;
+  padding: 10px 14px; min-height: var(--tap); border-radius: 0;
+}
+.btn svg { display: block; flex: none; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn-primary { background: var(--color-accent); color: var(--on-accent); }
+.btn-primary:hover { background: var(--color-accent-600); }
+.btn-primary:active { background: var(--color-accent-700); }
+.btn-secondary { border-color: var(--color-text); }
+.btn-secondary:hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
+.btn-secondary:active { background: color-mix(in srgb, var(--color-text) 14%, transparent); }
+.btn-ghost { color: var(--accent-small); padding-inline: 8px; }
+.btn-ghost:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+.btn-ghost:active { background: color-mix(in srgb, var(--color-accent) 18%, transparent); }
+.btn-icon { width: 40px; height: 40px; min-height: 0; padding: 0; justify-content: center; }
+.btn-block { width: 100%; justify-content: space-between; min-height: 54px; font-size: 16px; padding: 14px 16px; }
+.btn-lg { min-height: 50px; padding: 12px 16px; }
+
+/* ── 7. Tags & Marker ──────────────────────────────────────────────────── */
+.tag { display: inline-flex; align-items: center; font-size: 11px; letter-spacing: .02em; padding: 3px 10px; border-radius: 0; font-weight: 800; font-family: var(--font-heading); }
+.tag-accent { background: var(--color-accent-100); color: var(--color-accent-800); }
+.tag-neutral { background: var(--color-neutral-100); color: var(--color-neutral-800); }
+.tag-outline { border: 1px solid var(--accent-small); color: var(--accent-small); }
+.sq { display: inline-block; width: 10px; height: 10px; background: var(--color-accent); vertical-align: middle; }  /* die eine G-Coin-Darstellung */
+.sq-ink { background: var(--color-text); }
+.dot-live { display: inline-block; width: 10px; height: 10px; background: var(--color-accent); animation: ug-blink 1.4s ease-in-out infinite; }
+.rarity-common { background: var(--color-neutral-400); }
+.rarity-rare { background: var(--color-accent); }
+.rarity-legendary { background: var(--color-text); }
+
+/* ── 8. Formulare ──────────────────────────────────────────────────────── */
+.field > label { display: block; font-family: var(--font-heading); font-weight: 800; font-size: var(--fs-sm); margin-bottom: 6px; }
+.input {
+  width: 100%; min-height: 48px; padding: 8px 12px; font: inherit; font-size: 16px;
+  color: var(--color-text); caret-color: var(--color-accent);
+  background: var(--color-surface); border: 1px solid var(--color-divider); border-radius: 0;
+}
+.input::placeholder { color: var(--text-muted); }
+.input:hover { border-color: color-mix(in srgb, var(--color-text) 45%, transparent); }
+.input:focus-visible { border-color: var(--color-accent); outline-offset: 0; }
+.seg { display: flex; border: 1px solid var(--color-divider); border-radius: 0; overflow: hidden; }
+.seg-opt { flex: 1; display: inline-flex; align-items: center; gap: 6px; padding: 12px 10px; min-height: var(--tap); font-family: var(--font-heading); font-weight: 800; font-size: var(--fs-sm); cursor: pointer; position: relative; }
+.seg-opt + .seg-opt { border-left: 1px solid var(--color-divider); }
+.seg-opt input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+.seg-opt:has(input:checked) { background: var(--color-accent); color: var(--on-accent); }
+.seg-opt:not(:has(input:checked)):hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
+.seg-opt:has(input:focus-visible) { outline: 2px solid var(--color-accent); outline-offset: -2px; }
+.check { width: 18px; height: 18px; border: 2px solid var(--color-text); display: grid; place-items: center; color: var(--on-accent); }
+.check.is-on { background: var(--color-accent); border-color: var(--color-accent); }
+.progress { height: 4px; background: color-mix(in srgb, var(--color-text) 15%, transparent); }
+.progress > i { display: block; height: 100%; background: var(--color-accent); }
+
+/* ── 9. App-Rahmen: Header, Bottom-Nav, Sheet, Toast ───────────────────── */
+/* FIX 06.09: height statt min-height (+overflow:hidden) -> App-Shell scrollt NUR intern
+   in .screen-body, .tabbar bleibt fix am unteren Rand sichtbar (vorher scrollte der ganze
+   Body und die Tab-Leiste war erst nach dem Runterscrollen zu sehen). 100vh = Fallback fuer
+   Browser ohne dvh. */
+.screen { height: 100vh; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; background: var(--color-bg); }
+.screen-body { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding-top: env(safe-area-inset-top); }
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 8px var(--space-5) 12px; }
+.brand { font-family: var(--font-heading); font-weight: 800; font-size: 18px; letter-spacing: -0.015em; }
+.masthead { font-family: var(--font-heading); font-weight: 800; font-size: 64px; line-height: .92; letter-spacing: -0.045em; margin-left: -0.04em; padding: 6px var(--space-5) 0; }
+.dateline { display: flex; justify-content: space-between; gap: 8px; padding: 9px var(--space-5); border-top: var(--rule); border-bottom: var(--rule); font-family: var(--font-heading); font-weight: 800; font-size: var(--fs-xs); letter-spacing: .08em; text-transform: uppercase; font-feature-settings: 'tnum' 1; }
+.ticker { height: 30px; overflow: hidden; display: block; line-height: 30px; /* FIX 05.09: war display:flex -> max-content-Kind blaehte Screen-Breite */ background: var(--color-text); color: var(--color-bg); font-family: var(--font-heading); font-weight: 800; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+.ticker > div { display: flex; width: max-content; white-space: nowrap; animation: ug-ticker 22s linear infinite; }
+.ticker span { padding-right: 48px; }
+
+/* Bottom-Nav: fest, flach, Labels flush left, aktiv = Akzent */
+.tabbar { display: grid; grid-template-columns: repeat(5, 1fr); border-top: var(--rule); background: var(--color-bg); padding-bottom: env(safe-area-inset-bottom, 26px); }
+.tab { appearance: none; background: none; border: 0; padding: 10px 6px 6px 12px; min-height: 56px; display: flex; flex-direction: column; align-items: flex-start; gap: 7px; cursor: pointer; text-align: left; font-family: var(--font-heading); font-weight: 800; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 60%, transparent); }
+.tab + .tab { border-left: var(--rule-thin); }
+.tab[aria-current='page'], .tab.is-active { color: var(--accent-small); }
+
+/* Sheet von unten (Einlösen, Daily) */
+.sheet-backdrop { position: fixed; inset: 0; z-index: 60; background: color-mix(in srgb, var(--color-neutral-900) 50%, transparent); display: flex; align-items: flex-end; }
+.sheet { width: 100%; background: var(--color-bg); padding: 20px var(--space-5) calc(24px + env(safe-area-inset-bottom)); box-shadow: var(--shadow-lg); display: flex; flex-direction: column; gap: 12px; }
+.sheet-title { font-family: var(--font-heading); font-weight: 800; font-size: 24px; line-height: 1.08; letter-spacing: -0.02em; }
+
+/* Ticket (Coupon einlösen) */
+.ticket { background: var(--color-accent); color: var(--on-accent); padding: 18px var(--space-5); }
+.ticket-rule { border-top: 2px dashed color-mix(in srgb, var(--on-accent) 45%, transparent); padding-top: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: baseline; }
+.ticket-code { font-family: var(--font-heading); font-weight: 800; font-size: 26px; letter-spacing: .08em; font-feature-settings: 'tnum' 1; }
+.swipe { position: relative; height: 60px; border: 2px solid var(--color-text); background: var(--color-surface); overflow: hidden; user-select: none; }
+.swipe-fill { position: absolute; inset: 0 auto 0 0; background: var(--color-accent); pointer-events: none; }
+.swipe-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding-left: 56px; font-family: var(--font-heading); font-weight: 800; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); pointer-events: none; }
+.swipe-knob { position: absolute; top: 0; left: 0; width: 56px; height: 56px; background: var(--color-text); color: var(--color-bg); display: grid; place-items: center; cursor: grab; touch-action: none; }
+
+/* Toast: Tinte, oben */
+.toast { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: var(--space-5); right: var(--space-5); z-index: 70; background: var(--color-text); color: var(--color-bg); padding: 12px 14px; font-family: var(--font-heading); font-weight: 800; font-size: 13px; box-shadow: var(--shadow-lg); }
+
+/* ── 10. Spiel (HUD flach, Steine bunt) ────────────────────────────────── */
+.hud { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--color-divider); border: var(--rule); }
+.hud > div { background: var(--color-bg); padding: 6px 10px 7px; }
+.hud-k { font-family: var(--font-heading); font-weight: 800; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); }
+.hud-v { font-family: var(--font-heading); font-weight: 800; font-size: 18px; line-height: 1.1; font-feature-settings: 'tnum' 1; }
+.board { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; padding: 2px; background: var(--color-surface); border: 2px solid var(--color-text); }
+.block { aspect-ratio: 1; box-shadow: inset 0 0 0 2px var(--color-text), 2px 2px 0 var(--color-text); }  /* Paper-Cut-Stein (2D-Fallback) */
+.block-empty { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-text) 8%, transparent); }
+.tray { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--color-divider); border-top: var(--rule); border-bottom: var(--rule); }
+.tray > div { background: var(--color-bg); height: 100px; display: grid; place-items: center; cursor: pointer; }
+.tray > .is-selected { box-shadow: inset 0 0 0 2px var(--color-accent); }
+
+/* ── 11. Bewegung — wenig, aber gezielt ────────────────────────────────── */
+@keyframes ug-blink { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+@keyframes ug-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes ug-wipe { from { clip-path: inset(0 100% 0 0); transform: translateY(10px); } to { clip-path: inset(0 0 0 0); transform: none; } }
+.wipe-in { animation: ug-wipe .55s cubic-bezier(.2, .8, .2, 1) both; }
+@media (prefers-reduced-motion: reduce) { .ticker > div, .dot-live, .wipe-in { animation: none; } }
+
+/* ── 12. Web / Landing (≥ 900px) ───────────────────────────────────────── */
+.container { max-width: 1120px; margin: 0 auto; padding: 0 var(--space-5); }
+@media (min-width: 900px) {
+  :root { --fs-poster: 128px; }
+  .masthead { font-size: 120px; }
+  .cells-2 { grid-template-columns: repeat(4, 1fr); }
+}

@@ -1,58 +1,84 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-page="avatar-edit">
 <head>
+<script src="sentry-init.js"></script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Deine Ziege - UniGoat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Deine Ziege — UniGoat</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+<link rel="stylesheet" href="unigoat-v2.css">
 <style>
-  :root{ --mint:#21D0A1; --mint-600:#12B489; --ink:#15181C; }
-  *{box-sizing:border-box;}
-  body{margin:0;font-family:'Nunito',system-ui,sans-serif;background:#f4f6f8;color:var(--ink);}
-  header{background:var(--ink);color:#fff;padding:calc(1rem + env(safe-area-inset-top)) 1.25rem 1rem;display:flex;align-items:center;gap:.6rem;position:sticky;top:0;z-index:20;}
-  header a{color:#9fb;text-decoration:none;font-weight:700;font-size:.9rem;margin-left:auto;}
-  h1{font-size:1.2rem;margin:0;font-family:'Fredoka',sans-serif;}
-  .wrap{max-width:460px;margin:0 auto;padding:1rem 1.1rem 3rem;}
-  .preview{display:flex;justify-content:center;margin:1rem 0 1.25rem;}
-  .preview svg{height:200px;width:auto;filter:drop-shadow(0 10px 24px rgba(0,0,0,.20));border-radius:18px;}
-  .flagchip{padding:.35rem .4rem;line-height:0;}
-  .gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;}
-  .avcell{position:relative;border:2px solid #e5e7eb;background:#fff;border-radius:14px;padding:.35rem;cursor:pointer;display:flex;justify-content:center;}
-  .avcell.active{border-color:var(--mint);background:#e9fbf5;}
-  .avcell .ug-av{width:60px !important;}
-  .avcell.locked .ug-av{filter:grayscale(1) opacity(.45);}
-  .avcell.locked .lockbadge{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);white-space:nowrap;background:rgba(20,26,30,.82);color:#fff;font-size:.6rem;font-weight:800;padding:2px 6px;border-radius:8px;}
-  .avcell.champ{border-color:#F4B740;background:#fffaf0;box-shadow:0 0 0 1px #F4B740 inset;}
-  .avcell.champ .lockbadge{background:#F4B740;color:#3a2a05;}
-  .avcell.streak{border-color:#F1543F;background:#fff5f3;box-shadow:0 0 0 1px #F1543F inset;}
-  .avcell.streak .lockbadge{background:#F1543F;color:#fff;}
-  .grp{margin-bottom:1.1rem;}
-  .grp h3{font-size:.95rem;margin:0 0 .5rem;color:#374151;font-family:'Fredoka',sans-serif;}
-  .chips{display:flex;flex-wrap:wrap;gap:.5rem;}
-  .chip{border:2px solid #e5e7eb;background:#fff;border-radius:12px;padding:.5rem .8rem;cursor:pointer;font-weight:700;font-size:.85rem;color:#374151;}
-  .chip.active{border-color:var(--mint);background:#e9fbf5;color:var(--mint-600);}
-  .swatch{width:40px;height:40px;border-radius:12px;border:3px solid #e5e7eb;cursor:pointer;padding:0;}
-  .swatch.active{border-color:var(--ink);}
-  .save{position:sticky;bottom:0;background:#f4f6f8;padding:.9rem 0 .5rem;}
-  .save button{width:100%;padding:.95rem;border:none;border-radius:14px;background:var(--mint);color:#083b2f;font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.05rem;cursor:pointer;}
-  #msg{text-align:center;font-size:.85rem;margin-top:.5rem;min-height:1rem;color:#6b7280;}
-  .login{max-width:460px;margin:3rem auto;padding:2rem 1.5rem;text-align:center;color:#6b7280;}
+  /* Alias: altes Token-Vokabular auf v2 (fuer inline var(--green) etc. + GoatAvatar-Rendering) */
+  :root{
+    --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+    --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+    --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+    --fh:var(--font-heading); --fb:var(--font-body);
+    --mint:var(--color-accent); --mint-600:var(--color-accent-600);
+  }
+
+  main{ padding-bottom:8px; }
+
+  /* Preview des Goat-Avatars — bleibt FARBIG, eckig (v2), auf Papier */
+  .preview{ display:flex; justify-content:center; padding:22px 20px 20px; border-bottom:var(--rule); }
+  .preview svg{ height:200px; width:auto; }
+
+  /* Auswahl-Gruppen */
+  .grp{ padding:16px 20px 4px; }
+  .grp h3{ font-family:var(--font-heading); font-weight:800; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); margin:0 0 12px; }
+
+  /* Avatar-Galerie (Grid bleibt als solches, nur Chrome eckig/v2) */
+  .gallery{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--color-divider); border:var(--rule); }
+  .avcell{ position:relative; border:0; background:var(--color-bg); padding:8px 6px; cursor:pointer; display:flex; justify-content:center; align-items:center; min-height:70px; }
+  .avcell.active{ background:var(--color-accent-100); box-shadow:inset 0 0 0 2px var(--color-accent); }
+  .avcell .ug-av{ width:56px !important; }
+  .avcell.locked .ug-av{ filter:grayscale(1) opacity(.45); }
+  .avcell.locked .lockbadge{ position:absolute; bottom:4px; left:50%; transform:translateX(-50%); white-space:nowrap; background:var(--color-text); color:var(--color-bg); font-size:9px; font-weight:800; padding:2px 6px; letter-spacing:.02em; }
+  .avcell.champ{ box-shadow:inset 0 0 0 2px #C79A2E; }
+  .avcell.champ .lockbadge{ background:#C79A2E; color:#2A1F05; }
+  .avcell.streak{ box-shadow:inset 0 0 0 2px #C43A22; }
+  .avcell.streak .lockbadge{ background:#C43A22; color:#fff; }
+
+  /* Chips (Flaggen) */
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; padding-bottom:4px; }
+  .chip{ border:2px solid var(--color-text); background:var(--color-bg); padding:9px 14px; cursor:pointer; font-family:var(--font-heading); font-weight:800; font-size:13px; color:var(--color-text); line-height:1; }
+  .chip.active{ background:var(--color-accent); color:var(--on-accent); border-color:var(--color-accent); }
+  .flagchip{ padding:7px 8px; line-height:0; }
+
+  /* Farb-Swatches (Hintergrund) */
+  .swatch{ width:40px; height:40px; border:2px solid var(--color-text); cursor:pointer; padding:0; }
+  .swatch.active{ box-shadow:inset 0 0 0 3px var(--color-bg), 0 0 0 2px var(--color-text); }
+
+  /* Speichern-Leiste */
+  .save{ position:sticky; bottom:0; background:var(--color-bg); border-top:var(--rule); padding:14px 20px calc(14px + env(safe-area-inset-bottom)); }
+  #msg{ text-align:center; font-family:var(--font-heading); font-weight:700; font-size:13px; margin-top:10px; min-height:1rem; color:var(--text-muted); }
+
+  #login{ padding:48px 24px; text-align:center; color:var(--text-muted); font-size:15px; line-height:1.6; }
 </style>
 </head>
 <body>
-<header>
-  <span>🐐</span><h1>Deine Ziege</h1>
-  <a href="game/index.html">Zum Spiel →</a>
-</header>
-<div class="wrap" id="app" style="display:none;">
-  <div class="preview" id="preview"></div>
-  <div id="controls"></div>
-  <div class="save">
-    <button id="saveBtn">Speichern</button>
-    <div id="msg"></div>
+<div class="screen">
+  <div class="screen-body">
+    <div class="topbar" style="padding-top:14px">
+      <a class="btn btn-icon backbtn" href="profile.html" style="margin-left:8px" aria-label="Zurück"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--color-text);fill:none;stroke-width:2"><path d="M15 18l-6-6 6-6"/></svg></a>
+      <div class="masthead masthead-sm" style="font-size:30px;padding:0 8px 0 2px">Deine Ziege</div>
+      <a class="btn btn-ghost" href="game/index.html" style="margin-right:8px;font-size:13px">Zum Spiel <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="hr"></div>
+
+    <main id="app" style="display:none;">
+      <div class="preview" id="preview"></div>
+      <div id="controls"></div>
+      <div class="save">
+        <button id="saveBtn" class="btn btn-primary btn-block">Speichern <span aria-hidden="true">→</span></button>
+        <div id="msg"></div>
+      </div>
+    </main>
+
+    <div id="login" style="display:none;">
+      Bitte logg dich in UniGoat ein, um deine Ziege zu personalisieren.
+    </div>
   </div>
-</div>
-<div class="login" id="login" style="display:none;">
-  Bitte logg dich in UniGoat ein, um deine Ziege zu personalisieren.
 </div>
 
 <script src="lib/supabase.min.js"></script>
@@ -72,7 +98,7 @@
     var host = document.getElementById('controls'); host.innerHTML='';
     // 1) Avatar-Galerie
     var g1=document.createElement('div'); g1.className='grp';
-    g1.innerHTML='<h3>Ziege waehlen</h3>';
+    g1.innerHTML='<h3>Ziege wählen</h3>';
     var gal=document.createElement('div'); gal.className='gallery';
     GoatAvatar.AVATARS.forEach(function(id){
       var champOnly=!!(GoatAvatar.AVATAR_CHAMPION&&GoatAvatar.AVATAR_CHAMPION[id]);
@@ -106,7 +132,7 @@
     GoatAvatar.OPTIONS.flag.forEach(function(val){
       var el=document.createElement('button'); el.className='chip flagchip'+(cfg.flag===val?' active':'');
       if(val==='none'){ el.textContent='Keine'; }
-      else { el.innerHTML='<img src="'+GoatAvatar.FLAG_PATH+val+'.svg" alt="'+val+'" style="width:28px;height:21px;border-radius:3px;display:block;object-fit:cover;">'; }
+      else { el.innerHTML='<img src="'+GoatAvatar.FLAG_PATH+val+'.svg" alt="'+val+'" style="width:28px;height:21px;display:block;object-fit:cover;">'; }
       el.onclick=function(){ cfg.flag=val; drawPreview(); buildControls(); };
       fr.appendChild(el);
     });

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <script src="sentry-init.js"></script>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">    <title>Job - UniGoat</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
+  <link rel="stylesheet" href="style.css">
+    <style>
+        /* Pattern: Magic UI BlurFade */
+        @keyframes blurFadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .app-container { background: white; padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px) + 30px); }
+
+        /* Optional Hero-Cover (nur wenn photo_type=hero) */
+        /* HEADER + Bell ohne Blur — Foto soll sichtbar sein */
+        .app-header {
+            background: transparent !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            top: env(safe-area-inset-top, 0px) !important;
+            padding-top: 0.5rem !important;
+        }
+        .notification-bell-container .notification-bell-btn {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            background: rgba(0,0,0,0.45) !important;
+            color: white !important;
+        }
+        .notification-bell-container .notification-bell-btn svg { color: white !important; stroke: white !important; }
+        .app-container { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+        body { background: #F9FAFB; }
+
+        .job-cover {
+            width: 100%;
+            height: calc(260px + env(safe-area-inset-top, 0px));
+            padding-top: env(safe-area-inset-top, 0px);
+            overflow: hidden;
+            position: relative;
+            background: #1F2937;
+        }
+        .job-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        /* Dunkler Gradient unten am Hero damit kein harter Cut */
+        .job-cover::before {
+            content: '';
+            position: absolute; left: 0; right: 0; bottom: 0;
+            height: 40%;
+            background: linear-gradient(180deg, transparent, rgba(0,0,0,0.5));
+            pointer-events: none;
+            z-index: 1;
+        }
+        .job-cover::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(255,255,255,0.85) 100%);
+            pointer-events: none;
+        }
+        .job-hero { text-align: center; padding: 2rem 1.5rem; background: #F9FAFB; animation: blurFadeIn 0.5s ease-out both; }
+        .job-hero.with-cover { padding-top: 1rem; margin-top: -2.5rem; position: relative; z-index: 1; }
+        .job-logo { width: 80px; height: 80px; border-radius: 18px; object-fit: cover; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); background: #fff; }
+        .job-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; line-height: 1.2; letter-spacing: -0.02em; }
+        .job-company { color: #6B7280; font-weight: 500; }
+
+        /* Einheitliche Meta-Chip-Zeile (identisch auf allen 3 Detail-Seiten) */
+        .r8-meta-chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0}
+        .r8-chip{display:inline-flex;align-items:center;gap:.35rem;background:#F3F4F6;
+            color:#374151;padding:.4rem .7rem;border-radius:999px;font-size:.85rem;
+            font-weight:600;line-height:1}
+
+        /* Glasmorphismus Info Grid */
+        .info-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+            padding: 1.5rem;
+            background: rgba(255,255,255,0.92);
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            animation: blurFadeIn 0.5s 0.1s ease-out both;
+        }
+        .info-item { text-align: center; }
+        .info-label { font-size: 0.75rem; color: #9CA3AF; text-transform: uppercase; margin-bottom: 0.25rem; }
+        .info-value { font-weight: 700; font-size: 0.95rem; color: #111827; }
+
+        .content-section { padding: 1.5rem; animation: blurFadeIn 0.5s 0.2s ease-out both; }
+        .content-section h3 { margin-bottom: 0.75rem; font-size: 1.1rem; font-weight: 700; }
+        .content-section p, .content-section li { color: #4B5563; line-height: 1.6; font-size: 0.95rem; }
+        .content-section #desc { white-space: pre-line; }
+        .content-section ul { padding-left: 1.2rem; }
+
+        /* Apply Bar — clean ohne Blur */
+        .apply-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            padding: 1rem 1.5rem;
+            background: white;
+            border-top: 1px solid rgba(0,0,0,0.06);
+            display: flex; justify-content: center;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+        }
+        .apply-btn {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white; border: none; width: 100%; max-width: 600px;
+            padding: 1rem; border-radius: 999px; font-weight: 700; font-size: 1rem; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .apply-btn:active { transform: scale(0.97); }
+        /* Barrierefreiheit */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header" style="background:transparent; color:#374151; box-shadow:none; border:none; position:absolute; width:100%; display:flex; justify-content:space-between; align-items:center;">
+        <a href="javascript:history.back()" class="back-arrow" style="color:#374151;">&#8592;</a>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+            <button id="jobSaveBtn" class="save-btn" type="button" aria-label="Speichern" style="background:#EEF2FF; color:#4F46E5; box-shadow:none; width:34px; height:34px;"></button>
+            <button onclick="Room8Share({ type: 'job' })" title="Teilen" style="background:#EEF2FF; color:#4F46E5; border:none; border-radius:999px; height:34px; padding:0 0.8rem; display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:600; font-size:0.88rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Teilen
+            </button>
+        </div>
+    </header>
+
+    <div id="loading" style="padding: 2rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+        <div class="skeleton" style="width:80px;height:80px;border-radius:20px;"></div>
+        <div class="skeleton" style="width:200px;height:20px;border-radius:8px;"></div>
+        <div class="skeleton" style="width:120px;height:14px;border-radius:6px;"></div>
+        <div style="width:100%;margin-top:1rem;"><div class="skeleton" style="width:100%;height:120px;border-radius:16px;"></div></div>
+    </div>
+
+    <div id="content" style="display:none;">
+        <div class="job-cover" id="jobCover" style="display:none;">
+            <img id="coverImg" alt="" loading="eager" decoding="async">
+        </div>
+        <div class="job-hero" id="jobHero">
+            <img src="no-image.svg" id="logo" class="job-logo" alt="Logo">
+            <h1 id="title" class="job-title"></h1>
+            <div class="r8-meta-chips" id="r8MetaChips"></div>
+            <div id="company" class="job-company" style="display:none;"></div>
+            <div id="viewCountWrap" style="display:none; margin-top:0.5rem; align-items:center; gap:4px; color:#6b7280; font-size:0.85rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span id="viewCount">0</span>
+            </div>
+        </div>
+
+        <!-- Gehalt + Ort stehen schon in den Chips oben -> hier nur Typ + Start (keine Doppelung) -->
+        <div class="info-grid">
+            <div class="info-item" style="display:none;"><div class="info-label" data-i18n="job_label_salary">Gehalt</div><div id="salary" class="info-value"></div></div>
+            <div class="info-item"><div class="info-label" data-i18n="job_label_type">Typ</div><div id="type" class="info-value"></div></div>
+            <div class="info-item" style="display:none;"><div class="info-label" data-i18n="job_label_location">Ort</div><div id="location" class="info-value"></div></div>
+            <div class="info-item"><div class="info-label" data-i18n="job_label_start">Start</div><div id="start" class="info-value" data-i18n="job_start_immediate">Sofort</div></div>
+        </div>
+
+        <div class="content-section">
+            <h3 data-i18n="job_description">Beschreibung</h3>
+            <p id="desc"></p>
+        </div>
+
+        <div class="content-section" id="reqSection" style="display:none;">
+            <h3 data-i18n="job_requirements">Das bringst du mit</h3>
+            <ul id="reqList"></ul>
+        </div>
+
+        <div class="content-section" id="benSection" style="display:none;">
+            <h3 data-i18n="job_benefits">Das bieten wir</h3>
+            <ul id="benList"></ul>
+        </div>
+        
+        <div style="height:2rem;"></div>
+    </div>
+
+    <div class="apply-bar">
+        <button class="apply-btn" id="applyBtn" data-i18n="job_apply">Jetzt bewerben</button>
+    </div>
+</div>
+
+<!-- Bewerbungs-Modal -->
+<div id="applyOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1000; align-items:flex-end; justify-content:center;">
+  <div style="background:#fff; width:100%; max-width:560px; max-height:92vh; overflow-y:auto; border-radius:20px 20px 0 0; padding:1.5rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom));">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.25rem;">
+      <h2 style="margin:0; font-size:1.25rem;">Jetzt bewerben</h2>
+      <button id="applyClose" style="background:none; border:none; font-size:1.6rem; color:#9ca3af; cursor:pointer; line-height:1;">&times;</button>
+    </div>
+    <p id="applyJobName" style="margin:0 0 1rem; color:#6b7280; font-size:0.9rem;"></p>
+
+    <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.25rem;">Name *</label>
+    <input id="appName" type="text" placeholder="Vor- und Nachname" style="width:100%; padding:0.75rem; border:1px solid #e5e7eb; border-radius:12px; margin-bottom:0.85rem; font-size:1rem;">
+
+    <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.25rem;">E-Mail *</label>
+    <input id="appEmail" type="email" placeholder="dein@email.de" style="width:100%; padding:0.75rem; border:1px solid #e5e7eb; border-radius:12px; margin-bottom:0.85rem; font-size:1rem;">
+
+    <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.25rem;">Telefon <small style="color:#9ca3af;">(optional)</small></label>
+    <input id="appPhone" type="tel" placeholder="0151 ..." style="width:100%; padding:0.75rem; border:1px solid #e5e7eb; border-radius:12px; margin-bottom:0.85rem; font-size:1rem;">
+
+    <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.25rem;">Anschreiben <small style="color:#9ca3af;">(optional)</small></label>
+    <textarea id="appLetter" rows="4" placeholder="Warum passt du zu dieser Stelle?" style="width:100%; padding:0.75rem; border:1px solid #e5e7eb; border-radius:12px; margin-bottom:0.85rem; font-size:1rem; resize:vertical;"></textarea>
+
+    <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.25rem;">Lebenslauf <small style="color:#9ca3af;">(PDF, optional, max 5 MB)</small></label>
+    <input id="appResume" type="file" accept="application/pdf" style="width:100%; margin-bottom:0.35rem; font-size:0.9rem;">
+    <div id="appResumeName" style="font-size:0.8rem; color:#047857; margin-bottom:0.85rem;"></div>
+
+    <button id="appSubmit" class="apply-btn" style="width:100%;">Bewerbung absenden</button>
+    <p style="font-size:0.75rem; color:#9ca3af; text-align:center; margin-top:0.6rem;">Deine Daten gehen nur an den Anbieter dieser Stelle.</p>
+  </div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="session-cache.js"></script>
+<script src="room8-ui.js"></script>
+<script src="room8-share.js"></script>
+<script src="room8-saves.js"></script>
+<script>
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const id = new URLSearchParams(window.location.search).get('id');
+
+    async function load() {
+        if (!id) return;
+        const { data: job } = await sb.from('listings').select('*, listing_photos(storage_path, photo_type, display_order)').eq('id', id).single();
+
+        // View-Counter erhoehen (fire-and-forget, blockt User-Flow nicht)
+        if (job) {
+            sb.rpc('increment_view_count', { listing_id: id }).then(function(){}, function(){});
+        }
+
+        if (job) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+
+            // Speichern-Button verdrahten
+            if (window.Room8Saves) {
+                try { await Room8Saves.load(); } catch (e) {}
+                Room8Saves.wire(document.getElementById('jobSaveBtn'), 'job', id);
+            }
+
+            // View-Count Anzeige
+            var vcw = document.getElementById('viewCountWrap');
+            document.getElementById('viewCount').textContent = (job.view_count || 0) + 1;
+            vcw.style.display = 'inline-flex';
+
+            document.getElementById('title').textContent = job.title;
+            document.getElementById('company').textContent = job.company_name;
+            document.getElementById('location').textContent = job.city;
+            document.getElementById('type').textContent = (job.job_type || '').toUpperCase();
+            
+            let salary = job.salary_amount + ' €';
+            if (job.salary_type === 'per_hour') salary += '/h';
+            else salary += '/Monat';
+            document.getElementById('salary').textContent = salary;
+            
+            document.getElementById('desc').textContent = job.description;
+
+            // ===== Einheitliche Meta-Chip-Zeile =====
+            // HTML-Escape Helper (kein vorhandener Helper auf dieser Seite)
+            function r8Esc(s) {
+                return String(s).replace(/[&<>"']/g, function (c) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+                });
+            }
+            var chips = [];
+            // 1. Ort -> Stadt
+            if (job.city) chips.push('📍 ' + r8Esc(job.city));
+            // 2. Zeit -> Arbeitsstunden/Woche (nur wenn vorhanden)
+            var hours = job.min_hours_per_week || job.hours_per_week || job.weekly_hours;
+            if (hours) chips.push('🕒 ' + r8Esc(hours) + 'h/Woche');
+            // 3. Wert -> Gehalt (bereits oben als 'salary' berechnet)
+            if (job.salary_amount) chips.push('💶 ' + r8Esc(salary));
+            // 4. Anbieter -> Firma
+            if (job.company_name) chips.push('🏢 ' + r8Esc(job.company_name));
+            document.getElementById('r8MetaChips').innerHTML =
+                chips.map(function (c) { return '<span class="r8-chip">' + c + '</span>'; }).join('');
+
+            // Photos: photo_type='hero' -> Cover-Banner, photo_type='logo' (oder NULL) -> Logo
+            var photos = job.listing_photos || [];
+            var heroPhoto = photos.find(function(p){ return p.photo_type === 'hero'; });
+            var logoPhoto = photos.find(function(p){ return p.photo_type === 'logo'; }) ||
+                            photos.find(function(p){ return p.photo_type !== 'hero'; }); // fallback first non-hero
+            // Bucket aus dem Pfad ableiten: Partner-Einreichungen liegen in
+            // event-images/partner-uploads/, normale Inserate in listing-images.
+            function bucketFor(p) { return (p && p.indexOf('partner-uploads/') === 0) ? 'event-images' : 'listing-images'; }
+            if (heroPhoto) {
+                var heroBkt = bucketFor(heroPhoto.storage_path);
+                var heroUrl = (window.Room8 && Room8.getOptimizedImageUrl)
+                    ? Room8.getOptimizedImageUrl(heroBkt, heroPhoto.storage_path, { width: 1200, quality: 80 })
+                    : sb.storage.from(heroBkt).getPublicUrl(heroPhoto.storage_path).data.publicUrl;
+                var _cv = document.getElementById('coverImg');
+                _cv.onerror = function () { document.getElementById('jobCover').style.display = 'none'; };
+                _cv.src = heroUrl;
+                document.getElementById('jobCover').style.display = 'block';
+                document.getElementById('jobHero').classList.add('with-cover');
+            }
+            if (logoPhoto) {
+                var logoBkt = bucketFor(logoPhoto.storage_path);
+                var logoUrl = (window.Room8 && Room8.getOptimizedImageUrl)
+                    ? Room8.getOptimizedImageUrl(logoBkt, logoPhoto.storage_path, { width: 200, height: 200, quality: 80 })
+                    : sb.storage.from(logoBkt).getPublicUrl(logoPhoto.storage_path).data.publicUrl;
+                document.getElementById('logo').src = logoUrl;
+            }
+
+            // Arrays
+            if (job.requirements && job.requirements.length > 0) {
+                document.getElementById('reqSection').style.display = 'block';
+                document.getElementById('reqList').innerHTML = job.requirements.map(i => `<li>${i}</li>`).join('');
+            }
+            if (job.benefits && job.benefits.length > 0) {
+                document.getElementById('benSection').style.display = 'block';
+                document.getElementById('benList').innerHTML = job.benefits.map(i => `<li>${i}</li>`).join('');
+            }
+
+            // Apply Button -> In-App-Bewerbungsformular oeffnen
+            document.getElementById('applyBtn').onclick = openApply;
+            document.getElementById('applyJobName').textContent = job.title + (job.company_name ? ' bei ' + job.company_name : '');
+        }
+    }
+
+    // ===== Bewerbungs-Flow =====
+    var overlay = document.getElementById('applyOverlay');
+    function closeApply() { overlay.style.display = 'none'; }
+    document.getElementById('applyClose').onclick = closeApply;
+    overlay.onclick = function (e) { if (e.target === overlay) closeApply(); };
+    document.getElementById('appResume').onchange = function () {
+        var f = this.files[0];
+        document.getElementById('appResumeName').textContent = f ? ('Ausgewaehlt: ' + f.name) : '';
+    };
+
+    async function openApply() {
+        var ses = await sb.auth.getSession();
+        var user = ses && ses.data && ses.data.session ? ses.data.session.user : null;
+        if (!user) { Room8UI.info('Bitte melde dich an, um dich zu bewerben.'); setTimeout(function(){ window.location.href = 'login.html'; }, 1200); return; }
+        // Profil vorbefuellen (Name aus my_profile, Email aus Auth)
+        try {
+            var p = await sb.from('my_profile').select('full_name').maybeSingle();
+            if (p && p.data && p.data.full_name && !document.getElementById('appName').value) document.getElementById('appName').value = p.data.full_name;
+        } catch (e) {}
+        if (!document.getElementById('appEmail').value) document.getElementById('appEmail').value = user.email || '';
+        overlay.style.display = 'flex';
+    }
+
+    document.getElementById('appSubmit').onclick = async function () {
+        var btn = this;
+        var name = document.getElementById('appName').value.trim();
+        var email = document.getElementById('appEmail').value.trim();
+        var phone = document.getElementById('appPhone').value.trim();
+        var letter = document.getElementById('appLetter').value.trim();
+        var file = document.getElementById('appResume').files[0];
+        if (!name || !email) { Room8UI.warning('Bitte Name und E-Mail ausfuellen.'); return; }
+        if (file && file.size > 5 * 1024 * 1024) { Room8UI.warning('Lebenslauf max 5 MB.'); return; }
+
+        btn.disabled = true; btn.textContent = 'Wird gesendet...';
+        try {
+            var ses = await sb.auth.getSession();
+            var uid = ses.data.session.user.id;
+            var resumePath = null;
+            if (file) {
+                resumePath = uid + '/cv_' + Date.now() + '.pdf';
+                var up = await sb.storage.from('resumes').upload(resumePath, file, { contentType: 'application/pdf', upsert: true });
+                if (up.error) throw up.error;
+            }
+            // apply-Counter (fire-and-forget)
+            sb.rpc('increment_listing_apply', { p_listing_id: id }).then(function(){}, function(){});
+            var { error } = await sb.from('job_applications').upsert({
+                user_id: uid, listing_id: id,
+                applicant_name: name, applicant_email: email,
+                applicant_phone: phone || null, cover_letter: letter || null,
+                resume_path: resumePath
+            }, { onConflict: 'user_id,listing_id' });
+            if (error) throw error;
+            closeApply();
+            Room8UI.success('Bewerbung gesendet! Der Anbieter meldet sich bei dir.');
+        } catch (e) {
+            Room8UI.warning('Fehler: ' + (e.message || e));
+        } finally {
+            btn.disabled = false; btn.textContent = 'Bewerbung absenden';
+        }
+    };
+
+    load();
+</script>
+<script src="notificationBell.js"></script>
+<script src="verifyGate.js"></script>
+<script>
+(function(){var n=0;(function w(){var s=(typeof sb!=='undefined'&&sb)||window.sb;
+  if(s){try{verifyGate({blur:['#content'],message:'Verifiziere dich als Student, um diesen Job zu sehen.'});}catch(e){}return;}
+  if(n++>60)return;setTimeout(w,100);})();})();
+</script>
+</body>
+</html>

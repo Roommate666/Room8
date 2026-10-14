@@ -30,7 +30,12 @@
           /^user[_-]?[0-9a-f]{4,}/i.test(prof.username || '');
         if (incomplete) {
           try { sessionStorage.setItem('og_redirected', '1'); } catch (e) {}
-          window.location.replace('complete-profile.html');
+          // In der SPA laeuft der Gate INNERHALB eines iframes -> das OBERSTE Fenster umleiten,
+          // damit complete-profile als Vollseite kommt (nicht im iframe, was zu Shell-in-Shell fuehrt).
+          var topw = window;
+          try { if (window.top && window.top !== window.self) topw = window.top; } catch (e) { topw = window; }
+          try { topw.location.replace('complete-profile.html'); }
+          catch (e) { window.location.replace('complete-profile.html'); }
         }
       }).catch(function () { /* fail-open */ });
     }).catch(function () { /* fail-open */ });

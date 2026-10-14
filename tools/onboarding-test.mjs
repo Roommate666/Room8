@@ -1,0 +1,32 @@
+import { chromium } from 'playwright';
+const B='https://371d6cbe.unigoat-spa.pages.dev';
+const stamp=Date.now();
+const EMAIL='gatetest_'+stamp+'@unigoat-test.de';
+const PASS='GateTest2026!';
+const USER='gate'+(stamp%100000);
+const b=await chromium.launch();
+const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true});
+const p=await ctx.newPage();
+const errs=[]; p.on('pageerror',e=>errs.push(e.message));
+await p.goto(B+'/register.html',{waitUntil:'networkidle'});
+await p.fill('#username', USER);
+await p.fill('#email', EMAIL);
+await p.fill('#password', PASS);
+// ALLE Checkboxen anhaken (AGB etc.)
+const cbs=await p.$$('input[type=checkbox]');
+for(const cb of cbs){ try{ await cb.check(); }catch(e){} }
+await p.click('#registerBtn');
+await p.waitForTimeout(7000);
+const url1=p.url().replace(B,'');
+console.log('Nach Registrierung -> URL:', url1);
+const onComplete=/complete-profile/.test(p.url());
+const isShellNested=await p.evaluate(()=>!!document.getElementById('frames'));
+const hasCityField=await p.evaluate(()=>!!document.getElementById('city'));
+const bodyMsg=await p.evaluate(()=>{var e=document.querySelector('.error,.msg,#msg,[class*=error]');return e?e.innerText.slice(0,80):'';});
+console.log('Auf complete-profile.html (Vollseite):', onComplete);
+console.log('Stadt-Feld sichtbar (complete-profile):', hasCityField);
+console.log('Verschachtelte Shell (soll NICHT):', isShellNested);
+if(bodyMsg) console.log('Seiten-Meldung:', bodyMsg);
+console.log('JS-Fehler:', errs.length?errs.slice(0,2).join(' // '):'keine');
+console.log('TEST-EMAIL:', EMAIL);
+await b.close();

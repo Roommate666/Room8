@@ -3,44 +3,78 @@
 <head>
 <script src="sentry-init.js"></script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Menü-Fotos verwalten — UniGoat Admin</title>
+<link rel="stylesheet" href="unigoat-v2.css">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="unigoat.css">
 <style>
-  .amwrap{max-width:640px;margin:0 auto;padding:16px;}
-  .amhd{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
-  .amhd b{font-family:'Fraunces',serif;font-size:1.4rem;}
-  .csel{width:100%;padding:14px;border-radius:14px;border:1px solid #d7e0de;font-size:1rem;background:#fff;margin-bottom:16px;}
-  .mpanel{background:var(--card,#fff);border-radius:16px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.05);}
-  .mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0;}
-  .mthumb{position:relative;aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:#eef2f1;}
-  .mthumb img{width:100%;height:100%;object-fit:cover;}
-  .mthumb button{position:absolute;top:5px;right:5px;width:26px;height:26px;border-radius:50%;border:none;background:rgba(220,38,38,.92);color:#fff;font-weight:800;cursor:pointer;line-height:1;}
-  .uparea{border:2px dashed #b9c7c3;border-radius:14px;padding:22px;text-align:center;color:var(--mut,#6b7a77);cursor:pointer;}
-  .uparea input{display:none;}
-  .btn-main{width:100%;background:var(--mint,#12B489);color:#04231a;border:none;border-radius:14px;padding:14px;font-weight:800;font-size:1rem;cursor:pointer;margin-top:12px;}
-  .msg{text-align:center;padding:10px;font-weight:600;}
-  .muted{color:var(--mut,#6b7a77);font-size:.85rem;}
+  /* Alias: altes Token-Vokabular auf v2 mappen, damit bestehendes JS
+     + inline-styles in v2-Farben weiterlaufen. */
+  :root{
+    --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+    --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+    --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+    --fh:var(--font-heading); --fb:var(--font-body);
+    --mint:var(--color-accent); --mut:var(--text-muted);
+  }
+  .icn{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; display:block; }
+
+  /* Coupon-Auswahl (Select) im v2-Look (eckig, Tinte-Rahmen) */
+  .csel{ width:100%; padding:13px 14px; border-radius:0; border:2px solid color-mix(in srgb,var(--color-text) 30%,transparent);
+    font-family:var(--font-body); font-size:16px; color:var(--color-text); background:var(--color-bg); margin-bottom:0;
+    caret-color:var(--color-accent); }
+  .csel:focus-visible{ border-color:var(--color-accent); outline:none; }
+
+  /* Panel = Karten-Block mit v2-Rules statt Schatten */
+  .mpanel{ background:var(--color-bg); border-top:var(--rule); padding:16px 0 0; box-shadow:none; }
+
+  /* Foto-Grid: Coupon-Bilder bleiben FARBIG (kein grayscale) */
+  .mgrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:14px 0; }
+  .mthumb{ position:relative; aspect-ratio:3/4; border-radius:0; overflow:hidden; background:var(--color-neutral-100); border:1px solid var(--color-divider); }
+  .mthumb img{ width:100%; height:100%; object-fit:cover; }
+  .mthumb button{ position:absolute; top:6px; right:6px; width:26px; height:26px; border-radius:0; border:none;
+    background:#C43A22; color:#fff; font-weight:800; cursor:pointer; line-height:1; }
+
+  /* Upload-Flaeche */
+  .uparea{ display:flex; align-items:center; justify-content:center; gap:8px; border:2px dashed color-mix(in srgb,var(--color-text) 30%,transparent);
+    border-radius:0; padding:22px; text-align:center; color:var(--text-muted); cursor:pointer;
+    font-family:var(--font-heading); font-weight:800; font-size:14px; }
+  .uparea:hover{ border-color:var(--color-accent); color:var(--color-text); }
+  .uparea input{ display:none; }
+
+  .msg{ text-align:center; padding:10px; font-weight:600; color:var(--color-text); }
+  .muted{ color:var(--text-muted); font-size:13px; }
 </style>
 </head>
-<body class="ug">
-<div class="amwrap">
-  <div class="amhd"><a href="admin.html" style="text-decoration:none;font-size:1.4rem;">←</a><b>Menü-Fotos verwalten</b></div>
-  <div id="gate" class="msg">Prüfe Zugriff…</div>
-  <div id="app" style="display:none;">
-    <select id="couponSel" class="csel"><option value="">— Coupon wählen —</option></select>
-    <div id="panel" class="mpanel" style="display:none;">
-      <div id="bizName" style="font-weight:700;margin-bottom:4px;"></div>
-      <div class="muted">Lade Menü-/Angebots-Fotos hoch. Sie erscheinen swipebar auf der Coupon-Detailseite unter „Menü &amp; Angebot ansehen".</div>
-      <div class="mgrid" id="mgrid"></div>
-      <label class="uparea" id="uparea">
-        📸 Fotos auswählen (mehrere möglich)
-        <input type="file" id="fileInput" accept="image/*" multiple>
-      </label>
-      <div id="upmsg" class="msg"></div>
+<body>
+<div class="screen">
+  <div class="screen-body">
+    <div class="topbar" style="padding-top:14px">
+      <a class="btn btn-icon backbtn" href="admin.html" style="margin-left:8px" aria-label="Zurück"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--color-text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M15 18l-6-6 6-6"/></svg></a>
+      <div class="masthead" style="font-size:30px;padding:0 8px 0 2px">Admin</div>
+      <span style="width:40px"></span>
+    </div>
+    <div class="hr"></div>
+
+    <div style="padding:16px 20px 24px;max-width:640px;margin:0 auto;">
+      <div class="kicker" style="margin-bottom:4px">UniGoat · Admin</div>
+      <div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-.02em;margin-bottom:14px;">Menü-Fotos verwalten</div>
+
+      <div id="gate" class="msg">Prüfe Zugriff…</div>
+      <div id="app" style="display:none;">
+        <select id="couponSel" class="csel"><option value="">— Coupon wählen —</option></select>
+        <div id="panel" class="mpanel" style="display:none;">
+          <div id="bizName" style="font-family:var(--font-heading);font-weight:800;font-size:18px;margin-bottom:6px;"></div>
+          <div class="muted">Lade Menü-/Angebots-Fotos hoch. Sie erscheinen swipebar auf der Coupon-Detailseite unter „Menü &amp; Angebot ansehen".</div>
+          <div class="mgrid" id="mgrid"></div>
+          <label class="uparea" id="uparea">
+            <svg class="icn" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Fotos auswählen (mehrere möglich)
+            <input type="file" id="fileInput" accept="image/*" multiple>
+          </label>
+          <div id="upmsg" class="msg"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="de" data-page="imprint">
+<head>
+    <script src="sentry-init.js"></script>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title data-i18n="imprint_page_title">Impressum - UniGoat</title>
+    <meta name="description" content="Impressum der UniGoat Studenten-Plattform. Kontaktdaten und rechtliche Informationen.">
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
+  <link rel="stylesheet" href="unigoat-v2.css">
+    <style>
+        /* Alias: altes Token-Vokabular auf v2 mappen, damit bestehendes JS + Inline-Styles in v2-Farben laufen */
+        :root{
+          --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+          --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+          --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+          --fh:var(--font-heading); --fb:var(--font-body);
+        }
+
+        .icn{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+        /* Prosa-Rahmen: Zeitungs-Look, Radius 0, 2px-Linien */
+        .legal-content{ padding:0 0 40px; }
+        .legal-body{ padding:0 var(--space-5); }
+        .legal-body h2{
+          font-family:var(--font-heading); font-weight:800; font-size:var(--fs-lg);
+          letter-spacing:-.01em; line-height:1.2; margin:26px 0 10px;
+          padding-bottom:8px; border-bottom:var(--rule-thin);
+        }
+        .legal-body h3{
+          font-family:var(--font-heading); font-weight:800; font-size:var(--fs-md);
+          line-height:1.25; margin:18px 0 6px;
+        }
+        .legal-body p{ font-size:var(--fs-md); line-height:1.7; color:var(--text-soft); margin-bottom:12px; }
+        .disclaimer-text{ color:var(--text-muted); }
+
+        /* Poster-Kontakt (der eine Mint-Moment) */
+        .imp-poster{ background:var(--color-accent); color:var(--on-accent); padding:22px var(--space-5) 20px; }
+        .imp-poster .kicker{ color:var(--on-accent); opacity:.92; }
+        .imp-poster .imp-name{ font-family:var(--font-heading); font-weight:800; font-size:26px; line-height:1.1; letter-spacing:-.02em; margin:10px 0 8px; }
+        .imp-poster .imp-addr{ font-size:var(--fs-md); line-height:1.6; }
+
+        /* Kontakt-Zellen (E-Mail) */
+        .contact-cell{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px var(--space-5); border-top:var(--rule-thin); }
+        .contact-cell:first-child{ border-top:0; }
+        .contact-label{ display:flex; align-items:center; gap:8px; font-family:var(--font-heading); font-weight:800; font-size:var(--fs-sm); }
+        .contact-label .icn{ color:var(--accent-small); }
+        .contact-link{ font-family:var(--font-heading); font-weight:800; font-size:var(--fs-sm); color:var(--accent-small); text-decoration:none; }
+        .contact-link:hover{ text-decoration:underline; }
+
+        .resp-box{ padding:14px var(--space-5); border-top:var(--rule-thin); border-bottom:var(--rule-thin); }
+        .resp-box p{ margin:0; }
+
+        .imp-stand{ margin-top:32px; text-align:center; color:var(--text-muted); font-family:var(--font-heading); font-weight:800; font-size:var(--fs-xs); letter-spacing:.08em; text-transform:uppercase; }
+
+        @media (prefers-reduced-motion: reduce){
+            *, *::before, *::after{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="screen">
+  <div class="screen-body">
+
+    <div class="topbar" style="padding-top:14px">
+        <a class="btn btn-icon" href="javascript:history.back()" aria-label="Zurück" style="margin-left:8px">
+            <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--color-text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <div class="masthead masthead-sm" data-i18n="imprint_title" style="font-size:30px;padding:0 8px 0 2px">Impressum</div>
+        <span style="width:40px"></span>
+    </div>
+    <div class="hr"></div>
+
+    <main class="legal-content">
+
+        <div id="legalBanner" style="display:none; background:var(--color-surface); border-top:var(--rule); border-bottom:var(--rule); padding:14px 20px; margin-bottom:4px; color:var(--color-text); font-size:0.9rem; line-height:1.5;">
+            <strong data-i18n="legal_banner_title">Rechtsverbindlich nur auf Deutsch</strong><br>
+            <span data-i18n="legal_banner_text">Diese rechtlichen Texte sind nur in der deutschen Originalfassung verbindlich.</span>
+        </div>
+        <script>
+            (function(){
+                var lang = (window.Room8i18n && Room8i18n.getCurrentLanguage) ? Room8i18n.getCurrentLanguage() : (localStorage.getItem('room8_language') || 'de');
+                if (lang === 'en') document.getElementById('legalBanner').style.display = 'block';
+            })();
+        </script>
+
+        <section class="imp-poster">
+            <div class="kicker" data-i18n="imprint_info_title">Angaben gem&auml;&szlig; &sect; 5 TMG</div>
+            <div class="imp-name">Yusuf Albayrak</div>
+            <div class="imp-addr">
+                Am Silbermannpark 13<br>
+                86161 Augsburg<br>
+                <span data-i18n="imprint_country">Deutschland</span>
+            </div>
+        </section>
+
+        <div class="kicker" data-i18n="imprint_contact_title" style="padding:20px 20px 8px;color:var(--color-accent-700)">Kontakt</div>
+        <div class="cells" style="border-top:var(--rule);border-bottom:var(--rule)">
+            <div class="contact-cell">
+                <span class="contact-label">
+                    <svg class="icn" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="0"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                    <span data-i18n="imprint_email_support">Support</span>
+                </span>
+                <a href="mailto:info@unigoat.de" class="contact-link">info@unigoat.de</a>
+            </div>
+            <div class="contact-cell">
+                <span class="contact-label">
+                    <svg class="icn" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="7" rx="0"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                    <span data-i18n="imprint_email_business">Business</span>
+                </span>
+                <a href="mailto:info@unigoat.de" class="contact-link">info@unigoat.de</a>
+            </div>
+        </div>
+
+        <div class="legal-body">
+
+            <h2 style="border-bottom:0">Verantwortlich f&uuml;r den Inhalt nach &sect; 18 Abs. 2 MStV</h2>
+        </div>
+        <div class="resp-box">
+            <p>
+                Yusuf Albayrak<br>
+                Am Silbermannpark 13<br>
+                86161 Augsburg
+            </p>
+        </div>
+        <div class="legal-body">
+
+            <h2>Umsatzsteuer</h2>
+            <p class="disclaimer-text">Kleinunternehmer gem&auml;&szlig; &sect; 19 UStG &ndash; es wird keine Umsatzsteuer ausgewiesen.</p>
+
+            <h2>Haftungsausschluss</h2>
+
+            <h3 data-i18n="imprint_liability_content_title">Haftung f&uuml;r Inhalte</h3>
+            <p class="disclaimer-text" data-i18n="imprint_liability_content_text">Die Inhalte unserer Seiten wurden mit gr&ouml;&szlig;ter Sorgfalt erstellt. F&uuml;r die Richtigkeit, Vollst&auml;ndigkeit und Aktualit&auml;t der Inhalte k&ouml;nnen wir jedoch keine Gew&auml;hr &uuml;bernehmen. Als Diensteanbieter sind wir gem&auml;&szlig; &sect; 7 Abs.1 TMG f&uuml;r eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach &sect;&sect; 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, &uuml;bermittelte oder gespeicherte fremde Informationen zu &uuml;berwachen oder nach Umst&auml;nden zu forschen, die auf eine rechtswidrige T&auml;tigkeit hinweisen.</p>
+
+            <h3 data-i18n="imprint_liability_links_title">Haftung f&uuml;r Links</h3>
+            <p class="disclaimer-text" data-i18n="imprint_liability_links_text">Unser Angebot enth&auml;lt Links zu externen Webseiten Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb k&ouml;nnen wir f&uuml;r diese fremden Inhalte auch keine Gew&auml;hr &uuml;bernehmen. F&uuml;r die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.</p>
+
+            <h2 data-i18n="imprint_copyright_title">Urheberrecht</h2>
+            <p class="disclaimer-text" data-i18n="imprint_copyright_text">Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielf&auml;ltigung, Bearbeitung, Verbreitung und jede Art der Verwertung au&szlig;erhalb der Grenzen des Urheberrechtes bed&uuml;rfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.</p>
+
+            <h2 data-i18n="imprint_dispute_title">Streitschlichtung</h2>
+            <p class="disclaimer-text" data-i18n="imprint_dispute_text">Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
+
+            <p class="imp-stand">
+                Stand: Februar 2026
+            </p>
+
+        </div>
+    </main>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="session-cache.js"></script>
+<script src="translations.js"></script>
+</body>
+</html>

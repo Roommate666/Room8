@@ -51,30 +51,30 @@
         };
 
         var colors = {
-            success: { bg: '#ECFDF5', border: '#10B981', text: '#065F46', icon: '#10B981' },
-            error: { bg: '#FEF2F2', border: '#EF4444', text: '#991B1B', icon: '#EF4444' },
-            warning: { bg: '#FFFBEB', border: '#F59E0B', text: '#92400E', icon: '#F59E0B' },
-            info: { bg: '#EFF6FF', border: '#3B82F6', text: '#1E40AF', icon: '#3B82F6' }
+            success: { icon: '#12B489' },
+            error: { icon: '#E5533C' },
+            warning: { icon: '#F4B740' },
+            info: { icon: '#12B489' }
         };
 
         var color = colors[type] || colors.info;
 
+        // v2-Look: eckig (Radius 0), Tinte-Hintergrund, Papier-Text, farbiges Icon je Typ.
         toast.style.cssText = `
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 14px 18px;
-            background: ${color.bg};
-            border: 1px solid ${color.border};
-            border-radius: 999px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8);
-            color: ${color.text};
+            padding: 13px 16px;
+            background: #201e1d;
+            border: none;
+            border-radius: 0;
+            box-shadow: 0 12px 32px rgba(45,43,43,0.22);
+            color: #f3f2f2;
+            font-family: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             font-size: 0.9rem;
-            font-weight: 500;
+            font-weight: 800;
             pointer-events: auto;
             animation: toastBlurIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
         `;
 
         toast.innerHTML = '<span style="color: ' + color.icon + '; flex-shrink: 0;">' + (icons[type] || icons.info) + '</span><span style="flex: 1;">' + escapeHtml(message) + '</span>';

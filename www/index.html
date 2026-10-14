@@ -4,12 +4,26 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- App-Start: in der nativen App SOFORT ein Splash-Overlay ueber die Landing legen (kein Flash der Marketing-Seite,
+       bevor der Login-Check zur App weiterleitet). Overlay steht statisch im HTML -> ab dem ersten Frame sichtbar. -->
+  <script>(function(){try{var n=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());if(n)document.documentElement.classList.add('is-native');}catch(e){}})();</script>
+  <style>
+    #appSplash{display:none;}
+    html.is-native #appSplash{display:flex;position:fixed;inset:0;z-index:2147483647;background:#FBF7EF;align-items:center;justify-content:center;overflow:hidden;}
+    #appSplash video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#FBF7EF;}
+    #appSplash img{position:relative;z-index:1;width:104px;height:104px;border-radius:24px;box-shadow:0 12px 30px rgba(30,27,22,.16);display:none;}
+    #appSplash.novideo{background:#FBF7EF;}
+    #appSplash.novideo video{display:none;}
+    #appSplash.novideo img{display:block;animation:splashPop .55s cubic-bezier(.2,.8,.3,1) both;}
+    @keyframes splashPop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:1}}
+  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>UniGoat – Studentenrabatte, Spiel &amp; echte Preise</title>
   <meta name="description" content="UniGoat ist die App von Studenten, für Studenten: exklusive Studentenrabatte in deiner Unistadt, ein süchtig machendes Spiel und jeden Monat echte Preise. Kostenlos.">
   <meta name="theme-color" content="#FBF7EF">
   <link rel="icon" href="logo-goat.png?v90">
   <link rel="apple-touch-icon" href="logo-goat.png?v90">
+  <link rel="manifest" href="/manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,900&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -178,6 +192,7 @@
   </style>
 </head>
 <body>
+<div id="appSplash"><video id="splashVid" muted playsinline autoplay preload="auto"><source src="intro-goat.mp4?v5" type="video/mp4"></video><img src="logo-goat.png?v90" alt="UniGoat"></div>
   <nav class="nav" id="nav">
     <a href="#" class="brand"><img src="logo-goat.png?v90" alt="UniGoat"> UniGoat<span class="beta">Beta</span></a>
     <div class="nav-actions">
@@ -288,10 +303,35 @@
   <script src="session-cache.js"></script>
   <script src="translations.js"></script>
   <script>
+    // Splash-Overlay (nur nativ sichtbar) ausblenden -> Landing zeigen, wenn NICHT eingeloggt
+    function hideAppSplash(){var d=document.getElementById('appSplash');if(d){d.style.transition='opacity .3s';d.style.opacity='0';setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);},320);}}
+    var isNativeApp = document.documentElement.classList.contains('is-native');
+    // --- Intro-Video (nur nativ): laeuft beim App-Start, endet auf dem UniGoat-Logo. Erst danach Weiterleitung. ---
+    var _dest=null, _authDone=false, _introDone=!isNativeApp, _went=false;
+    function _go(){ if(_went||!isNativeApp) return; if(!(_authDone&&_introDone)) return; _went=true; window.location.replace(_dest||'login.html'); }
+    if(isNativeApp){
+      var _sv=document.getElementById('splashVid'), _splash=document.getElementById('appSplash');
+      var _fin=function(){ if(_introDone) return; _introDone=true; _go(); };
+      if(_sv){
+        _sv.addEventListener('ended', _fin);
+        _sv.addEventListener('error', function(){ if(_splash) _splash.classList.add('novideo'); _fin(); });
+        if(_splash) _splash.addEventListener('click', _fin);        // Tap zum Ueberspringen
+        setTimeout(_fin, 9000);                                     // Sicherheit: Intro max 9s
+        var _p=_sv.play(); if(_p&&_p.catch) _p.catch(function(){ setTimeout(_fin,1200); }); // Autoplay blockiert -> kurz zeigen, dann weiter
+      } else { _introDone=true; }
+    }
+    // --- Auth-Check: nativ -> Ziel merken (erst nach Intro weiter); Web -> Verhalten wie bisher ---
+    function _authFallback(){ if(isNativeApp){ _dest='login.html'; _authDone=true; _go(); } else { hideAppSplash(); } }
     if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
       var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      sb.auth.getUser().then(({ data }) => { if (data && data.user) window.location.replace('coupons.html'); });
-    }
+      sb.auth.getUser().then(({ data }) => {
+        var loggedIn = !!(data && data.user);
+        if(isNativeApp){ _dest = loggedIn ? 'app.html' : 'login.html'; _authDone=true; _go(); }
+        else { if(loggedIn){ window.location.replace('app.html'); } else { hideAppSplash(); } }
+      }).catch(_authFallback);
+    } else { _authFallback(); }
+    // Global-Fallback: nie ewig haengen (nativ max 8s -> trotzdem weiter)
+    setTimeout(function(){ if(isNativeApp){ _authDone=true; _introDone=true; _go(); } else if(!/app\.html|login\.html/.test(location.href)) hideAppSplash(); }, 11000);
     window.addEventListener('scroll', function(){
       document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 20);
     });

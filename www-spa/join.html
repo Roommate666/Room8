@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="sentry-init.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Einladung — UniGoat</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+<link rel="stylesheet" href="unigoat-v2.css">
+<style>
+  body{ background:var(--color-bg); }
+  .join-wrap{ min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .join-card{ width:100%; max-width:380px; background:#fff; border:2px solid var(--color-text); padding:32px 26px 26px;
+    text-align:center; box-shadow:var(--shadow-lg); }
+  .glogo{ width:84px; height:84px; object-fit:contain; margin:0 auto 14px; display:block; }
+  .invite-kicker{ font-family:var(--font-heading); font-weight:800; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent-small); margin-bottom:10px; }
+  .join-card h1{ font-family:var(--font-heading); font-weight:800; font-size:26px; line-height:1.15; letter-spacing:-.02em; color:var(--color-text); }
+  .join-card .sub{ font-family:var(--font-body); font-size:15px; line-height:1.5; color:var(--text-muted); margin:12px 0 22px; }
+  .jbtn{ display:block; width:100%; text-decoration:none; font-family:var(--font-heading); font-weight:800; font-size:16px;
+    padding:15px; margin:10px 0 0; border-radius:0; cursor:pointer; border:2px solid var(--color-text); }
+  .jbtn.primary{ background:var(--color-accent); color:var(--color-text); }
+  .jbtn.ghost{ background:#fff; color:var(--color-text); }
+  .spin{ width:34px;height:34px;border:3px solid var(--color-divider);border-top-color:var(--color-accent);border-radius:50%;
+    margin:20px auto;animation:sp 1s linear infinite;} @keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="join-wrap">
+  <div class="join-card">
+    <img class="glogo" src="logo-goat.png?v90" alt="UniGoat">
+    <div id="content"><div class="spin"></div></div>
+  </div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function html(h){ $('content').innerHTML=h; }
+
+  var ref=(new URLSearchParams(location.search).get('ref')||'').trim();
+  if(!ref){ location.replace('dashboard.html'); return; }
+
+  async function run(){
+    var u=null;
+    try{ if(window.sb){ u=(await sb.auth.getUser()).data.user; } }catch(e){}
+
+    if(u){
+      // Eingeloggt -> direkt Freundschaftsanfrage senden
+      try{
+        var r=await sb.rpc('send_friend_request',{p_target:ref});
+        var d=(r&&r.data)||{};
+        var map={ already_friends:'Ihr seid schon Freunde. 🐐', request_already_sent:'Deine Anfrage läuft schon.',
+          cannot_add_self:'Das ist dein eigener Einladungslink. :)', user_not_found:'Diese Einladung ist ungültig oder abgelaufen.' };
+        if(d.ok){
+          try{ localStorage.removeItem('ug_pending_ref'); }catch(e){}
+          html('<h1>'+(d.status==='accepted'?'Ihr seid jetzt Freunde! 🎉':'Anfrage gesendet! ✅')+'</h1>'
+            +'<p class="sub">'+(d.status==='accepted'?'Los — fordert euch gegenseitig zum Goat-Blast-Duell heraus.':'Sobald er oder sie annimmt, könnt ihr euch duellieren.')+'</p>'
+            +'<a class="jbtn primary" href="friends.html">Zu meinen Freunden</a>'
+            +'<a class="jbtn ghost" href="game/duel.html">Zum Duell</a>');
+        } else {
+          html('<h1>Fast! 🐐</h1><p class="sub">'+(map[d.error]||'Das hat leider nicht geklappt.')+'</p>'
+            +'<a class="jbtn primary" href="friends.html">Zu meinen Freunden</a>'
+            +'<a class="jbtn ghost" href="dashboard.html">Weiter zur App</a>');
+        }
+      }catch(e){
+        html('<h1>Ups</h1><p class="sub">Etwas ist schiefgelaufen. Versuch es in deinen Freunden nochmal.</p>'
+          +'<a class="jbtn primary" href="friends.html">Zu meinen Freunden</a>');
+      }
+      return;
+    }
+
+    // Gast -> Einlader-Namen zeigen, Code fuer nach dem Login merken
+    var name='Ein Freund';
+    try{ if(window.sb){ var rr=await sb.rpc('resolve_referral',{p_code:ref}); if(rr&&rr.data&&rr.data.ok&&rr.data.username) name=rr.data.username; } }catch(e){}
+    try{ localStorage.setItem('ug_pending_ref', ref); }catch(e){}
+    html('<div class="invite-kicker">Einladung</div>'
+      +'<h1>🐐 '+esc(name)+'<br>lädt dich zu UniGoat ein</h1>'
+      +'<p class="sub">Echte Studenten-Deals, Goat Blast zocken und deine Freunde zum Duell fordern — kostenlos mit deiner Uni-Mail.</p>'
+      +'<a class="jbtn primary" href="register.html">Kostenlos beitreten</a>'
+      +'<a class="jbtn ghost" href="login.html">Ich habe schon einen Account</a>');
+  }
+  run();
+})();
+</script>
+</body>
+</html>

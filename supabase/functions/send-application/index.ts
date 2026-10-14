@@ -103,14 +103,14 @@ serve(async (req) => {
     }
 
     // 5. Profil-Link
-    const profileUrl = `https://www.room8.club/public-profile.html?id=${user_id}`
+    const profileUrl = `https://unigoat.de/public-profile.html?id=${user_id}`
 
     // 6. Gebrandete Email senden via Resend
     const emailBody = {
-      from: 'Room8 Bewerbungen <help@room8.club>',
+      from: 'UniGoat Bewerbungen <help@unigoat.de>',
       to: [recipientEmail],
       reply_to: applicantEmail,
-      subject: `Neue Bewerbung via Room8: ${job.title}`,
+      subject: `Neue Bewerbung via UniGoat: ${job.title}`,
       html: `
         <!DOCTYPE html>
         <html lang="de">
@@ -146,7 +146,7 @@ serve(async (req) => {
 
               ${cv_path ? '<p style="color: #6B7280; font-size: 0.9rem;">&#128206; Lebenslauf als PDF im Anhang</p>' : ''}
 
-              <a href="https://www.room8.club/partner-login.html" style="display: block; text-align: center; background: linear-gradient(135deg, #10B981, #059669); color: white; padding: 14px; border-radius: 999px; text-decoration: none; font-weight: 700; font-size: 1rem; margin-top: 20px;">
+              <a href="https://unigoat.de/partner-login.html" style="display: block; text-align: center; background: linear-gradient(135deg, #10B981, #059669); color: white; padding: 14px; border-radius: 999px; text-decoration: none; font-weight: 700; font-size: 1rem; margin-top: 20px;">
                 Im Partner-Portal ansehen
               </a>
 
@@ -162,7 +162,7 @@ serve(async (req) => {
 
             <div style="background: #F9FAFB; padding: 20px 30px; text-align: center; border-top: 1px solid #E5E7EB;">
               <p style="margin: 0; color: #9CA3AF; font-size: 0.8rem;">
-                Diese Bewerbung wurde &uuml;ber <strong>Room8</strong> eingereicht &mdash; Die Studenten-Plattform.
+                Diese Bewerbung wurde &uuml;ber <strong>UniGoat</strong> eingereicht &mdash; Die Studenten-Plattform.
               </p>
             </div>
           </div>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="sentry-init.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Angebote — UniGoat</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+<link rel="stylesheet" href="unigoat-v2.css">
+<style>
+  :root{
+    --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+    --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+    --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+    --fh:var(--font-heading); --fb:var(--font-body);
+  }
+  .icn{ width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; display:block; }
+
+  /* Reseller-Kopf */
+  .bd-hero{ position:relative; height:170px; background-size:cover; background-position:center; background-color:var(--color-neutral-300); }
+  .bd-hero .scrim{ position:absolute; inset:0; background:linear-gradient(rgba(0,0,0,.08),rgba(0,0,0,.55)); }
+  .bd-hero .cap{ position:absolute; left:20px; right:20px; bottom:14px; color:#fff; }
+  .bd-hero .biz{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; opacity:.92; }
+  .bd-hero .ti{ font-family:var(--font-heading); font-weight:800; font-size:24px; line-height:1.1; margin-top:3px; }
+  .bd-head-badge{ position:absolute; top:0; left:0; background:var(--color-accent); color:var(--on-accent); font-family:var(--font-heading); font-weight:800; font-size:13px; padding:5px 13px; letter-spacing:.02em; }
+  .bd-intro{ padding:13px 20px; color:var(--text-muted); font-size:14px; line-height:1.5; border-bottom:var(--rule); }
+
+  /* Branchen-Tabs (horizontal scrollbar) */
+  .bd-tabs{ display:flex; gap:0; overflow-x:auto; border-bottom:var(--rule); -webkit-overflow-scrolling:touch; }
+  .bd-tab{ flex:none; background:none; border:0; border-right:var(--rule-thin); padding:13px 17px; font-family:var(--font-heading); font-weight:800; font-size:12px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted); cursor:pointer; white-space:nowrap; }
+  .bd-tab.on{ background:var(--color-text); color:var(--color-bg); }
+
+  /* Aktives Angebot */
+  .bd-offer{ padding:0 0 24px; }
+  .bd-offer .img{ position:relative; height:200px; background-size:cover; background-position:center; background-color:var(--color-neutral-300); }
+  .bd-offer .disc{ position:absolute; top:0; left:0; background:var(--color-accent); color:var(--on-accent); font-family:var(--font-heading); font-weight:800; font-size:20px; padding:5px 14px; }
+  .bd-offer .body{ padding:16px 20px 0; }
+  .bd-offer .biz{ font-size:11px; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+  .bd-offer .ti{ font-family:var(--font-heading); font-weight:800; font-size:21px; line-height:1.15; margin-top:4px; }
+  .bd-offer .desc{ color:var(--color-text); font-size:14.5px; line-height:1.55; margin-top:10px; white-space:pre-line; }
+  .bd-offer .valid{ color:var(--text-muted); font-size:12.5px; margin-top:12px; }
+  .bd-cta{ display:block; margin:18px 20px 0; background:var(--color-accent); color:var(--on-accent); font-family:var(--font-heading); font-weight:800; font-size:16px; text-align:center; text-decoration:none; padding:16px; }
+  .bd-cta:active{ transform:translateY(1px); }
+  .bd-reward{ text-align:center; color:var(--accent-small); font-family:var(--font-heading); font-weight:800; font-size:12px; margin-top:10px; }
+
+  .ug-empty{ padding:44px 20px; text-align:center; color:var(--text-muted); font-size:14px; }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="screen-body">
+    <div class="topbar" style="padding-top:14px">
+      <a class="btn btn-icon back-arrow" href="coupons.html" aria-label="Zurück">
+        <svg class="icn" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+      </a>
+      <div class="masthead" style="font-size:28px;padding:0 8px 0 2px">Angebote</div>
+      <span style="width:40px"></span>
+    </div>
+    <div class="hr"></div>
+
+    <div id="content">
+      <div class="ug-empty">Lädt …</div>
+    </div>
+  </div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(x){return document.getElementById(x);};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function bucketUrl(p,w){try{var o=w?{transform:{width:w,quality:65}}:undefined;return sb.storage.from('listing-images').getPublicUrl(p,o).data.publicUrl;}catch(e){return null;}}
+  function fmtDisc(v){var s=(v||'').toString().trim();return /^\d+$/.test(s)?s+'%':s;}
+  function fmtDate(d){if(!d)return '';try{return new Date(d).toLocaleDateString('de-DE');}catch(e){return d;}}
+  function coverUrl(c,w){var ph=(c.coupon_photos||[]);var cov=ph.filter(function(p){return p.photo_type==='cover';})[0]||ph.filter(function(p){return p.photo_type!=='logo';})[0]||ph[0];return cov?bucketUrl(cov.storage_path,w):null;}
+  function catLabel(c){
+    var m={food:'Essen',beauty:'Beauty',service:'Service',leisure:'Freizeit',fashion:'Mode',tech:'Technik',retail:'Laden',shop:'Laden',grocery:'Supermarkt'};
+    return m[(c.category||'').toString().toLowerCase()]||'';
+  }
+  function tabLabel(c){ return (c.business_name&&c.business_name.trim())||catLabel(c)||(c.title||'Angebot'); }
+
+  var params=new URLSearchParams(location.search); var id=params.get('id');
+  var head=null, kids=[], active=0;
+
+  async function init(){
+    if(!window.sb||!id){ $('content').innerHTML='<div class="ug-empty">Nicht ladbar.</div>'; return; }
+    var r=await sb.from('coupons').select('*, coupon_photos(storage_path,photo_type,display_order)').eq('id',id).single();
+    if(r.error||!r.data){ $('content').innerHTML='<div class="ug-empty">Nicht gefunden.</div>'; return; }
+    head=r.data;
+    // Defensiv: wird diese Seite faelschlich fuer einen normalen Coupon geoeffnet -> auf die Einzelseite leiten
+    if(!head.is_bundle){ location.replace('coupon-detail.html?id='+encodeURIComponent(id)); return; }
+    var kr=await sb.from('coupons')
+      .select('id,title,business_name,city,discount_value,description,category,valid_until, coupon_photos(storage_path,photo_type,display_order)')
+      .eq('parent_coupon_id',id).eq('status','active').order('created_at');
+    kids=(kr.data||[]);
+    render();
+  }
+
+  function render(){
+    document.title=(head.title||'Angebote')+' — UniGoat';
+    var hero=coverUrl(head,800);
+    var heroHtml='<div class="bd-hero"'+(hero?' style="background-image:url(\''+encodeURI(hero)+'\')"':'')+'>'+
+      '<div class="bd-head-badge">'+kids.length+' Angebote</div><div class="scrim"></div>'+
+      '<div class="cap"><div class="biz">'+esc(head.business_name||'')+(head.city?' · '+esc(head.city):'')+'</div>'+
+      '<div class="ti">'+esc(head.title||'')+'</div></div></div>';
+    var introHtml=(head.description&&head.description.trim())?('<div class="bd-intro">'+esc(head.description)+'</div>'):'';
+    if(!kids.length){ $('content').innerHTML=heroHtml+introHtml+'<div class="ug-empty">Noch keine Angebote hinterlegt.</div>'; return; }
+    var tabsHtml='<div class="bd-tabs" id="tabs">'+kids.map(function(k,i){
+      return '<button class="bd-tab'+(i===active?' on':'')+'" data-i="'+i+'">'+esc(tabLabel(k))+'</button>';
+    }).join('')+'</div>';
+    $('content').innerHTML=heroHtml+introHtml+tabsHtml+'<div id="offer"></div>';
+    $('tabs').addEventListener('click',function(e){var b=e.target.closest('.bd-tab');if(!b)return;active=+b.getAttribute('data-i');[].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);});renderOffer();});
+    renderOffer();
+  }
+
+  function renderOffer(){
+    var k=kids[active]; if(!k)return;
+    var img=coverUrl(k,800);
+    var bl=catLabel(k);
+    var html='<div class="bd-offer">'+
+      '<div class="img"'+(img?' style="background-image:url(\''+encodeURI(img)+'\')"':'')+'><span class="disc">'+esc(fmtDisc(k.discount_value))+'</span></div>'+
+      '<div class="body"><div class="biz">'+esc(k.business_name||'')+(k.city?' · '+esc(k.city):'')+(bl?' · '+esc(bl):'')+'</div>'+
+      '<div class="ti">'+esc(k.title||'')+'</div>'+
+      (k.description&&k.description.trim()?'<div class="desc">'+esc(k.description)+'</div>':'')+
+      (k.valid_until?'<div class="valid">Gültig bis '+esc(fmtDate(k.valid_until))+'</div>':'')+
+      '</div>'+
+      '<a class="bd-cta" href="coupon-detail.html?id='+encodeURIComponent(k.id)+'">Einlösen</a>'+
+      '<div class="bd-reward">+100 G-Coins beim Einlösen</div>'+
+      '</div>';
+    $('offer').innerHTML=html;
+  }
+
+  init();
+})();
+</script>
+<script src="deeplink.js"></script>
+</body>
+</html>

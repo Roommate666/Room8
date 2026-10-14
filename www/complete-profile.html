@@ -3,100 +3,103 @@
 <head>
   <script src="sentry-init.js"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Profil vervollständigen - UniGoat</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="unigoat-v2.css">
   <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Sora:wght@400;500;600;700;800&display=swap');
-/* UniGoat-Look Fonts (14.08.2026) - nur Optik */
-body{font-family:'Sora',system-ui,-apple-system,sans-serif !important;}
-h1,h2,h3{font-family:'Fraunces',Georgia,serif !important;}
-    body { background: linear-gradient(160deg, #EFF6FF 0%, #F7F7F5 60%, #FFE7DE 100%); min-height: 100vh; }
-    .cp-wrap {
-      max-width: 480px; margin: 0 auto; padding: calc(2rem + env(safe-area-inset-top, 0px)) 1.25rem 2rem;
+    /* Alias: altes Token-Vokabular -> v2 (damit inline-styles/JS in v2-Farben laufen) */
+    :root{
+      --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+      --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+      --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+      --fh:var(--font-heading); --fb:var(--font-body);
     }
-    .cp-card {
-      background: #fff; border-radius: 1.25rem; padding: 1.75rem 1.5rem;
-      box-shadow: 0 10px 40px rgba(33,208,161,0.08), 0 2px 8px rgba(0,0,0,0.04);
-    }
-    .cp-logo { width: 64px; height: 64px; border-radius: 16px; margin: 0 auto 1rem; display: block; box-shadow: 0 4px 16px rgba(33,208,161,0.2); }
-    .cp-title { text-align: center; font-size: 1.4rem; font-weight: 800; color: #1A1A2E; margin-bottom: 0.4rem; letter-spacing: -0.02em; }
-    .cp-sub { text-align: center; color: #64748B; font-size: 0.95rem; margin-bottom: 1.75rem; line-height: 1.4; }
-    .cp-field { margin-bottom: 1.1rem; }
-    .cp-label { display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.4rem; }
-    .cp-input {
-      width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid #E5E7EB;
-      font-size: 1rem; transition: border-color 0.2s, box-shadow 0.2s;
-      box-sizing: border-box;
-    }
-    .cp-input:focus { outline: none; border-color: #12B489; box-shadow: 0 0 0 4px rgba(33,208,161,0.12); }
-    .cp-hint { font-size: 0.78rem; color: #94A3B8; margin-top: 0.3rem; }
-    .cp-error { font-size: 0.8rem; color: #EF4444; margin-top: 0.3rem; min-height: 1em; }
-    .cp-username-wrap { position: relative; }
-    .cp-username-prefix { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #94A3B8; font-weight: 600; pointer-events: none; font-size: 1rem; line-height: 1; }
-    .cp-username-input { padding-left: 2.4rem; }
-    .cp-status { font-size: 0.78rem; margin-top: 0.3rem; min-height: 1em; }
-    .cp-status.ok { color: #10B981; }
-    .cp-status.bad { color: #EF4444; }
-    .cp-status.checking { color: #94A3B8; }
-    .cp-btn {
-      width: 100%; padding: 0.95rem 1.5rem; margin-top: 0.5rem;
-      background: linear-gradient(135deg, #12B489, #0E9E77); color: #fff;
-      border: none; border-radius: 999px; font-size: 1rem; font-weight: 700;
-      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
-      box-shadow: 0 4px 20px rgba(33,208,161,0.35);
-    }
-    .cp-btn:active { transform: scale(0.98); }
-    .cp-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .cp-skip { display: block; text-align: center; color: #94A3B8; text-decoration: none; font-size: 0.85rem; margin-top: 0.9rem; }
+    .cp-icn{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+    /* Mint-Poster: der eine Mint-Moment dieses Screens */
+    .cp-poster{ background:var(--color-accent); color:var(--on-accent); padding:22px 20px 18px; }
+    .cp-poster .kicker{ color:var(--on-accent); opacity:.92; }
+    .cp-poster h1{ font-family:var(--font-heading); font-weight:800; font-size:26px; line-height:1.08; letter-spacing:-.02em; margin:10px 0 0; }
+    .cp-poster p{ margin:9px 0 0; font-size:14px; line-height:1.5; max-width:34ch; }
+
+    /* Formular-Karte */
+    .cp-card{ padding:16px 20px 22px; }
+    .cp-field{ margin-bottom:16px; }
+    .cp-hint{ font-size:12px; color:var(--text-muted); margin-top:6px; line-height:1.45; }
+    .cp-error{ font-size:13px; color:#C43A22; margin-top:10px; min-height:1em; font-family:var(--font-heading); font-weight:800; }
+
+    /* Benutzername mit @-Praefix */
+    .cp-username-wrap{ position:relative; }
+    .cp-username-prefix{ position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-family:var(--font-heading); font-weight:800; pointer-events:none; font-size:16px; line-height:1; }
+    .cp-username-input{ padding-left:26px; }
+
+    /* Verfuegbarkeits-Status */
+    .cp-status{ font-size:12px; margin-top:6px; min-height:1em; font-family:var(--font-heading); font-weight:800; }
+    .cp-status.ok{ color:var(--accent-small); }
+    .cp-status.bad{ color:#C43A22; }
+    .cp-status.checking{ color:var(--text-muted); }
+
+    /* select im v2-Input-Look */
+    select.input{ appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230A0A0A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>"); background-repeat:no-repeat; background-position:right 12px center; padding-right:36px; }
   </style>
 <link rel="icon" type="image/x-icon" href="favicon.ico?v133"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133"><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
 </head>
 <body>
-  <div class="cp-wrap">
-    <div class="cp-card">
-      <img src="logo-goat.png?v90" alt="UniGoat" class="cp-logo">
-      <h1 class="cp-title">Willkommen bei UniGoat 👋</h1>
-      <p class="cp-sub">Komplettiere kurz dein Profil — das sehen andere Studenten von dir.</p>
+  <div class="screen">
+    <div class="screen-body">
 
-      <form id="cpForm">
-        <div class="cp-field">
-          <label class="cp-label" for="full_name">Voller Name</label>
-          <input class="cp-input" type="text" id="full_name" name="full_name" autocomplete="name" required maxlength="80" placeholder="z.B. Max Mustermann">
-        </div>
+      <div class="dateline">
+        <span>UniGoat</span>
+        <span>Onboarding</span>
+      </div>
 
-        <div class="cp-field">
-          <label class="cp-label" for="username">Benutzername</label>
-          <div class="cp-username-wrap">
-            <span class="cp-username-prefix">@</span>
-            <input class="cp-input cp-username-input" type="text" id="username" name="username" autocomplete="off" required minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]{3,20}" placeholder="dein_handle">
+      <section class="cp-poster">
+        <div class="kicker">Willkommen 👋</div>
+        <h1>Komplettiere kurz dein Profil.</h1>
+        <p>Das sehen andere Studenten von dir. Dauert nur einen Moment.</p>
+      </section>
+
+      <div class="cp-card">
+        <form id="cpForm">
+          <div class="cp-field field">
+            <label for="full_name">Voller Name</label>
+            <input class="input" type="text" id="full_name" name="full_name" autocomplete="name" required maxlength="80" placeholder="z.B. Max Mustermann">
           </div>
-          <div class="cp-hint">3-20 Zeichen. Nur Buchstaben, Zahlen und _</div>
-          <div class="cp-status" id="usernameStatus"></div>
-        </div>
 
-        <div class="cp-field">
-          <label class="cp-label" for="university">Hochschule / Uni</label>
-          <select class="cp-input" id="university" name="university" required>
-            <option value="" disabled selected>Bitte auswählen…</option>
-            <option value="Universität Ulm">Universität Ulm</option>
-            <option value="Hochschule Neu-Ulm (HNU)">Hochschule Neu-Ulm (HNU)</option>
-            <option value="Universität Augsburg">Universität Augsburg</option>
-            <option value="Hochschule Augsburg">Hochschule Augsburg</option>
-            <option value="Andere Hochschule">Andere Hochschule</option>
-          </select>
-          <div class="cp-hint">Bestimmt dein Uni-Highscore-Board und lokale Coupons.</div>
-        </div>
+          <div class="cp-field field">
+            <label for="username">Benutzername</label>
+            <div class="cp-username-wrap">
+              <span class="cp-username-prefix">@</span>
+              <input class="input cp-username-input" type="text" id="username" name="username" autocomplete="off" required minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]{3,20}" placeholder="dein_handle">
+            </div>
+            <div class="cp-hint">3-20 Zeichen. Nur Buchstaben, Zahlen und _</div>
+            <div class="cp-status" id="usernameStatus"></div>
+          </div>
 
-        <div class="cp-field">
-          <label class="cp-label" for="city">Stadt / Unistadt</label>
-          <input class="cp-input" type="text" id="city" name="city" autocomplete="address-level2" required maxlength="60" placeholder="z.B. München" list="citySuggestions">
-          <datalist id="citySuggestions"></datalist>
-        </div>
+          <div class="cp-field field">
+            <label for="university">Hochschule / Uni</label>
+            <select class="input" id="university" name="university" required>
+              <option value="" disabled selected>Bitte auswählen…</option>
+              <option value="Universität Ulm">Universität Ulm</option>
+              <option value="Hochschule Neu-Ulm (HNU)">Hochschule Neu-Ulm (HNU)</option>
+              <option value="Universität Augsburg">Universität Augsburg</option>
+              <option value="Hochschule Augsburg">Hochschule Augsburg</option>
+              <option value="Andere Hochschule">Andere Hochschule</option>
+            </select>
+            <div class="cp-hint">Bestimmt dein Uni-Highscore-Board und lokale Coupons.</div>
+          </div>
 
-        <button type="submit" class="cp-btn" id="cpSubmit">Profil speichern</button>
-        <div class="cp-error" id="cpError"></div>
-      </form>
+          <div class="cp-field field">
+            <label for="city">Stadt / Unistadt</label>
+            <input class="input" type="text" id="city" name="city" autocomplete="address-level2" required maxlength="60" placeholder="z.B. München" list="citySuggestions">
+            <datalist id="citySuggestions"></datalist>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="cpSubmit">Profil speichern <span>→</span></button>
+          <div class="cp-error" id="cpError"></div>
+        </form>
+      </div>
+
     </div>
   </div>
 
@@ -240,7 +243,7 @@ h1,h2,h3{font-family:'Fraunces',Georgia,serif !important;}
           } catch (e) {}
 
           try { sessionStorage.removeItem('oauth_prefill'); } catch (e) {}
-          window.location.replace('dashboard.html');
+          window.location.replace('app.html');
         } catch (err) {
           console.error('[complete-profile] Submit error:', err);
           console.error('[complete-profile] submit error', err);

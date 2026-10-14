@@ -1,5 +1,8 @@
 {
   "version": "5",
+  "redirects": {
+    "https://esm.sh/@supabase/supabase-js@2": "https://esm.sh/@supabase/supabase-js@2.115.0"
+  },
   "remote": {
     "https://deno.land/std@0.168.0/async/abortable.ts": "80b2ac399f142cc528f95a037a7d0e653296352d95c681e284533765961de409",
     "https://deno.land/std@0.168.0/async/deadline.ts": "2c2deb53c7c28ca1dda7a3ad81e70508b1ebc25db52559de6b8636c9278fd41f",
@@ -12,6 +15,7 @@
     "https://deno.land/std@0.168.0/async/retry.ts": "e8e5173623915bbc0ddc537698fa418cf875456c347eda1ed453528645b42e67",
     "https://deno.land/std@0.168.0/async/tee.ts": "3a47cc4e9a940904fd4341f0224907e199121c80b831faa5ec2b054c6d2eff5e",
     "https://deno.land/std@0.168.0/http/server.ts": "e99c1bee8a3f6571ee4cdeb2966efad465b8f6fe62bec1bdb59c1f007cc4d155",
+    "https://esm.sh/@supabase/supabase-js@2.115.0": "f4e488ef8059a64be766b58feb4d6a18aa812038fdcf9c7c916efbdf26ab9585",
     "https://esm.sh/@supabase/supabase-js@2.47.14": "06ccc3462f1f0162e6d8182983ace734d76f8d0954782d1bcde25dbb2b71d387"
   },
   "workspace": {
@@ -19,6 +23,7 @@
       "dependencies": [
         "npm:@capacitor-community/apple-sign-in@^7.1.0",
         "npm:@capacitor/android@^7.4.4",
+        "npm:@capacitor/app@^7.1.2",
         "npm:@capacitor/assets@^3.0.5",
         "npm:@capacitor/cli@^7.4.4",
         "npm:@capacitor/core@^7.4.4",

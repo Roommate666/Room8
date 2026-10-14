@@ -3,85 +3,142 @@
 <head>
     <script src="sentry-init.js"></script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title data-i18n="terms_page_title">Nutzungsbedingungen - UniGoat</title>
     <meta name="description" content="Nutzungsbedingungen der UniGoat Studenten-Plattform. Regeln und Richtlinien für die Nutzung unserer App.">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="unigoat-v2.css">
 <style>
-/* Pattern: Magic UI BlurFade */
-@keyframes blurFadeIn {
-  from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
-  to { opacity: 1; filter: blur(0); transform: translateY(0); }
+/* Alias: altes Token-Vokabular -> v2, damit Bestands-JS + inline-styles in v2-Farben laufen */
+:root{
+  --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+  --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+  --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+  --fh:var(--font-heading); --fb:var(--font-body);
+  /* Kompat fuer alte Style-Referenzen im Bestand */
+  --text-main:var(--color-text); --primary-color:var(--accent-small);
 }
-/* Legal Content */
-.legal-content {
-max-width: 800px;
-margin: 0 auto;
-padding: 0 1rem 4rem;
-animation: blurFadeIn 0.5s ease-out both;
+
+/* Icons */
+.icn{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+/* Unterseiten-Masthead kleiner (Kanon: 54px), da unigoat-v2.css nur .masthead 64px/120px kennt */
+.masthead-sm{ font-size:54px; }
+
+/* Header-Chrome (Back, ohne Bottom-Nav) */
+.topbar{ display:flex; align-items:center; justify-content:space-between; padding:14px 8px 0; }
+.topbar .backbtn svg{ width:22px; height:22px; stroke:var(--color-text); fill:none; stroke-width:2; }
+
+/* Legal-Layout */
+.legal-content{
+  max-width:800px; margin:0 auto; padding:0 0 40px;
 }
-/* Glasmorphismus */
-.content-card {
-background: rgba(255,255,255,0.92);
-border-radius: 20px;
-padding: 1.5rem;
-box-shadow: 0 2px 12px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
-border: 1px solid rgba(0,0,0,0.04);
-line-height: 1.8;
-color: #374151;
-margin-top: 1rem;
+
+/* Rechtstext-Karte: eckig, Divider-Border (v2-Look) */
+.content-card{
+  background:var(--color-surface);
+  border-top:var(--rule);
+  border-bottom:var(--rule);
+  padding:20px;
+  line-height:1.75;
+  color:var(--color-text);
+  font-family:var(--font-body);
+  font-size:15px;
 }
-.content-card h2 {
-color: var(--text-main);
-margin-top: 2rem;
-margin-bottom: 1rem;
-font-size: 1.15rem;
-border-bottom: 2px solid #F3F4F6;
-padding-bottom: 0.5rem;
+.content-card h2{
+  font-family:var(--font-heading);
+  font-weight:800;
+  color:var(--color-text);
+  margin-top:28px;
+  margin-bottom:12px;
+  font-size:19px;
+  letter-spacing:-.01em;
+  line-height:1.2;
+  padding-bottom:8px;
+  border-bottom:2px solid var(--color-divider);
 }
-.content-card h3 {
-color: var(--text-main);
-margin-top: 1.5rem;
-font-size: 1.05rem;
+.content-card h2:first-of-type{ margin-top:8px; }
+.content-card h3{
+  font-family:var(--font-heading);
+  font-weight:800;
+  color:var(--color-text);
+  margin-top:20px;
+  font-size:16px;
 }
-/* Info Boxes */
-.info-box, .warning-box, .success-box {
-padding: 1rem 1.25rem;
-border-radius: 14px;
-margin: 1.5rem 0;
-font-size: 0.95rem;
-        }
-.info-box { background: #EFF6FF; border-left: 4px solid #3B82F6; color: #1E40AF; }
-.warning-box { background: #FFFBEB; border-left: 4px solid #F59E0B; color: #92400E; }
-.success-box { background: #ECFDF5; border-left: 4px solid #10B981; color: #065F46; }
-.email-link {
-background: #EFF6FF;
-padding: 0.2rem 0.6rem;
-border-radius: 6px;
-color: var(--primary-color);
-text-decoration: none;
-font-weight: 500;
-        }
+.content-card p{ margin:10px 0; }
+.content-card ul{ margin:10px 0; padding-left:20px; }
+.content-card li{ margin:4px 0; }
+.content-card a{ color:var(--accent-small); font-weight:600; }
+
+/* Der eine Mint-Poster-Moment: Zusammenfassung */
+.info-box{
+  background:var(--color-accent);
+  color:var(--on-accent);
+  padding:16px 18px;
+  margin:0 0 20px;
+  font-size:15px;
+  line-height:1.6;
+}
+.info-box strong{ font-family:var(--font-heading); font-weight:800; }
+.info-box a{ color:var(--on-accent); text-decoration:underline; }
+
+/* Warn-/Erfolg-Boxen: eckig, linke Kante als Akzent-Regel */
+.warning-box, .success-box{
+  padding:14px 16px;
+  margin:20px 0;
+  font-size:14px;
+  line-height:1.6;
+  background:var(--color-bg);
+  border-left:4px solid var(--color-divider);
+}
+.warning-box{ border-left-color:var(--accent-small); }
+.success-box{ border-left-color:var(--color-accent); background:var(--color-accent-100); color:var(--color-accent-900); }
+.success-box a{ color:var(--color-accent-800); }
+.warning-box strong, .success-box strong{ font-family:var(--font-heading); font-weight:800; }
+
+.email-link{
+  background:var(--color-accent-100);
+  padding:2px 8px;
+  color:var(--accent-small);
+  text-decoration:none;
+  font-weight:700;
+}
+
+/* Legal-Banner (EN-Hinweis, per JS eingeblendet) */
+#legalBanner{
+  background:var(--color-accent-100);
+  border-left:4px solid var(--accent-small);
+  padding:14px 16px;
+  margin-bottom:20px;
+  color:var(--color-accent-900);
+  font-size:14px;
+  line-height:1.5;
+}
+#legalBanner strong{ font-family:var(--font-heading); font-weight:800; }
 </style>
 </head>
 <body>
-<div class="app-container">
-    <header class="app-header">
-        <a href="javascript:history.back()" class="back-arrow">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-        </a>
-        <h1 data-i18n="terms_title">Rechtliches</h1>
-        <div style="width:40px;"></div>
-    </header>
+<div class="screen">
+  <div class="screen-body">
+    <div class="topbar">
+      <a href="javascript:history.back()" class="btn btn-icon backbtn" aria-label="Zurück">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </a>
+      <div class="masthead masthead-sm" style="padding:0 8px 0 2px" data-i18n="terms_title">Rechtliches</div>
+      <span style="width:40px"></span>
+    </div>
+    <div class="dateline">
+      <span>UniGoat</span>
+      <span>Nutzungsbedingungen</span>
+    </div>
 
 <main class="legal-content">
 <!-- AGB TAB -->
 <div id="tab-agb" class="content-card">
-<div id="legalBanner" style="display:none; background:#FEF3C7; border:1px solid #F59E0B; border-radius:12px; padding:1rem 1.25rem; margin-bottom:1.5rem; color:#78350F; font-size:0.9rem; line-height:1.5;">
+<div id="legalBanner" style="display:none;">
     <strong data-i18n="legal_banner_title">Rechtsverbindlich nur auf Deutsch</strong><br>
     <span data-i18n="legal_banner_text">Diese rechtlichen Texte sind nur in der deutschen Originalfassung verbindlich.</span>
 </div>
@@ -138,6 +195,18 @@ font-weight: 500;
 <li>Coupons sind Angebote der jeweiligen <strong>Partner</strong>. Der Vertrag über die vergünstigte Leistung kommt ausschließlich zwischen dir und dem Partner zustande; UniGoat ist nur Vermittler und übernimmt keine Gewähr für Verfügbarkeit, Richtigkeit oder Einlösung eines Angebots.</li>
 <li>Beim Einlösen kann – je nach Coupon – <strong>einmalig dein Standort</strong> geprüft werden, um zu bestätigen, dass du dich beim Partner befindest (Missbrauchsvermeidung). Deine Koordinaten werden dabei <strong>nicht gespeichert</strong>; Details siehe <a href="datenschutz.html">Datenschutzerklärung</a>. Verweigerst du die Standortfreigabe, kannst du den Coupon dennoch einlösen; die G-Coins-Gutschrift kann in diesem Fall entfallen.</li>
 <li>Missbräuchliche Einlösungen (z. B. ohne tatsächlichen Besuch, automatisiert oder in Betrugsabsicht) sind untersagt und können zu Punkteentzug und Kontosperrung führen.</li>
+</ul>
+
+<h2 id="verlosung">3d. Freunde-Verlosung („Party-Lostopf")</h2>
+<p>Die App kann eine monatliche Verlosung („Party-Lostopf") anbieten. Diese ist rechtlich vom Monats-Wettkampf (3b) getrennt. Es gelten folgende Teilnahmebedingungen:</p>
+<ul>
+<li><strong>Veranstalter</strong> ist der Betreiber (Yusuf Albayrak, Am Silbermannpark 13, 86161 Augsburg). Die Verlosung steht in <strong>keiner Verbindung zu Apple oder Google</strong>; diese sind weder Sponsor noch Veranstalter und nicht in die Durchführung eingebunden.</li>
+<li><strong>Teilnahmeberechtigt</strong> sind registrierte, als Studierende verifizierte Nutzer ab 16 Jahren. Mitarbeitende des Veranstalters und deren Angehörige sowie manipulierte oder mehrfach angelegte Konten sind ausgeschlossen.</li>
+<li><strong>Lose (Teilnahme-Chancen)</strong> erhältst du, indem du eine Freundin oder einen Freund einlädst, die/der sich mit gültiger Uni-Mail verifiziert (beide erhalten je ein Los), oder indem du Lose mit G-Coins einlöst. <strong>Es besteht kein Kaufzwang und kein Geldeinsatz</strong> — die Teilnahme über das Werben von Freunden ist kostenlos. G-Coins haben keinen Geldwert (siehe 3a).</li>
+<li><strong>Teilnahmeschluss</strong> ist das jeweils in der App angezeigte Ende des Verlosungszeitraums (in der Regel das Monatsende). Die <strong>Ziehung</strong> erfolgt anschließend automatisch nach dem Zufallsprinzip; jedes Los zählt als ein Zufalls-Ticket (mehr Lose bedeuten eine höhere Gewinnchance).</li>
+<li><strong>Gewinnbenachrichtigung:</strong> Die Gewinnerin oder der Gewinner wird über die App (Mitteilung/Push) sowie gegebenenfalls über Instagram (@unigoat.de) benachrichtigt. Erfolgt innerhalb von 14 Tagen keine Rückmeldung, kann der Preis neu verlost werden.</li>
+<li><strong>Preis:</strong> Art und Umfang des Preises werden in der App ausgewiesen und können sich ändern; ein Anspruch auf einen bestimmten Preis besteht nicht. Enthält der Preis <strong>alkoholhaltige Getränke</strong> (z. B. Bier), erfolgt die Übergabe ausschließlich an Personen, die das gesetzliche Mindestalter nach § 9 Jugendschutzgesetz erfüllen (Bier und Wein ab 16 Jahren); ein <strong>Altersnachweis bei der Übergabe</strong> ist vorzulegen. Eine Barauszahlung des Preises ist ausgeschlossen.</li>
+<li>Bei Betrug, technischer Manipulation, dem Anlegen mehrerer Konten oder Verstoß gegen diese Bedingungen kann der Veranstalter Teilnehmende ausschließen, Lose entziehen und die Verlosung ändern, aussetzen oder beenden. <strong>Der Rechtsweg ist ausgeschlossen.</strong></li>
 </ul>
 
 <h2>4. Gewerbliche Nutzung</h2>
@@ -258,12 +327,13 @@ Der Nutzer stellt UniGoat, seine Geschäftsführer, Mitarbeiter und Beauftragten
 <p>Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts.</p>
 <p>Sollten einzelne Bestimmungen dieser Nutzungsbedingungen ganz oder teilweise unwirksam sein oder werden, bleibt die Wirksamkeit der übrigen Bestimmungen unberührt. Anstelle der unwirksamen Bestimmung gilt eine wirksame Bestimmung, die dem wirtschaftlichen Zweck der unwirksamen Bestimmung am nächsten kommt.</p>
 
-<hr style="margin: 2rem 0; border: none; border-top: 1px solid #e5e7eb;">
-<p style="text-align: center; color: #9ca3af; font-size: 0.85rem;">
+<hr class="hr" style="margin: 2rem 0;">
+<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">
 Stand: Februar 2026
 </p>
 </div>
 </main>
+  </div>
 </div>
 
 <script src="config.js"></script>

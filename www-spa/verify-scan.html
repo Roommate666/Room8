@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="sentry-init.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Studierenden-Verifizierung &middot; UniGoat</title>
+<style>
+  /* UniGoat: dezent Schwarz-Weiss + Mint-Akzent. KEIN Lila. */
+  :root{
+    --mint:#21D0A1; --mint-600:#12B489; --gold:#F4B740;
+    --ink:#151a1e; --ink-soft:#4a545c; --line:#e6eaec;
+    --bg:#f6f8f8; --card:#ffffff; --danger:#e05555; --ok:#12B489;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);background:var(--bg);
+    min-height:100dvh;line-height:1.5;
+    padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  .wrap{max-width:520px;margin:0 auto;padding:20px 18px 48px}
+  header.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  header.top .backbtn{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:24px;line-height:1;color:var(--ink);text-decoration:none;font-weight:700}
+  header.top .goat{width:52px;height:52px;flex:0 0 auto}
+  header.top h1{font-size:1.28rem;margin:0;letter-spacing:-.01em}
+  header.top p{margin:2px 0 0;font-size:.86rem;color:var(--ink-soft)}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:18px;margin-bottom:16px;box-shadow:0 1px 2px rgba(20,26,30,.04);
+  }
+  .lead{font-size:.95rem;color:var(--ink-soft);margin:0 0 14px}
+  .lead strong{color:var(--ink)}
+
+  /* Upload-Zone */
+  .drop{
+    border:2px dashed var(--line);border-radius:16px;padding:26px 16px;text-align:center;
+    background:#fbfdfd;transition:border-color .15s,background .15s;cursor:pointer;
+  }
+  .drop:active{border-color:var(--mint);background:#f1fbf8}
+  .drop .ic{width:44px;height:44px;margin:0 auto 8px;color:var(--mint-600)}
+  .drop b{display:block;font-size:.98rem}
+  .drop span{display:block;font-size:.82rem;color:var(--ink-soft);margin-top:4px}
+  input[type=file]{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+
+  .preview{margin-top:14px;display:none}
+  .preview.show{display:block}
+  .preview img{
+    width:100%;max-height:340px;object-fit:contain;border-radius:12px;
+    border:1px solid var(--line);background:#fff;
+  }
+  .preview .change{
+    margin-top:8px;display:inline-block;font-size:.85rem;color:var(--mint-600);
+    background:none;border:none;padding:6px 0;cursor:pointer;font-weight:600;
+  }
+
+  /* Einwilligung */
+  .consent{display:flex;gap:10px;align-items:flex-start;margin:16px 0 4px;font-size:.86rem;color:var(--ink-soft)}
+  .consent input{
+    width:22px;height:22px;flex:0 0 auto;margin-top:1px;accent-color:var(--mint-600);cursor:pointer;
+  }
+  .consent label{cursor:pointer}
+  .consent a{color:var(--mint-600)}
+
+  .btn{
+    -webkit-appearance:none;appearance:none;border:none;width:100%;
+    padding:15px 18px;border-radius:14px;font-size:1.02rem;font-weight:700;
+    background:var(--mint-600);color:#fff;cursor:pointer;margin-top:14px;
+    transition:transform .05s,opacity .15s;touch-action:manipulation;
+  }
+  .btn:active{transform:scale(.985)}
+  .btn[disabled]{opacity:.45;cursor:not-allowed}
+  .btn .spin{
+    display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.5);
+    border-top-color:#fff;border-radius:50%;vertical-align:-3px;margin-right:8px;
+    animation:sp .7s linear infinite;
+  }
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  /* Ergebnis */
+  .result{display:none;margin-top:4px}
+  .result.show{display:block}
+  .result .badge{
+    display:flex;gap:12px;align-items:center;padding:14px;border-radius:14px;
+    font-size:.95rem;
+  }
+  .result.ok .badge{background:#eafaf4;border:1px solid #bdeede;color:#0c6f52}
+  .result.fail .badge{background:#fdeeee;border:1px solid #f4cccc;color:#9a2b2b}
+  .result .badge .ic{width:34px;height:34px;flex:0 0 auto}
+  .result .meta{margin:12px 2px 0;font-size:.9rem;color:var(--ink-soft)}
+  .result .meta div{padding:4px 0;border-top:1px solid var(--line)}
+  .result .meta div:first-child{border-top:none}
+  .result .meta b{color:var(--ink)}
+
+  .fine{font-size:.76rem;color:#8a949a;margin-top:16px;line-height:1.55}
+  .fine b{color:var(--ink-soft)}
+
+  .note-err{
+    display:none;margin-top:10px;font-size:.85rem;color:var(--danger);
+    background:#fdeeee;border:1px solid #f4cccc;border-radius:10px;padding:10px 12px;
+  }
+  .note-err.show{display:block}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <a href="verify-options.html" class="backbtn" aria-label="Zurück">‹</a>
+    <div class="goat" id="goatMascot" aria-hidden="true"></div>
+    <div>
+      <h1>Studierenden-Verifizierung</h1>
+      <p>Immatrikulationsbescheinigung scannen</p>
+    </div>
+  </header>
+
+  <div class="card" id="uploadCard">
+    <p class="lead">
+      Lade ein <strong>Foto deiner Immatrikulationsbescheinigung</strong> hoch. Unsere KI liest
+      Hochschule, Name und Gültigkeit aus und schaltet dich als verifizierte:r Studierende:r frei.
+      Achte darauf, dass das Semester-Enddatum lesbar ist.
+    </p>
+
+    <label class="drop" id="dropZone" for="fileInput">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/>
+        <circle cx="12" cy="13" r="3.2"/>
+      </svg>
+      <b>Foto aufnehmen oder auswählen</b>
+      <span>Kamera oder Datei &middot; JPG, PNG, WebP</span>
+    </label>
+    <!-- capture=environment oeffnet auf dem Handy direkt die Rueckkamera -->
+    <input type="file" id="fileInput" accept="image/*" capture="environment" />
+
+    <div class="preview" id="previewBox">
+      <img id="previewImg" alt="Vorschau der Bescheinigung" />
+      <button type="button" class="change" id="changeBtn">Anderes Bild wählen</button>
+    </div>
+
+    <div class="consent">
+      <input type="checkbox" id="consentBox" />
+      <label for="consentBox">
+        Ich willige ein, dass mein Bild einmalig zur Text-Erkennung verarbeitet wird. Das Bild wird
+        <b>nicht gespeichert</b>; nur Hochschule, Zeitpunkt und Gültigkeitsdatum werden am Profil hinterlegt.
+      </label>
+    </div>
+
+    <button class="btn" id="submitBtn" disabled>Bescheinigung prüfen</button>
+    <div class="note-err" id="errBox"></div>
+  </div>
+
+  <div class="card result" id="resultCard" style="display:none">
+    <div class="badge" id="resultBadge"></div>
+    <div class="meta" id="resultMeta"></div>
+    <button class="btn" id="retryBtn" style="background:var(--ink)">Erneut versuchen</button>
+  </div>
+
+  <p class="fine">
+    <b>Datenschutz:</b> Das Foto wird ausschließlich für die einmalige Text-Erkennung an unseren
+    KI-Dienst übermittelt und danach verworfen. Es landet nicht in unserer Datenbank oder im Speicher.
+    Gespeichert werden nur Hochschule, der Zeitpunkt der Prüfung und das Ablaufdatum der Gültigkeit.
+  </p>
+</div>
+
+<!-- Supabase Client + zentrale Config (stellen window.sb bereit) -->
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="game/avatar.js"></script>
+<script>
+'use strict';
+(function () {
+  // Ziegen-Maskottchen rendern (Design-Regel: suesse Ziege im UniGoat-Stil)
+  var mascot = document.getElementById('goatMascot');
+  if (window.GoatAvatar && mascot) {
+    mascot.innerHTML = window.GoatAvatar.renderGoatAvatar({ fur: 'grey', bg: 'mint', hat: 'grad' }, 52);
+  }
+
+  var fileInput   = document.getElementById('fileInput');
+  var dropZone    = document.getElementById('dropZone');
+  var previewBox  = document.getElementById('previewBox');
+  var previewImg  = document.getElementById('previewImg');
+  var changeBtn   = document.getElementById('changeBtn');
+  var consentBox  = document.getElementById('consentBox');
+  var submitBtn   = document.getElementById('submitBtn');
+  var errBox      = document.getElementById('errBox');
+  var uploadCard  = document.getElementById('uploadCard');
+  var resultCard  = document.getElementById('resultCard');
+  var resultBadge = document.getElementById('resultBadge');
+  var resultMeta  = document.getElementById('resultMeta');
+  var retryBtn    = document.getElementById('retryBtn');
+
+  var imageDataUrl = null; // base64 Data-URL des gewaehlten Bildes
+
+  function showErr(msg) {
+    errBox.textContent = msg;
+    errBox.classList.add('show');
+  }
+  function clearErr() {
+    errBox.textContent = '';
+    errBox.classList.remove('show');
+  }
+  function refreshSubmit() {
+    submitBtn.disabled = !(imageDataUrl && consentBox.checked);
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[<>&"]/g, function (c) {
+      return { '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c];
+    });
+  }
+
+  fileInput.addEventListener('change', function () {
+    clearErr();
+    var file = fileInput.files && fileInput.files[0];
+    if (!file) return;
+    if (!/^image\//.test(file.type)) { showErr('Bitte ein Bild auswählen.'); return; }
+    if (file.size > 8 * 1024 * 1024) { showErr('Bild ist zu groß (max. 8 MB).'); return; }
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      imageDataUrl = e.target.result;
+      previewImg.src = imageDataUrl;
+      previewBox.classList.add('show');
+      dropZone.style.display = 'none';
+      refreshSubmit();
+    };
+    reader.onerror = function () { showErr('Bild konnte nicht gelesen werden.'); };
+    reader.readAsDataURL(file);
+  });
+
+  changeBtn.addEventListener('click', function () {
+    imageDataUrl = null;
+    fileInput.value = '';
+    previewBox.classList.remove('show');
+    dropZone.style.display = '';
+    refreshSubmit();
+  });
+
+  consentBox.addEventListener('change', refreshSubmit);
+
+  function setLoading(on) {
+    if (on) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spin"></span>Wird geprüft …';
+    } else {
+      submitBtn.innerHTML = 'Bescheinigung prüfen';
+      refreshSubmit();
+    }
+  }
+
+  // App-Sprache (DE/EN) aus dem gleichen Speicher wie der Rest der App.
+  function isEN() {
+    try {
+      var l = localStorage.getItem('room8_language');
+      if (l) return String(l).toLowerCase().indexOf('en') === 0;
+    } catch (e) {}
+    return (navigator.language || 'de').toLowerCase().indexOf('en') === 0;
+  }
+
+  function renderResult(res) {
+    uploadCard.style.display = 'none';
+    resultCard.style.display = '';
+    resultCard.classList.add('show');
+    var ok = !!(res && res.verified);
+    var en = isEN();
+    resultCard.classList.toggle('ok', ok);
+    resultCard.classList.toggle('fail', !ok);
+
+    var icon = ok
+      ? '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+      : '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>';
+
+    var headline = ok
+      ? (en ? 'Verified! You are now a confirmed student.' : 'Verifiziert! Du bist jetzt bestätigte:r Studierende:r.')
+      : (en ? 'Verification not possible.' : 'Verifizierung nicht möglich.');
+    // Bilinguale Begruendung: reason_en bei EN, sonst reason (DE).
+    var reasonText = en ? (res && (res.reason_en || res.reason)) : (res && res.reason);
+    resultBadge.innerHTML = icon + '<div>' + escapeHtml(headline) +
+      (reasonText ? '<div style="font-weight:400;font-size:.85rem;margin-top:2px;opacity:.9">' + escapeHtml(reasonText) + '</div>' : '') +
+      '</div>';
+
+    var lUni = en ? 'University' : 'Hochschule';
+    var lName = en ? 'Name' : 'Name';
+    var lValid = en ? 'Valid until' : 'Gültig bis';
+    var rows = '';
+    if (res && res.university) rows += '<div>' + lUni + ': <b>' + escapeHtml(res.university) + '</b></div>';
+    if (res && res.name)       rows += '<div>' + lName + ': <b>' + escapeHtml(res.name) + '</b></div>';
+    if (res && res.valid_until)rows += '<div>' + lValid + ': <b>' + escapeHtml(res.valid_until) + '</b></div>';
+    resultMeta.innerHTML = rows;
+  }
+
+  retryBtn.addEventListener('click', function () {
+    resultCard.classList.remove('show', 'ok', 'fail');
+    resultCard.style.display = 'none';
+    uploadCard.style.display = '';
+    imageDataUrl = null;
+    fileInput.value = '';
+    previewBox.classList.remove('show');
+    dropZone.style.display = '';
+    consentBox.checked = false;
+    clearErr();
+    refreshSubmit();
+  });
+
+  submitBtn.addEventListener('click', function () {
+    clearErr();
+    if (!imageDataUrl) { showErr('Bitte zuerst ein Bild auswählen.'); return; }
+    if (!consentBox.checked) { showErr('Bitte der Verarbeitung zustimmen.'); return; }
+    if (!window.sb || !window.sb.functions) {
+      showErr('Verbindung nicht bereit. Bitte Seite neu laden.'); return;
+    }
+    setLoading(true);
+    window.sb.functions.invoke('verify-enrollment', { body: { image_base64: imageDataUrl } })
+      .then(function (r) {
+        setLoading(false);
+        // Bild sofort aus dem Speicher werfen (Datensparsamkeit auch clientseitig)
+        imageDataUrl = null;
+        previewImg.removeAttribute('src');
+        if (r.error) {
+          showErr('Fehler bei der Prüfung. Bitte erneut versuchen.');
+          return;
+        }
+        var data = r.data || {};
+        if (data.ok === false && !data.reason) {
+          showErr('Prüfung fehlgeschlagen. Bitte erneut versuchen.');
+          return;
+        }
+        renderResult(data);
+      })
+      .catch(function () {
+        setLoading(false);
+        showErr('Netzwerkfehler. Bitte erneut versuchen.');
+      });
+  });
+
+  // Login-Check: ohne Session macht die Function ohnehin 401
+  if (window.sb && window.sb.auth) {
+    window.sb.auth.getSession().then(function (r) {
+      if (!r || !r.data || !r.data.session) {
+        showErr('Bitte zuerst einloggen, um dich zu verifizieren.');
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>

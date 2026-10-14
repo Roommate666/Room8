@@ -126,10 +126,28 @@
         };
     };
 
-    // Loader-Script asynchron einbinden (nicht blocking)
-    var s = document.createElement('script');
-    s.src = 'https://js-de.sentry-cdn.com/9941e3abb148ca8129391459a79cd456.min.js';
-    s.crossOrigin = 'anonymous';
-    s.async = true;
-    (document.head || document.documentElement).appendChild(s);
+    // DSGVO (§25 TTDSG): Sentry (US-Anbieter) NUR nach analytics-Einwilligung laden.
+    function loadSentry() {
+        if (window.__room8SentryLoaded) return;
+        window.__room8SentryLoaded = true;
+        var s = document.createElement('script');
+        s.src = 'https://js-de.sentry-cdn.com/9941e3abb148ca8129391459a79cd456.min.js';
+        s.crossOrigin = 'anonymous';
+        s.async = true;
+        (document.head || document.documentElement).appendChild(s);
+    }
+    function hasAnalyticsConsent() {
+        try {
+            var c = JSON.parse(localStorage.getItem('room8_cookie_consent_v1') || 'null');
+            return !!(c && c.analytics);
+        } catch (e) { return false; }
+    }
+    if (hasAnalyticsConsent()) {
+        loadSentry();
+    } else {
+        // Erst laden, wenn der Nutzer im Consent-Banner "Analyse/Fehler-Tracking" akzeptiert
+        document.addEventListener('room8:consent', function (e) {
+            if (e && e.detail && e.detail.analytics) loadSentry();
+        });
+    }
 })();

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="de" data-page="spa-shell">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>UniGoat</title>
+<link rel="icon" href="logo-goat.png?v90">
+<style>
+  /* SPA-Shell: die echten Live-Seiten laufen unveraendert in iframes.
+     Nur EIN Tab-iframe ist sichtbar; Wechsel = Sichtbarkeit umschalten, KEIN Neuladen. */
+  html,body{ margin:0; height:100%; background:#FBF7EF; overflow:hidden; }
+  #frames{ position:fixed; inset:0; }
+  #frames iframe{
+    position:absolute; inset:0; width:100%; height:100%; border:0;
+    display:none; background:#FBF7EF;
+  }
+  #frames iframe.active{ display:block; }
+  /* Splash bis das erste iframe steht (kaschiert den Kaltstart, wie in der Live-App) */
+  #splash{
+    position:fixed; inset:0; z-index:10; background:#FBF7EF;
+    display:flex; align-items:center; justify-content:center;
+    transition:opacity .3s ease;
+  }
+  #splash img{
+    width:104px; height:104px; border-radius:24px;
+    box-shadow:0 12px 30px rgba(30,27,22,.16);
+    animation:splashPop .55s cubic-bezier(.2,.8,.3,1) both;
+  }
+  #splash.hide{ opacity:0; pointer-events:none; }
+  @keyframes splashPop{ 0%{transform:scale(.5);opacity:0} 60%{transform:scale(1.08);opacity:1} 100%{transform:scale(1);opacity:1} }
+</style>
+</head>
+<body>
+  <div id="splash"><img src="logo-goat.png?v90" alt="UniGoat"></div>
+
+  <div id="frames">
+    <!-- allow: Kamera (QR-Einloesen/Verify), Geolocation, Clipboard, Web-Share (Freund einladen) -->
+    <iframe data-tab="hub"     data-src="dashboard.html"  title="Hub"     allow="camera; microphone; geolocation; clipboard-write; web-share"></iframe>
+    <iframe data-tab="coupons" data-src="coupons.html"    title="Coupons" allow="camera; microphone; geolocation; clipboard-write; web-share"></iframe>
+    <iframe data-tab="game"    data-src="game/index.html" title="Game"    allow="camera; microphone; geolocation; clipboard-write; web-share; autoplay"></iframe>
+    <iframe data-tab="rang"    data-src="challenge.html"  title="Rang"    allow="camera; microphone; geolocation; clipboard-write; web-share"></iframe>
+    <iframe data-tab="profil"  data-src="profile.html"    title="Profil"  allow="camera; microphone; geolocation; clipboard-write; web-share"></iframe>
+  </div>
+
+<!-- DSGVO/TTDSG Consent-Banner auf Shell-Ebene (greift IMMER, egal ueber welchen Einstieg) -->
+<script src="cookie-consent.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  // Welche Live-Seite gehoert zu welchem Haupt-Tab (fuer das Abfangen interner Tab-Links)
+  var TAB_BY_PAGE = {
+    'dashboard.html':'hub',
+    'coupons.html':'coupons',
+    'game/index.html':'game',
+    'challenge.html':'rang',
+    'profile.html':'profil'
+  };
+
+  var frames = {};
+  [].forEach.call(document.querySelectorAll('#frames iframe'), function(f){
+    frames[f.getAttribute('data-tab')] = f;
+  });
+  var loaded = {};
+  var currentTab = 'hub';
+  var splash = document.getElementById('splash');
+  var splashDone = false;
+
+  // href einer Seite -> Tab (oder null, wenn es keine Haupt-Seite ist -> normale Navigation im iframe)
+  function pageToTab(href){
+    if(!href) return null;
+    if(/^(https?:)?\/\//i.test(href) && href.indexOf(location.host)<0) return null; // externer Link
+    if(href.charAt(0)==='#' || /^(mailto:|tel:|javascript:)/i.test(href)) return null;
+    var h = href.replace(/^https?:\/\/[^/]+/i,'').replace(/[?#].*$/,'').replace(/^\.?\//,'');
+    if(TAB_BY_PAGE[h]) return TAB_BY_PAGE[h];
+    if(/^game\/(index\.html)?$/.test(h)) return 'game';
+    return null;
+  }
+
+  function ensureLoaded(tab){
+    var f = frames[tab];
+    if(f && !loaded[tab]){ loaded[tab]=true; f.src = f.getAttribute('data-src'); }
+  }
+
+  function show(tab){
+    if(!frames[tab]) tab='hub';
+    ensureLoaded(tab);
+    currentTab = tab;
+    for(var t in frames){ frames[t].classList.toggle('active', t===tab); }
+    if(location.hash !== '#'+tab){ history.replaceState(null,'','#'+tab); }
+  }
+
+  // Deeplink aus einer Push-Notification -> INNERHALB der SPA aufloesen (nicht die Shell wegnavigieren).
+  // Haupt-Seite -> Tab wechseln; sonst (z.B. notifications.html, coupon-detail.html?id=..) im aktiven Tab oeffnen.
+  window.__ugDeepLink = function(url){
+    try{
+      if(!url){ show('hub'); return; }
+      var tab = pageToTab(url);
+      if(tab){ show(tab); return; }
+      // Sicherheit: NUR eigene (same-origin) Ziele zulassen. javascript:/data:/externe URLs -> Hub.
+      var u;
+      try{ u = new URL(url, location.origin); }catch(e){ show('hub'); return; }
+      if(u.origin !== location.origin || !/^https?:$/.test(u.protocol)){ show('hub'); return; }
+      var rel = u.pathname.replace(/^\//,'') + u.search + u.hash;
+      ensureLoaded(currentTab);
+      var f = frames[currentTab] || frames.hub;
+      if(f && f.contentWindow){ f.contentWindow.location.href = rel; }
+    }catch(e){ show('hub'); }
+  };
+
+  function hideSplash(){
+    if(splashDone) return; splashDone=true;
+    splash.classList.add('hide');
+    setTimeout(function(){ splash.style.display='none'; }, 350);
+  }
+
+  // Beim Laden eines iframes: Login-Guard + interne Tab-Links abfangen
+  function onFrameLoad(f){
+    try{
+      var w = f.contentWindow, d = f.contentDocument;
+      var href = w.location.href;
+      if(/\/login\.html/.test(href) || /\/landing\.html/.test(href)){
+        // Session weg -> raus aus der Shell, Login als Vollseite
+        location.replace('login.html'); return;
+      }
+      // Klicks auf Links zu den 5 Haupt-Seiten in Tab-Wechsel uebersetzen (kein Neuladen)
+      d.addEventListener('click', function(e){
+        var a = e.target.closest ? e.target.closest('a') : null;
+        if(!a) return;
+        var tab = pageToTab(a.getAttribute('href'));
+        // Nur echten Tab-WECHSEL abfangen. Link zur eigenen Tab-Seite (z.B. Zurueck aus
+        // einer Unterseite ohne Tab-Bar) normal navigieren lassen -> iframe kehrt zur Startseite zurueck.
+        if(tab && tab !== currentTab){ e.preventDefault(); show(tab); }
+      }, true);
+      hideSplash();
+    }catch(err){ hideSplash(); }
+  }
+
+  [].forEach.call(document.querySelectorAll('#frames iframe'), function(f){
+    f.addEventListener('load', function(){ onFrameLoad(f); });
+  });
+
+  // Start: Deep-Link per Hash, sonst Hub
+  var start = (location.hash||'#hub').slice(1);
+  if(!frames[start]) start='hub';
+  show(start);
+
+  // Speed: Nachbar-Tabs im Hintergrund vorladen, NACHDEM der Start-Tab geladen ist ->
+  // auch der ERSTE Besuch von Coupons/Rang/Profil ist dann instant (Game bleibt lazy, da schwer).
+  (function preloadNeighbours(){
+    var startFrame = frames[start];
+    function go(){ ['coupons','rang','profil'].forEach(function(t,i){ if(t!==start) setTimeout(function(){ ensureLoaded(t); }, 700*(i+1)); }); }
+    if(startFrame){ startFrame.addEventListener('load', function(){ setTimeout(go, 1000); }, {once:true}); }
+    else { setTimeout(go, 2500); }
+  })();
+
+  // Sicherheitsnetz: Splash spaetestens nach 3.5s weg
+  setTimeout(hideSplash, 3500);
+
+  // Externe Hash-Aenderung (z.B. Zurueck-Geste)
+  window.addEventListener('hashchange', function(){
+    var t=(location.hash||'#hub').slice(1);
+    if(frames[t]) show(t);
+  });
+})();
+</script>
+
+<!-- Native Push: im OBERSTEN Fenster (hier lebt window.Capacitor, nicht in den iframes).
+     Supabase + config fuer window.sb (Token-Speicherung), dann push-logic. Auf Web = No-op. -->
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="push-logic.js"></script>
+<script>
+(function(){
+  "use strict";
+  function isNative(){ try{ return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }catch(e){ return false; } }
+  if(!isNative()) return; // im Web kein Push
+  // Push erst registrieren, wenn Supabase-Client + push-logic da sind UND ein User eingeloggt ist.
+  function tryInit(tries){
+    tries = tries || 0;
+    if(tries > 20) return;
+    if(!window.sb || !window.PushService){ return setTimeout(function(){ tryInit(tries+1); }, 800); }
+    window.sb.auth.getUser().then(function(r){
+      if(r && r.data && r.data.user){ window.PushService.init(); }
+    }).catch(function(){});
+  }
+  setTimeout(function(){ tryInit(0); }, 1500);
+})();
+</script>
+</body>
+</html>

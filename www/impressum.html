@@ -3,162 +3,131 @@
 <head>
     <script src="sentry-init.js"></script>
     <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title data-i18n="imprint_page_title">Impressum - UniGoat</title>
     <meta name="description" content="Impressum der UniGoat Studenten-Plattform. Kontaktdaten und rechtliche Informationen.">
     <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="unigoat-v2.css">
     <style>
-        /* Pattern: Magic UI BlurFade */
-        @keyframes blurFadeIn {
-            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
-            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        /* Alias: altes Token-Vokabular auf v2 mappen, damit bestehendes JS + Inline-Styles in v2-Farben laufen */
+        :root{
+          --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+          --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+          --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+          --fh:var(--font-heading); --fb:var(--font-body);
         }
 
-        .legal-content {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 1rem 4rem;
-            animation: blurFadeIn 0.5s ease-out both;
+        .icn{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+        /* Prosa-Rahmen: Zeitungs-Look, Radius 0, 2px-Linien */
+        .legal-content{ padding:0 0 40px; }
+        .legal-body{ padding:0 var(--space-5); }
+        .legal-body h2{
+          font-family:var(--font-heading); font-weight:800; font-size:var(--fs-lg);
+          letter-spacing:-.01em; line-height:1.2; margin:26px 0 10px;
+          padding-bottom:8px; border-bottom:var(--rule-thin);
         }
-        /* Glasmorphismus Card */
-        .content-card {
-            background: rgba(255,255,255,0.92);
-            border-radius: 20px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
-            border: 1px solid rgba(0,0,0,0.04);
-            line-height: 1.8;
-            color: #374151;
-            font-size: 0.95rem;
-            margin-top: 1rem;
+        .legal-body h3{
+          font-family:var(--font-heading); font-weight:800; font-size:var(--fs-md);
+          line-height:1.25; margin:18px 0 6px;
         }
+        .legal-body p{ font-size:var(--fs-md); line-height:1.7; color:var(--text-soft); margin-bottom:12px; }
+        .disclaimer-text{ color:var(--text-muted); }
 
-        h2 {
-            color: var(--text-main);
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
-            border-bottom: 2px solid #F3F4F6;
-            padding-bottom: 0.5rem;
-        }
+        /* Poster-Kontakt (der eine Mint-Moment) */
+        .imp-poster{ background:var(--color-accent); color:var(--on-accent); padding:22px var(--space-5) 20px; }
+        .imp-poster .kicker{ color:var(--on-accent); opacity:.92; }
+        .imp-poster .imp-name{ font-family:var(--font-heading); font-weight:800; font-size:26px; line-height:1.1; letter-spacing:-.02em; margin:10px 0 8px; }
+        .imp-poster .imp-addr{ font-size:var(--fs-md); line-height:1.6; }
 
-        h3 {
-            color: var(--text-main);
-            margin-top: 1.5rem;
-            font-size: 1.05rem;
-            font-weight: 600;
-        }
+        /* Kontakt-Zellen (E-Mail) */
+        .contact-cell{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px var(--space-5); border-top:var(--rule-thin); }
+        .contact-cell:first-child{ border-top:0; }
+        .contact-label{ display:flex; align-items:center; gap:8px; font-family:var(--font-heading); font-weight:800; font-size:var(--fs-sm); }
+        .contact-label .icn{ color:var(--accent-small); }
+        .contact-link{ font-family:var(--font-heading); font-weight:800; font-size:var(--fs-sm); color:var(--accent-small); text-decoration:none; }
+        .contact-link:hover{ text-decoration:underline; }
 
-        p { margin-bottom: 1rem; }
+        .resp-box{ padding:14px var(--space-5); border-top:var(--rule-thin); border-bottom:var(--rule-thin); }
+        .resp-box p{ margin:0; }
 
-        /* Glasmorphismus Contact Box */
-        .contact-box {
-            background: rgba(248,250,252,0.88);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(0,0,0,0.04);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-            text-align: center;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
-        }
+        .imp-stand{ margin-top:32px; text-align:center; color:var(--text-muted); font-family:var(--font-heading); font-weight:800; font-size:var(--fs-xs); letter-spacing:.08em; text-transform:uppercase; }
 
-        .contact-box p { margin: 0.25rem 0; }
-        .contact-box strong { font-size: 1.1rem; color: var(--text-main); }
-
-        /* Email Box */
-        .email-list {
-            display: grid;
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-
-        .email-item {
-            background: rgba(240,253,244,0.88);
-            border: 1px solid rgba(134,239,172,0.6);
-            padding: 1rem;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
-        }
-
-        .email-label { font-weight: 600; color: #166534; display: flex; align-items: center; gap: 0.5rem; }
-        .email-link { color: #15803d; text-decoration: none; font-weight: 500; }
-        .email-link:hover { text-decoration: underline; }
-
-        /* Disclaimer Text */
-        .disclaimer-text {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-        /* Barrierefreiheit */
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        @media (prefers-reduced-motion: reduce){
+            *, *::before, *::after{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
         }
     </style>
 </head>
 <body>
 
-<div class="app-container" style="background: #F3F4F6;">
+<div class="screen">
+  <div class="screen-body">
 
-    <!-- Modern Header using app-header from style.css -->
-    <header class="app-header">
-        <a href="javascript:history.back()" class="back-arrow">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    <div class="topbar" style="padding-top:14px">
+        <a class="btn btn-icon" href="javascript:history.back()" aria-label="Zurück" style="margin-left:8px">
+            <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--color-text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
-        <h1 data-i18n="imprint_title">Impressum</h1>
-        <div style="width:40px;"></div>
-    </header>
+        <div class="masthead masthead-sm" data-i18n="imprint_title" style="font-size:30px;padding:0 8px 0 2px">Impressum</div>
+        <span style="width:40px"></span>
+    </div>
+    <div class="hr"></div>
 
     <main class="legal-content">
-        <div class="content-card">
 
-            <div id="legalBanner" style="display:none; background:#FEF3C7; border:1px solid #F59E0B; border-radius:12px; padding:1rem 1.25rem; margin-bottom:1.5rem; color:#78350F; font-size:0.9rem; line-height:1.5;">
-                <strong data-i18n="legal_banner_title">Rechtsverbindlich nur auf Deutsch</strong><br>
-                <span data-i18n="legal_banner_text">Diese rechtlichen Texte sind nur in der deutschen Originalfassung verbindlich.</span>
+        <div id="legalBanner" style="display:none; background:var(--color-surface); border-top:var(--rule); border-bottom:var(--rule); padding:14px 20px; margin-bottom:4px; color:var(--color-text); font-size:0.9rem; line-height:1.5;">
+            <strong data-i18n="legal_banner_title">Rechtsverbindlich nur auf Deutsch</strong><br>
+            <span data-i18n="legal_banner_text">Diese rechtlichen Texte sind nur in der deutschen Originalfassung verbindlich.</span>
+        </div>
+        <script>
+            (function(){
+                var lang = (window.Room8i18n && Room8i18n.getCurrentLanguage) ? Room8i18n.getCurrentLanguage() : (localStorage.getItem('room8_language') || 'de');
+                if (lang === 'en') document.getElementById('legalBanner').style.display = 'block';
+            })();
+        </script>
+
+        <section class="imp-poster">
+            <div class="kicker" data-i18n="imprint_info_title">Angaben gem&auml;&szlig; &sect; 5 TMG</div>
+            <div class="imp-name">Yusuf Albayrak</div>
+            <div class="imp-addr">
+                Am Silbermannpark 13<br>
+                86161 Augsburg<br>
+                <span data-i18n="imprint_country">Deutschland</span>
             </div>
-            <script>
-                (function(){
-                    var lang = (window.Room8i18n && Room8i18n.getCurrentLanguage) ? Room8i18n.getCurrentLanguage() : (localStorage.getItem('room8_language') || 'de');
-                    if (lang === 'en') document.getElementById('legalBanner').style.display = 'block';
-                })();
-            </script>
+        </section>
 
-            <h2 data-i18n="imprint_info_title" style="margin-top: 0;">Angaben gem&auml;&szlig; &sect; 5 TMG</h2>
-
-            <div class="contact-box">
-                <p><strong>Yusuf Albayrak</strong></p>
-                <p>Am Silbermannpark 13</p>
-                <p>86161 Augsburg</p>
-                <p data-i18n="imprint_country">Deutschland</p>
+        <div class="kicker" data-i18n="imprint_contact_title" style="padding:20px 20px 8px;color:var(--color-accent-700)">Kontakt</div>
+        <div class="cells" style="border-top:var(--rule);border-bottom:var(--rule)">
+            <div class="contact-cell">
+                <span class="contact-label">
+                    <svg class="icn" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="0"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                    <span data-i18n="imprint_email_support">Support</span>
+                </span>
+                <a href="mailto:info@unigoat.de" class="contact-link">info@unigoat.de</a>
             </div>
-
-            <h2 data-i18n="imprint_contact_title">Kontakt</h2>
-
-            <div class="email-list">
-                <div class="email-item">
-                    <span class="email-label">&#128231; <span data-i18n="imprint_email_support">Support</span></span>
-                    <a href="mailto:info@unigoat.de" class="email-link">info@unigoat.de</a>
-                </div>
-                <div class="email-item" style="background: #EFF6FF; border-color: #93C5FD;">
-                    <span class="email-label" style="color: #1E40AF;">&#128188; <span data-i18n="imprint_email_business">Business</span></span>
-                    <a href="mailto:info@unigoat.de" class="email-link" style="color: #1D4ED8;">info@unigoat.de</a>
-                </div>
+            <div class="contact-cell">
+                <span class="contact-label">
+                    <svg class="icn" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="7" rx="0"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                    <span data-i18n="imprint_email_business">Business</span>
+                </span>
+                <a href="mailto:info@unigoat.de" class="contact-link">info@unigoat.de</a>
             </div>
+        </div>
 
-            <h2>Verantwortlich f&uuml;r den Inhalt nach &sect; 18 Abs. 2 MStV</h2>
+        <div class="legal-body">
+
+            <h2 style="border-bottom:0">Verantwortlich f&uuml;r den Inhalt nach &sect; 18 Abs. 2 MStV</h2>
+        </div>
+        <div class="resp-box">
             <p>
                 Yusuf Albayrak<br>
                 Am Silbermannpark 13<br>
                 86161 Augsburg
             </p>
+        </div>
+        <div class="legal-body">
 
             <h2>Umsatzsteuer</h2>
             <p class="disclaimer-text">Kleinunternehmer gem&auml;&szlig; &sect; 19 UStG &ndash; es wird keine Umsatzsteuer ausgewiesen.</p>
@@ -177,12 +146,13 @@
             <h2 data-i18n="imprint_dispute_title">Streitschlichtung</h2>
             <p class="disclaimer-text" data-i18n="imprint_dispute_text">Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
 
-            <p style="margin-top: 3rem; text-align: center; color: #9ca3af; font-size: 0.85rem;">
+            <p class="imp-stand">
                 Stand: Februar 2026
             </p>
 
         </div>
     </main>
+  </div>
 </div>
 
 <script src="config.js"></script>

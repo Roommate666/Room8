@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<!-- Hallmark · macrostructure: Marquee Hero · genre: playful · tone: playful · anchor hue: mint
+     pre-emit critique: P5 H4 E5 S4 R4 V5 -->
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <!-- App-Start: in der nativen App SOFORT ein Splash-Overlay ueber die Landing legen (kein Flash der Marketing-Seite,
+       bevor der Login-Check zur App weiterleitet). Overlay steht statisch im HTML -> ab dem ersten Frame sichtbar. -->
+  <script>(function(){try{var n=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());if(n)document.documentElement.classList.add('is-native');}catch(e){}})();</script>
+  <style>
+    #appSplash{display:none;}
+    html.is-native #appSplash{display:flex;position:fixed;inset:0;z-index:2147483647;background:#FBF7EF;align-items:center;justify-content:center;}
+    #appSplash img{width:104px;height:104px;border-radius:24px;box-shadow:0 12px 30px rgba(30,27,22,.16);animation:splashPop .55s cubic-bezier(.2,.8,.3,1) both;}
+    @keyframes splashPop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:1}}
+  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>UniGoat – Studentenrabatte, Spiel &amp; echte Preise</title>
+  <meta name="description" content="UniGoat ist die App von Studenten, für Studenten: exklusive Studentenrabatte in deiner Unistadt, ein süchtig machendes Spiel und jeden Monat echte Preise. Kostenlos.">
+  <meta name="theme-color" content="#FBF7EF">
+  <link rel="icon" href="logo-goat.png?v90">
+  <link rel="apple-touch-icon" href="logo-goat.png?v90">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,900&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --paper:#FBF7EF; --surface:#FFFFFF; --ink:#1E1B16; --muted:#6E675B;
+      --mint:#12B489; --mint-dark:#0E9673; --mint-soft:rgba(18,180,137,.12);
+      --gold:#F4B740; --gold-dark:#C88A12;
+      --edge:rgba(30,27,22,.09);
+      --font-display:'Fraunces',serif; --font-body:'Sora',sans-serif;
+      --shadow:0 18px 44px rgba(30,27,22,.10);
+      --ease-out:cubic-bezier(.2,.7,.3,1);
+      /* Spiel-Block-Paletten (aus dem Game, uc0..uc5) */
+      --b0-l:#A9C6FF;--b0-b:#2F6FEE;--b0-d:#1E4CB4;--b0-et:#93B8FF;--b0-el:#7EA9FF;--b0-er:#204FB5;--b0-eb:#17398F;
+      --b1-l:#A6F0C1;--b1-b:#2FCB63;--b1-d:#1A8C43;--b1-et:#8CEBAF;--b1-el:#74E49F;--b1-er:#1B8C42;--b1-eb:#126733;
+      --b2-l:#D9B0FF;--b2-b:#9B4DEA;--b2-d:#6A2AA8;--b2-et:#D2A5FF;--b2-el:#C48FFF;--b2-er:#6A2AA8;--b2-eb:#521E85;
+      --b3-l:#FFE7AE;--b3-b:#F5A623;--b3-d:#C07D0C;--b3-et:#FFDA8C;--b3-el:#FFCF72;--b3-er:#B87A08;--b3-eb:#93600A;
+      --b4-l:#B6F3FB;--b4-b:#22D3EE;--b4-d:#0E90A8;--b4-et:#A3EEF9;--b4-el:#86E7F6;--b4-er:#128FA6;--b4-eb:#0B6C7E;
+      --b5-l:#FFB0A8;--b5-b:#E8483C;--b5-d:#B22F26;--b5-et:#FF9C92;--b5-el:#FF8478;--b5-er:#9E2B24;--b5-eb:#7E1F19;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{overflow-x:clip;}
+    html{scroll-behavior:smooth;}
+    body{font-family:var(--font-body);background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;}
+    h1,h2,h3{font-family:var(--font-display);font-weight:700;letter-spacing:-.02em;line-height:1.05;overflow-wrap:anywhere;}
+    a{color:inherit;text-decoration:none;}
+    .wrap{max-width:1080px;margin:0 auto;padding:0 1.25rem;}
+
+    /* ===== Beveled Spiel-Block (CSS-Art, wie im Spiel) ===== */
+    .tile{width:var(--sz,44px);height:var(--sz,44px);box-sizing:border-box;border-style:solid;
+      border-width:calc(var(--sz,44px)*.16);border-radius:3px;position:relative;
+      background:radial-gradient(120% 120% at 24% 16%,var(--l) 0%,var(--b) 44%,var(--d) 100%);
+      border-top-color:var(--et);border-left-color:var(--el);border-right-color:var(--er);border-bottom-color:var(--eb);
+      box-shadow:inset 0 calc(var(--sz,44px)*.07) calc(var(--sz,44px)*.06) rgba(255,244,214,.5);}
+    .tile::after{content:"";position:absolute;left:12%;top:9%;width:26%;height:38%;background:#fff;opacity:.85;
+      border-radius:62% 6% 62% 6%;transform:rotate(-14deg);}
+    .t0{--l:var(--b0-l);--b:var(--b0-b);--d:var(--b0-d);--et:var(--b0-et);--el:var(--b0-el);--er:var(--b0-er);--eb:var(--b0-eb);}
+    .t1{--l:var(--b1-l);--b:var(--b1-b);--d:var(--b1-d);--et:var(--b1-et);--el:var(--b1-el);--er:var(--b1-er);--eb:var(--b1-eb);}
+    .t2{--l:var(--b2-l);--b:var(--b2-b);--d:var(--b2-d);--et:var(--b2-et);--el:var(--b2-el);--er:var(--b2-er);--eb:var(--b2-eb);}
+    .t3{--l:var(--b3-l);--b:var(--b3-b);--d:var(--b3-d);--et:var(--b3-et);--el:var(--b3-el);--er:var(--b3-er);--eb:var(--b3-eb);}
+    .t4{--l:var(--b4-l);--b:var(--b4-b);--d:var(--b4-d);--et:var(--b4-et);--el:var(--b4-el);--er:var(--b4-er);--eb:var(--b4-eb);}
+    .t5{--l:var(--b5-l);--b:var(--b5-b);--d:var(--b5-d);--et:var(--b5-et);--el:var(--b5-el);--er:var(--b5-er);--eb:var(--b5-eb);}
+
+    /* ===== NAV (Floating pill) ===== */
+    .nav{position:sticky;top:.7rem;z-index:60;margin:.7rem auto 0;max-width:1000px;
+      display:flex;align-items:center;justify-content:space-between;gap:1rem;
+      padding:.6rem .7rem .6rem 1rem;background:rgba(255,255,255,.72);backdrop-filter:blur(14px);
+      border:1px solid var(--edge);border-radius:99px;box-shadow:0 8px 26px rgba(30,27,22,.07);
+      width:calc(100% - 1.5rem);}
+    .brand{display:flex;align-items:center;gap:.55rem;font-family:var(--font-display);font-weight:900;font-size:1.25rem;}
+    .brand img{width:34px;height:34px;border-radius:9px;object-fit:cover;}
+    .brand .beta{font-family:var(--font-body);font-weight:700;font-size:.56rem;letter-spacing:.06em;text-transform:uppercase;
+      background:var(--mint-soft);color:var(--mint-dark);padding:.12rem .4rem;border-radius:99px;align-self:flex-start;margin-top:.1rem;}
+    .nav-actions{display:flex;align-items:center;gap:.4rem;}
+    .nlink{font-weight:600;font-size:.88rem;padding:.5rem .8rem;border-radius:99px;color:var(--muted);white-space:nowrap;transition:.15s;}
+    .nlink:hover{color:var(--ink);background:rgba(30,27,22,.05);}
+    .nlink--primary{background:var(--mint);color:#fff;box-shadow:0 6px 16px rgba(18,180,137,.32);}
+    .nlink--primary:hover{background:var(--mint-dark);color:#fff;}
+
+    /* ===== HERO ===== */
+    .hero{position:relative;padding:3.6rem 0 2rem;text-align:center;isolation:isolate;}
+    .floaters{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:clip;}
+    .floaters .tile{position:absolute;opacity:.9;animation:float 7s var(--ease-out) infinite alternate;}
+    .floaters .tile:nth-child(1){left:6%;top:14%;--sz:54px;animation-delay:-1s;}
+    .floaters .tile:nth-child(2){left:14%;top:60%;--sz:38px;animation-delay:-3s;}
+    .floaters .tile:nth-child(3){right:8%;top:12%;--sz:60px;animation-delay:-2s;}
+    .floaters .tile:nth-child(4){right:15%;top:56%;--sz:42px;animation-delay:-4s;}
+    .floaters .tile:nth-child(5){left:2%;top:40%;--sz:32px;animation-delay:-.5s;}
+    .floaters .tile:nth-child(6){right:3%;top:38%;--sz:34px;animation-delay:-2.5s;}
+    @media(max-width:720px){.floaters .tile:nth-child(n+3){display:none;} .floaters .tile{opacity:.5;}}
+    @keyframes float{from{transform:translateY(0) rotate(-4deg);}to{transform:translateY(-22px) rotate(5deg);}}
+
+    .goat{width:96px;height:96px;border-radius:24px;object-fit:cover;box-shadow:var(--shadow);margin:0 auto 1.2rem;display:block;
+      border:3px solid #fff;transform:rotate(-3deg);}
+    .pill{display:inline-flex;align-items:center;gap:.5rem;background:var(--surface);border:1px solid var(--edge);
+      border-radius:99px;padding:.4rem .9rem;font-weight:600;font-size:.8rem;color:var(--muted);box-shadow:0 4px 14px rgba(30,27,22,.05);}
+    .pill .dot{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 4px var(--mint-soft);}
+    .hero h1{font-size:clamp(2.5rem,8vw,4.6rem);font-weight:900;margin:1.2rem auto 0;max-width:12ch;}
+    .hero h1 .m{color:var(--mint);} .hero h1 .g{color:var(--gold-dark);}
+    .hero-sub{font-size:clamp(1rem,2.6vw,1.2rem);color:var(--muted);max-width:600px;margin:1.1rem auto 0;}
+    .cta-row{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin-top:1.8rem;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;font-weight:700;font-size:1rem;
+      padding:.95rem 1.6rem;border-radius:99px;transition:transform .15s var(--ease-out),background .15s;cursor:pointer;border:none;white-space:nowrap;}
+    .btn--primary{background:var(--mint);color:#fff;box-shadow:0 12px 26px rgba(18,180,137,.34);}
+    .btn--primary:hover{background:var(--mint-dark);transform:translateY(-2px);}
+    .btn--outline{background:var(--surface);color:var(--ink);border:1.5px solid var(--edge);}
+    .btn--outline:hover{border-color:var(--mint);color:var(--mint-dark);}
+
+    /* Coin-Badge */
+    .coinbadge{display:inline-flex;align-items:center;gap:.85rem;margin-top:1.9rem;background:var(--surface);
+      border:1px solid var(--edge);border-radius:1.1rem;padding:.85rem 1.3rem;box-shadow:var(--shadow);}
+    .coin{width:40px;height:40px;border-radius:50%;flex:none;position:relative;
+      background:radial-gradient(circle at 34% 30%,#FFE7AE,var(--gold) 55%,var(--gold-dark));
+      box-shadow:inset 0 -3px 4px rgba(0,0,0,.18),0 3px 8px rgba(200,138,18,.4);overflow:hidden;}
+    .coin::before{content:"G";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+      font-family:var(--font-display);font-weight:900;color:#8a5a06;font-size:1.1rem;}
+    .coin::after{content:"";position:absolute;top:-60%;left:-30%;width:40%;height:220%;background:rgba(255,255,255,.6);
+      transform:rotate(20deg);animation:shimmer 3.5s ease-in-out infinite;}
+    @keyframes shimmer{0%,70%{left:-40%;}85%,100%{left:140%;}}
+    .coinbadge .big{font-family:var(--font-display);font-weight:900;font-size:1.9rem;color:var(--gold-dark);line-height:1;white-space:nowrap;}
+    .coinbadge .t{text-align:left;font-size:.88rem;font-weight:700;}
+    .coinbadge .t small{display:block;font-weight:500;color:var(--muted);font-size:.76rem;margin-top:.15rem;}
+    .trust{margin-top:1.5rem;font-size:.83rem;color:var(--muted);font-weight:600;}
+
+    /* ===== Line-Clear-Streifen ===== */
+    .strip{display:flex;justify-content:center;gap:2px;margin:2.6rem 0 0;padding:0 1rem;flex-wrap:wrap;}
+    .strip .tile{--sz:40px;}
+    @media(max-width:520px){.strip .tile{--sz:30px;}}
+
+    /* ===== SECTIONS ===== */
+    section.blk{padding:4rem 0;}
+    .head{text-align:center;max-width:620px;margin:0 auto 2.4rem;}
+    .head h2{font-size:clamp(1.9rem,5.4vw,2.7rem);font-weight:900;}
+    .head p{color:var(--muted);margin-top:.7rem;font-size:1.05rem;}
+
+    /* Feature-Cards (verspielt, leicht gekippt) */
+    .features{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.3rem;}
+    @media(max-width:820px){.features{grid-template-columns:1fr;max-width:420px;margin:0 auto;}}
+    .fcard{background:var(--surface);border:1px solid var(--edge);border-radius:1.5rem;padding:1.8rem;box-shadow:var(--shadow);
+      transition:transform .2s var(--ease-out);position:relative;}
+    .fcard:nth-child(1){transform:rotate(-1.2deg);} .fcard:nth-child(3){transform:rotate(1.2deg);}
+    .fcard:hover{transform:translateY(-6px) rotate(0);}
+    .fcard .tile{--sz:46px;margin-bottom:1.1rem;}
+    .fcard h3{font-size:1.35rem;font-weight:700;}
+    .fcard p{color:var(--muted);margin-top:.55rem;font-size:.96rem;}
+
+    /* ===== Wettkampf / Rangliste-Motiv ===== */
+    .comp{background:var(--surface);border:1px solid var(--edge);border-radius:2rem;box-shadow:var(--shadow);
+      padding:2.8rem 1.5rem;position:relative;overflow:hidden;}
+    .comp::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% -10%,var(--mint-soft),transparent 55%);}
+    .comp .head{position:relative;margin-bottom:2rem;}
+    .podium{position:relative;display:flex;justify-content:center;align-items:flex-end;gap:.8rem;max-width:420px;margin:0 auto;}
+    .pod{flex:1;background:var(--paper);border:1px solid var(--edge);border-radius:1rem 1rem .5rem .5rem;
+      padding:.9rem .5rem;text-align:center;}
+    .pod .rk{font-size:1.5rem;} .pod .nm{font-weight:700;font-size:.85rem;margin-top:.3rem;}
+    .pod .co{font-family:var(--font-display);font-weight:900;color:var(--gold-dark);font-size:.95rem;margin-top:.15rem;}
+    .pod--1{padding-bottom:2.4rem;border-color:var(--mint);box-shadow:0 -4px 0 var(--mint) inset;}
+    .pod--2{padding-bottom:1.4rem;} .pod--3{padding-bottom:.8rem;}
+    .comp .note{position:relative;text-align:center;color:var(--muted);font-size:.9rem;margin-top:1.6rem;}
+    .comp .note b{color:var(--ink);}
+
+    /* ===== CTA ===== */
+    .ctaband{position:relative;text-align:center;background:linear-gradient(160deg,var(--mint),var(--mint-dark));color:#fff;
+      border-radius:2rem;padding:3.4rem 1.5rem;box-shadow:0 22px 50px rgba(18,180,137,.32);overflow:hidden;}
+    .ctaband .tile{position:absolute;opacity:.28;--sz:60px;}
+    .ctaband .tile:nth-of-type(1){left:-14px;bottom:-14px;transform:rotate(-12deg);}
+    .ctaband .tile:nth-of-type(2){right:-10px;top:-16px;transform:rotate(14deg);}
+    .ctaband h2{font-size:clamp(1.9rem,5.4vw,2.7rem);font-weight:900;color:#fff;position:relative;}
+    .ctaband p{opacity:.92;margin-top:.7rem;font-size:1.05rem;position:relative;}
+    .ctaband .btn--white{background:#fff;color:var(--mint-dark);margin-top:1.7rem;position:relative;box-shadow:0 10px 26px rgba(0,0,0,.16);}
+    .ctaband .btn--white:hover{transform:translateY(-2px);}
+
+    /* ===== FOOTER ===== */
+    footer{padding:3rem 1.25rem 2.6rem;text-align:center;}
+    .flinks{display:flex;flex-wrap:wrap;gap:.4rem 1.4rem;justify-content:center;margin-bottom:1.1rem;}
+    .flinks a{color:var(--muted);font-size:.88rem;font-weight:600;}
+    .flinks a:hover{color:var(--mint-dark);}
+    .fcopy{color:var(--muted);font-size:.84rem;}
+
+    .fade{opacity:0;transform:translateY(18px);transition:opacity .6s var(--ease-out),transform .6s var(--ease-out);}
+    .fade.vis{opacity:1;transform:none;}
+    @media(prefers-reduced-motion:reduce){
+      .fade{opacity:1;transform:none;} .floaters .tile,.coin::after{animation:none;}
+      .fcard,.fcard:nth-child(1),.fcard:nth-child(3){transform:none;}
+    }
+  </style>
+</head>
+<body>
+<div id="appSplash"><img src="logo-goat.png?v90" alt="UniGoat"></div>
+  <nav class="nav" id="nav">
+    <a href="#" class="brand"><img src="logo-goat.png?v90" alt="UniGoat"> UniGoat<span class="beta">Beta</span></a>
+    <div class="nav-actions">
+      <a href="login.html" class="nlink">Anmelden</a>
+      <a href="register.html" class="nlink nlink--primary">Registrieren</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="floaters" aria-hidden="true">
+      <div class="tile t5"></div><div class="tile t3"></div><div class="tile t0"></div>
+      <div class="tile t1"></div><div class="tile t2"></div><div class="tile t4"></div>
+    </div>
+    <div class="wrap">
+      <img src="logo-goat.png?v90" alt="" class="goat" aria-hidden="true">
+      <span class="pill"><span class="dot"></span> Exklusiv für verifizierte Studenten</span>
+      <h1>Dein Campus.<br>Dein <span class="m">Spiel.</span><br>Deine <span class="g">Deals.</span></h1>
+      <p class="hero-sub">Studentenrabatte in deiner Stadt, ein Spiel das süchtig macht – und jeden Monat echte Preise. Komplett kostenlos. 🐐</p>
+      <div class="cta-row">
+        <a href="register.html" class="btn btn--primary">Kostenlos starten</a>
+        <a href="#how" class="btn btn--outline">Wie's funktioniert</a>
+      </div>
+      <div class="coinbadge">
+        <span class="coin" aria-hidden="true"></span>
+        <span class="big">+50</span>
+        <span class="t">G-Coins zum Start<small>Nach Verifizierung mit deiner Uni-Mail</small></span>
+      </div>
+      <div class="trust">📍 Ulm · Augsburg · Neu-Ulm · iOS &amp; Android</div>
+    </div>
+  </header>
+
+  <!-- Line-Clear-Streifen -->
+  <div class="strip" aria-hidden="true">
+    <div class="tile t0"></div><div class="tile t1"></div><div class="tile t2"></div><div class="tile t3"></div>
+    <div class="tile t4"></div><div class="tile t5"></div><div class="tile t1"></div><div class="tile t0"></div>
+  </div>
+
+  <!-- FEATURES -->
+  <section class="blk" id="how">
+    <div class="wrap">
+      <div class="head fade">
+        <h2>Eine App, drei Gründe dranzubleiben</h2>
+        <p>Von Studenten, für Studenten – in deiner Unistadt.</p>
+      </div>
+      <div class="features">
+        <div class="fcard fade">
+          <div class="tile t5"></div>
+          <h3>Coupons &amp; Rabatte</h3>
+          <p>Exklusive Studentenrabatte von lokalen Cafés, Läden und Studios. Einlösen, sparen – und G-Coins kassieren.</p>
+        </div>
+        <div class="fcard fade">
+          <div class="tile t1"></div>
+          <h3>Goat Blast</h3>
+          <p>Das Puzzle, das süchtig macht: Blöcke legen, Linien räumen, jeden Tag spielen und dabei G-Coins verdienen.</p>
+        </div>
+        <div class="fcard fade">
+          <div class="tile t3"></div>
+          <h3>Echte Preise</h3>
+          <p>Sammel im Monat die meisten G-Coins, klettere in der Rangliste – die Besten gewinnen jeden Monat echte Preise.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WETTKAMPF -->
+  <section class="blk">
+    <div class="wrap">
+      <div class="comp fade">
+        <div class="head">
+          <h2>Jeden Monat ein neuer Wettkampf 🏆</h2>
+          <p>Registrieren, G-Coins sammeln, aufsteigen. Am Monatsende werden die Besten gekürt – dann startet die Rangliste frisch bei null.</p>
+        </div>
+        <div class="podium" aria-hidden="true">
+          <div class="pod pod--2"><div class="rk">🥈</div><div class="nm">Platz 2</div><div class="co">🪙 …</div></div>
+          <div class="pod pod--1"><div class="rk">👑</div><div class="nm">Du?</div><div class="co">🪙 …</div></div>
+          <div class="pod pod--3"><div class="rk">🥉</div><div class="nm">Platz 3</div><div class="co">🪙 …</div></div>
+        </div>
+        <p class="note">Coins sammelst du durchs <b>Spielen</b>, <b>Coupons einlösen</b> und <b>Freunde werben</b>. Wer am meisten sammelt, gewinnt.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="wrap">
+    <div class="ctaband fade">
+      <div class="tile t3" aria-hidden="true"></div><div class="tile t1" aria-hidden="true"></div>
+      <h2>Bereit für UniGoat?</h2>
+      <p>Kostenlos anmelden, +50 G-Coins zum Start sichern und um echte Preise mitspielen.</p>
+      <a href="register.html" class="btn btn--white">Jetzt kostenlos starten</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="flinks">
+      <a href="impressum.html">Impressum</a>
+      <a href="datenschutz.html">Datenschutz</a>
+      <a href="nutzungsbedingungen.html">Nutzungsbedingungen</a>
+      <a href="faq.html">FAQ</a>
+    </div>
+    <p class="fcopy">UniGoat – Von Studenten, für Studenten.</p>
+  </footer>
+
+  <script src="lib/supabase.min.js"></script>
+  <script src="config.js"></script>
+  <script src="onboarding-gate.js"></script>
+  <script src="session-cache.js"></script>
+  <script src="translations.js"></script>
+  <script>
+    // Splash-Overlay (nur nativ sichtbar) ausblenden -> Landing zeigen, wenn NICHT eingeloggt
+    function hideAppSplash(){var d=document.getElementById('appSplash');if(d){d.style.transition='opacity .3s';d.style.opacity='0';setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);},320);}}
+    // In der nativen App NIE die Marketing-Landing zeigen: eingeloggt -> coupons, sonst -> login. Im Web bleibt die Landing.
+    var isNativeApp = document.documentElement.classList.contains('is-native');
+    function leaveLanding(){ if(isNativeApp){ window.location.replace('login.html'); } else { hideAppSplash(); } }
+    if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+      var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      sb.auth.getUser().then(({ data }) => {
+        if (data && data.user) { window.location.replace('app.html'); } // eingeloggt -> direkt in die App-Shell (kein Flash)
+        else { leaveLanding(); }
+      }).catch(leaveLanding);
+    } else { leaveLanding(); }
+    // Fallback: Overlay nie laenger als 3.5s haengen lassen (falls Netzwerk/Login-Check klemmt)
+    setTimeout(function(){ if(!/app\.html|login\.html/.test(location.href)) leaveLanding(); }, 3500);
+    window.addEventListener('scroll', function(){
+      document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 20);
+    });
+    var obs = new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)e.target.classList.add('vis');});},{threshold:.14});
+    document.querySelectorAll('.fade').forEach(function(el){obs.observe(el);});
+  </script>
+  <script src="cookie-consent.js"></script>
+</body>
+</html>

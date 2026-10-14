@@ -2,17 +2,19 @@
 <html lang="de" data-page="duel">
 <head>
 <script src="../sentry-init.js"></script>
+<script src="../features.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <title>Duell — UniGoat</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#1A1613; --paper:#F7F4EE; --card:#FFFFFF; --w4:#9C9284; --line:#E7DFD2;
+    /* v2-Design (Editorial/Zeitung): Archivo, eckig, 2px-Linien, Mint-Akzent, Paper #f3f2f2 */
+    --ink:#201e1d; --paper:#f3f2f2; --card:#ffffff; --w4:#6f6b68; --line:color-mix(in srgb,#201e1d 24%, transparent);
     --mint:#12B489; --mint2:#21D0A1; --mint-d:#0E9673; --mintL:#E4FBF3; --gold:#F4B740; --danger:#E5533C;
-    --grad:linear-gradient(180deg,#21D0A1,#12B489); --sh:0 1px 2px rgba(40,30,15,.05),0 14px 34px rgba(40,30,15,.09); --sh-mint:0 10px 22px rgba(18,180,137,.32);
-    --fh:'Fraunces',serif; --fb:'Sora',sans-serif;
+    --grad:#12B489; --sh:0 1px 2px rgba(40,30,15,.05),0 12px 30px rgba(40,30,15,.08); --sh-mint:0 8px 20px rgba(18,180,137,.24);
+    --fh:'Archivo',system-ui,sans-serif; --fb:'Archivo',system-ui,sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   body{font-family:var(--fb);background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;letter-spacing:-.01em;overflow-x:hidden;}
@@ -87,12 +89,38 @@
   .wagerpill{display:inline-flex;align-items:center;gap:5px;background:var(--mintL);color:var(--mint-d);font-weight:800;font-size:12px;padding:6px 12px;border-radius:999px;margin:0 auto 10px;}
 
   .board-card{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:4px;box-shadow:var(--sh);position:relative;}
+  /* Angriff kassiert -> Brett blitzt kurz rot auf */
+  body.under-attack .board-card{animation:atkFlash .5s ease-out;}
+  @keyframes atkFlash{0%,100%{box-shadow:var(--sh)}45%{box-shadow:0 0 0 3px var(--danger),0 0 22px rgba(229,83,60,.55)}}
   #board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));gap:0;aspect-ratio:1;touch-action:none;}
   .cell{background:rgba(232,222,198,.6);border-radius:3px;box-shadow:inset 0 0 0 1px rgba(120,100,60,.06);transition:background .08s;}
   .cell.filled{border-radius:2px;background:var(--mint);box-shadow:inset 0 2px 0 rgba(255,255,255,.28),inset 0 -2px 0 rgba(0,0,0,.14);}
   .cell.junk{border-radius:2px;background:repeating-linear-gradient(45deg,#8a8f96,#8a8f96 4px,#6f747b 4px,#6f747b 8px);box-shadow:inset 0 0 0 1px rgba(0,0,0,.18);}
-  .cell.ghost-ok{background:rgba(33,208,161,.45);}
-  .cell.ghost-bad{background:rgba(229,83,60,.35);}
+  /* ===== Goat-Blast-Block-Design (aus dem Hauptspiel uebernommen) -> Duell sieht aus wie das echte Spiel ===== */
+  .cell{position:relative;}
+  .cell.filled.tn{box-sizing:border-box!important;background:radial-gradient(120% 120% at 24% 16%,var(--ug-light) 0%,var(--ug-base) 44%,var(--ug-dark) 100%)!important;border-style:solid!important;border-width:calc(var(--cell,58px)*0.16)!important;border-top-color:var(--ug-edge-top)!important;border-left-color:var(--ug-edge-left)!important;border-right-color:var(--ug-edge-right)!important;border-bottom-color:var(--ug-edge-bottom)!important;box-shadow:inset 0 calc(var(--cell,58px)*0.07) calc(var(--cell,58px)*0.06) var(--ug-gloss)!important;border-radius:1px!important;}
+  .cell.filled.tn::after{content:none!important;}
+  .cell.filled.tn[data-horn]::before{content:""!important;position:absolute;left:12%;top:9%;width:26%;height:38%;background:#fff;opacity:.92;border-radius:62% 6% 62% 6%;transform:rotate(-14deg);pointer-events:none;}
+  .cell.filled.nT{border-top-left-radius:0!important;border-top-right-radius:0!important;}
+  .cell.filled.nB{border-bottom-left-radius:0!important;border-bottom-right-radius:0!important;}
+  .cell.filled.nL{border-top-left-radius:0!important;border-bottom-left-radius:0!important;}
+  .cell.filled.nR{border-top-right-radius:0!important;border-bottom-right-radius:0!important;}
+  .uc0{--ug-light:#A9C6FF;--ug-base:#2F6FEE;--ug-dark:#1E4CB4;--ug-edge-top:#93B8FF;--ug-edge-left:#7EA9FF;--ug-edge-right:#204FB5;--ug-edge-bottom:#17398F;--ug-gloss:rgba(255,244,214,0.42);}
+  .uc1{--ug-light:#A6F0C1;--ug-base:#2FCB63;--ug-dark:#1A8C43;--ug-edge-top:#8CEBAF;--ug-edge-left:#74E49F;--ug-edge-right:#1B8C42;--ug-edge-bottom:#126733;--ug-gloss:rgba(255,248,224,0.50);}
+  .uc2{--ug-light:#D9B0FF;--ug-base:#9B4DEA;--ug-dark:#6A2AA8;--ug-edge-top:#D2A5FF;--ug-edge-left:#C48FFF;--ug-edge-right:#6A2AA8;--ug-edge-bottom:#521E85;--ug-gloss:rgba(255,244,214,0.40);}
+  .uc3{--ug-light:#FFE7AE;--ug-base:#F5A623;--ug-dark:#C07D0C;--ug-edge-top:#FFDA8C;--ug-edge-left:#FFCF72;--ug-edge-right:#B87A08;--ug-edge-bottom:#93600A;--ug-gloss:rgba(255,248,224,0.62);}
+  .uc4{--ug-light:#B6F3FB;--ug-base:#22D3EE;--ug-dark:#0E90A8;--ug-edge-top:#A3EEF9;--ug-edge-left:#86E7F6;--ug-edge-right:#128FA6;--ug-edge-bottom:#0B6C7E;--ug-gloss:rgba(255,248,224,0.55);}
+  .uc5{--ug-light:#FFB0A8;--ug-base:#E8483C;--ug-dark:#B22F26;--ug-edge-top:#FF9C92;--ug-edge-left:#FF8478;--ug-edge-right:#9E2B24;--ug-edge-bottom:#7E1F19;--ug-gloss:rgba(255,244,214,0.50);}
+  /* Tray-Steine farbig mit Bevel (statt einfarbig mint) */
+  .pc.on{background:linear-gradient(150deg,color-mix(in srgb,var(--c,#2F6FEE) 55%,#fff 45%),var(--c,#2F6FEE) 42%,color-mix(in srgb,var(--c,#2F6FEE) 72%,#000 28%))!important;border-radius:20%!important;box-shadow:inset 1px 1px 1px rgba(255,255,255,.55),inset -2px -3px 2px rgba(0,0,0,.35),0 2px 0 color-mix(in srgb,var(--c,#2F6FEE) 55%,#000 45%)!important;}
+  .cell.ghost-ok{background:rgba(33,208,161,.45)!important;box-shadow:inset 0 0 0 2px rgba(18,180,137,.85)!important;border:none!important;}
+  .cell.ghost-bad{background:rgba(229,83,60,.35)!important;box-shadow:inset 0 0 0 2px var(--danger)!important;border:none!important;}
+  #board{touch-action:none;}
+  .slot{touch-action:none;}
+  #dragLayer{position:fixed;inset:0;pointer-events:none;z-index:200;}
+  #dragPiece{position:absolute;left:0;top:0;will-change:transform;}
+  #dragPiece .piece{display:grid;}
+  #dragPiece .cell{position:relative;border-radius:2px;}
   body.shake .board-card{animation:shk .3s;}
   @keyframes shk{0%,100%{transform:translate(0,0)}25%{transform:translate(-4px,1px)}75%{transform:translate(4px,-1px)}}
 
@@ -141,6 +169,27 @@
   .result .coins.neutral{color:var(--w4);}
   .result .elo{font-size:12.5px;font-weight:800;color:var(--w4);min-height:16px;margin-bottom:12px;}
   .result .verify{display:inline-flex;align-items:center;gap:6px;color:var(--w4);font-size:11.5px;font-weight:700;min-height:18px;margin-bottom:8px;}
+
+  /* ============================================================
+     v2-DESIGN-OVERRIDE — eckig, Archivo, 2px-Linien, flach.
+     NUR Chrome (Lobby/Buttons/Cards/Chips/Overlays). Das Goat-Blast-
+     Spielbrett + die Bloecke (.cell/.pc/#board/.mini/#dragPiece) sind
+     design-gesperrt und werden hier bewusst NICHT angefasst.
+     ============================================================ */
+  .back,.bilanz,.btn,.btn.small,.codebox,.join-in,.wagerbox,.chip,.chrow,.pcard,
+  .coinbar .cp,.wagerpill,.board-card,.slot,.gad,#rushBanner,#discoBanner,
+  #discoBanner .db-act,.toast,.result .card{border-radius:0!important;}
+  /* 2px-Linien statt 1/1.5px (v2-Signatur) */
+  .btn.ghost,.join-in,.chip,.board-card,.slot,.gad,.codebox,.wagerbox,.chrow,
+  .pcard,.bilanz,.coinbar .cp,.back{border-width:2px!important;border-style:solid!important;border-color:var(--line)!important;}
+  .pcard.me{border-color:var(--mint)!important;}
+  /* flache Buttons: Mint-Fill mit Tinte drauf (v2), keine schweren Schatten/Gradients */
+  .btn.primary{background:var(--mint)!important;color:var(--ink)!important;box-shadow:none!important;border:2px solid var(--ink)!important;}
+  .btn.ghost{box-shadow:none!important;}
+  .chip.sel{border-color:var(--mint)!important;background:var(--mintL)!important;box-shadow:none!important;}
+  .slot.sel{box-shadow:none!important;}
+  /* Archivo als Display-Font (kein Serif-Kerning mehr) */
+  h1,h2,h3,.serif,.codebox .code,.pcard .sc,.result .scores .s,.result h2,.cd .n{font-family:var(--fh)!important;letter-spacing:-.02em;}
 </style>
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png?v133">
 </head>
@@ -159,6 +208,7 @@
     <div id="lobbyChoice">
       <button class="btn primary" id="btnCreate">Duell erstellen</button>
       <button class="btn ghost" id="btnJoinView">Mit Code beitreten</button>
+      <a class="btn ghost" href="../friends.html" style="display:block;text-decoration:none;text-align:center;">🐐 Freund aus Liste herausfordern</a>
 
       <!-- Offene Herausforderungen -->
       <div id="challengeInbox" class="hidden">
@@ -245,7 +295,7 @@
 <div id="discoBanner">
   <span class="db-txt">🔌 Gegner offline – warte auf Verbindung…</span>
   <span class="db-act win hidden" id="discoForfeit">Gegner weg — Sieg beanspruchen</span>
-  <span class="db-act" id="discoAbort">Abbrechen</span>
+  <span class="db-act" id="discoAbort">Zum Menü</span>
 </div>
 <div class="cd" id="countdown"><div class="n" id="cdNum">3</div></div>
 <div class="result" id="result"><div class="card">
@@ -259,6 +309,7 @@
   <button class="btn ghost" id="btnMenu">Zum Menü</button>
 </div></div>
 <div class="toast" id="toast"></div>
+<div id="dragLayer"><div id="dragPiece"></div></div>
 
 <script src="../lib/supabase.min.js"></script>
 <script src="../config.js"></script>
@@ -272,9 +323,18 @@
   var matchId=null, seed=null, mode='high', role=null, code=null, ch=null, wager=0;
   var myCoins=0, hostId=null;
   var st=null, selIdx=-1, startMs=0, myScore=0, oppScore=0, myOver=false, oppOver=false, oppPresent=false, started=false;
-  // Gadget-Kosten (Vertrag: fog=15, rush=20). Client zeigt sie an; die Wahrheit
-  // (Abbuchung + Cap) liegt serverseitig in spend_match_gadget().
-  var GAD_COST={fog:15, rush:20};
+  // Gadget-Kosten = PROZENT vom Einsatz (skaliert mit dem Pot). Client zeigt sie an;
+  // die Wahrheit (Abbuchung + Cap) liegt serverseitig in spend_match_gadget() mit
+  // DERSELBEN Formel. fog=30% (min 10), rush=40% (min 15). Bei Spass-Duell (wager=0)
+  // greift das Minimum -> kein Gratis-Spam.
+  var GAD_COST={fog:10, rush:15};
+  function computeGadgetCosts(){
+    GAD_COST.fog  = Math.max(10, Math.round(0.30 * (wager||0)));
+    GAD_COST.rush = Math.max(15, Math.round(0.40 * (wager||0)));
+    var fn=$('fogN'), rn=$('rushN');
+    if(fn) fn.innerHTML='<b>'+GAD_COST.fog+'</b> G-Coins';
+    if(rn) rn.innerHTML='<b>'+GAD_COST.rush+'</b> G-Coins';
+  }
   var gadBusy=false;              // Doppelklick-Schutz waehrend spend_match_gadget-RPC
   var moveLog=[];                 // Zug-Log fuer Server-Replay [{idx,r,c,t}]
   var chosenWager=0;              // in der Wett-Auswahl gewaehlter Einsatz
@@ -303,6 +363,7 @@
     ch.on('broadcast',{event:'start'},function(m){ if(!started) beginGame(m.payload.at); });
     ch.on('broadcast',{event:'move'},function(m){ markOppSeen(); oppScore=m.payload.score||0; $('oppScore').textContent=oppScore; oppLastBoard=m.payload.b||oppLastBoard; renderMini(m.payload.b); if(m.payload.over) oppDone(); });
     ch.on('broadcast',{event:'gadget'},function(m){ recvGadget(m.payload.kind); });
+    ch.on('broadcast',{event:'attack'},function(m){ recvAttack(m.payload.n||0); }); // Tetris-99-Angriff empfangen
     ch.on('broadcast',{event:'over'},function(m){ markOppSeen(); oppScore=m.payload.score||0; $('oppScore').textContent=oppScore; oppDone(); });
     ch.on('broadcast',{event:'resync-req'},function(){ sendResync(); });
     ch.on('broadcast',{event:'resync'},function(m){ markOppSeen(); if(typeof m.payload.score==='number'){ oppScore=m.payload.score; $('oppScore').textContent=oppScore; } if(m.payload.b){ oppLastBoard=m.payload.b; renderMini(m.payload.b); } if(m.payload.over) oppDone(); });
@@ -396,9 +457,12 @@
   };
   $('btnJoinView').onclick=function(){ $('lobbyChoice').classList.add('hidden'); $('joinView').classList.remove('hidden'); $('codeIn').focus(); };
   $('btnShare').onclick=function(){
-    var txt='Duell mich auf UniGoat! 🐐 Code: '+code+' — im Spiel unter Duell eingeben.';
-    if(navigator.share) navigator.share({title:'UniGoat Duell',text:txt}).catch(function(){});
-    else { try{navigator.clipboard.writeText(code);}catch(e){} toast('Code kopiert: '+code); }
+    // Einladungs-LINK teilen: Freund tippt drauf -> landet direkt im Duell (Auto-Join via ?code=).
+    // FESTE Domain (nicht location.origin -> in der App waere das capacitor://localhost = kaputt).
+    var link='https://unigoat.de/game/duel.html?code='+encodeURIComponent(code);
+    var txt='Duell mich auf UniGoat! 🐐 Tipp drauf, dann bist du direkt drin:';
+    if(navigator.share) navigator.share({title:'UniGoat Duell',text:txt,url:link}).catch(function(){});
+    else { try{navigator.clipboard.writeText(link);}catch(e){} toast('Einladungs-Link kopiert!'); }
   };
   $('btnJoin').onclick=async function(){
     var c=($('codeIn').value||'').trim().toUpperCase(); $('joinErr').textContent='';
@@ -530,6 +594,7 @@
     show('game');
     setCoins(myCoins);   // Coin-Bar im Duell mit aktuellem Stand fuellen
     if(wager>0){ $('gameWager').classList.remove('hidden'); $('gameWagerN').textContent=(wager*2); }
+    computeGadgetCosts(); // Gadget-Preise = Prozent vom Einsatz (jetzt steht wager fest)
     var _gtb=$('gadTrash'); if(_gtb) _gtb.classList.toggle('hidden', wager>0); // Muell-Block nur in Spass-Duellen (kein Coin-Risiko)
     var cdEl=$('countdown'); cdEl.style.display='flex';
     // Rest-Wartezeit bis zum synchronisierten Start (at - jetzt), dann sichtbarer 3-2-1.
@@ -563,14 +628,26 @@
   boardEl.addEventListener('click',function(e){ var c=e.target.closest('.cell'); if(c) tapCell(+c.dataset.i); });
 
   function renderBoard(){
-    for(var r=0;r<SIZE;r++)for(var c=0;c<SIZE;c++){ var v=st.grid[r][c]; cells[r*SIZE+c].className='cell'+(v?(v.t==='j'?' junk':' filled'):''); }
+    var g=st.grid;
+    for(var r=0;r<SIZE;r++)for(var c=0;c<SIZE;c++){
+      var v=g[r][c], el=cells[r*SIZE+c];
+      if(!v){ el.className='cell'; continue; }
+      if(v.t==='j'){ el.className='cell junk'; continue; } // Muell behaelt sein eigenes Muster
+      // Goat-Blast-3D-Block: Fase (tn) + Farbe (uc) + Nachbar-Merge (gleiche Masse verschmilzt)
+      var cls='cell filled tn uc'+((v.c||0)%6);
+      if(r>0     && g[r-1][c] && g[r-1][c].t!=='j') cls+=' nT';
+      if(r<SIZE-1&& g[r+1][c] && g[r+1][c].t!=='j') cls+=' nB';
+      if(c>0     && g[r][c-1] && g[r][c-1].t!=='j') cls+=' nL';
+      if(c<SIZE-1&& g[r][c+1] && g[r][c+1].t!=='j') cls+=' nR';
+      el.className=cls;
+    }
   }
   function pieceDims(p){var mr=0,mc=0;p.cells.forEach(function(rc){mr=Math.max(mr,rc[0]);mc=Math.max(mc,rc[1]);});return[mr+1,mc+1];}
   function renderTray(){
     var t=$('tray'); t.innerHTML='';
     st.tray.forEach(function(p,i){
-      var slot=document.createElement('div'); slot.className='slot'+(p?'':' used')+(i===selIdx?' sel':'');
-      if(p){ slot.appendChild(buildPiece(p)); slot.onclick=function(){ selIdx=(selIdx===i?-1:i); renderTray(); clearGhost(); }; }
+      var slot=document.createElement('div'); slot.className='slot'+(p?'':' used')+(i===selIdx?' sel':''); slot.dataset.idx=i;
+      if(p){ slot.appendChild(buildPiece(p)); slot.addEventListener('pointerdown',startDrag); }
       t.appendChild(slot);
     });
   }
@@ -578,27 +655,84 @@
     var d=pieceDims(p), rows=d[0], cols=d[1];
     var el=document.createElement('div'); el.className='piece'; el.style.gridTemplateColumns='repeat('+cols+',13px)';
     var set={}; p.cells.forEach(function(rc){set[rc[0]+','+rc[1]]=1;});
-    for(var r=0;r<rows;r++)for(var c=0;c<cols;c++){ var x=document.createElement('div'); x.className='pc '+(set[r+','+c]?'on':'off'); el.appendChild(x); }
+    var UCBASE=['#2F6FEE','#2FCB63','#9B4DEA','#F5A623','#22D3EE','#E8483C'];
+    for(var r=0;r<rows;r++)for(var c=0;c<cols;c++){ var x=document.createElement('div'); var on=set[r+','+c]; x.className='pc '+(on?'on':'off'); if(on)x.style.setProperty('--c',UCBASE[(p.color||0)%6]); el.appendChild(x); }
     return el;
   }
   function clearGhost(){cells.forEach(function(c){c.classList.remove('ghost-ok','ghost-bad');});}
 
-  function tapCell(i){
-    if(!st||st.over||selIdx<0) return;
-    var p=st.tray[selIdx]; if(!p) return;
-    var R=(i/SIZE)|0, C=i%SIZE;
-    if(!GoatCore.canPlaceAt(st.grid,p.cells,R,C)){ document.body.classList.add('shake'); setTimeout(function(){document.body.classList.remove('shake');},300); return; }
+  // Platzieren (von Drag ODER Tap genutzt). Gibt true zurueck bei Erfolg.
+  function commit(p, idx, R, C){
+    if(!st || st.over || myOver || resultShown) return false;
+    if(!GoatCore.canPlaceAt(st.grid,p.cells,R,C)) return false;
     var tMs=Date.now()-startMs;
-    var res=GoatCore.place(st, selIdx, R, C, tMs);
-    if(!res.ok){ return; }
-    // Zug-Log fuer Server-Replay (t = ms seit Rundenstart, exakt wie an place() uebergeben)
-    moveLog.push({idx:selIdx, r:R, c:C, t:tMs});
+    var res=GoatCore.place(st, idx, R, C, tMs);
+    if(!res.ok) return false;
+    moveLog.push({idx:idx, r:R, c:C, t:tMs}); // Zug-Log fuer Server-Replay
     selIdx=-1; clearGhost(); renderBoard(); renderTray();
     myScore=st.score; $('meScore').textContent=myScore;
+    // Tetris-99-Angriff: 2+ Linien -> Muell an den Gegner. NUR Spass-Duelle (wager==0), sonst Score-Race (Anti-Cheat).
+    if(res.nLines>=2 && !wager){ var atk=(res.nLines-1)*4; bc('attack',{n:atk}); toast('⚔️ '+atk+' Blöcke an Gegner!'); }
     broadcastState();
     if(st.over){ endMyGame(); }
+    else { checkDecided(); }   // Gegner schon raus + ich habe gerade ueberholt -> sofort Ende (Sieg)
+    return true;
+  }
+  // Tap-Fallback: Stein angetippt (selIdx) + Zelle antippen -> platzieren
+  function tapCell(i){
+    if(!st || st.over || selIdx<0) return;
+    var p=st.tray[selIdx]; if(!p) return;
+    if(!commit(p, selIdx, (i/SIZE)|0, i%SIZE)){ document.body.classList.add('shake'); setTimeout(function(){document.body.classList.remove('shake');},300); }
   }
 
+  // ===== Drag & Drop (aus dem Hauptspiel uebernommen) -> Steine aufs Feld ZIEHEN statt antippen =====
+  var dragging=null, dragPieceEl=$('dragPiece');
+  function boardMetrics(){ var rect=boardEl.getBoundingClientRect(); var cell=rect.width/SIZE; return {rect:rect, cell:cell, step:cell}; }
+  function buildDragPiece(p, px){
+    var d=pieceDims(p), rows=d[0], cols=d[1];
+    var el=document.createElement('div'); el.className='piece'; el.style.display='grid'; el.style.gap='0'; el.style.gridTemplateColumns='repeat('+cols+','+px+'px)'; el.style.setProperty('--cell', px+'px');
+    var set={}; p.cells.forEach(function(rc){ set[rc[0]+','+rc[1]]=1; });
+    var uc=(p.color||0)%6;
+    for(var r=0;r<rows;r++)for(var c=0;c<cols;c++){ var x=document.createElement('div'); x.style.width=px+'px'; x.style.height=px+'px'; if(set[r+','+c]) x.className='cell filled tn uc'+uc; el.appendChild(x); }
+    return el;
+  }
+  function startDrag(e){
+    if(!st || st.over || myOver || resultShown) return;
+    var idx=+e.currentTarget.dataset.idx, p=st.tray[idx];
+    if(!p) return; e.preventDefault();
+    selIdx=idx; renderTray(); // Slot markieren
+    var m=boardMetrics();
+    if(dragPieceEl){ dragPieceEl.innerHTML=''; dragPieceEl.appendChild(buildDragPiece(p, m.cell)); }
+    dragging={p:p, idx:idx, lift:e.pointerType==='touch'?96:24, anchor:null, m:m};
+    moveDrag(e);
+    window.addEventListener('pointermove',moveDrag);
+    window.addEventListener('pointerup',endDrag);
+    window.addEventListener('pointercancel',endDrag);
+  }
+  function moveDrag(e){
+    if(!dragging) return;
+    var p=dragging.p, m=dragging.m;
+    var px=e.clientX, py=e.clientY-dragging.lift;
+    if(dragPieceEl) dragPieceEl.style.transform='translate3d('+px+'px,'+py+'px,0) translate(-50%,-50%)';
+    var d=pieceDims(p), rows=d[0], cols=d[1];
+    var C=Math.round((px-(cols*m.cell)/2-m.rect.left)/m.step);
+    var R=Math.round((py-(rows*m.cell)/2-m.rect.top)/m.step);
+    clearGhost(); dragging.anchor=null;
+    if(R>-1&&C>-1&&R<SIZE&&C<SIZE){
+      var ok=GoatCore.canPlaceAt(st.grid,p.cells,R,C);
+      p.cells.forEach(function(rc){ var rr=R+rc[0], cc=C+rc[1]; if(rr>=0&&cc>=0&&rr<SIZE&&cc<SIZE) cells[rr*SIZE+cc].classList.add(ok?'ghost-ok':'ghost-bad'); });
+      if(ok) dragging.anchor=[R,C];
+    }
+  }
+  function endDrag(e){
+    window.removeEventListener('pointermove',moveDrag);
+    window.removeEventListener('pointerup',endDrag);
+    window.removeEventListener('pointercancel',endDrag);
+    if(!dragging) return;
+    var p=dragging.p, idx=dragging.idx, anchor=dragging.anchor;
+    if(dragPieceEl) dragPieceEl.innerHTML=''; clearGhost(); dragging=null;
+    if(anchor) commit(p, idx, anchor[0], anchor[1]);
+  }
   function compactBoard(){ var s=''; for(var r=0;r<SIZE;r++)for(var c=0;c<SIZE;c++) s+=(st.grid[r][c]?'1':'0'); return s; }
   function broadcastState(){ bc('move',{score:st.score, over:st.over, b:compactBoard()}); }
   function renderMini(b){
@@ -667,6 +801,17 @@
       toast('💥 Müll-Block kassiert — 3 Blöcke im Feld!');
     }
   }
+  // Tetris-99-Angriff empfangen: n Muell-Zellen ins EIGENE Feld (gleiches Muster wie 'trash' -> Anti-Cheat via {j:n}-Replay)
+  function recvAttack(n){
+    if(!st || st.over || !n) return;
+    n = Math.max(1, Math.min(24, n|0)); // sicher begrenzen
+    GoatCore.injectJunk(st, GoatCore.pickJunkCells(st, n));
+    moveLog.push({j:n, t:Date.now()-startMs});
+    renderBoard(); broadcastState();
+    var b=document.body; b.classList.add('under-attack'); setTimeout(function(){ b.classList.remove('under-attack'); },520);
+    toast('⚔️ Angriff! '+n+' Blöcke ins Feld');
+    if(st.over){ endMyGame(); } // durch Muell uebergelaufen -> verloren
+  }
 
   // ---------- Forfeit: Gegner weg -> Sieg beanspruchen ----------
   $('discoForfeit').onclick=async function(){
@@ -719,7 +864,16 @@
     showResultShell();
     await submitDuel();
   }
-  function oppDone(){ oppOver=true; }
+  var oppFinalScore=0;
+  function oppDone(){ oppOver=true; oppFinalScore=oppScore; checkDecided(); }
+  // Duell endet, sobald das Ergebnis feststeht: Gegner ist raus (Game-Over) und ich fuehre
+  // bereits -> nicht warten, direkt beenden (Sieg). Der Game-Over-Gegner kann nicht mehr
+  // aufholen, also steht der Sieger fest. (Yusuf-Wunsch 06.09.)
+  function checkDecided(){
+    if(oppOver && !myOver && !resultShown && st && !st.over && myScore > oppFinalScore){
+      endMyGame();
+    }
+  }
 
   async function submitDuel(){
     if(submitting) return; submitting=true;
@@ -839,9 +993,16 @@
   $('btnAgain').onclick=function(){ location.href='duel.html'; };
   $('btnMenu').onclick=function(){ location.href='index.html'; };
   $('backBtn').onclick=async function(){
-    if(started && !myOver){
-      if(!confirm('Duell verlassen? Bei Wett-Duellen wird abgebrochen und der Einsatz zurückerstattet.'))return;
-      try{ if(matchId) await sb.rpc('abort_match',{p_match_id:matchId}); }catch(e){}
+    if(started && !myOver && !resultShown){
+      if(wager>0){
+        // Laufendes Wett-Duell aufgeben = Einsatz verloren, Gegner bekommt den Pot (kein Zurueckerstatten).
+        // Auch Verbindung kappen zaehlt genauso: der Gegner sieht "Gegner weg" und beansprucht den Sieg.
+        if(!confirm('Wett-Duell aufgeben?\n\nDu verlierst deinen Einsatz von '+wager+' G-Coins — dein Gegner bekommt sie.\n(Auch das Internet zu kappen zählt als Niederlage.)')) return;
+        // KEIN abort_match -> keine Rueckerstattung. Match bleibt offen, Gegner beansprucht den Sieg.
+      } else {
+        if(!confirm('Duell verlassen?')) return;
+        try{ if(matchId) await sb.rpc('abort_match',{p_match_id:matchId}); }catch(e){}
+      }
     }
     location.href='index.html';
   };
@@ -866,11 +1027,15 @@
       // Deep-Links
       var q=new URLSearchParams(location.search), pc=q.get('code'), mm=q.get('match');
       if(mm){ showAcceptForMatch(mm); }
-      else if(pc){ $('btnJoinView').click(); $('codeIn').value=pc.toUpperCase(); }
+      else if(pc){ // Auto-Join per Einladungs-Link: Code eintragen + automatisch beitreten
+        $('btnJoinView').click(); $('codeIn').value=pc.toUpperCase();
+        setTimeout(function(){ var jb=$('btnJoin'); if(jb&&!jb.disabled) jb.click(); }, 500);
+      }
       else { loadChallenges(); }
     });
   })();
 })();
 </script>
+<script src="../deeplink.js"></script>
 </body>
 </html>

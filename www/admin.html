@@ -3,7 +3,7 @@
 <head>
     <script src="sentry-init.js"></script>
     <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">    <title>Admin Panel - UniGoat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">    <title>Admin Panel - UniGoat</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133">
@@ -333,6 +333,7 @@
             <p>Angemeldet als: <span id="adminEmail">...</span></p>
         </div>
         <div style="display:flex; gap:1rem; align-items:center;">
+            <a href="admin-stats.html" class="back-link" style="font-size:0.85rem;font-weight:700;">📊 Dashboard</a>
             <a href="admin-menu.html" class="back-link" style="font-size:0.85rem;">📋 Menü-Fotos</a>
             <a href="admin-debug.html" class="back-link" style="font-size:0.85rem;">🔧 Debug</a>
             <a href="dashboard.html" class="back-link">← Zur App</a>
@@ -653,11 +654,20 @@
             </div>
             <input id="bcTitle" type="text" maxlength="120" placeholder="Titel (z.B. Neue Runde: Goat Blast! 🐐)" style="width:100%; padding:0.5rem; border:1px solid #D1D5DB; border-radius:8px; margin-bottom:0.5rem;">
             <textarea id="bcBody" maxlength="240" rows="2" placeholder="Text (z.B. Diese Woche 500€ zu gewinnen. Jetzt spielen!)" style="width:100%; padding:0.5rem; border:1px solid #D1D5DB; border-radius:8px; margin-bottom:0.5rem;"></textarea>
-            <div style="display:flex; align-items:center; gap:0.75rem;">
-                <button onclick="sendBroadcast()" style="padding:0.6rem 1rem; background:#EF4444; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:700;">📢 An alle senden</button>
+            <select id="bcCity" onfocus="loadBcCities()" title="Zielstadt" style="width:100%; padding:0.5rem; border:1px solid #D1D5DB; border-radius:8px; margin-bottom:0.5rem;">
+                <option value="">📍 Alle Städte</option>
+                <optgroup label="Studentenstadt + Umland">
+                    <option value="Ulm">🎓 Ulm + Umgebung (Neu-Ulm, Vöhringen, Senden …)</option>
+                    <option value="Augsburg">🎓 Augsburg + Umgebung (Neusäß, Königsbrunn …)</option>
+                </optgroup>
+                <optgroup label="Einzelne Stadt (nur exakt)" id="bcCityGroup"></optgroup>
+            </select>
+            <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+                <button onclick="previewBroadcast()" style="padding:0.6rem 1rem; background:#EEF2FF; color:#3730A3; border:1px solid #C7D2FE; border-radius:8px; cursor:pointer; font-weight:700;">👁 Reichweite prüfen</button>
+                <button onclick="sendBroadcast()" style="padding:0.6rem 1rem; background:#EF4444; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:700;">📢 Senden</button>
                 <span id="bcMsg" style="font-size:0.85rem; color:#6B7280;"></span>
             </div>
-            <div style="font-size:0.75rem; color:#9CA3AF; margin-top:0.5rem;">Sendet Push an alle Nutzer mit App-Erlaubnis. Quiet-Hours/Rate-Limit/Dedup greifen automatisch. E-Mail-Broadcast ist bewusst nicht dabei (braucht Opt-in).</div>
+            <div style="font-size:0.75rem; color:#9CA3AF; margin-top:0.5rem;">Wähle eine Stadt (z.B. nur Ulm) oder „Alle Städte". So bekommt ein Ulmer keine Augsburg-Push. Erst „Reichweite prüfen" zeigt, wie viele erreicht würden — ohne zu senden. Quiet-Hours/Rate-Limit/Dedup greifen automatisch.</div>
         </div>
     </div>
 
@@ -2616,17 +2626,49 @@
         else { t.value = 'Deine Ziege wartet 🐐'; b.value = 'Heute schon gespielt? Sichere dir deinen Highscore!'; }
     };
 
+    // Zielstadt-Dropdown mit den tatsaechlich vorhandenen Staedten (+ Anzahl) fuellen
+    window.loadBcCities = async () => {
+        var sel = document.getElementById('bcCity');
+        var grp = document.getElementById('bcCityGroup');
+        if (!sel || sel.dataset.loaded) return; sel.dataset.loaded = '1';
+        try {
+            var { data } = await sb.from('profiles').select('city').not('city', 'is', null).neq('city', '');
+            var counts = {};
+            (data || []).forEach(function (r) { var c = (r.city || '').trim(); if (c) counts[c] = (counts[c] || 0) + 1; });
+            Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; }).forEach(function (c) {
+                if (/^(ulm|augsburg)$/i.test(c)) return; // schon als Region oben abgedeckt
+                var o = document.createElement('option'); o.value = c; o.textContent = c + ' (' + counts[c] + ')'; (grp || sel).appendChild(o);
+            });
+        } catch (e) { /* Dropdown bleibt bei "Alle Staedte" + Regionen */ }
+    };
+
+    // Reichweite pruefen (dryRun) — zeigt Empfaengerzahl, sendet NICHTS
+    window.previewBroadcast = async () => {
+        var msg = document.getElementById('bcMsg');
+        var title = document.getElementById('bcTitle').value.trim() || '(Vorschau)';
+        var city = document.getElementById('bcCity').value;
+        msg.textContent = 'Prüfe Reichweite...'; msg.style.color = '#6B7280';
+        try {
+            var { data, error } = await sb.functions.invoke('notify-broadcast', { body: { title: title, dryRun: true, city: city } });
+            if (error) throw error;
+            if (data && data.success) { msg.textContent = '👁 ' + (city || 'Alle Städte') + ': ' + data.pushCandidates + ' Push-Empfänger, ' + data.inAppTargets + ' Postfächer'; msg.style.color = '#3730A3'; }
+            else { msg.textContent = '❌ ' + ((data && data.error) || 'Fehler'); msg.style.color = '#EF4444'; }
+        } catch (err) { msg.textContent = '❌ ' + err.message; msg.style.color = '#EF4444'; }
+    };
+
     window.sendBroadcast = async () => {
         var msg = document.getElementById('bcMsg');
         var title = document.getElementById('bcTitle').value.trim();
         var body = document.getElementById('bcBody').value.trim();
+        var city = document.getElementById('bcCity').value;
         if (!title) { msg.textContent = 'Titel fehlt.'; msg.style.color = '#EF4444'; return; }
-        if (!confirm('Push an ALLE Nutzer senden?\n\n' + title)) return;
+        var scope = city ? ('nur an ' + city) : 'an ALLE Städte';
+        if (!confirm('Push ' + scope + ' senden?\n\n' + title)) return;
         msg.textContent = 'Sende...'; msg.style.color = '#6B7280';
         try {
-            var { data, error } = await sb.functions.invoke('notify-broadcast', { body: { title: title, body: body } });
+            var { data, error } = await sb.functions.invoke('notify-broadcast', { body: { title: title, body: body, city: city } });
             if (error) throw error;
-            if (data && data.success) { msg.textContent = '✅ Gesendet an ' + data.sent + '/' + data.candidates + ' (Fehler: ' + data.failed + ')'; msg.style.color = '#12B489'; }
+            if (data && data.success) { msg.textContent = '✅ Gesendet (' + (data.city || 'alle') + ') an ' + data.sent + '/' + data.candidates + ' (Fehler: ' + data.failed + ')'; msg.style.color = '#12B489'; }
             else { msg.textContent = '❌ ' + ((data && data.error) || 'Fehler'); msg.style.color = '#EF4444'; }
         } catch (err) { msg.textContent = '❌ ' + err.message; msg.style.color = '#EF4444'; }
     };

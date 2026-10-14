@@ -3,127 +3,112 @@
 <head>
     <script src="sentry-init.js"></script>
     <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title data-i18n="privacy_page_title">Datenschutz - UniGoat</title>
-    <meta name="description" content="Datenschutzerklaerung der UniGoat Studenten-Plattform. Erfahre, wie wir deine Daten schuetzen und verarbeiten.">
+    <meta name="description" content="Datenschutzerklärung der UniGoat Studenten-Plattform. Erfahre, wie wir deine Daten schützen und verarbeiten.">
+    <link rel="stylesheet" href="unigoat-v2.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
     <style>
-        /* Pattern: Magic UI BlurFade */
-        @keyframes blurFadeIn {
-            from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
-            to { opacity: 1; filter: blur(0); transform: translateY(0); }
-        }
-        .legal-content {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 1rem 4rem;
-            animation: blurFadeIn 0.5s ease-out both;
-        }
-        /* Glasmorphismus */
-        .content-card {
-            background: rgba(255,255,255,0.92);
-            border-radius: 20px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
-            border: 1px solid rgba(0,0,0,0.04);
-            line-height: 1.8;
-            color: #374151;
-            font-size: 0.95rem;
-            margin-top: 1rem;
+        /* Alias: altes Token-Vokabular auf v2 mappen, damit bestehendes JS +
+           inline-styles in v2-Farben weiterlaufen. */
+        :root{
+          --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+          --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+          --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+          --fh:var(--font-heading); --fb:var(--font-body);
+          /* Alias-Restwerte aus dem alten Seiten-Stylesheet */
+          --primary-color: var(--color-accent); --text-main: var(--color-text);
         }
 
-        h2 {
-            color: var(--text-main);
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
-            border-bottom: 2px solid #F3F4F6;
-            padding-bottom: 0.5rem;
+        .icn{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; display:block; }
+        .masthead-sm{ font-size:54px; }
+
+        /* Chrome oben: Zurueck-Link, dann Titel + dateline */
+        .topbar{ display:flex; align-items:center; gap:12px; padding:12px var(--space-5) 0; }
+        .back-arrow{
+          display:inline-flex; align-items:center; justify-content:center;
+          width:var(--tap); height:var(--tap); margin-left:-8px;
+          color:var(--color-text); text-decoration:none;
+        }
+        .back-arrow:hover{ color:var(--accent-small); }
+
+        /* Lesekomfort fuer den Rechtstext: ein ruhiger Fliesstext-Block,
+           gute Zeilenlaenge, klare Hierarchie, kein Mint-Overkill. */
+        .legal-content{
+          max-width: 720px; margin: 0 auto;
+          padding: 8px var(--space-5) 64px;
+        }
+        .content-card{
+          line-height: 1.75; color: var(--color-text);
+          font-size: 15px;
+        }
+        .content-card h2{
+          font-family: var(--font-heading); font-weight: 800;
+          font-size: 22px; line-height: 1.15; letter-spacing: -0.02em;
+          margin-top: 40px; margin-bottom: 12px;
+          padding-bottom: 8px; border-bottom: var(--rule-thin);
+        }
+        .content-card h3{
+          font-family: var(--font-heading); font-weight: 800;
+          font-size: 16px; line-height: 1.25;
+          margin-top: 24px; margin-bottom: 8px;
+        }
+        .content-card p, .content-card li{ margin-bottom: 12px; }
+        .content-card ul{ padding-left: 20px; margin-bottom: 16px; }
+        .content-card li{ margin-bottom: 8px; }
+        .content-card a{ color: var(--accent-small); text-underline-offset: 3px; }
+        .content-card a:hover{ color: var(--color-accent-800); }
+
+        /* Kurzfassung: dezenter Mint-Akzent, KEIN Poster */
+        .info-box{
+          background: var(--color-accent-100);
+          border-left: 3px solid var(--color-accent);
+          padding: 14px 16px; margin: 0 0 28px 0;
+          color: var(--color-accent-900);
+        }
+        /* "Was wir NICHT tun": gleicher ruhiger Akzent-Block */
+        .highlight-box{
+          background: var(--color-accent-100);
+          border-left: 3px solid var(--color-accent);
+          padding: 14px 16px; margin: 16px 0;
+          color: var(--color-accent-900);
+        }
+        .highlight-box ul{ margin-bottom: 0; }
+
+        /* Kontakt-/Adressbloecke: neutrale Flaeche, eckig */
+        .contact-box{
+          background: var(--color-surface);
+          border: var(--rule-thin);
+          padding: 16px; margin: 16px 0;
         }
 
-        h3 {
-            color: var(--text-main);
-            margin-top: 1.5rem;
-            font-size: 1.05rem;
-            font-weight: 600;
+        .email-link{
+          background: var(--color-accent-100);
+          padding: 2px 8px;
+          color: var(--accent-small);
+          text-decoration: none; font-weight: 600;
         }
-
-        p, li { margin-bottom: 0.8rem; }
-        ul { padding-left: 1.2rem; margin-bottom: 1rem; }
-        li { margin-bottom: 0.5rem; }
-
-        /* Highlight Boxes */
-        .info-box {
-            background: #EFF6FF;
-            border-left: 4px solid #3B82F6;
-            padding: 1rem 1.25rem;
-            border-radius: 8px;
-            margin: 0 0 2rem 0;
-            color: #1E40AF;
-        }
-
-        .highlight-box {
-            background: #ECFDF5;
-            border-left: 4px solid #10B981;
-            padding: 1rem 1.25rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            color: #065F46;
-        }
-
-        /* Contact Address Box */
-        .contact-box {
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
-            border-radius: 12px;
-            padding: 1.25rem;
-            margin: 1rem 0;
-        }
-
-        .email-link {
-            background: #EFF6FF;
-            padding: 0.2rem 0.6rem;
-            border-radius: 6px;
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 500;
-        }
-        .email-link:hover { text-decoration: underline; }
-
-        a { color: var(--primary-color); text-decoration: none; }
-        a:hover { text-decoration: underline; }
-
-        /* --- UniGoat-Look Angleichung (14.08.2026): Fonts + Mint-Akzent --- */
-        :root { --primary-color: #12B489; --text-main: #0c2b24; }
-        body { font-family: 'Sora', system-ui, -apple-system, sans-serif; background: #f4f7f6; }
-        h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; }
-        .app-header h1 { font-family: 'Fraunces', serif; }
-        h2 { border-bottom-color: rgba(18,180,137,.18); }
-        .info-box { background: rgba(18,180,137,.08); border-left-color: #12B489; color: #0c5c46; }
-        .highlight-box { background: rgba(18,180,137,.10); border-left-color: #0e9e79; color: #0c5c46; }
-        .email-link { background: rgba(18,180,137,.12); color: #0e8f6c; }
+        .email-link:hover{ text-decoration: underline; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <header class="app-header">
-        <a href="javascript:history.back()" class="back-arrow">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+<div class="screen">
+  <div class="screen-body">
+    <div class="topbar">
+        <a href="javascript:history.back()" class="back-arrow" aria-label="Zurück">
+            <svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
-        <h1 data-i18n="privacy_title">Datenschutz</h1>
-        <div style="width:40px;"></div>
-    </header>
+    </div>
+    <div class="masthead masthead-sm" data-i18n="privacy_title">Datenschutz</div>
+    <div class="dateline"><span>UniGoat</span><span>Stand: September 2026</span></div>
 
     <main class="legal-content">
         <div class="content-card">
-            <div id="legalBanner" style="display:none; background:#FEF3C7; border:1px solid #F59E0B; border-radius:12px; padding:1rem 1.25rem; margin-bottom:1.5rem; color:#78350F; font-size:0.9rem; line-height:1.5;">
+            <div id="legalBanner" style="display:none; background:#FEF3C7; border:1px solid #F59E0B; padding:1rem 1.25rem; margin-bottom:1.5rem; color:#78350F; font-size:0.9rem; line-height:1.5;">
                 <strong data-i18n="legal_banner_title">Rechtsverbindlich nur auf Deutsch</strong><br>
                 <span data-i18n="legal_banner_text">Diese rechtlichen Texte sind nur in der deutschen Originalfassung verbindlich.</span>
             </div>
@@ -141,13 +126,13 @@
                 <span data-i18n="privacy_summary_text">Wir sammeln nur Daten, die für den Betrieb notwendig sind. Kein Verkauf, kein Tracking. Deine Sicherheit steht an erster Stelle.</span>
             </div>
 
-            <p style="font-size: 0.85rem; color: #9ca3af; margin-bottom: 2rem;">
-                Stand: Mai 2026
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 2rem;">
+                Stand: September 2026
             </p>
-            
+
             <h2 data-i18n="privacy_responsible_title">1. Verantwortlicher</h2>
             <p data-i18n="privacy_responsible_intro">Verantwortlich für die Datenverarbeitung auf dieser Website ist:</p>
-            
+
             <div class="contact-box">
                 <strong>Yusuf Albayrak</strong><br>
                 Yumita (Einzelunternehmen)<br>
@@ -157,9 +142,9 @@
                 <span data-i18n="privacy_country">Deutschland</span><br><br>
                 <span data-i18n="privacy_email_label">E-Mail:</span> <a href="mailto:info@unigoat.de" class="email-link">info@unigoat.de</a>
             </div>
-            
+
             <h2 data-i18n="privacy_data_title">2. Welche Daten wir erheben</h2>
-            
+
             <h3 data-i18n="privacy_registration_title">2.1 Registrierungsdaten</h3>
             <p data-i18n="privacy_registration_intro">Bei der Registrierung erheben wir:</p>
             <ul>
@@ -187,12 +172,12 @@
                 <li data-i18n="privacy_listings_item4">Hochgeladene Fotos</li>
                 <li data-i18n="privacy_listings_item5">Kontaktinformationen</li>
             </ul>
-            
+
             <h3>2.4 Nachrichten</h3>
             <p data-i18n="privacy_messages_text">
                 Nachrichten, die du über unsere Plattform sendest, werden verschlüsselt gespeichert, um die Kommunikation zwischen Nutzern zu ermöglichen.
             </p>
-            
+
             <h3>2.5 Technische Daten</h3>
             <p>Bei jedem Zugriff werden automatisch erfasst:</p>
             <ul>
@@ -238,6 +223,27 @@
                 sowie unser berechtigtes Interesse an der Missbrauchsvermeidung (Art. 6 Abs. 1 lit. f DSGVO).
             </p>
 
+            <h3>2.10 Freunde-Verlosung („Party-Lostopf")</h3>
+            <p>
+                Wenn du an der Verlosung teilnimmst, verarbeiten wir zur Durchführung: deine Nutzer-ID
+                und die Zuordnung deiner Lose, die Einladungs-Beziehung (wer wen geworben hat) sowie – im
+                Gewinnfall – die zur Preisübergabe nötige Kontaktaufnahme über die App. Es werden dafür
+                keine zusätzlichen personenbezogenen Daten erhoben. Rechtsgrundlage ist die Durchführung
+                der Verlosung (Art. 6 Abs. 1 lit. b) sowie unser berechtigtes Interesse an einem
+                manipulationsfreien Ablauf (Art. 6 Abs. 1 lit. f DSGVO). Details siehe
+                <a href="nutzungsbedingungen.html#verlosung">Teilnahmebedingungen</a>.
+            </p>
+
+            <h3>2.11 Feedback</h3>
+            <p>
+                Wenn du uns über die Feedback-Funktion in der App eine Nachricht schickst (Problem, Vorschlag oder
+                Sonstiges), speichern wir deinen Text, deine Nutzer-ID sowie technische Kontextangaben (z. B. die
+                aktuelle Seite und dein Gerät/Browser), um dein Anliegen zu bearbeiten und die App zu verbessern.
+                Zur Benachrichtigung wird dein Feedback zusätzlich per E-Mail an unser Team übermittelt (siehe
+                Abschnitt E-Mail-Versand). Rechtsgrundlage ist unser berechtigtes Interesse an der Produktverbesserung
+                (Art. 6 Abs. 1 lit. f DSGVO).
+            </p>
+
             <h2 data-i18n="privacy_not_title">3. Was wir NICHT tun</h2>
             <div class="highlight-box">
                 <ul style="margin-bottom: 0;">
@@ -246,7 +252,7 @@
                     <li><strong data-i18n="privacy_not_ads_label">Keine Werbung:</strong> <span data-i18n="privacy_not_ads_text">Wir zeigen keine personalisierte Werbung</span></li>
                 </ul>
             </div>
-            
+
             <h2 data-i18n="privacy_legal_title">4. Rechtsgrundlage</h2>
             <p data-i18n="privacy_legal_intro">Die Verarbeitung erfolgt auf Grundlage von:</p>
             <ul>
@@ -254,19 +260,22 @@
                 <li><strong>Art. 6 Abs. 1 lit. a DSGVO</strong> - <span data-i18n="privacy_legal_item2">Einwilligung</span></li>
                 <li><strong>Art. 6 Abs. 1 lit. f DSGVO</strong> - <span data-i18n="privacy_legal_item3">Berechtigtes Interesse</span></li>
             </ul>
-            
+
             <h2 data-i18n="privacy_hosting_title">5. Hosting und Speicherung</h2>
-            
+
             <h3 data-i18n="privacy_database_title">5.1 Datenbank (Supabase)</h3>
             <p>
                 <span data-i18n="privacy_database_text">Unsere Datenbank wird bei Supabase gehostet, mit Servern in der Europäischen Union (Frankfurt, Deutschland). Supabase erfüllt hohe Sicherheitsstandards.</span>
-                <br><a href="https://sb.com/privacy" target="_blank" style="font-size:0.9rem;">Supabase Datenschutz →</a>
+                <br><a href="https://supabase.com/privacy" target="_blank" style="font-size:0.9rem;">Supabase Datenschutz →</a>
             </p>
-            
+
             <h3>5.2 Webhosting</h3>
             <p>
-                Unsere Website wird bei Vercel Inc. gehostet.
+                Unsere Website und App-Inhalte werden über Vercel Inc. sowie Cloudflare, Inc. ausgeliefert
+                (Content-Delivery und Hosting). Dabei können technisch notwendige Verbindungsdaten (z. B.
+                IP-Adresse) verarbeitet werden, um die Inhalte auszuliefern und vor Angriffen zu schützen.
                 <br><a href="https://vercel.com/legal/privacy-policy" target="_blank" style="font-size:0.9rem;">Vercel Datenschutz →</a>
+                <br><a href="https://www.cloudflare.com/privacypolicy/" target="_blank" style="font-size:0.9rem;">Cloudflare Datenschutz →</a>
             </p>
 
             <h3>5.3 Push-Dienste</h3>
@@ -285,11 +294,22 @@
                 <br><a href="https://resend.com/legal/privacy-policy" target="_blank" style="font-size:0.9rem;">Resend Datenschutz →</a>
             </p>
 
-            <h3>5.5 Datentransfer in Drittländer</h3>
-            <p>Einige unserer Dienstleister haben ihren Sitz in den USA (Google/Firebase, Vercel, Apple, Resend). Der Datentransfer erfolgt auf Grundlage von:</p>
+            <h3>5.5 Fehler- und Absturzanalyse (Sentry)</h3>
+            <p>
+                Zur Erkennung und Behebung von technischen Fehlern und Abstürzen nutzen wir
+                <strong>Sentry (Functional Software, Inc., USA)</strong>. Dabei können im Fehlerfall technische
+                Daten (z. B. Fehlermeldung, App-/Browser-Version, Gerätetyp) verarbeitet werden. Personenbezogene
+                Angaben wie E-Mail-Adresse oder Zugangs-Tokens werden vor der Übermittlung automatisch entfernt.
+                Sentry wird <strong>erst nach deiner Einwilligung</strong> über den Consent-Hinweis geladen.
+                Rechtsgrundlage ist deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO).
+                <br><a href="https://sentry.io/privacy/" target="_blank" style="font-size:0.9rem;">Sentry Datenschutz →</a>
+            </p>
+
+            <h3>5.6 Datentransfer in Drittländer</h3>
+            <p>Einige unserer Dienstleister haben ihren Sitz in den USA (Google/Firebase, Vercel, Cloudflare, Apple, Resend, Sentry, Anthropic). Der Datentransfer erfolgt auf Grundlage von:</p>
             <ul>
                 <li><strong>EU-US Data Privacy Framework</strong> – Google, Vercel und Apple sind unter dem Data Privacy Framework zertifiziert</li>
-                <li><strong>Standardvertragsklauseln (SCC)</strong> gemäß Art. 46 Abs. 2 lit. c DSGVO als zusätzliche Absicherung (u.a. für Resend)</li>
+                <li><strong>Standardvertragsklauseln (SCC)</strong> gemäß Art. 46 Abs. 2 lit. c DSGVO als zusätzliche Absicherung (u.a. für Resend, Sentry und Anthropic)</li>
             </ul>
 
             <h2>6. Aufbewahrungsfristen</h2>
@@ -343,6 +363,7 @@
 
         </div>
     </main>
+  </div>
 </div>
 
 <script src="config.js"></script>

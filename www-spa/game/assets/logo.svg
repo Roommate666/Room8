@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="#1A1C1A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Minimalistische Line-Art-Ziege (Platzhalter im Stil deines Logos; echtes Logo-File kann ersetzt werden) -->
+  <path d="M30 40 C30 55 40 66 52 66 C64 66 72 57 72 45"/>
+  <path d="M72 45 C72 38 68 33 61 32 L54 31"/>
+  <path d="M30 40 C26 34 24 27 27 21 C33 25 37 31 40 37"/>
+  <path d="M72 45 C79 40 84 33 82 26 C75 29 70 35 66 41"/>
+  <path d="M40 37 C45 33 55 33 61 37"/>
+  <circle cx="44" cy="45" r="1.6" fill="#1A1C1A" stroke="none"/>
+  <path d="M52 66 L52 74 M46 71 C50 78 54 78 58 71" />
+</svg>

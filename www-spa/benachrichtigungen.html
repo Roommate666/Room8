@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="de" data-page="notifications">
+<head>
+<script src="sentry-init.js"></script>
+<script src="features.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Benachrichtigungen — UniGoat</title>
+<link rel="stylesheet" href="unigoat-v2.css">
+<style>
+  /* Alias: altes Token-Vokabular auf v2 mappen, damit bestehendes JS
+     + inline-styles in v2-Farben weiterlaufen. */
+  :root{
+    --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+    --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+    --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+    --fh:var(--font-heading); --fb:var(--font-body);
+  }
+  .icn{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; display:block; }
+  .tab .icn{ width:20px; height:20px; margin-bottom:2px; }
+
+  /* Unterseiten-Kopf mit Zurueck-Button */
+  .subhd{ display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+  .backbtn{ background:none; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; width:24px; height:24px; color:var(--color-text); padding:0; }
+
+  /* Benachrichtigungs-Feed: eckige v2-Zeilen */
+  .feed{ display:flex; flex-direction:column; border-top:var(--rule); }
+  .feeditem{ background:var(--color-bg); border-bottom:var(--rule-thin); border-radius:0; padding:14px 4px; }
+  .feeditem .ft{ font-family:var(--font-heading); font-weight:800; font-size:15px; line-height:1.35; }
+  .feeditem .fb{ color:var(--text-muted); font-size:14px; margin-top:4px; line-height:1.5; }
+  .feeditem .fm{ font-family:var(--font-heading); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--color-neutral-300); margin-top:7px; }
+  .feedtag{ display:inline-block; font-family:var(--font-heading); font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; padding:2px 8px; border-radius:0; margin-right:8px; vertical-align:middle; }
+  .tag-game{ background:var(--color-accent); color:var(--on-accent); }
+  .tag-coupon{ background:var(--color-accent-100); color:var(--color-accent-800); }
+  .tag-admin{ background:transparent; color:var(--text-muted); border:1px solid var(--color-divider); }
+  .empty{ text-align:center; color:var(--text-muted); padding:50px 20px; line-height:1.6; }
+</style>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+</head>
+<body>
+<div class="screen">
+  <div class="screen-body">
+    <div class="subhd">
+      <a class="backbtn" href="einstellungen.html" aria-label="Zurück"><svg class="icn" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></a>
+      <div class="masthead masthead-sm" style="margin:0">Benachrichtigungen</div>
+    </div>
+    <div class="dateline"><span>Campus-Ausgabe</span><span>Feed</span></div>
+    <div class="feed" id="feed"><div class="feeditem"><div class="fb">Lade…</div></div></div>
+  </div>
+
+  <nav class="tabbar">
+    <a class="tab" href="dashboard.html"><svg class="icn" viewBox="0 0 24 24"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1Z"/></svg>Hub</a>
+    <a class="tab" href="coupons.html"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="0"/><path d="M3 10h18"/></svg>Coupons</a>
+    <a class="tab" href="game/index.html"><svg class="icn" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="0"/><path d="M8 12h3M9.5 10.5v3M15 11h.01M17 13h.01"/></svg>Game</a>
+    <a class="tab" href="challenge.html"><svg class="icn" viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>Rang</a>
+    <a class="tab" href="profile.html"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>Profil</a>
+  </nav>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  function fmtWhen(ts){try{var d=new Date(ts),now=new Date(),diff=(now-d)/1000;
+    if(diff<60)return 'gerade eben';
+    if(diff<3600)return Math.floor(diff/60)+' Min';
+    if(diff<86400)return Math.floor(diff/3600)+' Std';
+    return d.toLocaleDateString('de-DE');}catch(e){return '';}}
+  function tagFor(n){
+    var t=((n.type||'')+' '+(n.title||'')+' '+(n.message||'')).toLowerCase();
+    if(/rang|spiel|game|ueberhol|überhol|coin|goat|duell/.test(t))return ['tag-game','🎮 Spiel'];
+    if(/coupon|deal|rabatt|shawarma|men[uü]|einl[oö]s|laden/.test(t))return ['tag-coupon','🎟️ Coupon'];
+    return ['tag-admin','📢 Info'];
+  }
+  async function loadFeed(uid){
+    var host=$('feed');
+    try{
+      var r=await sb.from('notifications').select('title,message,type,created_at').eq('user_id',uid).order('created_at',{ascending:false}).limit(50);
+      var rows=(r&&r.data)||[];
+      host.innerHTML='';
+      if(!rows.length){host.innerHTML='<div class="empty">🔔<br>Noch keine Benachrichtigungen.<br><small>Hier landen Spiel-Duelle, Coupon-Deals und Infos.</small></div>';return;}
+      rows.forEach(function(n){
+        var tag=tagFor(n);
+        var it=document.createElement('div');it.className='feeditem';
+        var t=document.createElement('div');t.className='ft';
+        var tg=document.createElement('span');tg.className='feedtag '+tag[0];tg.textContent=tag[1];
+        t.appendChild(tg);t.appendChild(document.createTextNode(n.title||''));
+        var b=document.createElement('div');b.className='fb';b.textContent=n.message||'';
+        var m=document.createElement('div');m.className='fm';m.textContent=fmtWhen(n.created_at);
+        it.appendChild(t);it.appendChild(b);it.appendChild(m);host.appendChild(it);
+      });
+    }catch(e){host.innerHTML='<div class="empty">Benachrichtigungen konnten nicht geladen werden.</div>';}
+  }
+  async function init(){
+    var s=await sb.auth.getUser();
+    if(!s||!s.data||!s.data.user){location.href='login.html';return;}
+    await loadFeed(s.data.user.id);
+  }
+  function boot(){if(window.sb)init();else setTimeout(boot,120);}
+  boot();
+})();
+</script>
+</body>
+</html>

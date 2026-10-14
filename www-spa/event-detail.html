@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <script src="sentry-init.js"></script>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title>Event - UniGoat</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .app-container { background-color: #f3f4f6; padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
+
+        .detail-hero { position: relative; width: 100%; aspect-ratio: 16 / 9; background: linear-gradient(135deg, #CCFBF1 0%, #5EEAD4 100%); overflow: hidden; }
+        .detail-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .detail-back {
+            position: absolute; top: calc(1rem + env(safe-area-inset-top)); left: 1rem;
+            background: rgba(255,255,255,0.95); border-radius: 50%;
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            color: #111827; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .detail-share {
+            position: absolute; top: calc(1rem + env(safe-area-inset-top)); right: 1rem;
+            background: rgba(255,255,255,0.95); border-radius: 50%;
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            color: #111827; border: none; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .detail-content { padding: 1.25rem; background: white; margin-top: -16px; border-radius: 24px 24px 0 0; position: relative; z-index: 2; }
+
+        .badge-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+        .badge { font-size: 0.7rem; font-weight: 700; padding: 0.3rem 0.65rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.03em; }
+        .badge-cat { background: #CCFBF1; color: #0F766E; }
+        .badge-official { background: linear-gradient(135deg, #14B8A6, #0F766E); color: white; }
+        .badge-past { background: #F3F4F6; color: #6B7280; }
+
+        .event-title { font-size: 1.6rem; font-weight: 800; color: #111827; margin: 0 0 0.5rem; line-height: 1.25; }
+
+        /* Einheitliche Meta-Chip-Zeile (identisch auf allen 3 Detail-Seiten) */
+        .r8-meta-chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0}
+        .r8-chip{display:inline-flex;align-items:center;gap:.35rem;background:#F3F4F6;
+            color:#374151;padding:.4rem .7rem;border-radius:999px;font-size:.85rem;
+            font-weight:600;line-height:1}
+        .event-organizer-line { color: #6B7280; font-size: 0.9rem; margin-bottom: 1rem; }
+
+        .meta-grid { display: flex; flex-direction: column; gap: 0.75rem; padding: 1rem; background: #F9FAFB; border-radius: 12px; margin-bottom: 1rem; }
+        .meta-row { display: flex; align-items: flex-start; gap: 0.75rem; }
+        .meta-icon { font-size: 1.25rem; flex-shrink: 0; width: 24px; }
+        .meta-content { flex: 1; }
+        .meta-label { font-size: 0.75rem; color: #6B7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+        .meta-value { color: #111827; font-size: 0.95rem; font-weight: 500; }
+
+        .description-section { margin-bottom: 1.5rem; }
+        .description-section h3 { font-size: 1rem; font-weight: 700; color: #111827; margin: 0 0 0.5rem; }
+        .description-text { color: #374151; font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; }
+
+        /* Detail-Seite: keine Bottom-Tab-Nav (verdeckte sonst die Anmelde-Leiste).
+           Navigation laeuft ueber Zurueck-Button im Hero + interest-bar. */
+        .bottom-nav { display: none !important; }
+        .interest-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; border-top: 1px solid #E5E7EB;
+            padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom));
+            display: flex; gap: 0.75rem; z-index: 50;
+        }
+        .btn-primary {
+            flex: 1; padding: 0.85rem; border-radius: 12px;
+            background: linear-gradient(135deg, #14B8A6, #0F766E); color: white;
+            font-size: 1rem; font-weight: 700; border: none; cursor: pointer;
+        }
+        .btn-primary.going { background: #DCFCE7; color: #166534; }
+        .btn-secondary {
+            padding: 0.85rem 1.25rem; border-radius: 12px;
+            background: white; color: #374151; border: 1px solid #E5E7EB;
+            font-size: 1rem; font-weight: 600; cursor: pointer;
+        }
+
+        .going-count { color: #6B7280; font-size: 0.85rem; margin-bottom: 0.5rem; }
+
+        .attendees-section { margin: 1rem 0 0.5rem; }
+        .attendees-title { font-size: 0.95rem; font-weight: 700; color: #374151; margin: 0 0 0.6rem; }
+        .attendees-list { display: flex; flex-wrap: wrap; gap: 0.85rem; }
+        .attendee {
+            display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+            width: 64px; text-decoration: none; color: #374151; cursor: pointer;
+        }
+        .attendee-avatar {
+            width: 48px; height: 48px; border-radius: 50%; object-fit: cover;
+            background: #E5E7EB; display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; font-weight: 700; color: #6B7280; overflow: hidden;
+        }
+        .attendee-name {
+            font-size: 0.72rem; text-align: center; line-height: 1.1;
+            max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .attendee-more {
+            display: flex; align-items: center; justify-content: center;
+            width: 48px; height: 48px; border-radius: 50%; background: #F3F4F6;
+            color: #6B7280; font-size: 0.8rem; font-weight: 700;
+        }
+        /* Speichern-Button im Hero (oben rechts, links neben Teilen) */
+        .detail-save {
+            position: absolute; top: calc(1rem + env(safe-area-inset-top)); right: 4rem;
+            background: rgba(255,255,255,0.95); border-radius: 50%;
+            width: 40px; height: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            color: #111827;
+        }
+
+        .external-link {
+            display: inline-block; margin-top: 0.5rem;
+            color: #0F766E; text-decoration: none; font-size: 0.9rem; font-weight: 600;
+        }
+
+        .loading { text-align: center; padding: 4rem 1rem; color: #9CA3AF; }
+
+        /* Report Button + Modal */
+        /* Melden = sekundaere, seltene Aktion: dezent, zentriert, am Ende des Contents.
+           Eigener Bereich ausserhalb von .detail-content, leicht abgesetzt vor der interest-bar. */
+        .report-footer {
+            text-align: center;
+            padding: 1.25rem 1.25rem 0.5rem;
+            background: white;
+        }
+        .report-link {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            padding: 0.5rem 0.85rem; border-radius: 999px;
+            color: #9CA3AF; font-size: 0.8rem; font-weight: 500; text-decoration: none;
+            background: none; border: none; cursor: pointer;
+            transition: color 0.15s, background 0.15s;
+        }
+        .report-link svg { width: 14px; height: 14px; flex-shrink: 0; }
+        .report-link:hover { color: #EF4444; background: #FEF2F2; }
+
+        .report-modal-bg {
+            position: fixed; inset: 0; background: rgba(17,24,39,0.6);
+            display: none; align-items: center; justify-content: center;
+            z-index: 200; padding: 1rem;
+        }
+        .report-modal-bg.active { display: flex; }
+        .report-modal {
+            background: white; border-radius: 16px; padding: 1.5rem;
+            max-width: 420px; width: 100%; max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+        }
+        .report-modal h3 { margin: 0 0 0.5rem; font-size: 1.1rem; font-weight: 700; color: #111827; }
+        .report-modal p { margin: 0 0 1rem; color: #6B7280; font-size: 0.9rem; }
+        .report-options { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+        .report-option {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.65rem 0.75rem; border: 1px solid #E5E7EB; border-radius: 10px;
+            cursor: pointer; transition: all 0.15s; font-size: 0.9rem; color: #374151;
+        }
+        .report-option:hover { border-color: #14B8A6; background: #F0FDFA; }
+        .report-option input { margin: 0; }
+        .report-option.checked { border-color: #14B8A6; background: #F0FDFA; color: #0F766E; font-weight: 600; }
+        .report-details {
+            width: 100%; padding: 0.65rem 0.75rem; border: 1px solid #E5E7EB; border-radius: 10px;
+            font-size: 0.9rem; font-family: inherit; min-height: 70px; resize: vertical;
+        }
+        .report-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        .report-actions .btn {
+            flex: 1; padding: 0.7rem; border-radius: 10px;
+            font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none;
+        }
+        .report-actions .btn-cancel { background: #F3F4F6; color: #374151; }
+        .report-actions .btn-submit { background: #EF4444; color: white; }
+        .report-actions .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div id="loadingState" class="loading">
+        <div style="font-size:2rem;">⏳</div>
+        <p data-i18n="event_loading">Lade Event...</p>
+    </div>
+
+    <div id="eventContent" style="display:none;">
+        <div class="detail-hero" id="eventHero">
+            <a href="events.html" class="detail-back" aria-label="Zurück">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </a>
+            <button class="detail-share" onclick="shareEvent()" aria-label="Teilen">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            </button>
+            <button id="eventSaveBtn" class="detail-save save-btn" type="button" aria-label="Speichern"></button>
+        </div>
+
+        <div class="detail-content">
+            <div class="badge-row" id="badgeRow"></div>
+            <h1 class="event-title" id="eventTitle"></h1>
+            <div class="r8-meta-chips" id="r8MetaChips"></div>
+            <div class="event-organizer-line" id="eventOrganizer"></div>
+
+            <div class="meta-grid" id="metaGrid"></div>
+
+            <div class="description-section">
+                <h3 data-i18n="event_description">Beschreibung</h3>
+                <div class="description-text" id="eventDescription"></div>
+                <a id="externalLink" class="external-link" target="_blank" rel="noopener" style="display:none;">→ Mehr Infos</a>
+            </div>
+
+            <div class="going-count" id="goingCount"></div>
+            <div id="attendeesSection" class="attendees-section" style="display:none;">
+                <h3 class="attendees-title" data-i18n="event_attendees_title">Wer geht hin</h3>
+                <div id="attendeesList" class="attendees-list"></div>
+            </div>
+            <div id="viewCountWrap" style="display:none; align-items:center; gap:4px; color:#6b7280; font-size:0.85rem; margin-top:0.25rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span id="viewCount">0</span>
+            </div>
+        </div>
+
+        <!-- Melden: dezent, zentriert am Ende des Contents (vor der interest-bar) -->
+        <div class="report-footer">
+            <button id="reportLink" class="report-link" onclick="openReportModal()" style="display:none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                <span data-i18n="event_report_title">Event melden</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="reportModalBg" class="report-modal-bg" onclick="if(event.target===this) closeReportModal()">
+        <div class="report-modal">
+            <h3 data-i18n="event_report_title">Event melden</h3>
+            <p data-i18n="event_report_subtitle">Was stimmt mit diesem Event nicht? Wir prüfen jede Meldung.</p>
+
+            <div class="report-options" id="reportOptions">
+                <label class="report-option"><input type="radio" name="reason" value="spam"><span data-i18n="event_report_spam">Spam / Werbung</span></label>
+                <label class="report-option"><input type="radio" name="reason" value="illegal"><span data-i18n="event_report_illegal">Illegale Inhalte (Drogen, Waffen)</span></label>
+                <label class="report-option"><input type="radio" name="reason" value="hate"><span data-i18n="event_report_hate">Hass / Diskriminierung</span></label>
+                <label class="report-option"><input type="radio" name="reason" value="fake"><span data-i18n="event_report_fake">Fake / Existiert nicht</span></label>
+                <label class="report-option"><input type="radio" name="reason" value="duplicate"><span data-i18n="event_report_duplicate">Doppelt</span></label>
+                <label class="report-option"><input type="radio" name="reason" value="other"><span data-i18n="event_report_other">Anderer Grund</span></label>
+            </div>
+
+            <textarea id="reportDetails" class="report-details" placeholder="Optional: Details (max 500 Zeichen)" maxlength="500" data-i18n-placeholder="event_report_details_placeholder"></textarea>
+
+            <div class="report-actions">
+                <button class="btn btn-cancel" onclick="closeReportModal()" data-i18n="common_cancel">Abbrechen</button>
+                <button id="reportSubmitBtn" class="btn btn-submit" onclick="submitReport()" disabled data-i18n="event_report_submit">Melden</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="interestBar" class="interest-bar" style="display:none;">
+        <button id="goingBtn" class="btn-primary" onclick="toggleGoing()" data-i18n="event_attend">Ich gehe hin</button>
+        <button class="btn-secondary" onclick="navigateTo('events.html')" data-i18n="common_back">Zurück</button>
+    </div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="translations.js"></script>
+<script src="navigation.js"></script>
+<script src="room8-utils.js"></script>
+<script src="room8-saves.js"></script>
+<script>
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    function escapeHtml(t) { if (t === null || t === undefined) return ''; return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function navigateTo(url) { try { window.location.href = url; } catch(e) {} }
+
+    var CATEGORY_LABELS = { party:'Party', lecture:'Vortrag', workshop:'Workshop', sport:'Sport', culture:'Kultur', networking:'Networking', food:'Essen', other:'Event' };
+
+    var eventId = new URLSearchParams(window.location.search).get('id');
+    var currentEvent = null;
+    var currentUserId = null;
+    var userIsGoing = false;
+
+    if (!eventId) {
+        document.getElementById('loadingState').innerHTML = '<p>Kein Event ausgewählt.</p>';
+    } else {
+        loadEvent();
+    }
+
+    async function loadEvent() {
+        if (window.Room8Saves) { try { await Room8Saves.load(); } catch (e) {} }
+        try {
+            var userRes = await sb.auth.getUser();
+            currentUserId = userRes.data.user ? userRes.data.user.id : null;
+
+            var result = await sb.from('events').select('*').eq('id', eventId).single();
+            if (result.error || !result.data) {
+                document.getElementById('loadingState').innerHTML = '<p>Event nicht gefunden.</p>';
+                return;
+            }
+            currentEvent = result.data;
+
+            // Check ob User schon "going" markiert hat
+            if (currentUserId) {
+                var interestRes = await sb.from('event_interests')
+                    .select('status')
+                    .eq('event_id', eventId)
+                    .eq('user_id', currentUserId)
+                    .maybeSingle();
+                userIsGoing = interestRes.data && interestRes.data.status === 'going';
+            }
+
+            // View-Counter via RPC (atomar + SECURITY DEFINER, umgeht RLS)
+            sb.rpc('increment_event_view', { event_id_input: eventId }).then(function(){}, function(){});
+
+            renderEvent();
+        } catch (e) {
+            console.error('Event laden:', e);
+            document.getElementById('loadingState').innerHTML = '<p>Fehler beim Laden.</p>';
+        }
+    }
+
+    function renderEvent() {
+        var ev = currentEvent;
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('eventContent').style.display = 'block';
+        document.getElementById('interestBar').style.display = 'flex';
+
+        // Speichern-Button verdrahten
+        if (window.Room8Saves) {
+            Room8Saves.wire(document.getElementById('eventSaveBtn'), 'event', eventId);
+        }
+
+        // Hero-Bild
+        var hero = document.getElementById('eventHero');
+        if (ev.cover_image_path) {
+            var url = window.Room8 ? Room8.getOptimizedImageUrl('event-images', ev.cover_image_path, { width: 1200, quality: 80 }) : null;
+            if (url) {
+                var img = document.createElement('img');
+                img.src = url;
+                img.alt = ev.title;
+                img.width = 1200; img.height = 675;
+                img.loading = 'eager';
+                img.decoding = 'async';
+                hero.insertBefore(img, hero.firstChild);
+            }
+        }
+
+        // Badges
+        var badges = '<span class="badge badge-cat">' + (CATEGORY_LABELS[ev.category] || 'Event') + '</span>';
+        if (ev.is_official) badges += '<span class="badge badge-official">Offiziell</span>';
+        var startDate = new Date(ev.start_at);
+        if (startDate < new Date()) badges += '<span class="badge badge-past">Vergangen</span>';
+        document.getElementById('badgeRow').innerHTML = badges;
+
+        // Titel + Organizer
+        document.getElementById('eventTitle').textContent = ev.title;
+        document.getElementById('eventOrganizer').textContent = ev.organizer_name ? 'von ' + ev.organizer_name : '';
+
+        // Einheitliche Meta-Chip-Zeile (Reihenfolge: Ort, Zeit, Wert, Anbieter; leere weglassen)
+        renderMetaChips(ev);
+
+        // Meta-Grid: Ort + Preis stehen schon in den Chips oben -> hier nur noch
+        // das ausfuehrliche "Wann" (mit Zeitspanne) + Plaetze, um Doppelung zu vermeiden.
+        var meta = '';
+        meta += metaRow('🕒', 'Wann', formatFullDate(ev.start_at, ev.end_at));
+        if (ev.max_participants) {
+            meta += metaRow('👥', 'Plätze', ev.max_participants + ' max.');
+        }
+        document.getElementById('metaGrid').innerHTML = meta;
+
+        // Beschreibung
+        document.getElementById('eventDescription').textContent = ev.description || 'Keine Beschreibung.';
+
+        // External Link (sanitize gegen javascript:/data: URLs)
+        // AI-LOCK: sanitizeUrl + https-Regex ist XSS-Schutz. Spec: events-system.md
+        if (ev.external_url) {
+            var safeUrl = window.Room8 ? Room8.sanitizeUrl(ev.external_url) : '';
+            // Zusaetzlich: nur http/https erlauben
+            if (safeUrl && /^https?:\/\//i.test(safeUrl)) {
+                var link = document.getElementById('externalLink');
+                link.href = safeUrl;
+                link.style.display = 'inline-block';
+            }
+        }
+
+        // Interessenten-Zaehler (mit freien Plaetzen bei begrenztem Event)
+        updateGoingCount();
+
+        // Teilnehmer-Liste (wer ist dabei) -> Profil zum Abchecken
+        loadAttendees();
+
+        // View-Count Anzeige
+        var vcw = document.getElementById('viewCountWrap');
+        document.getElementById('viewCount').textContent = (ev.view_count || 0) + 1;
+        vcw.style.display = 'inline-flex';
+
+        // Going Button State
+        updateGoingButton();
+
+        // Report-Link anzeigen (wenn User eingeloggt + nicht eigenes Event)
+        showReportLink();
+    }
+
+    // Teilnehmer laden (going) + als Avatar-Liste mit Link zum Profil rendern
+    async function loadAttendees() {
+        var section = document.getElementById('attendeesSection');
+        var list = document.getElementById('attendeesList');
+        if (!section || !list) return;
+        try {
+            var ires = await sb.from('event_interests')
+                .select('user_id')
+                .eq('event_id', eventId)
+                .eq('status', 'going')
+                .limit(50);
+            var ids = (ires.data || []).map(function (r) { return r.user_id; }).filter(Boolean);
+            if (ids.length === 0) { section.style.display = 'none'; return; }
+
+            var pres = await sb.from('public_profiles')
+                .select('id, username, full_name, avatar_url')
+                .in('id', ids);
+            var byId = {};
+            (pres.data || []).forEach(function (p) { byId[p.id] = p; });
+
+            var shown = ids.slice(0, 12);
+            var html = shown.map(function (uid) {
+                var p = byId[uid] || {};
+                var name = p.full_name || p.username || 'Student';
+                var first = String(name).split(' ')[0] || 'Student';
+                var initial = escapeHtml((first[0] || '?').toUpperCase());
+                var avatar = p.avatar_url
+                    ? '<span class="attendee-avatar"><img src="' + encodeURI(p.avatar_url) + '" alt="" width="48" height="48" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;"></span>'
+                    : '<span class="attendee-avatar">' + initial + '</span>';
+                return '<a class="attendee" href="public-profile.html?id=' + encodeURIComponent(uid) + '">' +
+                    avatar + '<span class="attendee-name">' + escapeHtml(first) + '</span></a>';
+            }).join('');
+
+            var total = (currentEvent && currentEvent.interest_count) ? currentEvent.interest_count : ids.length;
+            if (total > shown.length) {
+                html += '<div class="attendee"><span class="attendee-more">+' + (total - shown.length) + '</span></div>';
+            }
+            list.innerHTML = html;
+            section.style.display = 'block';
+        } catch (e) {
+            section.style.display = 'none';
+        }
+    }
+
+    // Einheitliche Meta-Chip-Zeile: feste Reihenfolge, leere Chips weglassen
+    function renderMetaChips(ev) {
+        var el = document.getElementById('r8MetaChips');
+        if (!el) return;
+        var chips = [];
+
+        // 1. Ort -> Stadt bzw. Adresse
+        var ort = ev.city || ev.location || ev.address;
+        if (ort) chips.push('📍 ' + escapeHtml(ort));
+
+        // 2. Zeit -> Datum + Uhrzeit (z.B. "Sa 13.06. 13:00")
+        if (ev.start_at) {
+            var d = new Date(ev.start_at);
+            if (!isNaN(d.getTime())) {
+                var day = d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
+                var time = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+                chips.push('🕒 ' + escapeHtml(day + ' ' + time));
+            }
+        }
+
+        // 3. Wert -> Eintritt, sonst "Gratis"
+        if (ev.price !== null && ev.price !== undefined) {
+            var wert = Number(ev.price) > 0
+                ? Number(ev.price).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
+                : 'Gratis';
+            chips.push('💶 ' + escapeHtml(wert));
+        }
+
+        // 4. Anbieter -> Veranstalter-Name
+        if (ev.organizer_name) chips.push('🏢 ' + escapeHtml(ev.organizer_name));
+
+        el.innerHTML = chips.map(function (c) { return '<span class="r8-chip">' + c + '</span>'; }).join('');
+    }
+
+    function metaRow(icon, label, value) {
+        return '<div class="meta-row">' +
+            '<span class="meta-icon">' + icon + '</span>' +
+            '<div class="meta-content">' +
+                '<div class="meta-label">' + label + '</div>' +
+                '<div class="meta-value">' + escapeHtml(value) + '</div>' +
+            '</div>' +
+        '</div>';
+    }
+
+    function formatFullDate(startIso, endIso) {
+        var s = new Date(startIso);
+        var dateStr = s.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+        var timeStr = s.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+        var result = dateStr + ', ' + timeStr;
+        if (endIso) {
+            var e = new Date(endIso);
+            var endTime = e.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+            result += ' - ' + endTime + ' Uhr';
+        } else {
+            result += ' Uhr';
+        }
+        return result;
+    }
+
+    function evL(key, fb) { return (window.Room8i18n && Room8i18n.t(key)) || fb; }
+
+    function updateGoingButton() {
+        var btn = document.getElementById('goingBtn');
+        var max = currentEvent && currentEvent.max_participants;
+        var count = (currentEvent && currentEvent.interest_count) || 0;
+        if (userIsGoing) {
+            btn.textContent = evL('event_attend_done', '✓ Angemeldet - wir melden uns');
+            btn.classList.add('going');
+            btn.disabled = false;
+        } else if (max && count >= max) {
+            // Begrenztes Event ausgebucht
+            btn.textContent = evL('event_attend_full', 'Ausgebucht');
+            btn.classList.remove('going');
+            btn.disabled = true;
+        } else {
+            btn.textContent = evL('event_attend', 'Ich bin interessiert');
+            btn.classList.remove('going');
+            btn.disabled = false;
+        }
+    }
+
+    function updateGoingCount() {
+        var c = (currentEvent && currentEvent.interest_count) || 0;
+        var max = currentEvent && currentEvent.max_participants;
+        var el = document.getElementById('goingCount');
+        if (c <= 0) { el.textContent = ''; return; }
+        var base = '👥 ' + c + (c === 1 ? ' Person interessiert' : ' Leute interessiert');
+        el.textContent = max ? (base + ' · ' + Math.max(0, max - c) + ' Plätze frei') : base;
+    }
+
+    async function toggleGoing() {
+        if (!currentUserId) {
+            navigateTo('login.html?redirect=' + encodeURIComponent(window.location.href));
+            return;
+        }
+        var btn = document.getElementById('goingBtn');
+        var max = currentEvent && currentEvent.max_participants;
+
+        // Limit-Schutz beim Anmelden (begrenztes Event)
+        if (!userIsGoing && max && (currentEvent.interest_count || 0) >= max) {
+            if (window.Room8) Room8.showToast(evL('event_attend_full', 'Ausgebucht'), 'error');
+            return;
+        }
+
+        btn.disabled = true;
+        try {
+            if (userIsGoing) {
+                await sb.from('event_interests').delete()
+                    .eq('event_id', eventId).eq('user_id', currentUserId);
+                userIsGoing = false;
+                if (currentEvent.interest_count > 0) currentEvent.interest_count -= 1;
+                if (window.Room8) Room8.showToast(evL('event_attend_left', 'Anmeldung zurückgenommen.'), 'info');
+            } else {
+                var ins = await sb.from('event_interests').upsert({
+                    event_id: eventId,
+                    user_id: currentUserId,
+                    status: 'going'
+                }, { onConflict: 'event_id,user_id' });
+                if (ins.error) throw ins.error;
+                userIsGoing = true;
+                currentEvent.interest_count = (currentEvent.interest_count || 0) + 1;
+                if (window.Room8) Room8.showToast(evL('event_attend_toast', 'Angemeldet! Wir melden uns per E-Mail bei dir.'), 'success');
+            }
+            updateGoingButton();
+            updateGoingCount();
+            loadAttendees();
+        } catch (e) {
+            console.error('Going toggle:', e);
+            if (window.Room8) Room8.showToast('Fehler. Bitte erneut versuchen.', 'error');
+            btn.disabled = false;
+        }
+        // updateGoingButton() im try-Zweig setzt den disabled-State korrekt (z.B. "Ausgebucht").
+    }
+
+    function shareEvent() {
+        // Geteilt wird /s/<id>?t=event -> Server-Side-OG-Vorschau (Bild+Titel) -> App
+        var id = new URLSearchParams(window.location.search).get('id');
+        var title = currentEvent ? currentEvent.title : 'UniGoat Event';
+        var url = id ? ('https://unigoat.pages.dev/s/' + encodeURIComponent(id) + '?t=event') : window.location.href;
+        if (navigator.share) {
+            navigator.share({ title: title, url: url }).catch(function(){});
+        } else {
+            navigator.clipboard.writeText(url);
+            if (window.Room8) Room8.showToast('Link kopiert', 'success');
+        }
+    }
+
+    // ============================================
+    // REPORT-FUNKTION
+    // ============================================
+    function showReportLink() {
+        // Report-Link nur zeigen wenn eingeloggt UND nicht eigenes Event
+        if (currentUserId && currentEvent && currentEvent.organizer_id !== currentUserId) {
+            document.getElementById('reportLink').style.display = 'inline-flex';
+        }
+    }
+
+    function openReportModal() {
+        document.getElementById('reportModalBg').classList.add('active');
+    }
+
+    function closeReportModal() {
+        document.getElementById('reportModalBg').classList.remove('active');
+        document.querySelectorAll('input[name="reason"]').forEach(function(r) { r.checked = false; });
+        document.querySelectorAll('.report-option').forEach(function(o) { o.classList.remove('checked'); });
+        document.getElementById('reportDetails').value = '';
+        document.getElementById('reportSubmitBtn').disabled = true;
+    }
+
+    // Radio-Klick = Visual-State + Submit aktivieren
+    document.getElementById('reportOptions').addEventListener('change', function(e) {
+        if (e.target.name === 'reason') {
+            document.querySelectorAll('.report-option').forEach(function(o) { o.classList.remove('checked'); });
+            e.target.closest('.report-option').classList.add('checked');
+            document.getElementById('reportSubmitBtn').disabled = false;
+        }
+    });
+
+    async function submitReport() {
+        var btn = document.getElementById('reportSubmitBtn');
+        var checked = document.querySelector('input[name="reason"]:checked');
+        if (!checked) return;
+
+        if (!currentUserId) {
+            navigateTo('login.html?redirect=' + encodeURIComponent(window.location.href));
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Senden...';
+
+        try {
+            var details = document.getElementById('reportDetails').value.trim();
+            var rpcRes = await sb.rpc('report_event', {
+                event_id_input: eventId,
+                reason_input: checked.value,
+                details_input: details || null
+            });
+
+            if (rpcRes.error) {
+                console.error('Report Fehler:', rpcRes.error);
+                if (window.Room8) Room8.showToast('Fehler beim Melden', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Melden';
+                return;
+            }
+
+            // RPC liefert {success, error?} zurueck
+            var result = rpcRes.data;
+            if (result && result.success === false) {
+                var msg = 'Fehler';
+                if (result.error === 'already_reported') msg = 'Du hast dieses Event bereits gemeldet';
+                else if (result.error === 'cant_report_own') msg = 'Du kannst dein eigenes Event nicht melden';
+                else if (result.error === 'event_not_found') msg = 'Event nicht gefunden';
+                else if (result.error === 'not_authenticated') msg = 'Bitte einloggen';
+                if (window.Room8) Room8.showToast(msg, 'error');
+                btn.disabled = false;
+                btn.textContent = 'Melden';
+                return;
+            }
+
+            if (window.Room8) Room8.showToast('Danke - Meldung eingegangen', 'success');
+            closeReportModal();
+            // Report-Link verstecken (User hat schon gemeldet)
+            document.getElementById('reportLink').style.display = 'none';
+
+        } catch (e) {
+            console.error('Report Submit:', e);
+            if (window.Room8) Room8.showToast('Fehler beim Melden', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Melden';
+        }
+    }
+</script>
+    <script src="room8-ui.js"></script>
+<script src="verifyGate.js"></script>
+<script>
+(function(){var n=0;(function w(){var s=(typeof sb!=='undefined'&&sb)||window.sb;
+  if(s){try{verifyGate({blur:['#eventContent'],message:'Verifiziere dich als Student, um dieses Event zu sehen.'});}catch(e){}return;}
+  if(n++>60)return;setTimeout(w,100);})();})();
+</script>
+</body>
+</html>

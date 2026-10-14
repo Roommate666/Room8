@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "LZ4LV4JQ24.club.room8.app",
+        "paths": [
+          "/game/duel.html",
+          "/game/duel.html*"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <script src="sentry-init.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Profil vervollständigen - UniGoat</title>
+  <link rel="stylesheet" href="unigoat-v2.css">
+  <style>
+    /* Alias: altes Token-Vokabular -> v2 (damit inline-styles/JS in v2-Farben laufen) */
+    :root{
+      --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+      --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+      --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+      --fh:var(--font-heading); --fb:var(--font-body);
+    }
+    .cp-icn{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+    /* Mint-Poster: der eine Mint-Moment dieses Screens */
+    .cp-poster{ background:var(--color-accent); color:var(--on-accent); padding:22px 20px 18px; }
+    .cp-poster .kicker{ color:var(--on-accent); opacity:.92; }
+    .cp-poster h1{ font-family:var(--font-heading); font-weight:800; font-size:26px; line-height:1.08; letter-spacing:-.02em; margin:10px 0 0; }
+    .cp-poster p{ margin:9px 0 0; font-size:14px; line-height:1.5; max-width:34ch; }
+
+    /* Formular-Karte */
+    .cp-card{ padding:16px 20px 22px; }
+    .cp-field{ margin-bottom:16px; }
+    .cp-hint{ font-size:12px; color:var(--text-muted); margin-top:6px; line-height:1.45; }
+    .cp-error{ font-size:13px; color:#C43A22; margin-top:10px; min-height:1em; font-family:var(--font-heading); font-weight:800; }
+
+    /* Benutzername mit @-Praefix */
+    .cp-username-wrap{ position:relative; }
+    .cp-username-prefix{ position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-family:var(--font-heading); font-weight:800; pointer-events:none; font-size:16px; line-height:1; }
+    .cp-username-input{ padding-left:26px; }
+
+    /* Verfuegbarkeits-Status */
+    .cp-status{ font-size:12px; margin-top:6px; min-height:1em; font-family:var(--font-heading); font-weight:800; }
+    .cp-status.ok{ color:var(--accent-small); }
+    .cp-status.bad{ color:#C43A22; }
+    .cp-status.checking{ color:var(--text-muted); }
+
+    /* select im v2-Input-Look */
+    select.input{ appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230A0A0A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>"); background-repeat:no-repeat; background-position:right 12px center; padding-right:36px; }
+  </style>
+<link rel="icon" type="image/x-icon" href="favicon.ico?v133"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133"><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
+</head>
+<body>
+  <div class="screen">
+    <div class="screen-body">
+
+      <div class="dateline">
+        <span>UniGoat</span>
+        <span>Onboarding</span>
+      </div>
+
+      <section class="cp-poster">
+        <div class="kicker">Willkommen 👋</div>
+        <h1>Komplettiere kurz dein Profil.</h1>
+        <p>Das sehen andere Studenten von dir. Dauert nur einen Moment.</p>
+      </section>
+
+      <div class="cp-card">
+        <form id="cpForm">
+          <div class="cp-field field">
+            <label for="full_name">Voller Name</label>
+            <input class="input" type="text" id="full_name" name="full_name" autocomplete="name" required maxlength="80" placeholder="z.B. Max Mustermann">
+          </div>
+
+          <div class="cp-field field">
+            <label for="username">Benutzername</label>
+            <div class="cp-username-wrap">
+              <span class="cp-username-prefix">@</span>
+              <input class="input cp-username-input" type="text" id="username" name="username" autocomplete="off" required minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]{3,20}" placeholder="dein_handle">
+            </div>
+            <div class="cp-hint">3-20 Zeichen. Nur Buchstaben, Zahlen und _</div>
+            <div class="cp-status" id="usernameStatus"></div>
+          </div>
+
+          <div class="cp-field field">
+            <label for="university">Hochschule / Uni</label>
+            <select class="input" id="university" name="university" required>
+              <option value="" disabled selected>Bitte auswählen…</option>
+              <option value="Universität Ulm">Universität Ulm</option>
+              <option value="Hochschule Neu-Ulm (HNU)">Hochschule Neu-Ulm (HNU)</option>
+              <option value="Universität Augsburg">Universität Augsburg</option>
+              <option value="Hochschule Augsburg">Hochschule Augsburg</option>
+              <option value="Andere Hochschule">Andere Hochschule</option>
+            </select>
+            <div class="cp-hint">Bestimmt dein Uni-Highscore-Board und lokale Coupons.</div>
+          </div>
+
+          <div class="cp-field field">
+            <label for="city">Stadt / Unistadt</label>
+            <input class="input" type="text" id="city" name="city" autocomplete="address-level2" required maxlength="60" placeholder="z.B. München" list="citySuggestions">
+            <datalist id="citySuggestions"></datalist>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="cpSubmit">Profil speichern <span>→</span></button>
+          <div class="cp-error" id="cpError"></div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="lib/supabase.min.js"></script>
+  <script src="config.js"></script>
+  <script>
+    (async function () {
+      var sb = window.sb || (window.supabase && window.supabase.createClient
+        ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
+        : null);
+      if (!sb) {
+        console.error('[complete-profile] Supabase-Client nicht verfuegbar');
+        document.getElementById('cpError').textContent = 'Verbindungsfehler. Bitte App neu starten.';
+        return;
+      }
+      window.sb = sb;
+      var $ = function (id) { return document.getElementById(id); };
+
+      // Auth-Check
+      var sessRes = await sb.auth.getSession();
+      if (!sessRes.data.session) { window.location.href = 'login.html'; return; }
+      var user = sessRes.data.session.user;
+
+      // Pre-fill aus oauth_prefill (gesetzt von social-auth.js) ODER user_metadata
+      var pre = {};
+      try { pre = JSON.parse(sessionStorage.getItem('oauth_prefill') || '{}'); } catch (e) {}
+      var meta = user.user_metadata || {};
+      $('full_name').value = pre.full_name || meta.full_name || meta.name || '';
+
+      // Uni -> Unistadt (Auto-Fill der Stadt bei Uni-Wahl)
+      var UNI_CITY = {
+        'Universität Ulm': 'Ulm',
+        'Hochschule Neu-Ulm (HNU)': 'Neu-Ulm',
+        'Universität Augsburg': 'Augsburg',
+        'Hochschule Augsburg': 'Augsburg'
+      };
+      $('university').addEventListener('change', function () {
+        var c = UNI_CITY[$('university').value];
+        if (c) $('city').value = c;  // "Andere Hochschule" -> Stadt manuell
+      });
+
+      // Bestehende Profile-Daten laden falls schon teilweise da
+      var isPartner = false;
+      try {
+        var existing = await sb.from('profiles').select('username, full_name, city, university, is_partner').eq('id', user.id).maybeSingle();
+        if (existing.data) {
+          isPartner = !!existing.data.is_partner;
+          if (isPartner) {
+            // Partner (Cafes/Shops) brauchen keine Hochschule -> Feld ausblenden + optional
+            var uf = $('university'); uf.required = false;
+            var box = uf.closest('.cp-field'); if (box) box.style.display = 'none';
+          }
+          if (existing.data.full_name && !$('full_name').value) $('full_name').value = existing.data.full_name;
+          if (existing.data.city) $('city').value = existing.data.city;
+          if (existing.data.university) {
+            var opt = Array.prototype.find.call($('university').options, function (o) { return o.value === existing.data.university; });
+            $('university').value = opt ? existing.data.university : 'Andere Hochschule';
+          }
+          if (existing.data.username && !/^user[_-]?[0-9a-f]{4,}/i.test(existing.data.username)) {
+            $('username').value = existing.data.username;
+          }
+        }
+      } catch (e) {}
+
+      // Username Live-Check
+      var checkTimer = null;
+      var statusEl = $('usernameStatus');
+      var lastChecked = '';
+      var lastAvailable = false;
+
+      async function checkUsername() {
+        var v = $('username').value.trim();
+        if (!v || v.length < 3 || !/^[a-zA-Z0-9_]+$/.test(v)) { statusEl.textContent = ''; statusEl.className = 'cp-status'; return; }
+        statusEl.textContent = 'Prüfe Verfügbarkeit...'; statusEl.className = 'cp-status checking';
+        var resp = await sb.from('profiles').select('id').eq('username', v).neq('id', user.id).maybeSingle();
+        lastChecked = v;
+        if (resp.data) { statusEl.textContent = '✗ Schon vergeben'; statusEl.className = 'cp-status bad'; lastAvailable = false; }
+        else { statusEl.textContent = '✓ Verfügbar'; statusEl.className = 'cp-status ok'; lastAvailable = true; }
+      }
+      $('username').addEventListener('input', function () {
+        clearTimeout(checkTimer);
+        checkTimer = setTimeout(checkUsername, 350);
+      });
+
+      // Submit
+      $('cpForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var btn = $('cpSubmit');
+        var errEl = $('cpError');
+        errEl.textContent = '';
+        var fullName = $('full_name').value.trim();
+        var username = $('username').value.trim();
+        var university = $('university').value;
+        var city = (typeof normalizeCity === 'function' ? normalizeCity($('city').value) : $('city').value.trim());
+
+        if (!fullName || fullName.length < 2) { errEl.textContent = 'Bitte vollen Namen eingeben.'; return; }
+        if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) { errEl.textContent = 'Benutzername: 3-20 Zeichen, nur Buchstaben/Zahlen/_'; return; }
+        if (!isPartner && !university) { errEl.textContent = 'Bitte deine Hochschule auswählen.'; return; }
+        if (!city || city.length < 2) { errEl.textContent = 'Bitte deine Stadt eingeben.'; return; }
+
+        btn.disabled = true; btn.textContent = 'Speichere...';
+
+        try {
+          // Falls username noch nicht gecheckt -> nochmal pruefen
+          if (lastChecked !== username) await checkUsername();
+          if (!lastAvailable) { btn.disabled = false; btn.textContent = 'Profil speichern'; errEl.textContent = 'Benutzername schon vergeben.'; return; }
+
+          // Profil-Write ueber SECURITY-DEFINER-RPC (direkte profiles-Updates sind
+          // fuer authenticated nicht erlaubt -> 42501).
+          var res = await sb.rpc('set_my_profile', {
+            p_username: username,
+            p_full_name: fullName,
+            p_city: city,
+            p_university: university
+          });
+          var d = res && res.data;
+          if (res && res.error) {
+            console.error('[complete-profile] rpc error', res.error);
+            errEl.textContent = 'Da ist was schiefgelaufen. Bitte versuch es nochmal — sonst melde dich beim UniGoat-Team unter info@unigoat.de.';
+            btn.disabled = false; btn.textContent = 'Profil speichern';
+            return;
+          }
+          if (!d || !d.ok) {
+            errEl.textContent = (d && d.error === 'USERNAME_TAKEN')
+              ? 'Benutzername schon vergeben.'
+              : 'Speichern nicht möglich. Bitte erneut versuchen.';
+            btn.disabled = false; btn.textContent = 'Profil speichern';
+            return;
+          }
+
+          // Referral einloesen, falls ueber Einladungslink gekommen (Belohnung erst bei Verifizierung)
+          try {
+            var rc = localStorage.getItem('ug_ref');
+            if (rc) { await sb.rpc('claim_referral', { p_code: rc }); localStorage.removeItem('ug_ref'); }
+          } catch (e) {}
+
+          // E-Mail-Opt-in aus der Registrierung anwenden (Standard = an)
+          try {
+            var em = localStorage.getItem('ug_email_marketing');
+            if (em !== null) { await sb.rpc('set_email_marketing', { p_on: em !== '0' }); localStorage.removeItem('ug_email_marketing'); }
+          } catch (e) {}
+
+          try { sessionStorage.removeItem('oauth_prefill'); } catch (e) {}
+          window.location.replace('app.html');
+        } catch (err) {
+          console.error('[complete-profile] Submit error:', err);
+          console.error('[complete-profile] submit error', err);
+          errEl.textContent = 'Da ist was schiefgelaufen. Bitte versuch es nochmal — sonst melde dich beim UniGoat-Team unter info@unigoat.de.';
+          btn.disabled = false; btn.textContent = 'Profil speichern';
+        }
+      });
+    })();
+  </script>
+  <script src="cities.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', function(){ if (typeof populateCityDatalist === 'function') populateCityDatalist('citySuggestions'); });</script>
+</body>
+</html>

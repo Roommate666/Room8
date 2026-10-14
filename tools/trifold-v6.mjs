@@ -1,0 +1,11 @@
+import { chromium } from 'playwright';
+const SRC='file:///Users/yusufcash/Desktop/UNIGOAT-STARTUPSUED/A6-Flyer-Erstis-v6/UniGoat%20Tri-Fold%20StartupSUED.dc.html';
+const b=await chromium.launch();
+const p=await b.newPage();
+await p.goto(SRC,{waitUntil:'networkidle',timeout:30000});
+await p.waitForTimeout(2500);
+const info=await p.evaluate(()=>({pages:document.querySelectorAll('doc-page').length, brokenImgs:[...document.querySelectorAll('img')].filter(i=>!i.complete||i.naturalWidth===0).length}));
+console.log('doc-pages:',info.pages,'kaputte Bilder:',info.brokenImgs);
+await p.pdf({ path:'/Users/yusufcash/Desktop/UNIGOAT-STARTUPSUED/UniGoat-TriFold-v6.pdf', width:'306mm', height:'216mm', printBackground:true, margin:{top:'0',bottom:'0',left:'0',right:'0'} });
+await b.close();
+console.log('gerendert');

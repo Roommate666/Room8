@@ -17,34 +17,41 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
 }
 
-const FROM_ADDRESS = 'UniGoat <noreply@room8.club>'
+const FROM_ADDRESS = 'UniGoat <noreply@unigoat.de>'
 
-// Jugendliches, buntes UniGoat-Mail-Template. Bettet den uebergebenen HTML-Body
-// in einen Brand-Wrapper (bunter Gradient-Header, weisse Card, freundlicher Footer).
-// Aufrufer koennen mit skipWrap:true das rohe HTML behalten.
+// UniGoat v2-Mail-Template (Editorial/Zeitungs-Look, passend zur App):
+// Archivo, eckig (Radius 0), 2px-Tinte-Linien, Mint-Akzent, Masthead-Kopf.
+// Bettet den uebergebenen HTML-Body in den Brand-Rahmen. Aufrufer koennen mit
+// skipWrap:true (oder wenn html bereits ein volles <html>-Dokument ist) das rohe HTML behalten.
 function wrapEmail(innerHtml: string, preheader?: string): string {
-  const pre = preheader ? String(preheader).slice(0, 120) : 'Deine Studenten-App für Rabatte, Jobs & Events.'
+  const pre = preheader ? String(preheader).slice(0, 120) : 'Deine Studenten-App für Rabatte, Coupons und den Goat-Wettkampf.'
   return `<!DOCTYPE html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#F4F6FB;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,sans-serif;">
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;800&display=swap" rel="stylesheet"></head>
+<body style="margin:0;padding:0;background:#f3f2f2;font-family:'Archivo',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#201e1d;">
 <span style="display:none;max-height:0;overflow:hidden;opacity:0;">${pre}</span>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F6FB;padding:24px 12px;"><tr><td align="center">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 8px 30px rgba(30,41,59,0.08);">
-    <tr><td style="background:linear-gradient(120deg,#3B82F6 0%,#10B981 38%,#F59E0B 70%,#EC4899 100%);padding:30px 28px;text-align:center;">
-      <div style="font-size:30px;font-weight:800;letter-spacing:-0.5px;color:#ffffff;">Room<span style="color:#FFE08A;">8</span></div>
-      <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.92);margin-top:4px;">Die App von Studenten, für Studenten 🎓</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f2f2;padding:24px 12px;"><tr><td align="center">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border:2px solid #201e1d;">
+    <tr><td style="padding:22px 24px 12px;">
+      <div style="font-size:38px;font-weight:800;letter-spacing:-1.6px;line-height:.9;color:#201e1d;">UniGoat</div>
     </td></tr>
-    <tr><td style="padding:32px 28px 8px;color:#1F2937;font-size:16px;line-height:1.6;">
+    <tr><td style="border-top:2px solid #201e1d;border-bottom:2px solid #201e1d;padding:9px 24px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#201e1d;">Campus-Ausgabe</td>
+        <td align="right" style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#0B6B52;">unigoat.de</td>
+      </tr></table>
+    </td></tr>
+    <tr><td style="padding:26px 24px 8px;color:#201e1d;font-size:16px;line-height:1.6;">
       ${innerHtml}
     </td></tr>
-    <tr><td style="padding:20px 28px 28px;">
-      <div style="border-top:1px solid #EEF0F3;padding-top:18px;text-align:center;">
-        <div style="font-size:13px;color:#6B7280;line-height:1.5;">Studentenrabatte ☕ · Nebenjobs 💼 · Events 🎉<br>Alles für deine Unistadt — kostenlos &amp; nur für verifizierte Studenten.</div>
-        <div style="font-size:12px;color:#9CA3AF;margin-top:14px;">UniGoat · <a href="https://www.unigoat.de" style="color:#3B82F6;text-decoration:none;">unigoat.de</a></div>
+    <tr><td style="padding:18px 24px 26px;">
+      <div style="border-top:2px solid #201e1d;padding-top:16px;">
+        <div style="font-size:13px;color:#6f6a67;line-height:1.5;">Studentenrabatte, Coupons und der monatliche Goat-Wettkampf — kostenlos und nur für verifizierte Studenten.</div>
+        <div style="font-size:12px;color:#8a8785;margin-top:12px;">UniGoat · <a href="https://www.unigoat.de" style="color:#0B6B52;text-decoration:none;font-weight:800;">unigoat.de</a></div>
       </div>
     </td></tr>
   </table>
-  <div style="font-size:11px;color:#B6BCC6;margin-top:16px;">Du bekommst diese Mail, weil du bei UniGoat dabei bist.</div>
+  <div style="font-size:11px;color:#9b9797;margin-top:14px;">Du bekommst diese Mail, weil du bei UniGoat dabei bist.</div>
 </td></tr></table>
 </body></html>`
 }
@@ -76,6 +83,34 @@ async function logNotification(
   } catch (e) {
     console.error('notification_logs insert failed (non-fatal):', e)
   }
+}
+
+// Resend-Versand mit Retry NUR bei 429 (rate_limit_exceeded, 10 req/s Konto-Limit).
+// Andere Fehler (400/422 ungueltige Mail) werden NICHT wiederholt (bringt nichts).
+// Wartezeit: 'Retry-After'-Header (Sekunden) bevorzugt, sonst exponentieller Backoff +
+// Jitter. Max 4 Versuche, gedeckelt damit die Edge-Function nicht ins Zeitlimit laeuft.
+async function sendViaResend(
+  payload: Record<string, unknown>,
+  apiKey: string,
+): Promise<{ res: Response, data: Record<string, unknown>, attempts: number }> {
+  const MAX_ATTEMPTS = 4
+  let res!: Response
+  let data: Record<string, unknown> = {}
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    data = await res.json().catch(() => ({}))
+    if (res.status !== 429 || attempt === MAX_ATTEMPTS) return { res, data, attempts: attempt }
+    const ra = parseFloat(res.headers.get('retry-after') || '')
+    const waitMs = (Number.isFinite(ra) && ra > 0)
+      ? Math.min(ra * 1000, 2000)
+      : Math.min(200 * Math.pow(2, attempt - 1), 1500) + Math.floor(Math.random() * 120)
+    await new Promise((r) => setTimeout(r, waitMs))
+  }
+  return { res, data, attempts: MAX_ATTEMPTS }
 }
 
 serve(async (req) => {
@@ -118,9 +153,12 @@ serve(async (req) => {
     const parsed = await req.json()
     to = parsed.to ?? null
     subject = parsed.subject ?? null
-    // HTML in das bunte UniGoat-Brand-Template einbetten (ausser skipWrap:true)
+    // HTML in das UniGoat-v2-Brand-Template einbetten.
+    // Nicht wrappen, wenn skipWrap:true ODER wenn der Body bereits ein volles
+    // HTML-Dokument ist (z. B. email_template() aus SQL) -> verhindert Doppel-Wrap.
+    const isFullDoc = typeof parsed.html === 'string' && /<html[\s>]/i.test(parsed.html)
     const html = parsed.html
-      ? (parsed.skipWrap === true ? parsed.html : wrapEmail(parsed.html, parsed.subject))
+      ? (parsed.skipWrap === true || isFullDoc ? parsed.html : wrapEmail(parsed.html, parsed.subject))
       : parsed.html
     const text = parsed.text
     const replyTo = parsed.replyTo
@@ -172,39 +210,31 @@ serve(async (req) => {
     if (text) payload.text = text
     if (replyTo) payload.reply_to = replyTo
 
-    const resendRes = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    })
-
-    const resendData = await resendRes.json()
+    // Versand mit Retry-on-429 (siehe sendViaResend oben).
+    const { res: resendRes, data: resendData, attempts } = await sendViaResend(payload, RESEND_API_KEY)
 
     if (!resendRes.ok) {
       console.error('Resend error:', resendData)
       await logNotification(supabase, {
         user_id: userId,
         status: 'resend_failed',
-        error_code: resendData.name || String(resendRes.status),
-        error_msg: resendData.message || JSON.stringify(resendData).slice(0, 500),
+        error_code: (resendData.name as string) || String(resendRes.status),
+        error_msg: (resendData.message as string) || JSON.stringify(resendData).slice(0, 500),
         title: subject,
-        metadata: { to, http_status: resendRes.status },
+        metadata: { to, http_status: resendRes.status, attempts },
       })
-      captureException(resendData.message || 'Resend non-2xx', {
+      captureException((resendData.message as string) || 'Resend non-2xx', {
         function: 'send-email',
         user_id: userId,
         tags: {
           channel: 'email',
           status: 'resend_failed',
-          error_code: resendData.name || String(resendRes.status),
+          error_code: (resendData.name as string) || String(resendRes.status),
         },
-        extra: { http_status: resendRes.status, resend_response: resendData },
+        extra: { http_status: resendRes.status, resend_response: resendData, attempts },
       }).catch(() => {})
       return new Response(
-        JSON.stringify({ success: false, error: resendData.message || 'resend_failed', details: resendData }),
+        JSON.stringify({ success: false, error: (resendData.message as string) || 'resend_failed', details: resendData }),
         { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       )
     }
@@ -212,10 +242,11 @@ serve(async (req) => {
     await logNotification(supabase, {
       user_id: userId,
       status: 'success',
-      provider_id: resendData.id ?? null,
+      provider_id: (resendData.id as string) ?? null,
       title: subject,
       metadata: {
         to,
+        ...(attempts > 1 ? { attempts } : {}),
         ...(adminAlertType ? { admin_alert_type: adminAlertType } : {}),
       },
     })

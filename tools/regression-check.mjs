@@ -18,7 +18,7 @@ const CHECKS = [
   { url: '/support.html',        must: 'body',          name: 'Support' },
 ];
 
-const browser = await chromium.launch({ channel: 'chrome' });
+const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: 430, height: 932 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 const page = await ctx.newPage();
 

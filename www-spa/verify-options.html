@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="de" data-page="verify">
+<head>
+<script src="sentry-init.js"></script>
+<script src="features.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Verifizierung — UniGoat</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+<link rel="stylesheet" href="unigoat-v2.css">
+<style>
+  :root{ --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface); --mut:var(--text-muted);
+    --w4:var(--text-muted); --line:var(--color-divider); --green:var(--color-accent); --fh:var(--font-heading); }
+  .tab .icn{ width:20px; height:20px; margin-bottom:2px; stroke:currentColor; fill:none; stroke-width:2; }
+  main{ padding-bottom:8px; }
+
+  /* Intro als Poster (der eine Mint-Moment) */
+  .vintro{ background:var(--color-accent); color:var(--on-accent); padding:22px 20px 18px; }
+  .vintro h2{ font-family:var(--font-heading); font-weight:800; font-size:24px; margin:10px 0 0; line-height:1.1; letter-spacing:-.02em; }
+  .vintro p{ margin:10px 0 0; font-size:14px; line-height:1.5; max-width:34ch; }
+  .vsteps{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:1px; margin-top:16px; background:color-mix(in srgb,var(--on-accent) 22%,transparent); border:1px solid color-mix(in srgb,var(--on-accent) 22%,transparent); }
+  .vstep{ background:var(--color-accent); padding:10px 6px; text-align:center; font-family:var(--font-heading); font-weight:800; font-size:11px; line-height:1.35; }
+  .vstep b{ display:block; font-size:20px; }
+
+  /* Karte + Formular */
+  .vcard{ border-bottom:var(--rule); padding:4px 20px 18px; }
+  .verify-form{ margin-top:10px; }
+  .verify-form .input{ margin-bottom:10px; }
+  .vhint{ font-size:12px; color:var(--text-muted); margin-top:12px; line-height:1.5; }
+  .btn-red{ color:#C43A22; border:1px solid #E3A99B; background:transparent; }
+
+  #success-view{ display:none; text-align:center; padding:34px 20px; }
+  #success-view .succ-mark{ width:64px; height:64px; margin:0 auto 16px; background:var(--color-accent); color:var(--on-accent); display:grid; place-items:center; }
+  #success-view .succ-mark svg{ width:34px; height:34px; stroke:var(--on-accent); fill:none; stroke-width:2.5; }
+  #success-view h2{ font-family:var(--font-heading); font-weight:800; font-size:26px; margin:6px 0 10px; letter-spacing:-.02em; }
+  #success-view p{ color:var(--text-muted); line-height:1.6; max-width:32ch; margin:0 auto; }
+  #success-view .btn{ margin-top:12px; }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="screen-body">
+    <div class="topbar" style="padding-top:14px">
+      <a class="btn btn-icon backbtn" href="profile.html" style="margin-left:8px" aria-label="Zurück"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--color-text);fill:none;stroke-width:2"><path d="M15 18l-6-6 6-6"/></svg></a>
+      <div class="masthead" style="font-size:30px;padding:0 8px 0 2px">Verifizierung</div>
+      <span style="width:40px"></span>
+    </div>
+    <div class="hr"></div>
+
+    <main>
+      <section class="vintro">
+        <div class="kicker" style="color:var(--on-accent);opacity:.9">Studenten-Status</div>
+        <h2>Bestätige, dass du studierst.</h2>
+        <p>Verifizierte Studenten schalten alle Coupons &amp; Deals frei. Läuft komplett über deine Uni-Mail — einmal einen Code bestätigen, fertig.</p>
+        <div class="vsteps">
+          <div class="vstep"><b>1</b>Uni-Mail eingeben</div>
+          <div class="vstep"><b>2</b>Code aus Mail</div>
+          <div class="vstep"><b>3</b>Sofort verifiziert</div>
+        </div>
+      </section>
+
+      <div id="selection-view">
+        <div class="kicker" style="padding:18px 20px 6px">Deine Uni-E-Mail</div>
+        <div class="vcard option-card" id="card-email" onclick="toggleOption('email')">
+          <form id="emailForm" class="verify-form" onclick="event.stopPropagation();">
+            <input class="input" type="email" id="uniEmail" placeholder="max.muster@stud.uni-ulm.de" required>
+            <button type="submit" class="btn btn-primary btn-block" id="btnEmail">Code anfordern <span>→</span></button>
+          </form>
+          <form id="codeForm" class="verify-form" style="display:none;" onclick="event.stopPropagation();">
+            <input class="input" type="text" id="uniCode" inputmode="numeric" maxlength="6" placeholder="6-stelliger Code" autocomplete="one-time-code">
+            <button type="submit" class="btn btn-primary btn-block" id="btnCode">Bestätigen</button>
+            <button type="button" class="btn btn-secondary btn-block" id="btnResend" style="margin-top:.6rem;">Code erneut senden</button>
+          </form>
+          <div class="vhint">Nur offizielle Hochschul-Adressen (z. B. <b>@uni-ulm.de</b>, <b>@stud.hs-*.de</b>) werden akzeptiert. Kein Gmail/GMX. Code nicht da? Schau im Spam-Ordner.</div>
+        </div>
+      </div>
+
+      <div id="success-view">
+        <div class="succ-mark"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+        <h2>Einreichung erfolgreich!</h2>
+        <p>Alles klar — dein Status wird bestätigt.</p>
+        <button onclick="navigateTo('profile.html')" class="btn btn-primary btn-block">Zurück zum Profil</button>
+        <button onclick="retryVerification()" class="btn btn-secondary btn-block">Erneut verifizieren</button>
+        <button onclick="resetVerification()" class="btn btn-block btn-red">Verifizierung zurücksetzen</button>
+      </div>
+    </main>
+  </div>
+
+  <nav class="tabbar">
+    <a class="tab" href="dashboard.html"><svg class="icn" viewBox="0 0 24 24"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1Z"/></svg>Hub</a>
+    <a class="tab" href="coupons.html"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="0"/><path d="M3 10h18"/></svg>Coupons</a>
+    <a class="tab" href="game/index.html"><svg class="icn" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="0"/><path d="M8 12h3M9.5 10.5v3M15 11h.01M17 13h.01"/></svg>Game</a>
+    <a class="tab" href="challenge.html"><svg class="icn" viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>Rang</a>
+    <a class="tab" href="profile.html"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>Profil</a>
+  </nav>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="room8-ui.js"></script>
+<script src="uni-domains.js"></script>
+<script>
+    // Init
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function navigateTo(url) {
+        try { window.location.href = url; } catch(e) { console.warn(e); }
+    }
+
+    var currentUser = null;
+
+    async function init() {
+        if (!supabase) return;
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) {
+            navigateTo('login.html');
+            return;
+        }
+        currentUser = user;
+
+        // Check if already pending/approved
+        const { data: profile } = await sb.from('profiles').select('verification_status').eq('id', user.id).single();
+        if (profile && (profile.verification_status === 'pending' || profile.verification_status === 'approved')) {
+            showSuccess();
+            document.querySelector('#success-view h2').textContent = "Status: " + (profile.verification_status === 'approved' ? "Verifiziert 🎓" : "In Prüfung");
+            document.querySelector('#success-view p').innerHTML = profile.verification_status === 'approved'
+                ? "Dein Studenten-Status ist bestätigt. Viel Spaß bei UniGoat!"
+                : "Du hast deine Uni-Mail bereits eingereicht.";
+        }
+    }
+
+    function toggleOption(type) {
+        var ef = document.getElementById('emailForm'); if (ef) ef.style.display = 'block';
+        var ce = document.getElementById('card-email'); if (ce) ce.classList.add('selected');
+    }
+
+    function showSuccess(method) {
+        var h = document.querySelector('#success-view h2');
+        var p = document.querySelector('#success-view p');
+        if (method === 'email' && h && p) {
+            h.textContent = 'Verifiziert! 🎓';
+            p.innerHTML = 'Dein Studenten-Status ist bestätigt. Viel Spaß bei UniGoat!';
+        }
+        document.getElementById('selection-view').style.display = 'none';
+        document.getElementById('success-view').style.display = 'block';
+    }
+
+    function retryVerification() {
+        document.getElementById('success-view').style.display = 'none';
+        document.getElementById('selection-view').style.display = 'block';
+        var ef = document.getElementById('emailForm'); if (ef) ef.style.display = 'block';
+        var cf = document.getElementById('codeForm'); if (cf) cf.style.display = 'none';
+    }
+
+    // Verifizierung zuruecksetzen (gibt Uni-Mail frei -> Re-Verify moeglich)
+    async function resetVerification() {
+        var ok;
+        try { ok = (window.Room8UI && Room8UI.confirm)
+            ? await Room8UI.confirm('Verifizierung wirklich zurücksetzen? Deine Uni-Mail wird wieder freigegeben und du kannst dich neu verifizieren.', { danger: true })
+            : confirm('Verifizierung zurücksetzen?'); } catch(e){ ok = confirm('Verifizierung zurücksetzen?'); }
+        if (!ok) return;
+        try {
+            var r = await sb.rpc('reset_my_verification');
+            if (r.error) throw r.error;
+            if (window.Room8UI && Room8UI.success) Room8UI.success('Verifizierung zurückgesetzt. Du kannst dich jetzt neu verifizieren.');
+            retryVerification();
+        } catch(e) {
+            if (window.Room8UI && Room8UI.error) Room8UI.error('Zurücksetzen hat nicht geklappt. Versuch es nochmal — sonst melde dich beim UniGoat-Team unter info@unigoat.de.');
+            else alert('Zurücksetzen fehlgeschlagen.');
+        }
+    }
+
+    // Domain-Klassifizierung aus uni-domains.js (Whitelist-first)
+    function classifyUniEmail(email) {
+        if (window.Room8UniDomains) return window.Room8UniDomains.classify(email);
+        return { accepted: false, blocked: false, domain: (email.split('@')[1] || '').toLowerCase() };
+    }
+
+    // --- EMAIL SUBMIT ---
+    document.getElementById('emailForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('uniEmail').value.trim().toLowerCase();
+        const btn = document.getElementById('btnEmail');
+
+        var cls = classifyUniEmail(email);
+        if (cls.blocked) {
+            Room8UI.error('Private E-Mail-Adressen (Gmail, GMX, Outlook, etc.) sind nicht erlaubt. Bitte nutze deine offizielle Uni-E-Mail.');
+            return;
+        }
+        if (!cls.accepted) {
+            Room8UI.error('Diese Adresse konnten wir nicht als Hochschul-Adresse erkennen. Bitte prüfe die Schreibweise und nutze deine offizielle Uni-Mail (z. B. name@uni-stadt.de).');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "Sende Code...";
+
+        try {
+            const { data, error } = await sb.rpc('request_uni_code', { p_email: email });
+            if (error) throw error;
+            if (!data || !data.ok) {
+                var m = data && data.error;
+                var mins = (data && data.retry_after_sec) ? Math.max(1, Math.ceil(data.retry_after_sec/60)) : 10;
+                Room8UI.error(m==='NOT_UNI_EMAIL' ? 'Bitte nutze deine offizielle Uni-E-Mail.'
+                    : m==='EMAIL_IN_USE' ? 'Diese Uni-Mail ist bereits mit einem anderen Konto verifiziert.'
+                    : m==='INVALID_EMAIL' ? 'Bitte gib eine gültige E-Mail ein.'
+                    : m==='RATE_LIMITED' ? ('Zu viele Code-Anfragen. Bitte warte ca. '+mins+' Min und versuch es erneut — schau solange in dein Postfach (auch Spam).')
+                    : 'Konnte den Code nicht senden. Versuch es nochmal.');
+                btn.disabled = false; btn.textContent = "Code anfordern"; return;
+            }
+            document.getElementById('emailForm').style.display = 'none';
+            document.getElementById('codeForm').style.display = 'block';
+            var ci = document.getElementById('uniCode'); if (ci) ci.focus();
+            if (Room8UI.success) Room8UI.success('Code an ' + email + ' gesendet. Schau in dein Uni-Postfach (auch Spam).');
+        } catch (err) {
+            Room8UI.error("Konnte den Code nicht senden. Versuch es nochmal.");
+            btn.disabled = false; btn.textContent = "Code anfordern";
+        }
+    });
+
+    // Code eingeben -> verifizieren
+    document.getElementById('codeForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        var code = (document.getElementById('uniCode').value || '').replace(/[^0-9]/g, '');
+        var btn = document.getElementById('btnCode');
+        if (code.length < 6) { Room8UI.error('Bitte gib den 6-stelligen Code aus der Mail ein.'); return; }
+        btn.disabled = true; btn.textContent = 'Prüfe...';
+        try {
+            const { data, error } = await sb.rpc('verify_uni_code', { p_code: code });
+            if (error) throw error;
+            if (data && data.ok) {
+                showSuccess('email');
+                return;
+            }
+            var m = data && data.error;
+            Room8UI.error(m==='CODE_WRONG' ? 'Der Code stimmt nicht. Bitte prüfe deine Mail.'
+                : m==='CODE_EXPIRED' ? 'Der Code ist abgelaufen. Fordere einen neuen an.'
+                : m==='EMAIL_IN_USE' ? 'Diese Uni-Mail ist bereits verifiziert.'
+                : 'Bestätigung fehlgeschlagen. Versuch es nochmal.');
+            btn.disabled = false; btn.textContent = 'Bestätigen';
+        } catch (err) {
+            Room8UI.error('Bestätigung fehlgeschlagen. Versuch es nochmal.');
+            btn.disabled = false; btn.textContent = 'Bestätigen';
+        }
+    });
+
+    // Code erneut senden -> zurueck zur E-Mail-Eingabe
+    document.getElementById('btnResend').addEventListener('click', () => {
+        document.getElementById('codeForm').style.display = 'none';
+        document.getElementById('emailForm').style.display = 'block';
+        var be = document.getElementById('btnEmail'); be.disabled = false; be.textContent = 'Code anfordern';
+    });
+
+    init();
+</script>
+</body>
+</html>

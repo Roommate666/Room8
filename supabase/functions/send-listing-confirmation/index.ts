@@ -24,7 +24,7 @@ function row(label: string, value: string) {
 function footerHtml() {
   return `
     <div style="background:#1F2937;padding:24px 30px;text-align:center;">
-      <p style="margin:0 0 4px;color:white;font-weight:700;font-size:0.95rem;">Room8</p>
+      <p style="margin:0 0 4px;color:white;font-weight:700;font-size:0.95rem;">UniGoat</p>
       <p style="margin:0;color:rgba(255,255,255,0.5);font-size:0.75rem;">Die Studenten-Plattform</p>
       <p style="margin:8px 0 0;color:rgba(255,255,255,0.4);font-size:0.7rem;">Bei Fragen antworten Sie einfach auf diese E-Mail.</p>
     </div>`
@@ -99,23 +99,23 @@ serve(async (req) => {
       const hours = job.min_hours_per_week && job.max_hours_per_week
         ? `${job.min_hours_per_week}-${job.max_hours_per_week}h / Woche` : '-'
 
-      const jobUrl = `https://www.room8.club/job-detail.html?id=${listing_id}`
+      const jobUrl = `https://unigoat.de/job-detail.html?id=${listing_id}`
 
       const applyInfo = job.application_url
         ? `Bewerber werden direkt auf <strong>${job.application_url.replace(/^https?:\/\//, '')}</strong> weitergeleitet.`
         : `Bewerbungen werden per E-Mail an <strong>${ownerEmail}</strong> weitergeleitet.`
 
       emails.push({
-        from: 'Room8 Jobs <partner@room8.club>',
+        from: 'UniGoat Jobs <partner@unigoat.de>',
         to: [ownerEmail],
-        reply_to: 'help@room8.club',
+        reply_to: 'help@unigoat.de',
         subject: `Ihr Jobinserat "${job.title}" ist jetzt live!`,
         html: `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"></head>
         <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;padding:20px;background:#f3f4f6;margin:0;">
           <div style="max-width:600px;margin:0 auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
 
             <div style="background:#1F2937;padding:40px 30px;text-align:center;">
-              <div style="font-size:1.6rem;font-weight:800;color:#ffffff;margin-bottom:6px;">Room8 <span style="color:#A78BFA;">Jobs</span></div>
+              <div style="font-size:1.6rem;font-weight:800;color:#ffffff;margin-bottom:6px;">UniGoat <span style="color:#A78BFA;">Jobs</span></div>
               <p style="color:#9CA3AF;margin:0;font-size:0.9rem;">Stellenanzeigen f&uuml;r Unternehmen</p>
               <div style="margin-top:20px;">
                 <h1 style="color:#ffffff;margin:0;font-size:1.5rem;font-weight:700;">Ihr Jobinserat ist live!</h1>
@@ -126,8 +126,8 @@ serve(async (req) => {
               <p style="color:#374151;font-size:1rem;line-height:1.6;margin:0 0 24px;">
                 Hallo ${name},<br><br>
                 ${partner_credentials
-                  ? `willkommen als <strong>Room8 Partner</strong>! Ihr Jobinserat ist ab sofort sichtbar. &Uuml;ber Ihr Partner-Dashboard k&ouml;nnen Sie Bewerbungen einsehen.`
-                  : `Ihr Jobinserat ist ab sofort auf <strong>Room8</strong> sichtbar und erreicht tausende verifizierte Studenten.`}
+                  ? `willkommen als <strong>UniGoat Partner</strong>! Ihr Jobinserat ist ab sofort sichtbar. &Uuml;ber Ihr Partner-Dashboard k&ouml;nnen Sie Bewerbungen einsehen.`
+                  : `Ihr Jobinserat ist ab sofort auf <strong>UniGoat</strong> sichtbar und erreicht tausende verifizierte Studenten.`}
               </p>
 
               ${partner_credentials ? `
@@ -137,7 +137,7 @@ serve(async (req) => {
                 <p style="margin:0 0 4px;color:#374151;font-size:0.9rem;">E-Mail: <strong>${partner_credentials.email}</strong></p>
                 <p style="margin:0 0 8px;color:#374151;font-size:0.9rem;">Passwort: <strong>${partner_credentials.password}</strong></p>
                 <p style="margin:0 0 8px;color:#92400E;font-size:0.82rem;background:#FEF3C7;border-radius:8px;padding:8px 12px;">Bitte &auml;ndern Sie Ihr Passwort nach dem ersten Login.</p>
-                <a href="https://www.room8.club/partner-login.html" style="display:inline-block;background:#10B981;color:white;padding:8px 20px;border-radius:999px;text-decoration:none;font-weight:700;font-size:0.85rem;margin-top:4px;">Zum Partner-Portal</a>
+                <a href="https://unigoat.de/partner-login.html" style="display:inline-block;background:#10B981;color:white;padding:8px 20px;border-radius:999px;text-decoration:none;font-weight:700;font-size:0.85rem;margin-top:4px;">Zum Partner-Portal</a>
               </div>` : ''}
 
               <div style="background:#F9FAFB;border-radius:16px;overflow:hidden;margin-bottom:24px;">
@@ -157,8 +157,8 @@ serve(async (req) => {
               <div style="margin-top:24px;background:#F9FAFB;border-radius:12px;padding:16px;">
                 <h4 style="margin:0 0 8px;color:#374151;font-size:0.9rem;">So geht's weiter:</h4>
                 <p style="margin:0;color:#6B7280;font-size:0.85rem;line-height:1.6;">
-                  1. Studenten sehen Ihr Inserat in der Room8 App<br>
-                  2. Interessierte bewerben sich direkt &uuml;ber Room8<br>
+                  1. Studenten sehen Ihr Inserat in der UniGoat App<br>
+                  2. Interessierte bewerben sich direkt &uuml;ber UniGoat<br>
                   3. ${applyInfo}
                 </p>
               </div>
@@ -189,8 +189,8 @@ serve(async (req) => {
       const businessName = profile?.partner_business_name || coupon.business_name || 'Partner'
       const contactName = coupon.business_name ? coupon.business_name + ' Team' : (profile?.partner_business_name || 'Team')
       const validUntil = coupon.valid_until ? new Date(coupon.valid_until).toLocaleDateString('de-DE') : 'Unbegrenzt'
-      const couponUrl = `https://www.room8.club/coupon-detail.html?id=${listing_id}`
-      const dashboardUrl = 'https://www.room8.club/partner-login.html'
+      const couponUrl = `https://unigoat.de/coupon-detail.html?id=${listing_id}`
+      const dashboardUrl = 'https://unigoat.de/partner-login.html'
 
       const credentialsBlock = partner_credentials ? `
           <div style="background:#ECFDF5;border:2px solid #10B981;border-radius:16px;padding:20px;margin-bottom:24px;text-align:center;">
@@ -199,7 +199,7 @@ serve(async (req) => {
             <p style="margin:0 0 4px;color:#374151;font-size:0.9rem;">E-Mail: <strong>${partner_credentials.email}</strong></p>
             <p style="margin:0 0 8px;color:#374151;font-size:0.9rem;">Passwort: <strong>${partner_credentials.password}</strong></p>
             <p style="margin:0 0 8px;color:#92400E;font-size:0.82rem;background:#FEF3C7;border-radius:8px;padding:8px 12px;">Bitte &auml;ndern Sie Ihr Passwort nach dem ersten Login.</p>
-            <a href="https://www.room8.club/partner-login.html" style="display:inline-block;background:#10B981;color:white;padding:8px 20px;border-radius:999px;text-decoration:none;font-weight:700;font-size:0.85rem;margin-top:4px;">Zum Partner-Portal</a>
+            <a href="https://unigoat.de/partner-login.html" style="display:inline-block;background:#10B981;color:white;padding:8px 20px;border-radius:999px;text-decoration:none;font-weight:700;font-size:0.85rem;margin-top:4px;">Zum Partner-Portal</a>
           </div>` : ''
 
       // Zusatzinfos
@@ -213,18 +213,18 @@ serve(async (req) => {
       if (coupon.phone) extraRows += row('Telefon', `<a href="tel:${coupon.phone}" style="color:#2563EB;text-decoration:none;">${coupon.phone}</a>`)
 
       emails.push({
-        from: 'Room8 Partner <partner@room8.club>',
+        from: 'UniGoat Partner <partner@unigoat.de>',
         to: [ownerEmail],
-        reply_to: 'help@room8.club',
+        reply_to: 'help@unigoat.de',
         subject: partner_credentials
-          ? `Willkommen als Room8 Partner, ${businessName}!`
+          ? `Willkommen als UniGoat Partner, ${businessName}!`
           : `Ihr Coupon "${coupon.title}" ist jetzt live!`,
         html: `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"></head>
         <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;padding:20px;background:#f3f4f6;margin:0;">
           <div style="max-width:600px;margin:0 auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
 
             <div style="background:#1F2937;padding:40px 30px;text-align:center;">
-              <div style="font-size:1.6rem;font-weight:800;color:#ffffff;margin-bottom:6px;">Room8 <span style="color:#34D399;">Partner</span></div>
+              <div style="font-size:1.6rem;font-weight:800;color:#ffffff;margin-bottom:6px;">UniGoat <span style="color:#34D399;">Partner</span></div>
               <p style="color:#9CA3AF;margin:0;font-size:0.9rem;">Coupon-Management f&uuml;r Unternehmen</p>
               <div style="margin-top:20px;">
                 <h1 style="color:#ffffff;margin:0;font-size:1.5rem;font-weight:700;">
@@ -237,8 +237,8 @@ serve(async (req) => {
               <p style="color:#374151;font-size:1rem;line-height:1.6;margin:0 0 24px;">
                 Hallo ${contactName},<br><br>
                 ${partner_credentials
-                  ? `willkommen als <strong>Room8 Partner</strong>! Ihr Coupon-Angebot f&uuml;r <strong>${businessName}</strong> ist ab sofort f&uuml;r tausende Studenten sichtbar.`
-                  : `Ihr Coupon <strong>${coupon.title}</strong> f&uuml;r <strong>${businessName}</strong> ist ab sofort auf Room8 sichtbar.`
+                  ? `willkommen als <strong>UniGoat Partner</strong>! Ihr Coupon-Angebot f&uuml;r <strong>${businessName}</strong> ist ab sofort f&uuml;r tausende Studenten sichtbar.`
+                  : `Ihr Coupon <strong>${coupon.title}</strong> f&uuml;r <strong>${businessName}</strong> ist ab sofort auf UniGoat sichtbar.`
                 }
               </p>
 
@@ -264,7 +264,7 @@ serve(async (req) => {
               <div style="margin-top:20px;background:#F9FAFB;border-radius:12px;padding:16px;">
                 <h4 style="margin:0 0 8px;color:#374151;font-size:0.9rem;">So funktioniert's:</h4>
                 <p style="margin:0;color:#6B7280;font-size:0.85rem;line-height:1.6;">
-                  1. Studenten sehen Ihren Coupon in der Room8 App<br>
+                  1. Studenten sehen Ihren Coupon in der UniGoat App<br>
                   2. An der Kasse zeigen sie den QR-Code vor<br>
                   3. ${partner_credentials ? 'Sie scannen den Code im Partner-Dashboard &mdash; fertig!' : 'Der Rabatt wird gew&auml;hrt &mdash; fertig!'}
                 </p>

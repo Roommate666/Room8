@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-page="register">
 <head>
     <script src="sentry-init.js"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Registrieren - UniGoat</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
     <link rel="privacy-policy" href="datenschutz.html">
@@ -11,402 +11,209 @@
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="unigoat-v2.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,800..900;1,9..144,800..900&family=Sora:wght@500;700;800&display=swap" rel="stylesheet">
   <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Sora:wght@400;500;600;700;800&display=swap');
-/* UniGoat-Look Fonts (14.08.2026) - nur Optik */
-body{font-family:'Sora',system-ui,-apple-system,sans-serif !important;}
-h1,h2,h3{font-family:'Fraunces',Georgia,serif !important;}
-    .app-container {
-      padding-bottom: 0;
+    /* Alias: altes Token-Vokabular auf v2 mappen, damit bestehendes JS +
+       inline-styles (var(--primary-color) etc.) in v2-Farben weiterlaufen. */
+    :root{
+      --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+      --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+      --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+      --fh:var(--font-heading); --fb:var(--font-body);
+      --primary-color:var(--color-accent); --text-light:var(--text-muted);
     }
+    main{ padding-bottom:24px; }
 
-    /* Pattern: Magic UI BlurFade */
-    @keyframes blurFadeIn {
-      from { opacity: 0; filter: blur(8px); transform: translateY(8px); }
-      to { opacity: 1; filter: blur(0px); transform: translateY(0); }
-    }
-    @keyframes shimmerSlide {
-      0%, 100% { left: -100%; }
-      50% { left: 100%; }
-    }
+    /* Poster-Kopf: editorial 250-Hook (gleicher Look wie promo.html) */
+    .reg-poster{ position:relative; overflow:hidden; background:#F3FBF8; color:#0E3B30; padding:22px 20px 24px; }
+    .reg-poster .reg-brand{ display:flex; align-items:center; gap:8px; font-family:'Sora',sans-serif; font-weight:800; font-size:13px; letter-spacing:.06em; color:#0E3B30; margin-bottom:16px; }
+    .reg-poster .reg-brand img{ width:24px; height:24px; }
+    .reg-poster .reg-kick{ font-family:'Sora',sans-serif; color:#12B489; font-weight:800; font-size:13px; letter-spacing:.18em; text-transform:uppercase; margin-bottom:2px; }
+    .reg-poster .reg-num{ font-family:'Fraunces',serif; font-weight:900; font-size:84px; line-height:.85; color:#0E3B30; letter-spacing:-.02em; }
+    .reg-poster .reg-num .reg-plus{ font-size:50px; vertical-align:top; }
+    .reg-poster .reg-gc{ font-family:'Fraunces',serif; font-weight:900; font-size:30px; line-height:1; color:#0E3B30; margin-top:4px; }
+    .reg-poster .reg-gc em{ font-style:italic; color:#12B489; }
+    .reg-poster .reg-lead{ margin:12px 0 0; font-family:'Sora',sans-serif; font-size:13.5px; line-height:1.5; color:#5c7a70; font-weight:500; max-width:25ch; position:relative; z-index:2; }
+    .reg-poster .reg-goat{ position:absolute; right:-12px; bottom:-8px; width:134px; height:auto; z-index:1; }
+    .reg-poster .reg-cube{ position:absolute; right:118px; top:30px; width:28px; height:28px; border-radius:5px; transform:rotate(45deg); background:linear-gradient(135deg,#21D0A1,#0E9E77); box-shadow:inset 0 2px 3px rgba(255,255,255,.4); opacity:.9; }
+    .reg-poster .reg-cube.c2{ right:150px; top:66px; width:20px; height:20px; background:linear-gradient(135deg,#8BEED0,#12B489); }
 
-    /* Animated Mesh Gradient Background */
-    @keyframes gradientShift {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-    }
-    .app-content::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(-45deg, #EFF6FF, #DBEAFE, #F0F9FF, #E0F2FE, #EFF6FF);
-      background-size: 400% 400%;
-      animation: gradientShift 12s ease infinite;
-      z-index: -1;
-    }
+    /* Formular-Bereich */
+    .reg-body{ padding:18px 20px 0; }
+    .reg-body .field{ margin-bottom:14px; }
+    .reg-body .field small{ display:block; color:var(--text-muted); font-size:12px; margin-top:6px; }
 
-    .register-container {
-      max-width: 100%;
-      margin: 0;
-      padding: 0;
-      background: transparent;
-      border-radius: 0;
-      box-shadow: none;
-    }
+    /* Consent-Zeilen (eckig, v2) */
+    .consent{ display:flex; align-items:flex-start; gap:12px; border:1px solid var(--color-divider); background:var(--color-surface); padding:14px; cursor:pointer; font-weight:normal; font-size:14px; color:var(--color-text); line-height:1.5; margin-bottom:14px; }
+    .consent input[type="checkbox"]{ width:20px; height:20px; margin-top:1px; accent-color:var(--color-accent); cursor:pointer; flex-shrink:0; border-radius:0; }
+    .consent a{ color:var(--accent-small); text-decoration:underline; font-weight:600; }
 
-    .register-header {
-      text-align: center;
-      margin-bottom: 1.5rem;
-      animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
-    }
+    /* Nachricht */
+    #msg{ margin-top:14px; text-align:left; font-weight:600; padding:14px; font-size:14px; line-height:1.5; }
+    #msg:empty{ display:none; }
+    #msg.success{ background:var(--color-accent-100); color:var(--color-accent-800); border:1px solid var(--color-accent); }
+    #msg.error{ background:#FBEAE6; color:#C43A22; border:1px solid #E3A99B; }
+    #msg a{ color:var(--accent-small); font-weight:800; text-decoration:underline; }
 
-    .register-logo {
-      width: 84px;
-      height: 84px;
-      margin: 0 auto 1rem;
-    }
+    .info-box{ background:var(--color-accent-100); border:1px solid var(--color-accent); padding:16px; margin-top:14px; font-size:14px; color:var(--color-text); line-height:1.6; }
 
-    .register-logo img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-    }
+    /* Social Login */
+    .social-divider{ display:flex; align-items:center; gap:14px; margin:20px 0; }
+    .social-divider::before, .social-divider::after{ content:''; flex:1; height:1px; background:var(--color-divider); }
+    .social-divider span{ font-family:var(--font-heading); font-weight:800; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); white-space:nowrap; }
+    .social-buttons{ display:flex; flex-direction:column; gap:10px; }
+    .social-btn{ display:flex; align-items:center; justify-content:center; gap:12px; width:100%; padding:14px 16px; font-family:var(--font-heading); font-size:15px; font-weight:800; border:1px solid var(--color-text); background:var(--color-surface); color:var(--color-text); cursor:pointer; border-radius:0; min-height:54px; }
+    .social-btn:active{ transform:translateY(1px); }
+    .social-btn:hover{ background:color-mix(in srgb,var(--color-text) 7%,transparent); }
+    .social-btn svg{ width:20px; height:20px; flex-shrink:0; }
+    .social-btn.apple-btn{ background:var(--color-text); color:var(--color-bg); border-color:var(--color-text); }
+    .social-btn.apple-btn:hover{ background:color-mix(in srgb,var(--color-text) 88%,transparent); }
 
-    .register-header h1 {
-      font-size: 1.5rem;
-      font-weight: 800;
-      margin-bottom: 0.5rem;
-      background: linear-gradient(135deg, #12B489, #0E9E77);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: -0.02em;
-    }
-
-    .register-header p {
-      color: var(--text-light);
-      font-size: 0.9rem;
-    }
-
-    /* Formular verschoenern */
-    #registerForm {
-      animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
-    }
-    #registerForm .form-group input[type="text"],
-    #registerForm .form-group input[type="email"],
-    #registerForm .form-group input[type="password"] {
-      border-radius: 14px;
-      padding: 0.9rem 1rem;
-      border: 1.5px solid #E5E7EB;
-      font-size: 0.95rem;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      background: #FAFAFA;
-    }
-    #registerForm .form-group input:focus {
-      border-color: #12B489;
-      box-shadow: 0 0 0 4px rgba(33,208,161, 0.08);
-      background: #fff;
-    }
-    #registerForm .form-group label {
-      font-weight: 600;
-      font-size: 0.85rem;
-      color: #374151;
-      margin-bottom: 0.4rem;
-    }
-
-    /* Pattern: Magic UI ShimmerButton */
-    .register-btn {
-      width: 100%;
-      padding: 0.95rem 1.5rem;
-      background: linear-gradient(135deg, #12B489, #0E9E77);
-      color: white;
-      border: none;
-      border-radius: 999px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 20px rgba(33,208,161, 0.35);
-      position: relative;
-      overflow: hidden;
-    }
-    .register-btn::after {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%; width: 50%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      animation: shimmerSlide 3s ease-in-out infinite;
-    }
-    .register-btn:active {
-      transform: scale(0.98);
-      box-shadow: 0 2px 12px rgba(33,208,161, 0.3);
-    }
-    .register-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-    .register-btn:disabled::after { animation: none; }
-
-    .login-link {
-      text-align: center;
-      margin-top: 1.5rem;
-      padding: 1.25rem;
-      color: var(--text-light);
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.6);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
-      font-size: 0.9rem;
-      animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
-    }
-
-    .login-link a {
-      color: #12B489;
-      text-decoration: none;
-      font-weight: 700;
-    }
-
-    .login-link a:hover {
-      text-decoration: underline;
-    }
-
-    #msg {
-      margin-top: 1rem;
-      text-align: center;
-      font-weight: 600;
-      padding: 1rem;
-      border-radius: 14px;
-    }
-
-    #msg:empty {
-      display: none;
-    }
-
-    #msg.success {
-      background: rgba(16, 185, 129, 0.1);
-      color: #059669;
-      border: 1px solid rgba(16, 185, 129, 0.2);
-    }
-
-    #msg.error {
-      background: rgba(239, 68, 68, 0.08);
-      color: #dc2626;
-      border: 1px solid rgba(239, 68, 68, 0.15);
-    }
-
-    .info-box {
-      background: rgba(33,208,161, 0.06);
-      border: 1px solid rgba(33,208,161, 0.15);
-      padding: 1.25rem;
-      border-radius: 14px;
-      margin-top: 1rem;
-      font-size: 0.9rem;
-      color: #1e40af;
-      line-height: 1.6;
-    }
-
-    .checkbox-container {
-      background: #FAFAFA;
-      padding: 1rem;
-      border-radius: 14px;
-      border: 1.5px solid #E5E7EB;
-    }
-
-    .checkbox-container input[type="checkbox"] {
-      width: 22px !important;
-      height: 22px !important;
-      accent-color: #12B489;
-    }
-
-    /* Social Login Buttons */
-    .social-divider {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin: 1.5rem 0;
-      animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
-    }
-    .social-divider::before, .social-divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: #E5E7EB;
-    }
-    .social-divider span {
-      font-size: 0.8rem;
-      color: #9CA3AF;
-      white-space: nowrap;
-    }
-    .social-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      animation: blurFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
-    }
-    .social-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.75rem;
-      width: 100%;
-      padding: 0.85rem 1rem;
-      border-radius: 999px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      border: 1.5px solid #E5E7EB;
-      background: #fff;
-      color: #374151;
-      cursor: pointer;
-      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-    }
-    .social-btn:active { transform: scale(0.98); }
-    .social-btn:hover { border-color: #D1D5DB; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .social-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
-    .social-btn.google-btn:hover { background: #F8F9FA; }
-    .social-btn.apple-btn { background: #000; color: #fff; border-color: #000; }
-    .social-btn.apple-btn:hover { background: #1a1a1a; }
-
-    @media (prefers-reduced-motion: reduce) {
-      .register-header, #registerForm, .login-link { animation: none; opacity: 1; }
-      .register-btn::after { animation: none; }
-    }
+    .login-link{ text-align:center; margin-top:20px; padding:16px; color:var(--text-muted); border-top:var(--rule); font-size:14px; }
+    .login-link a{ color:var(--accent-small); text-decoration:none; font-weight:800; }
+    .login-link a:hover{ text-decoration:underline; }
   </style>
 </head>
 <body>
 <script>try{var _r=new URLSearchParams(location.search).get("ref");if(_r)localStorage.setItem("ug_ref",_r.trim().toUpperCase());}catch(e){}</script>
 
-  <div class="app-container">
-    <header class="app-header">
-      <a href="index.html" class="back-arrow">&#8592;</a>
-      <h1 data-i18n="nav_register">Registrieren</h1>
-    </header>
-    
-    <main class="app-content">
-      <div class="register-container">
-        <div class="register-header">
-          <div class="register-logo">
-            <img src="logo-goat.png?v90" alt="UniGoat Logo">
-          </div>
-          <h1 data-i18n="register_join">Tritt UniGoat bei</h1>
-          <p data-i18n="register_subtitle">Erstelle dein Konto und sichere dir Studentenrabatte, Jobs und Events</p>
-        </div>
-
-        <form id="registerForm">
-          <div class="form-group">
-            <label for="username" data-i18n="auth_username">Benutzername</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              required
-              minlength="3"
-              autocomplete="username"
-              data-i18n-placeholder="register_username_placeholder"
-              placeholder="Wähle einen Benutzernamen"
-            >
-          </div>
-
-          <div class="form-group">
-            <label for="email" data-i18n="register_email_label">E-Mail-Adresse</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              required
-              autocomplete="email"
-              data-i18n-placeholder="register_email_placeholder"
-              placeholder="deine.email@beispiel.de"
-            >
-            <small style="color: #6b7280; font-size: 0.85rem;" data-i18n="register_email_hint">
-              Du kannst jede E-Mail-Adresse verwenden
-            </small>
-          </div>
-
-          <div class="form-group">
-            <label for="password" data-i18n="register_password_label">Passwort (min. 6 Zeichen)</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              required
-              minlength="6"
-              autocomplete="new-password"
-              data-i18n-placeholder="register_password_placeholder"
-              placeholder="Wähle ein starkes Passwort"
-            >
-          </div>
-
-          <div class="form-group" style="margin-bottom: 1.5rem;">
-            <label class="checkbox-container" style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; font-weight: normal; font-size: 0.9rem; color: #4b5563;">
-              <input
-                type="checkbox"
-                id="acceptTerms"
-                name="acceptTerms"
-                required
-                style="width: 20px; height: 20px; margin-top: 2px; accent-color: var(--primary-color); cursor: pointer; flex-shrink: 0;"
-              >
-              <span>
-                <span data-i18n="register_terms_agree">Ich akzeptiere die</span>
-                <a href="nutzungsbedingungen.html" target="_blank" style="color: var(--primary-color); text-decoration: underline;" data-i18n="register_terms_link">Nutzungsbedingungen (AGB)</a>
-                <span data-i18n="register_terms_and">und die</span>
-                <a href="datenschutz.html" target="_blank" style="color: var(--primary-color); text-decoration: underline;" data-i18n="register_privacy_link">Datenschutzerklärung</a>
-              </span>
-            </label>
-          </div>
-
-          <div class="form-group" style="margin-bottom: 1.5rem;">
-            <label class="checkbox-container" style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; font-weight: normal; font-size: 0.9rem; color: #4b5563;">
-              <input
-                type="checkbox"
-                id="emailOptIn"
-                name="emailOptIn"
-                checked
-                style="width: 20px; height: 20px; margin-top: 2px; accent-color: var(--primary-color); cursor: pointer; flex-shrink: 0;"
-              >
-              <span>Schick mir E-Mails zu Rabatten, Wettkampf und Neuigkeiten. (Jederzeit abbestellbar.)</span>
-            </label>
-          </div>
-
-          <button type="submit" class="register-btn" id="registerBtn" data-i18n="register_btn_create">
-            Konto erstellen
-          </button>
-
-          <p id="msg"></p>
-        </form>
-
-        <!-- Social Login -->
-        <div class="social-divider"><span>oder direkt mit</span></div>
-
-        <div class="social-buttons">
-          <button type="button" class="social-btn google-btn" id="googleRegBtn">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-            </svg>
-            Mit Google registrieren
-          </button>
-
-          <button type="button" class="social-btn apple-btn" id="appleRegBtn">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
-              <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-            </svg>
-            Mit Apple registrieren
-          </button>
-        </div>
-
-        <div class="login-link">
-          <span data-i18n="auth_have_account">Bereits ein Konto?</span> <a href="login.html" data-i18n="auth_login_link">Anmelden</a>
-        </div>
+  <div class="screen app-container">
+    <div class="screen-body">
+      <div class="topbar" style="padding-top:14px">
+        <a class="btn btn-icon back-arrow" href="index.html" aria-label="Zurück"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--color-text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M15 18l-6-6 6-6"/></svg></a>
+        <div class="masthead" style="font-size:30px;padding:0 8px 0 2px" data-i18n="nav_register">Registrieren</div>
+        <span style="width:40px"></span>
       </div>
-    </main>
-    
+      <div class="hr"></div>
+
+      <main class="app-content">
+        <section class="reg-poster">
+          <span class="reg-brand"><img src="logo-goat.png?v90" alt="UniGoat Logo">UNIGOAT.DE</span>
+          <div class="reg-kick">Dein Startguthaben</div>
+          <div class="reg-num"><span class="reg-plus">+</span>250</div>
+          <div class="reg-gc">G-Coins <em>geschenkt.</em></div>
+          <p class="reg-lead">Konto erstellen, Uni-Mail bestätigen – und dein Guthaben ist da. Plus Rabatte, Jobs &amp; Events in Ulm &amp; Neu-Ulm.</p>
+          <span class="reg-cube"></span>
+          <span class="reg-cube c2"></span>
+          <img class="reg-goat" src="goat-welcome.png" alt="">
+        </section>
+
+        <div class="reg-body">
+          <form id="registerForm">
+            <div class="form-group field">
+              <label for="username" data-i18n="auth_username">Benutzername</label>
+              <input
+                class="input"
+                type="text"
+                id="username"
+                name="username"
+                required
+                minlength="3"
+                autocomplete="username"
+                data-i18n-placeholder="register_username_placeholder"
+                placeholder="Wähle einen Benutzernamen"
+              >
+            </div>
+
+            <div class="form-group field">
+              <label for="email" data-i18n="register_email_label">E-Mail-Adresse</label>
+              <input
+                class="input"
+                type="email"
+                id="email"
+                name="email"
+                required
+                autocomplete="email"
+                data-i18n-placeholder="register_email_placeholder"
+                placeholder="deine.email@beispiel.de"
+              >
+              <small data-i18n="register_email_hint">
+                Du kannst jede E-Mail-Adresse verwenden
+              </small>
+            </div>
+
+            <div class="form-group field">
+              <label for="password" data-i18n="register_password_label">Passwort (min. 6 Zeichen)</label>
+              <input
+                class="input"
+                type="password"
+                id="password"
+                name="password"
+                required
+                minlength="6"
+                autocomplete="new-password"
+                data-i18n-placeholder="register_password_placeholder"
+                placeholder="Wähle ein starkes Passwort"
+              >
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-container consent">
+                <input
+                  type="checkbox"
+                  id="acceptTerms"
+                  name="acceptTerms"
+                  required
+                >
+                <span>
+                  <span data-i18n="register_terms_agree">Ich akzeptiere die</span>
+                  <a href="nutzungsbedingungen.html" target="_blank" data-i18n="register_terms_link">Nutzungsbedingungen (AGB)</a>
+                  <span data-i18n="register_terms_and">und die</span>
+                  <a href="datenschutz.html" target="_blank" data-i18n="register_privacy_link">Datenschutzerklärung</a>
+                </span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-container consent">
+                <input
+                  type="checkbox"
+                  id="emailOptIn"
+                  name="emailOptIn"
+                  checked
+                >
+                <span>Schick mir E-Mails zu Rabatten, Wettkampf und Neuigkeiten. (Jederzeit abbestellbar.)</span>
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block register-btn" id="registerBtn" data-i18n="register_btn_create">
+              Konto erstellen
+            </button>
+
+            <p id="msg"></p>
+          </form>
+
+          <!-- Social Login -->
+          <div class="social-divider"><span data-i18n="register_or_direct">oder direkt mit</span></div>
+
+          <div class="social-buttons">
+            <button type="button" class="social-btn google-btn" id="googleRegBtn">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+              Mit Google registrieren
+            </button>
+
+            <button type="button" class="social-btn apple-btn" id="appleRegBtn">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+              </svg>
+              Mit Apple registrieren
+            </button>
+          </div>
+
+          <div class="login-link">
+            <span data-i18n="auth_have_account">Bereits ein Konto?</span> <a href="login.html" data-i18n="auth_login_link">Anmelden</a>
+          </div>
+        </div>
+      </main>
+    </div>
+
     <footer class="app-footer-nav" id="app-footer-nav"></footer>
   </div>
 
@@ -428,7 +235,7 @@ h1,h2,h3{font-family:'Fraunces',Georgia,serif !important;}
 
     form.addEventListener('submit', function(e) {
       e.preventDefault();
-      
+
       var username = document.getElementById('username').value.trim();
       var email = document.getElementById('email').value.trim().toLowerCase();
       var password = document.getElementById('password').value;
@@ -521,7 +328,7 @@ h1,h2,h3{font-family:'Fraunces',Georgia,serif !important;}
         }
         if (session) {
           setMsg(m.success, true);
-          window.location.href = 'dashboard.html';
+          window.location.href = 'app.html';
           return;
         }
 

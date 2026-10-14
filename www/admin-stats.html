@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="de" data-page="admin-stats">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Dashboard — UniGoat Admin</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+<style>
+  :root{
+    --bg:#070c1c; --card:#101a33; --card2:#16223f; --line:rgba(255,255,255,.09);
+    --navy-2:#11214b; --gold:#ffd23f; --pink:#ff4f8b; --green:#57e08b; --blue:#4ad6ff;
+    --text:#eef3ff; --muted:#8fa2c8;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;padding:18px 14px 60px;max-width:760px;margin:0 auto}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+  h1{font-size:22px;font-weight:800;margin:0;letter-spacing:-.01em}
+  .top .sub{font-size:11.5px;color:var(--muted)}
+  .refresh{border:1px solid var(--line);background:var(--card);color:var(--text);
+    font-weight:700;font-size:13px;padding:9px 14px;border-radius:10px;cursor:pointer}
+  .refresh:active{transform:translateY(1px)}
+  .msg{padding:40px 16px;text-align:center;color:var(--muted);font-size:14px;line-height:1.5}
+  .msg button{margin-top:14px;background:var(--gold);color:#20180a;border:0;font-weight:800;
+    font-size:15px;padding:12px 22px;border-radius:12px;cursor:pointer}
+  .sec-title{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);margin:22px 4px 10px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media (max-width:520px){ .grid{grid-template-columns:repeat(2,1fr)} }
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px}
+  .kpi .v{font-size:26px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+  .kpi .l{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.25}
+  .kpi.gold .v{color:var(--gold)} .kpi.green .v{color:var(--green)}
+  .kpi.pink .v{color:var(--pink)} .kpi.blue .v{color:var(--blue)}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px 16px;margin-top:10px}
+  .panel h3{margin:0 0 12px;font-size:13px;font-weight:800;color:var(--text)}
+  /* Balkendiagramm */
+  .chart{display:flex;align-items:flex-end;gap:5px;height:110px}
+  .bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}
+  .bar .col{width:100%;background:linear-gradient(180deg,var(--gold),#c98f18);border-radius:4px 4px 0 0;min-height:3px}
+  .bar .bn{font-size:10px;color:var(--text);font-variant-numeric:tabular-nums}
+  .bar .bl{font-size:9px;color:var(--muted);white-space:nowrap;transform:rotate(-90deg);transform-origin:center;height:26px;display:flex;align-items:center}
+  /* Ranglisten */
+  .rank{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+  .rank:last-child{border-bottom:0}
+  .rank .nm{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:10px}
+  .rank .ct{color:var(--gold);font-weight:800;font-variant-numeric:tabular-nums;flex:0 0 auto}
+  .empty{color:var(--muted);font-size:13px;padding:6px 0}
+  .note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px;padding:12px 14px;
+    background:rgba(255,79,139,.08);border:1px solid rgba(255,79,139,.22);border-radius:12px}
+  .note b{color:#ffb3cc}
+  /* Verlosungs-Editor */
+  .ed-l{display:block;font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 5px}
+  .ed-in{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;
+    padding:11px 12px;color:var(--text);font-size:14px;font-family:inherit}
+  .ed-in:focus{outline:none;border-color:var(--gold)}
+  .ed-btn{margin-top:12px;background:var(--gold);color:#20180a;border:0;font-weight:800;
+    font-size:14px;padding:11px 18px;border-radius:10px;cursor:pointer}
+  .ed-btn:disabled{opacity:.6}
+  .ed-msg{margin-left:12px;font-size:13px;font-weight:700}
+</style>
+</head>
+<body>
+  <div class="top">
+    <div>
+      <h1>📊 Dashboard</h1>
+      <div class="sub" id="stamp">lädt…</div>
+    </div>
+    <button class="refresh" id="refreshBtn">Aktualisieren</button>
+  </div>
+  <div id="content"><div class="msg">Lädt Daten…</div></div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  function nf(n){ return (+n||0).toLocaleString('de-DE'); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+  function kpi(v, label, cls){ return '<div class="kpi '+(cls||'')+'"><div class="v">'+v+'</div><div class="l">'+label+'</div></div>'; }
+
+  function render(d){
+    var u=d.users||{}, g=d.game||{}, c=d.coupons||{}, r=d.referral||{};
+    // Aktivierungs-Quoten (das eigentliche Signal)
+    var spielerQuote = u.total>0 ? Math.round((g.players/u.total)*100) : 0;
+    var html='';
+
+    html+='<div class="sec-title">Nutzer & Wachstum</div><div class="grid">'
+      + kpi(nf(u.total),'Nutzer gesamt','gold')
+      + kpi(nf(u.verified),'verifiziert (Uni)','green')
+      + kpi(nf(u.active_today),'heute aktiv')
+      + kpi(nf(u.active_7d),'aktiv (7 Tage)')
+      + kpi('+'+nf(u.new_7d),'neu (7 Tage)','green')
+      + kpi('+'+nf(u.new_30d),'neu (30 Tage)')
+      + '</div>';
+
+    // Chart Neuanmeldungen 14 Tage
+    var s=d.signups_14d||[]; var max=1; s.forEach(function(x){ if(+x.n>max) max=+x.n; });
+    html+='<div class="panel"><h3>Neuanmeldungen · 14 Tage</h3><div class="chart">';
+    s.forEach(function(x){
+      var h=Math.round((+x.n/max)*84);
+      html+='<div class="bar"><div class="bn">'+(+x.n||0)+'</div><div class="col" style="height:'+h+'px"></div><div class="bl">'+esc(x.tag)+'</div></div>';
+    });
+    html+='</div></div>';
+
+    html+='<div class="sec-title">Engagement · Spiel</div><div class="grid">'
+      + kpi(nf(g.plays_total),'Goat-Blast-Spiele','blue')
+      + kpi(nf(g.players),'Spieler insgesamt','blue')
+      + kpi(spielerQuote+' %','Spieler-Quote')
+      + kpi(nf(g.plays_7d),'Spiele (7 Tage)')
+      + kpi((g.avg_seconds||0).toString().replace('.',',')+'s','Ø Spieldauer')
+      + kpi(nf(g.duels),'Duelle gespielt')
+      + '</div>';
+
+    html+='<div class="sec-title">Coupons</div><div class="grid">'
+      + kpi(nf(c.redemptions_total),'Einlösungen gesamt','green')
+      + kpi(nf(c.redemptions_7d),'Einlösungen (7 T.)','green')
+      + kpi(nf(c.active_coupons),'aktive Coupons','gold')
+      + '</div>';
+    var tc=d.top_coupons||[];
+    html+='<div class="panel"><h3>Meist eingelöste Coupons</h3>';
+    if(tc.length){ tc.forEach(function(x){ html+='<div class="rank"><span class="nm">'+esc(x.title)+'</span><span class="ct">'+nf(x.redemptions)+'</span></div>'; }); }
+    else html+='<div class="empty">Noch keine Einlösungen erfasst.</div>';
+    html+='</div>';
+
+    html+='<div class="sec-title">Freunde-Verlosung</div><div class="grid">'
+      + kpi(nf(r.raffle_tickets),'Lose im Topf','pink')
+      + kpi(nf(r.raffle_players),'Teilnehmer','pink')
+      + kpi(nf(r.referred_users),'geworbene Nutzer')
+      + kpi(nf(r.rewarded),'belohnte Werbungen','green')
+      + '</div>';
+
+    // Editor: laufende Verlosung anpassen (Titel + Preis)
+    html+='<div class="panel"><h3>Laufende Verlosung bearbeiten</h3>'
+      +'<label class="ed-l" for="edTitle">Titel</label>'
+      +'<input id="edTitle" class="ed-in" maxlength="60" placeholder="Party-Lostopf 🎉">'
+      +'<label class="ed-l" for="edPrize">Preis (wird in der App angezeigt)</label>'
+      +'<input id="edPrize" class="ed-in" maxlength="120" placeholder="2 Kasten Bier + 2 Kasten Red Bull">'
+      +'<div style="display:flex;align-items:center"><button id="edSave" class="ed-btn">Speichern</button>'
+      +'<span id="edMsg" class="ed-msg"></span></div>'
+      +'<div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.4">Gilt sofort fuer die laufende Runde. Nach der Monatsziehung erbt die neue Runde diese Werte.</div>'
+      +'</div>';
+
+    var tci=d.top_cities||[];
+    html+='<div class="panel"><h3>Nutzer nach Stadt</h3>';
+    if(tci.length){ tci.forEach(function(x){ html+='<div class="rank"><span class="nm">'+esc(x.city)+'</span><span class="ct">'+nf(x.n)+'</span></div>'; }); }
+    else html+='<div class="empty">Keine Daten.</div>';
+    html+='</div>';
+
+    // Ehrliche Einordnung: Aktivierung
+    if(u.total>=20 && spielerQuote<25){
+      html+='<div class="note"><b>Aktivierung schwach:</b> Nur '+spielerQuote+' % der '+nf(u.total)
+        +' Nutzer haben je gespielt. Der Hebel ist nicht mehr Reichweite, sondern die Aktivierung der bestehenden Accounts (Onboarding, Reaktivierungs-Push).</div>';
+    }
+
+    $('content').innerHTML=html;
+    if(d.generated_at){ try{ $('stamp').textContent='Stand: '+new Date(d.generated_at).toLocaleString('de-DE'); }catch(e){ $('stamp').textContent=''; } }
+    wireRaffleEditor();
+  }
+
+  async function wireRaffleEditor(){
+    var ti=$('edTitle'), pr=$('edPrize'), btn=$('edSave'), msg=$('edMsg');
+    if(!btn) return;
+    // aktuelle Werte der laufenden Verlosung vorbelegen
+    try{ var res=await sb.rpc('get_active_raffle'); var d=res&&res.data; if(d&&d.ok){ if(ti)ti.value=d.title||''; if(pr)pr.value=d.prize||''; } }catch(e){}
+    btn.addEventListener('click', async function(){
+      if(!pr.value.trim()){ msg.textContent='Preis darf nicht leer sein.'; msg.style.color='var(--pink)'; return; }
+      btn.disabled=true; msg.textContent='Speichere…'; msg.style.color='var(--muted)';
+      try{
+        var r=await sb.rpc('admin_update_raffle', { p_prize: pr.value, p_title: ti.value });
+        var dd=r&&r.data;
+        if(dd&&dd.ok){ msg.textContent='Gespeichert ✓'; msg.style.color='var(--green)'; }
+        else { msg.textContent='Fehler: '+((dd&&dd.error)||'unbekannt'); msg.style.color='var(--pink)'; }
+      }catch(e){ msg.textContent='Fehler beim Speichern.'; msg.style.color='var(--pink)'; }
+      btn.disabled=false;
+    });
+  }
+
+  function showMsg(txt, withLogin){
+    var b = withLogin ? '<button id="goLogin">Zum Login</button>' : '';
+    $('content').innerHTML='<div class="msg">'+txt+b+'</div>';
+    $('stamp').textContent='';
+    var gl=$('goLogin'); if(gl) gl.addEventListener('click', function(){ location.href='login.html'; });
+  }
+
+  async function load(){
+    if(!window.sb){ showMsg('Verbindung nicht bereit. Seite neu laden.'); return; }
+    var u; try{ u=(await sb.auth.getUser()).data.user; }catch(e){}
+    if(!u){ showMsg('Bitte zuerst mit deinem Admin-Konto einloggen.', true); return; }
+    $('content').innerHTML='<div class="msg">Lädt Daten…</div>';
+    var res; try{ res=await sb.rpc('admin_dashboard_stats'); }catch(e){ showMsg('Fehler beim Laden. Versuch es nochmal.'); return; }
+    var d=res&&res.data;
+    if(!d || d.ok!==true){
+      if(d && d.error==='FORBIDDEN'){ showMsg('Kein Zugriff — dieses Dashboard ist nur für Admins.'); return; }
+      showMsg('Konnte die Daten nicht laden.'); return;
+    }
+    render(d);
+  }
+
+  $('refreshBtn').addEventListener('click', load);
+  load();
+})();
+</script>
+</body>
+</html>

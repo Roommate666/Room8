@@ -1,0 +1,27 @@
+{
+  "name": "UniGoat (Beta) - Dein Campus. Dein Deal.",
+  "short_name": "UniGoat",
+  "description": "Die exklusive Plattform von Studenten, für Studenten. Finde Wohnungen, verkaufe Gegenstände und finde Jobs.",
+  "start_url": "/wohnungen.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "logo.png?v61",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png?v61",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "social", "shopping"],
+  "lang": "de",
+  "dir": "ltr"
+}

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <script src="sentry-init.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title>Profil bearbeiten - UniGoat</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
+  <link rel="stylesheet" href="unigoat-v2.css">
+    <style>
+    /* Alias: altes Token-Vokabular auf v2 mappen, damit bestehendes JS
+       + inline-styles in v2-Farben weiterlaufen. */
+    :root{
+      --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+      --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+      --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+      --fh:var(--font-heading); --fb:var(--font-body);
+      /* Alt-Aliasse aus style.css, die inline-styles noch lesen */
+      --text-main:var(--color-text); --text-color:var(--color-text); --text-light:var(--text-muted);
+    }
+        .icn{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; display:block; }
+
+        /* Kopf mit Zurueck-Chrome (kein Tabbar) */
+        .topbar{ display:flex; align-items:center; justify-content:space-between; padding:14px 20px 12px; }
+        .backbtn{ width:40px; height:40px; display:grid; place-items:center; border:1px solid var(--color-text); background:transparent; cursor:pointer; }
+        .backbtn svg{ width:22px; height:22px; stroke:var(--color-text); fill:none; stroke-width:2; }
+        .head-title{ font-family:var(--font-heading); font-weight:800; font-size:22px; letter-spacing:-.02em; }
+
+        main{ padding:0 0 32px; }
+
+        /* Avatar-Vorschau — bleibt FARBIG (kein grayscale), rund wie im Original */
+        .avatar-upload-container{ text-align:center; padding:22px 20px 6px; }
+        .avatar-preview{
+            width:110px; height:110px; border-radius:50%; object-fit:cover;
+            background:var(--color-surface);
+            border:2px solid var(--color-text);
+            cursor:pointer;
+        }
+        .avatar-preview:active{ transform:scale(.97); }
+        #avatarFile{ display:none; }
+        .avatar-hint{ margin-top:10px; font-size:13px; color:var(--text-muted); font-weight:600; }
+
+        /* Sektionen: Zeitungs-Regel + Kicker */
+        .section-title{
+            font-family:var(--font-heading); font-weight:800; font-size:11px;
+            letter-spacing:.1em; text-transform:uppercase; color:var(--color-accent-700);
+            padding:22px 20px 0; margin:0;
+        }
+        .form-block{ padding:12px 20px 0; }
+
+        /* Felder im v2-Look (mappt .form-group -> .field/.input) */
+        #editProfileForm .form-group{ margin-bottom:14px; }
+        #editProfileForm .form-group label{
+            display:block; font-family:var(--font-heading); font-weight:800;
+            font-size:13px; margin-bottom:6px; color:var(--color-text);
+        }
+        #editProfileForm .form-group input,
+        #editProfileForm .form-group select,
+        #editProfileForm .form-group textarea{
+            width:100%; min-height:48px; padding:8px 12px; font:inherit; font-size:16px;
+            color:var(--color-text); caret-color:var(--color-accent);
+            background:var(--color-surface); border:1px solid var(--color-divider); border-radius:0;
+        }
+        #editProfileForm .form-group textarea{ min-height:auto; resize:vertical; }
+        #editProfileForm .form-group input::placeholder,
+        #editProfileForm .form-group textarea::placeholder{ color:var(--text-muted); }
+        #editProfileForm .form-group input:focus,
+        #editProfileForm .form-group select:focus,
+        #editProfileForm .form-group textarea:focus{
+            border-color:var(--color-accent); outline:none;
+        }
+        #editProfileForm .form-group small{ display:block; margin-top:6px; }
+
+        .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+        @media (max-width: 600px){ .form-row{ grid-template-columns:1fr; } }
+
+        /* Speichern-Button (v2 btn-primary btn-block) */
+        .submit-btn{
+            width:100%; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+            min-height:54px; padding:14px 16px; cursor:pointer; text-decoration:none;
+            font-family:var(--font-heading); font-weight:800; font-size:16px; line-height:1.2;
+            background:var(--color-accent); color:var(--on-accent);
+            border:1px solid var(--color-accent); border-radius:0;
+        }
+        .submit-btn:hover{ background:var(--color-accent-600); }
+        .submit-btn:disabled{ opacity:.45; cursor:not-allowed; }
+
+        /* Verifizierungs-Sektion (der eine Mint-Poster-Moment) */
+        .verification-section{ background:var(--color-accent); color:var(--on-accent); padding:20px; margin-top:26px; }
+        .verification-section h3{ margin:0 0 12px 0; font-family:var(--font-heading); font-weight:800; font-size:20px; letter-spacing:-.02em; }
+
+        /* Status-Badge — eckig, auf Poster lesbar */
+        .status-badge{ font-family:var(--font-heading); font-weight:800; padding:4px 10px; border-radius:0; display:inline-flex; align-items:center; gap:6px; font-size:12px; }
+        .status-badge::before{ content:''; width:7px; height:7px; flex-shrink:0; background:currentColor; }
+        .status-unverified{ background:var(--color-text); color:var(--color-bg); }
+        .status-pending{ background:var(--color-bg); color:var(--color-text); }
+        .status-verified{ background:var(--color-bg); color:var(--accent-small); }
+
+        /* Verify-Button auf dem Poster: Tinte-auf-Papier */
+        #verify-btn{
+            background:var(--color-text); color:var(--color-bg);
+            border:1px solid var(--color-text);
+        }
+        #verify-btn:hover{ background:var(--color-neutral-800); }
+    </style>
+</head>
+<body>
+
+<div class="screen">
+  <div class="screen-body">
+    <div class="topbar">
+        <a href="javascript:history.back()" class="backbtn" aria-label="Zurück">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <h1 class="head-title" data-i18n="edit_profile_title">Profil bearbeiten</h1>
+        <span style="width: 40px;"></span>
+    </div>
+    <div class="hr"></div>
+
+    <main class="app-content">
+        <form id="editProfileForm">
+            <!-- Avatar Upload — bleibt farbig -->
+            <div class="avatar-upload-container">
+                <label for="avatarFile">
+                    <img src="placeholder.png" alt="Dein Avatar" id="avatar-preview" class="avatar-preview" onerror="this.src='https://via.placeholder.com/150'">
+                    <p class="avatar-hint" data-i18n="edit_profile_change_photo">Klicke, um Bild zu ändern</p>
+                </label>
+                <input type="file" id="avatarFile" accept="image/*">
+            </div>
+
+            <!-- Basis-Informationen -->
+            <h3 class="section-title" data-i18n="edit_profile_basic_info">Basis-Informationen</h3>
+
+            <div class="form-block">
+                <div class="form-group">
+                    <label for="username" data-i18n="edit_profile_username">Benutzername *</label>
+                    <input type="text" id="username" required data-i18n-placeholder="edit_profile_username_placeholder" placeholder="Dein Benutzername">
+                </div>
+
+                <div class="form-group">
+                    <label for="full_name" data-i18n="edit_profile_fullname">Vollständiger Name</label>
+                    <input type="text" id="full_name" data-i18n-placeholder="edit_profile_fullname_placeholder" placeholder="z.B. Max Mustermann">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="city" data-i18n="edit_profile_city">Stadt</label>
+                        <input type="text" id="city" data-i18n-placeholder="edit_profile_city_placeholder" placeholder="z.B. Berlin" list="citySuggestions" autocomplete="address-level2">
+                        <datalist id="citySuggestions"></datalist>
+                    </div>
+                    <div class="form-group">
+                        <label for="age" data-i18n="edit_profile_age">Alter</label>
+                        <input type="number" id="age" min="16" max="99" data-i18n-placeholder="edit_profile_age_placeholder" placeholder="z.B. 22">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Studium -->
+            <h3 class="section-title" data-i18n="edit_profile_studies">Studium</h3>
+
+            <div class="form-block">
+                <div class="form-group">
+                    <label for="university" data-i18n="edit_profile_university">Universität</label>
+                    <input type="text" id="university" data-i18n-placeholder="edit_profile_university_placeholder" placeholder="z.B. TU Berlin">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="study_field" data-i18n="edit_profile_field">Studienfach</label>
+                        <input type="text" id="study_field" data-i18n-placeholder="edit_profile_field_placeholder" placeholder="z.B. Informatik">
+                    </div>
+                    <div class="form-group">
+                        <label for="semester" data-i18n="edit_profile_semester">Semester</label>
+                        <select id="semester">
+                            <option value="" data-i18n="edit_profile_select">Bitte wählen</option>
+                            <option value="1">1. Semester</option>
+                            <option value="2">2. Semester</option>
+                            <option value="3">3. Semester</option>
+                            <option value="4">4. Semester</option>
+                            <option value="5">5. Semester</option>
+                            <option value="6">6. Semester</option>
+                            <option value="7">7. Semester</option>
+                            <option value="8">8. Semester</option>
+                            <option value="9">9. Semester</option>
+                            <option value="10">10. Semester</option>
+                            <option value="11">11. Semester</option>
+                            <option value="12">12. Semester</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Persönliches -->
+            <h3 class="section-title" data-i18n="edit_profile_about">Über mich</h3>
+
+            <div class="form-block">
+                <div class="form-group">
+                    <label for="bio" data-i18n="edit_profile_bio">Biografie</label>
+                    <textarea id="bio" rows="4" data-i18n-placeholder="edit_profile_bio_placeholder" placeholder="Erzähl etwas über dich..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="languages" data-i18n="edit_profile_languages">Sprachen</label>
+                    <input type="text" id="languages" data-i18n-placeholder="edit_profile_languages_placeholder" placeholder="z.B. Deutsch, Englisch, Spanisch">
+                    <small style="color: var(--text-muted); font-size: 0.8rem;" data-i18n="edit_profile_languages_hint">Mehrere Sprachen mit Komma trennen</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="interests" data-i18n="edit_profile_interests">Interessen & Hobbys</label>
+                    <textarea id="interests" rows="3" data-i18n-placeholder="edit_profile_interests_placeholder" placeholder="z.B. Fitness, Kochen, Reisen, Gaming..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" style="margin-top: 20px;" data-i18n="edit_profile_save">Änderungen speichern</button>
+            </div>
+
+            <!-- Verifizierungs-Sektion (Mint-Poster) -->
+            <div class="verification-section">
+                <h3 data-i18n="edit_profile_verification_title">Studenten-Verifizierung</h3>
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <p style="margin: 0 0 0.5rem 0; font-weight: 700;">
+                            <span data-i18n="edit_profile_status">Status:</span> <span id="verification-status" class="status-badge" data-i18n="general_loading">Lädt...</span>
+                        </p>
+                        <p id="verification-info" style="margin: 0; font-size: 0.9rem; opacity: .9;" data-i18n="edit_profile_checking">
+                            Prüfe Verifizierungsstatus...
+                        </p>
+                    </div>
+                    <a href="verify-options.html" id="verify-btn" class="submit-btn" style="margin: 0; padding: 0.75rem 1.5rem; text-decoration: none; display: inline-block; white-space: nowrap; width: auto;" data-i18n="edit_profile_verify_btn">
+                        Jetzt verifizieren &#8594;
+                    </a>
+                </div>
+            </div>
+
+            <div id="form-message" style="margin-top: 20px; padding: 0 20px; text-align: center; font-family: var(--font-heading); font-weight: 800;"></div>
+        </form>
+    </main>
+    <div id="app-footer-nav"></div>
+  </div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="session-cache.js"></script>
+<script src="navigation.js"></script>
+<script src="translations.js"></script>
+<script src="cities.js"></script>
+<script>document.addEventListener('DOMContentLoaded', function(){ if (typeof populateCityDatalist === 'function') populateCityDatalist('citySuggestions'); });</script>
+<script>
+    // Supabase Client - Direkte Initialisierung
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Helper: Navigation
+    function navigateTo(url) {
+        try { window.location.href = url; } catch(e) { console.warn(e); }
+    }
+
+    var form = document.getElementById('editProfileForm');
+    var usernameInput = document.getElementById('username');
+    var fullNameInput = document.getElementById('full_name');
+    var cityInput = document.getElementById('city');
+    var ageInput = document.getElementById('age');
+    var universityInput = document.getElementById('university');
+    var studyFieldInput = document.getElementById('study_field');
+    var semesterInput = document.getElementById('semester');
+    var bioInput = document.getElementById('bio');
+    var languagesInput = document.getElementById('languages');
+    var interestsInput = document.getElementById('interests');
+    var avatarFileInput = document.getElementById('avatarFile');
+    var avatarPreview = document.getElementById('avatar-preview');
+    var msgContainer = document.getElementById('form-message');
+    var submitBtn = form.querySelector('button[type="submit"]');
+    var statusBadge = document.getElementById('verification-status');
+    var verificationInfo = document.getElementById('verification-info');
+    var verifyBtn = document.getElementById('verify-btn');
+
+    var currentUser = null;
+
+    // Einfache Übersetzungs-Funktion (Fallback falls translations.js nicht lädt)
+    function getTranslation(key, fallback) {
+        if (typeof t === 'function') return t(key); // Nutze globale t()
+        return fallback;
+    }
+
+    async function loadProfileData() {
+        if (!sb) {
+            console.error('Supabase nicht initialisiert');
+            return;
+        }
+
+        try {
+            var authResult = await sb.auth.getUser();
+            var user = authResult.data ? authResult.data.user : null;
+
+            if (!user) {
+                navigateTo('login.html');
+                return;
+            }
+            currentUser = user;
+
+            // Eigen-Read ueber my_profile-View (direkter profiles-Read wird von RLS geblockt)
+            var profileResult = await sb
+                .from('my_profile')
+                .select('*')
+                .maybeSingle();
+
+            var profile = profileResult.data;
+            var error = profileResult.error;
+
+            if (error && error.code !== 'PGRST116') {
+                console.error('Fehler beim Laden:', error);
+                return;
+            }
+
+            if (!profile) {
+                console.log('Kein Profil gefunden - User kann jetzt eines erstellen');
+                return;
+            }
+        } catch (err) {
+            console.error('Fehler:', err);
+            return;
+        }
+
+        if (profile) {
+            usernameInput.value = profile.username || '';
+            fullNameInput.value = profile.full_name || '';
+            cityInput.value = profile.city || '';
+            ageInput.value = profile.age || '';
+            universityInput.value = profile.university || '';
+            studyFieldInput.value = profile.study_field || '';
+            semesterInput.value = profile.semester || '';
+            bioInput.value = profile.bio || '';
+            languagesInput.value = profile.languages || '';
+            interestsInput.value = profile.interests || '';
+
+            if (profile.avatar_url) {
+                avatarPreview.src = profile.avatar_url;
+            }
+
+            // Verifizierungs-Status anzeigen
+            var isVerified = profile.is_verified;
+            var verificationStatus = profile.verification_status || 'not_started';
+            var uniEmail = profile.uni_email || profile.edu_email;
+
+            if (isVerified) {
+                statusBadge.innerHTML = '&#10004; Verifiziert';
+                statusBadge.className = 'status-badge status-verified';
+                verificationInfo.textContent = uniEmail
+                    ? 'Verifiziert mit ' + uniEmail
+                    : 'Dein Studentenstatus ist verifiziert';
+                verifyBtn.style.display = 'none';
+            } else if (verificationStatus === 'pending') {
+                statusBadge.innerHTML = '&#8987; Ausstehend';
+                statusBadge.className = 'status-badge status-pending';
+                verificationInfo.textContent = 'Deine Verifizierung wird überprüft';
+                verifyBtn.href = 'verification-status.html';
+                verifyBtn.innerHTML = 'Status prüfen &#8594;';
+            } else {
+                statusBadge.innerHTML = '&#10007; Nicht verifiziert';
+                statusBadge.className = 'status-badge status-unverified';
+                verificationInfo.textContent = 'Verifiziere deinen Studentenstatus um alle Features freizuschalten';
+                verifyBtn.href = 'verify-options.html';
+                verifyBtn.innerHTML = 'Jetzt verifizieren &#8594;';
+            }
+        }
+    }
+
+    avatarFileInput.addEventListener('change', function() {
+        var file = avatarFileInput.files[0];
+        if (file) {
+            avatarPreview.src = URL.createObjectURL(file);
+        }
+    });
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Speichere...';
+        msgContainer.textContent = '';
+
+        var updates = {
+            username: usernameInput.value,
+            full_name: fullNameInput.value,
+            city: (typeof normalizeCity === 'function' ? normalizeCity(cityInput.value) : cityInput.value.trim()),
+            age: ageInput.value ? parseInt(ageInput.value) : null,
+            university: universityInput.value,
+            study_field: studyFieldInput.value,
+            semester: semesterInput.value ? parseInt(semesterInput.value) : null,
+            bio: bioInput.value,
+            languages: languagesInput.value,
+            interests: interestsInput.value,
+            updated_at: new Date().toISOString()
+        };
+
+        try {
+            var file = avatarFileInput.files[0];
+
+            if (file) {
+                var filePath = currentUser.id + '/' + Date.now() + '_' + file.name;
+                var { error: uploadError } = await sb.storage.from('avatars').upload(filePath, file);
+
+                if (uploadError) throw uploadError;
+
+                var { data } = sb.storage.from('avatars').getPublicUrl(filePath);
+                updates.avatar_url = data.publicUrl;
+            }
+
+            // Speichern ueber SECURITY-DEFINER-RPC (authenticated darf profiles nicht direkt updaten)
+            var saveRes = await sb.rpc('update_my_profile', { p_data: updates });
+            if (saveRes.error) throw saveRes.error;
+            if (saveRes.data && saveRes.data.ok === false) {
+                throw new Error(saveRes.data.error === 'USERNAME_TAKEN' ? 'Dieser Benutzername ist bereits vergeben.' : 'Speichern nicht möglich. Bitte versuch es nochmal.');
+            }
+
+            msgContainer.style.color = 'green';
+            msgContainer.innerHTML = '&#10004; Profil erfolgreich aktualisiert!';
+
+            setTimeout(function() {
+                navigateTo('profile.html');
+            }, 1500);
+
+        } catch (error) {
+            console.error(error);
+            msgContainer.style.color = 'red';
+            msgContainer.textContent = 'Fehler: ' + error.message;
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Änderungen speichern';
+        }
+    });
+
+    loadProfileData();
+</script>
+<script src="notificationBell.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+import { chromium } from 'playwright';
+const B='https://371d6cbe.unigoat-spa.pages.dev';
+const EMAIL='gatetest_1789592449153@unigoat-test.de', PASS='GateTest2026!';
+const b=await chromium.launch(); const p=await (await b.newContext({viewport:{width:390,height:844}})).newPage();
+await p.goto(B+'/login.html',{waitUntil:'networkidle'});
+await p.fill('#loginEmail',EMAIL); await p.fill('#loginPassword',PASS);
+await p.click('#loginBtn'); await p.waitForTimeout(5000);
+const msg=await p.evaluate(()=>{var e=document.querySelector('.error,#msg,[class*=error],[class*=msg]');return e?e.innerText.slice(0,120):'(keine Meldung)';});
+console.log('URL:', p.url().replace(B,''));
+console.log('Login-Meldung:', msg);
+await b.close();

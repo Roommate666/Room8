@@ -84,10 +84,10 @@
   // Profile-Check nach Login: wenn unvollstaendig -> complete-profile.html
   async function routeAfterLogin(user, oauthProfile) {
     var sb = getSb();
-    if (!sb) { window.location.href = 'dashboard.html'; return; }
+    if (!sb) { window.location.href = 'app.html'; return; }
     var prof = null;
     try {
-      var resp = await sb.from('profiles').select('id, username, full_name, city, is_partner').eq('id', user.id).maybeSingle();
+      var resp = await sb.from('profiles').select('id, username, full_name, city').eq('id', user.id).maybeSingle();
       prof = resp.data || null;
     } catch (e) { /* RLS/network — assume needs completion */ }
 
@@ -109,10 +109,9 @@
         } catch (e) {}
       }
       window.location.href = 'complete-profile.html';
-    } else if (prof && prof.is_partner) {
-      window.location.href = 'partner-dashboard.html';
     } else {
-      window.location.href = 'dashboard.html';
+      // Nach Login direkt in die App-Shell (app.html)
+      window.location.href = 'app.html';
     }
   }
 

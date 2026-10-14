@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="de" data-page="profile">
+<head>
+<script src="sentry-init.js"></script>
+<script src="features.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Profil — UniGoat</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+<link rel="stylesheet" href="unigoat-v2.css">
+<style>
+  /* Alias: altes Token-Vokabular auf v2 (fuer inline var(--green) etc. + GoatAvatar-Visitenkarte) */
+  :root{
+    --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+    --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+    --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+    --fh:var(--font-heading); --fb:var(--font-body);
+  }
+  .tab .icn{ width:20px; height:20px; margin-bottom:2px; stroke:currentColor; fill:none; stroke-width:2; }
+
+  /* Profilkarte */
+  .pcard{ display:flex; align-items:center; gap:16px; padding:18px 20px; border-bottom:var(--rule); }
+  .av{ flex:none; border:2px solid var(--color-text); background:var(--color-surface); line-height:0; overflow:hidden; }
+  .av img, .av svg, .av canvas{ display:block; max-width:92px; max-height:92px; }
+  .pinfo{ min-width:0; }
+  .nm{ font-family:var(--font-heading); font-weight:800; font-size:24px; line-height:1.08; letter-spacing:-.02em; }
+  .un{ font-size:13px; color:var(--text-muted); margin-top:4px; font-weight:600; word-break:break-word; }
+
+  /* Tier-Fortschritt */
+  .tierbox{ padding:14px 20px; border-bottom:var(--rule); }
+  .tier{ display:flex; justify-content:space-between; font-family:var(--font-heading); font-weight:800; font-size:11px; letter-spacing:.08em; }
+  .tb{ color:var(--accent-small); } .tb.off{ color:var(--text-muted); }
+  .tbar{ height:6px; background:color-mix(in srgb,var(--color-text) 12%,transparent); margin-top:8px; overflow:hidden; }
+  .tbar>i{ display:block; height:100%; background:var(--color-accent); }
+  .tnote{ font-size:12px; color:var(--text-muted); margin-top:8px; line-height:1.4; }
+
+  /* Stats (in v2-cells) */
+  .pstatnum{ font-family:var(--font-heading); font-weight:800; font-size:30px; line-height:1; letter-spacing:-.03em; font-feature-settings:'tnum' 1; margin-top:6px; }
+
+  /* Menue-Zeilen */
+  .prow{ display:flex; align-items:center; gap:14px; text-decoration:none; color:var(--color-text); padding:14px 20px; border-bottom:var(--rule-thin); font-family:var(--font-heading); font-weight:800; font-size:15px; }
+  .prow .ic{ width:20px; height:20px; stroke:var(--color-text); fill:none; stroke-width:1.9; flex:none; }
+  .prow .ch{ margin-left:auto; color:var(--text-muted); font-size:15px; font-weight:800; white-space:nowrap; }
+  .prow.logout{ color:#C43A22; } .prow.logout .ic{ stroke:#C43A22; }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="screen-body">
+    <div class="topbar" style="padding-top:14px">
+      <div class="masthead" style="font-size:40px;padding:0 0 0 20px">Profil</div>
+      <a href="einstellungen.html" class="btn btn-icon" style="margin-right:12px" aria-label="Einstellungen"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--color-text);fill:none;stroke-width:1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a>
+    </div>
+    <div class="hr"></div>
+
+    <div class="pcard">
+      <div class="av" id="av"></div>
+      <div class="pinfo">
+        <div class="nm" id="nm">…</div>
+        <div class="un" id="un"></div>
+      </div>
+    </div>
+
+    <div class="tierbox">
+      <div class="tier"><span class="tb" id="tierA">BRONZE</span><span class="tb off" id="tierB">SILBER</span></div>
+      <div class="tbar"><i id="tbar" style="width:0%"></i></div>
+      <div class="tnote" id="tnote"></div>
+    </div>
+
+    <div class="cells cells-2">
+      <div class="cell"><div class="kicker kicker-muted">G-Coins</div><div class="pstatnum" id="sCoins">0</div></div>
+      <div class="cell"><div class="kicker kicker-muted">Tage Streak</div><div class="pstatnum" id="sStreak">0</div></div>
+      <div class="cell"><div class="kicker kicker-muted">Coupons eingelöst</div><div class="pstatnum" id="sCoupons">0</div></div>
+      <div class="cell"><div class="kicker kicker-muted">Freunde geworben</div><div class="pstatnum" id="sFriends">0</div></div>
+    </div>
+
+    <div class="kicker" style="padding:18px 20px 4px">Dein Konto</div>
+    <a class="prow" href="avatar-edit.html"><svg class="ic" viewBox="0 0 24 24"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 15.4 7.2 17l.9-5.4L4.2 7.7l5.4-.8z"/></svg>Goat-Shop — Goat anpassen<span class="ch">›</span></a>
+    <div class="prow" id="cardRow" style="cursor:pointer"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h6M7 13h4"/></svg>Meine Visitenkarte<span class="ch">›</span></div>
+    <div class="prow" id="freezeRow" style="cursor:pointer"><svg class="ic" viewBox="0 0 24 24"><path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/></svg><span id="freezeTxt">Streak-Retter</span><span class="ch">›</span></div>
+    <a class="prow" href="verify-options.html"><svg class="ic" viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg>Verifizierung<span class="ch" id="verifyCh">›</span></a>
+    <a class="prow" href="challenge.html"><svg class="ic" viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>Monats-Challenge<span class="ch">›</span></a>
+    <a class="prow" href="friends.html"><svg class="ic" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>Meine Freunde<span class="ch">›</span></a>
+    <a class="prow" href="edit-profile.html"><svg class="ic" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Profil bearbeiten<span class="ch">›</span></a>
+    <a class="prow" href="https://instagram.com/unigoat.de" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>Instagram: @unigoat.de<span class="ch">›</span></a>
+    <a class="prow logout" href="#" id="logoutRow"><svg class="ic" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Abmelden<span class="ch"></span></a>
+    <div style="height:20px"></div>
+  </div>
+
+  <div class="vkbg" id="vkbg"></div>
+
+  <nav class="tabbar">
+    <a class="tab" href="dashboard.html"><svg class="icn" viewBox="0 0 24 24"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1Z"/></svg>Hub</a>
+    <a class="tab" href="coupons.html"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="0"/><path d="M3 10h18"/></svg>Coupons</a>
+    <a class="tab" href="game/index.html"><svg class="icn" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="0"/><path d="M8 12h3M9.5 10.5v3M15 11h.01M17 13h.01"/></svg>Game</a>
+    <a class="tab" href="challenge.html"><svg class="icn" viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>Rang</a>
+    <a class="tab" href="profile.html" aria-current="page"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>Profil</a>
+  </nav>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="onboarding-gate.js"></script>
+<script src="game/avatar.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  function nf(n){return (n||0).toLocaleString('de-DE');}
+  var ME=null;
+  function openMyCard(){ if(!ME||!window.GoatAvatar)return; var bg=$('vkbg'); bg.innerHTML=GoatAvatar.renderVisitenkarte({username:ME.username,full_name:ME.full_name,city:ME.city,is_champion:ME.is_champion,coins:ME.coins,streak:ME.streak_days,avatar_config:ME.avatar_config}); bg.classList.add('show'); }
+  // Streak-Retter (Freeze): Anzeige + Kauf (50 G-Coins, max 2)
+  function renderFreezeRow(){ var el=$('freezeTxt'); if(!el||!ME)return; var f=ME.streak_freezes||0; el.textContent='Streak-Retter · '+f+'/2'+(f<2?' · gewinn im Spiel (alle 3 Daily-Quests)':' (voll)'); }
+  async function buyFreeze(){
+    if(!ME)return; if((ME.streak_freezes||0)>=2){ if(window.Room8UI&&Room8UI.info)Room8UI.info('Du hast schon 2 Streak-Retter.'); return; }
+    if((ME.coins||0)<50){ if(window.Room8UI&&Room8UI.warning)Room8UI.warning('Du brauchst 50 G-Coins für einen Streak-Retter.'); return; }
+    try{ var r=await sb.rpc('buy_streak_freeze'); if(r.error||!(r.data&&r.data.ok)) throw (r.error||new Error('fail'));
+      ME.streak_freezes=r.data.freezes; ME.coins=r.data.coins; $('sCoins').textContent=nf(ME.coins); renderFreezeRow();
+      if(window.Room8UI&&Room8UI.success)Room8UI.success('Streak-Retter gekauft! 🛡️');
+    }catch(e){ if(window.Room8UI&&Room8UI.error)Room8UI.error('Kauf hat nicht geklappt.'); }
+  }
+  var TIERS=[['Bronze',0],['Silber',1000],['Gold',3000],['Platin',8000]];
+  function tierInfo(c){var i=0;for(var k=0;k<TIERS.length;k++){if(c>=TIERS[k][1])i=k;}var cur=TIERS[i],next=TIERS[i+1];
+    var pct=next?Math.min(100,Math.round((c-cur[1])/(next[1]-cur[1])*100)):100;
+    return{cur:cur[0],next:next?next[0]:'MAX',pct:pct,toNext:next?(next[1]-c):0};}
+
+  async function load(){
+    if(!window.sb){ location.href='login.html'; return; }
+    var u; try{u=(await sb.auth.getUser()).data.user;}catch(e){}
+    if(!u){ location.href='login.html'; return; }
+    var p={}; try{var r=await sb.from('my_profile').select('full_name,username,university,city,coins,streak_days,streak_freezes,is_student_verified,is_champion,avatar_config').maybeSingle(); if(r.data)p=r.data;}catch(e){}
+    ME=p;
+    renderFreezeRow();
+    $('nm').textContent=(p.full_name||p.username||'Goat');
+    $('un').textContent='@'+(p.username||'goat')+(p.university?' · '+p.university:'');
+    $('sCoins').textContent=nf(p.coins); $('sStreak').textContent=(p.streak_days||0);
+    try{ if(window.GoatAvatar) $('av').innerHTML=GoatAvatar.renderGoatAvatar(p.avatar_config||{},88); }catch(e){}
+    var ti=tierInfo(p.coins||0);
+    $('tierA').textContent=ti.cur.toUpperCase(); $('tierB').textContent=ti.next.toUpperCase(); $('tbar').style.width=ti.pct+'%';
+    $('tnote').textContent=ti.toNext>0?('Noch '+nf(ti.toNext)+' G-Coins bis '+ti.next+' — schaltet neue Goat-Kostüme frei.'):'Höchstes Tier erreicht — alle Kostüme frei 🎉';
+    if(p.is_student_verified){ $('verifyCh').textContent='Verifiziert ✓'; $('verifyCh').style.color='var(--green)'; }
+
+    // Stats: eingeloeste Coupons + geworbene Freunde
+    try{ var c=await sb.from('coupon_redemptions').select('id',{count:'exact',head:true}); $('sCoupons').textContent=(c.count||0); }catch(e){}
+    try{ var f=await sb.from('coin_transactions').select('id',{count:'exact',head:true}).eq('reason','referral'); $('sFriends').textContent=(f.count||0); }catch(e){}
+
+    // Freunde einladen -> Code holen + teilen
+    $('inviteRow') && $('inviteRow').addEventListener('click',async function(){
+      try{
+        var rr=await sb.rpc('ensure_referral_code'); var code=rr.data&&rr.data.code; if(!code)return;
+        var link='https://unigoat.de/register?ref='+code;
+        if(navigator.share){ navigator.share({title:'UniGoat',text:'Komm auf UniGoat — Studentenrabatte, Games & G-Coins! 🐐',url:link}).catch(function(){}); }
+        else { try{navigator.clipboard.writeText(link);}catch(e){} var ic=$('inviteCh'); if(ic)ic.textContent='Link kopiert ✓'; }
+      }catch(e){}
+    });
+  }
+  $('logoutRow').addEventListener('click',async function(e){ e.preventDefault(); try{ localStorage.removeItem('ug_saved_email'); await sb.auth.signOut(); }catch(e){} location.href='login.html'; });
+  // Visitenkarte oeffnen/schliessen
+  var _cr=$('cardRow'); if(_cr) _cr.addEventListener('click',openMyCard);
+  var _fr=$('freezeRow'); if(_fr) _fr.addEventListener('click',function(){ location.href='game/index.html'; });
+  var _vk=$('vkbg'); if(_vk) _vk.addEventListener('click',function(e){ if(e.target===this||e.target.classList.contains('close')) this.classList.remove('show'); });
+  load();
+})();
+</script>
+</body>
+</html>

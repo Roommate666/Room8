@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="de" data-page="feedback">
+<head>
+<script src="sentry-init.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Feedback — UniGoat</title>
+<meta name="description" content="Sag uns, was in der UniGoat-App hakt oder besser sein könnte. Probleme melden und Verbesserungsvorschläge geben.">
+<link rel="stylesheet" href="unigoat-v2.css">
+<style>
+  :root{
+    --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+    --w4:var(--text-muted); --line:var(--color-divider);
+    --green:var(--color-accent); --fh:var(--font-heading); --fb:var(--font-body);
+  }
+  .icn{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; display:block; }
+  .masthead-sm{ font-size:54px; }
+  main{ padding-bottom:30px; }
+
+  .fb-poster{ background:var(--color-accent); color:var(--on-accent); padding:22px 20px 18px; }
+  .fb-poster .kicker{ color:var(--on-accent); opacity:.9; }
+  .fb-poster h2{ font-family:var(--font-heading); font-weight:800; font-size:23px; margin:8px 0 0; line-height:1.15; letter-spacing:-.02em; }
+  .fb-poster p{ margin:8px 0 0; font-size:14px; line-height:1.5; max-width:36ch; }
+
+  .fb-wrap{ padding:18px 20px 0; }
+  .fb-label{ font-family:var(--font-heading); font-weight:800; font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); margin:0 0 8px; }
+  .fb-types{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:18px; }
+  .fb-type{ display:flex; flex-direction:column; align-items:center; gap:5px; padding:12px 6px; border:2px solid var(--color-divider); background:var(--color-bg); font-family:var(--font-heading); font-weight:800; font-size:12px; color:var(--color-text); cursor:pointer; text-align:center; }
+  .fb-type .em{ font-size:22px; line-height:1; }
+  .fb-type.on{ border-color:var(--color-accent); background:var(--color-accent-100); color:var(--color-accent-800); }
+  textarea#msg{ width:100%; min-height:150px; resize:vertical; padding:14px; border:2px solid var(--color-divider); background:var(--color-bg); font-family:var(--font-body); font-size:15px; color:var(--color-text); box-sizing:border-box; }
+  textarea#msg:focus{ outline:none; border-color:var(--color-accent); }
+  .fb-count{ text-align:right; font-size:12px; color:var(--text-muted); margin-top:4px; }
+  .fb-msg{ font-size:13px; margin:10px 0 0; min-height:18px; }
+  .fb-msg.err{ color:#C43A22; font-weight:700; }
+  #submitBtn{ margin-top:16px; }
+  #submitBtn[disabled]{ opacity:.55; }
+
+  .fb-success{ display:none; text-align:center; padding:40px 24px; }
+  .fb-success .ok{ width:76px; height:76px; margin:0 auto 18px; border-radius:50%; background:var(--color-accent); display:grid; place-items:center; }
+  .fb-success .ok svg{ width:40px; height:40px; stroke:var(--on-accent); fill:none; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
+  .fb-success h3{ font-family:var(--font-heading); font-weight:800; font-size:22px; margin:0 0 8px; }
+  .fb-success p{ color:var(--text-muted); font-size:14px; line-height:1.5; max-width:32ch; margin:0 auto 20px; }
+
+  footer{ text-align:center; color:var(--text-muted); font-size:12px; padding:26px 20px 30px; border-top:var(--rule); }
+</style>
+<link rel="icon" type="image/x-icon" href="favicon.ico?v133">
+</head>
+<body>
+<div class="screen">
+  <div class="screen-body">
+    <div class="topbar" style="padding-top:14px">
+      <a class="btn btn-icon backbtn" href="profile.html" style="margin-left:8px" aria-label="Zurück"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--color-text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M15 18l-6-6 6-6"/></svg></a>
+      <div class="masthead masthead-sm" style="padding:0 8px 0 2px">Feedback</div>
+      <span style="width:40px"></span>
+    </div>
+    <div class="dateline"><span>Deine Stimme</span><span>UniGoat</span><span>Wir lesen alles</span></div>
+    <div class="hr"></div>
+
+    <main>
+      <section class="fb-poster">
+        <div class="kicker">Hilf mit</div>
+        <h2>Was hakt — oder was wünschst du dir?</h2>
+        <p>Ob Bug, Idee oder Kritik: Sag es uns direkt. Wir lesen jedes Feedback und bauen die App damit besser.</p>
+      </section>
+
+      <div class="fb-wrap" id="formWrap">
+        <div class="fb-label">Worum geht's?</div>
+        <div class="fb-types" id="types">
+          <div class="fb-type on" data-type="problem"><span class="em">🐞</span>Problem / Bug</div>
+          <div class="fb-type" data-type="vorschlag"><span class="em">💡</span>Vorschlag</div>
+          <div class="fb-type" data-type="sonstiges"><span class="em">💬</span>Sonstiges</div>
+        </div>
+
+        <div class="fb-label">Deine Nachricht</div>
+        <textarea id="msg" maxlength="4000" placeholder="Beschreib kurz, was passiert ist oder was besser sein könnte. Je konkreter, desto schneller können wir helfen."></textarea>
+        <div class="fb-count"><span id="count">0</span> / 4000</div>
+
+        <div class="fb-msg" id="hint"></div>
+        <button class="btn btn-primary btn-block" id="submitBtn">Feedback absenden</button>
+      </div>
+
+      <div class="fb-success" id="success">
+        <div class="ok"><svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg></div>
+        <h3>Danke! 🐐</h3>
+        <p>Dein Feedback ist bei uns gelandet. Wir schauen es uns an.</p>
+        <a class="btn btn-primary btn-block" href="profile.html">Zurück zum Profil</a>
+      </div>
+    </main>
+
+    <footer><p>UniGoat · von Studenten für Studenten</p></footer>
+  </div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var selType='problem';
+
+  $('types').addEventListener('click', function(e){
+    var el=e.target.closest('.fb-type'); if(!el) return;
+    [].forEach.call(document.querySelectorAll('.fb-type'), function(t){ t.classList.remove('on'); });
+    el.classList.add('on'); selType=el.getAttribute('data-type');
+  });
+
+  $('msg').addEventListener('input', function(){ $('count').textContent=this.value.length; });
+
+  function setHint(txt, isErr){ var h=$('hint'); h.textContent=txt||''; h.className='fb-msg'+(isErr?' err':''); }
+
+  async function submit(){
+    var msg=$('msg').value.trim();
+    if(msg.length<3){ setHint('Bitte schreib noch ein paar Worte mehr.', true); return; }
+    if(!window.sb){ setHint('Verbindung wird aufgebaut, bitte kurz warten…', true); return; }
+    $('submitBtn').disabled=true; setHint('Wird gesendet…', false);
+    var ctx=(document.referrer||'')+' | '+(navigator.userAgent||'').slice(0,140);
+    try{
+      var r=await sb.rpc('submit_feedback', { p_type:selType, p_message:msg, p_context:ctx });
+      if(r.error) throw r.error;
+      var d=r.data||{};
+      if(d.ok){
+        $('formWrap').style.display='none';
+        $('success').style.display='block';
+        return;
+      }
+      var map={ NOT_AUTHENTICATED:'Bitte melde dich zuerst an, dann können wir dein Feedback zuordnen.',
+                TOO_SHORT:'Bitte schreib noch ein paar Worte mehr.',
+                RATE_LIMITED:'Du hast gerade viel gesendet — bitte in ein paar Minuten nochmal.' };
+      setHint(map[d.error]||('Konnte nicht gesendet werden ('+(d.error||'Fehler')+').'), true);
+    }catch(e){
+      setHint('Konnte nicht gesendet werden. Bitte später nochmal versuchen.', true);
+    }finally{
+      $('submitBtn').disabled=false;
+    }
+  }
+  $('submitBtn').addEventListener('click', submit);
+})();
+</script>
+</body>
+</html>

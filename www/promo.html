@@ -3,28 +3,48 @@
 <head>
 <script src="sentry-init.js"></script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Bonus einlösen — UniGoat</title>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#E9F1EE">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700..900;1,9..144,700..900&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  *{margin:0;box-sizing:border-box}
-  body{font-family:'Sora',system-ui,sans-serif;background:#0a0a0b;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
-  .card{max-width:420px;width:100%;text-align:center;}
-  .goat{width:88px;height:88px;filter:invert(1);}
-  h1{font-family:'Fraunces',serif;font-size:2rem;margin:14px 0 6px;}
-  .coins{font-family:'Fraunces',serif;font-size:3.4rem;color:#12B489;line-height:1;margin:18px 0 6px;}
-  p{color:rgba(255,255,255,.72);line-height:1.55;font-size:1rem;}
-  .btn{display:block;width:100%;background:#12B489;color:#04231a;font-weight:800;text-decoration:none;padding:16px;border-radius:14px;margin-top:22px;font-size:1.05rem;border:none;cursor:pointer;}
-  .btn.ghost{background:transparent;color:#12B489;border:1.5px solid #12B489;}
-  .spin{margin:30px auto;width:34px;height:34px;border:4px solid rgba(255,255,255,.2);border-top-color:#12B489;border-radius:50%;animation:s 1s linear infinite;}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Sora',system-ui,sans-serif;background:#E9F1EE;color:#0E3B30;min-height:100vh;
+    display:flex;align-items:center;justify-content:center;padding:18px;-webkit-font-smoothing:antialiased;}
+  .card{width:100%;max-width:440px;background:#fff;border-radius:28px;padding:30px 28px 28px;
+    box-shadow:0 20px 50px rgba(14,59,48,.10);position:relative;overflow:hidden;}
+  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+  .brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px;letter-spacing:.06em;color:#0E3B30;}
+  .brand img{width:26px;height:26px;}
+  .chip{border:1.5px solid #12B489;color:#12B489;font-weight:800;font-size:11px;letter-spacing:.1em;
+    padding:5px 11px;border-radius:999px;text-transform:uppercase;}
+  .kick{color:#12B489;font-weight:800;font-size:14px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:2px;}
+  .num{font-family:'Fraunces',serif;font-weight:900;font-size:108px;line-height:.86;color:#0E3B30;letter-spacing:-.02em;}
+  .num .plus{font-size:64px;vertical-align:top;}
+  .gc{font-family:'Fraunces',serif;font-weight:900;font-size:38px;line-height:1;color:#0E3B30;margin-top:2px;}
+  .gc em{font-style:italic;color:#12B489;}
+  .lead{color:#5c7a70;font-size:15.5px;line-height:1.5;margin-top:14px;font-weight:500;max-width:330px;}
+  .goat{display:block;width:210px;margin:6px auto -4px;}
+  .cubes{position:absolute;right:16px;bottom:150px;width:70px;height:70px;opacity:.9;pointer-events:none;}
+  .cube{position:absolute;width:30px;height:30px;border-radius:5px;transform:rotate(45deg);
+    background:linear-gradient(135deg,#21D0A1,#0E9E77);box-shadow:inset 0 2px 3px rgba(255,255,255,.4);}
+  .cube.c2{right:0;top:22px;background:linear-gradient(135deg,#8BEED0,#12B489);width:24px;height:24px;}
+  .cta{display:block;width:100%;background:#E8604C;color:#fff;font-weight:800;font-size:17px;text-decoration:none;
+    text-align:center;padding:17px;border-radius:15px;margin-top:22px;box-shadow:0 10px 22px rgba(232,96,76,.30);border:none;cursor:pointer;}
+  .cta:active{transform:translateY(1px);}
+  .ghost{display:block;width:100%;background:transparent;color:#0E3B30;border:1.6px solid #0E3B30;font-weight:800;
+    font-size:15px;text-align:center;padding:14px;border-radius:15px;margin-top:11px;text-decoration:none;}
+  .proof{text-align:center;font-size:12.5px;color:#7a9389;font-weight:600;margin-top:18px;line-height:1.5;}
+  .proof b{color:#0E3B30;}
+  .spin{margin:60px auto;width:36px;height:36px;border:4px solid #d6e8e1;border-top-color:#12B489;border-radius:50%;animation:s 1s linear infinite;}
   @keyframes s{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 <div class="card" id="card">
-  <img class="goat" src="favicon-192x192.png?v133" alt="">
   <div class="spin" id="spin"></div>
   <div id="content" style="display:none;"></div>
 </div>
@@ -35,35 +55,79 @@
 (function(){
   "use strict";
   var $=function(id){return document.getElementById(id);};
-  var code=(new URLSearchParams(location.search)).get('code')||'';
-  code=code.trim();
+  var code=((new URLSearchParams(location.search)).get('code')||'').trim();
+
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   function show(html){ $('spin').style.display='none'; var el=$('content'); el.innerHTML=html; el.style.display='block'; }
 
+  var cubes='<div class="cubes"><div class="cube"></div><div class="cube c2"></div></div>';
+  var proof='<div class="proof">🌍 Von Studenten für Studenten<br><b>14+ Partner in Ulm &amp; Neu-Ulm</b></div>';
+
+  // Bonus-Screen (nicht eingeloggt): grosse Zahl + Register/Login
+  function renderSignup(coins, chip){
+    show(
+      '<div class="top"><span class="brand"><img src="logo-goat.png?v90" alt="">UNIGOAT.DE</span>'+
+      (chip?'<span class="chip">'+esc(chip)+'</span>':'')+'</div>'+
+      cubes+
+      '<div class="kick">Willkommensbonus</div>'+
+      '<div class="num"><span class="plus">+</span>'+ (coins||500) +'</div>'+
+      '<div class="gc">G-Coins <em>geschenkt.</em></div>'+
+      '<div class="lead">Registrier dich kostenlos mit deiner Uni-Mail – der Bonus ist sofort da.</div>'+
+      '<img class="goat" src="goat-welcome.png" alt="">'+
+      '<a class="cta" href="register.html">Kostenlos registrieren</a>'+
+      '<a class="ghost" href="login.html">Ich habe schon einen Account</a>'+
+      proof
+    );
+  }
+  // Erfolg (eingeloggt, eingeloest)
+  function renderSuccess(coins, label){
+    show(
+      '<div class="top"><span class="brand"><img src="logo-goat.png?v90" alt="">UNIGOAT.DE</span><span class="chip">Eingelöst</span></div>'+
+      cubes+
+      '<div class="kick">Gutgeschrieben 🎉</div>'+
+      '<div class="num"><span class="plus">+</span>'+ (coins||0) +'</div>'+
+      '<div class="gc">G-Coins <em>für dich.</em></div>'+
+      '<div class="lead">'+esc(label||'Dein Bonus')+' ist deinem Konto gutgeschrieben. Sammle weiter und gewinn jeden Monat echte Preise.</div>'+
+      '<img class="goat" src="goat-welcome.png" alt="">'+
+      '<a class="cta" href="coupons.html">Los geht’s</a>'+
+      proof
+    );
+  }
+  function renderInfo(titleKick, big, lead, btnText, btnHref){
+    show(
+      '<div class="top"><span class="brand"><img src="logo-goat.png?v90" alt="">UNIGOAT.DE</span></div>'+
+      '<div class="kick">'+esc(titleKick)+'</div>'+
+      '<div class="gc" style="font-size:30px;margin-top:8px;">'+esc(big)+'</div>'+
+      '<div class="lead">'+esc(lead)+'</div>'+
+      '<a class="cta" href="'+btnHref+'">'+esc(btnText)+'</a>'+ proof
+    );
+  }
+
   async function run(){
-    if(!code){ show('<h1>Kein Code</h1><p>Dieser Link enthält keinen Bonus-Code.</p><a class="btn" href="coupons.html">Zu UniGoat</a>'); return; }
+    if(!code){ renderInfo('Kein Code','Dieser Link enthält keinen Bonus.','Öffne UniGoat direkt und sichere dir trotzdem deinen Start-Bonus.','Zu UniGoat','coupons.html'); return; }
     if(!window.sb){ setTimeout(run,200); return; }
+
+    // Betrag vorab laden (promo_codes ist fuer anon lesbar) -> Hook schon vor Login zeigen
+    var coins=500, label='Willkommensbonus';
+    try{
+      var pc=await sb.from('promo_codes').select('coins,label,active').eq('code',code).maybeSingle();
+      if(pc&&pc.data){ coins=pc.data.coins||coins; label=pc.data.label||label; }
+    }catch(e){}
+
     var user=null; try{ user=(await sb.auth.getUser()).data.user; }catch(e){}
     if(!user){
-      // Nicht eingeloggt -> Code merken, zum Registrieren; nach Signup schreibt der Hub den Bonus gut.
       try{ localStorage.setItem('ug_promo_pending', code); }catch(e){}
-      show('<h1>Fast geschafft! 🐐</h1><p>Registrier dich kostenlos mit deiner Uni-Mail — dein Bonus wird dir dann sofort gutgeschrieben.</p><a class="btn" href="register.html">Kostenlos registrieren</a><a class="btn ghost" href="login.html">Ich habe schon einen Account</a>');
+      renderSignup(coins, code);
       return;
     }
-    // Eingeloggt -> direkt einloesen
+    // eingeloggt -> direkt einloesen
     try{
-      var r=await sb.rpc('redeem_promo',{p_code:code});
-      var d=r.data||{};
-      if(d.ok){
-        try{ localStorage.removeItem('ug_promo_pending'); }catch(e){}
-        show('<div class="coins">+'+(d.coins||0)+'</div><h1>G-Coins! 🎉</h1><p>'+(d.label||'Bonus')+' ist deinem Konto gutgeschrieben. Sammle weiter und gewinn jeden Monat echte Preise.</p><a class="btn" href="coupons.html">Los geht\'s</a>');
-      } else if(d.error==='already_redeemed'){
-        show('<h1>Schon eingelöst ✓</h1><p>Diesen Bonus hast du bereits erhalten. Spiel weiter und sammle G-Coins!</p><a class="btn" href="game/index.html">Zum Spiel</a>');
-      } else if(d.error==='expired'||d.error==='inactive'){
-        show('<h1>Aktion beendet</h1><p>Dieser Bonus-Code ist leider nicht mehr gültig.</p><a class="btn" href="coupons.html">Zu UniGoat</a>');
-      } else {
-        show('<h1>Code ungültig</h1><p>Dieser Bonus-Code wurde nicht erkannt.</p><a class="btn" href="coupons.html">Zu UniGoat</a>');
-      }
-    }catch(e){ show('<h1>Hoppla</h1><p>Konnte gerade nicht einlösen. Versuch es gleich nochmal.</p><a class="btn" href="promo.html?code='+encodeURIComponent(code)+'">Nochmal</a>'); }
+      var r=await sb.rpc('redeem_promo',{p_code:code}); var d=r.data||{};
+      if(d.ok){ try{ localStorage.removeItem('ug_promo_pending'); }catch(e){} renderSuccess(d.coins||coins, d.label||label); }
+      else if(d.error==='already_redeemed'){ renderInfo('Schon eingelöst ✓','Bonus bereits erhalten','Diesen Bonus hast du schon. Spiel weiter und sammle G-Coins!','Zum Spiel','game/index.html'); }
+      else if(d.error==='expired'||d.error==='inactive'){ renderInfo('Aktion beendet','Code nicht mehr gültig','Dieser Bonus-Code ist leider abgelaufen.','Zu UniGoat','coupons.html'); }
+      else { renderInfo('Code ungültig','Nicht erkannt','Dieser Bonus-Code wurde nicht erkannt.','Zu UniGoat','coupons.html'); }
+    }catch(e){ renderInfo('Hoppla','Kurz schiefgelaufen','Konnte gerade nicht einlösen. Versuch es gleich nochmal.','Nochmal','promo.html?code='+encodeURIComponent(code)); }
   }
   run();
 })();

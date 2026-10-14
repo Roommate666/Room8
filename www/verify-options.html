@@ -4,86 +4,96 @@
 <script src="sentry-init.js"></script>
 <script src="features.js"></script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Verifizierung — UniGoat</title>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="unigoat.css">
+<link rel="stylesheet" href="unigoat-v2.css">
 <style>
-  .backbtn{background:none;border:none;cursor:pointer;display:flex;align-items:center;}
-  .vintro{background:linear-gradient(135deg,#12B489,#0e9e79);color:#fff;border-radius:18px;padding:18px;margin:8px 0 16px;}
-  .vintro h2{font-family:'Fraunces',serif;margin:0 0 6px;font-size:1.3rem;}
-  .vintro p{margin:0;opacity:.95;font-size:.9rem;line-height:1.5;}
-  .vsteps{display:flex;gap:8px;margin-top:14px;}
-  .vstep{flex:1;background:rgba(255,255,255,.16);border-radius:12px;padding:9px 6px;text-align:center;font-size:.72rem;font-weight:600;line-height:1.35;}
-  .vstep b{display:block;font-size:1.1rem;}
-  .vcard{background:var(--card,#fff);border-radius:18px;padding:18px;box-shadow:0 2px 14px rgba(0,0,0,.05);margin:12px 0;}
-  .vlabel{font-weight:700;margin:0 0 8px;font-size:.95rem;}
-  .verify-form input{width:100%;box-sizing:border-box;padding:14px;border:1px solid #d7e0de;border-radius:12px;font-size:1rem;margin-bottom:10px;background:#fff;}
-  .verify-form input:focus{outline:none;border-color:#12B489;}
-  .submit-btn{width:100%;background:#12B489;color:#04231a;border:none;border-radius:12px;padding:14px;font-weight:800;font-size:1rem;cursor:pointer;}
-  .submit-btn:disabled{opacity:.6;cursor:default;}
-  .vhint{font-size:.78rem;color:var(--mut,#6b7a77);margin-top:12px;line-height:1.5;}
-  #success-view{display:none;text-align:center;padding:24px 6px;}
-  #success-view h2{font-family:'Fraunces',serif;font-size:1.5rem;margin:12px 0;}
-  #success-view p{color:var(--mut,#6b7a77);line-height:1.6;}
-  #success-view .submit-btn{margin-top:10px;}
+  :root{ --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface); --mut:var(--text-muted);
+    --w4:var(--text-muted); --line:var(--color-divider); --green:var(--color-accent); --fh:var(--font-heading); }
+  .tab .icn{ width:20px; height:20px; margin-bottom:2px; stroke:currentColor; fill:none; stroke-width:2; }
+  main{ padding-bottom:8px; }
+
+  /* Intro als Poster (der eine Mint-Moment) */
+  .vintro{ background:var(--color-accent); color:var(--on-accent); padding:22px 20px 18px; }
+  .vintro h2{ font-family:var(--font-heading); font-weight:800; font-size:24px; margin:10px 0 0; line-height:1.1; letter-spacing:-.02em; }
+  .vintro p{ margin:10px 0 0; font-size:14px; line-height:1.5; max-width:34ch; }
+  .vsteps{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:1px; margin-top:16px; background:color-mix(in srgb,var(--on-accent) 22%,transparent); border:1px solid color-mix(in srgb,var(--on-accent) 22%,transparent); }
+  .vstep{ background:var(--color-accent); padding:10px 6px; text-align:center; font-family:var(--font-heading); font-weight:800; font-size:11px; line-height:1.35; }
+  .vstep b{ display:block; font-size:20px; }
+
+  /* Karte + Formular */
+  .vcard{ border-bottom:var(--rule); padding:4px 20px 18px; }
+  .verify-form{ margin-top:10px; }
+  .verify-form .input{ margin-bottom:10px; }
+  .vhint{ font-size:12px; color:var(--text-muted); margin-top:12px; line-height:1.5; }
+  .btn-red{ color:#C43A22; border:1px solid #E3A99B; background:transparent; }
+
+  #success-view{ display:none; text-align:center; padding:34px 20px; }
+  #success-view .succ-mark{ width:64px; height:64px; margin:0 auto 16px; background:var(--color-accent); color:var(--on-accent); display:grid; place-items:center; }
+  #success-view .succ-mark svg{ width:34px; height:34px; stroke:var(--on-accent); fill:none; stroke-width:2.5; }
+  #success-view h2{ font-family:var(--font-heading); font-weight:800; font-size:26px; margin:6px 0 10px; letter-spacing:-.02em; }
+  #success-view p{ color:var(--text-muted); line-height:1.6; max-width:32ch; margin:0 auto; }
+  #success-view .btn{ margin-top:12px; }
 </style>
 </head>
-<body class="ug">
-<div class="ug-app">
-  <div class="ug-hd">
-    <a class="backbtn" href="profile.html" aria-label="Zurück"><svg class="li" viewBox="0 0 24 24" style="width:24px;height:24px;stroke:var(--ink);fill:none;stroke-width:1.8"><path d="M15 18l-6-6 6-6"/></svg></a>
-    <div class="brand"><b>Verifizierung</b></div>
-    <span style="width:24px"></span>
+<body>
+<div class="screen">
+  <div class="screen-body">
+    <div class="topbar" style="padding-top:14px">
+      <a class="btn btn-icon backbtn" href="profile.html" style="margin-left:8px" aria-label="Zurück"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--color-text);fill:none;stroke-width:2"><path d="M15 18l-6-6 6-6"/></svg></a>
+      <div class="masthead" style="font-size:30px;padding:0 8px 0 2px">Verifizierung</div>
+      <span style="width:40px"></span>
+    </div>
+    <div class="hr"></div>
+
+    <main>
+      <section class="vintro">
+        <div class="kicker" style="color:var(--on-accent);opacity:.9">Studenten-Status</div>
+        <h2>Bestätige, dass du studierst.</h2>
+        <p>Verifizierte Studenten schalten alle Coupons &amp; Deals frei. Läuft komplett über deine Uni-Mail — einmal einen Code bestätigen, fertig.</p>
+        <div class="vsteps">
+          <div class="vstep"><b>1</b>Uni-Mail eingeben</div>
+          <div class="vstep"><b>2</b>Code aus Mail</div>
+          <div class="vstep"><b>3</b>Sofort verifiziert</div>
+        </div>
+      </section>
+
+      <div id="selection-view">
+        <div class="kicker" style="padding:18px 20px 6px">Deine Uni-E-Mail</div>
+        <div class="vcard option-card" id="card-email" onclick="toggleOption('email')">
+          <form id="emailForm" class="verify-form" onclick="event.stopPropagation();">
+            <input class="input" type="email" id="uniEmail" placeholder="max.muster@stud.uni-ulm.de" required>
+            <button type="submit" class="btn btn-primary btn-block" id="btnEmail">Code anfordern <span>→</span></button>
+          </form>
+          <form id="codeForm" class="verify-form" style="display:none;" onclick="event.stopPropagation();">
+            <input class="input" type="text" id="uniCode" inputmode="numeric" maxlength="6" placeholder="6-stelliger Code" autocomplete="one-time-code">
+            <button type="submit" class="btn btn-primary btn-block" id="btnCode">Bestätigen</button>
+            <button type="button" class="btn btn-secondary btn-block" id="btnResend" style="margin-top:.6rem;">Code erneut senden</button>
+          </form>
+          <div class="vhint">Nur offizielle Hochschul-Adressen (z. B. <b>@uni-ulm.de</b>, <b>@stud.hs-*.de</b>) werden akzeptiert. Kein Gmail/GMX. Code nicht da? Schau im Spam-Ordner.</div>
+        </div>
+      </div>
+
+      <div id="success-view">
+        <div class="succ-mark"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+        <h2>Einreichung erfolgreich!</h2>
+        <p>Alles klar — dein Status wird bestätigt.</p>
+        <button onclick="navigateTo('profile.html')" class="btn btn-primary btn-block">Zurück zum Profil</button>
+        <button onclick="retryVerification()" class="btn btn-secondary btn-block">Erneut verifizieren</button>
+        <button onclick="resetVerification()" class="btn btn-block btn-red">Verifizierung zurücksetzen</button>
+      </div>
+    </main>
   </div>
 
-  <main>
-    <div class="vintro">
-      <h2>Bestätige deinen Studenten-Status 🎓</h2>
-      <p>Als verifizierter Student schaltest du alle Coupons, Deals und Events frei. Läuft komplett über deine Uni-Mail — einmal einen Code bestätigen, fertig.</p>
-      <div class="vsteps">
-        <div class="vstep"><b>1</b>Uni-Mail eingeben</div>
-        <div class="vstep"><b>2</b>Code aus Mail</div>
-        <div class="vstep"><b>3</b>Sofort verifiziert</div>
-      </div>
-    </div>
-
-    <div id="selection-view">
-      <div class="vcard option-card" id="card-email" onclick="toggleOption('email')">
-        <div class="vlabel">📧 Deine Uni-E-Mail</div>
-        <form id="emailForm" class="verify-form" onclick="event.stopPropagation();">
-          <input type="email" id="uniEmail" placeholder="max.muster@stud.uni-ulm.de" required>
-          <button type="submit" class="submit-btn" id="btnEmail">Code anfordern</button>
-        </form>
-        <form id="codeForm" class="verify-form" style="display:none;" onclick="event.stopPropagation();">
-          <input type="text" id="uniCode" inputmode="numeric" maxlength="6" placeholder="6-stelliger Code" autocomplete="one-time-code">
-          <button type="submit" class="submit-btn" id="btnCode">Bestätigen</button>
-          <button type="button" class="submit-btn" id="btnResend" style="margin-top:.6rem;background:transparent;color:#12B489;border:1px solid #12B489;">Code erneut senden</button>
-        </form>
-        <div class="vhint">Nur offizielle Hochschul-Adressen (z. B. <b>@uni-ulm.de</b>, <b>@stud.hs-*.de</b>) werden akzeptiert. Kein Gmail/GMX. Code nicht da? Schau im Spam-Ordner.</div>
-      </div>
-    </div>
-
-    <div id="success-view">
-      <div style="font-size:3rem;">🎉</div>
-      <h2>Einreichung erfolgreich!</h2>
-      <p>Alles klar — dein Status wird bestätigt.</p>
-      <button onclick="navigateTo('profile.html')" class="submit-btn">Zurück zum Profil</button>
-      <button onclick="retryVerification()" class="submit-btn" style="background:transparent;color:#12B489;border:1px solid #12B489;">Erneut verifizieren</button>
-      <button onclick="resetVerification()" class="submit-btn" style="background:transparent;color:#b91c1c;border:1px solid #f3c2c2;">Verifizierung zurücksetzen</button>
-    </div>
-  </main>
+  <nav class="tabbar">
+    <a class="tab" href="dashboard.html"><svg class="icn" viewBox="0 0 24 24"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1Z"/></svg>Hub</a>
+    <a class="tab" href="coupons.html"><svg class="icn" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="0"/><path d="M3 10h18"/></svg>Coupons</a>
+    <a class="tab" href="game/index.html"><svg class="icn" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="0"/><path d="M8 12h3M9.5 10.5v3M15 11h.01M17 13h.01"/></svg>Game</a>
+    <a class="tab" href="challenge.html"><svg class="icn" viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>Rang</a>
+    <a class="tab" href="profile.html"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>Profil</a>
+  </nav>
 </div>
-
-<nav class="ugnav">
-  <a href="dashboard.html"><svg viewBox="0 0 24 24"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1Z"/></svg>Hub</a>
-  <a href="coupons.html"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>Coupons</a>
-  <a href="game/index.html"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="3"/><path d="M8 12h3M9.5 10.5v3M15 11h.01M17 13h.01"/></svg>Game</a>
-  <a href="challenge.html"><svg viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>Rang</a>
-  <a href="profile.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>Profil</a>
-</nav>
 
 <script src="lib/supabase.min.js"></script>
 <script src="config.js"></script>
@@ -190,9 +200,11 @@
             if (error) throw error;
             if (!data || !data.ok) {
                 var m = data && data.error;
+                var mins = (data && data.retry_after_sec) ? Math.max(1, Math.ceil(data.retry_after_sec/60)) : 10;
                 Room8UI.error(m==='NOT_UNI_EMAIL' ? 'Bitte nutze deine offizielle Uni-E-Mail.'
                     : m==='EMAIL_IN_USE' ? 'Diese Uni-Mail ist bereits mit einem anderen Konto verifiziert.'
                     : m==='INVALID_EMAIL' ? 'Bitte gib eine gültige E-Mail ein.'
+                    : m==='RATE_LIMITED' ? ('Zu viele Code-Anfragen. Bitte warte ca. '+mins+' Min und versuch es erneut — schau solange in dein Postfach (auch Spam).')
                     : 'Konnte den Code nicht senden. Versuch es nochmal.');
                 btn.disabled = false; btn.textContent = "Code anfordern"; return;
             }

@@ -1,5 +1,5 @@
 // Guest-Interest Edge Function: ein eingeloggter Student zeigt Interesse an einem
-// Gast-Inserat (owner = Room8-Gast-Account). Wir finden die Vermieter-Kontaktmail
+// Gast-Inserat (owner = UniGoat-Gast-Account). Wir finden die Vermieter-Kontaktmail
 // server-seitig ueber guest_listings (via created_listing_id) und schicken eine
 // Benachrichtigung. Der Student sieht die Vermieter-Mail NIE (Datenschutz).
 //
@@ -61,7 +61,7 @@ Deno.serve(async (req: Request) => {
     const html =
       `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">` +
       `<h2 style="color:#4F46E5;">Jemand interessiert sich für deine Wohnung!</h2>` +
-      `<p>Ein Student hat über Room8 Interesse an deinem Inserat <strong>${esc(gl.title)}</strong> gezeigt.</p>` +
+      `<p>Ein Student hat über UniGoat Interesse an deinem Inserat <strong>${esc(gl.title)}</strong> gezeigt.</p>` +
       `<div style="background:#F3F4F6;padding:16px;border-radius:10px;margin:16px 0;">` +
       `<p><strong>Name:</strong> ${esc(name) || '-'}</p>` +
       `<p><strong>Kontakt:</strong> ${esc(contact)}</p>` +
@@ -74,9 +74,9 @@ Deno.serve(async (req: Request) => {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'UniGoat <noreply@room8.club>',
+        from: 'UniGoat <noreply@unigoat.de>',
         to: [gl.contact_email],
-        subject: 'Interesse an deiner Wohnung auf Room8',
+        subject: 'Interesse an deiner Wohnung auf UniGoat',
         html,
         text: `Ein Student interessiert sich für "${gl.title}". Name: ${name}. Kontakt: ${contact}. Nachricht: ${message}`,
         headers: { 'List-Unsubscribe': '<mailto:info@unigoat.de?subject=unsubscribe>' },

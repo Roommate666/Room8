@@ -22,6 +22,51 @@ function htmlToText(html: string): string {
     .replace(/[ \t]+/g, ' ').replace(/(\s*\n\s*){2,}/g, '\n\n').trim()
 }
 
+// UniGoat v2-Mail-Rahmen (Editorial: Archivo, eckig, 2px-Tinte, Mint-Akzent) —
+// identisch zum Wrapper in send-email, damit alle Mails gleich aussehen.
+function v2Mail(headline: string, bodyHtml: string, cta?: { text: string, url: string }): string {
+  const ctaHtml = cta
+    ? `<div style="margin:30px 0;"><a href="${cta.url}" style="display:inline-block;padding:14px 28px;background:#12B489;color:#201e1d;text-decoration:none;font-weight:800;font-size:15px;font-family:'Archivo',sans-serif;border-radius:0;">${cta.text}</a></div>`
+    : ''
+  return `<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;800&display=swap" rel="stylesheet"></head>
+<body style="margin:0;padding:0;background:#f3f2f2;font-family:'Archivo',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#201e1d;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f2f2;padding:24px 12px;"><tr><td align="center">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border:2px solid #201e1d;">
+    <tr><td style="padding:22px 24px 12px;">
+      <div style="font-size:38px;font-weight:800;letter-spacing:-1.6px;line-height:.9;color:#201e1d;">UniGoat</div>
+    </td></tr>
+    <tr><td style="border-top:2px solid #201e1d;border-bottom:2px solid #201e1d;padding:9px 24px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#201e1d;">Campus-Ausgabe</td>
+        <td align="right" style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#0B6B52;">unigoat.de</td>
+      </tr></table>
+    </td></tr>
+    <tr><td style="padding:26px 24px 8px;color:#201e1d;font-size:16px;line-height:1.6;">
+      <h1 style="font-size:22px;color:#201e1d;margin:0 0 14px;font-weight:800;letter-spacing:-0.4px;line-height:1.1;">${headline}</h1>
+      ${bodyHtml}
+      ${ctaHtml}
+    </td></tr>
+    <tr><td style="padding:18px 24px 26px;">
+      <div style="border-top:2px solid #201e1d;padding-top:16px;">
+        <div style="font-size:13px;color:#6f6a67;line-height:1.5;">UniGoat — Studentenrabatte, Coupons und der monatliche Goat-Wettkampf.</div>
+        <div style="font-size:12px;color:#8a8785;margin-top:12px;">Fragen? <a href="mailto:info@unigoat.de" style="color:#0B6B52;text-decoration:none;font-weight:800;">info@unigoat.de</a></div>
+      </div>
+    </td></tr>
+  </table>
+</td></tr></table>
+</body></html>`
+}
+
+// v2-Hinweisbox (Mint-Kante, eckig) fuer Feature-Listen o. Ae.
+function v2Note(title: string, items: string[]): string {
+  const lis = items.map((t) => `<li style="margin:7px 0;color:#201e1d;">${t}</li>`).join('')
+  return `<div style="border-left:4px solid #12B489;background:#E4FBF3;padding:16px 18px;margin:22px 0;">`
+    + `<div style="font-weight:800;font-size:14px;color:#201e1d;margin-bottom:6px;">${title}</div>`
+    + `<ul style="margin:6px 0 0;padding-left:18px;font-size:15px;line-height:1.5;">${lis}</ul></div>`
+}
+
 // CORS Headers
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -64,193 +109,85 @@ serve(async (req) => {
     }
 
     // Link-Injection-Schutz: nur room8.club-Links erlaubt (kein Phishing ueber unsere Domain).
-    if (data && data.verificationLink && !/^https:\/\/(www\.)?room8\.club\//.test(String(data.verificationLink))) {
+    if (data && data.verificationLink && !/^https:\/\/(www\.)?(unigoat\.de|room8\.club)\//.test(String(data.verificationLink))) {
       return new Response(JSON.stringify({ success: false, error: 'invalid_link' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // E-Mail Templates
+    // E-Mail Templates (alle im UniGoat-v2-Look ueber v2Mail())
     const templates = {
       'uni_email_verification': {
-        from: 'UniGoat Team <noreply@room8.club>',
-        subject: 'Bestätige deine Uni-E-Mail für Room8',
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <body style="font-family: Arial, sans-serif; padding: 20px; background: #f3f4f6;">
-            <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-              <div style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); padding: 40px; text-align: center;">
-                <div style="font-size: 3rem; margin-bottom: 15px;">&#127891;</div>
-                <h1 style="color: white; margin: 0; font-size: 2rem;">Uni-E-Mail bestätigen</h1>
-              </div>
-              <div style="padding: 40px 30px;">
-                <p style="color: #374151; line-height: 1.6; font-size: 16px;">Hi,</p>
-                <p style="color: #374151; line-height: 1.6; font-size: 16px;">Fast geschafft! Bestätige jetzt deine Uni-E-Mail-Adresse, um deine Room8-Verifizierung abzuschließen.</p>
-                <div style="text-align: center; margin: 30px 0;">
-                  <a href="${data.verificationLink}" style="display: inline-block; background: #3b82f6; color: white !important; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);">
-                    &#9989; E-Mail bestätigen
-                  </a>
-                </div>
-                <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
-                  Falls du diese Verifizierung nicht angefordert hast, kannst du diese E-Mail ignorieren.
-                </p>
-              </div>
-              <div style="background: #1f2937; color: #9ca3af; padding: 30px; text-align: center; font-size: 14px;">
-                <p style="margin: 0 0 10px 0;">&copy; 2025 Room8</p>
-                <p style="margin: 0;">Fragen? <a href="mailto:info@unigoat.de" style="color: #60a5fa; text-decoration: none;">info@unigoat.de</a></p>
-              </div>
-            </div>
-          </body>
-          </html>
-        `
+        from: 'UniGoat Team <noreply@unigoat.de>',
+        subject: 'Bestätige deine Uni-E-Mail für UniGoat',
+        html: v2Mail(
+          'Bestätige deine Uni-Mail',
+          `<p style="margin:0 0 12px;">Fast geschafft. Bestätige jetzt deine Uni-E-Mail-Adresse, um deine UniGoat-Verifizierung abzuschließen.</p>`
+          + `<p style="margin:16px 0 0;font-size:14px;color:#6f6a67;">Falls du diese Verifizierung nicht angefordert hast, kannst du diese E-Mail einfach ignorieren.</p>`,
+          { text: 'E-Mail bestätigen', url: data.verificationLink }
+        )
       },
-      
+
       'account_verified': {
-        from: 'UniGoat Team <noreply@room8.club>',
-        subject: 'Dein Konto wurde verifiziert!',
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <body style="font-family: Arial, sans-serif; padding: 20px; background: #f3f4f6;">
-            <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden;">
-              <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 50px 30px; text-align: center;">
-                <div style="font-size: 4rem; margin-bottom: 15px;">&#127881;</div>
-                <h1 style="color: white; margin: 0; font-size: 2.5rem;">Herzlichen Glückwunsch!</h1>
-              </div>
-              <div style="padding: 40px 30px;">
-                <p style="color: #374151; line-height: 1.6; font-size: 16px;">Hi ${escHtml(data.userName)},</p>
-                <p style="color: #374151; line-height: 1.6; font-size: 16px;"><strong>Dein Studenten-Status wurde verifiziert.</strong></p>
-                <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; margin: 25px 0; border-radius: 8px;">
-                  <h3 style="margin: 0 0 15px 0; color: #065f46;">Du hast jetzt vollen Zugriff auf:</h3>
-                  <ul style="margin: 10px 0; padding-left: 20px;">
-                    <li style="margin: 8px 0; color: #065f46;">Alle Inserate mit vollständigen Details</li>
-                    <li style="margin: 8px 0; color: #065f46;">Nachrichten an andere Nutzer senden</li>
-                    <li style="margin: 8px 0; color: #065f46;">Eigene Inserate erstellen</li>
-                  </ul>
-                </div>
-                <div style="text-align: center;">
-                  <a href="https://room8.club/wohnungen.html" style="display: inline-block; background: #10b981; color: white !important; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                    Jetzt losschauen
-                  </a>
-                </div>
-                <p style="margin-top: 30px; color: #374151;">
-                  Willkommen in der Room8 Community!<br>
-                  <strong>Dein Room8 Team</strong>
-                </p>
-              </div>
-              <div style="background: #1f2937; color: #9ca3af; padding: 30px; text-align: center; font-size: 14px;">
-                <p style="margin: 0;">&copy; 2025 Room8</p>
-              </div>
-            </div>
-          </body>
-          </html>
-        `
+        from: 'UniGoat Team <noreply@unigoat.de>',
+        subject: 'Du bist verifiziert — willkommen bei UniGoat!',
+        html: v2Mail(
+          'Du bist verifiziert!',
+          `<p style="margin:0 0 12px;">Hi ${escHtml(data.userName)}, dein Studenten-Status ist bestätigt.</p>`
+          + v2Note('Ab jetzt freigeschaltet:', [
+              'Alle Coupons &amp; Studenten-Deals einlösen',
+              'Am monatlichen Goat-Wettkampf um echte Preise teilnehmen',
+              'Freunde einladen und zum Duell herausfordern',
+            ])
+          + `<p style="margin:18px 0 0;">Willkommen bei UniGoat!<br><strong>Dein UniGoat Team</strong></p>`,
+          { text: 'Zu den Deals', url: 'https://unigoat.de/coupons.html' }
+        )
       },
 
       'verification_approved': {
-        from: 'UniGoat Team <noreply@room8.club>',
+        from: 'UniGoat Team <noreply@unigoat.de>',
         subject: 'Deine Verifizierung wurde bestätigt!',
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <body style="font-family: Arial, sans-serif; padding: 20px; background: #f3f4f6;">
-            <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-              <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px; text-align: center;">
-                <div style="font-size: 3rem; margin-bottom: 15px;">&#9989;</div>
-                <h1 style="color: white; margin: 0; font-size: 2rem;">Verifizierung bestätigt!</h1>
-              </div>
-              <div style="padding: 40px 30px;">
-                <p style="color: #374151; line-height: 1.6; font-size: 16px;">Hi,</p>
-                <p style="color: #374151; line-height: 1.6; font-size: 16px;">Dein Studenten-Status wurde erfolgreich verifiziert. Du hast jetzt vollen Zugriff auf alle Funktionen von Room8!</p>
-                <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; margin: 25px 0; border-radius: 8px;">
-                  <h3 style="margin: 0 0 15px 0; color: #065f46;">Du kannst jetzt:</h3>
-                  <ul style="margin: 10px 0; padding-left: 20px;">
-                    <li style="margin: 8px 0; color: #065f46;">Alle Inserate mit Details ansehen</li>
-                    <li style="margin: 8px 0; color: #065f46;">Nachrichten an andere Nutzer senden</li>
-                    <li style="margin: 8px 0; color: #065f46;">Eigene Inserate erstellen</li>
-                  </ul>
-                </div>
-                <div style="text-align: center; margin: 30px 0;">
-                  <a href="https://room8.club/wohnungen.html" style="display: inline-block; background: #10b981; color: white !important; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);">
-                    Jetzt losschauen
-                  </a>
-                </div>
-                <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
-                  Willkommen in der Room8 Community!<br>
-                  <strong>Dein Room8 Team</strong>
-                </p>
-              </div>
-              <div style="background: #1f2937; color: #9ca3af; padding: 30px; text-align: center; font-size: 14px;">
-                <p style="margin: 0 0 10px 0;">&copy; 2025 Room8</p>
-                <p style="margin: 0;">Fragen? <a href="mailto:info@unigoat.de" style="color: #60a5fa; text-decoration: none;">info@unigoat.de</a></p>
-              </div>
-            </div>
-          </body>
-          </html>
-        `
+        html: v2Mail(
+          'Verifizierung bestätigt!',
+          `<p style="margin:0 0 12px;">Dein Studenten-Status wurde bestätigt. Du hast jetzt vollen Zugriff auf UniGoat.</p>`
+          + v2Note('Ab jetzt freigeschaltet:', [
+              'Alle Coupons &amp; Studenten-Deals einlösen',
+              'Am monatlichen Goat-Wettkampf teilnehmen',
+              'Freunde einladen und herausfordern',
+            ])
+          + `<p style="margin:18px 0 0;">Willkommen bei UniGoat!<br><strong>Dein UniGoat Team</strong></p>`,
+          { text: 'Zu den Deals', url: 'https://unigoat.de/coupons.html' }
+        )
       },
 
       'verification_rejected': {
-        from: 'UniGoat Team <noreply@room8.club>',
+        from: 'UniGoat Team <noreply@unigoat.de>',
         subject: 'Deine Verifizierung wurde abgelehnt',
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <body style="font-family: Arial, sans-serif; padding: 20px; background: #f3f4f6;">
-            <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-              <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 40px; text-align: center;">
-                <div style="font-size: 3rem; margin-bottom: 15px;">&#10060;</div>
-                <h1 style="color: white; margin: 0; font-size: 2rem;">Verifizierung abgelehnt</h1>
-              </div>
-              <div style="padding: 40px 30px;">
-                <p style="color: #374151; line-height: 1.6; font-size: 16px;">Hi,</p>
-                <p style="color: #374151; line-height: 1.6; font-size: 16px;">Deine Verifizierung wurde leider abgelehnt. Bitte versuche es erneut mit einem gültigen Dokument oder deiner Uni-E-Mail-Adresse.</p>
-                <div style="text-align: center; margin: 30px 0;">
-                  <a href="https://room8.club/verify-options.html" style="display: inline-block; background: #3b82f6; color: white !important; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);">
-                    Erneut verifizieren
-                  </a>
-                </div>
-                <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
-                  Falls du Fragen hast, kontaktiere uns unter <a href="mailto:info@unigoat.de" style="color: #3b82f6; text-decoration: none;">info@unigoat.de</a>.
-                </p>
-              </div>
-              <div style="background: #1f2937; color: #9ca3af; padding: 30px; text-align: center; font-size: 14px;">
-                <p style="margin: 0 0 10px 0;">&copy; 2025 Room8</p>
-                <p style="margin: 0;">Fragen? <a href="mailto:info@unigoat.de" style="color: #60a5fa; text-decoration: none;">info@unigoat.de</a></p>
-              </div>
-            </div>
-          </body>
-          </html>
-        `
+        html: v2Mail(
+          'Verifizierung abgelehnt',
+          `<p style="margin:0 0 12px;">Deine Verifizierung konnte leider nicht bestätigt werden. Bitte versuche es erneut mit deiner offiziellen Uni-E-Mail-Adresse.</p>`
+          + `<p style="margin:16px 0 0;font-size:14px;color:#6f6a67;">Fragen? Schreib uns an <a href="mailto:info@unigoat.de" style="color:#0B6B52;text-decoration:none;font-weight:800;">info@unigoat.de</a>.</p>`,
+          { text: 'Erneut verifizieren', url: 'https://unigoat.de/verify-options.html' }
+        )
       },
 
       'admin_verification_request': {
-        from: 'UniGoat <noreply@room8.club>',
-        subject: '🔔 Neue Verifizierungsanfrage',
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <body style="font-family: monospace; padding: 20px;">
-            <div style="max-width: 600px; margin: 0 auto;">
-              <h2>🔔 Neue Verifizierungsanfrage</h2>
-              <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                <strong>User:</strong> ${escHtml(data.userName)}<br>
-                <strong>E-Mail:</strong> ${escHtml(data.userEmail)}<br>
-                <strong>Uni-Domain:</strong> ${escHtml(data.emailDomain)}<br>
-                <strong>Registriert:</strong> ${escHtml(data.registeredAt)}
-              </div>
-              ${data.documentUploaded ? '<p>📄 Immatrikulationsbescheinigung wurde hochgeladen.</p>' : '<p>✉️ E-Mail-Verifizierung wird genutzt.</p>'}
-              <a href="https://room8.club/admin.html" style="display: inline-block; background: #8b5cf6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; margin-top: 15px;">
-                Im Admin-Panel öffnen
-              </a>
-            </div>
-          </body>
-          </html>
-        `
+        from: 'UniGoat <noreply@unigoat.de>',
+        subject: 'Neue Verifizierungsanfrage',
+        html: v2Mail(
+          'Neue Verifizierungsanfrage',
+          v2Note('Details', [
+              `<strong>User:</strong> ${escHtml(data.userName)}`,
+              `<strong>E-Mail:</strong> ${escHtml(data.userEmail)}`,
+              `<strong>Uni-Domain:</strong> ${escHtml(data.emailDomain)}`,
+              `<strong>Registriert:</strong> ${escHtml(data.registeredAt)}`,
+            ])
+          + `<p style="margin:8px 0 0;">${data.documentUploaded ? 'Immatrikulationsbescheinigung wurde hochgeladen.' : 'E-Mail-Verifizierung wird genutzt.'}</p>`,
+          { text: 'Im Admin-Panel öffnen', url: 'https://unigoat.de/admin.html' }
+        )
       }
     }
     
-    const template = templates[type]
-    
+    const template = (templates as Record<string, { from: string; subject: string; html: string }>)[type]
+
     if (!template) {
       throw new Error(`Unknown notification type: ${type}`)
     }
@@ -297,8 +234,8 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify({ 
-        success: false, 
-        error: error.message 
+        success: false,
+        error: (error as Error).message
       }),
       { 
         status: 400, 

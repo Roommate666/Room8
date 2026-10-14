@@ -1,0 +1,79 @@
+/*
+  UniGoat Design-System — festgezurrt 07.08.2026
+  Richtung: dezentes Schwarz-Weiss (weich, nicht hart-schwarz) + EIN Akzent = Mintgruen.
+  Ein Akzent konvertiert besser als reines S/W (CTAs stechen raus).
+  Nutzung: als CSS-Variablen in allen neuen Screens. Keine Hex-Werte mehr direkt im Markup.
+*/
+
+:root {
+  /* --- Tinte / Text (weiches Schwarz, kein #000) --- */
+  --ink:        #15181C;   /* Haupttext / Ueberschriften */
+  --ink-2:      #3C424A;   /* Sekundaertext */
+  --muted:      #767E88;   /* Hinweise, Labels */
+
+  /* --- Flaechen --- */
+  --bg:         #F6F7F7;   /* App-Hintergrund (off-white, nicht grell) */
+  --surface:    #FFFFFF;   /* Karten */
+  --surface-2:  #F0F2F2;   /* eingesenkte Flaechen / Spielfeld-Grund */
+  --line:       #E6E9EB;   /* Haarlinien / Rahmen */
+
+  /* --- Akzent: Mintgruen --- */
+  --mint:       #21D0A1;   /* Primaerakzent (Fuellung CTA, aktive Bloecke) */
+  --mint-600:   #12B489;   /* Hover / gedrueckt */
+  --mint-700:   #0C8E6C;   /* dunkel, Text auf hell */
+  --mint-100:   #E4FBF3;   /* zarter Tint-Hintergrund */
+  --mint-ink:   #06392C;   /* Text auf Mint-Flaeche */
+
+  /* --- Funktionsfarben (sparsam) --- */
+  --gold:       #F4B740;   /* Coins / Belohnung */
+  --danger:     #E5533C;
+
+  /* --- Radius / Schatten (weich) --- */
+  --r-sm: 8px;
+  --r:    14px;
+  --r-lg: 22px;
+  --r-pill: 999px;
+  --shadow-1: 0 1px 2px rgba(21,24,28,.06), 0 4px 14px rgba(21,24,28,.06);
+  --shadow-2: 0 8px 30px rgba(21,24,28,.12);
+  --shadow-mint: 0 8px 24px rgba(33,208,161,.35);
+
+  /* --- Typo --- */
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Space Grotesk', var(--font);
+
+  --tap: 48px; /* Mindest-Touchflaeche */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink:        #F1F4F5;
+    --ink-2:      #C3C9CE;
+    --muted:      #8A929B;
+    --bg:         #0D0F11;
+    --surface:    #16191C;
+    --surface-2:  #1E2226;
+    --line:       #272C31;
+    --mint-100:   #123227;
+    --mint-ink:   #EAFFF8;
+    --shadow-1: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.35);
+    --shadow-2: 0 10px 34px rgba(0,0,0,.5);
+  }
+}
+
+/* Kleine Utility-Basis, die neue Screens teilen */
+.ug-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: var(--tap); padding: 0 20px;
+  border: none; border-radius: var(--r-pill);
+  font-family: var(--font); font-weight: 700; font-size: 16px;
+  cursor: pointer; transition: transform .08s ease, background .15s ease, box-shadow .15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.ug-btn:active { transform: translateY(1px) scale(.99); }
+.ug-btn--primary { background: var(--mint); color: var(--mint-ink); box-shadow: var(--shadow-mint); }
+.ug-btn--primary:hover { background: var(--mint-600); }
+.ug-btn--ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+.ug-card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-1);
+}

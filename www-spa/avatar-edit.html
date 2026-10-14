@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="de" data-page="avatar-edit">
+<head>
+<script src="sentry-init.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Deine Ziege — UniGoat</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+<link rel="stylesheet" href="unigoat-v2.css">
+<style>
+  /* Alias: altes Token-Vokabular auf v2 (fuer inline var(--green) etc. + GoatAvatar-Rendering) */
+  :root{
+    --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+    --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+    --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+    --fh:var(--font-heading); --fb:var(--font-body);
+    --mint:var(--color-accent); --mint-600:var(--color-accent-600);
+  }
+
+  main{ padding-bottom:8px; }
+
+  /* Preview des Goat-Avatars — bleibt FARBIG, eckig (v2), auf Papier */
+  .preview{ display:flex; justify-content:center; padding:22px 20px 20px; border-bottom:var(--rule); }
+  .preview svg{ height:200px; width:auto; }
+
+  /* Auswahl-Gruppen */
+  .grp{ padding:16px 20px 4px; }
+  .grp h3{ font-family:var(--font-heading); font-weight:800; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); margin:0 0 12px; }
+
+  /* Avatar-Galerie (Grid bleibt als solches, nur Chrome eckig/v2) */
+  .gallery{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--color-divider); border:var(--rule); }
+  .avcell{ position:relative; border:0; background:var(--color-bg); padding:8px 6px; cursor:pointer; display:flex; justify-content:center; align-items:center; min-height:70px; }
+  .avcell.active{ background:var(--color-accent-100); box-shadow:inset 0 0 0 2px var(--color-accent); }
+  .avcell .ug-av{ width:56px !important; }
+  .avcell.locked .ug-av{ filter:grayscale(1) opacity(.45); }
+  .avcell.locked .lockbadge{ position:absolute; bottom:4px; left:50%; transform:translateX(-50%); white-space:nowrap; background:var(--color-text); color:var(--color-bg); font-size:9px; font-weight:800; padding:2px 6px; letter-spacing:.02em; }
+  .avcell.champ{ box-shadow:inset 0 0 0 2px #C79A2E; }
+  .avcell.champ .lockbadge{ background:#C79A2E; color:#2A1F05; }
+  .avcell.streak{ box-shadow:inset 0 0 0 2px #C43A22; }
+  .avcell.streak .lockbadge{ background:#C43A22; color:#fff; }
+
+  /* Chips (Flaggen) */
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; padding-bottom:4px; }
+  .chip{ border:2px solid var(--color-text); background:var(--color-bg); padding:9px 14px; cursor:pointer; font-family:var(--font-heading); font-weight:800; font-size:13px; color:var(--color-text); line-height:1; }
+  .chip.active{ background:var(--color-accent); color:var(--on-accent); border-color:var(--color-accent); }
+  .flagchip{ padding:7px 8px; line-height:0; }
+
+  /* Farb-Swatches (Hintergrund) */
+  .swatch{ width:40px; height:40px; border:2px solid var(--color-text); cursor:pointer; padding:0; }
+  .swatch.active{ box-shadow:inset 0 0 0 3px var(--color-bg), 0 0 0 2px var(--color-text); }
+
+  /* Speichern-Leiste */
+  .save{ position:sticky; bottom:0; background:var(--color-bg); border-top:var(--rule); padding:14px 20px calc(14px + env(safe-area-inset-bottom)); }
+  #msg{ text-align:center; font-family:var(--font-heading); font-weight:700; font-size:13px; margin-top:10px; min-height:1rem; color:var(--text-muted); }
+
+  #login{ padding:48px 24px; text-align:center; color:var(--text-muted); font-size:15px; line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="screen-body">
+    <div class="topbar" style="padding-top:14px">
+      <a class="btn btn-icon backbtn" href="profile.html" style="margin-left:8px" aria-label="Zurück"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--color-text);fill:none;stroke-width:2"><path d="M15 18l-6-6 6-6"/></svg></a>
+      <div class="masthead masthead-sm" style="font-size:30px;padding:0 8px 0 2px">Deine Ziege</div>
+      <a class="btn btn-ghost" href="game/index.html" style="margin-right:8px;font-size:13px">Zum Spiel <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="hr"></div>
+
+    <main id="app" style="display:none;">
+      <div class="preview" id="preview"></div>
+      <div id="controls"></div>
+      <div class="save">
+        <button id="saveBtn" class="btn btn-primary btn-block">Speichern <span aria-hidden="true">→</span></button>
+        <div id="msg"></div>
+      </div>
+    </main>
+
+    <div id="login" style="display:none;">
+      Bitte logg dich in UniGoat ein, um deine Ziege zu personalisieren.
+    </div>
+  </div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="game/avatar.js"></script>
+<script src="ug-toast.js"></script>
+<script>
+(function(){
+  "use strict";
+  var cfg = Object.assign({}, GoatAvatar.DEFAULTS);
+  var myCoins = 0;
+  var iAmChampion = false;
+  var myBest = 0;
+
+  function drawPreview(){ document.getElementById('preview').innerHTML = GoatAvatar.renderGoatAvatar(cfg,190); }
+  function buildControls(){
+    var host = document.getElementById('controls'); host.innerHTML='';
+    // 1) Avatar-Galerie
+    var g1=document.createElement('div'); g1.className='grp';
+    g1.innerHTML='<h3>Ziege wählen</h3>';
+    var gal=document.createElement('div'); gal.className='gallery';
+    GoatAvatar.AVATARS.forEach(function(id){
+      var champOnly=!!(GoatAvatar.AVATAR_CHAMPION&&GoatAvatar.AVATAR_CHAMPION[id]);
+      var streakMin=(GoatAvatar.AVATAR_STREAK&&GoatAvatar.AVATAR_STREAK[id])||0;
+      var streakOnly=streakMin>0;
+      var min=GoatAvatar.AVATAR_MIN[id]||0;
+      var tier=GoatAvatar.tierForCoins(min);
+      var locked = champOnly ? !iAmChampion : streakOnly ? (myBest<streakMin) : (myCoins<min);
+      var special = champOnly || streakOnly;
+      var badge = champOnly ? '👑 Champion' : streakOnly ? ('🔥 '+streakMin+' Tage') : ('🔒 '+tier);
+      var b=document.createElement('button'); b.className='avcell'+(cfg.avatar===id?' active':'')+(locked?' locked':'')+(champOnly?' champ':'')+(streakOnly?' streak':'');
+      b.title=(GoatAvatar.AV_LABELS[id]||id)+(locked?(champOnly?' — nur fuer Monats-Gewinner':streakOnly?(' — ab '+streakMin+'-Tage-Streak'):(' — ab '+tier)):'');
+      b.innerHTML=GoatAvatar.renderGoatAvatar({avatar:id,bg:'grey',flag:'none'},60)
+        +((locked||special)?'<span class="lockbadge">'+badge+'</span>':'');
+      b.onclick=function(){
+        if(locked){
+          var m=document.getElementById('msg');
+          if(champOnly){ m.textContent='👑 Das Champion-Kostüm bekommt nur, wer den Monats-Wettkampf auf Platz 1 gewinnt.'; }
+          else if(streakOnly){ m.textContent='🔥 Das '+(GoatAvatar.AV_LABELS[id]||id)+'-Kostüm schaltest du mit einer '+streakMin+'-Tage-Streak frei.'; }
+          else { m.textContent='🔒 '+(GoatAvatar.AV_LABELS[id]||id)+' schaltest du ab '+tier+' frei ('+min.toLocaleString('de-DE')+' G-Coins).'; }
+          m.style.color='#b45309'; return;
+        }
+        cfg.avatar=id; drawPreview(); buildControls();
+      };
+      gal.appendChild(b);
+    });
+    g1.appendChild(gal); host.appendChild(g1);
+    // 2) Flagge
+    var g2=document.createElement('div'); g2.className='grp'; g2.innerHTML='<h3>Flagge (Land)</h3>';
+    var fr=document.createElement('div'); fr.className='chips';
+    GoatAvatar.OPTIONS.flag.forEach(function(val){
+      var el=document.createElement('button'); el.className='chip flagchip'+(cfg.flag===val?' active':'');
+      if(val==='none'){ el.textContent='Keine'; }
+      else { el.innerHTML='<img src="'+GoatAvatar.FLAG_PATH+val+'.svg" alt="'+val+'" style="width:28px;height:21px;display:block;object-fit:cover;">'; }
+      el.onclick=function(){ cfg.flag=val; drawPreview(); buildControls(); };
+      fr.appendChild(el);
+    });
+    g2.appendChild(fr); host.appendChild(g2);
+    // 3) Hintergrund-Farbe (falls keine Flagge)
+    var g3=document.createElement('div'); g3.className='grp'; g3.innerHTML='<h3>Hintergrund</h3>';
+    var br=document.createElement('div'); br.className='chips';
+    GoatAvatar.OPTIONS.bg.forEach(function(val){
+      var el=document.createElement('button'); el.className='swatch'+(cfg.bg===val?' active':'');
+      el.style.background=GoatAvatar.BG[val]; el.title=val;
+      el.onclick=function(){ cfg.bg=val; drawPreview(); buildControls(); };
+      br.appendChild(el);
+    });
+    g3.appendChild(br); host.appendChild(g3);
+  }
+
+  async function init(){
+    if(!window.sb){ document.getElementById('login').style.display='block'; return; }
+    var u; try{ u=(await sb.auth.getUser()).data.user; }catch(e){ u=null; }
+    if(!u){ document.getElementById('login').style.display='block'; return; }
+    try{
+      var r=await sb.from('public_profiles').select('avatar_config').eq('id',u.id).single();
+      if(r.data && r.data.avatar_config && typeof r.data.avatar_config==='object'){
+        cfg=Object.assign({}, GoatAvatar.DEFAULTS, r.data.avatar_config);
+      }
+    }catch(e){}
+    try{ var pc=await sb.from('my_profile').select('coins,is_champion,streak_best').maybeSingle(); if(pc.data){ myCoins=pc.data.coins||0; iAmChampion=!!pc.data.is_champion; myBest=pc.data.streak_best||0; } }catch(e){}
+    document.getElementById('app').style.display='block';
+    drawPreview(); buildControls();
+    document.getElementById('saveBtn').onclick=save;
+  }
+  async function save(){
+    var msg=document.getElementById('msg'); if(msg) msg.textContent='';
+    try{
+      var r=await sb.rpc('set_my_avatar',{p_config:cfg});
+      if(r.error) throw r.error;
+      if(window.ugToast) ugToast('Gespeichert – deine Ziege ist im Board 🐐','success');
+      else if(msg){ msg.textContent='Gespeichert!'; msg.style.color='#12B489'; }
+    }catch(e){
+      if(window.ugToast) ugToast('Speichern hat nicht geklappt. Versuch es nochmal.','error');
+      else if(msg){ msg.textContent='Fehler'; msg.style.color='#ef4444'; }
+    }
+  }
+  init();
+})();
+</script>
+</body>
+</html>
