@@ -33,15 +33,16 @@
   }
 
   async function maybeShow(){
-    if(!window.sb) return;
+    var s = window.sb;
+    if(!s) return;
     try{
-      var cfg = await sb.from('app_config').select('value').eq('key','events_enabled').maybeSingle();
+      var cfg = await s.from('app_config').select('value').eq('key','events_enabled').maybeSingle();
       if(!cfg.data || cfg.data.value !== true) return;           // Schalter aus
-      var cnt = await sb.from('events').select('id', { count:'exact', head:true })
+      var cnt = await s.from('events').select('id', { count:'exact', head:true })
                         .eq('status','active').eq('is_test', false);
       if((cnt.count || 0) < 1) return;                           // kein leerer Tab
       insertTab();
-    }catch(e){ /* still: lieber kein Tab als ein kaputter */ }
+    }catch(e){ if(window.Room8Sentry) Room8Sentry.captureException(e); /* sonst still: lieber kein Tab als ein kaputter */ }
   }
 
   // window.sb kommt aus config.js; kurz nachwarten falls noch nicht initialisiert

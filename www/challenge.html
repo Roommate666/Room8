@@ -317,7 +317,7 @@
         var rh=await sb.from('goat_leaderboard').select('username,university,score,user_id,avatar_config')
           .eq('game_key','goat_blast').eq('mode','high').order('score',{ascending:false}).limit(200);
         var hrows=rh.data||[]; var hrk=0, hprev=null;
-        return hrows.map(function(x,i){ if(hprev===null||x.score!==hprev){ hrk=i+1; hprev=x.score; } return Object.assign({},x,{rank:hrk}); });
+        return hrows.map(function(x,i){ if(hprev===null||x.score!==hprev){ hrk=i+1; hprev=x.score; } return Object.assign({},x,{rank:hrk,is_champion:false}); });
       }catch(e){ return []; }
     }
     var rows=[]; try{ var r=await sb.rpc('get_challenge_leaderboard',{p_limit:200}); rows=r.data||[]; }catch(e){}

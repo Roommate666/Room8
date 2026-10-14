@@ -235,7 +235,7 @@ button { font: inherit; color: inherit; }
 .ticker span { padding-right: 48px; }
 
 /* Bottom-Nav: fest, flach, Labels flush left, aktiv = Akzent */
-.tabbar { display: grid; grid-template-columns: repeat(5, 1fr); border-top: var(--rule); background: var(--color-bg); padding-bottom: env(safe-area-inset-bottom, 26px); }
+.tabbar { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border-top: var(--rule); background: var(--color-bg); padding-bottom: env(safe-area-inset-bottom, 26px); }
 .tab { appearance: none; background: none; border: 0; padding: 10px 6px 6px 12px; min-height: 56px; display: flex; flex-direction: column; align-items: flex-start; gap: 7px; cursor: pointer; text-align: left; font-family: var(--font-heading); font-weight: 800; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 60%, transparent); }
 .tab + .tab { border-left: var(--rule-thin); }
 .tab[aria-current='page'], .tab.is-active { color: var(--accent-small); }

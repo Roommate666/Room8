@@ -151,6 +151,9 @@
 
   async function load(){
     if(!window.sb){ $('list').innerHTML='<div class="ug-empty">Bitte einloggen.</div>'; return; }
+    // Flag-Gate: Events-Seite nur erreichbar, wenn der Admin-Schalter an ist (sonst zurueck zu Coupons)
+    try{ var fg=await sb.from('app_config').select('value').eq('key','events_enabled').maybeSingle();
+      if(!fg.data||fg.data.value!==true){ location.replace('coupons.html'); return; } }catch(e){}
     try{ var cc=JSON.parse(localStorage.getItem('ug_events_cache')||'null'); if(cc&&cc.length){ all=cc; render(); } }catch(e){}
     try{
       // status='active' + is_test=false (wie zuvor). Laufende Events bleiben sichtbar,

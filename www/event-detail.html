@@ -226,7 +226,7 @@
             var userRes = await sb.auth.getUser();
             currentUserId = userRes.data.user ? userRes.data.user.id : null;
 
-            var result = await sb.from('events').select('*').eq('id', eventId).single();
+            var result = await sb.from('events').select('id,title,description,location,address,city,start_at,end_at,category,organizer_id,organizer_name,organizer_type,cover_image_path,external_url,price,max_participants,status,is_official,view_count,interest_count').eq('id', eventId).single();
             if (result.error || !result.data) {
                 document.getElementById('loadingState').innerHTML = '<p>Event nicht gefunden.</p>';
                 return;
