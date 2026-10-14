@@ -129,6 +129,19 @@
 
   .cw-toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(16px);background:var(--color-text);color:var(--color-bg);font-family:var(--font-heading);font-weight:800;font-size:13px;padding:11px 18px;border-radius:0;opacity:0;transition:.25s;z-index:340;max-width:90%;text-align:center;box-shadow:var(--shadow-lg);}
   .cw-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* Rang-Hinweis: offene Freundschaftsanfragen (fuehrt zu friends.html) */
+  .reqhint{ display:flex; align-items:center; gap:8px; margin:10px var(--space-5) 0; background:var(--color-accent-100);
+    border:1px solid var(--color-accent); color:var(--color-text); text-decoration:none; padding:11px 14px;
+    font-family:var(--font-heading); font-weight:800; font-size:var(--fs-sm); }
+  .reqhint .arw{ margin-left:auto; color:var(--accent-small); white-space:nowrap; }
+
+  /* Top-3-Umschalter (blendet die Liste ab Platz 4 aus) */
+  .top3wrap{ display:flex; justify-content:flex-end; padding:0 var(--space-5); margin:2px 0 6px; }
+  .top3btn{ border:1px solid var(--color-divider); background:var(--color-surface); color:var(--text-muted);
+    font-family:var(--font-heading); font-weight:800; font-size:11px; letter-spacing:.04em; text-transform:uppercase;
+    padding:7px 12px; cursor:pointer; border-radius:0; }
+  .top3btn.on{ background:var(--color-text); color:var(--color-bg); border-color:var(--color-text); }
 </style>
 <link rel="icon" type="image/x-icon" href="favicon.ico?v133"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133"><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
 </head>
@@ -142,7 +155,10 @@
       <button type="button" data-scope="global" class="on">Global</button>
       <button type="button" data-scope="uni">Uni</button>
       <button type="button" data-scope="friends">Freunde</button>
+      <button type="button" data-scope="highscore">Spiel</button>
     </div>
+
+    <a class="reqhint" id="reqHint" href="friends.html" hidden><span class="txt"></span><span class="arw">→ ansehen</span></a>
 
     <div class="infocard" id="infoCard">
       <button class="info-head" id="infoToggle" type="button"><span>🏆 So läuft die Monats-Challenge</span><span class="chev">›</span></button>
@@ -157,6 +173,7 @@
 
     <div class="podium" id="podium"></div>
     <a class="win-banner" href="https://instagram.com/unigoat.de" target="_blank" rel="noopener">Du kannst was gewinnen! Alle Infos auf Instagram <span class="arw">→</span></a>
+    <div class="top3wrap" id="top3wrap" hidden><button type="button" class="top3btn" id="top3btn">Nur Top 3</button></div>
     <div id="rows"></div>
     <div id="empty" style="display:none;"></div>
     <div style="height:20px"></div>
@@ -217,8 +234,10 @@
   var EMPTY_MSG={
     global:'Noch keine G-Coins diesen Monat.<br>Sei der Erste — Coupons einlösen & Daily spielen! 🐐',
     uni:'An deiner Uni hat diesen Monat noch niemand G-Coins gesammelt.<br>Mach den Anfang! 🐐',
-    friends:'Du hast noch keine Freunde in der Rangliste.<br>Lad Freunde über deinen Einladungs-Code ein! 🐐'
+    friends:'Du hast noch keine Freunde in der Rangliste.<br>Lad Freunde über deinen Einladungs-Code ein! 🐐',
+    highscore:'Noch keine Highscores.<br>Spiel Goat Blast und setz dich an die Spitze! 🐐'
   };
+  var top3Only=false; // Top-3-Umschalter: blendet die Liste ab Platz 4 aus
   function openCard(x){
     if(!x)return;
     var bg=$('vkbg'); bg.innerHTML=window.GoatAvatar?GoatAvatar.renderVisitenkarte(x):''; bg.classList.add('show');
@@ -256,6 +275,23 @@
     }catch(e){ cwToast('Fehler beim Senden.'); this.disabled=false; }
   };
 
+  // 1-Klick-Duell: direkt herausfordern (kein Modal mehr) — gleicher Flow wie in friends.html.
+  // Der Wager ist ohnehin 0, das alte Modal war nur eine Zwischenbestaetigung.
+  async function sendChallenge(uid, uname, btn){
+    if(btn) btn.disabled=true;
+    try{
+      var r=await sb.rpc('create_match',{p_mode:'high', p_wager:0, p_challenged_id:uid});
+      var d=r.data||{};
+      if(!d.ok){
+        var map={NOT_ENOUGH_COINS:'Nicht genug G-Coins.',CANNOT_CHALLENGE_SELF:'Du kannst dich nicht selbst herausfordern.',NOT_AUTHENTICATED:'Bitte einloggen.'};
+        cwToast(map[d.error]||'Herausforderung fehlgeschlagen.');
+      }else{
+        cwToast('Herausforderung an '+(uname||'Spieler')+' gesendet ⚔️');
+      }
+    }catch(e){ cwToast('Fehler beim Senden.'); }
+    finally{ if(btn) setTimeout(function(){ btn.disabled=false; }, 1200); }
+  }
+
   // Duell-Button-Klick (Podium + Liste)
   function duelClick(e){
     if(window.featureEnabled && !featureEnabled('duel')) return; // iOS: Duell aus
@@ -264,7 +300,7 @@
     var uid=b.getAttribute('data-uid'), uname=b.getAttribute('data-uname');
     if(!MEID){ cwToast('Bitte einloggen.'); return; }
     if(uid===MEID) return;
-    openDuelModal(uid, uname);
+    sendChallenge(uid, uname, b);
   }
 
   // Holt die Rangliste je nach aktivem Segment.
@@ -274,6 +310,15 @@
   async function fetchRows(scope){
     if(scope==='friends'){
       try{ var rf=await sb.rpc('get_friends_leaderboard'); return rf.data||[]; }catch(e){ return []; }
+    }
+    if(scope==='highscore'){
+      // Echte Goat-Blast-Highscores aus goat_leaderboard (vorher nur im Spiel-Menue versteckt).
+      try{
+        var rh=await sb.from('goat_leaderboard').select('username,university,score,user_id,avatar_config')
+          .eq('game_key','goat_blast').eq('mode','high').order('score',{ascending:false}).limit(200);
+        var hrows=rh.data||[]; var hrk=0, hprev=null;
+        return hrows.map(function(x,i){ if(hprev===null||x.score!==hprev){ hrk=i+1; hprev=x.score; } return Object.assign({},x,{rank:hrk}); });
+      }catch(e){ return []; }
     }
     var rows=[]; try{ var r=await sb.rpc('get_challenge_leaderboard',{p_limit:200}); rows=r.data||[]; }catch(e){}
     if(scope==='uni'){
@@ -285,10 +330,12 @@
     return rows;
   }
 
+  // Anzeige-Wert je Scope: Highscore = Spiel-Punkte, sonst Monats-G-Coins
+  function valOf(x){ return SCOPE==='highscore' ? (nf(x.score)+' Pkt') : (nf(x.coins_month)+' 🪙'); }
   function render(rows){
     LB=rows||[];
     $('podium').innerHTML=''; $('rows').innerHTML='';
-    if(!rows||!rows.length){ $('empty').innerHTML=EMPTY_MSG[SCOPE]||EMPTY_MSG.global; $('empty').style.display='block'; return; }
+    if(!rows||!rows.length){ $('empty').innerHTML=EMPTY_MSG[SCOPE]||EMPTY_MSG.global; $('empty').style.display='block'; $('top3wrap').hidden=true; return; }
     $('empty').style.display='none';
     var top=rows.slice(0,3), rest=rows.slice(3);
     var order=[1,0,2]; // p2, p1, p3 Anordnung
@@ -304,14 +351,17 @@
           '<div class="pod-base"><span class="pod-rank">'+rk+'</span></div>'+
         '</div>'+
         '<div class="pod-name">'+(rk===1?'👑 ':'')+esc(x.username||'Anonym')+'</div>'+
-        '<div class="pod-coins">'+nf(x.coins_month)+' 🪙</div>'+
+        '<div class="pod-coins">'+valOf(x)+'</div>'+
         duelBtn+
       '</div>';
     }).join('');
     $('rows').innerHTML=rest.map(function(x){var mine=MEID&&x.user_id===MEID;
       var duelBtn=(MEID && !mine && (!window.featureEnabled||featureEnabled('duel')))?'<button class="duelbtn" data-uid="'+esc(x.user_id)+'" data-uname="'+esc(x.username||'Anonym')+'">'+SWORDS+'Duell</button>':''; // iOS: Duell aus
-      return '<div class="lrow'+(mine?' me':'')+'" data-uid="'+esc(x.user_id)+'"><span class="r">'+x.rank+'</span><span class="n">'+(x.is_champion?'👑 ':'')+esc(x.username||'Anonym')+(mine?' (du)':'')+'</span><span class="s">'+nf(x.coins_month)+'</span>'+duelBtn+'</div>';
+      return '<div class="lrow'+(mine?' me':'')+'" data-uid="'+esc(x.user_id)+'"><span class="r">'+x.rank+'</span><span class="n">'+(x.is_champion?'👑 ':'')+esc(x.username||'Anonym')+(mine?' (du)':'')+'</span><span class="s">'+valOf(x)+'</span>'+duelBtn+'</div>';
     }).join('');
+    // Top-3-Umschalter nur anbieten, wenn es ueberhaupt Plaetze ab 4 gibt
+    $('top3wrap').hidden = rest.length===0;
+    $('rows').style.display = top3Only ? 'none' : '';
     $('podium').onclick=function(e){ duelClick(e); cardClick(e); };
     $('rows').onclick=function(e){ duelClick(e); cardClick(e); };
   }
@@ -331,16 +381,36 @@
     load();
   });
 
+  // Top-3-Umschalter: blendet die Liste ab Platz 4 aus / wieder ein
+  $('top3btn').addEventListener('click',function(){
+    top3Only=!top3Only;
+    this.classList.toggle('on',top3Only);
+    this.textContent=top3Only?'Alle anzeigen':'Nur Top 3';
+    $('rows').style.display=top3Only?'none':'';
+  });
+
+  // Rang-Hinweis: offene Freundschaftsanfragen (Pain-Point: kam vorher nirgends sichtbar an)
+  async function loadReqHint(){
+    var el=$('reqHint'); if(!el||!MEID) return;
+    try{
+      var r=await sb.rpc('list_friend_requests'); var n=(r.data||[]).length;
+      if(n>0){ el.querySelector('.txt').textContent=n+(n===1?' neue Freundschaftsanfrage':' neue Freundschaftsanfragen'); el.hidden=false; }
+      else el.hidden=true;
+    }catch(e){}
+  }
+
   async function init(){
     if(!window.sb) return;
     try{ MEID=(await sb.auth.getUser()).data.user.id; }catch(e){}
     if(MEID){
       try{ var mp=await sb.from('my_profile').select('university,coins').maybeSingle(); if(mp.data){ MYUNI=mp.data.university||null; MYCOINS=+mp.data.coins||0; } }catch(e){}
+      loadReqHint();
     }
     load();
   }
   init();
 })();
 </script>
+<script src="events-tab.js"></script>
 </body>
 </html>

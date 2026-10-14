@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="de" data-page="admin-events">
+<head>
+<script src="sentry-init.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Events-Schalter — UniGoat Admin</title>
+<link rel="stylesheet" href="unigoat-v2.css">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+<style>
+  :root{
+    --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+    --line:var(--color-divider); --green:var(--color-accent); --mut:var(--text-muted);
+    --fh:var(--font-heading); --fb:var(--font-body);
+  }
+  .switchrow{ display:flex; align-items:center; justify-content:space-between; gap:16px;
+    border:2px solid var(--color-text); padding:18px 16px; margin:6px 0 16px; }
+  .switchrow .lbl{ font-family:var(--font-heading); font-weight:800; font-size:18px; color:var(--color-text); }
+  .switchrow .sub{ color:var(--text-muted); font-size:13px; margin-top:3px; max-width:230px; }
+  .switch{ position:relative; width:58px; height:32px; flex:none; border:0; background:var(--color-neutral-300);
+    border-radius:0; cursor:pointer; transition:background .2s; }
+  .switch.on{ background:var(--color-accent); }
+  .switch::after{ content:''; position:absolute; top:3px; left:3px; width:26px; height:26px; background:#fff; transition:left .2s; }
+  .switch.on::after{ left:29px; }
+  .switch[disabled]{ opacity:.5; pointer-events:none; }
+  .statusline{ font-family:var(--font-heading); font-weight:800; font-size:15px; margin:2px 0 6px; color:var(--color-text); }
+  .muted{ color:var(--text-muted); font-size:13px; line-height:1.55; }
+  .btnlink{ display:inline-block; margin-top:14px; background:var(--color-text); color:var(--color-bg); text-decoration:none;
+    font-family:var(--font-heading); font-weight:800; font-size:14px; padding:12px 18px; }
+  .msg{ text-align:center; padding:10px; font-weight:600; color:var(--color-text); }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="screen-body">
+    <div class="topbar" style="padding-top:14px">
+      <a class="btn btn-icon backbtn" href="admin.html" style="margin-left:8px" aria-label="Zurück"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--color-text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M15 18l-6-6 6-6"/></svg></a>
+      <div class="masthead" style="font-size:30px;padding:0 8px 0 2px">Admin</div>
+      <span style="width:40px"></span>
+    </div>
+    <div class="hr"></div>
+
+    <div style="padding:16px 20px 24px;max-width:640px;margin:0 auto;">
+      <div class="kicker" style="margin-bottom:4px">UniGoat · Admin</div>
+      <div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-.02em;margin-bottom:14px;">Events-Tab</div>
+
+      <div id="gate" class="msg">Prüfe Zugriff…</div>
+      <div id="app" style="display:none;">
+        <div class="switchrow">
+          <div>
+            <div class="lbl">Events-Tab anzeigen</div>
+            <div class="sub">Schaltet die Events-Spalte in der ganzen App an oder aus.</div>
+          </div>
+          <button class="switch" id="sw" type="button" role="switch" aria-checked="false" aria-label="Events-Tab an/aus"></button>
+        </div>
+        <div class="statusline" id="status">…</div>
+        <div class="muted" id="hint"></div>
+        <a class="btnlink" href="event-create.html">+ Neues Event anlegen</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var enabled=false, busy=false;
+
+  async function refresh(){
+    try{ var c=await sb.from('app_config').select('value').eq('key','events_enabled').maybeSingle();
+      enabled=!!(c.data && c.data.value===true); }catch(e){}
+    var cnt=0;
+    try{ var r=await sb.from('events').select('id',{count:'exact',head:true}).eq('status','active').eq('is_test',false);
+      cnt=r.count||0; }catch(e){}
+    var sw=$('sw'); sw.classList.toggle('on',enabled); sw.setAttribute('aria-checked',enabled?'true':'false');
+    $('status').textContent = enabled ? 'Status: AN — Events-Tab ist sichtbar' : 'Status: AUS — Events-Tab ist versteckt';
+    $('hint').innerHTML = cnt>0
+      ? ('Aktuell <b>'+cnt+'</b> sichtbare'+(cnt===1?'s Event':' Events') + ' in der App.')
+      : 'Hinweis: aktuell <b>0</b> sichtbare Events. Der Tab erscheint erst, wenn mindestens ein Event angelegt ist (Sicherheitsnetz gegen einen leeren Tab).';
+  }
+
+  async function toggle(){
+    if(busy) return; busy=true;
+    var sw=$('sw'); sw.disabled=true;
+    var target=!enabled;
+    try{
+      var r=await sb.rpc('set_app_flag',{p_key:'events_enabled', p_value:target});
+      if(r.error) throw r.error;
+      enabled=target;
+    }catch(e){ alert('Konnte nicht speichern: '+(e.message||e)); }
+    sw.disabled=false; busy=false;
+    refresh();
+  }
+
+  async function init(){
+    var s=await sb.auth.getUser();
+    if(!s||!s.data||!s.data.user){ $('gate').textContent='Bitte einloggen.'; location.href='login.html'; return; }
+    var adm=false;
+    try{ var p=await sb.from('my_profile').select('is_admin').maybeSingle(); adm=!!(p.data&&p.data.is_admin); }catch(e){}
+    if(!adm){ $('gate').textContent='Kein Admin-Zugriff.'; return; }
+    $('gate').style.display='none'; $('app').style.display='block';
+    $('sw').addEventListener('click', toggle);
+    refresh();
+  }
+  function boot(){ if(window.sb) init(); else setTimeout(boot,120); }
+  boot();
+})();
+</script>
+</body>
+</html>
