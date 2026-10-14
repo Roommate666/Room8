@@ -1,170 +1,117 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-page="event-detail">
 <head>
     <script src="sentry-init.js"></script>
     <meta charset="UTF-8">
     <meta name="robots" content="noindex, nofollow, noarchive">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Event - UniGoat</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico?v133">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="unigoat-v2.css">
     <style>
-        .app-container { background-color: #f3f4f6; padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
+      /* Alias: altes Token-Vokabular auf v2 (wie coupon-detail.html) */
+      :root{
+        --ink:var(--color-text); --paper:var(--color-bg); --card:var(--color-surface);
+        --w2:var(--color-neutral-300); --w4:var(--text-muted); --line:var(--color-divider);
+        --green:var(--color-accent); --greenD:var(--accent-small); --greenL:var(--color-accent-100);
+        --fh:var(--font-heading); --fb:var(--font-body);
+      }
+      body{ background:var(--color-bg); }
+      .app-container{ background:var(--color-bg); padding-bottom:calc(120px + env(safe-area-inset-bottom)); }
 
-        .detail-hero { position: relative; width: 100%; aspect-ratio: 16 / 9; background: linear-gradient(135deg, #CCFBF1 0%, #5EEAD4 100%); overflow: hidden; }
-        .detail-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .detail-back {
-            position: absolute; top: calc(1rem + env(safe-area-inset-top)); left: 1rem;
-            background: rgba(255,255,255,0.95); border-radius: 50%;
-            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-            color: #111827; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        }
-        .detail-share {
-            position: absolute; top: calc(1rem + env(safe-area-inset-top)); right: 1rem;
-            background: rgba(255,255,255,0.95); border-radius: 50%;
-            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-            color: #111827; border: none; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        }
-        .detail-content { padding: 1.25rem; background: white; margin-top: -16px; border-radius: 24px 24px 0 0; position: relative; z-index: 2; }
+      /* Hero: full-width Bild, eckig (v2) */
+      .detail-hero{ position:relative; width:100%; aspect-ratio:16/9; background:var(--color-neutral-300); overflow:hidden; }
+      .detail-hero img{ width:100%; height:100%; object-fit:cover; display:block; }
+      .detail-back,.detail-share,.detail-save{
+        position:absolute; top:calc(1rem + env(safe-area-inset-top));
+        width:40px; height:40px; display:flex; align-items:center; justify-content:center;
+        background:var(--color-bg); color:var(--color-text); text-decoration:none; border:2px solid var(--color-text); cursor:pointer;
+      }
+      .detail-back{ left:1rem; }
+      .detail-share{ right:1rem; }
+      .detail-save{ right:4rem; }
 
-        .badge-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
-        .badge { font-size: 0.7rem; font-weight: 700; padding: 0.3rem 0.65rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.03em; }
-        .badge-cat { background: #CCFBF1; color: #0F766E; }
-        .badge-official { background: linear-gradient(135deg, #14B8A6, #0F766E); color: white; }
-        .badge-past { background: #F3F4F6; color: #6B7280; }
+      .detail-content{ padding:18px 20px 4px; background:var(--color-bg); position:relative; z-index:2; }
 
-        .event-title { font-size: 1.6rem; font-weight: 800; color: #111827; margin: 0 0 0.5rem; line-height: 1.25; }
+      /* Badges (Kategorie / Offiziell / Vergangen) im v2-Look: eckig */
+      .badge-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+      .badge{ font-family:var(--font-heading); font-size:11px; font-weight:800; padding:4px 10px; text-transform:uppercase; letter-spacing:.04em; }
+      .badge-cat{ background:var(--color-accent-100); color:var(--accent-small); }
+      .badge-official{ background:var(--color-accent); color:var(--on-accent); }
+      .badge-past{ background:var(--color-neutral-100); color:var(--text-muted); }
 
-        /* Einheitliche Meta-Chip-Zeile (identisch auf allen 3 Detail-Seiten) */
-        .r8-meta-chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0}
-        .r8-chip{display:inline-flex;align-items:center;gap:.35rem;background:#F3F4F6;
-            color:#374151;padding:.4rem .7rem;border-radius:999px;font-size:.85rem;
-            font-weight:600;line-height:1}
-        .event-organizer-line { color: #6B7280; font-size: 0.9rem; margin-bottom: 1rem; }
+      .event-title{ font-family:var(--font-heading); font-size:26px; font-weight:800; color:var(--color-text); margin:0 0 6px; line-height:1.15; letter-spacing:-.02em; }
 
-        .meta-grid { display: flex; flex-direction: column; gap: 0.75rem; padding: 1rem; background: #F9FAFB; border-radius: 12px; margin-bottom: 1rem; }
-        .meta-row { display: flex; align-items: flex-start; gap: 0.75rem; }
-        .meta-icon { font-size: 1.25rem; flex-shrink: 0; width: 24px; }
-        .meta-content { flex: 1; }
-        .meta-label { font-size: 0.75rem; color: #6B7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
-        .meta-value { color: #111827; font-size: 0.95rem; font-weight: 500; }
+      /* Meta-Chip-Zeile */
+      .r8-meta-chips{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
+      .r8-chip{ display:inline-flex; align-items:center; gap:6px; background:var(--color-surface); border:1px solid var(--color-divider);
+        color:var(--color-text); padding:6px 11px; font-size:13px; font-weight:600; line-height:1; }
+      .event-organizer-line{ color:var(--text-muted); font-size:14px; margin-bottom:14px; }
 
-        .description-section { margin-bottom: 1.5rem; }
-        .description-section h3 { font-size: 1rem; font-weight: 700; color: #111827; margin: 0 0 0.5rem; }
-        .description-text { color: #374151; font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; }
+      /* Meta-Grid (Wann/Plaetze) */
+      .meta-grid{ display:flex; flex-direction:column; gap:12px; padding:14px; background:var(--color-surface); border-left:5px solid var(--color-accent); margin-bottom:16px; }
+      .meta-row{ display:flex; align-items:flex-start; gap:12px; }
+      .meta-icon{ font-size:18px; flex-shrink:0; width:22px; }
+      .meta-content{ flex:1; }
+      .meta-label{ font-family:var(--font-heading); font-size:11px; color:var(--text-muted); font-weight:800; text-transform:uppercase; letter-spacing:.05em; }
+      .meta-value{ color:var(--color-text); font-size:15px; font-weight:600; }
 
-        /* Detail-Seite: keine Bottom-Tab-Nav (verdeckte sonst die Anmelde-Leiste).
-           Navigation laeuft ueber Zurueck-Button im Hero + interest-bar. */
-        .bottom-nav { display: none !important; }
-        .interest-bar {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: white; border-top: 1px solid #E5E7EB;
-            padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom));
-            display: flex; gap: 0.75rem; z-index: 50;
-        }
-        .btn-primary {
-            flex: 1; padding: 0.85rem; border-radius: 12px;
-            background: linear-gradient(135deg, #14B8A6, #0F766E); color: white;
-            font-size: 1rem; font-weight: 700; border: none; cursor: pointer;
-        }
-        .btn-primary.going { background: #DCFCE7; color: #166534; }
-        .btn-secondary {
-            padding: 0.85rem 1.25rem; border-radius: 12px;
-            background: white; color: #374151; border: 1px solid #E5E7EB;
-            font-size: 1rem; font-weight: 600; cursor: pointer;
-        }
+      .description-section{ margin-bottom:22px; }
+      .description-section h3{ font-family:var(--font-heading); font-size:15px; font-weight:800; color:var(--color-text); margin:0 0 8px; }
+      .description-text{ color:var(--color-text); font-size:15px; line-height:1.6; white-space:pre-wrap; }
+      .external-link{ display:inline-block; margin-top:8px; color:var(--accent-small); text-decoration:none; font-family:var(--font-heading); font-weight:800; font-size:14px; }
 
-        .going-count { color: #6B7280; font-size: 0.85rem; margin-bottom: 0.5rem; }
+      /* Detail-Seite hat KEINE Tabbar (interest-bar unten) */
+      .bottom-nav,.tabbar{ display:none !important; }
+      .interest-bar{ position:fixed; bottom:0; left:0; right:0; background:var(--color-bg); border-top:2px solid var(--color-text);
+        padding:14px 20px calc(14px + env(safe-area-inset-bottom)); display:flex; gap:10px; z-index:50; }
+      .btn-primary{ flex:1; padding:14px; border:none; background:var(--color-accent); color:var(--on-accent);
+        font-family:var(--font-heading); font-size:16px; font-weight:800; cursor:pointer; min-height:52px; }
+      .btn-primary.going{ background:var(--color-accent-100); color:var(--accent-small); }
+      .btn-primary:disabled{ opacity:.55; cursor:not-allowed; }
+      .btn-secondary{ padding:14px 18px; border:2px solid var(--color-text); background:var(--color-bg); color:var(--color-text);
+        font-family:var(--font-heading); font-size:15px; font-weight:800; cursor:pointer; }
 
-        .attendees-section { margin: 1rem 0 0.5rem; }
-        .attendees-title { font-size: 0.95rem; font-weight: 700; color: #374151; margin: 0 0 0.6rem; }
-        .attendees-list { display: flex; flex-wrap: wrap; gap: 0.85rem; }
-        .attendee {
-            display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
-            width: 64px; text-decoration: none; color: #374151; cursor: pointer;
-        }
-        .attendee-avatar {
-            width: 48px; height: 48px; border-radius: 50%; object-fit: cover;
-            background: #E5E7EB; display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem; font-weight: 700; color: #6B7280; overflow: hidden;
-        }
-        .attendee-name {
-            font-size: 0.72rem; text-align: center; line-height: 1.1;
-            max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-        }
-        .attendee-more {
-            display: flex; align-items: center; justify-content: center;
-            width: 48px; height: 48px; border-radius: 50%; background: #F3F4F6;
-            color: #6B7280; font-size: 0.8rem; font-weight: 700;
-        }
-        /* Speichern-Button im Hero (oben rechts, links neben Teilen) */
-        .detail-save {
-            position: absolute; top: calc(1rem + env(safe-area-inset-top)); right: 4rem;
-            background: rgba(255,255,255,0.95); border-radius: 50%;
-            width: 40px; height: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            color: #111827;
-        }
+      .going-count{ color:var(--text-muted); font-size:14px; margin-bottom:8px; }
 
-        .external-link {
-            display: inline-block; margin-top: 0.5rem;
-            color: #0F766E; text-decoration: none; font-size: 0.9rem; font-weight: 600;
-        }
+      .attendees-section{ margin:16px 0 8px; }
+      .attendees-title{ font-family:var(--font-heading); font-size:15px; font-weight:800; color:var(--color-text); margin:0 0 10px; }
+      .attendees-list{ display:flex; flex-wrap:wrap; gap:14px; }
+      .attendee{ display:flex; flex-direction:column; align-items:center; gap:5px; width:64px; text-decoration:none; color:var(--color-text); cursor:pointer; }
+      .attendee-avatar{ width:48px; height:48px; border-radius:50%; object-fit:cover; background:var(--color-neutral-200);
+        display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-size:17px; font-weight:800; color:var(--text-muted); overflow:hidden; }
+      .attendee-name{ font-size:11px; text-align:center; line-height:1.1; max-width:64px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .attendee-more{ display:flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:50%;
+        background:var(--color-neutral-100); color:var(--text-muted); font-family:var(--font-heading); font-size:13px; font-weight:800; }
 
-        .loading { text-align: center; padding: 4rem 1rem; color: #9CA3AF; }
+      .loading{ text-align:center; padding:4rem 1rem; color:var(--text-muted); }
 
-        /* Report Button + Modal */
-        /* Melden = sekundaere, seltene Aktion: dezent, zentriert, am Ende des Contents.
-           Eigener Bereich ausserhalb von .detail-content, leicht abgesetzt vor der interest-bar. */
-        .report-footer {
-            text-align: center;
-            padding: 1.25rem 1.25rem 0.5rem;
-            background: white;
-        }
-        .report-link {
-            display: inline-flex; align-items: center; gap: 0.35rem;
-            padding: 0.5rem 0.85rem; border-radius: 999px;
-            color: #9CA3AF; font-size: 0.8rem; font-weight: 500; text-decoration: none;
-            background: none; border: none; cursor: pointer;
-            transition: color 0.15s, background 0.15s;
-        }
-        .report-link svg { width: 14px; height: 14px; flex-shrink: 0; }
-        .report-link:hover { color: #EF4444; background: #FEF2F2; }
+      /* Melden */
+      .report-footer{ text-align:center; padding:20px 20px 8px; background:var(--color-bg); }
+      .report-link{ display:inline-flex; align-items:center; gap:6px; padding:8px 14px; color:var(--text-muted); font-size:13px; font-weight:600;
+        text-decoration:none; background:none; border:none; cursor:pointer; transition:color .15s,background .15s; }
+      .report-link svg{ width:14px; height:14px; flex-shrink:0; }
+      .report-link:hover{ color:#C43A22; background:#FBECE8; }
 
-        .report-modal-bg {
-            position: fixed; inset: 0; background: rgba(17,24,39,0.6);
-            display: none; align-items: center; justify-content: center;
-            z-index: 200; padding: 1rem;
-        }
-        .report-modal-bg.active { display: flex; }
-        .report-modal {
-            background: white; border-radius: 16px; padding: 1.5rem;
-            max-width: 420px; width: 100%; max-height: 90vh; overflow-y: auto;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
-        }
-        .report-modal h3 { margin: 0 0 0.5rem; font-size: 1.1rem; font-weight: 700; color: #111827; }
-        .report-modal p { margin: 0 0 1rem; color: #6B7280; font-size: 0.9rem; }
-        .report-options { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
-        .report-option {
-            display: flex; align-items: center; gap: 0.5rem;
-            padding: 0.65rem 0.75rem; border: 1px solid #E5E7EB; border-radius: 10px;
-            cursor: pointer; transition: all 0.15s; font-size: 0.9rem; color: #374151;
-        }
-        .report-option:hover { border-color: #14B8A6; background: #F0FDFA; }
-        .report-option input { margin: 0; }
-        .report-option.checked { border-color: #14B8A6; background: #F0FDFA; color: #0F766E; font-weight: 600; }
-        .report-details {
-            width: 100%; padding: 0.65rem 0.75rem; border: 1px solid #E5E7EB; border-radius: 10px;
-            font-size: 0.9rem; font-family: inherit; min-height: 70px; resize: vertical;
-        }
-        .report-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
-        .report-actions .btn {
-            flex: 1; padding: 0.7rem; border-radius: 10px;
-            font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none;
-        }
-        .report-actions .btn-cancel { background: #F3F4F6; color: #374151; }
-        .report-actions .btn-submit { background: #EF4444; color: white; }
-        .report-actions .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+      .report-modal-bg{ position:fixed; inset:0; background:color-mix(in srgb,var(--color-neutral-900) 60%,transparent);
+        display:none; align-items:center; justify-content:center; z-index:200; padding:16px; }
+      .report-modal-bg.active{ display:flex; }
+      .report-modal{ background:var(--color-bg); border:2px solid var(--color-text); padding:22px; max-width:420px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:var(--shadow-lg); }
+      .report-modal h3{ font-family:var(--font-heading); margin:0 0 6px; font-size:19px; font-weight:800; color:var(--color-text); }
+      .report-modal p{ margin:0 0 14px; color:var(--text-muted); font-size:14px; }
+      .report-options{ display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+      .report-option{ display:flex; align-items:center; gap:8px; padding:11px 12px; border:1px solid var(--color-divider);
+        cursor:pointer; transition:all .15s; font-size:14px; color:var(--color-text); }
+      .report-option:hover{ border-color:var(--color-accent); background:var(--color-accent-100); }
+      .report-option input{ margin:0; accent-color:var(--color-accent); }
+      .report-option.checked{ border-color:var(--color-accent); background:var(--color-accent-100); color:var(--accent-small); font-weight:700; }
+      .report-details{ width:100%; padding:11px 12px; border:1px solid var(--color-divider); font-size:14px; font-family:inherit; min-height:70px; resize:vertical; background:var(--color-bg); color:var(--color-text); }
+      .report-actions{ display:flex; gap:8px; margin-top:14px; }
+      .report-actions .btn{ flex:1; padding:12px; font-family:var(--font-heading); font-size:15px; font-weight:800; cursor:pointer; border:none; }
+      .report-actions .btn-cancel{ background:var(--color-neutral-100); color:var(--color-text); }
+      .report-actions .btn-submit{ background:#C43A22; color:#fff; }
+      .report-actions .btn-submit:disabled{ opacity:.5; cursor:not-allowed; }
     </style>
 </head>
 <body>
@@ -205,7 +152,7 @@
                 <h3 class="attendees-title" data-i18n="event_attendees_title">Wer geht hin</h3>
                 <div id="attendeesList" class="attendees-list"></div>
             </div>
-            <div id="viewCountWrap" style="display:none; align-items:center; gap:4px; color:#6b7280; font-size:0.85rem; margin-top:0.25rem;">
+            <div id="viewCountWrap" style="display:none; align-items:center; gap:4px; color:var(--text-muted); font-size:0.85rem; margin-top:0.25rem;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
                 <span id="viewCount">0</span>
             </div>
