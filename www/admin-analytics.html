@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="de" data-page="admin-analytics">
+<head>
+<script src="sentry-init.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Analytics — UniGoat Admin</title>
+<link rel="stylesheet" href="unigoat-v2.css">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133">
+<style>
+  :root{ --ink:var(--color-text); --mut:var(--text-muted); --mint:var(--color-accent); }
+  .kpis{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:6px 0 18px; }
+  .kpi{ border:2px solid var(--color-text); padding:14px 15px; }
+  .kpi .n{ font-family:var(--font-heading); font-weight:800; font-size:30px; line-height:1; color:var(--color-text); font-feature-settings:'tnum' 1; }
+  .kpi .l{ font-size:12px; color:var(--text-muted); font-weight:700; margin-top:5px; }
+  .sec{ font-family:var(--font-heading); font-weight:800; font-size:16px; margin:20px 0 10px; }
+  .bars{ display:flex; flex-direction:column; gap:5px; }
+  .bar{ display:grid; grid-template-columns:48px 1fr 40px; align-items:center; gap:8px; font-size:12px; }
+  .bar .t{ color:var(--text-muted); font-weight:700; }
+  .bar .track{ height:16px; background:var(--color-surface); position:relative; }
+  .bar .fill{ height:16px; background:var(--color-accent); }
+  .bar .v{ text-align:right; font-weight:800; font-family:var(--font-heading); font-feature-settings:'tnum' 1; }
+  .rows{ border-top:var(--rule); }
+  .r{ display:flex; align-items:center; justify-content:space-between; padding:10px 2px; border-bottom:var(--rule-thin); font-size:14px; }
+  .r .lbl{ font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .r .n{ font-family:var(--font-heading); font-weight:800; color:var(--accent-small); font-feature-settings:'tnum' 1; margin-left:12px; }
+  .seg{ display:flex; border:1px solid var(--color-divider); margin-bottom:6px; }
+  .seg button{ flex:1; border:0; background:none; padding:8px; font-family:var(--font-heading); font-weight:800; font-size:12px; color:var(--text-muted); cursor:pointer; }
+  .seg button + button{ border-left:1px solid var(--color-divider); }
+  .seg button.on{ background:var(--color-text); color:var(--color-bg); }
+  .msg{ text-align:center; padding:14px; font-weight:600; color:var(--color-text); }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="screen-body">
+    <div class="topbar" style="padding-top:14px">
+      <a class="btn btn-icon backbtn" href="admin.html" style="margin-left:8px" aria-label="Zurück"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--color-text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M15 18l-6-6 6-6"/></svg></a>
+      <div class="masthead" style="font-size:30px;padding:0 8px 0 2px">Analytics</div>
+      <span style="width:40px"></span>
+    </div>
+    <div class="hr"></div>
+
+    <div style="padding:16px 20px 26px;max-width:680px;margin:0 auto;">
+      <div class="kicker" style="margin-bottom:4px">UniGoat · Admin</div>
+      <div style="font-family:var(--font-heading);font-weight:800;font-size:22px;margin-bottom:12px;">Was machen die Studenten?</div>
+
+      <div id="gate" class="msg">Prüfe Zugriff…</div>
+      <div id="app" style="display:none;">
+        <div class="seg" id="rangeSeg">
+          <button data-d="7">7 Tage</button>
+          <button data-d="14" class="on">14 Tage</button>
+          <button data-d="30">30 Tage</button>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi"><div class="n" id="kDau">–</div><div class="l">Aktiv heute</div></div>
+          <div class="kpi"><div class="n" id="kWau">–</div><div class="l">Aktiv (7 Tage)</div></div>
+          <div class="kpi"><div class="n" id="kActive">–</div><div class="l">Aktiv (Zeitraum)</div></div>
+          <div class="kpi"><div class="n" id="kEvents">–</div><div class="l">Aktionen gesamt</div></div>
+        </div>
+
+        <div class="sec">Aktive Nutzer pro Tag</div>
+        <div class="bars" id="byDay"></div>
+
+        <div class="sec">Meistbesuchte Seiten</div>
+        <div class="rows" id="topPages"></div>
+
+        <div class="sec">Häufigste Aktionen</div>
+        <div class="rows" id="topEvents"></div>
+
+        <p class="muted" style="font-size:12px;color:var(--text-muted);margin-top:20px;line-height:1.5;">
+          Eigenes Event-Log (Supabase) — keine Drittanbieter, keine Cookies. Zählt nur eingeloggte Nutzer.
+          Noch keine Daten? Erscheint, sobald Nutzer die App mit dem neuen Stand öffnen.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="lib/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function nf(n){return (Number(n)||0).toLocaleString('de-DE');}
+  var curDays=14;
+
+  function renderBars(byDay){
+    var max=1; byDay.forEach(function(d){ if(+d.nutzer>max) max=+d.nutzer; });
+    $('byDay').innerHTML = byDay.map(function(d){
+      var pct=Math.round((+d.nutzer/max)*100);
+      return '<div class="bar"><span class="t">'+esc(d.tag)+'</span>'+
+        '<span class="track"><span class="fill" style="width:'+pct+'%"></span></span>'+
+        '<span class="v">'+nf(d.nutzer)+'</span></div>';
+    }).join('') || '<div class="muted" style="color:var(--text-muted);font-size:13px">Noch keine Daten.</div>';
+  }
+  function renderRows(el, arr, keyLabel, keyN){
+    $(el).innerHTML = (arr&&arr.length) ? arr.map(function(x){
+      return '<div class="r"><span class="lbl">'+esc(x[keyLabel])+'</span><span class="n">'+nf(x[keyN])+'</span></div>';
+    }).join('') : '<div class="r"><span class="lbl" style="color:var(--text-muted)">Noch keine Daten.</span></div>';
+  }
+
+  async function load(){
+    try{
+      var r=await sb.rpc('analytics_overview',{p_days:curDays});
+      if(r.error) throw r.error;
+      var d=r.data||{};
+      $('kDau').textContent=nf(d.dau_today);
+      $('kWau').textContent=nf(d.wau);
+      $('kActive').textContent=nf(d.active_total);
+      $('kEvents').textContent=nf(d.events_total);
+      renderBars(d.by_day||[]);
+      renderRows('topPages', d.top_pages||[], 'page', 'n');
+      renderRows('topEvents', d.top_events||[], 'event', 'n');
+    }catch(e){ $('byDay').innerHTML='<div class="msg">Fehler: '+esc(e.message||e)+'</div>'; }
+  }
+
+  async function init(){
+    var s=await sb.auth.getUser();
+    if(!s||!s.data||!s.data.user){ $('gate').textContent='Bitte einloggen.'; location.href='login.html'; return; }
+    var adm=false; try{ var p=await sb.from('my_profile').select('is_admin').maybeSingle(); adm=!!(p.data&&p.data.is_admin); }catch(e){}
+    if(!adm){ $('gate').textContent='Kein Admin-Zugriff.'; return; }
+    $('gate').style.display='none'; $('app').style.display='block';
+    $('rangeSeg').addEventListener('click',function(e){
+      var b=e.target.closest('button[data-d]'); if(!b)return;
+      curDays=+b.getAttribute('data-d');
+      [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);});
+      load();
+    });
+    load();
+  }
+  function boot(){ if(window.sb) init(); else setTimeout(boot,120); }
+  boot();
+})();
+</script>
+</body>
+</html>
