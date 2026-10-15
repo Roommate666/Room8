@@ -47,6 +47,22 @@
     cover-first (nicht display_order, siehe 15.10.-Fehler).
   - **Added:** 15.10.2026
 
+- [ ] **Jobs-Tab aktivieren — WENN Firmen konkret Jobs einstellen wollen**
+  - Toggle-Infrastruktur ist VORBEREITET (16.10.): `app_config.jobs_enabled` (default aus),
+    `set_app_flag`-Allowlist erweitert, `www/jobs-tab.js` (klon von events-tab.js, noch NICHT
+    eingebunden), `events-tab.js` auf Reihenfolge Coupons->Jobs->Events angepasst.
+  - OFFEN bei echter Nachfrage: (a) jobs.html + job-detail.html + job-create.html ins v2-Design
+    umbauen (aktuell altes navigation.js-Design = Stil-Bruch), (b) jobs-tab.js in die 9 v2-Seiten
+    einbinden (wie events-tab.js), (c) jobs.html Flag-Gate (redirect coupons wenn aus), (d)
+    admin-jobs.html (klon admin-events.html) + admin.html-Link, (e) Flag anschalten.
+  - Jobs-System selbst (einstellen + in-App-bewerben + Lebenslauf-Upload + view_count/apply_clicks)
+    ist voll funktionsfaehig, nur nicht im Tab sichtbar. **Added:** 16.10.2026
+
+- [ ] **Admin-Feedback-Seite** (aus Feedback-Thema 15.10.)
+  - Backend fertig (feedback-Tabelle + admin_list_feedback + admin_update_feedback_status), aber
+    keine UI in admin.html. Feedback kommt aktuell nur per Mail an info@unigoat.de. Seite bauen:
+    Liste + Filter + Status neu/gesehen/erledigt. **Added:** 16.10.2026
+
 - [ ] **Verify-Onboarding datenbasiert verbessern**
   - Analytics-Funnel (verify_opened -> requested -> success) ist seit v255 live. Sobald echte
     Daten da sind (1-2 Tage): Abbruchstelle identifizieren + gezielt fixen. 137 Unverifizierte

@@ -26,9 +26,9 @@
     if(onEvents) a.setAttribute('aria-current', 'page');
     a.innerHTML = iconCalendar() + 'Events';
 
-    // Position: Hub . Coupons . [Events] . Game . Rang . Profil
-    var coup = bar.querySelector('a[href="coupons.html"]');
-    if(coup && coup.nextSibling) bar.insertBefore(a, coup.nextSibling);
+    // Position: Hub . Coupons . [Jobs] . [Events] . Game ... -> Events nach einem evtl. Jobs-Tab, sonst nach Coupons
+    var anchor = bar.querySelector('a[data-tab="jobs"]') || bar.querySelector('a[href="coupons.html"]');
+    if(anchor && anchor.nextSibling) bar.insertBefore(a, anchor.nextSibling);
     else bar.appendChild(a);
   }
 
