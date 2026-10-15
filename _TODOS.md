@@ -21,9 +21,42 @@
     Termin, bricht iOS-Login fuer ALLE User. Tool: `tools/generate-apple-jwt.js`.
   - Siehe `_GOLDEN-RULES.md` Regel 9.
 
+- [ ] **iOS 2.6.0 / Build 80 einreichen (Events + Analytics + Rang + Coupon-Bilder)**
+  - Version im Projekt gebumpt (15.10.). In Xcode: Archive -> Upload.
+  - **VOR Freigabe:** App-Datenschutz in App Store Connect um "Nutzungsdaten -> Produktinteraktion"
+    ergaenzen (Analytics ab v256), mit Nutzer verknuepft, NICHT fuers Tracking. Sonst 5.1.1-Rejection.
+  - **Added:** 15.10.2026
+
 ---
 
 ## Mittel
+
+- [ ] **Globaler Push-Tages-Cap (Fatigue-Schutz)**
+  - Ein sehr aktiver Nutzer kann bis ~6-7 Pushes/Tag bekommen (Engagement-Crons:
+    daily-game-reminder, daily-quest-reminder, streak-risk, rank-changes + Deal der Woche).
+    Kein globales Tageslimit ueber alle Kanaele. Vorschlag: daily_push_cap-Tabelle, max 4/Tag
+    ausser chat_message; oder Engagement-Crons zusammenlegen/spreizen.
+  - Aufgetaucht im Push-Marketing-Review 15.10. Nicht dringend (Deal addiert nur +2/Woche),
+    relevant sobald Nutzerzahl steigt.
+  - **Added:** 15.10.2026
+
+- [ ] **Admin-Knopf "Bild aufs Format erweitern" beim Coupon-Anlegen**
+  - 15.10. wurden die 14 Coupon-Titelbilder einmalig per Higgsfield-Outpaint auf 3:2 gebracht.
+    Kuenftige Partner-Uploads kommen wieder im Originalformat. Loesung: Outpaint-Schritt in die
+    Upload-Pipeline (admin/coupon-create), damit jedes neue Bild automatisch 3:2 wird + Hero-Auswahl
+    cover-first (nicht display_order, siehe 15.10.-Fehler).
+  - **Added:** 15.10.2026
+
+- [ ] **Verify-Onboarding datenbasiert verbessern**
+  - Analytics-Funnel (verify_opened -> requested -> success) ist seit v255 live. Sobald echte
+    Daten da sind (1-2 Tage): Abbruchstelle identifizieren + gezielt fixen. 137 Unverifizierte
+    = groesster Wachstums-Hebel.
+  - **Added:** 15.10.2026
+
+- [ ] **should_notify() CASE um coupon_reminder + game_push erweitern**
+  - Opt-out wirkt schon via inline-Check in send_daily_coupon_reminders, aber der zentrale
+    should_notify-CASE kennt die Channels nicht -> Redundanz/Inkonsistenz-Risiko. (Niedrig)
+  - **Added:** 15.10.2026
 
 - [ ] **CSP von Report-Only auf enforcing umstellen**
   - In `www/vercel.json` laeuft die Content-Security-Policy aktuell als
