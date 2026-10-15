@@ -399,6 +399,18 @@
     }catch(e){}
   }
 
+  // Uni-Rangliste nur anbieten, wenn mind. 2 verschiedene Unis in der Rangliste vertreten sind.
+  // Bei nur einer Uni ist "Uni" fast dasselbe wie "Global" -> Tab ausblenden (kommt autom. zurueck bei 2+).
+  async function maybeHideUniTab(){
+    var btn=document.querySelector('#seg button[data-scope="uni"]');
+    if(!btn) return;
+    try{
+      var r=await sb.rpc('get_challenge_leaderboard',{p_limit:200});
+      var unis={}; (r.data||[]).forEach(function(x){ var u=(x.university||'').trim(); if(u) unis[u]=1; });
+      if(Object.keys(unis).length < 2) btn.style.display='none';
+    }catch(e){}
+  }
+
   async function init(){
     if(!window.sb) return;
     try{ MEID=(await sb.auth.getUser()).data.user.id; }catch(e){}
@@ -406,6 +418,7 @@
       try{ var mp=await sb.from('my_profile').select('university,coins').maybeSingle(); if(mp.data){ MYUNI=mp.data.university||null; MYCOINS=+mp.data.coins||0; } }catch(e){}
       loadReqHint();
     }
+    maybeHideUniTab();
     load();
   }
   init();
