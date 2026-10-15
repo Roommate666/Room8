@@ -517,7 +517,7 @@
         // Geteilt wird /s/<id>?t=event -> Server-Side-OG-Vorschau (Bild+Titel) -> App
         var id = new URLSearchParams(window.location.search).get('id');
         var title = currentEvent ? currentEvent.title : 'UniGoat Event';
-        var url = id ? ('https://unigoat.pages.dev/s/' + encodeURIComponent(id) + '?t=event') : window.location.href;
+        var url = id ? ('https://unigoat.de/s/' + encodeURIComponent(id) + '?t=event') : window.location.href;
         if (navigator.share) {
             navigator.share({ title: title, url: url }).catch(function(){});
         } else {
