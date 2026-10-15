@@ -208,6 +208,7 @@
                     : 'Konnte den Code nicht senden. Versuch es nochmal.');
                 btn.disabled = false; btn.textContent = "Code anfordern"; return;
             }
+            if (window.UGTrack) UGTrack.track('verify_code_requested', {});
             document.getElementById('emailForm').style.display = 'none';
             document.getElementById('codeForm').style.display = 'block';
             var ci = document.getElementById('uniCode'); if (ci) ci.focus();
@@ -229,6 +230,7 @@
             const { data, error } = await sb.rpc('verify_uni_code', { p_code: code });
             if (error) throw error;
             if (data && data.ok) {
+                if (window.UGTrack) UGTrack.track('verify_success', { method: 'email' });
                 showSuccess('email');
                 return;
             }

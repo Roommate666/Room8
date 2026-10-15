@@ -20,6 +20,12 @@
   .bar .track{ height:16px; background:var(--color-surface); position:relative; }
   .bar .fill{ height:16px; background:var(--color-accent); }
   .bar .v{ text-align:right; font-weight:800; font-family:var(--font-heading); font-feature-settings:'tnum' 1; }
+  .funnel{ display:flex; flex-direction:column; gap:6px; margin-bottom:6px; }
+  .fstep{ display:grid; grid-template-columns:1fr auto; align-items:center; gap:10px; }
+  .fstep .fbar{ height:30px; background:var(--color-accent); color:var(--on-accent); display:flex; align-items:center;
+    padding:0 10px; font-family:var(--font-heading); font-weight:800; font-size:13px; }
+  .fstep .fmeta{ font-size:12px; color:var(--text-muted); white-space:nowrap; }
+  .fdrop{ color:#C43A22; font-weight:800; }
   .rows{ border-top:var(--rule); }
   .r{ display:flex; align-items:center; justify-content:space-between; padding:10px 2px; border-bottom:var(--rule-thin); font-size:14px; }
   .r .lbl{ font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -59,6 +65,11 @@
           <div class="kpi"><div class="n" id="kActive">–</div><div class="l">Aktiv (Zeitraum)</div></div>
           <div class="kpi"><div class="n" id="kEvents">–</div><div class="l">Aktionen gesamt</div></div>
         </div>
+
+        <div class="sec">Verify-Funnel — wo springen sie ab?</div>
+        <div class="funnel" id="funVerify"></div>
+        <div class="sec">Coupon-Funnel</div>
+        <div class="funnel" id="funCoupon"></div>
 
         <div class="sec">Aktive Nutzer pro Tag</div>
         <div class="bars" id="byDay"></div>
@@ -102,6 +113,15 @@
       return '<div class="r"><span class="lbl">'+esc(x[keyLabel])+'</span><span class="n">'+nf(x[keyN])+'</span></div>';
     }).join('') : '<div class="r"><span class="lbl" style="color:var(--text-muted)">Noch keine Daten.</span></div>';
   }
+  function renderFunnel(el, steps){
+    var max = steps.length ? Math.max(1, +steps[0].n) : 1;
+    $(el).innerHTML = steps.map(function(s,i){
+      var pct = Math.max(8, Math.round((+s.n/max)*100));
+      var drop = (i>0 && +steps[i-1].n>0) ? Math.round((1-(+s.n/+steps[i-1].n))*100) : null;
+      return '<div class="fstep"><div class="fbar" style="width:'+pct+'%">'+nf(s.n)+'</div>'+
+        '<div class="fmeta">'+esc(s.label)+((drop!=null&&drop>0)?(' · <span class="fdrop">−'+drop+'%</span>'):'')+'</div></div>';
+    }).join('');
+  }
 
   async function load(){
     try{
@@ -113,6 +133,9 @@
       $('kActive').textContent=nf(d.active_total);
       $('kEvents').textContent=nf(d.events_total);
       renderBars(d.by_day||[]);
+      var fn=d.funnel||{};
+      renderFunnel('funVerify',[{label:'Verify geöffnet',n:fn.verify_opened||0},{label:'Code angefordert',n:fn.verify_requested||0},{label:'verifiziert',n:fn.verify_success||0}]);
+      renderFunnel('funCoupon',[{label:'Coupon angesehen',n:fn.coupon_viewed||0},{label:'eingelöst',n:fn.coupon_redeemed||0}]);
       renderRows('topPages', d.top_pages||[], 'page', 'n');
       renderRows('topEvents', d.top_events||[], 'event', 'n');
     }catch(e){ $('byDay').innerHTML='<div class="msg">Fehler: '+esc(e.message||e)+'</div>'; }

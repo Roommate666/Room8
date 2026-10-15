@@ -1414,6 +1414,7 @@ function gameOver(){
   if(mode==='daily'&&score>0){ try{ if(window.sb){ sb.rpc('claim_daily_challenge').then(function(r){ if(r&&r.data&&r.data.awarded>0){ setTimeout(function(){ say('Daily Challenge! +'+r.data.awarded+' G-Coins 🪙',2000); },1000); } }).catch(function(){}); } }catch(e){} }
   // Online-Submit (nur eingeloggt, fire-and-forget). Score+Seed+Zuege -> Server (spaeter Replay-validiert).
   if(score>0&&G){
+    if(window.UGTrack) UGTrack.track('game_played',{mode:mode,score:G.score});
     const payload={mode:mode,score:G.score,seed:G.seed,moves:moveLog.slice(),lines_total:G.linesTotal,duration_ms:nowMs(),event_id:(currentEventCache&&currentEventCache.id)||null};
     OnlineBoard.submit(payload).then(r=>{
       if(r&&r.ok&&r.rank&&$('overBest'))$('overBest').textContent+=' · Online #'+r.rank;

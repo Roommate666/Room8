@@ -286,6 +286,7 @@
     var r=await sb.from('coupons').select('*, coupon_photos(storage_path,photo_type,display_order)').eq('id',id).single();
     if(r.error||!r.data){$('biz').textContent='Coupon nicht gefunden';return;}
     coupon=r.data;render();checkSaved();
+    if(window.UGTrack&&coupon) UGTrack.track('coupon_view',{coupon_id:coupon.id,biz:coupon.business_name||null});
     if(userId){try{var red=await sb.from('coupon_redemptions').select('id').eq('coupon_id',id).eq('user_id',userId).maybeSingle();if(red.data&&coupon.usage_limit_per_user===1){already=true;markDone();}}catch(e){}}
   }
   function render(){
@@ -552,6 +553,7 @@
     if(!d||!d.ok){
       var em=ERR_MSG[d&&d.error]||'Einlösen nicht möglich.';
       failSheet(em); if((d&&d.error)==='ALREADY_REDEEMED'){already=true;markDone();} return; }
+    if(window.UGTrack&&coupon) UGTrack.track('coupon_redeemed',{coupon_id:coupon.id,coins:d.coins_earned||0});
     var code=d.verification_code||'—';
     var earned=d.coins_earned||0;
     var coinBlock = (earned>0 ? '<div class="coinwin"><span class="ccoin">G</span><span class="cnum" id="coinCount">+0</span><span class="clbl">G-Coins</span></div>' : '');
