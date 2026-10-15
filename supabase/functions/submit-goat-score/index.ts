@@ -31,6 +31,7 @@ const corsHeaders = {
 const MAX_SCORE = 5000000
 const MAX_MOVES = 5000        // DoS-Schutz: eine Runde hat realistisch < einige hundert Zuege
 const MIN_DURATION_MS = 3000  // eine echte Runde dauert laenger als 3s
+const MAX_PTS_PER_SEC = 150   // realer Max ~35 Pkt/s (echte Daten) -> 150/s als grosszuegige Bot-Grenze
 
 function json(body: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -89,9 +90,14 @@ serve(async (req) => {
       finalScore = rep.score
       verified = true
       replayValidated = (rep.score === Math.round(clientScore))
-      // Zusatz-Plausi: unrealistisch schnelle Runde -> nicht als validiert markieren
+      // Haertung 1: unrealistisch schnelle Runde -> ablehnen (frueher nur entwertet)
       if (durationMs != null && Number.isFinite(durationMs) && durationMs < MIN_DURATION_MS) {
-        replayValidated = false
+        return json({ success: false, error: 'too_fast' }, 400)
+      }
+      // Haertung 3: Plausibilitaets-Obergrenze Punkte/Sekunde (realer Max ~35/s)
+      if (durationMs != null && Number.isFinite(durationMs) && durationMs > 0
+          && rep.score / (durationMs / 1000) > MAX_PTS_PER_SEC) {
+        return json({ success: false, error: 'implausible_rate' }, 400)
       }
     } else {
       // Kein Replay moeglich (Alt-Client/kein moves) -> nur Basis-verified, NICHT preisgeld-faehig

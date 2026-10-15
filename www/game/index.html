@@ -630,8 +630,8 @@ function roundImg(){var i=ROUND_COLORS.indexOf(roundColor);return ROUND_IMGS[i<0
 function pieceImgUrl(){return "url('assets/block-"+roundImg()+".webp')";}
 const LINES_PER_LEVEL=6, MAX_LEVEL=15;
 const GOATMODE_AT=4, HYPED_AT=2, CURIOUS_AT=1;
-const HEAT_MS=6000, HEAT_MS_GOAT=7500;
-const GOLD_CHANCE=.11, CHILI_CHANCE=.1;
+// HEAT_MS/HEAT_MS_GOAT/GOLD_CHANCE/CHILI_CHANCE leben im Core (game/core.js). Die frueheren
+// lokalen Kopien waren toter Code (nie genutzt) -> entfernt, damit kein Drift zum Server-Core entsteht.
 
 const SHAPES=[
   {c:[[0,0]],t:1},
@@ -872,27 +872,8 @@ function renderBoard(){
 }
 
 /* ================= Pieces ================= */
-function piecePool(){
-  const pool=[];
-  for(const s of SHAPES){
-    let w=0;
-    if(s.t===1)w=level<3?5:(level<6?3:2);
-    else if(s.t===2)w=level<2?1:4;
-    else if(s.t===3)w=level<3?0:(level<6?2:4);
-    else w=level<4?0:(level<7?1:2);
-    for(let i=0;i<w;i++)pool.push(s);
-  }
-  return pool;
-}
-function newPiece(){
-  const pool=piecePool();
-  const s=pool[Math.floor(rng()*pool.length)];
-  const p={cells:s.c,color:COLORS[Math.floor(rng()*COLORS.length)],special:null};
-  const roll=rng();
-  if(roll<CHILI_CHANCE)p.special={i:Math.floor(rng()*s.c.length),t:'x'};
-  else if(roll<CHILI_CHANCE+GOLD_CHANCE)p.special={i:Math.floor(rng()*s.c.length),t:'g'};
-  return p;
-}
+// piecePool()/newPiece() leben im Core (GoatCore._internal.newPiece fuellt das Tray).
+// Die lokalen Kopien waren toter Code (nie aufgerufen) -> entfernt.
 function refillTray(){
   // Core besitzt tray/nextTray (in create/place erzeugt) -> hier nur spiegeln + rendern
   tray=G.tray;nextTray=G.nextTray;
@@ -958,19 +939,8 @@ function findFullLines(){
   return{rows,cols};
 }
 
-/* ================= Schimmel ================= */
-function moldCadence(){return level>=6?5:level>=4?6:level>=2?8:0;}
-function maybeSpawnMold(){
-  const cad=moldCadence();
-  if(!cad||placements%cad!==0)return;
-  const empty=[];
-  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(!grid[r][c])empty.push([r,c]);
-  if(empty.length<=6)return; // nicht unfair zumüllen
-  const[r,c]=empty[Math.floor(rng()*empty.length)];
-  grid[r][c]={t:'m'};
-  renderBoard();
-  say('Igitt, Schimmel! 🦠',1300);
-}
+/* Schimmel + Bomben: der aktive Core erzeugt keine (moldCadence/bombCadence = 0).
+   Die lokalen maybeSpawnMold/maybeSpawnBomb waren toter Code (nie aufgerufen) -> entfernt. */
 
 /* ================= Streak-Feuer (Echtzeit) ================= */
 // Echtzeit-Heat: Core ist Autoritaet (advanceTime). Hier nur Zeit vorspulen + rendern.
@@ -1384,18 +1354,7 @@ function tickBombs(){
     gameOver();return true;}
   return false;
 }
-function bombCadence(){return level>=5?7:level>=3?9:0;}
-function maybeSpawnBomb(){
-  const cad=bombCadence();
-  if(!cad||placements%cad!==0)return;
-  const empty=[];
-  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(!grid[r][c])empty.push([r,c]);
-  if(empty.length<=8)return;
-  const[r,c]=empty[Math.floor(rng()*empty.length)];
-  grid[r][c]={t:'b',timer:12};
-  renderBoard();
-  say('Bombe! Räum die Reihe! 💣',1600);
-}
+// bombCadence/maybeSpawnBomb: toter Code (Core erzeugt keine Bomben) -> entfernt.
 
 /* ================= Game Flow ================= */
 function bestKey(){return mode==='daily'?('ugb2_daily_'+todayKey()):'ugb2_high';}
@@ -1824,8 +1783,11 @@ setInterval(()=>{
     say(SPEECH.idle[Math.floor(Math.random()*SPEECH.idle.length)]);
 },8000);
 
-window.__gb={forceBomb:t=>{for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(!grid[r][c]){grid[r][c]={t:'b',timer:t};renderBoard();return true;}return false;},tick:tickBombs,active:()=>gameActive,score:()=>G?G.score:score,look:goatLook,jump:goatJumpFX,rig:()=>GoatRig.ready,
-  seed:()=>G&&G.seed,moves:()=>moveLog.slice(),mode:()=>mode,over:()=>G&&G.over,online:OnlineBoard};
+// Debug-Hooks (inkl. forceBomb = Board-Manipulation) NUR lokal / bei ?debug=1 — in Produktion aus (Anti-Cheat).
+if(location.hostname==='localhost'||location.hostname==='127.0.0.1'||/[?&]debug=1/.test(location.search)){
+  window.__gb={forceBomb:t=>{for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(!grid[r][c]){grid[r][c]={t:'b',timer:t};renderBoard();return true;}return false;},tick:tickBombs,active:()=>gameActive,score:()=>G?G.score:score,look:goatLook,jump:goatJumpFX,rig:()=>GoatRig.ready,
+    seed:()=>G&&G.seed,moves:()=>moveLog.slice(),mode:()=>mode,over:()=>G&&G.over,online:OnlineBoard};
+}
 GoatRig.init();
 showMenu();
 // Direktstart per URL-Hash (#play/#high = Highscore, #daily = Tages-Puzzle) -> springt ins Spiel
