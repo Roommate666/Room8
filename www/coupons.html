@@ -115,7 +115,8 @@
   "use strict";
   var $=function(id){return document.getElementById(id);};
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-  function bucketUrl(p,w){try{var o=w?{transform:{width:w,quality:60}}:undefined;return sb.storage.from('listing-images').getPublicUrl(p,o).data.publicUrl;}catch(e){return null;}}
+  // width allein liefert bei Supabase ein verzerrtes Bild (Originalhoehe bleibt) -> height + resize:cover erzwingen (3:2)
+  function bucketUrl(p,w){try{var o=w?{transform:{width:w,height:Math.round(w*2/3),resize:'cover',quality:60}}:undefined;return sb.storage.from('listing-images').getPublicUrl(p,o).data.publicUrl;}catch(e){return null;}}
   function fmtDisc(v){var s=(v||'').toString().trim();return /^\d+$/.test(s)?s+'%':s;}
   // Live-Oeffnungsstatus aus hours-JSON (Fallback opening_hours-Text)
   var DAYKEYS=['sun','mon','tue','wed','thu','fri','sat'];
@@ -174,7 +175,7 @@
   async function load(){
     if(!window.sb){ $('list').innerHTML='<div class="ug-empty">Bitte einloggen.</div>'; return; }
     // Sofort aus Cache zeigen (stale-while-revalidate) -> Coupons erscheinen instant beim Wiederkommen
-    try{ var cc=JSON.parse(localStorage.getItem('ug_coupons_cache')||'null'); if(cc&&cc.length){ all=cc; render(); } }catch(e){}
+    try{ var cc=JSON.parse(localStorage.getItem('ug_coupons_cache2')||'null'); if(cc&&cc.length){ all=cc; render(); } }catch(e){}
     try{ var u=(await sb.auth.getUser()).data.user; if(u){ var pr=await sb.from('my_profile').select('coins').maybeSingle(); if(pr.data)$('coins').textContent=(pr.data.coins||0).toLocaleString('de-DE'); } }catch(e){}
     var heute=new Date().toISOString().slice(0,10);
     try{
@@ -186,7 +187,7 @@
       data.forEach(function(c){ if(c.parent_coupon_id){ childCount[c.parent_coupon_id]=(childCount[c.parent_coupon_id]||0)+1; } });
       var tops=data.filter(function(c){ return !c.parent_coupon_id; });
       all=tops.map(function(c){ var cov=(c.coupon_photos||[]).filter(function(p){return p.photo_type==='cover';})[0]||(c.coupon_photos||[])[0]; c.imageUrl=cov?bucketUrl(cov.storage_path,400):null; c.childCount=childCount[c.id]||0; return c; });
-      try{ localStorage.setItem('ug_coupons_cache', JSON.stringify(all)); }catch(e){}
+      try{ localStorage.setItem('ug_coupons_cache2', JSON.stringify(all)); }catch(e){}
     }catch(e){ if(!all.length) all=[]; }
     render();
   }

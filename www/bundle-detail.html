@@ -71,7 +71,7 @@
   "use strict";
   var $=function(x){return document.getElementById(x);};
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-  function bucketUrl(p,w){try{var o=w?{transform:{width:w,quality:65}}:undefined;return sb.storage.from('listing-images').getPublicUrl(p,o).data.publicUrl;}catch(e){return null;}}
+  function bucketUrl(p,w){try{var o=w?{transform:{width:w,height:Math.round(w*2/3),resize:'cover',quality:65}}:undefined;return sb.storage.from('listing-images').getPublicUrl(p,o).data.publicUrl;}catch(e){return null;}}
   function fmtDisc(v){var s=(v||'').toString().trim();return /^\d+$/.test(s)?s+'%':s;}
   function fmtDate(d){if(!d)return '';try{return new Date(d).toLocaleDateString('de-DE');}catch(e){return d;}}
   function coverUrl(c,w){var ph=(c.coupon_photos||[]);var cov=ph.filter(function(p){return p.photo_type==='cover';})[0]||ph.filter(function(p){return p.photo_type!=='logo';})[0]||ph[0];return cov?bucketUrl(cov.storage_path,w):null;}

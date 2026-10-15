@@ -107,7 +107,7 @@
   "use strict";
   var $=function(id){return document.getElementById(id);};
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-  function bucketUrl(p,w){try{var o=w?{transform:{width:w,quality:60}}:undefined;return sb.storage.from('event-images').getPublicUrl(p,o).data.publicUrl;}catch(e){return null;}}
+  function bucketUrl(p,w){try{var o=w?{transform:{width:w,height:Math.round(w*2/3),resize:'cover',quality:60}}:undefined;return sb.storage.from('event-images').getPublicUrl(p,o).data.publicUrl;}catch(e){return null;}}
 
   var WD=['So','Mo','Di','Mi','Do','Fr','Sa'];
   function p2(n){return (n<10?'0':'')+n;}
