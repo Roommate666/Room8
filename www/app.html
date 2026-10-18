@@ -149,10 +149,11 @@
   show(start);
 
   // Speed: Nachbar-Tabs im Hintergrund vorladen, NACHDEM der Start-Tab geladen ist ->
-  // auch der ERSTE Besuch von Coupons/Rang/Profil ist dann instant (Game bleibt lazy, da schwer).
+  // auch der ERSTE Besuch ist dann instant. Game zuletzt (schwer), aber MIT vorladen —
+  // sonst "spackt" der erste Game-Klick, weil das iframe erst beim Antippen laedt.
   (function preloadNeighbours(){
     var startFrame = frames[start];
-    function go(){ ['coupons','rang','profil'].forEach(function(t,i){ if(t!==start) setTimeout(function(){ ensureLoaded(t); }, 700*(i+1)); }); }
+    function go(){ ['coupons','rang','profil','game'].forEach(function(t,i){ if(t!==start) setTimeout(function(){ ensureLoaded(t); }, 700*(i+1)); }); }
     if(startFrame){ startFrame.addEventListener('load', function(){ setTimeout(go, 1000); }, {once:true}); }
     else { setTimeout(go, 2500); }
   })();
