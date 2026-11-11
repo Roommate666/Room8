@@ -67,6 +67,7 @@
             // URL-Filter: nur unsere Domains capturen, nicht 3rd-party Scripts
             allowUrls: [
                 /https?:\/\/(www\.)?room8\.club/,
+                /https?:\/\/(www\.)?unigoat\.de/,  // Produktions-Domain (Web/PWA) — sonst werden Web-Fehler verworfen
                 /capacitor:\/\/localhost/,        // Native iOS/Android WebView
                 /file:\/\//,                      // Native Android File-Scheme
             ],

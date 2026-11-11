@@ -78,7 +78,7 @@
 <link rel="icon" type="image/x-icon" href="favicon.ico?v133"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v133"><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v133"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v133">
 </head>
 <body>
-<script>try{var _r=new URLSearchParams(location.search).get("ref");if(_r)localStorage.setItem("ug_ref",_r.trim().toUpperCase());}catch(e){}</script>
+<script>try{var _r=new URLSearchParams(location.search).get("ref");if(_r){var _rc=_r.trim().toUpperCase();localStorage.setItem("ug_ref",_rc);localStorage.setItem("ug_pending_ref",_rc);}}catch(e){}</script>
 
   <div class="screen app-container">
     <div class="screen-body">
@@ -222,6 +222,17 @@
   <script src="social-auth.js"></script>
   <script>
     // Social Login: Google + Apple (nativ in Capacitor, Web-OAuth-Fallback im Browser)
+    // Zeigt dem Nutzer eine verstaendliche Meldung. Fallback auf alert(), falls
+    // Room8UI (noch) nicht geladen ist -> kein stiller Haenger mehr.
+    function showAuthError(msg) {
+      if (window.Room8UI && typeof Room8UI.error === 'function') { Room8UI.error(msg); return; }
+      try { alert(msg); } catch(e) {}
+    }
+    function isCancel(err) {
+      if (window.Room8Auth && typeof Room8Auth.isUserCancel === 'function') return Room8Auth.isUserCancel(err);
+      var c=(err&&err.message||'').toLowerCase();
+      return /cancel|abbruch|dismiss|closed|1001|12501/.test(c);
+    }
     document.getElementById('googleLoginBtn').addEventListener('click', async function() {
       var btn = this;
       try {
@@ -229,8 +240,8 @@
         await window.signInWithGoogle();
       } catch(err) {
         console.error('Google Login Error:', err);
-        var c=(err&&err.message||'').toLowerCase();
-        if (!/cancel|abbruch|dismiss|closed/.test(c) && window.Room8UI) Room8UI.error('Die Google-Anmeldung hat nicht geklappt. Versuch es nochmal — oder melde dich beim UniGoat-Team unter info@unigoat.de.');
+        // Logging passiert zentral in social-auth.js; hier nur UI. Abbruch = still.
+        if (!isCancel(err)) showAuthError('Die Google-Anmeldung hat nicht geklappt. Versuch es nochmal — oder melde dich beim UniGoat-Team unter info@unigoat.de.');
         btn.disabled = false; btn.style.opacity = '1';
       }
     });
@@ -241,8 +252,7 @@
         await window.signInWithApple();
       } catch(err) {
         console.error('Apple Login Error:', err);
-        var c=(err&&err.message||'').toLowerCase();
-        if (!/cancel|abbruch|dismiss|closed|1001/.test(c) && window.Room8UI) Room8UI.error('Die Apple-Anmeldung hat nicht geklappt. Versuch es nochmal — oder melde dich beim UniGoat-Team unter info@unigoat.de.');
+        if (!isCancel(err)) showAuthError('Die Apple-Anmeldung hat nicht geklappt. Versuch es nochmal — oder melde dich beim UniGoat-Team unter info@unigoat.de.');
         btn.disabled = false; btn.style.opacity = '1';
       }
     });

@@ -1,18 +1,20 @@
 // uni-domains.js — Klassifizierung von E-Mail-Domains fuer die Studenten-Verifizierung
 //
+// QUELLE DER WAHRHEIT = DB-Tabelle public.uni_domains (seit Konsolidierung). Dieselbe Tabelle
+// speist die DB-Funktion request_uni_code und die Edge Function verify-uni-token. Der Client
+// laedt die Tabelle beim Seitenaufruf dynamisch und nutzt sie fuer die Vorfilterung, damit er
+// automatisch aktuell bleibt. Die statische Liste unten ist nur noch Offline-Fallback, falls
+// die Query fehlschlaegt.
+//
 // Strategie (Whitelist-first, statt nur Blocklist):
 //   1. Bekannte Freemailer (gmail, gmx, ...) -> sofort abgelehnt
 //   2. Domain matcht ein akademisches Muster (uni-*.de, .edu, .ac.at, ...) -> akzeptiert
-//   3. Domain steht in der kuratierten DACH-Hochschulliste -> akzeptiert
+//   3. Domain steht in der Hochschulliste -> akzeptiert
 //   4. Alles andere (z.B. eigene Firmen-Domain) -> NICHT per Mail erlaubt -> Dokument-Upload
 //
-// Warum kein 9000-Eintraege-Welt-Datensatz: zu gross fuer jeden Pageload. Muster + kuratierte
-// Liste decken den realen DACH-Markt sehr gut ab; alle Sonderfaelle laufen ueber Doku-Upload.
-//
 // WICHTIG: Diese Pruefung ist clientseitig und damit per DevTools umgehbar. Die wirkliche
-// Sicherheit ist der Mail-Besitz (Verifizierungs-Link geht an die eingegebene Adresse).
-// Fuer vollstaendigen Schutz muss die verify-uni-token Edge-Function dieselbe Domain-Pruefung
-// nochmal serverseitig durchfuehren (siehe TODO in CLAUDE.md / specs/auth-and-verify.md).
+// Sicherheit ist der Mail-Besitz (Verifizierungs-Link geht an die eingegebene Adresse) PLUS
+// die serverseitige Pruefung in request_uni_code + verify-uni-token (beide lesen uni_domains).
 
 (function () {
   'use strict';
@@ -101,7 +103,7 @@
     'haw-hamburg.de',                     // HAW Hamburg
     'hcu-hamburg.de',
     'macromedia.de',
-    'iubh.de', 'iu.org',                  // IU Internationale Hochschule
+    'iubh.de', 'iu.org', 'iu-study.org',  // IU Internationale Hochschule (iu-study.org = aktuelle Studenten-Mail-Domain)
     'srh.de',
     'leuphana.de',                        // Leuphana Lueneburg
     'jacobs-university.de', 'constructor.university',
@@ -184,6 +186,39 @@
     return { accepted: false, blocked: false, domain: domain };
   }
 
+  // --- Dynamisches Nachladen der Allowlist aus der DB-Tabelle public.uni_domains ---
+  // Quelle der Wahrheit. Bei Erfolg werden ACCEPT_PATTERNS + KNOWN_UNI_DOMAINS ersetzt, sodass
+  // classify() automatisch den aktuellen Stand nutzt. Bei Fehler bleibt der statische Fallback.
+  function loadFromTable() {
+    try {
+      var base = window.SUPABASE_URL || (typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : null);
+      var key = window.SUPABASE_ANON_KEY || (typeof SUPABASE_ANON_KEY !== 'undefined' ? SUPABASE_ANON_KEY : null);
+      if (!base || !key || typeof fetch !== 'function') return;
+      var url = base.replace(/\/+$/, '') + '/rest/v1/uni_domains?select=value,is_pattern';
+      fetch(url, { headers: { apikey: key, Authorization: 'Bearer ' + key } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (rows) {
+          if (!Array.isArray(rows) || rows.length === 0) return;
+          var exact = [];
+          var pats = [];
+          for (var i = 0; i < rows.length; i++) {
+            var v = rows[i] && rows[i].value;
+            if (typeof v !== 'string') continue;
+            if (rows[i].is_pattern) {
+              try { pats.push(new RegExp(v)); } catch (e) { /* ungueltiges Muster ignorieren */ }
+            } else {
+              exact.push(v.toLowerCase());
+            }
+          }
+          // Nur ersetzen wenn plausibel befuellt (Schutz gegen Teil-/Leer-Antwort).
+          if (exact.length > 0) KNOWN_UNI_DOMAINS = exact;
+          if (pats.length > 0) ACCEPT_PATTERNS = pats;
+          window.Room8UniDomains.KNOWN_UNI_DOMAINS = KNOWN_UNI_DOMAINS;
+        })
+        .catch(function () { /* Fallback: statische Liste bleibt aktiv */ });
+    } catch (e) { /* Fallback: statische Liste bleibt aktiv */ }
+  }
+
   window.Room8UniDomains = {
     classify: classify,
     // true wenn die Mail als Uni-Mail akzeptiert wird
@@ -191,6 +226,11 @@
     // true wenn explizit ein Freemailer (fuer alte Aufrufer kompatibel)
     isBlockedEmail: function (email) { return classify(email).blocked; },
     BLOCKED_DOMAINS: BLOCKED_DOMAINS,
-    KNOWN_UNI_DOMAINS: KNOWN_UNI_DOMAINS
+    KNOWN_UNI_DOMAINS: KNOWN_UNI_DOMAINS,
+    // laedt die Allowlist aus uni_domains neu (wird beim Load automatisch aufgerufen)
+    reload: loadFromTable
   };
+
+  // Beim Laden einmal aus der Tabelle aktualisieren (non-blocking).
+  loadFromTable();
 })();

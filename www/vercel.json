@@ -88,6 +88,9 @@
   ],
   "rewrites": [
     { "source": "/s/:id", "destination": "/api/share?id=:id" },
-    { "source": "/inserieren", "destination": "/inserieren.html" }
+    { "source": "/inserieren", "destination": "/inserieren.html" },
+    { "source": "/register", "destination": "/register.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/join", "destination": "/join.html" }
   ]
 }

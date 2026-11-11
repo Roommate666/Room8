@@ -1,74 +1,60 @@
 // Supabase Edge Function: verify-uni-token
 // Verifiziert einen Uni-E-Mail-Token serverseitig (umgeht RLS)
+//
+// Quelle der Wahrheit = Tabelle public.uni_domains (EINE zentrale Allowlist, geteilt mit
+// der DB-Funktion request_uni_code und dem Client). is_pattern=false -> exakte Domain,
+// is_pattern=true -> Postgres-POSIX-Regex. Keine hardcoded Domain-Liste mehr hier.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.47.14"
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-// Blockierte Domains (private E-Mail-Anbieter)
-const BLOCKED_DOMAINS = [
-  'gmail.com','googlemail.com','yahoo.com','yahoo.de','hotmail.com','hotmail.de',
-  'outlook.com','outlook.de','live.com','live.de','msn.com','icloud.com','me.com',
-  'mac.com','aol.com','aol.de','gmx.de','gmx.net','gmx.at','gmx.ch','gmx.com',
-  'web.de','freenet.de','mail.com','email.com','zoho.com','yandex.com','yandex.ru',
-  'mail.ru','proton.me','protonmail.com','protonmail.ch','pm.me','tutanota.com',
-  'tutamail.com','tuta.io','posteo.de','posteo.net','mailbox.org','t-online.de',
-  'vodafone.de','o2online.de'
-]
-
-// Positive Uni-Erkennung: nur echte Hochschul-Domains werden per Mail akzeptiert.
-// Wer nicht matcht (z.B. eigene Domain), muss die Immatrikulationsbescheinigung nutzen.
-// Starke internationale Muster + kuratierte Allowlist grosser Unis mit untypischer Domain.
-const UNI_PATTERNS = [
-  /\.edu$/,                          // USA
-  /\.edu\.[a-z]{2,3}$/,              // .edu.au, .edu.cn, .edu.tr ...
-  /\.ac\.[a-z]{2,3}$/,              // .ac.uk, .ac.jp, .ac.at ...
-  /(^|\.)uni-[a-z0-9-]+\.[a-z]{2,3}$/, // uni-muenchen.de, mail.uni-koeln.de
-  /(^|\.)tu-[a-z0-9-]+\.de$/,       // tu-berlin.de, tu-dresden.de
-  /(^|\.)fu-[a-z0-9-]+\.de$/,       // fu-berlin.de
-  /(^|\.)hu-[a-z0-9-]+\.de$/,       // hu-berlin.de
-  /(^|\.)fh-[a-z0-9-]+\.de$/,       // fh-aachen.de
-  /(^|\.)hs-[a-z0-9-]+\.de$/,       // hs-mannheim.de
-  /(^|\.)th-[a-z0-9-]+\.de$/,       // th-koeln.de
-  /(^|\.)dh[bw]?-[a-z0-9-]+\.de$/,  // dhbw-*.de
-  /hochschule/,                      // *hochschule*.de
-  /universit(y|ae|e|a|aet)/,        // university/universite/universitaet...
-  /(^|\.)uni\.[a-z]{2,3}$/,         // uni.lu ...
-  /(^|\.)stud\.|(^|\.)student\./    // stud./student. Subdomains
-]
-const UNI_ALLOW = new Set([
-  'hnu.de','student.hnu.de','thu.de','student.thu.de', // Ulm/Neu-Ulm Launch-Schulen (HNU, THU)
-  'tum.de','lmu.de','rwth-aachen.de','kit.edu','charite.de','hhu.de','wwu.de',
-  'ovgu.de','b-tu.de','leuphana.de','hpi.de','whu.edu','ebs.edu','zhaw.ch',
-  'ethz.ch','epfl.ch','uzh.ch','unibe.ch','unibas.ch','unisg.ch','hslu.ch',
-  'phbern.ch','ku.de','ph-weingarten.de','hnee.de','htw-berlin.de',
-  'htwk-leipzig.de','htwg-konstanz.de','beuth-hochschule.de','bht-berlin.de',
-  'code.berlin','constructor.university','jacobs-university.de',
-  // Deutschland komplett (Hochschul-Datensatz 22.09.2026)
-  'akad.de', 'asfh-berlin.de', 'augustana.de', 'b-tu.de', 'ba-bautzen.de', 'bethel.de', 'bits-iserlohn.de', 'campus-m-university.de',
-  'campusm21.de', 'cbs.de', 'dhv-speyer.de', 'diploma.de', 'dshs-koeln.de', 'eba-muenchen.de', 'ebs.de', 'ecla.de',
-  'efh-bochum.de', 'efh-freiburg.de', 'efh-hannover.de', 'efh-reutlingen-ludwigsburg.de', 'efhlu.de', 'eh-darmstadt.de', 'ehs-dresden.de', 'ems-mainz.de',
-  'eufh.de', 'europa-uni.de', 'euv-frankfurt-o.de', 'evfh-berlin.de', 'evfh-nuernberg.de', 'fern-fh.de', 'fernuni-hagen.de', 'fhdw.bib.de',
-  'fhdw.de', 'fhkt.de', 'fhm-mittelstand.de', 'fhnon.de', 'fhoebb.de', 'fhs-mannheim.de', 'fhs-moritzburg.de', 'fht-stuttgart.de',
-  'fhtw-berlin.de', 'fhvr.berlin.de', 'fhw-berlin.de', 'fhwt.de', 'fom.de', 'fs-students.de', 'fs.de', 'h-brs.de',
-  'h-da.de', 'hanseuni.de', 'hdm-stuttgart.de', 'hertie-school.org', 'hfb.de', 'hff-muenchen.de', 'hfg-gmuend.de', 'hfk-bremen.de',
-  'hfk2020.de', 'hfm-detmold.de', 'hfmdd.de', 'hfmt-koeln.de', 'hfp.mhn.de', 'hfph.mwn.de', 'hhl.de', 'hhu.de',
-  'himh.de', 'hmdk-stuttgart.de', 'hmt-leipzig.de', 'hmtm-hannover.de', 'hmtm.de', 'hochschule-bonn-rhein-sieg.de', 'hwg-lu.de', 'hwp-hamburg.de',
-  'i-u.de', 'ihi-zittau.de', 'ism-dortmund.de', 'isnm.de', 'ist-hochschule.de', 'iubh-fernstudium.de', 'karlshochschule.de', 'kath-fh-nord.de',
-  'kfb-berlin.de', 'kfh-freiburg.de', 'kfh-mainz.de', 'kfhnw.de', 'kh-berlin.de', 'khsa.de', 'ksbk-do.de', 'ksfh.de',
-  'ku-eichstaett.de', 'kunstakademie-duesseldorf.de', 'merkur-fh.org', 'merz-akademie.de', 'mfh-iserlohn.de', 'mh-hannover.de', 'mh-luebeck.de', 'mh-trossingen.de',
-  'mu-luebeck.de', 'musikhochschule-muenchen.de', 'muthesius.de', 'nordakademie.de', 'ostfalia.de', 'oth-aw.de', 'paderborn.de', 'pfh-goettingen.de',
-  'philtheol-augustin.de', 'popakademie.de', 'privatfh-da.de', 'pth-bb.de', 'pth-muenster.de', 'pthv.de', 'rauheshaus.de', 'rfh-koeln.de',
-  'ruhr-uni-bochum.de', 'selk.de', 'siewerth-akademie.de', 'siu-heidelberg.de', 'srh-berlin.de', 'stw.de', 'tfh-berlin.de', 'tfh-bochum.de',
-  'tfh-wildau.de', 'tha.de', 'thh-friedensau.de', 'thi.de', 'thm.de', 'tiho-hannover.de', 'tuhh.de', 'udk-berlin.de',
-  'unibw-hamburg.de', 'unibw-muenchen.de', 'uol.de', 'w-hs.de', 'whu-koblenz.de', 'wwu.de',
+// Blockierte Domains (private E-Mail-Anbieter). Gespiegelt aus request_uni_code (v_blocked),
+// damit ein Freemailer niemals als Uni gilt, selbst wenn er irgendein Muster streifen wuerde.
+const BLOCKED_DOMAINS = new Set([
+  'gmail.com','googlemail.com','gmx.de','gmx.net','web.de','yahoo.com','yahoo.de',
+  'hotmail.com','hotmail.de','outlook.com','outlook.de','live.de','live.com','icloud.com','me.com',
+  't-online.de','freenet.de','aol.com','proton.me','protonmail.com','mail.de'
 ])
-function isUniDomain(domain: string | undefined): boolean {
+
+// Laedt die Allowlist aus uni_domains und entscheidet exakt ODER Muster.
+// Gleiche Logik wie DB-Funktion request_uni_code: Freemail-Block zuerst, dann Tabelle.
+// deno-lint-ignore no-explicit-any
+async function isUniDomain(
+  supabase: any,
+  domain: string | undefined
+): Promise<boolean> {
   if (!domain) return false
-  if (BLOCKED_DOMAINS.includes(domain)) return false
-  if (UNI_ALLOW.has(domain)) return true
-  return UNI_PATTERNS.some((re) => re.test(domain))
+  const d = domain.toLowerCase()
+  if (BLOCKED_DOMAINS.has(d)) return false
+
+  const { data, error } = await supabase
+    .from('uni_domains')
+    .select('value, is_pattern')
+
+  if (error || !data) {
+    // Fail-closed: lieber ablehnen als eine Nicht-Uni durchlassen.
+    console.error('uni_domains load error:', error?.message)
+    return false
+  }
+
+  for (const row of data) {
+    const value = row.value as string
+    if (!row.is_pattern) {
+      if (d === value.toLowerCase()) return true
+    } else {
+      // Postgres-POSIX-Regex. JS-RegExp ist kompatibel genug fuer diese Muster
+      // (keine POSIX-Klassen verwendet). test() gegen die volle Domain, ungeankert
+      // wie "v_domain ~ value" (Muster tragen eigene ^/$ Anker wo noetig).
+      try {
+        if (new RegExp(value).test(d)) return true
+      } catch (_e) {
+        console.error('invalid uni_domains pattern:', value)
+      }
+    }
+  }
+  return false
 }
 
 const corsHeaders = {
@@ -99,7 +85,7 @@ serve(async (req) => {
 
     if (findError || !profile) {
       console.error('DB lookup error:', findError?.message, findError?.code)
-      throw new Error('Der Verifizierungslink ist ung\u00fcltig oder bereits abgelaufen. Bitte fordere einen neuen Link an.')
+      throw new Error('Der Verifizierungslink ist ungültig oder bereits abgelaufen. Bitte fordere einen neuen Link an.')
     }
 
     // Token-Ablauf pruefen (24 Stunden gueltig)
@@ -108,14 +94,14 @@ serve(async (req) => {
       const maxAge = 24 * 60 * 60 * 1000 // 24h in ms
       if (tokenAge > maxAge) {
         await supabase.from('profiles').update({ uni_email_verification_token: null }).eq('id', profile.id)
-        throw new Error('Der Verifizierungslink ist abgelaufen (max. 24 Stunden g\u00fcltig). Bitte fordere einen neuen Link an.')
+        throw new Error('Der Verifizierungslink ist abgelaufen (max. 24 Stunden gültig). Bitte fordere einen neuen Link an.')
       }
     }
 
-    // Server-seitige Uni-Domain-Validierung (Allowlist/Muster). Eigene Domains kommen NICHT durch.
+    // Server-seitige Uni-Domain-Validierung (Allowlist/Muster aus uni_domains). Eigene Domains kommen NICHT durch.
     if (profile.uni_email) {
       const domain = profile.uni_email.split('@')[1]?.toLowerCase()
-      if (!isUniDomain(domain)) {
+      if (!(await isUniDomain(supabase, domain))) {
         await supabase.from('profiles').update({ uni_email_verification_token: null }).eq('id', profile.id)
         throw new Error('Diese E-Mail sieht nicht nach einer offiziellen Uni-Adresse aus. Bitte nutze deine offizielle Hochschul-Mail-Adresse (z. B. name@uni-stadt.de).')
       }
@@ -200,8 +186,9 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Verify error:', error)
+    const msg = error instanceof Error ? error.message : String(error)
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ success: false, error: msg }),
       { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     )
   }

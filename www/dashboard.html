@@ -140,7 +140,7 @@
   async function inviteFriends(){
     try{
       var rr=await sb.rpc('ensure_referral_code'); var code=rr.data&&rr.data.code; if(!code)return;
-      var link='https://unigoat.de/register?ref='+code;
+      var link='https://unigoat.de/join.html?ref='+code;
       if(navigator.share){
         navigator.share({title:'UniGoat',text:'Komm auf UniGoat — Studentenrabatte, Games & G-Coins! 🐐 Mein Code: '+code,url:link}).catch(function(){});
       } else {

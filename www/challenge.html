@@ -159,6 +159,7 @@
     </div>
 
     <a class="reqhint" id="reqHint" href="friends.html" hidden><span class="txt"></span><span class="arw">→ ansehen</span></a>
+    <a class="reqhint" id="verifyNudge" href="verify-options.html" hidden><span class="txt">Nur verifizierte Studenten zählen in der Wertung und gewinnen die Preise — du bist noch nicht dabei.</span><span class="arw">→ verifizieren</span></a>
 
     <div class="infocard" id="infoCard">
       <button class="info-head" id="infoToggle" type="button"><span>🏆 So läuft die Monats-Challenge</span><span class="chev">›</span></button>
@@ -230,7 +231,7 @@
   // Preise/Contest laufen extern ueber Instagram -> hier nur Rangliste + Medaillen.
   var LB=[]; // Leaderboard-Daten fuer die Visitenkarte
   var SCOPE='global'; // global | uni | friends
-  var MEID=null; var MYUNI=null; var MYCOINS=0;
+  var MEID=null; var MYUNI=null; var MYCOINS=0; var MYVERIFIED=false;
   var EMPTY_MSG={
     global:'Noch keine G-Coins diesen Monat.<br>Sei der Erste — Coupons einlösen & Daily spielen! 🐐',
     uni:'An deiner Uni hat diesen Monat noch niemand G-Coins gesammelt.<br>Mach den Anfang! 🐐',
@@ -399,6 +400,15 @@
     }catch(e){}
   }
 
+  // Eingeloggte, NICHT verifizierte User spielen zwar mit, zaehlen aber seit dem
+  // Verify-Gate (18.10.) NICHT in der Wertung und koennen keine Preise gewinnen.
+  // Banner weist auf die Uni-Mail-Verifizierung hin. Bewusst NUR an den Verify-Status
+  // gekoppelt (NICHT an Coins) -> ein verifizierter User mit 0 Coins sieht ihn nicht.
+  function showVerifyNudge(){
+    var el=$('verifyNudge'); if(!el||!MEID) return;
+    el.hidden = MYVERIFIED;
+  }
+
   // Uni-Rangliste nur anbieten, wenn mind. 2 verschiedene Unis in der Rangliste vertreten sind.
   // Bei nur einer Uni ist "Uni" fast dasselbe wie "Global" -> Tab ausblenden (kommt autom. zurueck bei 2+).
   async function maybeHideUniTab(){
@@ -415,8 +425,9 @@
     if(!window.sb) return;
     try{ MEID=(await sb.auth.getUser()).data.user.id; }catch(e){}
     if(MEID){
-      try{ var mp=await sb.from('my_profile').select('university,coins').maybeSingle(); if(mp.data){ MYUNI=mp.data.university||null; MYCOINS=+mp.data.coins||0; } }catch(e){}
+      try{ var mp=await sb.from('my_profile').select('university,coins,is_verified,is_student_verified').maybeSingle(); if(mp.data){ MYUNI=mp.data.university||null; MYCOINS=+mp.data.coins||0; MYVERIFIED=!!(mp.data.is_verified||mp.data.is_student_verified); } }catch(e){}
       loadReqHint();
+      showVerifyNudge();
     }
     maybeHideUniTab();
     load();

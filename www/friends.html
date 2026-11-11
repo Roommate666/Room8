@@ -200,6 +200,60 @@
 }
   #raffleCard{ margin:16px 20px 4px; width:auto; }
   #raffleCard[hidden]{ display:none; }
+
+  /* ==== Einlade-Rangliste (Verlosung) — UniGoat-Look, Mint, Archivo, eckig ==== */
+  #refLb{ margin:18px 0 4px; }
+  #refLb[hidden]{ display:none; }
+  /* Verlosungs-Kopf: Tinten-Block mit Mint-Akzent */
+  .rl-head{ background:var(--color-text); color:var(--color-bg); margin:0 var(--space-5); padding:16px var(--space-5); }
+  .rl-eyebrow{ display:flex; align-items:center; gap:8px; font-family:var(--font-heading); font-weight:800;
+    font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--color-accent-300); }
+  .rl-eyebrow .rl-dot{ width:7px; height:7px; background:var(--color-accent); border-radius:50%; animation:rl-pulse 1.6s ease-in-out infinite; }
+  @keyframes rl-pulse{ 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:.35; transform:scale(.7); } }
+  .rl-head h2{ margin:8px 0 0; font-family:var(--font-heading); font-weight:800; font-size:24px; line-height:1.1; letter-spacing:-.02em; color:var(--color-bg); }
+  .rl-prize{ display:flex; align-items:center; gap:10px; margin-top:12px; padding:10px 12px; background:var(--color-accent); color:var(--on-accent); }
+  .rl-prize .rl-gift{ font-size:20px; flex:none; }
+  .rl-prize strong{ font-family:var(--font-heading); font-weight:800; font-size:14px; line-height:1.3; }
+  .rl-meta{ margin:10px 0 0; font-size:12px; line-height:1.5; color:var(--color-neutral-300); }
+  .rl-meta b{ color:var(--color-bg); }
+  /* Podium Top 3 — eckige Sockel, Mint statt bunt */
+  .rl-podium{ display:flex; align-items:flex-end; justify-content:center; gap:8px; margin:16px var(--space-5) 6px; }
+  .rl-pod{ flex:1; max-width:33%; display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .rl-pod.empty{ visibility:hidden; }
+  .rl-pod .rl-medal{ font-size:22px; line-height:1; margin-bottom:4px; }
+  .rl-pod .rl-name{ font-family:var(--font-heading); font-weight:800; font-size:13px; color:var(--color-text);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+  .rl-pod .rl-cnt{ font-size:11.5px; font-weight:800; color:var(--accent-small); margin:2px 0 6px; font-feature-settings:'tnum' 1; }
+  .rl-pod .rl-base{ width:100%; display:flex; align-items:center; justify-content:center;
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.4),inset 0 -4px 8px rgba(0,0,0,.14); }
+  .rl-pod .rl-rank{ font-family:var(--font-heading); font-weight:800; font-size:24px; color:#fff; text-shadow:0 2px 4px rgba(0,0,0,.28); }
+  .rl-pod.r1 .rl-base{ height:78px; background:linear-gradient(180deg,#F9D24E,#DFA100); }
+  .rl-pod.r2 .rl-base{ height:58px; background:linear-gradient(180deg,#DBE1E9,#A6AFBA); }
+  .rl-pod.r3 .rl-base{ height:40px; background:linear-gradient(180deg,#E6B082,#BE7C3E); }
+  .rl-pod.me .rl-name::after{ content:' · du'; color:var(--accent-small); }
+  /* Rang-Zeilen ab Platz 4 */
+  .rl-rows{ margin-top:4px; }
+  .rl-row{ display:grid; grid-template-columns:40px minmax(0,1fr) auto; gap:var(--space-3); align-items:center;
+    padding:0 var(--space-5); height:50px; border-top:var(--rule-thin); }
+  .rl-row .rr{ font-family:var(--font-heading); font-weight:800; font-size:var(--fs-md); color:var(--text-muted); font-feature-settings:'tnum' 1; }
+  .rl-row .rn{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:var(--font-heading); font-weight:800; font-size:var(--fs-md); }
+  .rl-row .rs{ font-family:var(--font-heading); font-weight:800; font-size:var(--fs-md); color:var(--accent-small); font-feature-settings:'tnum' 1; }
+  .rl-row.me{ background:var(--color-text); color:var(--color-bg); border-top:0; }
+  .rl-row.me .rr, .rl-row.me .rs{ color:var(--color-bg); }
+  /* eigene Zeile, falls ausserhalb Top 20 */
+  .rl-selfbar{ display:grid; grid-template-columns:40px minmax(0,1fr) auto; gap:var(--space-3); align-items:center;
+    margin:8px var(--space-5) 0; padding:0 var(--space-5); height:50px; background:var(--color-text); color:var(--color-bg); }
+  .rl-selfbar .rr{ font-family:var(--font-heading); font-weight:800; font-size:var(--fs-md); font-feature-settings:'tnum' 1; }
+  .rl-selfbar .rn{ font-family:var(--font-heading); font-weight:800; font-size:var(--fs-md); }
+  .rl-selfbar .rs{ font-family:var(--font-heading); font-weight:800; font-size:var(--fs-md); font-feature-settings:'tnum' 1; }
+  .rl-empty{ padding:22px var(--space-5); text-align:center; color:var(--text-muted); font-size:var(--fs-sm); line-height:1.6; }
+  /* Prominenter Teilen-CTA */
+  .rl-cta-wrap{ margin:14px var(--space-5) 0; }
+  .rl-cta{ width:100%; min-height:56px; border:0; cursor:pointer; font-family:var(--font-heading); font-weight:800;
+    font-size:16px; color:var(--on-accent); background:var(--color-accent); padding:15px 18px; text-align:center;
+    -webkit-tap-highlight-color:transparent; }
+  .rl-cta:active{ transform:translateY(1px); background:var(--color-accent-700); }
+  .rl-cta:focus-visible{ outline:2px solid var(--color-text); outline-offset:3px; }
 </style>
 </head>
 <body>
@@ -287,6 +341,32 @@
       </div>
       <p class="pl-hint">Ab 16 · nur verifiziert · <a href="nutzungsbedingungen.html#verlosung" style="color:inherit;text-decoration:underline">Teilnahmebedingungen</a></p>
     </article>
+
+    <!-- Einlade-Rangliste (Live-Verlosung) -->
+    <section id="refLb" data-feature="raffle" aria-label="Einlade-Rangliste">
+      <div class="rl-head">
+        <div class="rl-eyebrow"><span class="rl-dot" aria-hidden="true"></span>Live-Rangliste · November</div>
+        <h2>Lade Freunde ein &amp; gewinn</h2>
+        <div class="rl-prize">
+          <span class="rl-gift" aria-hidden="true">&#127873;</span>
+          <strong>2&times; Red-Bull-Kasten + 2&times; Bier-Kasten</strong>
+        </div>
+        <p class="rl-meta">Wer im <b>November</b> die meisten Freunde wirbt, gewinnt. Es z&auml;hlen nur <b>verifizierte Studenten</b>, die du einl&auml;dst. Platz&nbsp;1 am Monatsende r&auml;umt ab. &#128016;</p>
+      </div>
+
+      <!-- Top 3 Podium -->
+      <div class="rl-podium" id="rlPodium"></div>
+      <!-- eigene Position, falls nicht in den Top 20 -->
+      <div id="rlSelf"></div>
+      <!-- Plaetze 4-20 -->
+      <div class="rl-rows" id="rlRows"></div>
+      <!-- Leerzustand -->
+      <div class="rl-empty" id="rlEmpty" hidden>Noch niemand dabei &mdash; <b>sei der Erste</b> und lad deine Freunde ein! &#128016;</div>
+
+      <div class="rl-cta-wrap">
+        <button class="rl-cta" type="button" id="rlShareBtn">&#128279; Freunde einladen</button>
+      </div>
+    </section>
 
     <!-- Freund hinzufuegen -->
     <div style="padding:16px 20px 4px">
@@ -383,7 +463,9 @@
     catch(e){ $('myCode').textContent='—'; }
     // Gemerkten Einladungs-Code einloesen (join.html -> Registrierung -> hier)
     await redeemPendingRef();
-    await Promise.all([loadRequests(), loadFriends(), loadBoard(), loadRaffle()]);
+    await Promise.all([loadRequests(), loadFriends(), loadBoard(), loadRaffle(), loadReferralBoard()]);
+    // Live-Refresh der Einlade-Rangliste bei Rueckkehr zur Seite
+    if(!window._refLbVis){ window._refLbVis=true; document.addEventListener('visibilitychange', function(){ if(!document.hidden) loadReferralBoard(); }); }
   }
 
   async function loadRaffle(){
@@ -407,6 +489,70 @@
     }); }
     // Live: bei Rueckkehr zur Seite Lose-Zahl neu laden
     if(!window._raffleVis){ window._raffleVis=true; document.addEventListener('visibilitychange', function(){ if(!document.hidden) loadRaffle(); }); }
+  }
+
+  // ---------- Einlade-Rangliste (Verlosung November) ----------
+  // Zaehlt NUR verifizierte geworbene Studenten (farming-sicher) via get_referral_leaderboard.
+  // Zeitfenster fest auf November 2026 (Verlosungszeitraum), Metrik = geworbene_verifiziert.
+  var REF_SINCE='2026-11-01';
+  function cntLabel(n){ n=+n||0; return nf(n)+(n===1?' Freund':' Freunde'); }
+  async function loadReferralBoard(){
+    if(window.featureEnabled && !featureEnabled('raffle')) return; // iOS: Verlosung aus
+    var rows=[]; try{ var r=await sb.rpc('get_referral_leaderboard',{p_since:REF_SINCE, p_limit:20}); rows=r.data||[]; }catch(e){}
+    var pod=$('rlPodium'), list=$('rlRows'), self=$('rlSelf'), empty=$('rlEmpty');
+    if(!pod) return;
+
+    if(!rows.length){
+      pod.innerHTML=''; list.innerHTML=''; self.innerHTML='';
+      if(empty) empty.hidden=false;
+      return;
+    }
+    if(empty) empty.hidden=true;
+
+    // eigene Position in der Rangliste suchen
+    var myRow=null;
+    for(var i=0;i<rows.length;i++){ if(ME && rows[i].werber===ME.id){ myRow=rows[i]; break; } }
+
+    // Top 3 -> Podium (Anordnung 2 | 1 | 3 fuer Treppen-Optik)
+    var top=rows.slice(0,3), rest=rows.slice(3);
+    var MEDAL={1:'🥇',2:'🥈',3:'🥉'}; // Gold/Silber/Bronze
+    var order=[1,0,2];
+    pod.innerHTML=order.map(function(idx){
+      var x=top[idx];
+      if(!x) return '<div class="rl-pod empty"></div>';
+      var rk=+x.rang||(idx+1);
+      var mine=ME && x.werber===ME.id;
+      return '<div class="rl-pod r'+rk+(mine?' me':'')+'">'+
+        '<div class="rl-medal" aria-hidden="true">'+(MEDAL[rk]||'')+'</div>'+
+        '<div class="rl-name">'+(rk===1?'👑 ':'')+esc(x.username||'Goat')+'</div>'+
+        '<div class="rl-cnt">'+cntLabel(x.geworbene_verifiziert)+'</div>'+
+        '<div class="rl-base"><span class="rl-rank">'+rk+'</span></div>'+
+      '</div>';
+    }).join('');
+
+    // Plaetze 4-20
+    list.innerHTML=rest.map(function(x){
+      var rk=+x.rang||0;
+      var mine=ME && x.werber===ME.id;
+      return '<div class="rl-row'+(mine?' me':'')+'">'+
+        '<span class="rr">'+String(rk).padStart(2,'0')+'</span>'+
+        '<span class="rn">'+esc(x.username||'Goat')+(mine?' (du)':'')+'</span>'+
+        '<span class="rs">'+cntLabel(x.geworbene_verifiziert)+'</span></div>';
+    }).join('');
+
+    // Eigene Position: wenn ausserhalb der Top 20, trotzdem die eigene Zahl zeigen
+    if(myRow){
+      self.innerHTML='';
+    } else if(ME){
+      var mine2=0; try{ var mr=await sb.rpc('get_referral_leaderboard',{p_since:REF_SINCE, p_limit:100000});
+        var all=mr.data||[]; for(var j=0;j<all.length;j++){ if(all[j].werber===ME.id){ mine2=all[j].geworbene_verifiziert; break; } } }catch(e){}
+      self.innerHTML='<div class="rl-selfbar">'+
+        '<span class="rr">–</span>'+                       // noch kein Rang
+        '<span class="rn">Dein Rang — du (noch nicht platziert)</span>'+
+        '<span class="rs">'+cntLabel(mine2)+'</span></div>';
+    } else {
+      self.innerHTML='';
+    }
   }
 
   async function loadRequests(){
@@ -557,6 +703,7 @@
   });
   $('focusAdd').onclick=function(){ $('addInput').focus(); };
   $('shareBtn').onclick=shareInvite;
+  if($('rlShareBtn')) $('rlShareBtn').onclick=shareInvite; // Verlosungs-CTA nutzt denselben Einladungs-Mechanismus
   $('qrBtn').onclick=showQR;
   $('qrClose').onclick=function(){ $('qrModal').hidden=true; };
   $('qrModal').addEventListener('click',function(e){ if(e.target===this) this.hidden=true; });

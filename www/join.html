@@ -77,12 +77,12 @@
     // Gast -> Einlader-Namen zeigen, Code fuer nach dem Login merken
     var name='Ein Freund';
     try{ if(window.sb){ var rr=await sb.rpc('resolve_referral',{p_code:ref}); if(rr&&rr.data&&rr.data.ok&&rr.data.username) name=rr.data.username; } }catch(e){}
-    try{ localStorage.setItem('ug_pending_ref', ref); }catch(e){}
+    try{ var RC=ref.toUpperCase(); localStorage.setItem('ug_ref', RC); localStorage.setItem('ug_pending_ref', RC); }catch(e){}
     html('<div class="invite-kicker">Einladung</div>'
       +'<h1>🐐 '+esc(name)+'<br>lädt dich zu UniGoat ein</h1>'
       +'<p class="sub">Echte Studenten-Deals, Goat Blast zocken und deine Freunde zum Duell fordern — kostenlos mit deiner Uni-Mail.</p>'
-      +'<a class="jbtn primary" href="register.html">Kostenlos beitreten</a>'
-      +'<a class="jbtn ghost" href="login.html">Ich habe schon einen Account</a>');
+      +'<a class="jbtn primary" href="register.html?ref='+encodeURIComponent(ref)+'">Kostenlos beitreten</a>'
+      +'<a class="jbtn ghost" href="login.html?ref='+encodeURIComponent(ref)+'">Ich habe schon einen Account</a>');
   }
   run();
 })();

@@ -218,6 +218,7 @@
           var d = res && res.data;
           if (res && res.error) {
             console.error('[complete-profile] rpc error', res.error);
+            try { window.Room8Sentry && window.Room8Sentry.captureException(res.error, { tags: { provider: 'profile', step: 'profile', platform: (window.Capacitor && window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : 'web') }, extra: { rpc: 'set_my_profile' } }); } catch (le) {}
             errEl.textContent = 'Da ist was schiefgelaufen. Bitte versuch es nochmal — sonst melde dich beim UniGoat-Team unter info@unigoat.de.';
             btn.disabled = false; btn.textContent = 'Profil speichern';
             return;
@@ -246,7 +247,7 @@
           window.location.replace('app.html');
         } catch (err) {
           console.error('[complete-profile] Submit error:', err);
-          console.error('[complete-profile] submit error', err);
+          try { window.Room8Sentry && window.Room8Sentry.captureException(err, { tags: { provider: 'profile', step: 'profile', platform: (window.Capacitor && window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : 'web') }, extra: { phase: 'submit' } }); } catch (le) {}
           errEl.textContent = 'Da ist was schiefgelaufen. Bitte versuch es nochmal — sonst melde dich beim UniGoat-Team unter info@unigoat.de.';
           btn.disabled = false; btn.textContent = 'Profil speichern';
         }

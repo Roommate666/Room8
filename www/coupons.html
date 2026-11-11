@@ -38,6 +38,15 @@
   .ug-banner p{ font-size:13px; color:var(--text-muted); margin:0 0 10px; line-height:1.45; }
   .ug-banner .act{ display:inline-block; background:var(--color-accent); color:var(--on-accent); font-family:var(--font-heading); font-weight:800; font-size:13px; padding:9px 15px; text-decoration:none; }
 
+  /* Verify-Hinweis fuer NICHT verifizierte Studenten (nur dann sichtbar) -> gleicher Stil wie Partner-Banner, nur praesenter (Mint-Toenung + Rahmen + Schloss) */
+  .ug-verify{ display:none; gap:12px; align-items:flex-start; background:var(--color-accent-100); border:2px solid var(--color-accent); padding:14px 16px; margin:14px 20px 0; }
+  .ug-verify.show{ display:flex; }
+  .ug-verify .vlock{ flex:none; width:34px; height:34px; background:var(--color-accent); color:var(--on-accent); display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .ug-verify .vtx{ flex:1; min-width:0; }
+  .ug-verify h3{ font-family:var(--font-heading); font-weight:800; font-size:15px; margin:0 0 3px; color:var(--color-text); }
+  .ug-verify p{ font-size:13px; color:var(--color-text); opacity:.75; margin:0 0 10px; line-height:1.45; }
+  .ug-verify .act{ display:inline-block; background:var(--color-accent); color:var(--on-accent); font-family:var(--font-heading); font-weight:800; font-size:13px; padding:9px 15px; text-decoration:none; }
+
   /* Coupon-Karten */
   #list{ padding:2px 0 16px; }
   .cpn{ display:block; text-decoration:none; color:var(--color-text); border-bottom:var(--rule); }
@@ -74,6 +83,15 @@
       <a class="coins-pill" href="challenge.html" style="margin-right:12px"><i class="sq"></i> <span id="coins">–</span></a>
     </div>
     <div class="hr"></div>
+
+    <div class="ug-verify" id="verifyBanner">
+      <span class="vlock">🔒</span>
+      <span class="vtx">
+        <h3>Du bist noch nicht verifiziert</h3>
+        <p>Alle Deals siehst du – aber zum <b>Einlösen</b> und für den <b>Wettkampf um echte Preise</b> verifiziere dich einmal als Student. Dauert 30 Sekunden mit deiner Uni-Mail.</p>
+        <a class="act" href="verify-options.html">Jetzt verifizieren</a>
+      </span>
+    </div>
 
     <div class="ug-search">
       <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke-width:2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -176,7 +194,7 @@
     if(!window.sb){ $('list').innerHTML='<div class="ug-empty">Bitte einloggen.</div>'; return; }
     // Sofort aus Cache zeigen (stale-while-revalidate) -> Coupons erscheinen instant beim Wiederkommen
     try{ var cc=JSON.parse(localStorage.getItem('ug_coupons_cache3')||'null'); if(cc&&cc.length){ all=cc; render(); } }catch(e){}
-    try{ var u=(await sb.auth.getUser()).data.user; if(u){ var pr=await sb.from('my_profile').select('coins').maybeSingle(); if(pr.data)$('coins').textContent=(pr.data.coins||0).toLocaleString('de-DE'); } }catch(e){}
+    try{ var u=(await sb.auth.getUser()).data.user; if(u){ var pr=await sb.from('my_profile').select('coins, is_verified, is_student_verified').maybeSingle(); if(pr.data){ $('coins').textContent=(pr.data.coins||0).toLocaleString('de-DE'); if(!(pr.data.is_verified||pr.data.is_student_verified)){ var _vb=$('verifyBanner'); if(_vb)_vb.classList.add('show'); } } } }catch(e){}
     var heute=new Date().toISOString().slice(0,10);
     try{
       // Nur Spalten die die Liste braucht (KEINE lange description/Detailfelder -> kleinere Payload, schnellerer Cold-Load)
