@@ -535,6 +535,7 @@ body.shake .board-card{animation:shake .3s;}
     <button class="cornerbtn" id="startMenuBtn" aria-label="Menü" title="Menü" style="right:12px;">☰</button>
     <h1><span class="ge">🐐</span> Unigoat Blast</h1>
     <div class="daystreak" id="dayStreak">🔥 0 Tage in Folge</div>
+    <div id="mpStart" hidden></div>
     <div id="eventInfo"></div>
     <button class="btn primary btn-play" id="btnHigh">▶ Spielen</button>
     <button class="btn daily daily-card" id="btnDaily">
@@ -578,10 +579,10 @@ body.shake .board-card{animation:shake .3s;}
       <button class="lb-tab" data-lb="uni">Meine Uni</button>
       <button class="lb-tab" data-lb="daily">Daily</button>
     </div>
-    <div style="background:linear-gradient(180deg,#fff7e0,#ffefc2);border:1.5px solid #f0c95a;border-radius:12px;padding:9px 12px;margin:0 0 10px;font-size:12.5px;font-weight:700;color:#7a5a12;line-height:1.45;">
+    <div id="mpGame"><div style="background:linear-gradient(180deg,#fff7e0,#ffefc2);border:1.5px solid #f0c95a;border-radius:12px;padding:9px 12px;margin:0 0 10px;font-size:12.5px;font-weight:700;color:#7a5a12;line-height:1.45;">
       🏆 Jeden Monat gewinnen die Besten — <b>global &amp; an deiner Uni</b> — dicke <b>G-Coins-Boni</b>.
       <a href="https://instagram.com/unigoat.de" target="_blank" rel="noopener" style="color:#c1355e;font-weight:800;text-decoration:none;">Echte Preise &amp; Gewinner auf Instagram →</a>
-    </div>
+    </div></div>
     <ol id="lbList" class="lb-list"></ol>
     <p class="lb-empty" id="lbEmpty" hidden>Noch keine Eintraege — spiel eine Runde! 🐐</p>
     <p class="lb-status" id="lbStatus"></p>
@@ -1821,6 +1822,14 @@ try{var _h=(location.hash||'').toLowerCase();if(_h==='#play'||_h==='#high'||_h==
   if(hc)hc.addEventListener('click',close);
   hp.addEventListener('click',function(e){if(e.target===hp)close();});
 })();
+</script>
+<script src="../prizes.js"></script>
+<script>
+// Monats-Preise: Kompakt-Zeile auf dem Startbildschirm, volle Liste in der Rangliste. Ohne Preise bleibt der alte Text.
+try{
+  UGPrizes.render(document.getElementById('mpStart'),{variant:'line',base:'../'});
+  UGPrizes.render(document.getElementById('mpGame'),{variant:'game',base:'../'});
+}catch(e){}
 </script>
 <script src="../deeplink.js"></script>
 <script src="../analytics.js"></script>

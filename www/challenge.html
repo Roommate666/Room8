@@ -165,15 +165,16 @@
       <button class="info-head" id="infoToggle" type="button"><span>🏆 So läuft die Monats-Challenge</span><span class="chev">›</span></button>
       <ul>
         <li>Sammle diesen Monat <b>G-Coins</b>: <b>+100</b> pro eingelöstem Coupon, dazu Coins fürs tägliche Goat-Spiel.</li>
-        <li>Nur die <b>Top 3 global</b> gewinnen jeden Monat <b>echte Geschenke</b> 🎁. Die Besten an deiner Uni bekommen G-Coins-Boni.</li>
+        <li>Nur die <b>Top 3 global</b> gewinnen jeden Monat <b>echte Preise</b> 🎁 (siehe oben). Die Besten an deiner Uni bekommen G-Coins-Boni.</li>
         <li>Am Monatsende wird die Rangliste <b>zurückgesetzt</b> — jeder startet neu bei 0.</li>
         <li>Es zählt nur <b>eins</b>: Wer am Monatsende die <b>meisten G-Coins</b> hat, gewinnt. Kämpf dich nach oben. 💪</li>
         <li>Die Gewinner werden auf <b>Instagram</b> bekannt gegeben.</li>
       </ul>
     </div>
 
+    <div id="mpRang" hidden></div>
     <div class="podium" id="podium"></div>
-    <a class="win-banner" href="https://instagram.com/unigoat.de" target="_blank" rel="noopener">Du kannst was gewinnen! Alle Infos auf Instagram <span class="arw">→</span></a>
+    <a class="win-banner" id="winBanner" href="https://instagram.com/unigoat.de" target="_blank" rel="noopener">Du kannst was gewinnen! Alle Infos auf Instagram <span class="arw">→</span></a>
     <div class="top3wrap" id="top3wrap" hidden><button type="button" class="top3btn" id="top3btn">Nur Top 3</button></div>
     <div id="rows"></div>
     <div id="empty" style="display:none;"></div>
@@ -227,8 +228,8 @@
   var SWORDS='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" y1="14" x2="9" y2="18"/><line x1="7" y1="17" x2="4" y2="20"/><line x1="3" y1="19" x2="5" y2="21"/></svg>';
   function tierName(c){try{return window.GoatAvatar?GoatAvatar.tierLabel(Number(c||0)):'Bronze';}catch(e){return'Bronze';}}
 
-  // Store-safe: KEINE Geldbetraege in der App (sonst Google-Play Gewinnspiel-Policy).
-  // Preise/Contest laufen extern ueber Instagram -> hier nur Rangliste + Medaillen.
+  // Monats-Preise seit 15.11.2026 aus monthly_prizes (prizes.js). Store-Regeln: Teilnahme gratis,
+  // Teilnahmebedingungen verlinkt (nutzungsbedingungen.html#wettkampf, Apple/Google nicht Veranstalter).
   var LB=[]; // Leaderboard-Daten fuer die Visitenkarte
   var SCOPE='global'; // global | uni | friends
   var MEID=null; var MYUNI=null; var MYCOINS=0; var MYVERIFIED=false;
@@ -434,6 +435,20 @@
   }
   init();
 })();
+</script>
+<script src="prizes.js"></script>
+<script>
+// Monats-Preise ueber dem Podium; Instagram-Banner nur noch fuer die Gewinner-Bekanntgabe,
+// Verify-Hinweis nennt den 1. Preis. Ohne Preise bleibt alles wie vorher.
+try{
+  UGPrizes.render(document.getElementById('mpRang'),{variant:'paper'}).then(function(list){
+    if(!list.length) return;
+    var wb=document.getElementById('winBanner');
+    if(wb){ wb.textContent='Gewinner werden auf Instagram bekannt gegeben '; var s=document.createElement('span'); s.className='arw'; s.textContent='→'; wb.appendChild(s); }
+    var t=document.querySelector('#verifyNudge .txt');
+    if(t&&list[0]) t.textContent='Nur verifizierte Studenten zählen in der Wertung und können gewinnen (Platz 1: '+list[0].title+') — du bist noch nicht dabei.';
+  });
+}catch(e){}
 </script>
 <script src="events-tab.js"></script>
 <script src="analytics.js"></script>

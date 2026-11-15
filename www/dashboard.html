@@ -73,6 +73,9 @@
       <div><span class="cta2"><svg class="icn" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/></svg> Goat Blast spielen</span></div>
     </a>
 
+    <!-- Monats-Preise (monthly_prizes, prizes.js); leer -> bleibt versteckt -->
+    <div id="mpHub" hidden></div>
+
     <!-- Streak / Tier -->
     <div class="cells cells-2">
       <div class="cell tap" id="streakInfo" title="Tippen: was ist die Streak?">
@@ -418,6 +421,8 @@
   load();
 })();
 </script>
+<script src="prizes.js"></script>
+<script>try{UGPrizes.render(document.getElementById('mpHub'),{variant:'paper',cta:{href:'challenge.html',text:'Zur Rangliste ›'}});}catch(e){}</script>
 <script src="deeplink.js"></script>
 <script src="events-tab.js"></script>
 <script src="analytics.js"></script>
