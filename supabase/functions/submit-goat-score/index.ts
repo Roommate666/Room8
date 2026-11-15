@@ -100,8 +100,9 @@ serve(async (req) => {
         return json({ success: false, error: 'implausible_rate' }, 400)
       }
     } else {
-      // Kein Replay moeglich (Alt-Client/kein moves) -> nur Basis-verified, NICHT preisgeld-faehig
-      verified = true
+      // Kein Replay moeglich (Alt-Client/kein moves) -> wird gespeichert, aber NICHT in der Rangliste
+      // (Security 15.11.: sonst landet ein frei erfundener Score bis MAX_SCORE ganz oben)
+      verified = false
       replayValidated = false
     }
 

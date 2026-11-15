@@ -1,0 +1,23 @@
+// Test: Onboarding-Verify (start=1), Spaeter-Link, Auto-Submit bei 6 Ziffern. RPC wird abgefangen (keine DB-Aenderung).
+import { chromium } from 'playwright';
+const BASE = process.argv[2] || 'http://localhost:8765';
+const EMAIL = 'redbull-demo@unigoat.de', PASS = 'RedBull2026!';
+const b = await chromium.launch(); const page = await b.newPage();
+let rpcCalls = 0;
+await page.route('**/rest/v1/rpc/verify_uni_code', r => { rpcCalls++; r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: false, error: 'CODE_WRONG' }) }); });
+await page.goto(BASE + '/login.html', { waitUntil: 'domcontentloaded' });
+await page.fill('#loginEmail', EMAIL); await page.fill('#loginPassword', PASS);
+await page.keyboard.press('Enter'); await page.waitForURL(/app/, { timeout: 20000 });
+const res = {};
+await page.goto(BASE + '/verify-options.html?start=1', { waitUntil: 'networkidle' });
+res.start_skip_sichtbar = await page.$eval('#skipVerify', e => getComputedStyle(e).display !== 'none');
+res.start_back = await page.$eval('.backbtn', e => e.getAttribute('href'));
+res.start_succ_text = await page.$eval('#succPrimary', e => e.textContent);
+await page.evaluate(() => { retryVerification(); document.getElementById('emailForm').style.display='none'; document.getElementById('codeForm').style.display='block'; });
+await page.fill('#uniCode', '123456'); await page.waitForTimeout(1500);
+res.autosubmit_rpc = rpcCalls;
+await page.goto(BASE + '/verify-options.html', { waitUntil: 'networkidle' });
+res.normal_skip_sichtbar = await page.$eval('#skipVerify', e => getComputedStyle(e).display !== 'none');
+res.normal_back = await page.$eval('.backbtn', e => e.getAttribute('href'));
+res.normal_succ_text = await page.$eval('#succPrimary', e => e.textContent);
+console.log(JSON.stringify(res, null, 1)); await b.close();

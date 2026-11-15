@@ -19,7 +19,7 @@
 - **Aktion:** Lokale Datei geloescht (war .gitignored). Optional: Git-History Cleanup via filter-repo (Polish, nicht kritisch).
 
 ### S2. Keystore-Passwort hardcoded in build.gradle
-- **Pfad:** `android/app/build.gradle:17,19` — `'Albayrak8Para$'`
+- **Pfad:** `android/app/build.gradle:17,19` — `'<entfernt, rotiert 15.11.2026>'`
 - **Auswirkung:** Wer Repo-Lesezugriff hat + die `room8-release.jks` bekommt: kann Fake-Updates der App signieren
 - **Fix:** In `~/.gradle/gradle.properties` als `RELEASE_STORE_PASSWORD=...` auslagern, in `build.gradle` mit `project.findProperty(...)` lesen. Datei ist user-scoped, nicht im Repo.
 

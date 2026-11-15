@@ -244,7 +244,8 @@
           } catch (e) {}
 
           try { sessionStorage.removeItem('oauth_prefill'); } catch (e) {}
-          window.location.replace('app.html');
+          // Studenten direkt in die Verifizierung (dauert im Median ~4 Min), mit "Spaeter"-Ausweg. Partner direkt in die App.
+          window.location.replace(isPartner ? 'app.html' : 'verify-options.html?start=1');
         } catch (err) {
           console.error('[complete-profile] Submit error:', err);
           try { window.Room8Sentry && window.Room8Sentry.captureException(err, { tags: { provider: 'profile', step: 'profile', platform: (window.Capacitor && window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : 'web') }, extra: { phase: 'submit' } }); } catch (le) {}

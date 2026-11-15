@@ -73,13 +73,14 @@
           </form>
           <div class="vhint">Nur offizielle Hochschul-Adressen (z. B. <b>@uni-ulm.de</b>, <b>@stud.hs-*.de</b>) werden akzeptiert. Kein Gmail/GMX. Code nicht da? Schau im Spam-Ordner.</div>
         </div>
+        <a id="skipVerify" href="app.html" style="display:none;text-align:center;padding:14px 20px;color:var(--text-muted);font-size:14px;text-decoration:underline">Später verifizieren</a>
       </div>
 
       <div id="success-view">
         <div class="succ-mark"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
         <h2>Einreichung erfolgreich!</h2>
         <p>Alles klar — dein Status wird bestätigt.</p>
-        <button onclick="navigateTo('profile.html')" class="btn btn-primary btn-block">Zurück zum Profil</button>
+        <button id="succPrimary" onclick="navigateTo(START ? 'app.html#coupons' : 'profile.html')" class="btn btn-primary btn-block">Zurück zum Profil</button>
         <button onclick="retryVerification()" class="btn btn-secondary btn-block">Erneut verifizieren</button>
         <button onclick="resetVerification()" class="btn btn-block btn-red">Verifizierung zurücksetzen</button>
       </div>
@@ -108,6 +109,15 @@
     }
 
     var currentUser = null;
+    // Onboarding-Modus (direkt nach complete-profile): Zurueck/Spaeter fuehrt in die App, Erfolg zu den Coupons.
+    var START = /[?&]start=1\b/.test(location.search);
+    if (START) {
+        document.addEventListener('DOMContentLoaded', function () {
+            var bb = document.querySelector('.backbtn'); if (bb) bb.setAttribute('href', 'app.html');
+            var sk = document.getElementById('skipVerify'); if (sk) sk.style.display = 'block';
+            var sp = document.getElementById('succPrimary'); if (sp) sp.textContent = 'Weiter zu den Coupons';
+        });
+    }
 
     async function init() {
         if (!supabase) return;
@@ -243,6 +253,16 @@
         } catch (err) {
             Room8UI.error('Bestätigung fehlgeschlagen. Versuch es nochmal.');
             btn.disabled = false; btn.textContent = 'Bestätigen';
+        }
+    });
+
+    // 6 Ziffern eingegeben/eingefuegt -> automatisch bestaetigen (spart einen Tipp)
+    document.getElementById('uniCode').addEventListener('input', function () {
+        var v = (this.value || '').replace(/[^0-9]/g, '');
+        var btn = document.getElementById('btnCode');
+        if (v.length === 6 && btn && !btn.disabled) {
+            var f = document.getElementById('codeForm');
+            if (f.requestSubmit) f.requestSubmit(); else btn.click();
         }
     });
 

@@ -35,3 +35,5 @@ www_backup*/          # manuelle Backup-Verzeichnisse
 roommate_full_updated/  # alter, kompletter App-Build (Duplikat)
 *.bat                 # Windows-Helfer-Skripte (maschinen-spezifisch)
 roommate-app/
+
+backups/

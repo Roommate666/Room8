@@ -35,12 +35,29 @@
     track('pageview', { page: f || 'index' });
   }
 
+  // SPA-Shell (app.html) laedt alle Tabs als versteckte iframes vor. Pageview nur zaehlen,
+  // wenn der Tab wirklich sichtbar ist (iframe hat Klasse 'active') - und bei jedem Wechsel dorthin.
+  function pageviewWhenVisible() {
+    var fe = null;
+    try { fe = window.frameElement; } catch (e) { fe = null; }
+    if (!fe || !fe.classList || !fe.hasAttribute('data-tab')) { pageview(); return; }
+    var last = fe.classList.contains('active');
+    if (last) pageview();
+    try {
+      new MutationObserver(function () {
+        var a = fe.classList.contains('active');
+        if (a && !last) pageview();
+        last = a;
+      }).observe(fe, { attributes: true, attributeFilter: ['class'] });
+    } catch (e) {}
+  }
+
   window.UGTrack = { track: track };
 
   // Sobald window.sb (config.js) bereit ist: gepufferte Events senden + Auto-Pageview
   var n = 0;
   (function boot() {
-    if (window.sb) { flush(); pageview(); return; }
+    if (window.sb) { flush(); pageviewWhenVisible(); return; }
     if (n++ > 40) return;
     setTimeout(boot, 100);
   })();

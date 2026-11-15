@@ -1755,7 +1755,7 @@ async function renderWinner(){
   const winner=await OnlineBoard.eventWinner();
   if(!winner){if(w)w.remove();return;}
   if(!w){w=document.createElement('p');w.id='lbWinner';w.className='lb-winner';host.insertBefore(w,$('lbList'));}
-  w.innerHTML='👑 Aktuell vorn: <b>'+(winner.username||'Anonym')+'</b> — '+(+winner.score).toLocaleString('de-DE');
+  w.textContent='👑 Aktuell vorn: ';const wb=document.createElement('b');wb.textContent=String(winner.username||'Anonym');w.appendChild(wb);w.appendChild(document.createTextNode(' — '+(+winner.score).toLocaleString('de-DE')));
 }
 (function(){
   const bp=$('boardPanel'),bo=$('btnBoard'),bc=$('boardClose');if(!bp)return;

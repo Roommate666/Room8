@@ -5,7 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
 
 // Typen die Mails an FREMDE User schicken -> nur Admins duerfen sie ausloesen.
-const ADMIN_TYPES = ['account_verified', 'verification_approved', 'verification_rejected', 'admin_verification_request']
+const ADMIN_TYPES = ['account_verified', 'verification_approved', 'verification_rejected', 'admin_verification_request', 'uni_email_verification']
 
 // HTML-Escape gegen Injection in Mail-Templates (User-kontrollierte Felder wie Name).
 function escHtml(s: unknown): string {
