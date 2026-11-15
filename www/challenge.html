@@ -135,6 +135,7 @@
     border:1px solid var(--color-accent); color:var(--color-text); text-decoration:none; padding:11px 14px;
     font-family:var(--font-heading); font-weight:800; font-size:var(--fs-sm); }
   .reqhint .arw{ margin-left:auto; color:var(--accent-small); white-space:nowrap; }
+  .reqhint[hidden]{ display:none; } /* sonst ueberstimmt display:flex das hidden-Attribut (leere Box, Verify-Hinweis auch bei Verifizierten) */
 
   /* Top-3-Umschalter (blendet die Liste ab Platz 4 aus) */
   .top3wrap{ display:flex; justify-content:flex-end; padding:0 var(--space-5); margin:2px 0 6px; }
@@ -438,15 +439,13 @@
 </script>
 <script src="prizes.js"></script>
 <script>
-// Monats-Preise ueber dem Podium; Instagram-Banner nur noch fuer die Gewinner-Bekanntgabe,
-// Verify-Hinweis nennt den 1. Preis. Ohne Preise bleibt alles wie vorher.
+// Monats-Preise ueber dem Podium; Instagram-Banner nur noch fuer die Gewinner-Bekanntgabe.
+// Ohne Preise bleibt alles wie vorher.
 try{
   UGPrizes.render(document.getElementById('mpRang'),{variant:'paper'}).then(function(list){
     if(!list.length) return;
     var wb=document.getElementById('winBanner');
     if(wb){ wb.textContent='Gewinner werden auf Instagram bekannt gegeben '; var s=document.createElement('span'); s.className='arw'; s.textContent='→'; wb.appendChild(s); }
-    var t=document.querySelector('#verifyNudge .txt');
-    if(t&&list[0]) t.textContent='Nur verifizierte Studenten zählen in der Wertung und können gewinnen (Platz 1: '+list[0].title+') — du bist noch nicht dabei.';
   });
 }catch(e){}
 </script>
