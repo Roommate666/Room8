@@ -295,6 +295,68 @@ async function refreshToken(): Promise<Record<string, unknown>> {
   return { ok: true, expires_in: j.expires_in }
 }
 
+// ---------- Lokaler Browser-Bot (Mac, wie CHIFU-Autopost) ----------
+// Der Bot liest die Instagram-Inbox im eingeloggten Browser und fragt hier nach.
+// Body: { thread_id, who, messages: [{from:'them'|'us', text, id}], human_recent: bool, is_request: bool }
+// Antwort: { send: bool, reply, action, category }
+async function handleWebDm(b: Record<string, any>): Promise<Record<string, unknown>> {
+  const threadId = String(b.thread_id || '')
+  const who = String(b.who || threadId)
+  const msgs: { from: string; text: string; id?: string }[] = Array.isArray(b.messages) ? b.messages : []
+  if (!threadId || !msgs.length) return { send: false, error: 'thread_id/messages fehlt' }
+  const last = msgs[msgs.length - 1]
+  if (last.from !== 'them') return { send: false, action: 'skip', reason: 'letzte Nachricht ist von uns' }
+  const text = String(last.text || '').trim()
+  const userKey = 'web:' + threadId
+  const mid = 'web:' + threadId + ':' + (last.id || String(msgs.length))
+
+  const { data: ins } = await sb.from('ig_messages')
+    .upsert({ mid, ig_user_id: userKey, direction: 'in', text: text || null, status: 'received', meta: { who, src: 'web' } },
+      { onConflict: 'mid', ignoreDuplicates: true })
+    .select('id')
+  if (!ins || !ins.length) return { send: false, action: 'skip', reason: 'schon bearbeitet' }
+  const mark = (status: string, category: string | null = null, extra: Record<string, unknown> = {}) =>
+    sb.from('ig_messages').update({ status, category, meta: { who, src: 'web', ...extra } }).eq('mid', mid)
+
+  if (!text) {
+    await mark('flag', 'other')
+    await telegram(`Instagram-DM von ${who}: Bild/Sprachnachricht ohne Text. Bitte selbst ansehen.`)
+    return { send: false, action: 'flag' }
+  }
+  const mode = (await cfg('auto_reply')) || 'on'
+  if (mode === 'off') { await mark('skipped'); return { send: false, action: 'skip', reason: 'aus' } }
+  if (b.human_recent) {
+    await mark('skipped', null, { reason: 'human_takeover' })
+    await telegram(`Instagram ${who}: neue Nachricht in einem Gespr\u00e4ch, das ihr selbst f\u00fchrt. Bitte selbst antworten.\n"${text.slice(0, 500)}"`)
+    return { send: false, action: 'skip', reason: 'human_takeover' }
+  }
+  const day = new Date(Date.now() - 24 * 3600e3).toISOString()
+  const { count: autoCount } = await sb.from('ig_messages').select('id', { count: 'exact', head: true })
+    .eq('ig_user_id', userKey).eq('status', 'auto').gte('created_at', day)
+
+  const history = msgs.slice(-12).map((m) => ({ direction: m.from === 'them' ? 'in' : 'out', text: m.text }))
+  let d: Decision
+  try { d = await decide(history, await liveContext()) } catch (e) {
+    await mark('flag', 'other', { error: String(e).slice(0, 200) })
+    await telegram(`Instagram ${who}: Bot-Fehler, bitte selbst antworten.\n"${text.slice(0, 500)}"`)
+    return { send: false, action: 'flag' }
+  }
+  if ((autoCount ?? 0) >= MAX_AUTO_PER_DAY && d.action !== 'skip') {
+    d = { ...d, action: 'flag', flag_reason: (d.flag_reason ? d.flag_reason + '; ' : '') + 'Tageslimit Bot-Antworten erreicht' }
+  }
+  const wantsReply = (d.action === 'reply' || d.action === 'reply_and_flag') && !!d.reply.trim()
+  const send = wantsReply && mode === 'on'
+  const reply = send ? clipBytes(d.reply, 1000) : ''
+  if (send) await sb.from('ig_messages').insert({ mid: mid + ':out', ig_user_id: userKey, direction: 'out', text: reply, status: 'auto', category: d.category })
+  await mark(d.action === 'skip' ? 'skipped' : (d.action === 'reply' && send ? 'answered' : 'flag'), d.category, { reason: d.flag_reason, request: !!b.is_request })
+  if (d.action === 'flag' || d.action === 'reply_and_flag' || (mode === 'draft' && wantsReply)) {
+    const head = send ? 'Bot antwortet, bitte kurz pr\u00fcfen' : (mode === 'draft' && wantsReply ? 'Vorschlag (Entwurfsmodus)' : 'Bitte selbst antworten')
+    await telegram(`Instagram ${who} [${d.category}] ${head}\nGrund: ${d.flag_reason || '-'}\nNachricht: "${text.slice(0, 600)}"` +
+      (d.reply ? `\nAntwort: "${d.reply.slice(0, 600)}"` : ''))
+  }
+  return { send, reply, action: d.action, category: d.category }
+}
+
 // ---------- Einstieg ----------
 Deno.serve(async (req) => {
   const url = new URL(req.url)
@@ -313,6 +375,7 @@ Deno.serve(async (req) => {
   if (action) {
     if (!INTERNAL || !timingSafeEqual(req.headers.get('x-internal-secret') ?? '', INTERNAL)) return new Response('unauthorized', { status: 401 })
     if (action === 'refresh') return Response.json(await refreshToken())
+    if (action === 'dm') return Response.json(await handleWebDm(await req.json().catch(() => ({}))))
     if (action === 'test') {
       // Trockenlauf: Einordnung + Antwortvorschlag, ohne Senden und ohne Speichern
       const { text } = await req.json().catch(() => ({ text: '' }))
