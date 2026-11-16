@@ -3,7 +3,7 @@
 // Network First Strategie für schnellere Seitenwechsel
 // ==========================================
 
-var CACHE_NAME = 'room8-v281';
+var CACHE_NAME = 'room8-v282';
 var IMAGE_CACHE = 'room8-images-v2';
 
 // Statische Assets die gecacht werden sollen
