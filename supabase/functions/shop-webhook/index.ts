@@ -59,7 +59,9 @@ async function onPaid(shop: any, o: any) {
   const email = String(o.email || o.contact_email || o.customer?.email || '').trim()
   const codes = orderCodes(o)
   const subtotal = Number(o.total_line_items_price ?? o.current_subtotal_price ?? o.subtotal_price ?? 0)
-  const base = { shop: shop.key, shopify_order_id: orderId, order_name: o.name ?? null, email, subtotal, codes, raw: o, updated_at: new Date().toISOString() }
+  // Datensparsam: keine Adressen/Artikel speichern, nur was fuer die Gutschrift noetig ist
+  const raw = { id: o.id, name: o.name ?? null, financial_status: o.financial_status ?? null, created_at: o.created_at ?? null }
+  const base = { shop: shop.key, shopify_order_id: orderId, order_name: o.name ?? null, email, subtotal, codes, raw, updated_at: new Date().toISOString() }
 
   const { data: existing } = await sb.from('shop_orders').select('status').eq('shop', shop.key).eq('shopify_order_id', orderId).maybeSingle()
   if (existing && (existing.status === 'awarded' || existing.status === 'reversed')) return { status: 'duplicate' }
