@@ -422,7 +422,7 @@
         '<div class="ticket-perf"></div>'+
         '<div class="ticket-bottom">'+
           '<div class="swipe" id="swipe"><div class="fill" id="swFill"></div><div class="lbl" id="swLbl">Zum Einlösen wischen <span class="chev"><svg viewBox="0 0 24 24"><path d="M8 6l6 6-6 6M13 6l6 6-6 6"/></svg></span></div><div class="knob" id="swKnob"><svg viewBox="0 0 24 24"><path d="M8 6l6 6-6 6M13 6l6 6-6 6"/></svg></div></div>'+
-          '<div class="ticket-hint">⚠️ '+(coupon.usage_limit_per_user===1?'Einmalig — erst an der Kasse einlösen.':'Erst an der Kasse einlösen.')+'</div>'+
+          '<div class="ticket-hint">⚠️ '+(isOnline()?'Nach dem Wischen siehst du deinen Rabattcode für den Online-Shop.':(coupon.usage_limit_per_user===1?'Einmalig — erst an der Kasse einlösen.':'Erst an der Kasse einlösen.'))+'</div>'+
         '</div>'+
       '</div>'+
       '<button class="ghost" onclick="closeSheet()">Abbrechen</button>');
@@ -512,7 +512,10 @@
     function step(t){ var p=Math.min(1,(t-s)/dur); el.textContent='+'+Math.round(to*(1-Math.pow(1-p,3))); if(p<1)requestAnimationFrame(step); }
     requestAnimationFrame(step);
   }
+  // Online-Deal (venue_type 'online'): kein QR, Code fuer den Shop anzeigen. Coins gibt es dafuer nur ueber shop-webhook.
+  function isOnline(){ return !!(coupon && coupon.venue_type==='online'); }
   window.finish=function(){ // Nach dem Swipe: QR-Code am Tresen scannen -> einloesen
+    if(isOnline()){ doRedeem(''); return; }
     scanQrThenRedeem();
   };
   // ---- QR-Scanner (html5-qrcode, lazy geladen) ----
@@ -561,9 +564,13 @@
         '<div class="checkwrap"><svg class="checkmark" viewBox="0 0 52 52"><circle class="ck-ring" cx="26" cy="26" r="24"/><path class="ck-tick" d="M14 27l8 8 16-18"/></svg></div>'+
         '<h2 class="serif succ-h">Eingelöst! 🎉</h2>'+
         coinBlock +
-        '<div class="stampbox"><span class="stamp-lbl">An der Kasse vorzeigen</span><b class="stamp-code">'+code+'</b><span class="stamp-ok">✓ gültig</span></div>'+
-        '<p class="succ-p">Zeig der Kasse einfach diesen Screen.</p>'+
-        '<button class="btn" onclick="closeSheet();'+(coupon.usage_limit_per_user===1?'location.reload()':'')+'">Fertig</button>'+
+        (isOnline()
+          ? '<div class="stampbox"><span class="stamp-lbl">Dein Rabattcode</span><b class="stamp-code">'+escapeHtml(coupon.discount_code||code)+'</b><span class="stamp-ok">✓ gültig</span></div>'+
+            '<p class="succ-p">Gib den Code beim Bestellen im Shop ein.</p>'+
+            (coupon.website?'<a class="btn" style="display:block;text-align:center;text-decoration:none;margin-bottom:8px" target="_blank" rel="noopener" href="'+escapeHtml(/^https?:/.test(coupon.website)?coupon.website:'https://'+coupon.website)+'">Zum Shop</a>':'')
+          : '<div class="stampbox"><span class="stamp-lbl">An der Kasse vorzeigen</span><b class="stamp-code">'+code+'</b><span class="stamp-ok">✓ gültig</span></div>'+
+            '<p class="succ-p">Zeig der Kasse einfach diesen Screen.</p>')+
+        '<button class="'+(isOnline()&&coupon.website?'ghost':'btn')+'" onclick="closeSheet();'+(coupon.usage_limit_per_user===1?'location.reload()':'')+'">Fertig</button>'+
       '</div>');
     try{ if(navigator.vibrate) navigator.vibrate([18,40,28]); }catch(e){}
     fireConfetti();
