@@ -178,7 +178,7 @@
         '<div class="img"'+(bg?' data-bg="'+bg+'"':'')+'>'+openHtml+'<span class="disc">'+esc(fmtDisc(c.discount_value))+'</span></div>'+
         '<div class="meta"><div class="biz">'+esc(c.business_name||'')+(c.city?' · '+esc(c.city):'')+'</div>'+
         '<div class="ti">'+esc(c.title||'')+'</div>'+
-        '<div class="foot"><span class="tag2">'+usage+'</span><span class="reward">+250 beim Einlösen</span></div></div></a>';
+        '<div class="foot"><span class="tag2">'+usage+'</span><span class="reward">'+(c.venue_type==='online'?'Online-Shop':'+250 beim Einlösen')+'</span></div></div></a>';
     }).join('');
     lazyBg();
   }
@@ -198,7 +198,7 @@
     var heute=new Date().toISOString().slice(0,10);
     try{
       // Nur Spalten die die Liste braucht (KEINE lange description/Detailfelder -> kleinere Payload, schnellerer Cold-Load)
-      var r=await sb.from('coupons').select('id,title,business_name,city,discount_value,discount_code,category,usage_limit_per_user,valid_until,max_redemptions,current_redemptions,opening_hours,created_at,parent_coupon_id,is_bundle, coupon_photos(storage_path,photo_type,display_order)').eq('status','active').order('created_at');
+      var r=await sb.from('coupons').select('id,title,business_name,city,discount_value,discount_code,category,usage_limit_per_user,valid_until,max_redemptions,current_redemptions,opening_hours,created_at,parent_coupon_id,is_bundle,venue_type, coupon_photos(storage_path,photo_type,display_order)').eq('status','active').order('created_at');
       var data=(r.data||[]).filter(function(c){ if(c.valid_until&&c.valid_until<heute)return false; if(c.max_redemptions!=null&&(c.current_redemptions||0)>=c.max_redemptions)return false; return true; });
       // Bundle-Kinder (parent_coupon_id gesetzt) erscheinen NICHT als eigene Karte -> pro Head zaehlen
       var childCount={};

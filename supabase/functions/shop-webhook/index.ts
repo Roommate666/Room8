@@ -11,6 +11,7 @@
 //   1. Bestellung bezahlt und Rabattcode des Shops benutzt
 //   2. Warenwert >= min_total
 //   3. Bestell-E-Mail gehoert zu einem UniGoat-Konto (Login- oder Uni-Mail), das verifiziert ist
+//      (Shops mit uses_code_pool: stattdessen persoenlicher Einmal-Code aus coupon_code_pool -> Student)
 //   4. pro Bestellung einmal; pro Nutzer und Coupon nur so oft wie usage_limit_per_user erlaubt
 //
 // Deploy: supabase functions deploy shop-webhook --no-verify-jwt
@@ -69,11 +70,28 @@ async function onPaid(shop: any, o: any) {
   const save = (status: string, extra: Record<string, unknown> = {}) =>
     sb.from('shop_orders').upsert({ ...base, status, ...extra }, { onConflict: 'shop,shopify_order_id' })
 
-  if (!codes.includes(String(shop.discount_code).toUpperCase())) { await save('no_code'); return { status: 'no_code' } }
+  // Code-Pool-Shops (z.B. Padel Up): persoenlicher Einmal-Code -> Student direkt ueber den Code.
+  // deno-lint-ignore no-explicit-any
+  let poolRow: any = null
+  if (shop.uses_code_pool) {
+    if (shop.coupon_id && codes.length) {
+      const { data: rows } = await sb.from('coupon_code_pool').select('code,user_id,redemption_id')
+        .eq('coupon_id', shop.coupon_id).not('user_id', 'is', null).in('code', codes).limit(1)
+      poolRow = rows?.[0] ?? null
+    }
+    if (!poolRow) { await save('no_code'); return { status: 'no_code' } }
+  } else if (!codes.includes(String(shop.discount_code).toUpperCase())) { await save('no_code'); return { status: 'no_code' } }
   if (subtotal < Number(shop.min_total || 0)) { await save('below_min'); return { status: 'below_min' } }
 
-  const { data: m } = await sb.rpc('shop_match_user', { p_email: email })
-  const match = Array.isArray(m) ? m[0] : null
+  // deno-lint-ignore no-explicit-any
+  let match: any = null
+  if (poolRow) {
+    const { data: p } = await sb.from('profiles').select('id,is_verified,is_student_verified').eq('id', poolRow.user_id).maybeSingle()
+    if (p) match = { user_id: p.id, verified: p.is_verified === true || p.is_student_verified === true }
+  } else {
+    const { data: m } = await sb.rpc('shop_match_user', { p_email: email })
+    match = Array.isArray(m) ? m[0] : null
+  }
   if (!match) {
     await save('no_user')
     await telegram(`${shop.name}-Shop: Bestellung ${o.name ?? orderId} mit ${shop.discount_code}, aber ${email || '(keine Mail)'} ist kein UniGoat-Konto. Keine Coins.`)
@@ -93,8 +111,9 @@ async function onPaid(shop: any, o: any) {
   }
 
   // Einloesung buchen (damit der Partner sie sieht) + Coins
-  let redemptionId: string | null = null
-  if (shop.coupon_id) {
+  // Pool-Shops: die Einloesung wurde schon beim Abholen des Codes gebucht.
+  let redemptionId: string | null = poolRow?.redemption_id ?? null
+  if (shop.coupon_id && !poolRow) {
     const { data: r } = await sb.from('coupon_redemptions').insert({
       coupon_id: shop.coupon_id, user_id: match.user_id, verification_code: ('SHOP' + String(o.order_number ?? orderId)).slice(0, 20),
       redeemed_at: new Date().toISOString(), geo_verified: false,

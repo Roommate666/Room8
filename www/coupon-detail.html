@@ -191,7 +191,7 @@
     <button class="menubtn" id="menuBtn" style="display:none;" onclick="openMenu()"><svg class="icn" viewBox="0 0 24 24" style="stroke:currentColor"><rect x="8" y="3" width="8" height="4" rx="0"/><path d="M8 5H5v16h14V5h-3M9 12h6M9 16h4"/></svg> Menü &amp; Angebot ansehen</button>
     <a class="menubtn" id="bookBtn" href="#" target="_blank" rel="noopener" style="display:none;text-decoration:none;"><svg class="icn" viewBox="0 0 24 24" style="stroke:currentColor"><rect x="3" y="4" width="18" height="18" rx="0"/><path d="M3 9h18M8 2v4M16 2v4"/></svg> Termin online buchen</a>
     <div id="bookHint" style="display:none;font-size:12px;color:var(--text-muted);margin-top:6px;line-height:1.4;">Den Rabatt bekommst du vor Ort — beim Termin einfach den QR-Code aus der App zeigen.</div>
-    <div class="coin"><span class="g">G</span><span>+250 G-Coins, sobald du einlöst</span></div>
+    <div class="coin" id="coinRow"><span class="g">G</span><span>+250 G-Coins, sobald du einlöst</span></div>
     <div class="hoursrow" id="hoursRow" style="display:none;">
       <div class="ic"><svg class="icn" viewBox="0 0 24 24" style="stroke:var(--color-text)"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
       <div><b>Öffnungszeiten</b><br><small id="hoursText"></small></div>
@@ -286,8 +286,10 @@
     var r=await sb.from('coupons').select('*, coupon_photos(storage_path,photo_type,display_order)').eq('id',id).single();
     if(r.error||!r.data){$('biz').textContent='Coupon nicht gefunden';return;}
     coupon=r.data;render();checkSaved();
+    if(isOnline()){var cr=$('coinRow');if(cr)cr.style.display='none';} // Online-Deal: keine Coins beim Einloesen
     if(window.UGTrack&&coupon) UGTrack.track('coupon_view',{coupon_id:coupon.id});
     if(userId){try{var red=await sb.from('coupon_redemptions').select('id').eq('coupon_id',id).eq('user_id',userId).maybeSingle();if(red.data&&coupon.usage_limit_per_user===1){already=true;markDone();}}catch(e){}}
+    if(already&&isOnline()) showMyCodeBtn();
   }
   function render(){
     document.title=(coupon.title||'Coupon')+' — UniGoat';
@@ -340,6 +342,17 @@
     var ac=$('actcard');ac.style.setProperty('--n',acts.length||1);ac.innerHTML=acts.join('')||'<div style="color:var(--mut);font-size:.85rem;padding:.4rem;text-align:center;grid-column:1/-1">Keine Kontaktdaten</div>';
   }
   function markDone(){var b=$('redeemBtn');b.textContent='Bereits eingelöst ✓';b.classList.add('gray');b.onclick=null;}
+  // Online-Deal schon eingeloest: eigenen Rabattcode erneut anzeigen (my_coupon_code)
+  function shopLink(){ return coupon.website?'<a class="btn" style="display:block;text-align:center;text-decoration:none;margin-bottom:8px" target="_blank" rel="noopener" href="'+escapeHtml(/^https?:/.test(coupon.website)?coupon.website:'https://'+coupon.website)+'">Zum Shop</a>':''; }
+  async function showMyCodeBtn(){
+    var c=null; try{ var r=await sb.rpc('my_coupon_code',{p_coupon_id:coupon.id}); c=r&&r.data; }catch(e){}
+    if(!c) return;
+    var b=$('redeemBtn'); b.textContent='Deinen Rabattcode anzeigen'; b.classList.remove('gray');
+    b.onclick=function(){ open('<h2 class="serif" style="text-align:center">Dein Rabattcode</h2>'+
+      '<div class="stampbox"><span class="stamp-lbl">Dein Rabattcode</span><b class="stamp-code">'+escapeHtml(c)+'</b><span class="stamp-ok">✓ gültig</span></div>'+
+      '<p class="succ-p">Gib den Code beim Bestellen im Shop ein.</p>'+shopLink()+
+      '<button class="'+(coupon.website?'ghost':'btn')+'" onclick="closeSheet()">Schließen</button>'); };
+  }
 
   // ---- Speichern / Favorit (saved_items, item_type='coupon') ----
   var saved=false;
@@ -462,7 +475,9 @@
     GEO_REQUIRED:'Für diesen Coupon musst du vor Ort sein. Bitte erlaube den Standortzugriff und versuch es direkt beim Laden.',
     TOO_FAR:'Du bist noch nicht nah genug am Laden. Löse den Coupon direkt vor Ort ein.',
     QR_REQUIRED:'Bitte scanne den QR-Code am Tresen, um einzulösen.',
-    QR_INVALID:'Dieser QR-Code passt nicht zu diesem Laden. Scanne den UniGoat-QR direkt beim Anbieter.'
+    QR_INVALID:'Dieser QR-Code passt nicht zu diesem Laden. Scanne den UniGoat-QR direkt beim Anbieter.',
+    CODES_EXHAUSTED:'Alle Codes für diesen Deal sind vergeben. Schau bald wieder rein!',
+    ONLINE_ONLY:'Das ist ein Online-Deal ohne QR-Code. Bitte aktualisiere die App und löse ihn dann ein.'
   };
   function failSheet(msg){
     open('<div class="succ-ico" style="background:#ffe2e2;color:#d33">!</div>'+
@@ -565,7 +580,7 @@
         '<h2 class="serif succ-h">Eingelöst! 🎉</h2>'+
         coinBlock +
         (isOnline()
-          ? '<div class="stampbox"><span class="stamp-lbl">Dein Rabattcode</span><b class="stamp-code">'+escapeHtml(coupon.discount_code||code)+'</b><span class="stamp-ok">✓ gültig</span></div>'+
+          ? '<div class="stampbox"><span class="stamp-lbl">Dein Rabattcode</span><b class="stamp-code">'+escapeHtml(d.discount_code||coupon.discount_code||code)+'</b><span class="stamp-ok">✓ gültig</span></div>'+
             '<p class="succ-p">Gib den Code beim Bestellen im Shop ein.</p>'+
             (coupon.website?'<a class="btn" style="display:block;text-align:center;text-decoration:none;margin-bottom:8px" target="_blank" rel="noopener" href="'+escapeHtml(/^https?:/.test(coupon.website)?coupon.website:'https://'+coupon.website)+'">Zum Shop</a>':'')
           : '<div class="stampbox"><span class="stamp-lbl">An der Kasse vorzeigen</span><b class="stamp-code">'+code+'</b><span class="stamp-ok">✓ gültig</span></div>'+
@@ -575,7 +590,7 @@
     try{ if(navigator.vibrate) navigator.vibrate([18,40,28]); }catch(e){}
     fireConfetti();
     if(earned>0) countUp(document.getElementById('coinCount'), earned);
-    if(coupon.usage_limit_per_user===1){already=true;markDone();}
+    if(coupon.usage_limit_per_user===1){already=true;markDone();if(isOnline())showMyCodeBtn();}
     // Analytics erst nach erfolgreich gerendertem Erfolgs-Screen (nicht schon bei Server-Antwort)
     if(window.UGTrack&&coupon) UGTrack.track('coupon_redeemed',{coupon_id:coupon.id,coins:earned});
   }
